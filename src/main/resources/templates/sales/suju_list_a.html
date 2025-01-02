@@ -51,10 +51,10 @@
     <section>
         <div class="grid_box">
             <div class="title_box">
-                <span class="right_align rpt" data-labelCd="수주 내역">수주 내역</span>
-                <button type="button" class="btn-default y_write_auth" id="btnAddNew" title="수주 등록"><i class="fas fa-plus"></i></button>
-                <button type="button" class="btn-cancel y_write_auth" id="btnDelete" title="수주 삭제"><i class="fas fa-trash"></i></button>
-                <button type="button" class="btn-default" id="btnEdit" title="수주 수정"><i class="fas fa-edit"></i></button>
+                <span class="right_align rpt" data-labelCd="연료전지 발전설비 점검기록표">연료전지 발전설비 점검기록표</span>
+                <button type="button" class="btn-default y_write_auth" id="btnAddNew" title="연료전지 발전설비 점검기록표"><i class="fas fa-plus"></i></button>
+                <button type="button" class="btn-cancel y_write_auth" id="btnDelete" title="점검 삭제"><i class="fas fa-trash"></i></button>
+                <button type="button" class="btn-default" id="btnEdit" title="점검 수정"><i class="fas fa-edit"></i></button>
                 <button type="button" class="btn-default" id="btnExcel" title="엑셀 다운로드"><i class="fas fa-file-excel"></i></button>
                 <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
             </div>
@@ -73,7 +73,7 @@
                             <div class="col-6" >
                                 <div class="input-group" >
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="제품그룹">제품그룹</span>
+                                        <span class="input-group-text fit_box_md" data-labelCd="소속">소속</span>
                                     </div>
                                     <input class="form-control2" type="text" id="MaterialGroupName" name="MaterialGroupName" readonly />
                                 </div>
@@ -81,7 +81,7 @@
                             <div class="col-6" >
                                 <div class="input-group" >
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="제품코드">제품코드</span>
+                                        <span class="input-group-text fit_box_md" data-labelCd="성명">성명</span>
                                     </div>
                                     <input class="form-control2" type="text" id="product_code" name="product_code" readonly />
                                 </div>
@@ -90,9 +90,9 @@
                             <div class="col-12" >
                                 <div class="input-group" >
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="*제품">*제품</span>
+                                        <span class="input-group-text fit_box_md" data-labelCd="*형식">*형식(모델명)</span>
                                     </div>
-                                    <input type="text" class="form-control2" id='txtProductName' name="product_name" value="" placeholder="검색버튼을 클릭하여 제품을 검색하세요" readonly />
+                                    <input type="text" class="form-control2" id='txtProductName' name="product_name" value="" placeholder="검색버튼을 클릭하여 모델을 검색하세요" readonly />
                                     <input type="hidden" id="Material_id" name="Material_id" value="" />
                                     <button type="button" class="btn-default" id="btnProductSearch" title="제품검색" disabled><i class="fas fa-search"></i></button>
                                 </div>
@@ -101,7 +101,7 @@
                             <div class="col-6" >
                                 <div class="input-group" >
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="*수주량">*수주량</span>
+                                        <span class="input-group-text fit_box_md" data-labelCd="*정격출력">*정격출력</span>
                                     </div>
                                     <input class="form-control2 tar" type="text" id="SujuQty" name="SujuQty" onkeyup="numberSujuQty(this.value)" />
                                 </div>
@@ -110,7 +110,7 @@
                             <div class="col-6" >
                                 <div class="input-group" >
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="가용재고">가용재고</span>
+                                        <span class="input-group-text fit_box_md" data-labelCd="사용가스명">사용가스명</span>
                                     </div>
                                     <input class="form-control2 tar"  id="AvailableStock" name="AvailableStock" readonly />
                                 </div>
@@ -118,16 +118,16 @@
                             <div class="col-6" >
                                 <div class="input-group" >
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="*판매처">*판매처</span>
+                                        <span class="input-group-text fit_box_md" data-labelCd="*정격전압">*정격전압</span>
                                     </div>
                                     <select class="form-control2" id="cboCompany" name="Company_id"></select>
-                                    <input class="form-control2 tac" type="text" id="CompanyName" name="CompanyName" placeholder="업체명" style="display:none"/>
+                                    <input class="form-control2 tac" type="text" id="CompanyName" name="CompanyName" placeholder="제작회사" style="display:none"/>
                                 </div>
                             </div>
                             <div class="col-6" >
                                 <div class="input-group" >
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="수주구분">수주구분</span>
+                                        <span class="input-group-text fit_box_md" data-labelCd="설치위치">설치위치</span>
                                     </div>
                                     <select class="form-control2" id="cboSujuType" name="SujuType"></select>
                                 </div>
@@ -136,7 +136,7 @@
                             <div class="col-6">
                                 <div class="input-group" data-ax5picker="basic" id="popSrchDt1">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="수주일">수주일</span>
+                                        <span class="input-group-text fit_box_md" data-labelCd="점검일자">점검일자</span>
                                     </div>
                                     <input class="form-control2 tac" type="text" id="JumunDate" name="JumunDate">
                                     <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
@@ -145,7 +145,7 @@
                             <div class="col-6">
                                 <div class="input-group" data-ax5picker="basic" id="popSrchDt2">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="납기일">납기일</span>
+                                        <span class="input-group-text fit_box_md" data-labelCd="제작일자">제작일자</span>
                                     </div>
                                     <input class="form-control2 tac" type="text" id="DueDate" name="DueDate">
                                     <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
@@ -162,7 +162,7 @@
                             <div class="col-6" >
                                 <div class="input-group" >
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="단위">단위</span>
+                                        <span class="input-group-text fit_box_md" data-labelCd="제작번호">제작번호</span>
                                     </div>
                                     <input class="form-control2 tac " id="unit" name="unit" readonly  />
                                 </div>
@@ -170,7 +170,7 @@
                             <div class="col-6" >
                                 <div class="input-group" >
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="상태">상태</span>
+                                        <span class="input-group-text fit_box_md" data-labelCd="급배기방식">급배기방식</span>
                                     </div>
                                     <input class="form-control2 tac readonly" type="text" id="StateName" name="StateName" readonly disabled>
                                 </div>
@@ -401,9 +401,9 @@
 
             let modalContainer = null;
             if (data.mode == 'new') {
-                modalContainer = new PopupDraggable('수주 등록');
+                modalContainer = new PopupDraggable('점검 등록');
             } else {
-                modalContainer = new PopupDraggable('수주 수정');
+                modalContainer = new PopupDraggable('점검 수정');
             }
             modalContainer.open({ width: 800, height: 360, $content });
             $('#popSrchDt1').ax5DatePicker({ direction: 'top' });

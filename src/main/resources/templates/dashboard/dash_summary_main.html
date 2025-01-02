@@ -27,18 +27,18 @@
     <div class="row">
         <div class="col-lg-6 col-md-6 col-sm-12">
             <div class="card ">
-                <h5 class="card-header text-center bg-info text-white">금일/금주 생산현황</h5>
+                <h5 class="card-header text-center bg-info text-white">금일/금주 발전현황</h5>
                 <div class="card-body">
-                    <p class="card-text">지시량 대비 생산량을 표시합니다.</p>
+                    <p class="card-text">전주 대비 발전량을 표시합니다.</p>
                     <div class="h-250" data-ax5grid="produce-grid" ></div> 
                 </div>
             </div>
         </div>  
         <div class="col-lg-6 col-md-12 col-sm-12">
             <div class="card">
-                <h5 class="card-header text-center bg-info text-white">금일 생산제품</h5>
+                <h5 class="card-header text-center bg-info text-white">운전성과</h5>
                 <div class="card-body">
-                    <p class="card-text">금일생산제품을 지시량 순으로 5개까지 표시합니다.</p>
+                    <p class="card-text">월간 연간 누적 운전성과를 표시합니다.</p>
                     <div class="h-250" data-ax5grid="today-prod-grid"></div>
                 </div>
             </div>
@@ -74,9 +74,9 @@
         <div class="col-lg-6 col-md-12 col-sm-12">
             <div class="card-group">
                 <div class="card">
-                    <h5 class="card-header text-center bg-danger text-white">부적합품 현황</h5>
+                    <h5 class="card-header text-center bg-danger text-white">LNG 사용량</h5>
                     <div class="card-body">
-                        <p class="card-text">금년 생산제품중 부적합금액 크기순으로 5개까지 표시합니다.</p>
+                        <p class="card-text">금일 LNG생산량을 표시합니다.</p>
                         <div class="col-8" style="float:left;">
                             <div class="h-250" data-ax5grid="defect-grid"></div>
                         </div>
@@ -91,9 +91,9 @@
         <div class="col-lg-6 col-md-12 col-sm-12">
             <div class="card-group">
                 <div class="card">
-                    <h5 class="card-header text-center bg-info text-white">재고현황</h5>
+                    <h5 class="card-header text-center bg-info text-white">수익현황</h5>
                     <div class="card-body">
-                        <p class="card-text">현 재고품을 재고액 크기순으로 5개 표시합니다.</p>
+                        <p class="card-text">발전수 수익현황을 표시합니다.</p>
                         <div class="col-8" style="float:left;">
                             <div class="h-250" data-ax5grid="stock-grid"></div>
                         </div>
@@ -146,10 +146,10 @@
             let prodConfig = config;
             let prodConfigCol = [
                 { key: 'type', label: '', width: 100, align: 'center', sortable: false },
-                { key: 'ord', label: '지시', width: 160, align: 'right', sortable: false , formatter: 'money' },
-                { key: 'com', label: '완료', width: 160, align: 'right', sortable: false , formatter: 'money' },
-                { key: 'wor', label: '작업중', width: 160, align: 'right', sortable: false, formatter: 'money'  },
-                { key: 'wor_per', label: '완료율(%)', width: 160, align: 'right', sortable: false },
+                { key: 'ord', label: '전주', width: 160, align: 'right', sortable: false , formatter: 'money' },
+                { key: 'com', label: '발전', width: 160, align: 'right', sortable: false , formatter: 'money' },
+                { key: 'wor', label: '차이', width: 160, align: 'right', sortable: false, formatter: 'money'  },
+                { key: 'wor_per', label: '발전율(%)', width: 160, align: 'right', sortable: false },
             ];
             prodConfig.frozenColumnIndex = 1;
             prodConfig.target = $('[data-ax5grid="produce-grid"]');
@@ -159,11 +159,11 @@
 
             let todayProdConfig = config;
             let todatProdConfigCol = [
-                { key: 'prod_grp', label: '제품그룹', width: 130, align: 'center', sortable: false },
-                { key: 'prod', label: '제품', width: 200, align: 'center', sortable: false },
-                { key: 'ord', label: '지시량', width: 110, align: 'right', sortable: false , formatter: 'money' },
-                { key: 'com', label: '완료량', width: 110, align: 'right', sortable: false , formatter: 'money' },
-                { key: 'wor', label: '작업중', width: 110, align: 'right', sortable: false , formatter: 'money' },
+                { key: 'prod_grp', label: '전기', width: 130, align: 'center', sortable: false },
+                { key: 'prod', label: '월', width: 200, align: 'center', sortable: false },
+                { key: 'ord', label: '수익(천원)', width: 110, align: 'right', sortable: false , formatter: 'money' },
+                { key: 'com', label: '총효율(평균)', width: 110, align: 'right', sortable: false , formatter: 'money' },
+                { key: 'wor', label: '비고', width: 110, align: 'right', sortable: false , formatter: 'money' },
                 { key: 'wor_per', label: '완료율(%)', width: 105, align: 'right', sortable: false },
             ]
             todayProdConfig.frozenColumnIndex = 0;
@@ -173,11 +173,11 @@
 
             let defectConfig = config;
             let defectConfigCol = [
-                { key: 'prod_grp', label: '제품그룹', width: 100, align: 'center', sortable: false },
-                { key: 'prod', label: '제품', width: 100, align: 'center', sortable: false },
-                { key: 'unitp', label: '단가', width: 70, align: 'right', sortable: false, formatter: 'money' },
-                { key: 'deq', label: '부적합량', width: 100, align: 'right', sortable: false, formatter: 'money' },
-                { key: 'dep', label: '부적합금액', width: 100, align: 'right', sortable: false, formatter: 'money' },
+                { key: 'prod_grp', label: '금일사용량', width: 100, align: 'center', sortable: false },
+                { key: 'prod', label: '전일사용량', width: 100, align: 'center', sortable: false },
+                { key: 'unitp', label: '전일대비', width: 70, align: 'right', sortable: false, formatter: 'money' },
+                { key: 'deq', label: '금월사용량', width: 100, align: 'right', sortable: false, formatter: 'money' },
+                { key: 'dep', label: '전월사용량', width: 100, align: 'right', sortable: false, formatter: 'money' },
             ]
             defectConfig.frozenColumnIndex = 0;
             defectConfig.target = $('[data-ax5grid="defect-grid"]');
@@ -186,11 +186,11 @@
 			
             let stockConfig = config;
             let stockConfigCol = [
-                { key: 'prod_grp', label: '제품그룹', width: 100, align: 'center', sortable: false },
-                { key: 'prod', label: '제품', width: 100, align: 'center', sortable: false },
-                { key: 'unitp', label: '단가', width: 70, align: 'right', sortable: false, formatter: 'money' },
-                { key: 'stq', label: '재고량', width: 100, align: 'right', sortable: false, formatter: 'money' },
-                { key: 'stp', label: '재고금액', width: 100, align: 'right', sortable: false, formatter: 'money' },
+                { key: 'prod_grp', label: '예상수익', width: 100, align: 'center', sortable: false },
+                { key: 'prod', label: '전일대비', width: 100, align: 'center', sortable: false },
+                { key: 'unitp', label: '금월누적수익', width: 70, align: 'right', sortable: false, formatter: 'money' },
+                { key: 'stq', label: '전월수익', width: 100, align: 'right', sortable: false, formatter: 'money' },
+                { key: 'stp', label: '전월대비', width: 100, align: 'right', sortable: false, formatter: 'money' },
             ]
             stockConfig.frozenColumnIndex = 0;
             stockConfig.target = $('[data-ax5grid="stock-grid"]');

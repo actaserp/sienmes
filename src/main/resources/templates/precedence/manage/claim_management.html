@@ -209,6 +209,12 @@
 	
             location.href = '/gui/' + gui.gui_code + '/edit?bh_id=0' +'&data_date='+dateString;   
 		}
+
+        // 엑셀 다운로드
+        exportExcel() {
+            var targetview = this.check_result_grid;
+            targetview.exportExcel('작업장 주변 환경 점검목록.xls');
+        }
           
     }    
 
@@ -248,6 +254,11 @@
         $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
         $('#srchDt').ax5DatePicker({ direction: 'top' });
 
+        // 엑셀 다운로드
+        $('#btnExcel').on('click', function () {
+            page.exportExcel();
+        });
+        
         //검색 기능
         $('#btnSearch').click(function (e) {            
             page.searchMainData();
