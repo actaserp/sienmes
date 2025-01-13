@@ -1,109 +1,195 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-<div class="content_wrap">
-
-    <section class="section ">
-
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="비가동 유형">비가동 유형</h3>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>비가동 유형</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>설비 관리</li>
+                <li>비가동유형</li>
+            </ul>
         </div>
 
-        <div class="table_box search" >
+                <section class="section">
+                    <div class="section-top">
+                        <div class="search-wrap">
+                            <dl>
+                                <dt>
+                                    <label>
+                                        비가동유형명
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <div class="input-clear"><input type="text" id="txtStopCause" name="txtStopCause" class="input-srch" style="border-radius: 5px;" autocomplete="off">
+                                            <span class="btn-clear">×</span></div>
+                                    </div>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label>
+                                        계획/비계획 구분<span class="eq"></span>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <select id="cboPlanYn" name="cboPlanYn">
 
-            <div class="row" >
-
-                <div class="col-6 col-md-3 col-lg-3 col-xl-2" >
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t9" data-labelCd="비가동유형명">비가동유형명</span>
+                                        </select>
+                                    </div>
+                                </dd>
+                            </dl>
+                            <!--<dl>
+                                <dt>
+                                    조회기간<span class="eq">*</span>
+                                </dt>
+                                <dd>
+                                    <ul class="date-box">
+                                        <li>
+                                            <input type="date" id="srchStartDt" name="srchStartDt">
+                                            <label for="srchStartDt" class="hide">시작일</label>
+                                        </li>
+                                        <li>
+                                            <input type="date" id="srchEndDt" name="srchEndDt">
+                                            <label for="srchEndDt" class="hide">종료일</label>
+                                        </li>
+                                    </ul>
+                                </dd>
+                            </dl>
+    -->
+                            <dl>
+                                <dt>&nbsp;</dt>
+                                <dd>
+                                    <li>
+                                        <a class="btn btn-delete" title="검색" id="btnSearch">
+                                            <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            검색
+                                        </a>
+                                    </li>
+                                </dd>
+                            </dl>
                         </div>
-                            <input class="form-control2" type="text" id="txtStopCause" name="txtStopCause"/>
-                    </div>
-                </div>
-
-                <div class="col-6 col-md-3 col-lg-3 col-xl-2" >
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t9" data-labelCd="계획/비계획구분">계획/비계획구분</span>
+                        <div class="button-wrap">
+                            <ul>
+                                <li>
+                                    <a class="btn btn-excell" title="신규" id="btnAddNew">
+                                        <img src="/images/icon/ico-plus.svg" alt="신규 아이콘">
+                                        신규
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="btn btn-delete" title="삭제" id="btnDel">
+                                        <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                        삭제
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="btn btn-edit" title="저장" id="btnSave">
+                                        <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
+                                        저장
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
-                        <select class="form-control2" id="cboPlanYn" name="cboPlanYn"></select>
                     </div>
-                </div>
-                <div class="col-1" >
-                    <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                </div> 
+                    <div class="container-fluid">
+                        <div id="theGrid" style="height: 500px; width: 50%"></div>
+                        <section class="tab-section" style="width: 49%; display: inline-block; height: 500px">
+                            <div class="tab-contents">
+                                <div class="tab-item-sub" id="tab17" style="display: block;">
+                                    <div class="table-wrap">
+                                        <form id="stopCauseForm">
+                                            <div class="table_box sub" id="detail_box">
+                                        <input type="hidden" id="id" name="id" />
+                                        <table class="view-table" style="border-top:1px solid #D4D5D7">
+                                            <caption>청구서 등록 테이블</caption>
+                                            <colgroup>
+                                                <col class="wp30">
+                                                <col class="wauto">
+                                            </colgroup>
+                                            <tbody>
 
+                                            <tr>
+                                                <th><label>비가동 유형명</label></th>
+                                                <td>
+                                                    <div class="input-clear">
+                                                        <div class="input-clear"><input type="text" required id="stop_cause_name" name="stop_cause_name" class="wp100"><span class="btn-clear">×</span></div>
+                                                    </div>
+                                                </td>
+                                            </tr>
 
-            </div>
-        </div>
-    </section>
+                                            <tr>
+                                                <th><label>계획/비계획 구분</label></th>
+                                                <td>
+                                                    <div class="input-clear">
+                                                        <select id="plan_yn" name="plan_yn" required style="width: 100%">
 
+                                                        </select>
 
-    <section class="section ">
-        <div class="grid_box">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="비가동 유형">비가동 유형</span>
-                <button type="button" class="btn-default" id="btnExcel" title="엑셀 다운로드"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
-            </div>
-            <div class="h-450" data-ax5grid="stop-cause-grid"></div>  
-        </div>
-    </section>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th style="text-align: center">
+                                                    <label for="description">비고</label>
+                                                </th>
+                                                <td colspan="3">
+                                                    <textarea id="description" required name="description"></textarea>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
 
-    <section>
+                        </section>
+                    </div>
 
-        <div class="title_box">
-            <span class="right_align rpt" data-labelCd="싱세정보">상세정보</span>
-            <button type="button" class="btn-default" id="btnNew" name="btnNew"><i class="fas fa-plus"></i></button>
-            <button type="button" class="btn-danger y_write_auth" id="btnDel" style="float:none"><i class="fas fa-trash"></i></button>
-            <button disabled type="button" class="btn-default y_write_auth" id="btnSave" style="float:none"><i class="fas fa-save"></i></button>
-        </div>
+                    <!--        <div class="grid_box">-->
 
-        <form id="stopCauseForm">
-            <input type="hidden" id="id" name="id" />
-            <div class="table_box sub" id="detail_box">
-            <div class="row" >
+                    <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
+                    <!--        </div>-->
+                </section>
+            <!--<div class="table_box search" >
 
+                <div class="row" >
 
-                <div class="col-6" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t9" data-labelCd="비가동유형명">비가동유형명</span>
+                    &lt;!&ndash;<div class="col-6 col-md-3 col-lg-3 col-xl-2" >
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text fit_box_t9" data-labelCd="비가동유형명">비가동유형명</span>
+                            </div>
+                                <input class="form-control2" type="text" id="txtStopCause" name="txtStopCause"/>
                         </div>
-                        <input class="form-control2" id="stop_cause_name" name="stop_cause_name" disabled required>
                     </div>
-                </div>
 
-                <div class="col-6" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t9" data-labelCd="계획/비계획구분">계획/비계획구분</span>
+                    <div class="col-6 col-md-3 col-lg-3 col-xl-2" >
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text fit_box_t9" data-labelCd="계획/비계획구분">계획/비계획구분</span>
+                            </div>
+                            <select class="form-control2" id="cboPlanYn" name="cboPlanYn"></select>
                         </div>
-                        <select  class="form-control2" id="plan_yn" name="plan_yn" required disabled>
-                            <option value="Y">계획</option>
-                            <option value="N">비계획</option>
-                        </select>
                     </div>
-                </div>
+                    <div class="col-1" >
+                        <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
+                    </div> &ndash;&gt;
 
-                <div class="col-12">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t9_area" data-labelCd="비고">비고</span>
-                        </div>
-                        <textarea class="form-control2" id="description" name="description" disabled></textarea>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </form>
-    </section>
 
-</div>
+                </div>
+            </div>-->
+
+    </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
@@ -112,13 +198,63 @@
     class StopCausePage {
         constructor() {
             this.grid = null;
-            this.init(); 
             this.baseUrl = '/api/definition/stop_cause';
+            this.$btnAddNew = $('#btnAddNew');
+            this.$btnEdit = $('#btnSave');
+            //this.$btnDel = $('#btnDel');
+            this.viewData = new wijmo.collections.CollectionView();
+            this.init();
         }
 
         init() {
             let _this = this;
-            let config = {
+            this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+                selectionMode: wijmo.grid.SelectionMode.Row,
+                headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                autoGenerateColumns: false,
+                showMarquee: true,
+                isReadOnly: true,
+                columns: [
+                    {binding: 'stop_cause_name', header: '비가동유형', width: '*', align : 'left'},
+                    {binding: 'plan_yn', header: '계획/비계획구분', width: '*', align: 'center'},
+                    {binding: 'description', header: '비고', width: 300, align: 'left'},
+                ],
+                itemsSource: this.viewData,
+            });
+            new FlexGridContextMenu(this.grid);
+            this.grid.downloadFileName = '비가동 유형';
+            this.grid.hostElement.addEventListener('dblclick', (e) => {
+                let hitTest = this.grid.hitTest(e);
+                if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                    let row = hitTest.row;
+                    let item = this.grid.rows[row].dataItem;
+
+                    _this.showDetailStopCause(item.id);
+
+                    console.log(item);
+
+                    //$("#stop_cause_name").val(item.stop_cause_name);
+                    //$("#description").val(item.description);
+                }
+            });
+
+            this.$btnEdit.click(function(e) {
+                Alert.confirm('',
+                    "저장하시겠습니까?",
+                    function () { page.saveStopCause() },
+                    function () { }
+                );
+            });
+
+
+
+            this.$btnAddNew.click(function(e){
+                _this.resetFunc();
+            });
+
+            AjaxUtil.fillSelectOptions($('#cboPlanYn'), 'system_code', 'all', false, 'plan_yn');
+            AjaxUtil.fillSelectOptions($('#plan_yn'), 'system_code', 'choose', false, 'plan_yn');
+            /*let config = {
                 target: $('[data-ax5grid="stop-cause-grid"]'),
                 sortable: true,
                 frozenColumnIndex: 0, // 열 고정
@@ -156,7 +292,7 @@
 
             AjaxUtil.fillSelectOptions($('#cboPlanYn'), 'system_code', 'all', false, 'plan_yn');
             AjaxUtil.fillSelectOptions($('#plan_yn'), 'system_code', 'choose', false, 'plan_yn');
-
+*/
         }
 
         // 버튼 활성화 설정
@@ -167,16 +303,9 @@
         //}
 
         // 버튼 활성화 설정
-        setButtonState() {
-            let pk = $('#id').val();
-            $('#btnNew').prop('disabled', false);
-            $('#btnSave').prop('disabled', false);
-            if (pk) {
-                $('#btnDel').prop('disabled', false);
-            }
-            else {
-                $('#btnDel').prop('disabled', true);
-            }
+        resetFunc(){
+            $('#stopCauseForm')[0].reset();
+            $('#stopCauseForm').find('#id').val('');
         }
 
         // 비가동사유 목록 조회
@@ -191,17 +320,11 @@
             
             let result = AjaxUtil.getSyncData(_this.baseUrl + '/read', param);
             if (result.data != null) {
-                let recordsTotal = result.data.length;
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: recordsTotal,
-                    }
-                });
+                console.log(result.data);
+                _this.viewData.sourceCollection = result.data;
             }
 
-            $('#stopCauseForm')[0].reset();
+            /*$('#stopCauseForm')[0].reset();
             $('#stopCauseForm').find('#id').val('');
 
             $('#detail_box').find('input, select, textarea').each(function () {
@@ -211,7 +334,7 @@
             });
 
             //_this.setButtonDisable(false, true, true);
-            _this.setButtonState();
+            _this.setButtonState();*/
 
         }
 
@@ -226,7 +349,7 @@
             }
 
             //page.setButtonDisable(false, false, false);
-            page.setButtonState();
+
         }
 
         // 비가동사유 정보 저장
@@ -238,6 +361,17 @@
             //let data = $('#stopCauseForm').serialize();
             let data = FormUtil.extractForm($('#stopCauseForm'));
 
+            let cause_name = $('#stopCauseForm').find('#stop_cause_name').val();
+
+            console.log('data2', cause_name);
+            if(cause_name === 0 || cause_name.empty){
+                Alert.alert('', '비가동 유형명을 입력해주세요',
+                function(){
+                    return;
+                });
+            }
+
+            console.log('data', data);
             let fnSuccess = function (res) {
                 if (!res.success) {
                     Alert.alert('', res.message);
@@ -269,12 +403,21 @@
         // 비가동사유 정보 삭제
         deleteStopCause() {
             let _this = this;
-            
+
             let id = $('#stopCauseForm').find('#id').val();
+
+            console.log('id', id);
+            if(id === null || id.trim().length === 0){
+                Alert.alert('', '선택된 행이 없습니다.', function(){
+                    return;
+                });
+            }
+
             let data = { id: id };
             let fnSuccess = function (res) {
                 if (res.success) {
                     Notify.success("삭제되었습니다.");
+                    _this.resetFunc();
                     _this.searchMainData();
                 } else {
                     Alert.alert('', res.message);
@@ -291,36 +434,37 @@
     $(document.body).ready(function (e) {
         page = new StopCausePage();
 
+
+        let searchusrval = document.getElementById('txtStopCause');
+        searchusrval.addEventListener('keyup', event => submitTextarea(event, () => page.searchMainData()))
+
+
         // 검색버튼
         $('#btnSearch').click(function (e) { page.searchMainData(); });
 
         // 신규버튼
-        $('#btnNew').click(function (e) {
+        /*$('#btnNew').click(function (e) {
 
             $('#stopCauseForm')[0].reset();
             $('#stopCauseForm').find('#id').val('');
 
-            $('#detail_box').find('input, select, textarea').each(function () {
-                if ($(this).is(':disabled')) {
-                    $(this).removeAttr('disabled');
-                }
-            });
 
             //page.setButtonDisable(true, false, true);
-            page.setButtonState();
-        });
+
+        });*/
 
         // 저장버튼
-        $('#btnSave').click(function (e) {
+        /*$('#btnSave').click(function (e) {
             Alert.confirm('', 
                 "저장하시겠습니까?",
                 function () { page.saveStopCause() },
                 function () { }
             );
-        });
+        });*/
 
         // 삭제버튼
         $('#btnDel').click(function (e) {
+
             Alert.confirm('', 
                 '삭제하시겠습니까?',
                 function () { page.deleteStopCause() },
@@ -328,24 +472,6 @@
             );
         });
 
-                // 엑셀 다운로드
-        $('#btnExcel').on('click', function () {
-            page.exportExcel();
-        });	
-
-		//그리드 컬럼 설정
-        page.popColSetting = new popColSetting();
-        let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-		
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });	
         page.searchMainData();
 
     });
