@@ -28,18 +28,20 @@ public class LoginLogController {
 			@RequestParam(value="srchStartDt", required=false) String srchStartDt,
 			@RequestParam(value="srchEndDt", required=false) String srchEndDt,
 			@RequestParam(value="keyword", required=false) String keyword,
+			@RequestParam(value="type", required=false) String type,
 			HttpServletRequest request) {
-	    String start_date = srchStartDt + " 00:00:00";
-	    String end_date = srchEndDt + " 23:59:59";
+		String start_date = srchStartDt + " 00:00:00";
+		String end_date = srchEndDt + " 23:59:59";
 
 		Timestamp start = Timestamp.valueOf(start_date);
 		Timestamp end = Timestamp.valueOf(end_date);
-		
-		List<Map<String, Object>> items = this.loginLogService.getLoginLogList(start, end, keyword);
-		
-        AjaxResult result = new AjaxResult();
-        result.data = items;
-        
+
+		List<Map<String, Object>> items = this.loginLogService.getLoginLogList(start, end, keyword, type);
+
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
 		return result;
 	}
 }

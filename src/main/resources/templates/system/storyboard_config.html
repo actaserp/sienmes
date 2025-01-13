@@ -1,211 +1,385 @@
-<html layout:decorate="~{layout_page}">
+<html layout:decorate="~{layout_page}" xmlns:layout="http://www.w3.org/1999/xhtml">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="/css/import.css"/>
+<link rel="stylesheet" href="/resource/ax5ui/ax5ui.all.css"/>
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 9999; /* z-index를 더 높임 */
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    /* 공통 Modal 컨텐츠 스타일 */
+    .modal-content {
+        background: white;
+        border-radius: 8px;
+        margin: 10% auto;
+        padding: 20px;
+        width: 600px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        top: 15%;
+    }
+
+    .btn-popup-close img {
+        float: right;
+    }
+
+    #modalGrid {
+        height: auto; /* 높이를 자동으로 조정 */
+        max-height: 500px; /* 필요에 따라 최대 높이를 지정 */
+        overflow-y: auto; /* 스크롤 활성화 */
+    }
+
+
+    .modal3 {
+        display: none; /* 평소에는 보이지 않도록 */
+        position: fixed; /* fixed로 변경하여 화면 전체를 덮도록 */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        opacity: 0; /* 애니메이션을 위한 초기 투명도 */
+        transition: opacity 0.3s ease; /* 투명도 변경에 대한 애니메이션 */
+    }
+
+    .modal3.show {
+        display: block;
+        opacity: 1; /* 보여질 때의 투명도 */
+    }
+
+    .popup-wrapper3 {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* 화면 중앙으로 이동 및 초기 크기 설정 */
+        width: 70%;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        transition: transform 0.3s ease; /* 크기 변경에 대한 애니메이션 */
+    }
+
+    .popup-wrapper3.show {
+        transform: translate(-50%, -50%) scale(1); /* 보여질 때의 크기 */
+    }
+
+</style>
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section>
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="스토리보드 설정">스토리보드 설정</h3>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>스토리보드설정</h2>
+                <!--                <a title="북마크" class="bookmark toggle">-->
+                <!--                    내메뉴-->
+                <!--                </a>-->
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>시스템관리</li>
+                <li>스토리보드설정</li>
+            </ul>
         </div>
-    </section>
-    <section>
-        <div class="grid_box">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="스토리보드 설정">스토리보드 설정</span>
-                <button type="button" class="btn-default" id="btnAddMenu" title="메뉴 항목 추가" data-labelCd="메뉴 항목 추가">메뉴 항목 추가</button>
-                <button type="button" class="btn-default" id="btnAddHmi" title="HMI 양식 추가" data-labelCd="HMI 양식 추가">HMI 양식 추가</button>
-                <button type="button" class="btn-danger" id="btnDel" ><i class="fas fa-trash"></i></button>
-                <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
-            </div>
-            <div class="h-600" data-ax5grid="storyboard-grid" ></div>
-        </div>
-    </section>
-</div>
 
-<script type="text/x-tmpl" id="createMenuItemTemplate">
-<div class="content_wrap popup">
-    <!--<header>
-        <h4 id="popTitle">메뉴항목 추가</h4>
-        <div class="popup_close_box"><button class="btn_popup_close" id="modal-close"><i class="fas fa-times"></i></button></div>
-    </header>-->
+        <div class="tab-wrap">
+            <ul class="tab-links">
+                <li>
+                    <a href="#tab1" title="스토리보드설정">스토리보드설정</a>
+                </li>
+            </ul>
 
-    <section class="pt-2">
-        <form id="bomForm">
-            <div class="table_box sub">
-                <div class="row">
+            <div class="tab-contents">
+                <section class="tab-item" id="tab1" style="height: 750px; overflow: hidden;">
+                    <div class="section-top">
+                        <div class="search-wrap">
 
-                    <div class="col-12">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t7" data-labelCd="메뉴 선택">메뉴 선택</span>
-                            </div>
-                            <select class="form-control2 " type="text" id="cboMenuCode" name="MenuCode" ></select>
-                        </div>
-                    </div>    
-
-                    <div class="col-12">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t7" data-labelCd="지속 시간 (초)">지속 시간 (초)</span>
-                            </div>
-                            <input class="form-control2 " type="number" id="Duration" name="Duration" value="10"/>
-                        </div>
-                    </div> 
-
-                </div>
-            </div>
-        </form>
-    </section>
-
-    <section class="popupcontent" >
-        <div class="align_left">
-            <button type="button" class="btn-popup" id="btnSaveMenuItem" ><span data-labelCd="저장">저장</span></button>
-            <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
-        </div>
-    </section>
-
-</div>
-
-</script>
-
-<script type="text/x-tmpl" id="createHMIItemTemplate">
-<div class="content_wrap popup">
-    <!--<header>
-        <h4 id="popTitle">HMI양식 추가</h4>
-        <div class="popup_close_box"><button class="btn_popup_close" id="modal-close"><i class="fas fa-times"></i></button></div>
-    </header>-->
-    <section class="pt-2">
-        <form id="bomForm">
-            <div class="table_box sub">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t7" data-labelCd="HMI 양식 구분">HMI 양식 구분</span>
-                            </div>
-                            <select class="form-control2 " type="text" id="cboHMIType" name="hmi_type">
-                                <option value='hmi_a'>A</option>
-                                <option value='hmi_b'>B</option>
-                            </select>
+                            <dl>
+                                <dt>&nbsp;</dt>
+                                <dd>
+                                    <ul>
+                                        <li>
+                                            <a class="btn btn-popup-open" title="메뉴항목추가" id="btnAddMenu" data-popup="popup1"
+                                               onclick="showPopup()">
+                                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                                메뉴 항목 추가
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="btn btn-excell" title="HMI양식추가" id="btnAddHmi" data-popup="popup2"
+                                               onclick="showPopup2()">
+                                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                                HMI 양식 추가
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="btn btn-delete" title="삭제" id="btnDel">
+                                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                                삭제
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </dd>
+                            </dl>
                         </div>
                     </div>
+                    <div class="container-fluid">
+                        <p id="selectedItem"></p>
+                        <div id="theGrid" style="height: 700px; max-height: 700px"></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        </section>
+    </div> <!--//tab-contens end-->
+    </div> <!--//tab-wrap end-->
+    </div> <!--//layout-contents end -->
 
-                    <div class="col-12">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t7" data-labelCd="HMI 양식 선택">HMI 양식 선택</span>
-                            </div>
-                            <select class="form-control2 " type="text" id="cboHMI" name="hmi_id" >
-                            </select>
-                        </div>
-                    </div>    
-
-                    <div class="col-12">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t7" data-labelCd="지속 시간 (초)">지속 시간 (초)</span>
-                            </div>
-                            <input class="form-control2 " type="number" id="Duration" name="Duration" value="10"/>
-                        </div>
-                    </div>    
+    <footer style="margin-top:5px;">
+        <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
+    </footer>
+    <div style="height: 10px"></div>
 
 
+    <div class="modal">
+        <div class="popup-wrapper w700" id="popup1">
+            <div class="popup-title">
+                <h3>메뉴 항목 추가</h3>
+                <a title="팝업닫기" onclick="closeModalWindow('.modal', '.popup-wrapper')" class="btn-popup-close">
+                    <img src="/images/icon/btn-popup-close.svg" alt="닫기">
+                </a>
+            </div>
+            <div class="popup-contents">
+                <div class="table-wrap">
+                    <form id="bomForm">
+                        <table class="write-table">
+                            <caption>점검등록 테이블</caption>
+                            <colgroup>
+                                <col class="wp20">
+                                <col class="wp80">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>
+                                    <label for="cboMenuCode">메뉴 선택</label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <select class="form-control2 " type="text" id="cboMenuCode" name="MenuCode" ></select>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label for="Duration">지속 시간 (초)</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2 " type="number" id="Duration" name="Duration" value="10"/>
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </form>
                 </div>
             </div>
-        </form>
-    </section>
-    <section class="popupcontent" >
-        <div class="align_left">
-            <button type="button" class="btn-popup" id="btnSaveHmiItem" ><span data-labelCd="저장">저장</span></button>
-            <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+            <div class="popup-button">
+                <button onclick="uploadFile()" style="border: 1px solid #03428E !important;color: white;background: #03428E !important;font-size: 15px !important;">저장</button>
+                <button onclick="closePopup()"  style="border: 1px solid #03428E !important; font-size: 15px !important;">닫기</button>
+                <!--<button onclick="closeModalWindow('.modal', '.popup-wrapper')" style="border: 1px solid #03428E !important; font-size: 15px !important;">닫기</button>-->
+            </div>
         </div>
-    </section>
-</div>
-</script>
+    </div>
+
+    <div class="modal3">
+        <div class="popup-wrapper3 w700" id="popup2">
+            <div class="popup-title">
+                <h3>HMI 양식 추가</h3>
+                <a title="팝업닫기" onclick="closeModalWindow('.modal', '.popup-wrapper')" class="btn-popup-close">
+                    <img src="/images/icon/btn-popup-close.svg" alt="닫기">
+                </a>
+            </div>
+            <div class="popup-contents">
+                <div class="table-wrap">
+                    <form id="bomForm1">
+                        <table class="write-table">
+                            <caption>점검등록 테이블</caption>
+                            <colgroup>
+                                <col class="wp20">
+                                <col class="wp80">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>
+                                    <label for="cboMenuCode">HMI 양식 구분</label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <select class="form-control2 " type="text" id="cboHMIType" name="hmi_type">
+                                            <option value='hmi_a'>A</option>
+                                            <option value='hmi_b'>B</option>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <label for="Duration">HMI 양식 선택</label>
+                                </th>
+                                <td>
+                                    <select class="form-control2 " type="text" id="cboHMI" name="hmi_id"></select>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <label for="Duration">지속 시간 (초)</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2 " type="number" id="Duration2" name="Duration" value="10"/>
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <div class="popup-button">
+                <button onclick="uploadFile()" style="border: 1px solid #03428E !important;color: white;background: #03428E !important;font-size: 15px !important;">저장</button>
+                <button onclick="closePopup()"  style="border: 1px solid #03428E !important; font-size: 15px !important;">닫기</button>
+                <!--<button onclick="closeModalWindow('.modal', '.popup-wrapper')" style="border: 1px solid #03428E !important; font-size: 15px !important;">닫기</button>-->
+            </div>
+        </div>
+    </div>
+
+
+
 </th:block>
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
-<script type="text/javascript">
-    class StoryboardPage {
-        constructor() {
-            this.gridMenu = null;
-            this.init();
+    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+    <th:block th:replace="/common/approve_box :: approve_box"></th:block>
+    <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
+    <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
+    <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
+    <script>
+
+        // 팝업 함수
+        function closePopup() {
+
+            const modal = document.querySelector('.modal');
+            const modalContent = document.querySelector('.popup-wrapper');
+
+            // 애니메이션을 위한 클래스 제거
+            modal.classList.remove('show');
+            modalContent.classList.remove('show');
+
+            // 애니메이션이 끝난 후 모달을 숨기기 위해 타임아웃 설정
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modalContent.style.display = 'none';
+            }, 300); // 애니메이션 지속 시간 (0.3초)과 동일하게 설정
         }
 
-        init() {
-            let _this = this;
-            let config = {
-                target: $('[data-ax5grid="storyboard-grid"]'),
-                sortable: true,
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: true,  // checkbox(선택) 보이기 여부
-                multipleSelect: true, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        //e.colIndex
-                        //e.dindex
-                        //c.value
-                        //e.column
-                        //e.item
-                        //e.list
-                        //_this.grid.select(this.dindex);
-                        
-                    },
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    { key: 'BoardTypeName', label: '항목구분', width: 120, align: 'center', sortable: false },
-                    { key: 'name', label: '항목명', width: 200, align: 'center', sortable: false },
-                    { key: 'Duration', label: '지속시간(초)', width: 150, align: 'right', sortable: false },
-                    { key: 'writer', label: '작성자', width: 150, align: 'center', sortable: false },
-                    { key: 'created', label: '작성일', width: 150, align: 'center', sortable: false },
-                ]
-            };
-            this.grid_config = config;
-            this.grid = new ax5.ui.grid(config);
+        function showPopup() {
+            let fileNameDisplay = document.getElementById('fileNameDisplay');
+
+            const modal = document.querySelector('.modal');
+            const modalContent = document.querySelector('.popup-wrapper');
+
+            // 모달과 콘텐츠를 표시
+            modal.style.display = 'block';
+            modalContent.style.display = 'block';
+
+            // 애니메이션을 위한 클래스 추가
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+                modalContent.classList.add('show');
+            });
         }
 
-        setButtonDisable(_boolnew, _boolsave, _booldel) {
+        function showPopup2() {
+            let fileNameDisplay = document.getElementById('fileNameDisplay');
+
+            const modal = document.querySelector('.modal3');
+            const modalContent = document.querySelector('.popup-wrapper3');
+
+            // 모달과 콘텐츠를 표시
+            modal.style.display = 'block';
+            modalContent.style.display = 'block';
+
+            // 애니메이션을 위한 클래스 추가
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+                modalContent.classList.add('show');
+            });
+        }
+
+
+        var theGrid;
+        var viewdata;
+
+        var columns = [
+            {binding: 'BoardTypeName', header: '항목구분', width: 120, align: 'center'},
+            {binding: 'name', header: '항목명', width: 200, align: 'center'},
+            {binding: 'Duration', header: '지속시간(초)', width: 150, align: 'center'},
+            {binding: 'writer', header: '작성자', width: 150, align: 'center'},
+            {binding: 'created', header: '작성일', width: 200, align: 'center'},
+            {binding: '', header: '', width: "*", align: 'center'},
+        ];
+
+        document.readyState === 'complete' ? init() : window.onload = init;
+
+
+        function init() {
+            let data2 = [];
+
+            $.ajax({
+                url: '/api/system/storyboard/read',
+                type: 'GET',
+                async: false,
+                success: function (data) {
+                    console.log('wijmo', data);
+                    data2 = data.data;
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Error fetching log_list data:', textStatus, errorThrown);
+                }
+            });
+
+            viewdata = new wijmo.collections.CollectionView(data2);
+            // 데이터 그리드에 바인딩
+            theGrid = new wijmo.grid.FlexGrid('#theGrid', {
+                autoGenerateColumns: false,
+                showMarquee: true,
+                columns: columns,
+                isReadOnly: true,
+                itemsSource: viewdata
+            });
+
+            theGrid.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
+
+        }
+
+
+        /*setButtonDisable(_boolnew, _boolsave, _booldel)
+        {
             $('[id=btn_new_group]').prop('disabled', _boolnew);
             $('[id=btn_save_group]').prop('disabled', _boolsave);
             $('[id=btn_del_group]').prop('disabled', _booldel);
-        }
+        }*/
 
-       
-        searchDataBind() {
-            let _this = this;
 
-            let url = '/api/system/storyboard/read';
-
-            let result = AjaxUtil.getSyncData(url, null);
-            if (result != null) {
-                let recordsTotal = result.length;
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: recordsTotal,
-                    }
-                });
-            }
-
-        }//searchDataBind
-
-        showAddMenuItem() {
+        function showAddMenuItem() {
             let _this = this;
             //createMenuItemTemplate
 
@@ -213,7 +387,7 @@
             let $content = $(content);
 
             let modalContainer = new PopupDraggable('메뉴 항목 추가');
-            modalContainer.open({ width: 440, height: 160, $content });
+            modalContainer.open({width: 440, height: 160, $content});
 
             let $cboMenuCode = $content.find('#cboMenuCode');
             let $Duration = $content.find('#Duration');
@@ -241,12 +415,12 @@
 
         }
 
-        showAddHMIItem() {
+        function showAddHMIItem() {
             let _this = this;
             let content = tmpl('createHMIItemTemplate', {});
             let $content = $(content);
             let modalContainer = new PopupDraggable('HMI 양식 추가');
-            modalContainer.open({ width: 440, height: 200, $content });
+            modalContainer.open({width: 440, height: 200, $content});
 
             let $cboHMIType = $content.find('#cboHMIType');
             let $cboHMI = $content.find('#cboHMI');
@@ -271,13 +445,13 @@
                     'BoardType': $cboHMIType.val(),
                     'MenuCode': MenuCode,
                     'Duration': $Duration.val(),
-                    'ParameterData' : $cboHMI.val() == null ? 0 : $cboHMI.val()
+                    'ParameterData': $cboHMI.val() == null ? 0 : $cboHMI.val()
                 };
                 _this.saveItem(data, modalContainer);
             });
         }
 
-        saveItem(data, modalContainer) {
+        function saveItem(data, modalContainer) {
             let _this = this;
             let url = '/api/system/storyboard/save_hmi';
             let fnSuccess = function (result) {
@@ -292,11 +466,11 @@
             AjaxUtil.postAsyncData(url, data, fnSuccess);
         }
 
-        deleteItem(ids) {
+        function deleteItem(ids) {
             let _this = this;
             let url = '/api/system/storyboard/delete';
 
-            let data = { id_list: ids.join(',') };
+            let data = {id_list: ids.join(',')};
             let fnSuccess = function (res) {
                 Notify.success('삭제했습니다');
                 _this.searchDataBind();
@@ -305,60 +479,44 @@
             AjaxUtil.postAsyncData(url, data, fnSuccess);
 
         }
-    }
-
-    let page = null;
-
-    $(document).ready(function (e) {
-        page = new StoryboardPage();
-
-		//그리드 컬럼 설정
-        page.popColSetting = new popColSetting();
-        let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-		
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });	
-        page.searchDataBind();
-        $('#btn_search').click(function (ex) {
-            page.searchDataBind();
-        });
 
 
-        $('#btnAddMenu').click(function (e) {
-            page.showAddMenuItem();
-        });
+        $(document).ready(function (e) {
+            AjaxUtil.fillSelectOptions($('#cboMenuCode'), 'menu_item', '', false);
+            /*AjaxUtil.fillSelectOptions($('#cboHMI'), 'hmi_form', '', false);*/
 
-        $('#btnAddHmi').click(function (e) {
-            page.showAddHMIItem();
-        });
+            /* $('#btnAddMenu').click(function (e) {
+                 showAddMenuItem();
+             });
 
-        $('#btnDel').click(function (e) {
-            let ids = [];
-            $.each(page.grid.list, function (idx, item) {
-                if (item.__selected__) {
-                    ids.push(item.id);
+             $('#btnAddHmi').click(function (e) {
+                 showAddHMIItem();
+             });*/
+
+            $('#btnDel').click(function (e) {
+                let ids = [];
+                $.each(page.grid.list, function (idx, item) {
+                    if (item.__selected__) {
+                        ids.push(item.id);
+                    }
+                });
+
+                if (ids.length == 0) {
+                    return;
                 }
+
+                Alert.confirm('',
+                    '삭제하시겠습니까?',
+                    function () {
+                        deleteItem(ids)
+                    },
+                    function () {
+                    }
+                );
             });
-
-            if (ids.length == 0) {
-                return;
-            }
-
-            Alert.confirm('', 
-                '삭제하시겠습니까?',
-                function () { page.deleteItem(ids) },
-                function () { }
-            );
         });
-    });
-</script>
 
+    </script>
 </th:block>
 </html>
+

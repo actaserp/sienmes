@@ -1,348 +1,517 @@
-<html layout:decorate="~{layout_page}">
+<html layout:decorate="~{layout_page}" xmlns:layout="http://www.w3.org/1999/xhtml">
+<head>
+    <style>
+        .wj-header {
+            text-align: center !important;
+        }
+    </style>
+</head>
 
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section class="section">
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="사용자 관리">사용자 관리</h3>
+    <div class="layout-contents">
+        <!-- Page Title -->
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>사용자 관리</h2>
+                <!--                <a title="북마크" class="bookmark toggle">-->
+                <!--                    내메뉴-->
+                <!--                </a>-->
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>시스템관리</li>
+                <li>사용자</li>
+            </ul>
         </div>
 
+        <div class="tab-wrap">
+            <ul class="tab-links">
+                <li>
+                    <a href="#tab1" title="사용자 관리">사용자 관리</a>
+                </li>
+            </ul>
+            <div class="tab-contents">
+                <section class="tab-item" id="tab1" style="height: 820px;">
+                    <div class="section-top">
+                        <div class="search-wrap">
+                            <dl>
+                                <dt>
+                                    <label>사용자그룹</label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <select class="form-control2" id="cboUserGroup" name="cboUserGroup" style="border-radius: 5px 5px 5px 5px;"></select>
+                                    </div>
+                                </dd>
+                            </dl>
 
-        <div class="table_box search">
-            <form id="searchForm" autocomplete="off">
-                <div class="row">
+                            <dl>
+                                <dt>
+                                    <label for="txtName">
+                                        이름
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <input class="form-control2" id="txtName" name="txtName"/>
+                                    </div>
+                                </dd>
+                            </dl>
 
-                    <div class="col-12 col-lg-3">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="사용자 그룹">사용자 그룹</span>
-                            </div>
-                                <select class="form-control2" id="cboUserGroup" name="cboUserGroup"></select>
+                            <dl>
+                                <dt>
+                                    <label for="username">
+                                        사원번호
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <input class="form-control2" id="username" name="username"/>
+                                    </div>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label>부서</label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <select class="form-control2" id="txtDepart" name="txtDepart" style="border-radius: 5px 5px 5px 5px;"></select>
+                                    </div>
+                                </dd>
+                            </dl>
+
+                            <dl>
+                                <dt><span class="eq"></span></dt>
+                                <dd>
+                                    <li>
+                                        <a class="btn btn-delete" title="검색" id="btnSearch">
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            검색
+                                        </a>
+                                    </li>
+                                </dd>
+                            </dl>
                         </div>
+                    </div> <!--//section-top end -->
+                    <div class="container-fluid">
+                        <p id="selectedItem"></p>
+                        <div id="theGrid" style="height: 400px; max-height: 400px;"></div>
+                    </div>
+                    <div class="btn-wrap">
                     </div>
 
-                    <div class="col-11 col-lg-3">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="이름">이름</span>
-                            </div>
-                                <input class="form-control2" id="txtName" name="txtName"/>
+                    <div class="section-top">
+                        <div class="search-wrap">
+                            <dl>
+                                <dt><span class="eq"></span></dt>
+                                <dd>
+                                    <li>
+                                        <a class="btn btn-excell" title="신규등록" id="btnNew" >
+                                            <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                            신규등록
+                                        </a>
+                                        <!-- <button type="button" class="btn btn-excel" id="btnNew" name="btnNew" title="신규">
+                                             <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                             신규</button>-->
+                                    </li>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt><span class="eq"></span></dt>
+                                <dd>
+                                    <!-- <li>
+                                         <a class="btn btn-edit" id="btnSave" title="저장">
+                                             <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
+                                             저장
+                                         </a>
+                                     </li>-->
+                                    <button type="button" class="btn btn-edit" id="btnSave"  title="저장">
+                                        <img src="/images/icon/ico-save.svg" alt="저장 아이콘">저장</button>
+                                </dd>
+                            </dl>
+
+                            <dl>
+                                <dt><span class="eq"></span></dt>
+                                <dd>
+                                    <li>
+                                        <!--  <a class="btn btn-delete" title="삭제" id="btnDel">
+                                              <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                              삭제
+                                          </a>-->
+                                        <button type="button" class="btn btn-delete" id="btnDel" title="삭제">
+                                            <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                            삭제</button>
+                                    </li>
+                                </dd>
+                            </dl>
+
+                            <dl>
+                                <dt><span class="eq"></span></dt>
+                                <dd>
+                                    <li>
+                                        <!-- <a class="btn btn-delete" title="검색" id="btnPassSetting"  data-popup="popup1"
+                                            onclick="showPopup()">
+                                             패스워드 설정
+                                         </a>-->
+                                        <button type="button" class="btn btn-delete" id="btnPassSetting" data-popup="popup1"><i class="fas fa-cog"></i> 패스워드 설정</button>
+                                    </li>
+                                </dd>
+                            </dl>
                         </div>
                     </div>
+                    <div class="table-wrap" style=" overflow-x: auto;">
+                        <form id="userForm">
+                            <table class="write-table" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                                <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
+                                <input type="hidden" id="id" name="id" />
+                                <tbody>
+                                <tr>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="login_id">사번</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <input type="text" id="login_id" name="login_id" style="width: 100%;">
+                                    </td>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="Name">이름</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <input type="text" id="Name" name="Name" style="width: 100%;">
+                                    </td>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="UserGroup_id">사용자그룹</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select style="width: 100%;" id="UserGroup_id" name="UserGroup_id"></select>
+                                    </td>
+                                    <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
+                                        <label for="Factory_id">소속 공장</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select style="width: 100%;" id="Factory_id" name="Factory_id"></select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="Depart_id">부서</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select style="width: 100%;" id="Depart_id" name="Depart_id"></select>
+                                    </td>
+                                    <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
+                                        <label for="email">Email</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <input type="text" style="width: 100%;" id="email" name="email">
+                                    </td>
+                                    <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
+                                        <label for="lang_code">언어</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select style="width: 100%;" id="lang_code" name="lang_code"></select>
+                                    </td>
+                                    <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
+                                        <label for="is_active">활성화 여부</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd; text-align: center; vertical-align: middle;">
+                                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                                            <input type="checkbox" id="is_active">
+                                        </div>
+                                    </td>
 
-                    <div class="col-11 col-lg-3">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="사원번호">사원번호</span>
-                            </div>
-                                <input class="form-control2" id="username" name="username"/>
-                        </div>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </form>
                     </div>
 
-                    <div class="col-11 col-lg-2">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="부서">부서</span>
-                            </div>
-                                <select class="form-control2" id="txtDepart" name="txtDepart"></select>
-                        </div>
-                    </div>
+                    <!--<div class="row row-2" style="margin-bottom: 9px;">
+                        <div class="col wp50" style="margin-right: 15px;">
+                            <section class="tab-section" style="height: 360px; padding: 11px; margin-bottom: 0px;">
+                                <div class="title-wrap" style="margin-bottom: 0px">
+                                    <h3>상세 테이블</h3>
+                                    <ul class="tab-links-sub">
+                                        <li><a href="#tab01" title="통계">통계</a></li>
+                                        <li><a href="#tab02" title="현황">현황</a></li>
+                                    </ul>
+                                </div>
+                                <div class="tab-contents">
+                                    <div class="tab-item-sub" id="tab01">
+                                        <div class="table-wrap">
 
-                    <div class="col-1" >
-                        <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-    </section>
-    
-    <section>
-        <div class="grid_box">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="사용자 목록">사용자 목록</span>
-                <button type="button" class="btn-default" id="btnExcel" title="엑셀 다운로드"><i class="fas fa-file-excel"></i></button>
-            </div>
-            <div class="h-400" data-ax5grid="user-grid" ></div>
-        </div>
-    </section>
-
-    <section>
-        <div class="tabs" data-tab="tabWrap">
-            <div class="title_box">
-                <div class="left_align">
-                    <ul class="tab_links">
-                        <li><a href="#" data-tablink="#tab_basic" name="tab_basic" class="tab" data-labelCd="기본정보">기본정보</a></li>
-                        <li><a href="#" data-tablink="#tab_user_grp" name="tab_user_grp" class="tab" data-labelCd="사용자 그룹">사용자 그룹</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="tab-content">
-                <div class="tab" id="tab_basic">
-                    <div class="tab_con_box">
-                        <div class="table_box">
-                            <span class="right_align rpt" data-labelCd="사용자 상세 정보">사용자 상세 정보</span>
-                            <button type="button" class="btn-default" id="btnNew" name="btnNew" title="신규"><i class="fas fa-plus"></i></button>
-                            <button type="button" class="btn-danger" id="btnDel" title="삭제"><i class="fas fa-trash"></i></button>
-                            <button type="button" class="btn-default" id="btnSave"  title="저장"><i class="fas fa-save"></i></button>
-                            <button type="button" class="btn-default" id="btnPassSetting" ><i class="fas fa-cog"></i> 패스워드 설정</button>    
-                        </div>
-                   
-                        <div class="table_box">
-                            <form id="userForm">
-                                <div class="table_box sub" id="detail_box">
-                                    <div class="row">
-                                        <input type="hidden" id="id" name="id" />
-                    
-
-                                        <div class="col-6 col-md-3 col-lg-3" >
-                                            <div class="input-group" >
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t7" data-labelCd="사번">사번</span>
-                                                </div>
-                                                <input type="text" class="form-control2 "  id="login_id" name="login_id" required disabled />
+                                        </div>
+                                    </div>
+                                    &lt;!&ndash; tab2 &ndash;&gt;
+                                    <div class="tab-item-sub" id="tab02" style="padding-top: 10px;">
+                                        <div class="section-top">
+                                            <div class="search-wrap">
+                                                <dl>
+                                                    <dt><span class="eq"></span></dt>
+                                                    <dd>
+                                                        <li>
+                                                            <a class="btn btn-delete" title="검색" id="btnSearch">
+                                                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                                                검색
+                                                            </a>
+                                                        </li>
+                                                    </dd>
+                                                </dl>
                                             </div>
                                         </div>
-
-                                        <div class="col-6 col-md-3 col-lg-3" >
-                                            <div class="input-group" >
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t7" data-labelCd="이름">이름</span>
-                                                </div>
-                                                <input type="text" class="form-control2 "  id="Name" name="Name" required disabled />
-                                            </div>
+                                        <div class="container-fluid">
+                                            <p id="selectedItem"></p>
+                                            <div id="theGrid1" style="width: 100%; height: 280px"></div>
                                         </div>
-                                        <div class="col-6 col-md-3 col-lg-3" >
-                                            <div class="input-group" >
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t7" data-labelCd="사용자그룹">사용자그룹</span>
-                                                </div>
-                                                <select class="form-control2 "  id="UserGroup_id" name="UserGroup_id" disabled></select>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-6 col-md-3 col-lg-3" >
-                                            <div class="input-group" >
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t7" data-labelCd="소속 공장">소속 공장</span>
-                                                </div>
-                                                <select class="form-control2 "  id="Factory_id" name="Factory_id" disabled></select>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 col-md-3 col-lg-3" >
-                                            <div class="input-group" >
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t7" data-labelCd="부서">부서</span>
-                                                </div>
-                                                <select class="form-control2 "  id="Depart_id" name="Depart_id" disabled></select>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 col-md-3 col-lg-3" >
-                                            <div class="input-group" >
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t7" data-labelCd="Email">Email</span>
-                                                </div>
-                                                <input type="text" class="form-control2 "  id="email" name="email" required disabled />
-                                            </div>
-                                        </div>
-
-                                        <div class="col-6 col-md-3 col-lg-3" >
-                                            <div class="input-group" >
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t7" data-labelCd="언어">언어</span>
-                                                </div>
-                                                <select class="form-control2 "  id="lang_code" name="lang_code" disabled></select>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-6 col-md-3 col-lg-3 col-xl-2 mt-5 tac" >
-                                            <input type="checkbox" id="is_active" name="is_active" disabled />
-                                            활성화 여부 
-                                        </div>
-
                                     </div>
                                 </div>
-                            </form>
-                         </div>
-                     </div>
-                     <br/><br/>
-                </div>
-                
-                <div class="tab" id="tab_user_grp">
-                    <input type="hidden" id="user_pk"/>
-                    <div class="grid_box">
-                        <div class="title_box">
-                                <span class="right_align rpt" data-labelCd="사용자 그룹">사용자 그룹</span>
-                            <button type="button" class="btn-default" id="btnUserGroupSave"><i class="fas fa-save"></i></button>
+                            </section>
                         </div>
-                        <div class="h-300" data-ax5grid="user_group_grid"></div>
-                    </div>
-                </div>
+                    </div>-->
 
 
-            </div>
-        </div>
-    </section>
-</div>
-
-<script type="text/x-tmpl" id="passwordTemplate">
-    <div class="content_wrap popup">
-    <!--<header>
-        <h4 id="popTitle">패스워드 설정</h4>
-        <div class="popup_close_box"><button class="btn_popup_close" id="modal-close"><i class="fas fa-times"></i></button></div>
-    </header>-->
-
-    <section class="pt-2">
-        <form id="passwordForm">
-            <div class="table_box sub">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="input-group">
-                            <span class="text_left" style="line-height: 1.3">영어 대,소문자, 숫자, 특수문자를 모두 포함한 8~20 자리 사이의 패스워드를 입력해주세요.</span>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t7" data-labelCd="패스워드">패스워드</span>
+                    <div class="modal">
+                        <div class="popup-wrapper w700" id="popup1">
+                            <div class="popup-title">
+                                <h3>패스워드 설정</h3>
+                                <a title="팝업닫기" onclick="closeModalWindow('.modal', '.popup-wrapper')" class="btn-popup-close">
+                                    <img src="/images/icon/btn-popup-close.svg" alt="닫기">
+                                </a>
                             </div>
-                             <input class="form-control2 " type="password" id="pass1" name="pass1" value=''  />
+                            <div class="popup-contents">
+                                <div class="table-wrap">
+                                    <form id="bomForm">
+                                        <table class="write-table">
+                                            <input type="hidden" id="idx" name="id">
+                                            <caption>패스워드 설정테이블</caption>
+                                            <colgroup>
+                                                <col class="wp20">
+                                                <col class="wp80">
+                                            </colgroup>
+                                            <tbody>
+                                            <div>
+                                                영어 대,소문자,숫자,특수문자를 모두 포함한 8~20자리 사이의 패스워드를 입력해주세요.
+                                            </div>
+                                            <tr>
+                                                <th>
+                                                    <label for="pass1">패스워드</label>
+                                                </th>
+                                                <td>
+                                                    <div class="input-clear">
+                                                        <input class="form-control2 " type="password" id="pass1" name="pass1" >
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <label for="pass2">패스워드 확인</label>
+                                                </th>
+                                                <td>
+                                                    <input class="form-control2 " type="password" id="pass2" name="pass2">
+                                                </td>
+                                            </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="popup-button">
+                                <button id="btnPassSave" style="border: 1px solid #03428E !important;color: white;background: #03428E !important;font-size: 15px !important;">저장</button>
+                                <button onclick="closeModalWindow('.modal', '.popup-wrapper')" style="border: 1px solid #03428E !important; font-size: 15px !important;">닫기</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-12">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t7" data-labelCd="패스워드 확인">패스워드 확인</span>
-                        </div>
-                         <input class="form-control2 " type="password" id="pass2" name="pass2" value=''  />
-                    </div>
-                </div>
 
-                </div>
-            </div>
-        </form>
-    </section>
+                </section>
+            </div> <!--//tab-contens end-->
+        </div> <!--//tab-wrap end-->
+    </div> <!--//layout-contents end -->
 
-    <section class="popupcontent" >
-        <div class="popup_button_group">
-            <button type="button" class="btn-default" id="btnPassSave" ><span data-labelCd="저장">저장</span></button>
-            <button type="button" class="btn-default" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
-        </div>
-    </section>
+    <footer style="margin-top: 24px;">
+        <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
+    </footer>
 
-    </div>
-</script>
 </th:block>
-
 <th:block layout:fragment="scripts">
-<script type="text/javascript">
+    <th:block th:replace="/common/approve_box :: approve_box"></th:block>
+    <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
+    <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
+    <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
 
-    class UserPage {
-        constructor() {
-            this.grid = null;
-            this.userGroupGrid = null;
-            this.baseUrl = '/api/system/user';
-            this.init();
+    <script type="text/javascript">
+
+        function closePopup() {
+
+            const modal = document.querySelector('.modal');
+            const modalContent = document.querySelector('.popup-wrapper');
+
+            // 애니메이션을 위한 클래스 제거
+            modal.classList.remove('show');
+            modalContent.classList.remove('show');
+
+            // 애니메이션이 끝난 후 모달을 숨기기 위해 타임아웃 설정
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modalContent.style.display = 'none';
+            }, 300); // 애니메이션 지속 시간 (0.3초)과 동일하게 설정
         }
 
-        init() {
-            let _this = this;
-            let config = {
-                target: $('[data-ax5grid="user-grid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        _this.grid.select(this.dindex);
-                        _this.showDetailUser(e.item.id);
-                        _this.showUserGroup(e.item.id);
-
-                        $('#user_pk').val(e.item.id);
-                    },
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    { key: 'login_id', label: '사원번호', width: 100, align: 'center' },
-                    { key: 'Name', label: '이름', width: 120, align: 'center' },
-                    { key: 'group_name', label: '사용자그룹', width: 120, align: 'left' },
-                    { key: 'factory_name', label: '소속공장', width: 150, align: 'left',  },
-                    { key: 'dept_name', label: '부서', width: 150, align: 'left', },
-                    { key: 'lang_code', label: '언어', width: 100, align: 'center',  },
-                    { key: 'is_active', label: '활성화', width: 100, align: 'center',  },
-                    { key: 'date_joined', label: '생성일', width: 150, align: 'center', },
-                ]
-            };
-
-            this.grid = new ax5.ui.grid(config);
-
-            let userGroupConfig = {
-                target: $('[data-ax5grid="user_group_grid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: false, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 30  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 30, // body의 기본 높이
-                    onClick: function (e) {
-                        
-                     
-                    }
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    { key: 'grp_name', label: '사용자 그룹명', width: 450, align: 'left' },
-                    {
-                        key: 'grp_check', label: '<span class="editable_clr">소속 여부</span>', width: 100, align: 'center',
-                        editor: {
-                            type: 'checkbox', config: {height: 15, trueValue: 'Y', falseValue: 'N'}
-                        },
-                     },
-                ]
+        function showPopup(id) {
+            console.log('showpopup에서 id확인',id);
+            // 전달받은 id 값을 hidden input에 설정
+            const hiddenInput = document.getElementById('idx');
+            if (hiddenInput) {
+                hiddenInput.value = id;
             }
-            this.userGroupGrid = new ax5.ui.grid(userGroupConfig);
-            this.grid_config2 = userGroupConfig;
-            this.userGroupGrid.setData([]);
 
-            AjaxUtil.fillSelectOptions($('#cboUserGroup'), 'user_group', 'all', false);
-            AjaxUtil.fillSelectOptions($('#lang_code'), 'system_code', '', false, 'lang_code');
+            let fileNameDisplay = document.getElementById('fileNameDisplay');
 
-            this.initForm();
+            const modal = document.querySelector('.modal');
+            const modalContent = document.querySelector('.popup-wrapper');
+
+            // 모달과 콘텐츠를 표시
+            modal.style.display = 'block';
+            modalContent.style.display = 'block';
+
+            // 애니메이션을 위한 클래스 추가
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+                modalContent.classList.add('show');
+            });
         }
 
-        initForm() {
-            AjaxUtil.fillSelectOptions($('#UserGroup_id'), 'user_group', '', false);
-            AjaxUtil.fillSelectOptions($('#Factory_id'), 'factory', '', false);
-            AjaxUtil.fillSelectOptions($('#Depart_id'), 'depart', 'choose', false);
+        var theGrid;
+        var viewdata;
+
+        let columns = [
+            { binding: 'login_id', header:'사원번호', width: 100, align: 'center' },
+            { binding: 'Name', header: '이름', width: 160, align: 'center' },
+            { binding: 'group_name', header: '사용자그룹', width: 120, align: 'center' },
+            { binding: 'factory_name', header: '소속공장', width: 150, align: 'center'  },
+            { binding: 'dept_name', header: '부서', width: 150, align: 'center' },
+            { binding: 'lang_code', header: '언어', width: 100, align: 'center' },
+            {
+                binding: 'is_active',
+                header: '활성화',
+                width: 100,
+                align: 'center',
+                format: 'g', // 일반 문자열로 처리
+                dataMap: new wijmo.grid.DataMap([
+                    { key: true, value: 'true' },
+                    { key: false, value: 'false' }
+                ], 'key', 'value') // true/false 값을 매핑
+            },
+            { binding: 'date_joined', header: '생성일', width: 200, align: 'center' },
+            { binding: '', header: '', width: "*", align: 'center' },
+        ];
+
+        document.readyState === 'complete' ? init() : window.onload = init;
+
+        /*this.baseUrl = '/api/system/user';*/
+        <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
+        function init() {
+            let data2 = [];
+
+            let group = $('#cboUserGroup').val();
+            let keyword = $('#txtName').val();
+            let depart_id = $('#txtDepart').val();
+            let username = $('#username').val();
+
+            $.ajax({
+                url: '/api/system/user/read',
+                type: 'GET',
+                data: {
+                    'group': group,
+                    'keyword': keyword,
+                    'depart_id': depart_id,
+                    'username': username
+                },
+                async: false,
+                success: function (data) {
+                    data2 = data.data;
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Error fetching log_count data:', textStatus, errorThrown);
+                }
+            })
+
+            viewdata = new wijmo.collections.CollectionView(data2);
+
+            theGrid = new wijmo.grid.FlexGrid('#theGrid', {
+                autoGenerateColumns: false,
+                showMarquee: true,
+                columns: columns,
+                isReadOnly: true,
+                itemsSource: viewdata
+            });
+
+
+            theGrid.hostElement.addEventListener('dblclick', function (e) {
+                let selectedItem = theGrid.selectedItems[0];
+                console.log('확인',selectedItem);
+
+                document.getElementById('id').value = selectedItem.id;
+                document.getElementById('login_id').value = selectedItem.login_id;
+                document.getElementById('Name').value = selectedItem.Name;
+                document.getElementById('Depart_id').value = selectedItem.dept_name;
+                document.getElementById('is_active').checked = selectedItem.is_active === true; // 체크박스 상태 설정
+
+                // UserGroup_id 값을 설정
+                let userGroupSelect = document.getElementById('UserGroup_id');
+                if (userGroupSelect) {
+                    for (let i = 0; i < userGroupSelect.options.length; i++) {
+                        if (userGroupSelect.options[i].text === selectedItem.group_name) {
+                            userGroupSelect.options[i].selected = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Factory_id 값을 설정
+                let factorySelect = document.getElementById('Factory_id');
+                if (factorySelect) {
+                    for (let i = 0; i < factorySelect.options.length; i++) {
+                        if (factorySelect.options[i].text === selectedItem.factory_name) {
+                            factorySelect.options[i].selected = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Factory_id 값을 설정
+                let departSelect = document.getElementById('Depart_id');
+                if (departSelect) {
+                    for (let i = 0; i < departSelect.options.length; i++) {
+                        if (departSelect.options[i].text === selectedItem.dept_name) {
+                            departSelect.options[i].selected = true;
+                            break;
+                        }
+                    }
+                }
+
+                // login_id 값을 설정
+                let loginSelect = document.getElementById('lang_code');
+                if (loginSelect) {
+                    for (let i = 0; i < loginSelect.options.length; i++) {
+                        if (loginSelect.options[i].text === selectedItem.login_id) {
+                            loginSelect.options[i].selected = true;
+                            break;
+                        }
+                    }
+                }
+
+                setButtonState();
+            });
+
+            theGrid.rowHeaders.columns.splice(0, 1);
+            /*  new FlexGridContextMenu(theGrid);*/
         }
 
-        setButtonState() {
+        $('#btnSearch').click(searchDataBind);
+
+
+        function setButtonState() {
             let pk = $('#id').val();
             $('#btnNew').prop('disabled', false);
             $('#btnSave').prop('disabled', false);
@@ -356,49 +525,35 @@
             }
         }
 
+        function searchDataBind() {
+            let group = $('#cboUserGroup').val();
+            let keyword = $('#txtName').val();
+            let depart_id = $('#txtDepart').val();
+            let username = $('#username').val();
 
-        showDetailUser(idx) {
-            let _this = this;
-            let param = { 'id': idx, "action": 'detail' };
-            let result = AjaxUtil.getSyncData(_this.baseUrl + '/detail', param);
-            if (result.data != null) {
-                FormUtil.BindDataForm(result.data, $('#userForm'));
-
-                $('#description').text(result.data.description);
-
-                if (result.data.is_active == true) {
-                    $('#is_active').prop('checked', true);
-                }
-            }
-
-            page.setButtonState();
-        }
-
-        searchDataBind() {
-            let _this = this;
-
-
-            let data = {
-                'group': $('#cboUserGroup').val(),
-                'keyword': $('#txtName').val(),
-                'depart_id': $('#txtDepart').val(),
-                'username': $('#username').val(),
-                'action' : 'read'
-            };
-
-            let result = AjaxUtil.getSyncData(_this.baseUrl + '/read', data);
-            if (result.data != null) {
-                let recordsTotal = result.data.length;
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: recordsTotal,
+            $.ajax({
+                url: '/api/system/user/read',
+                type: 'GET',
+                data: {
+                    'group': group,
+                    'keyword': keyword,
+                    'depart_id': depart_id,
+                    'username': username
+                },
+                async: false,
+                success: function (result) {
+                    if (result.success) {
+                        grid_binding(result.data);
+                    } else {
+                        console.log("Error occurred");
                     }
-                });
-                $('#user_pk').val('');
-            }
-            
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Error fetching log_list data:', textStatus, errorThrown);
+
+                }
+            });
+
             $('#userForm')[0].reset();
             $('#userForm').find('#id').val('');
 
@@ -408,42 +563,151 @@
                 }
             });
 
-            //page.setButtonDisable(false, true, true);
-            page.setButtonState();
-        }//searchDataBind
+            setButtonState();
+        }
 
-        saveUser() {
-            let _this = this;
+        function grid_binding(data) {
+            if (!Array.isArray(data)) {
+                console.error('데이터가 배열 형식이 아닙니다:', data);
+                return;
+            }
+
+            let menulogData = data.map(item => ({
+                login_id: item.login_id,
+                Name: item.Name,
+                group_name: item.group_name,
+                factory_name:item.factory_name,
+                dept_name:item.dept_name,
+                lang_code:item.lang_code,
+                is_active:item.is_active,
+                date_joined:item.date_joined,
+
+            }));
+
+            if (typeof theGrid === 'undefined' || typeof viewdata === 'undefined') {
+                console.error('theGrid 또는 viewdata가 정의되지 않았습니다.');
+                return;
+            }
+
+            theGrid.columns.clear();
+            theGrid.autoGenerateColumns = false;
+
+            // columns 배열이 정의되어 있는지 확인
+            if (typeof columns === 'undefined' || !Array.isArray(columns)) {
+                console.error('columns 배열이 정의되지 않았습니다.');
+                return;
+            }
+
+            columns.forEach(columnDef => {
+                var col = new wijmo.grid.Column(columnDef);
+                theGrid.columns.push(col);
+            });
+
+            viewdata = new wijmo.collections.CollectionView(menulogData);
+
+            theGrid.itemsSource = viewdata;
+            theGrid.refresh();
+        }
+
+
+
+        $('#btnSave').click(saveUser);
+
+        function saveUser() {
             //데이터입력체크루틴 누락
-            let data = FormUtil.extractForm($('#userForm'));
-            let fnSuccess = function (res) {
-                if (res.success) {
-                    Notify.success("저장되었습니다."); // Notification
-                    _this.searchDataBind();
-                } else if (!res.success) {
-                     Alert.alert('', res.message);
+            let id = $('#id').val();
+            let login_id = $('#login_id').val();
+            let Name = $('#Name').val();
+            let UserGroup_id = $('#UserGroup_id').val();
+            let Factory_id = $('#Factory_id').val();
+            let Depart_id= $('#Depart_id').val();
+            let email  = $('#email').val();
+            let lang_code = $('#lang_code').val();
+            let is_active = $('#is_active').is(':checked'); // 체크박스 상태 확인
+
+
+            if (!Depart_id) {
+                Depart_id = 0;
+            }
+
+            /*let data = FormUtil.extractForm($('#userForm'));*/
+
+            let formData = new FormData();
+            formData.append('id', id);
+            formData.append('login_id', login_id);
+            formData.append('Name', Name);
+            formData.append('UserGroup_id', UserGroup_id);
+            formData.append('Factory_id', Factory_id);
+            formData.append('Depart_id', Depart_id);
+            formData.append('email', email);
+            formData.append('lang_code', lang_code);
+            formData.append('is_active', is_active);
+
+
+            $.ajax({
+                url: '/api/system/user/save',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRF-Token': $('[name=_csrf]').val() // CSRF 토큰을 헤더에 추가
+                },
+                success: function (result) {
+                    if (result.success) {
+                        Alert.alert('', result.message, function () {
+                            searchDataBind();
+                        });
+                    } else {
+                        Alert.alert('', '저장에 실패했습니다. ' + result.message);
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('HTTP Status:', jqXHR.status); // HTTP 상태 코드
+                    console.error('Response Text:', jqXHR.responseText); // 응답 본문
+                    console.error('Error Thrown:', errorThrown); // 에러 메시지
+                    console.error('Text Status:', textStatus); // 요청 상태
+                    Alert.alert('', '에러가 발생하였습니다. 상태 코드: ' + jqXHR.status);
                 }
-            };
-           AjaxUtil.postAsyncData(_this.baseUrl + '/save', data, fnSuccess);
+            });
         }
 
-        deleteUser() {
-            let _this = this;
-            let id = $('#userForm').find('#id').val();
+        $('#btnDel').click(deleteUser);
+
+        function deleteUser() {
+            /*/api/system/user/delete*/
+            let id = $('#id').val();
+
+            /* let id = $('#userForm').find('#id').val();*/
             let data = { id: id };
-            let fnsuccess = function (res) {
-                if (res.success) {
-                    Notify.success('삭제했습니다.');
-                    _this.searchDataBind();
-                } else {
-                    Alert.alert('', res.message);
-                }
-
-            };
-            let result = AjaxUtil.postAsyncData(_this.baseUrl + '/delete', data, fnsuccess);
+            Alert.confirm('', '삭제하시겠습니까?', function () {
+                $.ajax({
+                    url: '/api/system/user/delete',
+                    type: 'POST',
+                    data: data,
+                    headers: {
+                        'X-CSRF-Token': $('[name=_csrf]').val() // CSRF 토큰을 헤더에 추가
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            Alert.alert('', result.message, function () {
+                                searchDataBind();
+                            });
+                        } else {
+                            Alert.alert('', '삭제에 실패했습니다. ' + result.message);
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        Alert.alert('', '에러가 발생하였습니다. 상태 코드: ' + jqXHR.status);
+                    }
+                });
+            });
         }
 
-        validatePassword(pw, options) {
+
+
+        // 패스워드 설정 코드
+        function  validatePassword(pw, options) {
             // default options (allows any password)
             var o = {
                 lower: 0,
@@ -463,12 +727,12 @@
                 o[property] = options[property];
 
             var re = {
-                lower: /[a-z]/g,
-                upper: /[A-Z]/g,
-                alpha: /[A-Z]/gi,
-                numeric: /[0-9]/g,
-                special: /[\W_]/g
-            },
+                    lower: /[a-z]/g,
+                    upper: /[A-Z]/g,
+                    alpha: /[A-Z]/gi,
+                    numeric: /[0-9]/g,
+                    special: /[\W_]/g
+                },
                 rule, i;
 
             // enforce min/max length
@@ -527,67 +791,66 @@
             return true;
         }
 
-        showPassSetting(id) {
-            let _this = this;
+        /* function showPassSetting(id) {
+              let _this = this;
 
-            let content = tmpl('passwordTemplate', {id:id});
-            let $content = $(content);
+              let content = tmpl('passwordTemplate', {id:id});
+              let $content = $(content);
 
-            let popContainer = new PopupDraggable('패스워드 설정');
-            popContainer.open({ width: 450, height: 210, $content });
+              let popContainer = new PopupDraggable('패스워드 설정');
+              popContainer.open({ width: 450, height: 210, $content });
 
-            let $pass1 = $content.find('#pass1');
-            let $pass2 = $content.find('#pass2');
-            $content.find('#btnPassSave').click(function (e) {
-                let p1 = $pass1.val();
-                let p2 = $pass2.val();
-                //패스워드 복잡도 체크 필요
-                let passOption = {
-                    length: [8, 20],
-                    lower: 1,
-                    upper: 1,
-                    numeric: 1,
-                    special: 1,
-                    badWords: [],
-                    badSequenceLength: 0
-                };
+              let $pass1 = $content.find('#pass1');
+              let $pass2 = $content.find('#pass2');
+              $content.find('#btnPassSave').click(function (e) {
+                  let p1 = $pass1.val();
+                  let p2 = $pass2.val();
+                  //패스워드 복잡도 체크 필요
+                  let passOption = {
+                      length: [8, 20],
+                      lower: 1,
+                      upper: 1,
+                      numeric: 1,
+                      special: 1,
+                      badWords: [],
+                      badSequenceLength: 0
+                  };
 
-                let pwd = $('#loginPwd').val();
-                //let validationResult = _this.validatePassword(p1, passOption);
-                //if (!validationResult) {
-                //    Alert.alert('', '패스워드 정책위반');
-                //    return;
-                //}
-
-
-                if (p1 != p2) {
-                    Alert.alert('', "패스워드가 일치하지 않습니다.");
-                } else {
-                    let data = { id: id, pass1: p1, pass2: p2 };
-                    let fncallback = function (res) {
-                        if (res.success) {
-                            Notify.success("저장되었습니다.");
-                            popContainer.close();
-                        } else {
-                            Alert.alert('', res.message);
-                        }
-                    };
-                    AjaxUtil.postAsyncData(_this.baseUrl + '/passSetting', data, fncallback);
-                }
-            });
+                  let pwd = $('#loginPwd').val();
+                  //let validationResult = _this.validatePassword(p1, passOption);
+                  //if (!validationResult) {
+                  //    Alert.alert('', '패스워드 정책위반');
+                  //    return;
+                  //}
 
 
-        }
+                  if (p1 != p2) {
+                      Alert.alert('', "패스워드가 일치하지 않습니다.");
+                  } else {
+                      let data = { id: id, pass1: p1, pass2: p2 };
+                      let fncallback = function (res) {
+                          if (res.success) {
+                              Notify.success("저장되었습니다.");
+                              popContainer.close();
+                          } else {
+                              Alert.alert('', res.message);
+                          }
+                      };
+                      AjaxUtil.postAsyncData(_this.baseUrl + '/passSetting', data, fncallback);
+                  }
+              });
 
 
+         }*/
 
-        showUserGroup(user_id) {
+        // 사용자 그룹에 대한 theGrid2에 대한 코드
+        function showUserGroup(user_id) {
             let _this = this;
             let param = {
                 'action': 'user_grp_list',
                 'id': user_id,
             };
-            
+
             let result = AjaxUtil.getSyncData(_this.baseUrl + '/user_grp_list', param);
 
             if (result.data) {
@@ -602,19 +865,15 @@
             }
 
 
-
-
             _this.userGroupGrid.list.forEach(function (item, idx) {
                 if (item.grp_check == 'Y') {
 
 
                 }
             })
-
         }
 
-
-         saveUserGroup(user_id) {
+        function saveUserGroup(user_id) {
             let _this = this;
             //let items = [];
             // $.each(_this.userGroupGrid.list, function (idx, item) {
@@ -639,109 +898,151 @@
 
 
 
-    }
+        $(document).ready(function (e) {
 
-    var page = null;
+            $('#btnDel, #btnPassSetting').prop('disabled', true);
 
-    $(document).ready(function (e) {
-        page = new UserPage();
-        page.searchDataBind();
-
-        AjaxUtil.fillSelectOptions($('#txtDepart'), 'depart', 'all', '');
-
-        $('#btnSearch').click(function (ex) {
-            page.searchDataBind();
-        });
-
-        $('#cboUserGroup').change(function (ex) {
-            page.searchDataBind();
-        });
-        
-        $('#btnNew').click(function (e) {
-
-            $('#userForm')[0].reset();
-            $('#description').text('');
-            $('#userForm').find('#id').val('');
+            AjaxUtil.fillSelectOptions($('#txtDepart'), 'depart', 'all', '');
+            AjaxUtil.fillSelectOptions($('#cboUserGroup'), 'user_group', 'all', false);
+            AjaxUtil.fillSelectOptions($('#lang_code'), 'system_code', '', false, 'lang_code');
+            AjaxUtil.fillSelectOptions($('#UserGroup_id'), 'user_group', '', false);
+            AjaxUtil.fillSelectOptions($('#Factory_id'), 'factory', '', false);
+            AjaxUtil.fillSelectOptions($('#Depart_id'), 'depart', 'choose', false);
 
 
-            $('#userForm #code').attr('readonly', false);
-            $('#userForm input, select').each(function () {
-                if ($(this).is(':disabled')) {
-                    $(this).removeAttr('disabled');
+            $('#btnNew').click(function (e) {
+
+                $('#userForm')[0].reset();
+                $('#description').text('');
+                $('#userForm').find('#id').val('');
+
+
+                $('#userForm #code').attr('readonly', false);
+                $('#userForm input, select').each(function () {
+                    if ($(this).is(':disabled')) {
+                        $(this).removeAttr('disabled');
+                    }
+                });
+
+                $('#userForm textarea').each(function () {
+                    if ($(this).is(':disabled')) {
+                        $(this).removeAttr('disabled');
+                    }
+                });
+                //page.setButtonDisable(true, false, true);
+                setButtonState();
+
+                //$('#userForm').reset();
+            });
+
+            //패스워드 설정
+            $('#btnPassSetting').click(function (e) {
+                let id = $('#userForm').find('#id').val();
+                showPopup(id);
+            });
+
+            $('#btnPassSave').click(function (e) {
+                let pass1 = $('#pass1').val();
+                let pass2 = $('#pass2').val();
+                let id = $('#idx').val();
+
+                console.log('id확인',id);
+                console.log('pass1 확인',pass1);
+                console.log('pass2 확인',pass2);
+
+                //패스워드 복잡도 체크 필요
+                let passOption = {
+                    length: [8, 20],
+                    lower: 1,
+                    upper: 1,
+                    numeric: 1,
+                    special: 1,
+                    badWords: [],
+                    badSequenceLength: 0
+                };
+
+                let pwd = $('#loginPwd').val();
+
+                let validationResult = validatePassword(pass1, passOption);
+                if (!validationResult) {
+                    Alert.alert('', '패스워드 정책위반');
+                    return;
+                }
+
+
+                if (pass1 != pass2) {
+                    Alert.alert('', "패스워드가 일치하지 않습니다.");
+                } else {
+                    // FormData 객체 생성
+                    let formData = new FormData();
+                    formData.append('id', id);
+                    formData.append('pass1', pass1);
+                    formData.append('pass2', pass2);
+
+                    $.ajax({
+                        url: '/api/system/user/passSetting',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        headers: {
+                            'X-CSRF-Token': $('[name=_csrf]').val() // CSRF 토큰을 헤더에 추가
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                Alert.alert('', '저장 되었습니다.', function () {
+                                    closePopup();
+                                    searchDataBind();
+                                });
+                            } else {
+                                Alert.alert('', '저장에 실패했습니다. ' + response.message);
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            Alert.alert('', '에러가 발생하였습니다.');
+                        }
+                    });
                 }
             });
 
-            $('#userForm textarea').each(function () {
-                if ($(this).is(':disabled')) {
-                    $(this).removeAttr('disabled');
+
+
+
+
+            /* $('.tab_links .tab').click(function (e) {
+                 let target = e.currentTarget.name;
+                 let user_pk = $('#user_pk').val();
+
+                 if (!user_pk) {
+                     return;
+                 }
+
+                 let pk = page.grid.getList('selected')[0].id;
+
+                 if (target == 'tab_user_grp') {
+                     setTimeout(function () {
+                         showPopup(pk);
+                     }, 500);
+                 }
+             })*/
+
+
+            $('#btnUserGroupSave').click(function (e) {
+                let pk = page.grid.getList('selected')[0].id;
+                if (pk) {
+                    Alert.confirm('',
+                        '저장하시겠습니까?',
+                        function () { saveUserGroup(pk) },
+                        function () { }
+                    )
                 }
+
             });
-            //page.setButtonDisable(true, false, true);
-            page.setButtonState();
 
 
-            //$('#userForm').reset();
 
         });
-
-        $('#btnSave').click(function (e) {
-            Alert.confirm('', 
-                '저장하시겠습니까?',
-                function () { page.saveUser() },
-                function () { }
-            );
-        });
-
-        $('#btnDel').click(function (e) {
-            Alert.confirm('', 
-                '삭제하시겠습니까?',
-                function () { page.deleteUser() },
-                function () { }
-            );
-        });
-
-        $('.tab_links .tab').click(function (e) {
-            let target = e.currentTarget.name;
-            let user_pk = $('#user_pk').val();
-
-            if (!user_pk) {
-                return;
-            }
-
-            let pk = page.grid.getList('selected')[0].id;
-
-            if (target == 'tab_user_grp') {
-                setTimeout(function () {
-                    page.showUserGroup(pk);
-                    page.userGroupGrid.align(); 
-                }, 500);
-            }
-        })
-
-        //패스워드 설정
-        $('#btnPassSetting').click(function (e) {
-            let id = $('#userForm').find('#id').val();
-            page.showPassSetting(id);
-        });
-
-        // 엑셀 다운로드
-        $('#btnExcel').click(function (e) {
-            page.grid.exportExcel('사용자정보.xls');
-        });
-
-        $('#btnUserGroupSave').click(function (e) {
-            let pk = page.grid.getList('selected')[0].id;
-            if (pk) {
-                Alert.confirm('',
-                    '저장하시겠습니까?',
-                    function () { page.saveUserGroup(pk) },
-                    function () { }
-                )
-            }
-
-        });
-    });
-</script>
-
+    </script>
 </th:block>
+
 </html>

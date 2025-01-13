@@ -147,68 +147,71 @@ public class SystemService {
 	 * @param folderId
 	 * @return
 	 */
-	public List<Map<String, Object>> getUserGroupMenuList(Integer userGroupId, Integer folderId){
-		
+	public List<Map<String, Object>> getUserGroupMenuList(Integer userGroupId, Integer folderId) {
+
 		String sql = """
-        with recursive tree as (  
-                select a.id
-                    , a."Parent_id" as pid
-                    , '' as menu_code
-                    , a."FolderName" as name
-                    , 1 as depth
-                    , array[a.id] as path
-                    , false as cycle
-                    , a."_order" as ord
-                    ,'folder' as data_div
-                    , a.id as folder_id
-                    , true as is_folder
-                    from menu_folder a   
-                    where a."Parent_id" is null
-        """;
-        if (folderId !=null) {
-        	sql+=" and a.id = :folder_id";
-        }
-        
-        sql += """
-        union all
-                select null as id
-                      , mi."MenuFolder_id" as pid              
-                      , mi."MenuCode"::text as menu_code
-                      , mi."MenuName"  as name          
-                      , tree.depth+1
-                      , array_append(tree.path, mi."MenuFolder_id") as path
-                      , mi."MenuFolder_id" = any(tree.path) as cycle
-                      , mi._order as ord
-                      ,'menu' as data_div
-                      , mi."MenuFolder_id" as folder_id
-                      , false as is_folder
-                from menu_item mi 
-                inner join tree on mi."MenuFolder_id" = tree.id  
-                where mi."MenuCode" not in ('wm_user_group', 'wm_user', 'wm_user_group_menu')
-          )
-          select tree.pid
-              , tree.id
-              , tree.menu_code
-              , tree.name
-              , tree.depth
-              , tree.ord
-              , ugm."UserGroup_id"
-              , ugm."AuthCode"
-              , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%R%%', false) end  as r
-              , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%W%%', false) end  as w
-              , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%X%%', false) end  as x
-              , tree.is_folder
-              , ugm.id as ugm_id
-          from tree 
-          left join user_group_menu ugm on ugm."MenuCode" = tree.menu_code 
-          and ugm."UserGroup_id" = :group_id
-          order by path, tree.ord						
-		""";
-        
-        MapSqlParameterSource dicParam = new MapSqlParameterSource();
-        dicParam.addValue("folder_id", folderId);
-        dicParam.addValue("group_id", userGroupId);
-        return this.sqlRunner.getRows(sql, dicParam);		
+                with recursive tree as (  
+                        select a.id
+                            , a."Parent_id" as pid
+                            , '' as menu_code
+                            , a."FolderName" as gpname
+                            , a."FolderName" as name
+                            , 1 as depth
+                            , array[a.id] as path
+                            , false as cycle
+                            , a."_order" as ord
+                            ,'folder' as data_div
+                            , a.id as folder_id
+                            , true as is_folder
+                            from menu_folder a   
+                            where a."Parent_id" is null
+                             and a."FrontFolder_id" is not null
+                """;
+		if (folderId != null) {
+			sql += " and a.id = :folder_id";
+		}
+
+		sql += """
+                      union all
+                              select null as id
+                                    , mi."MenuFolder_id" as pid
+                                    , mi."MenuCode"::text as menu_code
+                                    , tree."gpname" as gpname
+                                    , mi."MenuName"  as name
+                                    , tree.depth+1
+                                    , array_append(tree.path, mi."MenuFolder_id") as path
+                                    , mi."MenuFolder_id" = any(tree.path) as cycle
+                                    , mi._order as ord
+                                    ,'menu' as data_div
+                                    , mi."MenuFolder_id" as folder_id
+                                    , false as is_folder
+                              from menu_item mi
+                              inner join tree on mi."MenuFolder_id" = tree.id
+                        )
+                        select tree.pid
+                            , tree.id
+                            , tree.menu_code
+                            , tree.gpname
+                            , tree.name
+                            , tree.depth
+                            , tree.ord
+                            , ugm."UserGroup_id"
+                            , ugm."AuthCode"
+                            , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%R%%', false) end  as r
+                            , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%W%%', false) end  as w
+                            , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%X%%', false) end  as x
+                            , tree.is_folder
+                            , ugm.id as ugm_id
+                        from tree 
+                        left join user_group_menu ugm on ugm."MenuCode" = tree.menu_code 
+                        and ugm."UserGroup_id" = :group_id
+                        order by path, tree.ord						
+                """;
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("folder_id", folderId);
+		dicParam.addValue("group_id", userGroupId);
+		return this.sqlRunner.getRows(sql, dicParam);
 	}
 
 	public List<Map<String, Object>> getBookmarkList(int userId){
@@ -313,47 +316,41 @@ public class SystemService {
 		return items;
 	}
 
-    public List<Map<String, Object>> getSystemLogList(Timestamp start, Timestamp end, String type, String source){    	
-    	String sql = """    			
-            select id
-            , "Type" as type
-            , "Source" as source
-            ,"Message" as message
-            , to_char("_created" ,'yyyy-mm-dd hh24:mi:ss') as created
-            from sys_log sl
-            where _created between :start and :end    			
-    	""";
-    	
-    	if(StringUtils.hasText(type)) {
-    		sql +="""    				
-    		and "Type" ilike concat('%',:type,'%')
-    		""";
-    	}
-    	
-    	if(StringUtils.hasText(source)) {
-    		sql +="""
-    		and "Source" ilike concat('%', :source, '%')		
-    		""";
-    	}
-    	sql+="""
-    	order by _created desc		
-    	""";    	
-    	
-    	//Map<String, Object> dicParam = new HashMap<String, Object>();
-    	//dicParam.put("start", start);
-    	//dicParam.put("end", start);
-    	//dicParam.put("type", type);
-    	//dicParam.put("source", source);    	
-    	//return this.sqlRunner.getRows(sql, dicParam);
-    	
-    	MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-    	
-    	namedParameters.addValue("start", start, java.sql.Types.TIMESTAMP);
-    	namedParameters.addValue("end", end, java.sql.Types.TIMESTAMP);
-    	namedParameters.addValue("type", type);
-    	namedParameters.addValue("source", source);
-    	return this.jdbcTemplate.queryForList(sql, namedParameters);    	
-    }
+	public List<Map<String, Object>> getSystemLogList(Timestamp start, Timestamp end, String type, String source) {
+		String sql = """
+           SELECT 
+               ROW_NUMBER() OVER (ORDER BY _created DESC) AS row_num,
+               id,
+               "Type" as type,
+               "Source" as source,
+       			"Message" as message,
+              to_char("_created" ,'yyyy-mm-dd hh24:mi:ss') as created
+           FROM sys_log sl
+           WHERE _created BETWEEN :start AND :end
+        """;
+
+		if (StringUtils.hasText(type)) {
+			sql += """
+            AND Type LIKE '%' + :type + '%'
+            """;
+		}
+
+		if (StringUtils.hasText(source)) {
+			sql += """
+            AND Source LIKE '%' + :source + '%'		
+            """;
+		}
+
+		sql += " ORDER BY _created DESC";
+
+		MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+		namedParameters.addValue("start", start, java.sql.Types.TIMESTAMP);
+		namedParameters.addValue("end", end, java.sql.Types.TIMESTAMP);
+		namedParameters.addValue("type", type);
+		namedParameters.addValue("source", source);
+
+		return this.jdbcTemplate.queryForList(sql, namedParameters);
+	}
     
     public Map<String, Object> getSystemLogDetail(Long id){
     	String sql = """

@@ -18,22 +18,22 @@ public class SystemLogController {
 	SystemService systemService;
 	
 	@GetMapping("/read")
-    public AjaxResult systemLogList(
-    		@RequestParam(value="srchStartDt", required = false) String start,    		
-    		@RequestParam(value="srchEndDt", required = false) String end,
-    		@RequestParam(value="srchType", required = false) String type,
-    		@RequestParam(value="srchSource", required = false) String source
-    		) {
-		
+	public AjaxResult systemLogList(
+			@RequestParam(value="srchStartDt", required = false) String start,
+			@RequestParam(value="srchEndDt", required = false) String end,
+			@RequestParam(value="srchType", required = false) String type,
+			@RequestParam(value="srchSource", required = false) String source
+	) {
+
 		start = start + " 00:00:00";
 		end = end + " 23:59:59";
- 
+
 		Timestamp tsStart = Timestamp.valueOf(start);
 		Timestamp tsEnd = Timestamp.valueOf(end);
-		
-        AjaxResult result = new AjaxResult();
-        result.data = this.systemService.getSystemLogList(tsStart, tsEnd, type, source);
-        result.success = true;
+
+		AjaxResult result = new AjaxResult();
+		result.data = this.systemService.getSystemLogList(tsStart, tsEnd, type, source);
+		result.success = true;
 		return result;
 	}
 	

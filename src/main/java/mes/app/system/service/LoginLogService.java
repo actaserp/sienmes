@@ -17,15 +17,16 @@ public class LoginLogService {
 	@Autowired
 	SqlRunner sqlRunner;
 
-	public List<Map<String, Object>> getLoginLogList (Timestamp start, Timestamp end, String keyword) {
+	public List<Map<String, Object>> getLoginLogList(Timestamp start, Timestamp end, String keyword, String type) {
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("start", start);
 		dicParam.addValue("end", end);
 		dicParam.addValue("keyword", keyword);
-		
+
 		String sql = """
-		    select ll.id
+            select row_number() over (order by date_trunc('day', ll._created) desc, up."Name" asc, ll._created desc) as row_number
+            , ll.id
             , ll."Type" as type
             , ll."IPAddress" as addr
             , au.username as login_id
@@ -35,20 +36,30 @@ public class LoginLogService {
             left join auth_user au ON au.id = ll."User_id" 
             left join user_profile up on up."User_id" = ll."User_id" 
             where ll._created between :start and :end
-			""";
+            """;
 
-        if (StringUtils.isEmpty(keyword)==false) {
-        	sql += """ 
-        			and (au.username ilike concat('%%', :keyword, '%%') 
-        				or up.\"Name\" ilike concat('%%', :keyword, '%%') 
-        				)
-        			""";
-        }
-        
-        sql += " order by ll._created desc ";
-        		
-		List<Map<String, Object>> itmes = this.sqlRunner.getRows(sql, dicParam);
-		
-		return itmes;
+		// 'login', 'logout' 타입을 적용할 경우 필터 추가
+		if (StringUtils.isNotEmpty(type)) {
+			sql += " and ll.\"Type\" = :type ";
+			dicParam.addValue("type", type);
+		} else {
+			sql += " and (ll.\"Type\" = 'login' or ll.\"Type\" = 'logout')"; // 전체 조회 시
+		}
+
+		// 키워드 검색 추가 조건
+		if (StringUtils.isNotEmpty(keyword)) {
+			sql += """ 
+                and (au.username ilike concat('%%', :keyword, '%%') 
+                    or up."Name" ilike concat('%%', :keyword, '%%') 
+                    )
+                """;
+		}
+
+		// 정렬 조건은 항상 동일하게 적용
+		sql += " order by date_trunc('day', ll._created) desc, up.\"Name\" asc, ll._created desc ";
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+
+		return items;
 	}
 }
