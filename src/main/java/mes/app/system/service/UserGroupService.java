@@ -3,6 +3,7 @@ package mes.app.system.service;
 import java.util.List;
 import java.util.Map;
 
+import mes.domain.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,21 @@ public class UserGroupService {
 		dicParam.addValue("group_id", id);
 		
 		Map<String , Object> item = this.sqlRunner.getRow(sql, dicParam);
+		return item;
+	}
+
+	public Map<String, Object> getDefaultMenu(User user) {
+
+		String sql = """
+			select u."gmenu", m."MenuName"
+			from user_group u
+			join menu_item m on u.gmenu = m."MenuCode"
+            where id = :group_id
+			""";
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("group_id", user.getUserProfile().getUserGroup().getId());
+
+		Map<String, Object> item = this.sqlRunner.getRow(sql, dicParam);
 		return item;
 	}
 	

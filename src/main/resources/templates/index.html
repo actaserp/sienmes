@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1, minimum-scale=1, maximum-scale=1">
     <link rel="icon" type="image/png" href="/img/favicon.png">
     <title th:text="${ system_title }"></title>
     <link rel="stylesheet" href="/resource/windowContainer/css/jquery.scrollbar.min.css">
@@ -15,176 +16,211 @@
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/theme-top-mes.css">
     <link rel="stylesheet" href="/css/theme-left-mes.css">
+    <link rel="stylesheet" type="text/css" href="/css/import.css">
+    <script src="/js/vendor/jquery-3.6.0.js"></script>
+    <script src="/js/vendor/jquery-ui.min.js"></script>
+    <script src="/js/ui.js"></script> <!-- Common js -->
+
 </head>
 
 <body>
 <div class="wrap">
-    <div class="header">
-        <div class="logo">
-            <div id="navbarBarMenu1" style="display: none;">
-                <button type="button" class="open_menu">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </button>
-            </div>
-            <h1 id="mainlogotitle" th:text="${ system_title }"></h1>
-        </div>
-        <div class="navbar">
-            <div class="left_align">
-                <div id="navbarBarMenu2" style="display: none;">
-                    <button type="button" class="open_menu">
-                        <span class="bar"></span>
-                        <span class="bar"></span>
-                        <span class="bar"></span>
-                        <span class="bar"></span>
-                    </button>
-                </div>
-                <div class="profiles_txt" id="notify_text"></div>
-                <div class="profiles_txt">
-                    <span th:text="${ profiles }"></span><input type="hidden" id="default_menu_code" th:value="${default_menu_code}" />
+    <div class="dashboard-layout-header">
+        <header>
+            <div class="left" style="display: flex; align-items: center; margin-left: 20px;">
+                <div class="logo" style="display: flex; align-items: center;">
+                    <img src="/images/logo/actas_log.png" alt="로고" style="max-width: 40%; height: auto; margin-right: 10px;">
+                    <h4 style="margin: 0;">열린 MES</h4>
                 </div>
             </div>
-      <div class="right_align" style="padding: 7px 14px;">
-        <!--
-        <div class="notification_box">
-          <button type="button" id="notiButton" class="" data-navpopOpen="notification">
-            <i class="icon ion-ios-mail"></i>
-            <span class="indicator" id="msgCntHeader">0</span>
-          </button>                     
-          <div class="navpop_cont notification_mbox animated flipInX" data-navpopCont="notification">
-            <div class="pop_body rtmsg_body scrollbar-inner">
-              <ul id="msgList">
-              </ul>
-            </div>
-            <div class="pop_footer rtmsg_footer" id="realtimemsgfooter" style="display: none;">
-              <span id="msgCnt" class="text">0</span> <span>개의 새로운 메시지가 있습니다.</span>
-              <button type="button" class="btn-delete" id="rtmsgDelAll" title="메시지 전체삭제"><span class="icon"></span></button>
-            </div>
-          </div> 
-        </div>
-        -->
+            <div class="right">
 
-        <div class="profile_box">
-          <button type="button" id="profile" data-navpopOpen="profile">
-            <span class="profile_info" id="userName1" th:text="${ userinfo.userProfile.name }"></span>
-            <i class="fas fa-angle-down"></i>
-          </button>
-          <div class="navpop_cont profile_mbox animated flipInX" data-navpopCont="profile">
-            <div class="pop_head">
-                <strong><span class="text" id="userName2" th:text="${ username }"></span></strong> <span>님</span>
-                (<span class="profile_state" data-commonCd="로그인 중">로그인 중</span>)
-              <!--<button type="button" data-navpopClose="profile"><i class="icon nth-icon-close-mini"></i></button>-->
-            </div>    
-            <div class="pop_body">
-              <ul>
-                  <li id="myinfo"><a href="#"><i class="icon ion-md-person"></i><span data-commonCd="내 정보">내 정보</span></a></li>
-                  <li id="myLanguage"><a href="#"><i class="icon ion-md-globe"></i><span data-commonCd="언어설정">언어설정</span></a></li>
-                  <li id="logout"><a href="#"><i class="icon ion-md-exit"></i><span data-commonCd="로그아웃">로그아웃</span></a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="theme_box">
-          <button type="button" id="themebox" data-navpopOpen="themebox">
-            <i class="icon-notebook"></i>
-          </button>
-          <div class="navpop_cont theme_mbox animated flipInY" data-navpopCont="themebox">
-            <div class="pop_head">
-                <span data-commonCd="테마관리 (브라우저별로 적용됩니다.)">테마관리 (브라우저별로 적용됩니다.)</span>
-                <button type="button" data-navpopClose="themebox"><i class="icon nth-icon-close-mini"></i></button>
-            </div>
-            <div class="pop_body">
-                <div class="p-2">
-                    <div class="row row-flush mb-2">
-                        <div class="col-r mb-2">
-                            <div class="setting-color"><label data-load-top-css="/css/theme-top-mes" data-load-left-css="/css/theme-left-mes"><input type="radio" name="setting-theme" checked="checked"><span class="icon-check"></span><span class="split"><span class="color bg-white"></span><span class="color bg-white-light"></span></span><span class="color bg-white"></span></label></div>
-                        </div>
-                        <div class="col-r mb-2">
-                            <div class="setting-color"><label data-load-top-css="/css/theme-top-b" data-load-left-css="/css/theme-left-a"><input type="radio" name="setting-theme"><span class="icon-check"></span><span class="split"><span class="color bg-info"></span><span class="color bg-info-light"></span></span><span class="color bg-white"></span></label></div>
-                        </div>
-                        <div class="col-r mb-2">
-                            <div class="setting-color"><label data-load-top-css="/css/theme-top-c" data-load-left-css="/css/theme-left-a"><input type="radio" name="setting-theme"><span class="icon-check"></span><span class="split"><span class="color bg-green"></span><span class="color bg-green-light"></span></span><span class="color bg-white"></span></label></div>
-                        </div>
-                        <div class="col-r mb-2">
-                            <div class="setting-color"><label data-load-top-css="/css/theme-top-d" data-load-left-css="/css/theme-left-a"><input type="radio" name="setting-theme"><span class="icon-check"></span><span class="split"><span class="color bg-purple"></span><span class="color bg-purple-light"></span></span><span class="color bg-white"></span></label></div>
-                        </div>
-                        <div class="col-r mb-2">
-                            <div class="setting-color"><label data-load-top-css="/css/theme-top-e" data-load-left-css="/css/theme-left-a"><input type="radio" name="setting-theme"><span class="icon-check"></span><span class="split"><span class="color bg-danger"></span><span class="color bg-danger-light"></span></span><span class="color bg-white"></span></label></div>
+                <div class="weather">
+                    <div class="wt-main">
+                        <p id="area"></p>
+                        <div class="wt-graphic">
+                            <img id="weatherIcon" src="" alt="">
+                            <!--                            <p id="temperature"></p> &lt;!&ndash; 기존의 <span> 태그를 제거 -->
+                            <p id="temperature"></p>
                         </div>
                     </div>
-                    <div class="row row-flush mb-2">
-                        <div class="col-r mb-2">
-                            <div class="setting-color"><label data-load-top-css="/css/theme-top-a" data-load-left-css="/css/theme-left-b"><input type="radio" name="setting-theme"><span class="icon-check"></span><span class="split"><span class="color bg-white"></span><span class="color bg-white-light"></span></span><span class="color bg-gray-dark"></span></label></div>
-                        </div>
-                        <div class="col-r mb-2">
-                            <div class="setting-color"><label data-load-top-css="/css/theme-top-f" data-load-left-css="/css/theme-left-b"><input type="radio" name="setting-theme"><span class="icon-check"></span><span class="split"><span class="color bg-info-dark"></span><span class="color bg-info"></span></span><span class="color bg-gray-dark"></span></label></div>
-                        </div>
-                        <div class="col-r mb-2">
-                            <div class="setting-color"><label data-load-top-css="/css/theme-top-g" data-load-left-css="/css/theme-left-b"><input type="radio" name="setting-theme"><span class="icon-check"></span><span class="split"><span class="color bg-green-dark"></span><span class="color bg-green"></span></span><span class="color bg-gray-dark"></span></label></div>
-                        </div>
-                        <div class="col-r mb-2">
-                            <div class="setting-color"><label data-load-top-css="/css/theme-top-h" data-load-left-css="/css/theme-left-b"><input type="radio" name="setting-theme"><span class="icon-check"></span><span class="split"><span class="color bg-purple-dark"></span><span class="color bg-purple"></span></span><span class="color bg-gray-dark"></span></label></div>
-                        </div>
-                        <div class="col-r mb-2">
-                            <div class="setting-color"><label data-load-top-css="/css/theme-top-i" data-load-left-css="/css/theme-left-b"><input type="radio" name="setting-theme"><span class="icon-check"></span><span class="split"><span class="color bg-danger-dark"></span><span class="color bg-danger"></span></span><span class="color bg-gray-dark"></span></label></div>
-                        </div>
+                    <div class="wt-detail">
+                        <ul>
+                            <li>
+                                <img src="/images/icon/ico-umbrella.svg" alt="강수">
+                                <p id="precipitationProbability"></p>
+                            </li>
+                            <li>
+                                <img src="/images/icon/ico-water.svg" alt="습도">
+                                <p id="humidity"></p>
+                            </li>
+                            <li>
+                                <img src="/images/icon/ico-wind.svg" alt="풍속">
+                                <p id="windSpeed"></p>
+                            </li>
+                        </ul>
                     </div>
                 </div>
+                <!-- 알람 -->
+                <a href="#" class="alarm" title="알람">
+                    <img src="/images/icon/ico-bell.svg" alt="알람 아이콘">
+                    <span>알람</span>
+                    <span class="num">0</span>
+                </a>
+                <div class="alarm-box" style="width: 1000px;">
+                    <ul class="alarm-tab-links">
+                        <li class="active">
+                            <a href="#alarm-tab1" title="주문의뢰">주문의뢰(0)</a> <!-- 동적으로 업데이트 -->
+                        </li>
+                    </ul>
+                    <div class="alarm-tab-contents">
+                        <div class="alarm-tab-item" id="alarm-tab1">
+                            <div class="table-wrap">
+                                <table>
+                                    <caption>알람 테이블</caption>
+                                    <colgroup>
+                                        <col class="wp30"> <!-- 날짜 -->
+                                        <col class="wp45"> <!-- 업체 이름 -->
+                                        <col class="wp25"> <!-- 주문 상태 -->
+                                    </colgroup>
+                                    <thead>
+                                    <tr>
+                                        <th>날    짜</th>
+                                        <th>업체 이름</th>
+                                        <th>주문 상태</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <!-- 알림 데이터가 여기 동적으로 추가됨 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <a href="#" title="확인" class="btn-gray" id="AlarmOk" onclick="AlarmOk()">확인</a>
+                    </div>
+                </div>
+                <!-- 알람 -->
+                <!-- 사용자 로그인 상태-->
+                <a class="user" title="사용자">
+<!--                    <span id="spplannm-display"></span>-->
+<!--                    <span style="padding:0 5px">·</span>-->
+                    <span>관리자</span>
+                    <span style="padding:0 5px">·</span>
+                    <span id="userName2" th:text="${ username }"></span>
+                    <span>(</span>
+                    <span id="userName3" th:text="${ userid }"></span>
+                    <span>)</span>
+                    <span style="padding-right: 8px">님</span>
+                </a>
+                <div class="user-box">
+                    <ul>
+                        <li id="myinfo">
+                            <a href="#" title="내 정보" data-popup="popup1" onclick="UserInfo()">내 정보</a>
+                        </li>
+                        <li id="logout">
+                            <a href="#" title="로그아웃">로그아웃</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
+        </header>
+        <!--header [E]-->
     </div>
 
-    <!--header [E]-->
-  </div>
-  <div class="container">
     <div class="menu_area">
-      <div class="menu_wrap">
-        <div class="tabs" data-tab="tabWrap">
-          <ul class="tab_links">
-            <li>
-              <button type="button" data-tablink=".tabs .all_menu" class="icon">
-                <span class="icon"></span><h data-commonCd="전체메뉴">전체메뉴</h>
-              </button>
-            </li>
-            <li>
-              <button type="button" data-tablink=".tabs .my_menu">
-                <span class="icon"></span><h data-commonCd="내 메뉴">내 메뉴</h>
-              </button>
-            </li>
-          </ul>
-          <div class="tab_contents scrollbar-inner all_menu">
-            <ul class="gnb" id="left-menu">
-            </ul>
-          </div>
-          <div class="tab_contents scrollbar-inner my_menu">
-            <ul class="gnb" id="bookmark-menu">
-            </ul>
-          </div>
+        <div class="dashboard-layout-contents">
+
+            <!-- [대시보드] 왼쪽 컨텐츠 영역 -->
+            <div class="dashboard-layout-left menu_wrap">
+                <!-- (레이아웃) 사이드바  -->
+                <div class="dashboard-layout-sidebar tabs scrollbar-rail" data-tab="tabWrap">
+                    <ul class="layout-sidebar-tab">
+                        <li class="active">
+                            <a href="#menu" title="전체메뉴">전체 메뉴</a>
+                        </li>
+                        <li>
+                            <a href="#bookmark" title="내메뉴">내 메뉴</a>
+                        </li>
+                    </ul>
+                    <div class="layout-sidebar-tabcont">
+                        <nav class="layout-nav sidebar-tabcont" id="menu">
+                            <ul class="dep1">
+                                <li class="dep1-1">
+                                    <a href="#a" title="대시보드" class="ico-lnb01">
+                                        대시보드
+                                    </a>
+                                    <ul class="dep2" id="dep2-dashboard">
+
+                                    </ul>
+                                </li>
+                                <li class="dep1-1">
+                                    <a href="#a" title="일지 및 데이터" class="ico-lnb02">
+                                        일지 및 데이터
+                                    </a>
+                                    <ul class="dep2" id="dep2-order-request">
+
+                                    </ul>
+                                </li>
+                                <li class="dep1-1">
+                                    <a href="#a" title="관리 메뉴" class="ico-lnb03">
+                                        관리 메뉴
+                                    </a>
+                                    <ul class="dep2" id="dep2-order-status">
+
+                                    </ul>
+                                </li>
+                                <li class="dep1-1">
+                                    <a href="#a" title="조치 및 통계" class="ico-lnb04">
+                                        조치 및 통계
+                                    </a>
+                                    <ul class="dep2" id="dep2-inspection-management">
+
+                                    </ul>
+                                </li>
+                                <li class="dep1-1">
+                                    <a href="#a" title="시스템설정" class="ico-lnb05">
+                                        시스템 설정
+                                    </a>
+                                    <ul class="dep2" id="dep2-system-settings">
+
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav> <!-- // nav end -->
+                        <div class="layout-bookmark sidebar-tabcont" id="bookmark">
+                            <ul class="bookmark-list" id="bookmark-menu">
+
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="layout-sidebar-bottom">
+                        <!--   <img src="/images/logo/logo-kt.svg" alt="kt logo">-->
+                    </div>
+                </div>
+            </div><!-- //dashboard-layout-left end-->
+
+            <!-- [대시보드] 오른쪽 컨텐츠 영역 -->
+            <!-- //dashboard-layout-right end-->
         </div>
-      </div>
     </div>
     <div class="con_area">
-      <div class="contents">
+        <!--      <div class="contents">-->
         <div class="nth-tabs" id="main-tabs"></div>
-      </div>
+        <!--      </div>-->
     </div>
-  </div>
-  <div class="footer">
-    <!--footer [S]-->
-    <span class="footer-left" id="link_privatepolicy" data-commonCd="개인정보 처리방침">개인정보 처리방침</span>
-    <span class="footer-left" id="link_emailreject" data-commonCd="이메일 무단수집 거부">이메일 무단수집 거부</span>
-    <span class="footer-right">Copyright ⓒ (주)엑타스. All Rights Reserved.</span>
-    <!--footer [E]-->
-  </div>
+
+    <div class="footer">
+        <!--footer [S]-->
+        <span class="footer-left" id="link_privatepolicy" data-commonCd="개인정보 처리방침">개인정보 처리방침</span>
+        <span class="footer-left" id="link_emailreject" data-commonCd="이메일 무단수집 거부">이메일 무단수집 거부</span>
+        <span class="footer-right">Copyright ⓒ (주)엑타스. All Rights Reserved.</span>
+        <!--footer [E]-->
+    </div>
 </div>
 
 <script type="text/javascript" src="/resource/jquery.min.js"></script>
 <script type="text/javascript" src="/resource/jquery-validation/1.17.0/jquery.validate.min.js"></script>
-    
+
 <script type="text/javascript">
     $('html').attr('lang', sessionStorage.getItem('lang_code'));
 </script>
@@ -196,7 +232,7 @@
 <script type="text/javascript" src="/resource/windowContainer/js/html5sortable.js"></script>
 <script type="text/javascript" src="/js/nth-tabs.js?v=1030"></script>
 
-<th:block th:replace="system_js :: system_js" ></th:block>
+<th:block th:replace="system_js :: system_js"></th:block>
 
 <script src="/js/common.js?v=1060"></script>
 <script type="text/javascript" src="/js/yumenu.js?v=1070"></script>
@@ -204,6 +240,8 @@
 <script type="text/javascript" src="/js/ax5commUtil.js?v=1070"></script>
 <script type="text/javascript">
     let nthTabs = null;
+    let default_menu = null;
+
     $(document).ready(function () {
 
         let lang_cd = i18n.getLanguageCode();
@@ -211,50 +249,244 @@
         i18n.initializeMenuData(lang_cd);
 
         //let default_menu = 'wm_dashboard_summary';
-        let default_menu = $('#default_menu_code').val();
-          nthTabs = $('#main-tabs').nthTabs();
-        if (default_menu != '') {
-            nthTabs.addTab({
-                id: default_menu,
-                title: 'Main',
-                url: '/gui/' + default_menu + '/default',
-                active: true,
-                allowClose: false
+        // let default_menu = $('#default_menu_code').val();
+        // nthTabs = $('#main-tabs').nthTabs();
+        // if (default_menu != '') {
+        //     nthTabs.addTab({
+        //         id: default_menu,
+        //         title: 'Main',
+        //         url: '/gui/' + default_menu + '/default',
+        //         active: true,
+        //         allowClose: false
+        //     });
+        //     if (!$('[href*=#' + default_menu + ']').find('i').hasClass('fa-star')) {
+        //         $('[href*=#' + default_menu + ']').prepend('<i class="fas fa-star' + ('false' == 'true' ? ' bookmark' : '') + '"></i>');
+        //     }
+        //     $('.nav-tabs .fa-star').off('click').on('click', function (e) {
+        //         $(this).toggleClass('bookmark');
+        //         fnBookMarkSave(default_menu, $(this).hasClass('bookmark'));
+        //     });
+        //     setTimeout(function () {
+        //         var $targetMenu = $('#left-menu').find('a[data-objid=' + default_menu + ']').closest('li.has-sub');
+        //         $targetMenu.addClass('open');
+        //         $targetMenu.children('ul').show();
+        //     }, 100);
+        // } else {
+        //     nthTabs.addTab({
+        //         id: default_menu,
+        //         title: 'dddd',
+        //         url: '/gui/' + default_menu + '/default',
+        //         active: true,
+        //         allowClose: false
+        //     });
+        //     if (!$('[href*=' + default_menu + ']').find('i').hasClass('fa-star')) {
+        //         $('[href*=' + default_menu + ']').prepend('<i class="fas fa-star' + ('false' == 'true' ? ' bookmark' : '') + '"></i>');
+        //         $('.nav-tabs .fa-star').off('click').on('click', function (e) {
+        //             $(this).toggleClass('bookmark');
+        //             fnBookMarkSave(default_menu, $(this).hasClass('bookmark'));
+        //         });
+        //     }
+        //     setTimeout(function () {
+        //         let $targetMenu = $('#left-menu').find('a[data-objid=' + default_menu + ']').closest('li.has-sub');
+        //         $targetMenu.addClass('open');
+        //         $targetMenu.children('ul').show();
+        //     }, 100);
+        // }
+
+        // 메뉴 매핑(FrontFolder_id)
+        const dep2Mappings = {
+            1: '#dep2-dashboard',  //대시보드
+            2: '#dep2-order-request',  //주문의뢰
+            3: '#dep2-order-status',    // 주문현황
+            4: '#dep2-inspection-management',
+            5: '#dep2-system-settings'
+        };
+        nthTabs = $('#main-tabs').nthTabs();
+
+        function loadMenu(FrontFolderId, $FrontFolderElement) {
+
+            $.ajax({
+                url: '/api/system/menus', // menus API를 통해 전체 메뉴 데이터를 가져옴
+                type: 'GET',
+                success: function (response) {
+                    console.log('response', response);
+                    // FrontFolder_id를 기반으로 폴더 필터링
+                    const folders = response.data.filter(folder => folder.frontfolder_id === parseInt(FrontFolderId));
+                    if (folders.length > 0) {
+                        // 해당 FrontFolderId에 해당하는 폴더가 있으면 대 메뉴를 다시 보여줌
+                        $FrontFolderElement.closest('.dep1-1').css('display', 'block');
+
+                        folders.forEach(function (folder) {
+                            let $li = $('<li class="dep2-1"></li>');
+                            let $a = $('<a href="#"></a>').text(folder.folder_name);
+                            $li.append($a);
+
+                            let $subUl = $('<ul class="dep3 documents" style="display: none;"></ul>');
+                            $li.append($subUl);
+
+                            // 해당 폴더의 하위 메뉴 항목 추가
+                            folder.nodes.forEach(function (item) {
+                                let $itemLi = $('<li class="dep3-custom-list-style"></li>');
+                                let $itemA = $('<a href="#" menuurl="' + item.url + '" data-bookmark="' + item.isbookmark + '" data-objid="' + item.objId + '" title="' + item.objNm + '"></a>').text(item.objNm);
+
+                                $itemLi.append($itemA);
+                                $subUl.append($itemLi);
+                            });
+
+                            $FrontFolderElement.append($li);
+
+                            // dep2 클릭 시 dep3 항목이 1개면 바로 탭 추가하고 dep3 숨김
+                            $a.on('click', function (e) {
+                                e.preventDefault();
+
+                                // dep3 항목 찾기
+                                var $dep3 = $li.find('.dep3 li');
+
+                                if ($dep3.length > 1) {
+
+                                } else if ($dep3.length === 1) {
+                                    $('.dep2-1').removeClass('on');
+                                    $('.dep3 li').removeClass('on');
+                                    $li.addClass('on');
+
+                                    var $a = $dep3.find('a');
+                                    var val = $a.text();
+                                    var menuurl = $a.attr('menuurl');
+                                    var objid = $a.attr('data-objid');
+                                    // var _bookmark = $a.attr('data-bookmark');
+
+                                    if (nthTabs.isExistsTab('#' + objid)) {
+                                        nthTabs.toggleTab('#' + objid);
+                                    } else {
+                                        nthTabs.addTab({
+                                            id: objid,
+                                            title: val,
+                                            url: '/gui/' + objid + '/default',
+                                            active: true,
+                                            allowClose: true,
+                                            // isbookmark: _bookmark
+                                        });
+                                        // nthTabs.bindBookmarkEvent(objid, _bookmark);
+                                    }
+
+                                    // dep3 리스트 숨김
+                                    $subUl.hide(); // dep3 항목이 1개일 때 숨김
+                                    return false;
+                                }
+                            });
+                        });
+
+                        $FrontFolderElement.find('.dep3').on('click', 'a', function (e) {
+                            e.preventDefault();
+
+                            // 모든 dep3의 li에서 on 클래스 제거
+                            $('.dep3 li').removeClass('on');
+
+                            // 현재 클릭한 li에 on 클래스 추가
+                            var $clickedDep3 = $(this).parent('li');
+                            $clickedDep3.addClass('on');
+
+                            // dep3가 1개인 dep2에서 on 클래스 제거
+                            $('.dep2-1.on').removeClass('on');
+
+                            var val = $(this).text();
+                            var menuurl = $(this).attr('menuurl');
+                            var objid = $(this).attr('data-objid');
+                            var _bookmark = $(this).attr('data-bookmark');
+
+                            if (nthTabs.isExistsTab('#' + objid)) {
+                                nthTabs.toggleTab('#' + objid);
+                            } else {
+                                nthTabs.addTab({
+                                    id: objid,
+                                    title: val,
+                                    url: '/gui/' + objid + '/default',
+                                    active: true,
+                                    allowClose: true,
+                                    // isbookmark: _bookmark
+                                });
+                                // nthTabs.bindBookmarkEvent(objid, _bookmark);
+                            }
+                        });
+                    }
+                }
             });
-            if (!$('[href*=#' + default_menu + ']').find('i').hasClass('fa-star')) {
-                $('[href*=#' + default_menu + ']').prepend('<i class="fas fa-star' + ('false' == 'true' ? ' bookmark' : '') + '"></i>');
-            }
-            $('.nav-tabs .fa-star').off('click').on('click', function (e) {
-                $(this).toggleClass('bookmark');
-                fnBookMarkSave(default_menu, $(this).hasClass('bookmark'));
-            });
-            setTimeout(function () {
-                var $targetMenu = $('#left-menu').find('a[data-objid=' + default_menu + ']').closest('li.has-sub');
-                $targetMenu.addClass('open');
-                $targetMenu.children('ul').show();
-            }, 100);
         }
-        else {
-            nthTabs.addTab({
-                id: default_menu,
-                title: 'dddd',
-                url: '/gui/' + default_menu + '/default',
-                active: true,
-                allowClose: false
+
+        // 폴더
+        Object.keys(dep2Mappings).forEach(FrontFolderId => {
+            loadMenu(FrontFolderId, $(dep2Mappings[FrontFolderId]));
+        });
+
+        // 북마크 및 default_menu를 한 번에 처리
+        $.getJSON('/api/system/bookmark', function (result) {
+            let _data = result.data;
+            var litagbook = '';
+
+            // 북마크 메뉴 생성
+            for (var i = 0; i < _data.length; i++) {
+                litagbook += '<li><a href="#" data-objid="' + _data[i].code + '" menuurl="' + _data[i].url + '">' + i18n.getMenuText(_data[i].name) + '</a></li>';
+            }
+
+            $('#bookmark-menu').html(litagbook);
+
+            // 클릭 이벤트 바인딩
+            $('#bookmark-menu').on('click', 'a', function (e) {
+                e.preventDefault();
+                $('#bookmark-menu li').removeClass('on');
+                $(this).parent('li').addClass('on');
+
+                var val = $(this).text();
+                var menuurl = $(this).attr('menuurl');
+                var objid = $(this).attr('data-objid');
+                var _bookmark = 'true';
+
+                if (nthTabs.isExistsTab('#' + objid)) {
+                    nthTabs.toggleTab('#' + objid);
+                } else {
+                    nthTabs.addTab({
+                        id: objid,
+                        title: val,
+                        url: '/gui/' + objid + '/default',
+                        active: true,
+                        allowClose: true,
+                        isbookmark: _bookmark
+                    });
+                }
             });
-            if (!$('[href*=' + default_menu + ']').find('i').hasClass('fa-star')) {
-                $('[href*=' + default_menu + ']').prepend('<i class="fas fa-star' + ('false' == 'true' ? ' bookmark' : '') + '"></i>');
-                $('.nav-tabs .fa-star').off('click').on('click', function (e) {
-                    $(this).toggleClass('bookmark');
-                    fnBookMarkSave(default_menu, $(this).hasClass('bookmark'));
+
+            // default_menu 처리
+            $.getJSON('/api/system/usergroup/defaultmenu', function (result) {
+                default_menu = result.data.gmenu;
+                let title = result.data.MenuName;
+
+                let _bookmark = 'false';
+                _data.forEach(function (item) {
+                    if (item.code === default_menu) {
+                        _bookmark = 'true';
+                    }
                 });
-            }
-            setTimeout(function () {
-                let $targetMenu = $('#left-menu').find('a[data-objid=' + default_menu + ']').closest('li.has-sub');
-                $targetMenu.addClass('open');
-                $targetMenu.children('ul').show();
-            }, 100);
-        }
+
+                // default_menu 탭 추가
+                nthTabs.addTab({
+                    id: default_menu,
+                    title: title,
+                    url: '/gui/' + default_menu + '/default',
+                    active: true,
+                    allowClose: false,
+                    // isbookmark: _bookmark
+                });
+
+            }).fail(function (e) {
+                console.error('Failed to retrieve default menu data.');
+            });
+
+        }).fail(function (e) {
+            Notify.error('Failed to retrieve bookmark data.');
+        });
+
+
+
         $('.scrollbar-inner').scrollbar();
         var parentClass = $(this).parent('li');
         if (!$(this).hasClass('on')) {
@@ -281,8 +513,7 @@
             $('.menu_wrap').addClass('mobile_menu_wrap');
             $('.menu_area').addClass('mobile_menu_area');
             $('.con_area').addClass('mobile_con_area');
-        }
-        else {
+        } else {
             $('#navbarBarMenu1').hide();
             $('#navbarBarMenu2').show();
         }
@@ -402,7 +633,7 @@ Quality is planned, designed, and built in-not inspected in.`;
 
         let notify_index = 0;
 
-        let timer = setInterval(function () { 
+        let timer = setInterval(function () {
             return;
 
             if (notify_index >= notify_list.length)
@@ -415,17 +646,17 @@ Quality is planned, designed, and built in-not inspected in.`;
         // 내정보 클릭
         $('#myinfo').on('click', function (e) {
             e.preventDefault();
-            Ax5Modal.open({ url: '/page/account/myinfo', width: 400, height: 300 });
+            Ax5Modal.open({url: '/page/account/myinfo', width: 400, height: 300});
             $(".profile_contbox").hide();
         });
 
         // 언어설정
         $('#myLanguage').on('click', function (e) {
             e.preventDefault();
-            Ax5Modal.open({ url: '/page/account/language', width: 400, height: 200 });
+            Ax5Modal.open({url: '/page/account/language', width: 400, height: 200});
             $(".profile_contbox").hide();
         });
-        
+
         // 테마변경
         $('.setting-color > label').on('click', function (e) {
             dynamicLinkCss($(this).data('load-top-css'), $(this).data('load-left-css'));
@@ -433,19 +664,87 @@ Quality is planned, designed, and built in-not inspected in.`;
 
         // 개인정보 처리방침 클릭
         $('#link_privatepolicy').on('click', function (e) {
-            Ax5Modal.open({ url: '/page/popup/privacy_policy', width: 800, height: 200 });
+            Ax5Modal.open({url: '/page/popup/privacy_policy', width: 800, height: 200});
         });
 
         // 이메일 무단수집 거부 클릭
         $('#link_emailreject').on('click', function (e) {
-            Ax5Modal.open({ url: '/page/popup/email_unauthorized_collection_policy', width: 800, height: 400 });
+            Ax5Modal.open({url: '/page/popup/email_unauthorized_collection_policy', width: 800, height: 400});
         });
 
         // 오픈소스 사용공지 필요
     });
-    
+
 </script>
-        
-<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+<script type="text/javascript">
+    // 날씨 정보
+    fetchWeatherData();
+    // 날씨 정보를 서버에서 가져오는 함수
+    function fetchWeatherData() {
+        $.ajax({
+            url: '/weather/current',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                // JSON 데이터 구조를 이용하여 각 항목에 대한 값을 추출
+                console.log(data); // 반환된 데이터를 콘솔에 출력
+                const fullAddress = data.address;
+                const shortAddress = fullAddress.split(" ")[0] + " " + fullAddress.split(" ")[1] + " " + fullAddress.split(" ")[2];
+                $('#area').text(shortAddress); // 지역 정보 표시
+                $('#temperature').html(`${data.T1H}<span class="celsius">℃</span>`);
+                $('#precipitationProbability').html(data.POP ? `${data.POP}%` : '0%'); // 강수확률이 없는 경우 '0%'로 표시
+                $('#humidity').html(`${data.REH}%`); // 습도를 표시할 때 '%'를 추가
+                $('#windSpeed').html(`${data.WSD}m/s`); // 풍속을 표시할 때 'm/s'를 추가
+
+                // 날씨 아이콘 업데이트
+                updateWeatherIcon(data.SKY, data.PTY);
+            },
+            error: function (error) {
+                console.error('Error fetching weather data:', error);
+            }
+        });
+    }
+    // 날씨 아이콘 업데이트 함수
+    function updateWeatherIcon(skyValue, ptyValue) {
+        // console.log("PTY Value:", ptyValue);
+        // console.log("SKY Value:", skyValue);
+
+        let iconPath = '/images/icon/weather/';
+        let altText = '날씨 아이콘';
+
+        // PTY 값에 따라 먼저 판단 (강수 형태 우선)
+        if (ptyValue == '1') {
+            iconPath += 'ico-wt4.svg'; // 비
+            altText = '비';
+        } else if (ptyValue == '3') {
+            iconPath += 'ico-wt5.svg'; // 눈
+            altText = '눈';
+        } else if (ptyValue == '4') {
+            iconPath += 'ico-wt7.svg'; // 소나기
+            altText = '소나기';
+        } else {
+            // PTY 값이 0이거나 비어 있을 때는 SKY 값으로 판단
+            if (skyValue == '1') {
+                iconPath += 'ico-wt1.svg'; // 맑음
+                altText = '맑음';
+            } else if (skyValue == '2') {
+                iconPath += 'ico-wt2.svg'; // 구름 조금
+                altText = '구름 조금';
+            } else if (skyValue == '3' || skyValue == '4') {
+                iconPath += 'ico-wt3.svg'; // 구름 많음 또는 흐림
+                altText = '구름 많음 또는 흐림';
+            }
+        }
+
+        // 아이콘 업데이트
+        const weatherIcon = $('#weatherIcon');
+        weatherIcon.attr('src', iconPath);
+        weatherIcon.attr('alt', altText);
+
+    }
+</script>
+
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 </body>
 </html>

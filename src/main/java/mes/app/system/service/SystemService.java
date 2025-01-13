@@ -22,96 +22,123 @@ public class SystemService {
 	
 	@Autowired
     private NamedParameterJdbcTemplate  jdbcTemplate;
-	
-	
-	public List<Map<String, Object>> getWebMenuList(User user){
-		
-        String sql = """
-			with recursive tree(id, menu_code, pid, name,depth, path, cycle, folder_order, _order) as (  
-                      select a.id
-                          ,a."FolderName"::text as menu_code 
-                          ,a."Parent_id" as pid
-                          ,a."FolderName" as name 
-                          ,1 as depth
-                          ,array[a.id] as path
-                          ,false as cycle
-                          ,_order as folder_order
-                          ,_order
-                          ,a."IconCSS"::text as css
-                          ,'folder' as data_div
-                          , a.id as folder_id
-                          from menu_folder a 
-                          where a."Parent_id" is null
-                      union all 
-                      select  null as id
-                          ,mi."MenuCode"::text as menu_code
-                          ,mi."MenuFolder_id" as pid
-                          ,mi."MenuName"  as name
-                          ,tree.depth+1
-                          ,array_append(tree.path, mi."MenuFolder_id") as path
-                          ,mi."MenuFolder_id" = any(tree.path) as cycle
-                          , tree.folder_order
-                          ,mi._order
-                          ,null as css
-                          ,'menu' as data_div
-                          ,mi."MenuFolder_id" as folder_id
-                      from menu_item mi 
-                      inner join tree on mi."MenuFolder_id" = tree.id 
-                      where exists (
-                        select 1 
-                        where :group_code = 'dev' 
-                        union all
-                        select 1 
-                        where mi."MenuCode" in ('wm_user_group_menu', 'wm_user_group', 'wm_user')
-                        and (:super_user = true or :group_code = 'admin' )
-                        union all
-                          select 1 
-                          from user_group_menu gm 
-                          where gm."MenuCode" = mi."MenuCode" 
-                          and gm."UserGroup_id" = :group_id 
-                          and gm."AuthCode" like '%R%'
-                          and ( :group_code not in ('dev') or :super_user = false )
-                          )
-                      and not cycle
-                  ), M as 
-                  (
-                  select tree.id
-                  ,tree.menu_code
-                  ,tree.pid
-                  ,tree.name
-                  ,tree.depth
-                  , tree.folder_order
-                  ,tree._order
-                  ,coalesce(tree.css,'') as css
-                  ,(bk."MenuCode" is not null) as isbookmark
-                  , data_div
-                  , count(*) over (partition by tree.folder_id) as sub_count
-                  , tree.path
-                  from tree 
-                  left join bookmark bk on bk."MenuCode" = tree.menu_code 
-                  and bk."User_id"= :user_id
-                  where 1 = 1
-                  )
-                  select id, menu_code, pid, name, depth, folder_order, _order, css, isbookmark 
-                  from M
-                  where sub_count > 1
-                  order by depth, "_order" 
+
+
+	public List<Map<String, Object>> getWebMenuList(User user) {
+
+		String sql = """
+        with recursive tree(id, menu_code, pid, name, depth, path, cycle, folder_order, _order, css, data_div, folder_id, FrontFolder_id) as (
+        select 
+            a.id,
+            null as menu_code,
+            a."Parent_id" as pid,
+            a."FolderName" as name, 
+            1 as depth,
+            array[a.id] as path,
+            false as cycle,
+            a._order as folder_order,
+            a._order,
+            a."IconCSS"::text as css,
+            'folder' as data_div,
+            a.id as folder_id,
+            a."FrontFolder_id"
+        from 
+            menu_folder a 
+        where 
+            a."Parent_id" is null
+        
+        union all 
+        
+        select  
+            null as id,
+            mi."MenuCode"::text as menu_code,
+            mi."MenuFolder_id" as pid,
+            mi."MenuName" as name,
+            tree.depth + 1,
+            array_append(tree.path, mi."MenuFolder_id") as path,
+            mi."MenuFolder_id" = any(tree.path) as cycle,
+            tree.folder_order,
+            mi._order,
+            null as css,
+            'menu' as data_div,
+            mi."MenuFolder_id" as folder_id,
+            tree.FrontFolder_id
+        from 
+            menu_item mi 
+        inner join 
+            tree on mi."MenuFolder_id" = tree.id 
+        where 
+            (:super_user = true)
+            or (exists (
+                select 1 
+                from user_group_menu gm 
+                where gm."MenuCode" = mi."MenuCode" 
+                and gm."UserGroup_id" = :group_id
+                and (gm."AuthCode" like '%R%' OR gm."AuthCode" LIKE '%W%')
+            ))
+        and 
+            not cycle
+        ), M as (
+            select 
+                tree.id,
+                tree.menu_code,
+                tree.pid,
+                tree.name,
+                tree.depth,
+                tree.folder_order,
+                tree._order,
+                coalesce(tree.css,'') as css,
+                (bk."MenuCode" is not null) as isbookmark,
+                tree.data_div,
+                count(*) over (partition by tree.folder_id) as sub_count,
+                tree.path,
+                tree.FrontFolder_id
+            from 
+                tree 
+            left join 
+                bookmark bk on bk."MenuCode" = tree.menu_code 
+            and 
+                bk."User_id" = :user_id 
+            where 
+                1 = 1
+        )
+        select 
+            id, 
+            menu_code, 
+            pid, 
+            name, 
+            depth, 
+            folder_order, 
+            _order, 
+            css, 
+            isbookmark,
+            case when depth = 1 then FrontFolder_id else null end as FrontFolder_id
+        from 
+            M
+        where 
+            sub_count > 1
+        and 
+            FrontFolder_id is not null
+        order by 
+            depth, _order;
         """;
-        
-        UserGroup userGroup = user.getUserProfile().getUserGroup();
-        
-        String group_code = userGroup.getCode();
-        boolean super_user = user.getSuperUser();
-        
-        MapSqlParameterSource dicParam = new MapSqlParameterSource();                
-        dicParam.addValue("group_id", userGroup.getId());
-        dicParam.addValue("user_id", user.getId());
-        dicParam.addValue("group_code", group_code);
-        dicParam.addValue("super_user", super_user);
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
-        
-        return items;
-		
+
+
+
+		UserGroup userGroup = user.getUserProfile().getUserGroup();
+
+		String group_code = userGroup.getCode();
+		boolean super_user = user.getSuperUser();
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("group_id", userGroup.getId());
+		dicParam.addValue("user_id", user.getId());
+		dicParam.addValue("group_code", group_code);
+		dicParam.addValue("super_user", super_user);
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+
+		return items;
+
 	}
 
 	/**

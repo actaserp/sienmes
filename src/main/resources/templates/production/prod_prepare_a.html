@@ -1,627 +1,539 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
 
-<div class="content_wrap">
-    <section class="section">
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="작업 준비">작업 준비</h3>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>작업 준비</h2>
+                <small2>A</small2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>        
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>생산 관리</li>
+                <li>작업 준비</li>
+            </ul>
         </div>
 
-        <div class="table_box search">
-            <div class="row">
+        <section class="section">
 
-                <div class="col-12 col-lg-6 col-xl-3" >
-                    <div class="input-group" data-ax5picker="basic" id="srchDt">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_sm" data-labelCd="일자">일자</span>
-                        </div>
-                        <input class="form-control2 tac" type="text" id="srchStartDt" name="srchStartDt">
-                        <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                    </div>
-                </div>	
-                
-                 <div class="col-6 col-md-3 col-lg-3 col-xl-2">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_md" data-labelCd="근무조">근무조</span>
-                        </div>
-                        <select class="form-control2" id="cboWorkShift" name="workshift"></select>
-                    </div>
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            일자<span class="eq">*</span>
+                        </dt>
+                        <dd>
+                            <ul class="date-box">
+                                <li>
+                                    <input type="date" id="srchStartDt" name="srchStartDt">
+                                    <label for="srchStartDt" class="hide">시작일</label>
+                                </li>
+                            </ul>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>
+                            <label for="cboWorkShift">
+                                근무조<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboWorkShift" name="cboWorkShift">
+                                </select>
+                            </div>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>
+                            <label for="cboWorkCenter">
+                                워크센터<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboWorkCenter" name="cboWorkCenter">
+                                </select>
+                            </div>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>&nbsp;</dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
                 </div>
-                 <div class="col-5 col-md-3 col-lg-3 col-xl-2">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_md" data-labelCd="워크센터">워크센터</span>
-                        </div>
-                        <select class="form-control2" id="cboWorkCenter" name="workcenter" ></select>
-                    </div>
-                </div>
-
-                <div class="col-1" >
-                    <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                </div> 
-
-            </div>
-        </div>
-
-    </section>
-    <section>
-        <div class="grid_box">
-            <div class="title_box">
-                 <span class="right_align rpt" data-labelCd="작업 지시 내역">작업 지시 내역</span>
-                <button type="button" class="btn-default" id="btnUp" title="순서 조정-위로"><i class="fas fa-arrow-up"></i></button>
-                <button type="button" class="btn-default" id="btnDown" title="순서 조정-아래로"><i class="fas fa-arrow-down"></i></button>
-                <button type="button" class="btn-default y_write_auth" id="btnWorkIndexSave"><span data-labelCd="순서 저장">순서 저장</span></button>
-                <!--<button type="button" class="btn-default" id="btnJobOrderPrint"  title="작업 지시서 인쇄"><span><i class="fas fa-print"></i></span></button>-->
-                <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
-            </div>
-                <div class="h-260" data-ax5grid="joborderGrid"></div>  
-        </div>
-
-    </section>
-    <section>
-        <div class="tabs" data-tab="tabWrap">
-            <div class="title_box">
-                <div class="left_align">
-                    <ul class="tab_links">
-                        <li><a href="#" data-tablink="#tab1" class="tab" data-labelCd="해당 소요 자재">해당 소요 자재</a></li>
-                        <!--<li><a href="#" data-tablink="#tab2" class="tab" data-labelCd="투입 요청 내역">투입 요청 내역</a></li>-->
+                <div class="button-wrap">
+                    <ul>
+                        <li>
+                            <a class="btn" title="위" id="btnUp">
+                                <i class="fas fa-arrow-up"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn" title="아래" id="btnDown">
+                                <i class="fas fa-arrow-down"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn btn-excell" title="수정" id="btnWorkIndexSave">
+                                순서 저장
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
-            <div class="tab-content">
-                <div class="tab" id="tab1">
-                    <div class="grid_box">
-                        <div class="title_box">
-                            <span class="right_align rpt" data-labelCd="해당 지시 소요 자재">해당 지시 소요 자재</span>
-                            <button type="button" id="btnMatReqSearch" class="btn-default y_write_auth"><span data-labelCd="소요량 조회">소요량 조회</span></button>
-                            <!--<button type="button" id="btnInputRequest" class="btn-default y_write_auth"><span data-labelCd="자재 공정 투입 요청">자재 공정 투입 요청</span></button>-->
-                            <button type="button" class="btn-default" id="btnExcel1" title="엑셀 다운로드"><i class="fas fa-file-excel"></i></button>
-                            <button type="button" class="btn-default" id="btnGridSetting2" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
+
+            <div class="container-fluid">
+                <div id="joborderGrid" style="height: 300px;"></div>
+            </div>
+
+        </section>
+        <div class="tab-wrap">
+
+            <ul class="tab-links">
+                <li><a href="#tab1">해당 소요 자재</a></li>
+<!--                <li><a href="#tab2">투입 요청 내역</a></li>-->
+            </ul>
+            <div>
+                <section class="tab-item" id="tab1" style="border-top-left-radius: 0;">
+
+                    <div class="section-top">
+                        <div class="button-wrap">
+                            <ul>
+                                <li>
+                                    <a class="btn" title="위" id="btnMatReqSearch">
+                                        소요량 조회
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
-                        <div class="h-280" data-ax5grid="materialRequiredGrid"></div>  
+                        <div id="materialRequiredGrid" style="height: 400px;"></div>
                     </div>
-                </div>
-                
-                <div class="tab" id="tab2" style="display: none;">
-                    <div class="grid_box">
-                        <div class="title_box">
-                            <span class="right_align rpt" data-labelCd="투입 요청 내역">투입 요청 내역</span>
-                            <button type="button" id="btnInputReqSearch" class="btn-default" title="투입 요청 조회"><i class="fas fa-search"></i></button>
-                            <button type="button" class="btn-default" id="btnExcel2" title="엑셀 다운로드"><i class="fas fa-file-excel"></i></button>
-                            <button type="button" class="btn-default" id="btnGridSetting3" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
+                </section>
+                <section class="tab-item" id="tab2" style="border-top-left-radius: 0;">
+
+                    <div class="section-top">
+                        <div class="button-wrap">
+                            <ul>
+                                <li>
+                                    <a class="btn" title="위" id="btnInputReqSearch">
+                                        투입 요청 조회
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
-                        <div class="h-280" data-ax5grid="inputRequestGrid"></div>  
+                        <div id="inputRequestGrid" style="height: 400px;"></div>
                     </div>
-                </div>
-                
+                </section>
             </div>
         </div>
-    </section>
-</div>
-</th:block> 
+
+
+    </div>
+</th:block>
 
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-<script type="text/javascript" src="/js/grid.js"></script>
+<!--    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
+<!--    <script type="text/javascript" src="/js/grid.js"></script>-->
 
-<script type="text/javascript">
+    <script type="text/javascript">
 
 
-    class PrepareProduction {
-        constructor() {
-            this.grid = null;
-            this.matreqGrid = null;
-            this.inputReqGrid = null;
-            this.url = '/api/production/prod_prepare';
+        class PrepareProduction {
+            constructor() {
+                this.grid = null;
+                this.matreqGrid = null;
+                this.inputReqGrid = null;
+                this.url = '/api/production/prod_prepare';
 
-            this.initJobOrder();
-            this.initMaterialRequired();
-            this.initInputRequest();
-        }
+                this.initJobOrder();
+                this.initMaterialRequired();
+                this.initInputRequest();
+            }
 
-        initJobOrder() {
-            let _this = this;
+            initJobOrder() {
+                let _this = this;
 
-            let config = {
-                target: $('[data-ax5grid="joborderGrid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: true,  // checkbox(선택) 보이기 여부
-                multipleSelect: true, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: false, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 32  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        this.self.select(this.dindex);
+                this.grid = new wijmo.grid.FlexGrid('#joborderGrid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
                     },
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    { key: 'work_order_number', label: '작업 지시 번호', width: 150, align: 'center' },
-                    { key: 'production_date', label: '생산일', width: 100, align: 'center' },
-                    { key: 'workcenter_name', label: '워크 센터', width: 100, align: 'left' },
-                    { key: 'shift_name', label: '근무조', width: 100, align: 'center' },
-                    { key: 'work_index', label: '작업 순서', width: 100, align: 'center' },
-                    { key: 'mat_name', label: '제품', width: 200, align: 'left' },
-                    { key: 'unit_name', label: '단위', width: 100, align: 'center' },
-                    { key: 'order_qty', label: '지시량', width: 100, align: 'right', formatter: 'money'},
-                    { key: 'state_name', label: '상태', width: 100, align: 'center', },
-                    //{ key: 'proc_input_req_id', label: '자재 공정 투입 요청 번호', width: 170, align: 'center', hidden: true },
-                ]
-            };
-            this.grid = new ax5.ui.grid(config);
-            this.grid_config1 = config;
-
-            AjaxUtil.fillSelectOptions($('#cboWorkShift'), 'shift', 'all', false);
-            AjaxUtil.fillSelectOptions($('#cboWorkCenter'), 'workcenter', 'all', false);
-
-            $('#srchDt').ax5DatePicker({ direction: 'top' });
-            $('#srchStartDt').val(CommonUtil.getYYYYMMDD());
-
-            $('#btnSearch').on('click', function (e) {
-                _this.jobOrderSearch();
-            });;
-
-            $('#btnUp').click(function (e) {
-                GridUtil.changeOrder('U', _this.grid);
-            });
-
-            $('#btnDown').click(function (e) {
-                GridUtil.changeOrder('D', _this.grid);
-            });
-
-            $('#btnWorkIndexSave').click(function (e) {
-                let length = _this.grid.list.length;
-                if (length == 0 || length == 1) {
-                    return;
-                }
-                Alert.confirm('', '순서를 저장하시겠습니까?', function () {
-                    _this.saveWorkIndex();
+                    columns: [
+                        { binding: 'work_order_number', header: '작업 지시 번호', width: 150, align: 'center' },
+                        { binding: 'production_date', header: '생산일', width: 100, align: 'center' },
+                        { binding: 'workcenter_name', header: '워크 센터', width: 100, align: 'left' },
+                        { binding: 'shift_name', header: '근무조', width: 100, align: 'center' },
+                        { binding: 'work_index', header: '작업 순서', width: 100, align: 'center' },
+                        { binding: 'mat_name', header: '제품', width: 200, align: 'left' },
+                        { binding: 'unit_name', header: '단위', width: 100, align: 'center' },
+                        { binding: 'order_qty', header: '지시량', width: 100, align: 'right', format: 'n2' },
+                        { binding: 'state_name', header: '상태', width: 100, align: 'center' }
+                    ]
                 });
-                
-            });
-        }
 
-        saveWorkIndex() {
-            let _this = this;
-            let items = [];
-            $.each(_this.grid.list, function (idx, item) {
-                items.push({id: item.id});
-            });
-			
-            let strData = JSON.stringify(items);
-            let data = { Q: strData };
-            let fnsuccess = function (result) {
-                if (result.success) {
-                    Notify.success('저장했습니다.');
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = '작업 지시 내역';
+
+                AjaxUtil.fillSelectOptions($('#cboWorkShift'), 'shift', 'all', false);
+                AjaxUtil.fillSelectOptions($('#cboWorkCenter'), 'workcenter', 'all', false);
+
+                $('#srchDt').ax5DatePicker({direction: 'top'});
+                $('#srchStartDt').val(CommonUtil.getYYYYMMDD());
+
+                $('#btnSearch').on('click', function (e) {
                     _this.jobOrderSearch();
-                }
-            };
+                });
+                ;
 
-            AjaxUtil.postAsyncData(this.url + '/save_work_index', data, fnsuccess);
-        }
+                $('#btnUp').click(function (e) {
+                    GridUtil.changeOrder('U', _this.grid);
+                });
 
-        jobOrderSearch() {
-            let _this = this;
+                $('#btnDown').click(function (e) {
+                    GridUtil.changeOrder('D', _this.grid);
+                });
 
-            let $cboWorkShift = $('#cboWorkShift');
-            let $cboWorkCenter = $('#cboWorkCenter');
-
-            let shift_code = $cboWorkShift.val();
-            let workcenter_pk = $cboWorkCenter.val()
-
-            //if (shift_code == '' || workcenter_pk == '') {
-            if (workcenter_pk == '') {
-                $('#btnUp, #btnDown, #btnWorkIndexSave').attr('disabled', true);
-            } else {
-                $('#btnUp, #btnDown, #btnWorkIndexSave').removeAttr('disabled');
-            }
-
-            let data = {
-                data_date: $('#srchStartDt').val(),
-                shift_code: shift_code,
-                workcenter_pk: workcenter_pk
-            };
-
-            let fnsuccess = function (result) {
-                if (result != null) {
-                    let recordsTotal = result.data.length;
-                    _this.grid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: recordsTotal,
-                        }
+                $('#btnWorkIndexSave').click(function (e) {
+                    let length = _this.grid.itemsSource.items.length;
+                    if (length == 0 || length == 1) {
+                        return;
+                    }
+                    Alert.confirm('', '순서를 저장하시겠습니까?', function () {
+                        _this.saveWorkIndex();
                     });
-                }
-            };
-            AjaxUtil.getAsyncData(this.url + '/job_order_list', data, fnsuccess);
 
-            this.matreqGrid.setData([]);
-            this.inputReqGrid.setData([]);
-        }
-
-        // 해당소요자재
-        initMaterialRequired() {
-            let _this = this;
-            let config = {
-                target: $('[data-ax5grid="materialRequiredGrid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: false, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 32  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        this.self.select(this.dindex);
-                    },
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    { key: 'mat_type_name', label: '품목 유형', width: 120, align: 'center' },
-                    { key: 'mat_group_name', label: '품목 그룹', width: 120, align: 'center' },
-                    { key: 'mat_code', label: '품목 코드', width: 120, align: 'left' },
-                    { key: 'mat_name', label: '품목 명', width: 200, align: 'left' },
-                    { key: 'unit_name', label: '단위', width: 100, align: 'center' },
-                    { key: 'requ_qty', label: '소요량', width: 120, align: 'right',
-                         formatter: function () {
-								let requ_qty = null;
-								if (this.item.requ_qty > 0 ) {
-									requ_qty = this.item.requ_qty.toFixed(1);
-								}
-                            	return ax5.util.number(requ_qty, {"money": true});
-                        	  }
-                     },
-                    { key: 'cur_stock', label: '기본 재고창고 재고', width: 160, align: 'right',  
-                    		formatter: function () {
-								let cur_stock = null;
-								if (this.item.cur_stock != 0 && this.item.cur_stock != null) {
-									cur_stock = this.item.cur_stock.toFixed(1);									
-								} else {
-									cur_stock = 0
-								}
-                            	return ax5.util.number(cur_stock, {"money": true});
-                        	  },
-                          
-	                    	styleClass: function () {
-		
-							var requ_qty = this.item.requ_qty;
-							var cur_stock = this.item.cur_stock;
-	
-							var color = null;
-							
-							if(requ_qty > cur_stock) {
-								color = "grid-cell-red"
-							}
-	
-							return color
-	                    }
-                    },
-                    { key: 'process_stock', label: '공정창고 재고', width: 150, align: 'right', hidden: true },
-                    { key: 'proc_safety_stock', label: '공정안전재고', width: 150, align: 'right', hidden: true },
-                    {
-                        key: 'input_req_qty', label: '<span class="editable_clr">투입 요청량</span>', width: 150, align: 'right', hidden: true,
-                        editor: {
-                            type: 'number'
-                        }
-                    },
-
-                ]
-            };
-            this.matreqGrid = new ax5.ui.grid(config);
-            this.grid_config2 = config;
-            //소요량조회
-            $('#btnMatReqSearch').click(function (e) {
-                _this.loadMatReqList();
-            });
-
-            // 자재공정투입요청
-            $('#btnInputRequest').click(function (e) {
-                _this.requestMaterialProcessInput();
-            });
-        }
-
-        requestMaterialProcessInput() {
-            let _this = this;
-
-            // 작업지시화면에서 선택된 데이터 중 자재공정투입요청번호가 있는지 확인
-            let jobordItems = _this.grid.getList('selected');
-
-            // 선택된 작업지시가 없으면?
-            if (jobordItems.length == 0) {
-                Alert.alert('', '선택된 작업지시가 없습니다.');
-                return;
+                });
             }
 
-            let jobres_pks = '';
-            let arrJobres = [];
+            saveWorkIndex() {
+                let _this = this;
+                let items = [];
+                $.each(_this.grid.itemsSource.items, function (idx, item) {
+                    items.push({id: item.id});
+                });
 
-            for (let idx = 0; idx < jobordItems.length; idx++) {
-                let item = jobordItems[idx];
-                let proc_input_req_id = item.proc_input_req_id;
-                if (proc_input_req_id != '' && proc_input_req_id != null) {
-                    Alert.alert('', '투입 요청 내역이 있습니다.'); // 이미 공정 투입 요청한 데이터가 있습니다.
-
-                    return;
-                }
-                arrJobres.push(item.id);
-            }
-
-            jobres_pks = arrJobres.join(',');
-
-            // 소요량 목록에서 확인
-            let matItems = _this.matreqGrid.list;
-            if (matItems.length == 0) {
-                Alert.alert('', '소요자재 데이터가 없습니다.');
-                return;
-            }
-
-            let arrMat = [];
-            let arrQty = [];
-
-            let valid = true;
-            let errorMatName = '';
-
-            $.each(matItems, function (idx, item) {
-                let mat_pk = item.mat_pk
-                let input_req_qty = item.input_req_qty;
-                let mat_name = item.mat_name;
-                arrMat.push(mat_pk);
-                arrQty.push(input_req_qty);
-
-                if (input_req_qty == null || input_req_qty == "" || input_req_qty == 0 || input_req_qty < 0) {
-                    errorMatName = mat_name;
-                    valid = false;
-                }
-            });
-
-            if (!valid) {
-                Alert.alert('', '품목 ' + errorMatName + ' 투입량을 확인하세요');
-                return;
-            }
-
-            let okCallback = function () {
-                let mat_pks = arrMat.join(',');
-                let input_req_qtys = arrQty.join(',');
-				
-                let data_date = $('#srchStartDt').val();
-                let data = {
-                    jobres_pks: jobres_pks,
-                    mat_pks: mat_pks,
-                    input_req_qtys: input_req_qtys,
-                    data_date: data_date
-                };
-
+                let strData = JSON.stringify(items);
+                let data = {Q: strData};
                 let fnsuccess = function (result) {
                     if (result.success) {
-                        Notify.success('요청되었습니다.');
+                        Notify.success('저장했습니다.');
                         _this.jobOrderSearch();
-                        _this.loadInputReqList(result.data)
-
-                    } else {
-                        Alert.alert('', result.message);
                     }
                 };
 
-                AjaxUtil.postAsyncData(_this.url + '/save_mat_proc_input', data, fnsuccess);
-            };
-
-            Alert.confirm('', '투입을 요청하시겠습니까?', okCallback);
-
-        }
-
-        loadMatReqList() {
-            let _this = this;
-            let items = _this.grid.getList('selected');
-            if (items.length == 0) {
-                return;
+                AjaxUtil.postAsyncData(this.url + '/save_work_index', data, fnsuccess);
             }
-            let arrTmp = [];
-            $.each(items, function (idx, item) {
-                arrTmp.push(item.id);
-                //if (item.proc_input_req_id != '' && item.proc_input_req_id != null) {
-                //    Alert.alert('', '이미 투입요청한 데이터가 있습니다.');
-                //    return;
-                //}
-            });
-            let jr_pks = arrTmp.join(',');
-            let data_date = $('#srchStartDt').val();
-            let data = {
-                jr_pks: jr_pks,
-                data_date : data_date
-            };
-            let fnsuccess = function (result) {
-                if (result != null) {
-                    let count = result.data.length;
-                    _this.matreqGrid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: count,
-                        }
-                    });
-                }
-            };
-            //let url = this.url + '/bom_detail_list'
-            //AjaxUtil.postAsyncData(url, data, fnsuccess);
-            AjaxUtil.getAsyncData(this.url + '/bom_detail_list', data, fnsuccess);
-        }
 
-        // 투입요청내역 초기화
-        initInputRequest() {
-            let _this = this;
-            let config = {
-                target: $('[data-ax5grid="inputRequestGrid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: false, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 32  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        this.self.select(this.dindex);
-                    },
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    { key: 'req_pk', label: '투입 요청 번호', width: 120, align: 'center' },
-                    { key: 'mat_type_name', label: '품목 유형', width: 120, align: 'center' },
-                    { key: 'mat_code', label: '품목 코드', width: 120, align: 'left' },
-                    { key: 'mat_name', label: '품목 명', width: 200, align: 'left' },
-                    { key: 'unit_name', label: '단위', width: 100, align: 'center' },
-                    { key: 'req_qty', label: '요청량', width: 100, align: 'right', },
-                    { key: 'state_name', label: '상태', width: 100, align: 'center', },
-                    { key: 'material_stock', label: '자재창고 재고', width: 120, align: 'right', },
-                    { key: 'process_stock', label: '공정창고 재고', width: 120, align: 'right', },
-                    { key: 'proc_safety_stock', label: '공정안전재고', width: 150, align: 'right', },
-                ]
-            };
+            jobOrderSearch() {
+                let _this = this;
 
-            this.inputReqGrid = new ax5.ui.grid(config);
-            this.grid_config3 = config;
-            // 투입요청내역 조회
-            $('#btnInputReqSearch').click(function (e) {
+                let $cboWorkShift = $('#cboWorkShift');
+                let $cboWorkCenter = $('#cboWorkCenter');
 
-                let items = _this.grid.getList('selected');
+                let shift_code = $cboWorkShift.val();
+                let workcenter_pk = $cboWorkCenter.val()
 
-                if (items.length == 0) {
-                    Alert.alert('', '투입 요청 번호가 없습니다.');  //자재공정투입요청번호를 확인할 수 없습니다.
-                    return;
+                //if (shift_code == '' || workcenter_pk == '') {
+                if (workcenter_pk == '') {
+                    $('#btnUp, #btnDown, #btnWorkIndexSave').attr('disabled', true);
                 } else {
-                    // 1 개 이상이고 각각 다른 자재 공정투입요청번호가 있을 경우는 어떻할 것인지?
+                    $('#btnUp, #btnDown, #btnWorkIndexSave').removeAttr('disabled');
                 }
-                let proc_input_req_id = items[0].proc_input_req_id;
-                if (proc_input_req_id == "" || proc_input_req_id==null) {
-                    Alert.alert('', '투입 요청 번호가 없습니다.'); //자재공정투입요청번호를 확인할 수 없습니다.
+
+                let data = {
+                    data_date: $('#srchStartDt').val(),
+                    shift_code: shift_code,
+                    workcenter_pk: workcenter_pk
+                };
+
+                let fnsuccess = function (result) {
+                    if (result != null) {
+                        _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
+                    }
+                };
+                AjaxUtil.getAsyncData(this.url + '/job_order_list', data, fnsuccess);
+
+                this.matreqGrid.itemsSource = new wijmo.collections.CollectionView([]);
+                this.inputReqGrid.itemsSource = new wijmo.collections.CollectionView([]);
+            }
+
+            // 해당소요자재
+            initMaterialRequired() {
+                let _this = this;
+                this.matreqGrid = new wijmo.grid.FlexGrid('#materialRequiredGrid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                    },
+                    columns: [
+                        { binding: 'mat_type_name', header: '품목 유형', width: 120, align: 'center' },
+                        { binding: 'mat_group_name', header: '품목 그룹', width: 120, align: 'center' },
+                        { binding: 'mat_code', header: '품목 코드', width: 120, align: 'left' },
+                        { binding: 'mat_name', header: '품목 명', width: 200, align: 'left' },
+                        { binding: 'unit_name', header: '단위', width: 100, align: 'center' },
+                        {
+                            binding: 'requ_qty', header: '소요량', width: 120, align: 'right',
+                            format: 'n1',
+                            cellTemplate: (item) => wijmo.format('{0:n1}', item.requ_qty || 0)
+                        },
+                        {
+                            binding: 'cur_stock', header: '기본 재고창고 재고', width: 160, align: 'right',
+                            format: 'n1',
+                            cellTemplate: (item) => {
+                                let stock = item.cur_stock || 0;
+                                return `<div class="${item.requ_qty > stock ? 'grid-cell-red' : ''}">${wijmo.format('{0:n1}', stock)}</div>`;
+                            }
+                        },
+                        { binding: 'process_stock', header: '공정창고 재고', width: 150, align: 'right', isReadOnly: true },
+                        { binding: 'proc_safety_stock', header: '공정안전재고', width: 150, align: 'right', isReadOnly: true },
+                        {
+                            binding: 'input_req_qty', header: '<span class="editable_clr">투입 요청량</span>', width: 150, align: 'right',
+                            isReadOnly: false
+                        }
+                    ]
+                });
+
+                new FlexGridContextMenu(this.matreqGrid);
+                this.matreqGrid.downloadFileName = '해당 소요 자재';
+
+                //소요량조회
+                $('#btnMatReqSearch').click(function (e) {
+                    _this.loadMatReqList();
+                });
+
+                // 자재공정투입요청
+                $('#btnInputRequest').click(function (e) {
+                    _this.requestMaterialProcessInput();
+                });
+            }
+
+            requestMaterialProcessInput() {
+                let _this = this;
+
+                // 작업지시화면에서 선택된 데이터 중 자재공정투입요청번호가 있는지 확인
+                let jobordItems = _this.grid.selectedItems;
+
+                // 선택된 작업지시가 없으면?
+                if (jobordItems.length == 0) {
+                    Alert.alert('', '선택된 작업지시가 없습니다.');
                     return;
                 }
-                _this.loadInputReqList(proc_input_req_id);
 
-            });
-        }
+                let jobres_pks = '';
+                let arrJobres = [];
 
-        // 투입요청목록 내역
-        loadInputReqList(proc_input_req_id) {
-            let _this = this;
-            let data = {
-                req_pk: proc_input_req_id
-            };
+                for (let idx = 0; idx < jobordItems.length; idx++) {
+                    let item = jobordItems[idx];
+                    let proc_input_req_id = item.proc_input_req_id;
+                    if (proc_input_req_id != '' && proc_input_req_id != null) {
+                        Alert.alert('', '투입 요청 내역이 있습니다.'); // 이미 공정 투입 요청한 데이터가 있습니다.
 
-            let fnsuccess = function (result) {
-                if (result != null) {
-                    let recordsTotal = result.data.length;
-                    _this.inputReqGrid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: recordsTotal,
-                        }
-                    });
+                        return;
+                    }
+                    arrJobres.push(item.id);
                 }
-            };
-            AjaxUtil.getAsyncData(this.url + '/mat_proc_input_list', data, fnsuccess);
-        }
 
-        // 엑셀 다운로드
-        exportExcel(target) {
-            if (target == '#tab1') {
-                var targetview = this.matreqGrid;
-                targetview.exportExcel('해당지시소요자재.xls');
-            }else if (target == '#tab2') {
-                var targetview = this.inputReqGrid;
-                targetview.exportExcel('투입요청내역.xls');
+                jobres_pks = arrJobres.join(',');
+
+                // 소요량 목록에서 확인
+                let matItems = _this.matreqGrid.list;
+                if (matItems.length == 0) {
+                    Alert.alert('', '소요자재 데이터가 없습니다.');
+                    return;
+                }
+
+                let arrMat = [];
+                let arrQty = [];
+
+                let valid = true;
+                let errorMatName = '';
+
+                $.each(matItems, function (idx, item) {
+                    let mat_pk = item.mat_pk
+                    let input_req_qty = item.input_req_qty;
+                    let mat_name = item.mat_name;
+                    arrMat.push(mat_pk);
+                    arrQty.push(input_req_qty);
+
+                    if (input_req_qty == null || input_req_qty == "" || input_req_qty == 0 || input_req_qty < 0) {
+                        errorMatName = mat_name;
+                        valid = false;
+                    }
+                });
+
+                if (!valid) {
+                    Alert.alert('', '품목 ' + errorMatName + ' 투입량을 확인하세요');
+                    return;
+                }
+
+                let okCallback = function () {
+                    let mat_pks = arrMat.join(',');
+                    let input_req_qtys = arrQty.join(',');
+
+                    let data_date = $('#srchStartDt').val();
+                    let data = {
+                        jobres_pks: jobres_pks,
+                        mat_pks: mat_pks,
+                        input_req_qtys: input_req_qtys,
+                        data_date: data_date
+                    };
+
+                    let fnsuccess = function (result) {
+                        if (result.success) {
+                            Notify.success('요청되었습니다.');
+                            _this.jobOrderSearch();
+                            _this.loadInputReqList(result.data)
+
+                        } else {
+                            Alert.alert('', result.message);
+                        }
+                    };
+
+                    AjaxUtil.postAsyncData(_this.url + '/save_mat_proc_input', data, fnsuccess);
+                };
+
+                Alert.confirm('', '투입을 요청하시겠습니까?', okCallback);
+
             }
+
+            loadMatReqList() {
+                let _this = this;
+                let items = _this.grid.selectedItems;
+                if (items.length == 0) {
+                    return;
+                }
+                let arrTmp = [];
+                $.each(items, function (idx, item) {
+                    arrTmp.push(item.id);
+                    //if (item.proc_input_req_id != '' && item.proc_input_req_id != null) {
+                    //    Alert.alert('', '이미 투입요청한 데이터가 있습니다.');
+                    //    return;
+                    //}
+                });
+                let jr_pks = arrTmp.join(',');
+                let data_date = $('#srchStartDt').val();
+                let data = {
+                    jr_pks: jr_pks,
+                    data_date: data_date
+                };
+                let fnsuccess = function (result) {
+                    if (result != null) {
+                        _this.matreqGrid.itemsSource = result.data;
+                    }
+                };
+                //let url = this.url + '/bom_detail_list'
+                //AjaxUtil.postAsyncData(url, data, fnsuccess);
+                AjaxUtil.getAsyncData(this.url + '/bom_detail_list', data, fnsuccess);
+            }
+
+            // 투입요청내역 초기화
+            initInputRequest() {
+                let _this = this;
+
+                this.inputReqGrid = new wijmo.grid.FlexGrid('#inputRequestGrid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                    },
+                    columns: [
+                        {binding: 'req_pk', header: '투입 요청 번호', width: 120, align: 'center'},
+                        {binding: 'mat_type_name', header: '품목 유형', width: 120, align: 'center'},
+                        {binding: 'mat_code', header: '품목 코드', width: 120, align: 'left'},
+                        {binding: 'mat_name', header: '품목 명', width: 200, align: 'left'},
+                        {binding: 'unit_name', header: '단위', width: 100, align: 'center'},
+                        {binding: 'req_qty', header: '요청량', width: 100, align: 'right',},
+                        {binding: 'state_name', header: '상태', width: 100, align: 'center',},
+                        {binding: 'material_stock', header: '자재창고 재고', width: 120, align: 'right',},
+                        {binding: 'process_stock', header: '공정창고 재고', width: 120, align: 'right',},
+                        {binding: 'proc_safety_stock', header: '공정안전재고', width: 150, align: 'right',},
+                    ]
+                });
+
+                new FlexGridContextMenu(this.inputReqGrid);
+                this.inputReqGrid.downloadFileName = '투입 요청 내역';
+
+                // 투입요청내역 조회
+                $('#btnInputReqSearch').click(function (e) {
+
+                    let items = _this.grid.selectedItems;
+
+                    if (items.length == 0) {
+                        Alert.alert('', '투입 요청 번호가 없습니다.');  //자재공정투입요청번호를 확인할 수 없습니다.
+                        return;
+                    } else {
+                        // 1 개 이상이고 각각 다른 자재 공정투입요청번호가 있을 경우는 어떻할 것인지?
+                    }
+                    let proc_input_req_id = items[0].proc_input_req_id;
+                    if (proc_input_req_id == "" || proc_input_req_id == null) {
+                        Alert.alert('', '투입 요청 번호가 없습니다.'); //자재공정투입요청번호를 확인할 수 없습니다.
+                        return;
+                    }
+                    _this.loadInputReqList(proc_input_req_id);
+
+                });
+            }
+
+            // 투입요청목록 내역
+            loadInputReqList(proc_input_req_id) {
+                let _this = this;
+                let data = {
+                    req_pk: proc_input_req_id
+                };
+
+                let fnsuccess = function (result) {
+                    if (result != null) {
+                        _this.inputReqGrid.itemsSource = result.data;
+                    }
+                };
+                AjaxUtil.getAsyncData(this.url + '/mat_proc_input_list', data, fnsuccess);
+            }
+
+
         }
 
+        let pagePrepareProduction;
 
+        $(document).ready(function (e) {
+            pagePrepareProduction = new PrepareProduction();
+            pagePrepareProduction.jobOrderSearch();
 
-    }
+            pagePrepareProduction.popColSetting = new popColSetting();
 
-    let pagePrepareProduction;
-
-    $(document).ready(function (e) {
-        pagePrepareProduction = new PrepareProduction();
-        pagePrepareProduction.jobOrderSearch();
-
-        let target = '#tab1';
-        $('.tab_links .tab').click(function (e) {
-            target = e.currentTarget.dataset.tablink;
         });
 
-        pagePrepareProduction.popColSetting = new popColSetting();
-
-        let columns1 = pagePrepareProduction.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid1',  pagePrepareProduction.grid);
-        let columns2 = pagePrepareProduction.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid2',  pagePrepareProduction.matreqGrid);
-        let columns3 = pagePrepareProduction.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid3',  pagePrepareProduction.inputReqGrid);
-		
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-            $('#btnGridSetting2').css('visibility','visible');  
-            $('#btnGridSetting3').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = pagePrepareProduction.grid_config1.frozenColumnIndex;
-            pagePrepareProduction.popColSetting.show(gui.gui_code, gui.template_key, 'grid1', pagePrepareProduction.grid_config1.columns, pagePrepareProduction.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });	
-        $('#btnGridSetting2').click(function (e) {
-            let _this = this;
-            let fix_cols = pagePrepareProduction.grid_config2.frozenColumnIndex;
-            pagePrepareProduction.popColSetting.show(gui.gui_code, gui.template_key, 'grid2', pagePrepareProduction.grid_config2.columns, pagePrepareProduction.matreqGrid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });
-        $('#btnGridSetting3').click(function (e) {
-            let _this = this;
-            let fix_cols = pagePrepareProduction.grid_config3.frozenColumnIndex;
-            pagePrepareProduction.popColSetting.show(gui.gui_code, gui.template_key, 'grid3', pagePrepareProduction.grid_config3.columns, pagePrepareProduction.inputReqGrid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });
-
-        //엑셀다운로드
-        $('#btnExcel1').click( function (e) {
-            pagePrepareProduction.exportExcel(target);
-        });
-        $('#btnExcel2').click(function (e) {
-            pagePrepareProduction.exportExcel(target);
-        });
-
-
-
-    });
-
-</script>
+    </script>
 </th:block>
 </html>

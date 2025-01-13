@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -103,6 +105,20 @@ public class UserGroupController{
 		this.userGroupRepository.deleteById(id);
 		AjaxResult result = new AjaxResult();
 		
+		return result;
+	}
+
+	@GetMapping("/defaultmenu")
+	public AjaxResult getUserGroup() {
+
+		SecurityContext sc = SecurityContextHolder.getContext();
+		Authentication auth = sc.getAuthentication();
+		User user = (User)auth.getPrincipal();
+
+		Map<String, Object> item = this.userGroupService.getDefaultMenu(user);
+
+		AjaxResult result = new AjaxResult();
+		result.data = item;
 		return result;
 	}
 	

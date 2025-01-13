@@ -2,54 +2,62 @@
 <script type="text/x-tmpl" id="materialSearchTemplate">
 
     <div class="content_wrap popup" id="mpopup">
-<!--        <header>
-            <h4 id="popTitle">품목 선택</h4>
-            <div class="popup_close_box"><button class="btn_popup_close" id="material-search-close"><i class="fas fa-times"></i></button></div>
-        </header>-->
 
-        <section class="pt-2" >
+        <section class="section" style="padding-top: 10px;">
 
-            <div class="table_box search">
-                <div class="row">
+            <div class="section-top">
+            <div class="search-wrap" style="text-align: left;">
+                <dl>
+                    <dt>
+                        <label for="cboMaterialType">
+                            품목구분<span class="eq"></span>
+                        </label>
+                    </dt>
+                    <dd>
+                        <div class="srch-box">
+                            <select id="cboMaterialType" name="cboMaterialType">
 
-                    <div class="col-6">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t4" data-commonCd="품목구분">품목구분</span>
-                            </div>
-                             <select class="form-control2" id='cboMaterialType' name="cboMaterialType" ></select>
+                            </select>
                         </div>
-                    </div>
-
-                    <div class="col-5">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t4" data-commonCd="품목명">품목명</span>
-                            </div>
-                             <input class="form-control2" type="text" id="keyword" name="keyword" />
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <label for="keyword">
+                            품목명<span class="eq"></span>
+                        </label>
+                    </dt>
+                    <dd>
+                        <div class="srch-box">
+                            <input class="form-control2" type="text" id="keyword" name="keyword" />
                         </div>
-                    </div>
-                    
-                    <div class="col-1" >
-                            <button type="button" class="btn-default" id="btnMaterialSearch" title="조회"><i class="fas fa-search"></i></button>
-                    </div> 
+                    </dd>
+                </dl>
 
-                </div>
+                <dl>
+                    <dt>&nbsp;</dt>
+                    <dd>
+                        <li>
+                            <a class="btn btn-delete" title="검색" id="btnMaterialSearch">
+                                <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                검색
+                            </a>
+                        </li>
+                    </dd>
+                </dl>
             </div>
-            <div class="grid_box">
-                    <div class="h-360" data-ax5grid="material-search-grid" ></div>
+            <div class="container-fluid">
+                <div id="material-search-grid" style="height: 300px;"></div>
             </div>
-        </section>
+        </div>
+    </section>
 
-    <section class="popupcontent" >
-        <div class="align_left">
+        <div class="popup-button">
             <button type="button" class="btn-popup" id="btnMaterialSelect" ><span data-commonCd="선택">선택</span></button>
             <button type="button" class="btn-popup" id="modal-close-button"><span data-commonCd="닫기">닫기</span></button>
             <button type="button" class="btn-popup" id="btnTest"><span data-commonCd="새로고침">새로고침</span></button>
         </div>
-    </section>
-
-
 
     </div>
     
@@ -66,6 +74,7 @@
 				this.checkVal = false
 			}
             this.grid = null;
+            this.viewData = new wijmo.collections.CollectionView();
             this.selectedItem = null;
             this.callback = null;
             this.modalContainer = new PopupDraggable('품목 선택');
@@ -86,14 +95,7 @@
 
             let result = AjaxUtil.getSyncData(url, data);
             if (result.data != null) {
-                let recordsTotal = result.data.length;
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: recordsTotal,
-                    }
-                });
+                _this.viewData.sourceCollection = result.data;
             }
 
             //검색버튼을 누르고 초기화한다
@@ -116,47 +118,29 @@
             let $content = $(content);
             this.modalContainer.open({ width: 640, height: 510, $content });
 
-            let config = {
-                target: $('[data-ax5grid="material-search-grid"]'),
-                sortable: true,
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: this.checkVal,  // checkbox(선택) 보이기 여부
-                multipleSelect: true, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 30  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function () {
-                        _this.grid.select(this.dindex);
-                    },
-                    onDBLClick: function () {
-                        _this.grid.select(this.dindex);
-                        _this.selectData(this.item);
-                        _this.selectedItem = this.item;
-                    },
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
+            this.grid = new wijmo.grid.FlexGrid('#material-search-grid', {
+                selectionMode: wijmo.grid.SelectionMode.Row,
+                autoGenerateColumns: false,
+                showMarquee: true,
+                isReadOnly: true,
                 columns: [
-                    //{ key: 'id', label: '품목번호', width: 80, align: 'right', sortable: false },
-                    { key: 'MaterialTypeName', label: '품목구분', width: 100, align: 'left' },
-                    { key: 'group_name', label: '품목그룹', width: 110, align: 'left' },
-                    { key: 'Code', label: '품목코드', width: 110, align: 'center' },
-                    { key: 'Name', label: '품목명', width: 230, align: 'left' },
+                    { binding: 'MaterialTypeName', header: '품목구분', width: 100, align: 'left' },
+                    { binding: 'group_name', header: '품목그룹', width: 110, align: 'left' },
+                    { binding: 'Code', header: '품목코드', width: 110, align: 'center' },
+                    { binding: 'Name', header: '품목명', width: 230, align: 'left' },
+                ],
+                itemsSource: this.viewData,
+            });
+            this.grid.select(-1, -1);
 
-                    //{ key: 'Description', label: '설명', width: 250, align: 'center', sortable: false },
-                ]
-            };
+            let selector = new wijmo.grid.selector.Selector(this.grid, {
+                itemChecked: function () {
 
-            this.grid = new ax5.ui.grid(config);
+                }
+            })
+            new FlexGridContextMenu(this.grid);
+            this.grid.downloadFileName = '품목 내역';
+
             this.$btnMaterialSearch = $content.find('#btnMaterialSearch');
             this.$cboMaterialType = $content.find('#cboMaterialType');
             this.$keyword = $content.find('#keyword');
@@ -176,7 +160,7 @@
 
             this.$btnMaterialSelect.click(function (e) {
                 // 그리드에서 현재 선택된 item을 찾아서 호출한다.
-                let items = _this.grid.getList("selected");
+                let items = _this.grid.selectedItems;
                 if (items.length == 0) {
                     return false;
                 }

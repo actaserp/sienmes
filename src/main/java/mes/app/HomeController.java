@@ -37,6 +37,7 @@ public class HomeController {
         Authentication auth = sc.getAuthentication();         
         User user = (User)auth.getPrincipal();
         String username = user.getUserProfile().getName();
+		String userid = user.getUsername();
                 
         SystemOption sysOpt= this.systemOptionRepository.getByCode("LOGO_TITLE");
         String logoTitle = sysOpt.getValue();
@@ -45,6 +46,7 @@ public class HomeController {
         
 		ModelAndView mv = new ModelAndView();
 		mv.addObject("username", username);
+		mv.addObject("userid", userid);
 		mv.addObject("userinfo", user);
 		mv.addObject("system_title", logoTitle);
 		mv.addObject("default_menu_code", "wm_dashboard_summary");
