@@ -1,467 +1,453 @@
-
 <html layout:decorate="~{layout_page}">
 <head>
-<style>
-    #thumbnail div img:hover{opacity:0.5}
-</style>
+    <style>
+        .wj-header {
+            text-align: center !important;
+        }
+    </style>
 </head>
-
 <th:block layout:fragment="content">
-<div class="content_wrap">
+    <div class="layout-contents">
 
-    <section class="section ">
-
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="설비정보">설비정보</h3>
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>설비정보</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>일지 및 데이터</li>
+                <li>기준정보</li>
+                <li>설비정보</li>
+            </ul>
         </div>
 
-        <div class="table_box search">
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label>설비그룹</label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select type="text" class="form-control2" id="cboEquipmentGroup" name="cboEquipmentGroup"></select>
+                            </div>
+                        </dd>
+                    </dl>
 
-            <div class="row">
+                    <dl>
+                        <dt>
+                            <label>워크센터</label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select type="text" class="form-control2" id="cboWorkcenter" name="cboWorkcenter"></select>
+                            </div>
+                        </dd>
+                    </dl>
 
-                <div class="col-6 col-md-3 col-lg-3 col-xl-2" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t4" data-labelCd="설비그룹">설비그룹</span>
-                        </div>
-                        <select class="form-control2" id="cboEquipmentGroup" name="cboEquipmentGroup"></select>
+                    <dl>
+                        <dt>
+                            <label>설비명</label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input type="text" class="form-control2" id="txtEquipment" name="txtEquipment">
+                            </div>
+                        </dd>
+                    </dl>
 
-                    </div>
-                </div>
-
-                <div class="col-6 col-md-3 col-lg-3 col-xl-2" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t4" data-labelCd="워크센터">워크센터</span>
-                        </div>
-                        <select class="form-control2" id="cboWorkcenter" name="cboWorkcenter"></select>
-
-                    </div>
-                </div>
-
-                <div class="col-6 col-md-3 col-lg-3 col-xl-2" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t4" data-labelCd="설비명">설비명</span>
-                        </div>
-                        <input class="form-control2" id="txtEquipment" name="txtEquipment"/>
-
-                    </div>
-                </div>
-
-                <div class="col-1" >
-                    <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                </div> 
-            </div>
-        </div>
-    </section>
-
-    <section class="section">
-        <div class="grid_box">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="설비 목록">설비 목록</span>
-                <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
-            </div>
-            <div class="h-360" data-ax5grid="equipment-grid"></div>  
-        </div>
-    </section>
-
-    <section class="section">
-        <div class="tabs" data-tab="tabWrap" >
-            <div class="title_box">
-                <div class="left_align">
-                    <ul class="tab_links">
-                        <li><a href="#" data-tablink="#tab_basic" name="tab_basic" class="tab" data-labelCd="설비정보">설비정보</a></li>
-                        <li><a href="#" data-tablink="#tab_photo" name="tab_photo" class="tab" data-labelCd="사진">사진</a></li>
-                    </ul>
+                    <dl>
+                        <dt><span class="eq"></span></dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
                 </div>
             </div>
-        </div>
-        <div class="tab-content">
-            <div class="tab" id="tab_basic">
-                <div class="tab_con_box">
-                    <div class="title_box">
-                        <span class="right_align rpt" data-labelCd="설비 정보">설비 정보</span>
-                        <button type="button" class="btn-default" id="btnBasicNew" name="btnBasicNew"><i class="fas fa-plus"></i></button>
-                        <button type="button" class="btn-cancel y_write_auth" id="btnBasicDel" ><i class="fas fa-trash"></i></button>
-                        <button disabled type="button" class="btn-default y_write_auth" id="btnBasicSave"><i class="fas fa-save"></i></button>
-                    </div>
-                    <div class="table_box">
-                        <form id="equipmentForm">
-                            <input class="form-control2 readonly" type="hidden" id="id" name="id" readonly/>
-                            <div class="table_box sub" >
-                                <div class="row" >
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="설비그룹">설비그룹</span>
-                                            </div>
-                                            <select class="form-control2" id="EquipmentGroup_id" name="EquipmentGroup_id" disabled></select>
-                                        </div>
-                                    </div>
-									
-									<div class="col-6 col-md-3">
-			                            <div class="input-group">
-			                                <div class="input-group-prepend">
-			                                    <span class="input-group-text fit_box_t7" data-labelCd="용도">용도</span>
-			                                </div>
-			                                <input class="form-control2" id="Usage" name="Usage" disabled>
-			                            </div>
-			                        </div>
-                        
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="*설비코드">*설비코드</span>
-                                            </div>
-                                            <input  class="form-control2" id="Code" name="Code" required disabled>
-                                        </div>
-                                    </div>
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="*설비명">*설비명</span>
-                                            </div>
-                                            <input class="form-control2" id="Name" name="Name" required disabled/>
-                                        </div>
-                                    </div>
+            <div class="container-fluid">
+                <p id="selectedItem"></p>
+                <div id="theGrid" style="height: 520px; max-height: 520px;"></div>
+            </div>
+        </section>
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7"data-labelCd="관리번호">관리번호</span>
-                                            </div>
-                                            <input class="form-control2" type="text" id="ManageNumber" name="ManageNumber" disabled/>
-                                        </div>
-                                    </div>
+        <div class="tab-wrap">
+            <ul class="tab-links">
+                <li><a href="#tab_basic">설비정보</a></li>
+                <li><a href="#tab_photo">사진</a></li>
+            </ul>
+            <div>
+                <section class="tab-item" id="tab_basic" style="border-top-left-radius: 0;">
+                    <div class="section-top">
+                       <!-- <div class="button-wrap">
+                            <ul>
+                                <li>
+                                    <a class="btn btn-edit" title="작업 지시 상세" id="btnJobResDetail">
+                                        <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
+                                        작업 지시 상세
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>-->
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="*워크센터">*워크센터</span>
+                        <div class="table_box">
+                            <form id="equipmentForm">
+                                <input class="form-control2 readonly" type="hidden" id="id" name="id" readonly/>
+                                <div class="table_box sub" >
+                                    <div class="row" >
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="설비그룹">설비그룹</span>
+                                                </div>
+                                                <select class="form-control2" id="EquipmentGroup_id" name="EquipmentGroup_id" disabled></select>
                                             </div>
-                                            <select class="form-control2" id="WorkCenter_id" name="WorkCenter_id" disabled></select>
                                         </div>
-                                    </div>
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="모델명">모델명</span>
+                                        <div class="col-6 col-md-3">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="용도">용도</span>
+                                                </div>
+                                                <input class="form-control2" id="Usage" name="Usage" disabled>
                                             </div>
-                                            <input class="form-control2" type="text" id="Model" name="Model" disabled/>
                                         </div>
-                                    </div>
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="제조사">제조사</span>
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="*설비코드">*설비코드</span>
+                                                </div>
+                                                <input  class="form-control2" id="Code" name="Code" required disabled>
                                             </div>
-                                            <input class="form-control2" type="text" id="Maker" name="Maker" disabled>
                                         </div>
-                                    </div>
-									
-									<div class="col-6 col-md-3">
-			                            <div class="input-group">
-			                                <div class="input-group-prepend">
-			                                    <span class="input-group-text fit_box_t7" data-labelCd="사용전압">사용전압</span>
-			                                </div>
-			                                <input class="form-control2" type="text" id="Voltage" name="Voltage" disabled>
-			                            </div>
-			                        </div>
-			
-			                        <div class="col-6 col-md-3">
-			                            <div class="input-group">
-			                                <div class="input-group-prepend">
-			                                    <span class="input-group-text fit_box_t7" data-labelCd="용량(Watt)">용량(Watt)</span>
-			                                </div>
-			                                <input class="form-control2" type="number" id="PowerWatt" name="PowerWatt" disabled>
-			                            </div>
-		                        	</div>
-                        
-			                        <div class="col-6 col-md-3">
-			                            <div class="input-group">
-			                                <div class="input-group-prepend">
-			                                    <span class="input-group-text fit_box_t7" data-labelCd="입고일">입고일</span>
-			                                </div>
-			                                <input class="form-control2" type="text" id="InputDate" name="InputDate" disabled>
-			                                <span class="input-group-text fs-xl "><i class="fas fa-calendar-alt calendar_color"></i></span>
-			                            </div>
-			                        </div>
-                        
-                                    <div class="col-6 col-md-3">
-			                            <div class="input-group">
-			                                <div class="input-group-prepend">
-			                                    <span class="input-group-text fit_box_t7" data-labelCd="사용부서">사용부서</span>
-			                                </div>
-			                                <select class="form-control2" id="Depart_id" name="Depart_id" disabled></select>
-			                            </div>
-			                        </div>
-                        
-                                    <div class="col-6 col-md-3">
-			                            <div class="input-group">
-			                                <div class="input-group-prepend">
-			                                    <span class="input-group-text fit_box_t7" data-labelCd="AS전화번호">AS전화번호</span>
-			                                </div>
-			                                <input class="form-control2" type="text" id="ASTelNumber" name="ASTelNumber" disabled>
-			                            </div>
-			                        </div>
-                        
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="시리얼번호">시리얼번호</span>
-                                            </div>
-                                            <input class="form-control2" type="text" id="SerialNumber" name="SerialNumber" disabled>
-                                        </div>
-                                    </div>
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="제작년도">제작년도</span>
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="*설비명">*설비명</span>
+                                                </div>
+                                                <input class="form-control2" id="Name" name="Name" required disabled/>
                                             </div>
-                                            <input class="form-control2" type="number" id="ProductionYear" name="ProductionYear" min="1990" max="2030" disabled>
                                         </div>
-                                    </div>
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="구매일">구매일</span>
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7"data-labelCd="관리번호">관리번호</span>
+                                                </div>
+                                                <input class="form-control2" type="text" id="ManageNumber" name="ManageNumber" disabled/>
                                             </div>
-                                            <input class="form-control2 tac" type="text" id="PurchaseDate" name="PurchaseDate"  disabled>  
-                                            <span class="input-group-text fs-xl "><i class="fas fa-calendar-alt calendar_color" ></i></span>
                                         </div>
-                                    </div>
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="설치일">설치일</span>
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="*워크센터">*워크센터</span>
+                                                </div>
+                                                <select class="form-control2" id="WorkCenter_id" name="WorkCenter_id" disabled></select>
                                             </div>
-                                            <input class="form-control2 tac" type="text" id="InstallDate" name="InstallDate" disabled>
-                                            <span class="input-group-text fs-xl "><i class="fas fa-calendar-alt calendar_color" ></i></span>
                                         </div>
-                                    </div>
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="공급업체">공급업체</span>
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="모델명">모델명</span>
+                                                </div>
+                                                <input class="form-control2" type="text" id="Model" name="Model" disabled/>
                                             </div>
-                                            <input class="form-control2" type="text" id="SupplierName" name="SupplierName" disabled>
                                         </div>
-                                    </div>
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="구매금액(원)">구매금액(원)</span>
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="제조사">제조사</span>
+                                                </div>
+                                                <input class="form-control2" type="text" id="Maker" name="Maker" disabled>
                                             </div>
-                                            <input class="form-control2" type="number" id="PurchaseCost" name="PurchaseCost" min="0" disabled>
                                         </div>
-                                    </div>
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="가동률표시여부">가동률표시여부</span>
+                                        <div class="col-6 col-md-3">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="사용전압">사용전압</span>
+                                                </div>
+                                                <input class="form-control2" type="text" id="Voltage" name="Voltage" disabled>
                                             </div>
-                                            <select class="form-control2" id="OperationRateYN" name="OperationRateYN"  disabled>
-                                                <option value="Y">Y</option>
-                                                <option value="N">N</option>
-                                            </select>
                                         </div>
-                                    </div>
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="폐기일">폐기일</span>
+                                        <div class="col-6 col-md-3">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="용량(Watt)">용량(Watt)</span>
+                                                </div>
+                                                <input class="form-control2" type="number" id="PowerWatt" name="PowerWatt" disabled>
                                             </div>
-                                            <input class="form-control2 tac" type="text" id="DisposalDate" name="DisposalDate" disabled>
-                                            <span class="input-group-text fs-xl "><i class="fas fa-calendar-alt calendar_color" ></i></span>
                                         </div>
-                                    </div>
 
-                                    <div class="col-6 col-md-3" >
-                                        <div class="input-group" >
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7" data-labelCd="관리책임자">관리책임자</span>
+                                        <div class="col-6 col-md-3">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="입고일">입고일</span>
+                                                </div>
+                                                <input class="form-control2" type="text" id="InputDate" name="InputDate" disabled>
+                                                <span class="input-group-text fs-xl "><i class="fas fa-calendar-alt calendar_color"></i></span>
                                             </div>
-                                            <input class="form-control2" type="text" id="Manager" name="Manager" disabled>
                                         </div>
-                                    </div>
-                        
-                                    <div class="col-12">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t7_area" data-labelCd="설명">설명</span>
+
+                                        <div class="col-6 col-md-3">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="사용부서">사용부서</span>
+                                                </div>
+                                                <select class="form-control2" id="Depart_id" name="Depart_id" disabled></select>
                                             </div>
-                                            <textarea class="form-control2" id="Description" name="Description" disabled></textarea>
                                         </div>
+
+                                        <div class="col-6 col-md-3">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="AS전화번호">AS전화번호</span>
+                                                </div>
+                                                <input class="form-control2" type="text" id="ASTelNumber" name="ASTelNumber" disabled>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="시리얼번호">시리얼번호</span>
+                                                </div>
+                                                <input class="form-control2" type="text" id="SerialNumber" name="SerialNumber" disabled>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="제작년도">제작년도</span>
+                                                </div>
+                                                <input class="form-control2" type="number" id="ProductionYear" name="ProductionYear" min="1990" max="2030" disabled>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="구매일">구매일</span>
+                                                </div>
+                                                <input class="form-control2 tac" type="text" id="PurchaseDate" name="PurchaseDate"  disabled>
+                                                <span class="input-group-text fs-xl "><i class="fas fa-calendar-alt calendar_color" ></i></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="설치일">설치일</span>
+                                                </div>
+                                                <input class="form-control2 tac" type="text" id="InstallDate" name="InstallDate" disabled>
+                                                <span class="input-group-text fs-xl "><i class="fas fa-calendar-alt calendar_color" ></i></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="공급업체">공급업체</span>
+                                                </div>
+                                                <input class="form-control2" type="text" id="SupplierName" name="SupplierName" disabled>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="구매금액(원)">구매금액(원)</span>
+                                                </div>
+                                                <input class="form-control2" type="number" id="PurchaseCost" name="PurchaseCost" min="0" disabled>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="가동률표시여부">가동률표시여부</span>
+                                                </div>
+                                                <select class="form-control2" id="OperationRateYN" name="OperationRateYN"  disabled>
+                                                    <option value="Y">Y</option>
+                                                    <option value="N">N</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="폐기일">폐기일</span>
+                                                </div>
+                                                <input class="form-control2 tac" type="text" id="DisposalDate" name="DisposalDate" disabled>
+                                                <span class="input-group-text fs-xl "><i class="fas fa-calendar-alt calendar_color" ></i></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-md-3" >
+                                            <div class="input-group" >
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7" data-labelCd="관리책임자">관리책임자</span>
+                                                </div>
+                                                <input class="form-control2" type="text" id="Manager" name="Manager" disabled>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t7_area" data-labelCd="설명">설명</span>
+                                                </div>
+                                                <textarea class="form-control2" id="Description" name="Description" disabled></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t11_area" data-labelCd="점검 및 사용상 주의점">점검 및 사용상 주의점</span>
+                                                </div>
+                                                <textarea class="form-control2" id="AttentionRemark" name="AttentionRemark" disabled></textarea>
+                                            </div>
+                                        </div>
+
                                     </div>
-                                    
-	                                <div class="col-12">
-			                            <div class="input-group">
-			                                <div class="input-group-prepend">
-			                                    <span class="input-group-text fit_box_t11_area" data-labelCd="점검 및 사용상 주의점">점검 및 사용상 주의점</span>
-			                                </div>
-			                                <textarea class="form-control2" id="AttentionRemark" name="AttentionRemark" disabled></textarea>
-			                            </div>
-			                        </div>
-                        
                                 </div>
-                            </div>                               
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="tab" id="tab_photo">
-                <div class="tab_con_box">
-                    <div class="title_box">
-                        <span class="right_align rpt" data-labelCd="사진">사진</span>
-                        <!--
-                        <button disabled type="button" class="btn-default y_write_auth" id="btnPhotoSave"><i class="fas fa-save"></i></button>
-                        -->
-                    </div>
-                    <div class="table_box">
-                        <div class="grid_box col-lg-7">
-                            <div data-ax5uploader="fileuploadAx" class="fileuploaddiv" id="fileUploadDiv">
-                                <span class="fileuploadTitle"></span>
-                                <button class="new y_write_auth" data-ax5uploader-button="selector" id ="addFile" style="width: 100px;height:30px;" data-labelCd="파일선택">파일선택</button>
-                                <div data-uploaded-box="fileuploadAx" data-ax5uploader-uploaded-box="inline" id="fileUploadBox"></div>
-                                <input type="hidden" id="srchFileId" name="srchFileId" />
-                                <input type="hidden" id="DataPk" name="DataPk" />
-                            </div>
-                        </div>
-                        <div class="row" style="height:300px">
-                            <div class="col-2" >
-                                <div class="col-4" id="thumbnail"></div>
-                            </div>
-                            <div class="col-6" >
-                                <img id="image_expand" src="" height="300"/>
-                            </div>
+                            </form>
                         </div>
                     </div>
-                </div>
+                </section>
+
+                <section class="tab-item" id="tab_photo" style="border-top-left-radius: 0;">
+                    <div class="section-top">
+
+                        <div class="table_box">
+                            <div class="grid_box col-lg-7">
+                                <div data-ax5uploader="fileuploadAx" class="fileuploaddiv" id="fileUploadDiv">
+                                    <span class="fileuploadTitle"></span>
+                                    <button class="new y_write_auth" data-ax5uploader-button="selector" id ="addFile" style="width: 100px;height:30px;" data-labelCd="파일선택">파일선택</button>
+                                    <div data-uploaded-box="fileuploadAx" data-ax5uploader-uploaded-box="inline" id="fileUploadBox"></div>
+                                    <input type="hidden" id="srchFileId" name="srchFileId" />
+                                    <input type="hidden" id="DataPk" name="DataPk" />
+                                </div>
+                            </div>
+                            <div class="row" style="height:300px">
+                                <div class="col-2" >
+                                    <div class="col-4" id="thumbnail"></div>
+                                </div>
+                                <div class="col-6" >
+                                    <img id="image_expand" src="" height="300"/>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                </section>
             </div>
         </div>
-    </section>    
-</div>
-</script>
+    </div>
+
 
 </th:block>
 
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
-<script type="text/javascript" src="/js/fileupload.js?v=100000006"></script>
-<script type="text/javascript">
+    <th:block th:replace="/common/approve_box :: approve_box"></th:block>
+    <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
+    <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
+    <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
+    <script type="text/javascript">
+        /*'/api/definition/equipment*/
 
-    class EquipmentPage {
-        constructor() {
-            this.grid = null;
-            this.init();
-            this.url = '/api/definition/equipment';
+
+        var theGrid;
+        var viewdata;
+
+        let columns =[
+            { binding: 'id', header: '번호', width: 80, align: 'right', visible:false },
+            { binding: 'group_name', header: '설비그룹', width: 120, align: 'left' },
+            { binding: 'Usage', header: '용도', width: 120, align: 'left' },
+            { binding: 'Code', header: '설비코드', width: 150, align: 'left' },
+            { binding: 'Name', header: '설비명', width: 200, align: 'left' },
+            { binding: 'workcenter_name', header: '워크센터', width: 150, align: 'left' },
+            { binding: 'ManageNumber', header: '관리번호', width: 250, align: 'left' },
+            { binding: 'Model', header: '모델명', width: 150, align: 'left' },
+            { binding: 'Maker', header: '제조사', width: 150, align: 'left' },
+            { binding: 'Voltage', header: '사용전압', width: 150, align: 'left' },
+            { binding: 'PowerWatt', header: '용량', width: 150, align: 'left' },
+            { binding: 'InputDate', header: '입고일', width: 150, align: 'left' },
+            { binding: 'DepartName', header: '사용부서', width: 150, align: 'left' },
+            { binding: 'ASTelNumber', header: 'AS전화번호', width: 150, align: 'left' },
+            { binding: 'SerialNumber', header: '시리얼번호', width: 150, align: 'left' },
+            { binding: 'ProductionYear', header: '제작년도', width: 150, align: 'center' },
+            { binding: 'PurchaseDate', header: '구매일', width: 150, align: 'center' },
+            { binding: 'InstallDate', header: '설치일', width: 150, align: 'center' },
+            { binding: 'SupplierName', header: '공급업체', width: 150, align: 'left' },
+            { binding: 'PurchaseCost', header: '구매금액', width: 150, align: 'right' },
+            { binding: 'OperationRateYN', header: '가동률표시', width: 100, align: 'center' },
+            { binding: 'Manager', header: '관리책임자', width: 150, align: 'center' },
+            { binding: 'SupplierName', header: '공급업체', width: 150, align: 'left' },
+            { binding: 'DisposalDate', header: '폐기일', width: 150, align: 'left' },
+            { binding: 'Description', header: '설명', width: 150, align: 'left' },
+            { binding: 'AttentionRemark', header: '점검 및 사용상 주의점', width: 150, align: 'left' }
+        ]
+
+        document.readyState === 'complete' ? init() : window.onload = init;
+        function init() {
+            let data2 = [];
+
+            let group = $('#cboEquipmentGroup').val();
+            let workcenter = $('#cboWorkcenter').val();
+            let equipment = $('#txtEquipment').val();
+
+
+            $.ajax({
+                url: '/api/definition/equipment/read',
+                type: 'GET',
+                data: {
+                    'group': group,
+                    'workcenter': workcenter,
+                    'equipment': equipment,
+                },
+                async: false,
+                success: function (data) {
+                    data2 = data.data;
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Error fetching log_count data:', textStatus, errorThrown);
+                }
+            })
+
+            viewdata = new wijmo.collections.CollectionView(data2);
+
+            theGrid = new wijmo.grid.FlexGrid('#theGrid', {
+                autoGenerateColumns: false,
+                showMarquee: true,
+                columns: columns,
+                isReadOnly: true,
+                itemsSource: viewdata
+            });
+            theGrid.rowHeaders.columns.splice(0, 1);
         }
 
-        init() {
-            let _this = this;
-            let config = {
-                target: $('[data-ax5grid="equipment-grid"]'),
-                sortable: true,
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        //e.colIndex
-                        //e.dindex
-                        //c.value
-                        //e.column
-                        //e.item
-                        //e.list
-                        let eq_pk = e.item.id;
-
-                        _this.grid.select(this.dindex);
-                        _this.showDetail(e.item.id);
-
-                        if (_this.current_tab == 'tab_photo') {
-                            _this.showPhotoFiles(eq_pk)
-                            _this.showThumbnail(eq_pk);
-
-                            $('#image_expand').attr('src', '');
-
-                        }
-                    },
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    //{ key: 'id', label: '번호', width: 80, align: 'right' },
-                    { key: 'group_name', label: '설비그룹', width: 120, align: 'left' },
-                    { key: 'Usage', label: '용도', width: 120, align: 'left' },
-                    { key: 'Code', label: '설비코드', width: 150, align: 'left' },
-                    { key: 'Name', label: '설비명', width: 200, align: 'left' },
-                    { key: 'workcenter_name', label: '워크센터', width: 150, align: 'left' },
-                    { key: 'ManageNumber', label: '관리번호', width: 250, align: 'left' },
-                    { key: 'Model', label: '모델명', width: 150, align: 'left' },
-                    { key: 'Maker', label: '제조사', width: 150, align: 'left' },
-                    { key: 'Voltage', label: '사용전압', width: 150, align: 'left' },
-                    { key: 'PowerWatt', label: '용량', width: 150, align: 'left' },
-                    { key: 'InputDate', label: '입고일', width: 150, align: 'left' },
-                    { key: 'DepartName', label: '사용부서', width: 150, align: 'left' },
-                    { key: 'ASTelNumber', label: 'AS전화번호', width: 150, align: 'left' },
-                    { key: 'SerialNumber', label: '시리얼번호', width: 150, align: 'left' },
-                    { key: 'ProductionYear', label: '제작년도', width: 150, align: 'center' },
-                    { key: 'PurchaseDate', label: '구매일', width: 150, align: 'center' },
-                    { key: 'InstallDate', label: '설치일', width: 150, align: 'center' },
-                    { key: 'SupplierName', label: '공급업체', width: 150, align: 'left' },
-                    { key: 'PurchaseCost', label: '구매금액', width: 150, align: 'right', formatter:'money' },
-                    { key: 'OperationRateYN', label: '가동률표시', width: 100, align: 'center' },
-                    { key: 'Manager', label: '관리책임자', width: 150, align: 'center' },
-                    { key: 'SupplierName', label: '공급업체', width: 150, align: 'left' },
-                    { key: 'DisposalDate', label: '폐기일', width: 150, align: 'left' },
-                    { key: 'Description', label: '설명', width: 150, align: 'left' },
-                    { key: 'AttentionRemark', label: '점검 및 사용상 주의점', width: 150, align: 'left' },
-                ]
-            };
-
-            this.grid = new ax5.ui.grid(config);
-            this.grid_config = config;
-            
-            AjaxUtil.fillSelectOptions($('#cboEquipmentGroup'), 'equipment_group', 'all', false);
-            AjaxUtil.fillSelectOptions($('#cboWorkcenter'), 'workcenter', 'all', false);
-			AjaxUtil.fillSelectOptions($('#Depart_id'), 'depart', 'choose', false);
-            this.initForm();
-        }
-
-        initForm() {
-            AjaxUtil.fillSelectOptions($('#EquipmentGroup_id'), 'equipment_group', 'choose', false);
-            AjaxUtil.fillSelectOptions($('#WorkCenter_id'), 'workcenter', 'choose', false);
-            this.setUploader(); 
-        }
-
-        setButtonState() {
+        function setButtonState() {
             let pk = $('#equipmentForm').find('#id').val();
             $('#btnBasicNew').prop('disabled', false);
             $('#btnBasicSave').prop('disabled', false);
@@ -475,24 +461,7 @@
             }
         }
 
-
-        showDetail(idx) {
-			let _this = this;
-            let param = { 'id': idx };
-            let result = AjaxUtil.getSyncData(_this.url+"/detail", param);
-            if (result != null) {
-                FormUtil.BindDataForm(result.data, $('#equipmentForm'));
-
-                $('#description').text(result.data.description);
-            }
-
-            //page.setButtonDisable(false, false, false);
-            page.setButtonState();
-
-            this.uploader.mode = 'active';
-        }
-
-        searchMainData() {
+        function searchMainData() {
             let _this = this;
 
             let data = {
@@ -501,7 +470,7 @@
                 'equipment': $('#txtEquipment').val()
             };
             let result = AjaxUtil.getSyncData(_this.url+"/read", data);
-            
+
             if (result != null) {
                 let recordsTotal = result.data.length;
                 _this.grid.setData({
@@ -517,10 +486,10 @@
 
             //page.setButtonDisable(false, false, false);
             page.setButtonState();
-            this.uploader.mode = 'disable';		
+            this.uploader.mode = 'disable';
         }//searchMainData
 
-        saveData() {
+       function saveData() {
             let _this = this;
             //데이터입력체크루틴 누락
 
@@ -547,7 +516,7 @@
             }
 
             let data = FormUtil.extractForm($('#equipmentForm'));
-            
+
 
             let fnSuccess = function (res) {
                 if (res.success) {
@@ -558,10 +527,10 @@
                     return;
                 }
             };
-           AjaxUtil.postAsyncData(_this.url+"/save", data, fnSuccess);
+            AjaxUtil.postAsyncData(_this.url+"/save", data, fnSuccess);
         }
 
-        deleteData() {
+        function deleteData() {
             let _this = this;
             let id = $('#equipmentForm').find('#id').val()
             let data = { id: id };
@@ -595,7 +564,7 @@
             AjaxUtil.postAsyncData(_this.url+"/delete", data, fnsuccess);
         }
 
-        showPhotoFiles(eq_pk) {
+        function showPhotoFiles(eq_pk) {
             let _this = this;
 
             let child = document.getElementById("thumbnail");
@@ -605,7 +574,7 @@
 
             //$('#addFile').prop('disabled', false);
             $('#DataPk').val(eq_pk);
-            
+
             //$('#fileUploadBox').show();
 
             //파일조회
@@ -613,7 +582,7 @@
             YuFileUploader.getAttachFiles(attparam);
         }
 
-        showThumbnail(eq_pk) {
+        function showThumbnail(eq_pk) {
             let _this = this;
 
             let data = {
@@ -634,12 +603,12 @@
         }
 
         // 사진파일 저장
-        savePhotoFiles() {
+        function  savePhotoFiles() {
             let param = {
                 'eq_id': $('#equipmentForm').find('#id').val(),
                 'file_id': $("#srchFileId").val(),
             };
-                       
+
             let fnSuccess = function (res) {
                 if (!res.success) {
                     Alert.alert('', res.message);
@@ -652,17 +621,17 @@
             AjaxUtil.postAsyncData(_this.url+"/save_photo", param, fnSuccess);
         }
 
-        //파일 업로더    
-        setUploader() {
+        //파일 업로더
+        function setUploader() {
             let _this = this;
             //$('#addFile').prop('disabled', false);
-                        
+
             let accept_files = 'jpg,jpeg,gif,png,xlsx,xls';
             let accept = '.' + accept_files.split(',').join(',.');
 
             if (_this.uploader)
                 return;
-           
+
             _this.uploader = $('#fileUploadDiv').yuFileUploader(
                 {
                     fileIdsCtl: '#srchFileId',
@@ -676,13 +645,13 @@
                         'delete': '<i class="fa fa-minus-circle" aria-hidden="true"></i>'
                     },
                     emptymsg: '파일을 Drag&amp;Drop하거나 클릭하여 업로드를 진행하세요' + '(업로드 후 저장버튼을 클릭하세요.)',
-                    
+
                     multiple: true,  // 멑티업로드 허용여부
                     maxcnt: 5, // 업로드 최대갯수
                     accept: accept, // 허용 확장자 image/* .gif,.jpg,.png
                     accepts: accept_files,    // 드래그로 업로드할 때 체크할 용도
                     fileSize: 50,   // Mega, 업로드 파일사이즈제한
-                    tableName: 'equ', 
+                    tableName: 'equ',
                     attachName: 'photo',
                     thumbnailYN: 'Y'
                 }
@@ -690,119 +659,89 @@
             _this.uploader.can_write = userinfo.can_write();
             _this.uploader.mode = 'disable';
         }
-        
-    }
-    
-    
 
-    expand = function(id) {
-        let url = '/api/files/image?id=' + id;
-        $('#image_expand').attr('src', url);
-    }
 
-    let page = null;
+        expand = function(id) {
+            let url = '/api/files/image?id=' + id;
+            $('#image_expand').attr('src', url);
+        }
 
-    $(document).ready(function (e) {
-        page = new EquipmentPage();
-        
-        $('#PurchaseDate').ax5DatePicker({ direction: 'bottom' });
-        $('#InstallDate').ax5DatePicker({ direction: 'bottom' });
-        $('#DisposalDate').ax5DatePicker({ direction: 'bottom' });
-		$('#InputDate').ax5DatePicker({ direction: 'bottom' });
-		
-        $('#btnSearch').click(function (ex) {
-            page.searchMainData();
-        });
+        $(document.body).ready(function (e) {
+            AjaxUtil.fillSelectOptions($('#cboEquipmentGroup'), 'equipment_group', 'all', false);
+            AjaxUtil.fillSelectOptions($('#cboWorkcenter'), 'workcenter', 'all', false);
+            AjaxUtil.fillSelectOptions($('#Depart_id'), 'depart', 'choose', false);
+            AjaxUtil.fillSelectOptions($('#EquipmentGroup_id'), 'equipment_group', 'choose', false);
+            AjaxUtil.fillSelectOptions($('#WorkCenter_id'), 'workcenter', 'choose', false);
+            /*setUploader();*/
 
-        $('.tab_links .tab').click(function (e) {
-            let target = e.currentTarget.name;
-            page.current_tab = target;
-            let eq_pk = $('#equipmentForm').find('#id').val();
 
-            if (target == 'tab_photo') {
-                $('#tab_photo').removeClass("hidden");
-                
-                if (eq_pk) {
-                    page.showPhotoFiles(eq_pk);
-                }
-            }
-        });
+            $('.tab_links .tab').click(function (e) {
+                let target = e.currentTarget.name;
+                page.current_tab = target;
+                let eq_pk = $('#equipmentForm').find('#id').val();
 
-        $('#btnBasicNew').click(function (e) {
+                if (target == 'tab_photo') {
+                    $('#tab_photo').removeClass("hidden");
 
-            $('#equipmentForm')[0].reset();
-
-            $('#equipmentForm').find('#id').val('');
-            $('#equipmentForm #Code').attr('readonly', false);
-            $('#equipmentForm input').each(function () {
-                if ($(this).is(':disabled')) {
-                    $(this).removeAttr('disabled');
+                    if (eq_pk) {
+                        page.showPhotoFiles(eq_pk);
+                    }
                 }
             });
-            $('#equipmentForm select').each(function () {
-                if ($(this).is(':disabled')) {
-                    $(this).removeAttr('disabled');
-                }
+
+            $('#btnBasicNew').click(function (e) {
+
+                $('#equipmentForm')[0].reset();
+
+                $('#equipmentForm').find('#id').val('');
+                $('#equipmentForm #Code').attr('readonly', false);
+                $('#equipmentForm input').each(function () {
+                    if ($(this).is(':disabled')) {
+                        $(this).removeAttr('disabled');
+                    }
+                });
+                $('#equipmentForm select').each(function () {
+                    if ($(this).is(':disabled')) {
+                        $(this).removeAttr('disabled');
+                    }
+                });
+                $('#equipmentForm textarea').each(function () {
+                    let $obj = $(this);
+                    if ($obj.is(':disabled')) {
+                        $obj.removeAttr('disabled');
+                    }
+                    $obj.text('');
+                });
+                //page.setButtonDisable(true, false, true);
+                page.setButtonState();
+
             });
-            $('#equipmentForm textarea').each(function () {
-                let $obj = $(this);
-                if ($obj.is(':disabled')) {
-                    $obj.removeAttr('disabled');
-                }
-                $obj.text('');
+
+            $('#btnBasicSave').click(function (e) {
+                Alert.confirm('',
+                    '저장하시겠습니까?',
+                    function () { page.saveData() },
+                    function () { }
+                );
             });
-            //page.setButtonDisable(true, false, true);
-            page.setButtonState();
 
+            $('#btnBasicDel').click(function (e) {
+                Alert.confirm('',
+                    '삭제하시겠습니까?',
+                    function () { page.deleteData() },
+                    function () { }
+                );
+            });
+
+            // 사진파일 저장버튼
+            $('#btnPhotoSave').click(function (e) {
+                Alert.confirm('',
+                    '사진을 저장하시겠습니까?',
+                    function () { page.savePhotoFiles() },
+                    function () { }
+                );
+            });
         });
-
-        $('#btnBasicSave').click(function (e) {
-            Alert.confirm('', 
-                '저장하시겠습니까?',
-                function () { page.saveData() },
-                function () { }
-            );
-        });
-
-        $('#btnBasicDel').click(function (e) {
-            Alert.confirm('', 
-                '삭제하시겠습니까?',
-                function () { page.deleteData() },
-                function () { }
-            );
-        });
-
-        // 사진파일 저장버튼
-        $('#btnPhotoSave').click(function (e) {
-            Alert.confirm('',
-                '사진을 저장하시겠습니까?',
-                function () { page.savePhotoFiles() },
-                function () { }
-            );
-        });
-
-        // 엑셀 다운로드
-        $('#btnExcel').click(function (e) {
-            page.grid.exportExcel('설비정보.xls');
-        });
-
-		//그리드 컬럼 설정
-        page.popColSetting = new popColSetting();
-        let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-		
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });	
-
-        page.searchMainData();
-
-    });
-</script>
+    </script>
 </th:block>
 </html>
