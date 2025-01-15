@@ -13,9 +13,9 @@
         <div class="page-title-wrap">
             <div class="left">
                 <h2>메뉴 권한</h2>
-                <!--                <a title="북마크" class="bookmark toggle">-->
-                <!--                    내메뉴-->
-                <!--                </a>-->
+                <a title="북마크" class="bookmark toggle">
+                    내메뉴
+                </a>
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
@@ -23,77 +23,66 @@
                 <li>메뉴권한</li>
             </ul>
         </div>
-        <div class="tab-wrap">
-            <ul class="tab-links">
+        <section class="section">
+            <div class="section-top">
+                <form id="searchForm" autocomplete="off">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label for="cboUserGroup2">
+                                    사용자그룹<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboUserGroup2" name="cboUserGroup"></select>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label for="cboMenuFolder">
+                                    메뉴폴더<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboMenuFolder" name="cboMenuFolder"></select>
+                            </dd>
+                        </dl>
 
-                <li>
-                    <a href="#tab1" title="메뉴권한">메뉴권한</a>
-                </li>
-            </ul>
-            <div class="tab-contents">
-                <section class="tab-item" id="tab1">
-                    <div class="section-top">
-                        <form id="searchForm" autocomplete="off">
-                            <div class="search-wrap">
-                                <dl>
-                                    <dt>
-                                        <label for="cboUserGroup2">
-                                            사용자그룹<span class="eq"></span>
-                                        </label>
-                                    </dt>
-                                    <dd>
-                                        <select class="form-control2" id="cboUserGroup2" name="cboUserGroup"></select>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label for="cboMenuFolder">
-                                            메뉴폴더<span class="eq"></span>
-                                        </label>
-                                    </dt>
-                                    <dd>
-                                        <select class="form-control2" id="cboMenuFolder" name="cboMenuFolder"></select>
-                                    </dd>
-                                </dl>
-
-                                </br>
-                                <dl>
-                                    <dd>
-                                        <div class="srch-box" style="margin-top: 20px">
-                                            읽기<input type="checkbox" id="AllcheckRead">
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dd>
-                                        <div class="srch-box" style="margin-top: 20px;">
-                                            쓰기<input type="checkbox" id="AllcheckWrite" >
-                                        </div>
-                                    </dd>
-                                </dl>
-                            </div>
-                        </form>
-                        <div class="button-wrap">
-                            <ul>
-                                <li>
-                                    <a class="btn btn-edit" id="btnSave2" title="저장">
-                                        <img src="/images/icon/ico-save.svg" alt="엑셀 아이콘">
-                                        저장
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                        </br>
+                        <dl>
+                            <dd>
+                                <div class="srch-box" style="margin-top: 20px">
+                                    읽기<input type="checkbox" id="AllcheckRead">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dd>
+                                <div class="srch-box" style="margin-top: 20px;">
+                                    쓰기<input type="checkbox" id="AllcheckWrite">
+                                </div>
+                            </dd>
+                        </dl>
                     </div>
+                </form>
+                <div class="button-wrap">
+                    <ul>
+                        <li>
+                            <a class="btn btn-edit" id="btnSave2" title="저장">
+                                <img src="/images/icon/ico-save.svg" alt="엑셀 아이콘">
+                                저장
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
 
-                    <div class="container-fluid">
-                        <p id="selectedItem"></p>
-                        <div id="theGrid" style="max-height: 690px;"></div>
-                    </div>
-                    <div class="btn-wrap"></div>
-                </section>
-
-            </div> <!--//tab-contens end-->
-        </div> <!--//tab-wrap end-->
+            <div class="container-fluid">
+                <p id="selectedItem"></p>
+                <div id="theGrid" style="max-height: 690px;"></div>
+            </div>
+            <div class="btn-wrap"></div>
+        </section>
     </div> <!--//layout-contents end -->
 
     <footer style="margin-top: 24px;">
@@ -104,8 +93,8 @@
 </th:block>
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/approve_box :: approve_box"></th:block>
-    <th:block th:replace="/common/ax5_uploader :: ax5_uploader" ></th:block>
-    <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box" ></th:block>
+    <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
+    <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
     <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
 
     <script type="text/javascript">
@@ -119,13 +108,13 @@
         document.readyState === 'complete' ? init() : window.onload = init;
 
         let columns = [
-            { binding: 'id', header: 'id', width: '*', align: 'center', visible: false },
-            { binding: 'code', header: '코드', width: '*', align: 'center' },
-            { binding: 'name', header: '그룹명', width: '*', align: 'center' },
-            { binding: 'description', header: '설명', width: '*', align: 'center' },
-            { binding: 'gmenu', header: 'Dashboard', width: '*', align: 'center', visible: false },
-            { binding: 'gmenuname', header: 'Dashboard', width: '*', align: 'center' },
-            { binding: 'flag', header: 'flag', width: '*', align: 'center', visible: false },
+            {binding: 'id', header: 'id', width: '*', align: 'center', visible: false},
+            {binding: 'code', header: '코드', width: '*', align: 'center'},
+            {binding: 'name', header: '그룹명', width: '*', align: 'center'},
+            {binding: 'description', header: '설명', width: '*', align: 'center'},
+            {binding: 'gmenu', header: 'Dashboard', width: '*', align: 'center', visible: false},
+            {binding: 'gmenuname', header: 'Dashboard', width: '*', align: 'center'},
+            {binding: 'flag', header: 'flag', width: '*', align: 'center', visible: false},
         ]
 
         function init() {
@@ -243,10 +232,10 @@
                 success: function (data) {
                     /* console.log("서버 응답 데이터:", data); //서버에서 반환된 데이터 로그 출력*/
 
-                    if(data && data.success&& Array.isArray(data.data) && data.data.length > 0){
+                    if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
                         let filteredData = filterDataByFolder(data.data, data.folder_id);
                         grid_binding2(filteredData);    // 서버에서 반환된 데이터
-                    } else{
+                    } else {
                         console.warn('서버에서 반환된 데이터가 없습니다.');
                         console.log("응답 데이터 형식 확인:", data);
 
@@ -287,10 +276,24 @@
             theGrid.autoGenerateColumns = false;
 
             var columns = [
-                { binding: 'name', header: '코드명', width: 250, align: 'left' },
-                { binding: 'r', header: '읽기', width: 200, align: 'center', dataType: wijmo.DataType.Boolean, isReadOnly: false },
-                { binding: 'w', header: '쓰기', width: 200, align: 'center', dataType: wijmo.DataType.Boolean, isReadOnly: false },
-                { binding: '', header: '', width: "*", align: 'center' },
+                {binding: 'name', header: '코드명', width: 250, align: 'left'},
+                {
+                    binding: 'r',
+                    header: '읽기',
+                    width: 200,
+                    align: 'center',
+                    dataType: wijmo.DataType.Boolean,
+                    isReadOnly: false
+                },
+                {
+                    binding: 'w',
+                    header: '쓰기',
+                    width: 200,
+                    align: 'center',
+                    dataType: wijmo.DataType.Boolean,
+                    isReadOnly: false
+                },
+                {binding: '', header: '', width: "*", align: 'center'},
             ];
 
             columns.forEach(colDef => {
@@ -320,7 +323,7 @@
             let folder_id = $('#cboMenuFolder').val();
 
             let url = '/api/system/usergroupmenu/save';
-            let data = { group_id: group_id, Q: '' };
+            let data = {group_id: group_id, Q: ''};
             let items = [];
 
             // itemsSource의 sourceCollection을 사용하여 데이터 순회

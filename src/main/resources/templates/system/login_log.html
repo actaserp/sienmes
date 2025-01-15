@@ -25,94 +25,85 @@
                 <li>로그인로그</li>
             </ul>
         </div>
-        <div class="tab-wrap">
-            <ul class="tab-links">
-                <li>
-                    <a href="#tab1" title="로그인로그">로그인로그</a>
-                </li>
-            </ul>
-            <div class="tab-contents">
-                <section class="tab-item" id="tab1" style="height: 820px;">
-                    <div class="section-top">
-                        <form id="searchForm3" autocomplete="off">
-                            <div class="search-wrap">
-                                <dl>
-                                    <dt>
-                                        발생일
-                                    </dt>
-                                    <dd>
-                                        <ul class="date-box">
-                                            <li>
-                                                <input class="tac w150 date_from" type="date" id="srchStartDt"
-                                                       name="srchStartDt" />
-                                                <label for="srchStartDt" class="hide">시작일</label>
-                                            </li>
-                                            <li>
-                                                <input class="tac w150 date_to" type="date" id="srchEndDt"
-                                                       name="srchEndDt"/>
-                                                <label for="srchEndDt" class="hide">종료일</label>
-                                            </li>
-                                        </ul>
-                                    </dd>
-                                </dl>
 
-                                <dl>
-                                    <dt>
-                                        <label for="type">
-                                            구분
-                                        </label>
-                                    </dt>
-                                    <dd>
-                                        <div class="srch-box" >
-                                            <select id="type" name="type" style="border-radius: 5px 5px 5px 5px; width: 150px;">
-                                                <option value="">전체</option>
-                                                <option value="login">login</option>
-                                                <option value="logout">logout</option>
-                                            </select>
-                                        </div>
-                                    </dd>
-                                </dl>
+        <section class="section">
+            <div class="section-top">
+                <form id="searchForm3" autocomplete="off">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                발생일
+                            </dt>
+                            <dd>
+                                <ul class="date-box">
+                                    <li>
+                                        <input class="tac w150 date_from" type="date" id="srchStartDt"
+                                               name="srchStartDt"/>
+                                        <label for="srchStartDt" class="hide">시작일</label>
+                                    </li>
+                                    <li>
+                                        <input class="tac w150 date_to" type="date" id="srchEndDt"
+                                               name="srchEndDt"/>
+                                        <label for="srchEndDt" class="hide">종료일</label>
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
 
-                                <dl>
-                                    <dt>
-                                        <label for="keyword">
-                                            이름
-                                        </label>
-                                    </dt>
-                                    <dd>
-                                        <div class="srch-box">
-                                            <input class="form-control2" id="keyword" name="keyword"/>
-                                        </div>
-                                    </dd>
-                                </dl>
+                        <dl>
+                            <dt>
+                                <label for="type">
+                                    구분
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <select id="type" name="type" style="border-radius: 5px 5px 5px 5px; width: 150px;">
+                                        <option value="">전체</option>
+                                        <option value="login">login</option>
+                                        <option value="logout">logout</option>
+                                    </select>
+                                </div>
+                            </dd>
+                        </dl>
 
-                                <dl>
-                                    <dt><span class="eq"></span></dt>
-                                    <dd>
-                                        <li>
-                                            <a class="btn btn-delete" title="검색" id="btnSearch">
-                                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                                검색
-                                            </a>
-                                        </li>
-                                    </dd>
-                                </dl>
+                        <dl>
+                            <dt>
+                                <label for="keyword">
+                                    이름
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input class="form-control2" id="keyword" name="keyword"/>
+                                </div>
+                            </dd>
+                        </dl>
 
-                            </div>
-                        </form>
+                        <dl>
+                            <dt><span class="eq"></span></dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
 
-                    </div> <!--//section-top end -->
-                    <div class="container-fluid">
-                        <p id="selectedItem"></p>
-                        <div id="theGrid" style="height: 700px; max-height: 700px;"></div>
                     </div>
+                </form>
 
-                    <div class="btn-wrap">
-                    </div>
-                </section>
+            </div> <!--//section-top end -->
+            <div class="container-fluid">
+                <p id="selectedItem"></p>
+                <div id="theGrid" style="height: 700px; max-height: 700px;"></div>
+            </div>
 
-            </div> <!--//tab-contens end-->
-        </div> <!--//tab-wrap end-->
+            <div class="btn-wrap">
+            </div>
+        </section>
     </div> <!--//layout-contents end -->
 
     <footer style="margin-top: 24px;">
@@ -227,9 +218,9 @@
             });
         }
 
-        function grid_binding(data){
+        function grid_binding(data) {
 
-            let formattedData = data.map(item=>({
+            let formattedData = data.map(item => ({
                 row_number: item.row_number,
                 type: item.type,
                 addr: item.addr.value,

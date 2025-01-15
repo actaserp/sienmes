@@ -1,6 +1,7 @@
 package mes.app.account;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -96,26 +98,44 @@ public class AccountController {
     	result.data = data;
     	
         UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(username, password);
-        CustomAuthenticationToken auth = (CustomAuthenticationToken)authManager.authenticate(authReq);
-        
-        if(auth!=null) {
-        	User user = (User)auth.getPrincipal();
-        	user.getActive();        	
-        	data.put("code", "OK");        	
-        	
-        } else {
-        	result.success=false;
-        	data.put("code", "NOID");
-        }
-        
-        SecurityContext sc = SecurityContextHolder.getContext();
-        sc.setAuthentication(auth);
-        
-        HttpSession session = request.getSession(true);
-        session.setAttribute("SPRING_SECURITY_CONTEXT", sc);
-        
-        return result;
-    }	
+		CustomAuthenticationToken auth = null;
+
+		try{
+			auth = (CustomAuthenticationToken)authManager.authenticate(authReq);
+		}catch (AuthenticationException e){
+			//e.printStackTrace();
+			data.put("code", "NOUSER");
+			return result;
+		}
+
+
+		if(auth!=null) {
+			User user = (User)auth.getPrincipal();
+			if (!user.getActive()) {  // user.getActive()가 false인 경우
+				data.put("code", "noactive");
+			} else {
+				data.put("code", "OK");
+
+				try {
+					this.accountService.saveLoginLog("login", auth);
+				} catch (UnknownHostException e) {
+					// Handle the exception (e.g., log it)
+					e.printStackTrace();
+				}
+			}
+		} else {
+			result.success=false;
+			data.put("code", "NOID");
+		}
+
+		SecurityContext sc = SecurityContextHolder.getContext();
+		sc.setAuthentication(auth);
+
+		HttpSession session = request.getSession(true);
+		session.setAttribute("SPRING_SECURITY_CONTEXT", sc);
+
+		return result;
+	}
     
     @GetMapping("/account/myinfo")
     public AjaxResult getUserInfo(Authentication auth){
