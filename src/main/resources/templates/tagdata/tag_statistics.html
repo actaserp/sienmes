@@ -1,71 +1,71 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section class="section">
+    <div class="content_wrap">
+        <section class="section">
 
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="데이터통계">데이터통계</h3>
+            <div class="title_box ">
+                <div class="left_align">
+                    <h3 data-labelCd="데이터통계">데이터통계</h3>
+                </div>
+                <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
+                <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
-        </div>
 
-        <div class="table_box search">
-            <form id="searchForm" autocomplete="off">
-            <div class="row">
+            <div class="table_box search">
+                <form id="searchForm" autocomplete="off">
+                    <div class="row">
 
-                <div class="col-12 col-lg-5 col-xl-4" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_sm" data-labelCd="기간">기간</span>
-                        </div> 
-                        <div data-ax5picker="multi" id="srchDt">
-                            <div class="input-group-append">
-                            <input class="tac " type="text" id="srchStartDt" name="srchStartDt" />
-                                <span class="input-group-text fs-xl">
+                        <div class="col-12 col-lg-5 col-xl-4" >
+                            <div class="input-group" >
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text fit_box_sm" data-labelCd="기간">기간</span>
+                                </div>
+                                <div data-ax5picker="multi" id="srchDt">
+                                    <div class="input-group-append">
+                                        <input class="tac " type="text" id="srchStartDt" name="srchStartDt" />
+                                        <span class="input-group-text fs-xl">
                                     <i class="fas fa-calendar-alt calendar_color" ></i>
                                 </span>
-                            <span class="slow_sign">~</span>
-                            <input class="tac " type="text" id="srchEndDt" name="srchEndDt" />
-                                <span class="input-group-text fs-xl">
+                                        <span class="slow_sign">~</span>
+                                        <input class="tac " type="text" id="srchEndDt" name="srchEndDt" />
+                                        <span class="input-group-text fs-xl">
                                     <i class="fas fa-calendar-alt calendar_color"></i>
                                 </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="col-5 col-md-3 col-lg-2" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_md" data-labelCd="태그 그룹">태그 그룹</span>
+                        <div class="col-5 col-md-3 col-lg-2" >
+                            <div class="input-group" >
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text fit_box_md" data-labelCd="태그 그룹">태그 그룹</span>
+                                </div>
+                                <select class="form-control2" id="tagGroup" name="tagGroup">
+                                </select>
+
+                            </div>
                         </div>
-                        <select class="form-control2" id="tagGroup" name="tagGroup">
-                        </select>
 
-                    </div>
-                </div>
+                        <div class="col-6 col-md-3 col-lg-2" >
+                            <div class="input-group" >
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text fit_box_md" data-labelCd="태그">태그</span>
+                                </div>
+                                <select class="form-control2" id="tag" name="tag"></select>
 
-                <div class="col-6 col-md-3 col-lg-2" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_md" data-labelCd="태그">태그</span>
+                            </div>
                         </div>
-                        <select class="form-control2" id="tag" name="tag"></select>
+
+                        <div class="col-1" >
+                            <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
+                        </div>
 
                     </div>
-                </div>
-
-                <div class="col-1" >
-                        <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                </div> 
-
+                </form>
             </div>
-            </form>
-        </div>
-    </section>
-    <section >
+        </section>
+        <section >
 
             <div class="grid_box">
                 <div class="title_box">
@@ -73,173 +73,173 @@
                     <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
                     <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
                 </div>
-                    <div class="h-630" data-ax5grid="tag-data-statistics-grid"></div>  
+                <div class="h-630" data-ax5grid="tag-data-statistics-grid"></div>
             </div>
 
-    </section>
-</div>
+        </section>
+    </div>
 </th:block>
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-<script type="text/javascript">
-    class tagDataStatistics {
-        constructor() {
-            this.grid = null;
-            this.init();
-            this.url = '/api/tagdata/tag_statistics';
-        }
+    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+    <script type="text/javascript">
+        class tagDataStatistics {
+            constructor() {
+                this.grid = null;
+                this.init();
+                this.url = '/api/tagdata/tag_statistics';
+            }
 
-        init() {
-            let _this = this;
-            let config = {
-                target: $('[data-ax5grid="tag-data-statistics-grid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: true, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        _this.grid.select(this.dindex);
-                        //_this.showDetailStoreHouse(e.item.id);
-                    }
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [                  //컬럼 key 변경 필요
-                    { key: 'tag_code', label: '태그', width: 150, align: 'left' },
-                    { key: 'tag_name', label: '태그명', width: 150, align: 'left' },
-                    { key: 'count_value', label: '데이터수', width: 150, align: 'right' },
-                    { key: 'avg_value', label: '평균', width: 150, align: 'right' },
-                    { key: 'min_value', label: '최소', width: 150, align: 'right' },
-                    { key: 'max_value', label: '최대', width: 150, align: 'right' },
-                    { key: 'std_value', label: '표준편차', width: 150, align: 'right' },
-                ]
-            };
-            this.grid_config = config;
-            this.grid = new ax5.ui.grid(config);
-            
-            AjaxUtil.fillSelectOptions($('#tag'), 'tag', 'all', false);       
-            AjaxUtil.fillSelectOptions($('#tagGroup'), 'tag_group', 'all', false);   
-        }
-
-        exportExcel() {
-            var targetview = this.grid;
-            // 현재 html코드로 데이터 만들어 확장자만 xls로 변경해주고 있음
-            targetview.exportExcel('데이터통계.xls');
-        }
-
-        searchMainData() {
-            let _this = this;                                      
-  
-            let srchStartDt = $('#srchStartDt').val();              
-            let srchEndDt = $('#srchEndDt').val();              
-            let tag_code = $('#tag').val();              
-            let tag_group_pk = $('#tagGroup').val();  
-
-            let url = this.url+'/read';
-            let data = {
-                start_date : srchStartDt,
-                end_date : srchEndDt,
-                tag_code : tag_code,
-                tag_group_pk : tag_group_pk,
-            };
-
-            AjaxUtil.getAsyncData(url, data, function (result) {
-                //success
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: result.length,
-                    }
-                });
-            });
-
-            //$.getJSON(url, function (res) {
-            //    let recordsTotal = res.length;
-            //    _this.grid.setData({
-            //        list: res,
-            //        page: {
-            //            display: true,
-            //            totalElements: recordsTotal,
-            //        }
-            //    });
-
-            //}).fail(function (e) {
-            //    Notify.error(JSON.parse(e.responseText).message);
-            //});
-        }
-    }
-
-    let page = null;
-
-    $(document).ready(function (e) {
-        page = new tagDataStatistics();
-
-        picker.bind({
-            target: $('[data-ax5picker="multi"]'),  
-            direction: "top",
-   			locale: {
-				format: 'YYYY-MM-DD'
-			},
-            content: {
-                width:  214,  // 130, //270,
-                margin: 10,
-                type: 'date',
-                
-                config: {
-                    control: {
-                        left: '<i class="fa fa-arrow-left"></i>',   //fa-chevron-left
-                        yearTmpl: '%s',
-                        monthTmpl: '%s',
-                        right: '<i class="fa fa-arrow-right"></i>'
+            init() {
+                let _this = this;
+                let config = {
+                    target: $('[data-ax5grid="tag-data-statistics-grid"]'),
+                    frozenColumnIndex: 0, // 열 고정
+                    frozenRowIndex: 0,    // 행 고정
+                    showLineNumber: true, // 열의 번호 보이기 여부
+                    showRowSelector: false,  // checkbox(선택) 보이기 여부
+                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
+                    sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
+                    multiSort: true, // 다중 정렬 여부
+                    header: {
+                        align: 'center',  // 헤더의 기본 정렬
+                        columnHeight: 38  // 헤더 높이
                     },
-                    lang: {
-                        yearTmpl: "%s년",
-                        months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-                        dayTmpl: "%s"
+                    body: {
+                        columnHeight: 25, // body의 기본 높이
+                        onClick: function (e) {
+                            _this.grid.select(this.dindex);
+                            //_this.showDetailStoreHouse(e.item.id);
+                        }
+                    },
+                    page: {
+                        display: true,  // 페이징 보이기 여부
+                        statusDisplay: true,
+                    },
+                    columns: [                  //컬럼 key 변경 필요
+                        { key: 'tag_code', label: '태그', width: 150, align: 'left' },
+                        { key: 'tag_name', label: '태그명', width: 150, align: 'left' },
+                        { key: 'count_value', label: '데이터수', width: 150, align: 'right' },
+                        { key: 'avg_value', label: '평균', width: 150, align: 'right' },
+                        { key: 'min_value', label: '최소', width: 150, align: 'right' },
+                        { key: 'max_value', label: '최대', width: 150, align: 'right' },
+                        { key: 'std_value', label: '표준편차', width: 150, align: 'right' },
+                    ]
+                };
+                this.grid_config = config;
+                this.grid = new ax5.ui.grid(config);
+
+                AjaxUtil.fillSelectOptions($('#tag'), 'tag', 'all', false);
+                AjaxUtil.fillSelectOptions($('#tagGroup'), 'tag_group', 'all', false);
+            }
+
+            exportExcel() {
+                var targetview = this.grid;
+                // 현재 html코드로 데이터 만들어 확장자만 xls로 변경해주고 있음
+                targetview.exportExcel('데이터통계.xls');
+            }
+
+            searchMainData() {
+                let _this = this;
+
+                let srchStartDt = $('#srchStartDt').val();
+                let srchEndDt = $('#srchEndDt').val();
+                let tag_code = $('#tag').val();
+                let tag_group_pk = $('#tagGroup').val();
+
+                let url = this.url+'/read';
+                let data = {
+                    start_date : srchStartDt,
+                    end_date : srchEndDt,
+                    tag_code : tag_code,
+                    tag_group_pk : tag_group_pk,
+                };
+
+                AjaxUtil.getAsyncData(url, data, function (result) {
+                    //success
+                    _this.grid.setData({
+                        list: result.data,
+                        page: {
+                            display: true,
+                            totalElements: result.length,
+                        }
+                    });
+                });
+
+                //$.getJSON(url, function (res) {
+                //    let recordsTotal = res.length;
+                //    _this.grid.setData({
+                //        list: res,
+                //        page: {
+                //            display: true,
+                //            totalElements: recordsTotal,
+                //        }
+                //    });
+
+                //}).fail(function (e) {
+                //    Notify.error(JSON.parse(e.responseText).message);
+                //});
+            }
+        }
+
+        let page = null;
+
+        $(document).ready(function (e) {
+            page = new tagDataStatistics();
+
+            picker.bind({
+                target: $('[data-ax5picker="multi"]'),
+                direction: "top",
+                locale: {
+                    format: 'YYYY-MM-DD'
+                },
+                content: {
+                    width:  214,  // 130, //270,
+                    margin: 10,
+                    type: 'date',
+
+                    config: {
+                        control: {
+                            left: '<i class="fa fa-arrow-left"></i>',   //fa-chevron-left
+                            yearTmpl: '%s',
+                            monthTmpl: '%s',
+                            right: '<i class="fa fa-arrow-right"></i>'
+                        },
+                        lang: {
+                            yearTmpl: "%s년",
+                            months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
+                            dayTmpl: "%s"
+                        }
                     }
                 }
+            });
+
+            //$('select').select2();
+
+            $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
+            $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
+
+            // 검색
+            $('#btnSearch').click(function (e) { page.searchMainData(); });
+            // 엑셀
+            $('#btnExcel').on('click', function () {
+                page.exportExcel();
+            });
+            //그리드 컬럼 설정
+            page.popColSetting = new popColSetting();
+            let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
+
+            if (userinfo.group_code == 'admin') {
+                $('#btnGridSetting').css('visibility','visible');
             }
-        });	
 
-        //$('select').select2();
+            $('#btnGridSetting').click(function (e) {
+                let _this = this;
+                let fix_cols = page.grid_config.frozenColumnIndex;
+                page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
+            });
 
-        $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
-        $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
-    
-        // 검색
-        $('#btnSearch').click(function (e) { page.searchMainData(); });
-        // 엑셀
-        $('#btnExcel').on('click', function () {
-            page.exportExcel();
-        });
-		//그리드 컬럼 설정
-        page.popColSetting = new popColSetting();
-        let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-		
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });	
+            page.searchMainData();
 
-        page.searchMainData();
-
-    })
-</script>
+        })
+    </script>
 </th:block>

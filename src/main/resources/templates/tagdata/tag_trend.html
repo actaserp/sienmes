@@ -4,81 +4,132 @@
         .chart_border {
             border: 1px solid blue;
         }
+        .select2{
+            margin-top: 13px;
+            height: 35px;
+        }
+        .select2-selection{
+            border: 1px solid rgb(208, 216, 221);
+        }
     </style>
 </head>
+<!--
+       데이터는 tag_dat에서 조회하는데 데이터도 없고 insert 하는 프로세스 또한 없음
+       뭥가 이상s
+-->
 <th:block layout:fragment="content">
-    <div class="content_wrap">
-        <section class="section">
-            <div class="title_box">
-                <div class="left_align">
-                    <h3 data-labelCd="데이터 트렌드">데이터 트렌드</h3>
-                </div>
-                <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-                <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>데이터 트랜드</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>공정 데이터</li>
+                <li>태그 데이터 트랜드</li>
+            </ul>
+        </div>
+        <form id="searchForm">
+            <section class="section">
+                <div class="section-top">
+                    <div class="search-wrap">
 
+                        <dl>
+                            <dt>
+                                <label>
+                                    일자
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="date" id="srchStartDt" name="srchStartDt"></div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label>
+                                    시간<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="text"id="srchStartTm" style="width: 100px" name="srchStartTm"  />
+                                    <span class="slow_sign">~</span>
+                                    <input type="text" id="srchEndTm" style="width: 100px" name="srchEndTm" />
+                                </div>
+                            </dd>
+                        </dl>
 
-            <div class="table_box search" >
-                <div class="row" >
+                        <dl>
+                            <dt>
+                                <label>
+                                    옵션<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <select id="cboOption">
+                                    <option value="basic" data-labelCd="기본">기본</option>
+                                    <option value="brush" data-labelCd="브러시">브러시</option>
+                                </select>
+                            </dd>
+                        </dl>
 
-                    <div class="col-6 col-md-4 col-xl-2">
-                        <div class="input-group" data-ax5picker="basic" id="srchDt">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_sm" data-labelCd="일자">일자</span>
-                            </div>
-                            <input class="form-control2 tac" type="text" id="srchStartDt" name="srchStartDt">
-                            <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                        </div>
+                        <dl>
+                            <dt>
+
+                            </dt>
+                            <dd>
+                                <select id="cboTag" name="cboTag" class="" multiple="multiple" title="태그" ></select>
+                            </dd>
+                        </dl>
+
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+
                     </div>
+                    <div class="button-wrap">
 
-                    <div class="col-6 col-md-4 col-xl-2" >
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_sm" data-labelCd="시간">시간</span>
-                            </div>
-                            <div class="form-control2">
-                                <input type="text" id="srchStartTm" name="srchStartTm" class="timepicker tac" />
-                                <span>~</span>
-                                <input type="text" id="srchEndTm" name="srchEndTm" class="timepicker tac"  />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-6 col-md-3 col-lg-2" >
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_sm" data-labelCd="옵션">옵션</span>
-                            </div>
-                            <select class="form-control2"  id="cboOption">
-                                <option value="basic" data-labelCd="기본">기본</option>
-                                <option value="brush" data-labelCd="브러시">브러시</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="col-6 col-md-3" >
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                            </div>
-                            <select id="cboTag" name="cboTag" class="form-control2" multiple="multiple" title="태그" ></select>
-                        </div>
-                    </div>
-
-                    <div class="col-1" >
-                        <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
                     </div>
                 </div>
+                <!--<div class="container-fluid">
+                    <div id="theGrid" style="height: 300px;"></div>
+
+                </div>-->
+
+                <!--        <div class="grid_box">-->
+
+                <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
+                <!--        </div>-->
+            </section>
+        </form>
+
+
+
+
+        <section class="section">
+            <div class="row" id="divChart">
             </div>
         </section>
-        <div class="row" id="divChart">
-        </div>
+
     </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
-    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
     <script src="/resource/apexcharts/apexcharts.3.26.min.js"></script>
-    <!--<script src="static/resource/apexcharts/apexcharts.3.26.min.js"></script>-->
     <script type="text/javascript">
         class chartTrend {
             constructor(chartId, title, lsl, usl, show_brush, series_data) {
@@ -159,7 +210,7 @@
                 let maxY = Math.max(...new_array);
                 let minY = Math.min(...new_array);
 
-                return { min: minY, max: maxY };
+                return {min: minY, max: maxY};
             }
 
             overPoint() {
@@ -178,6 +229,7 @@
 
                 return overY_array;
             }
+
 
             init() {
                 let _this = this;
@@ -235,7 +287,7 @@
                             show: true,
                             format: 'TT hh:mm:ss',
                         },
-                        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                        custom: function ({series, seriesIndex, dataPointIndex, w}) {
                             let color = ['#77B6EA', '#CC3D3D', '#FF5E00'];
                             let time = new Date(w.config.series[0].data[dataPointIndex][0]).toLocaleTimeString();
                             let item_name = w.config.title.text.replace(' ', '<br/>');
@@ -384,7 +436,9 @@
                     this.brushChart.render();
                 }
             }
+
         }
+
 
         let page = [];
 
@@ -455,7 +509,8 @@
             AjaxUtil.postAsyncData(url, param, fnSuccess);
         }
 
-        $(document).ready(function (e) {
+        $(document.body).ready(function (e) {
+
             $('#srchStartDt').val(CommonUtil.getYYYYMMDD());
 
             //셀렉트 검색기능 노준오
@@ -467,8 +522,6 @@
             });
 
             $('#cboTag').attr("title", '태그');
-
-            $('#srchDt').ax5DatePicker({ direction: 'top' });
 
             $('#srchStartTm').timepicker({
                 show2400: true,
@@ -489,8 +542,8 @@
                 }
             });
 
-        })
+        });
 
     </script>
-
 </th:block>
+</html>
