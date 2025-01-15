@@ -1,178 +1,246 @@
-<html layout:decorate="~{layout_page}">
+<html layout:decorate="~{layout_page}" xmlns:layout="http://www.w3.org/1999/xhtml">
+<head>
+    <style>
+        .wj-header {
+            text-align: center !important;
+        }
+    </style>
+</head>
+
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section>
-        <div class="title_box ">
-            <div class="left_align">
-                <h3>문서 종류</h3>
+
+
+    <div class="layout-contents">
+        <!-- Page Title -->
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>문서 종류</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>        
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>조치 및 통계</li>
+                <li>업무 지원</li>
+                <li>문서종류</li>
+            </ul>
         </div>
 
-        <div class="table_box search">
-            <div class="row">
-                <div class="col-6 col-md-3 col-lg-3 col-xl-2" >
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_md">문서종류명</span>
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label for="keyword">
+                                문서종류명
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input type="text" class="form-control2" id="keyword" name="keyword">
+                            </div>
+                        </dd>
+                    </dl>
 
-                        </div>
-                        <input class="form-control2" type="text" id="keyword" name="keyword">
-                    </div>
+                    <dl>
+                        <dt><span class="eq"></span></dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
                 </div>
-
-                <div class="col-1" >
-                	<button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                </div> 
+            </div> <!--//section-top end -->
+            <div class="container-fluid">
+                <p id="selectedItem"></p>
+                <div id="theGrid" style="height: 430px; max-height: 430px;"></div>
             </div>
-        </div>
-    </section>
-    
-    <section >
-        <div class="grid_box">
-            <div class="title_box">
-                 <span class="right_align rpt">문서 종류</span>
-                <button type="button" class="btn-default " id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
+            <div class="btn-wrap">
             </div>
-            <div class="h-500" data-ax5grid="doc-form-grid" ></div>  
-        </div>
-    </section>
 
-    <section>
-        <div class="title_box mb-2">
-            <span class="right_align rpt">상세정보</span>
-            <button type="button" class="btn-default" id="btnNew" name="btnNew"><i class="fas fa-plus"></i></button>
-            <button type="button" class="btn-danger y_write_auth" id="btnDel" style="float:none"><i class="fas fa-trash"></i></button>
-            <button type="button" class="btn-default y_write_auth" id="btnSave" style="float:none"><i class="fas fa-save"></i></button>
-        </div>
 
-        <form id="docFormForm">
-            <input type="hidden" id="id" name="id" />
-            <div class="table_box sub" id="detail_box">
-                <div class="row">
-                    <div class="col-6 col-md-3 col-lg-2" >
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md  ">문서그룹</span>
-                            </div>
-                                <input class="form-control2" id="form_group" name="form_group" disabled/>
-                        </div>
-                    </div>
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt><span class="eq"></span></dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-excell" title="신규등록" id="btnNew">
+                                    <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                    신규등록
+                                </a>
+                                <!-- <button type="button" class="btn btn-excel" id="btnNew" name="btnNew" title="신규">
+                                     <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                     신규</button>-->
+                            </li>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt><span class="eq"></span></dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-edit" id="btnSave" title="저장">
+                                    <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
+                                    저장
+                                </a>
+                            </li>
+                            <!-- <button type="button" class="btn btn-edit" id="btnSave"  title="저장">
+                                 <img src="/images/icon/ico-save.svg" alt="저장 아이콘">저장</button>-->
+                        </dd>
+                    </dl>
 
-                    <div class="col-6 col-md-6 col-lg-4" >
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md  ">문서종류명</span>
-                            </div>
-                            <input class="form-control2" id="form_name" name="form_name" disabled required/>
-                        </div>
-                    </div>
-
-                    <div class="col-12" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md">설명</span>
-                            </div>
-                            <textarea  class="form-control2 h-26" id="description" name="description" disabled></textarea>
-                        </div>
-                    </div>
+                    <dl>
+                        <dt><span class="eq"></span></dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="삭제" id="btnDelete">
+                                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                    삭제
+                                </a>
+                                <!-- <button type="button" class="btn btn-delete" id="btnDel" title="삭제">
+                                     <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                     삭제</button>-->
+                            </li>
+                        </dd>
+                    </dl>
                 </div>
             </div>
-        </form>
-    </section>
-</div>
+            <div class="table-wrap" style=" overflow-x: auto;" id="detailBox">
+                <form id="docFormForm">
+                    <table class="write-table" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                        <caption style="text-align: left; margin-bottom: 8px;">등록테이블</caption>
+                        <input type="hidden" id="id" name="id"/>
+                        <tbody>
+                        <tr>
+                            <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                <label for="form_group">문서그룹</label>
+                            </th>
+                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                <input type="text" id="form_group" name="form_group" style="width: 100%;">
+                            </td>
+
+
+                            <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                <label for="form_name">문서종류명</label>
+                            </th>
+                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                <input type="text" id="form_name" name="form_name" style="width: 100%;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                <label for="description">설명</label>
+                            </th>
+                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;" colspan="3">
+                                <textarea id="description" name="description"></textarea>
+                                <!--<input type="text" style="width: 100%;" id="description" name="description">-->
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </section>
+    </div> <!--//layout-contents end -->
+
+    <footer style="margin-top: 24px;">
+        <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
+    </footer>
+
 </th:block>
-
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <th:block th:replace="/common/approve_box :: approve_box"></th:block>
+    <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
+    <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
+    <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
 
-<script type="text/javascript">
-    class DocFormPage {
-        constructor() {
-            this.grid = null;
-            this.url = '/api/definition/doc_form';
-            this.init(); 
+    <script type="text/javascript">
+
+        var theGrid;
+        var viewdata;
+
+        let columns = [
+            {binding: 'form_group', header: '문서그룹', width: 200, align: 'center'},
+            {binding: 'form_name', header: '문서종류명', width: 200, align: 'center'},
+            {binding: 'description', header: '비고', width: 250, align: 'center'},
+            {binding: '', header: '', width: "*", align: 'center'}
+        ];
+
+
+        document.readyState === 'complete' ? init() : window.onload = init;
+
+        function init() {
+            let data2 = [];
+            let keyword = $('#keyword').val();
+
+            $.ajax({
+                url: '/api/definition/doc_form/read',
+                type: 'GET',
+                data: {
+                    'keyword': keyword,
+                },
+                async: false,
+                success: function (data) {
+                    data2 = data.data;
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Error fetching log_count data:', textStatus, errorThrown);
+                }
+            })
+
+            viewdata = new wijmo.collections.CollectionView(data2);
+
+            theGrid = new wijmo.grid.FlexGrid('#theGrid', {
+                autoGenerateColumns: false,
+                showMarquee: true,
+                columns: columns,
+                isReadOnly: true,
+                itemsSource: viewdata
+            });
+
+            theGrid.hostElement.addEventListener('click', function (e) {
+                let selectedItem = theGrid.selectedItems[0];
+
+                document.getElementById('id').value = selectedItem.id;
+                document.getElementById('form_group').value = selectedItem.form_group;
+                document.getElementById('form_name').value = selectedItem.form_name;
+                document.getElementById('description').value = selectedItem.description;
+            });
+
+            theGrid.rowHeaders.columns.splice(0, 1);
+            /*  new FlexGridContextMenu(theGrid);*/
+
         }
 
-        init() {
-            let _this = this;
-            let config = {
-                target: $('[data-ax5grid="doc-form-grid"]'),
-                sortable: true,
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
+
+        function searchMainData() {
+
+            let keyword = $('#keyword').val();
+
+            $.ajax({
+                url: '/api/definition/doc_form/read',
+                type: 'GET',
+                data: {
+                    'keyword': keyword,
                 },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        _this.grid.select(this.dindex);
-                        _this.showDetailDocForm(e.item.id);
+                success: function (result) {
+                    if (result.success) {
+                        console.log("Result data:", result.data);
+                        grid_binding(result.data);
+                    } else {
+                        console.log("Error occurred");
                     }
                 },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    { key: 'form_group', label: '문서그룹', width: 200, align: 'left' },
-                    { key: 'form_name', label: '문서종류명', width: 200, align: 'left', sortable: false },
-                    { key: 'description', label: '비고', width: 500, align: 'left', sortable: false },
-                ]
-            };
-
-            this.grid = new ax5.ui.grid(config);
-            this.grid_config = config; 
-            //AjaxUtil.fillSelectOptions($('#form_group'), 'form_group', 'choose', false);
-
-            
-        }
-
-        // 버튼 활성화 설정
-        //setButtonDisable(_boolnew, _boolsave, _booldel) {
-        //    $('[id=btnNew]').prop('disabled', _boolnew);
-        //    $('[id=btnSave]').prop('disabled', _boolsave);
-        //    $('[id=btnDel]').prop('disabled', _booldel);
-        //}
-
-        setButtonState() {
-            let pk = $('#id').val();
-            $('#btnNew').prop('disabled', false);
-            $('#btnSave').prop('disabled', false);
-            if (pk) {
-                $('#btnDel').prop('disabled', false);
-            }
-            else {
-                $('#btnDel').prop('disabled', true);
-            }
-        }
-
-        // 문서종류 목록 조회
-        searchMainData() {
-            let _this = this;
-            let param ={keyword : $('#keyword').val() }
-	
-            let result = AjaxUtil.getSyncData(this.url + "/read", param);
-            
-            if (result.success) {
-                let recordsTotal = result.data.length;
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: recordsTotal,
-                    }
-                });
-            }
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Error fetching log_list data:', textStatus, errorThrown);
+                }
+            });
 
             $('#docFormForm')[0].reset();
             $('#docFormForm').find('#id').val('');
@@ -184,38 +252,64 @@
             });
 
             //_this.setButtonDisable(false, true, true);
-            _this.setButtonState();
+            /*setButtonState();*/
+
+
         }
 
-        // 문서종류 상세정보 조회
-        showDetailDocForm(id) {
-            let param = { 'id': id };
-            let result = AjaxUtil.getSyncData(this.url + "/detail", param);
-            
-            if (result != null) {
-                FormUtil.BindDataForm(result.data, $('#docFormForm'));
-            }
+        function grid_binding(data) {
 
-            //page.setButtonDisable(false, false, false);
-            page.setButtonState();
+            let formattedData = data.map(item => ({
+                form_group: item.form_group,
+                form_name: item.form_name,
+                description: item.description
+            }));
+
+            theGrid.columns.clear();
+            theGrid.autoGenerateColumns = false;
+
+            columns.forEach(colDef => {
+                let col = new wijmo.grid.Column(colDef);
+                theGrid.columns.push(col);
+            });
+
+            viewdata = new wijmo.collections.CollectionView(formattedData);
+
+            theGrid.itemsSource = viewdata;
+            theGrid.refresh();
+
         }
 
-        // 문서종류 정보 저장
-        saveDocForm() {
-            let _this = this;
+        function saveDocForm() {
+            let url = '/api/definition/doc_form/save';
             let validate = true;
             let $target = null;
 
             //let data = $('#docFormForm').serialize();
             let data = FormUtil.extractForm($('#docFormForm'));
-            let fnSuccess = function (res) {
-                if (!res.success) {
-                    Alert.alert('', res.message);
-                } else {
-                    Notify.success('저장되었습니다');
-                    _this.searchMainData();
-                }
+
+            // 필수 항목 검증
+            if (!data.form_group || !data.form_name) {
+                Alert.alert('', '필수 항목 [ 문서그룹, 문서종류명  ]을 입력해주세요.', function () {
+                    if ($target) $target.focus();
+                });
+                return;
             }
+
+            Alert.confirm('', '저장하시겠습니까?', function () {
+                let fnSuccess = function (result) {
+                    if (result.success) {
+                        Alert.alert('', '저장되었습니다');
+                        searchMainData(); // 저장 후 데이터 갱신
+                    } else {
+                        Alert.alert('저장 실패', result.message);
+                        console.error('저장 실패:', result.message);
+                    }
+                };
+
+                // 데이터 저장 요청
+                AjaxUtil.postAsyncData(url, data, fnSuccess);
+            });
 
             $('#detail_box').find('input, textarea').each(function () {
                 if ($(this).is(':required')) {
@@ -227,104 +321,70 @@
                 }
             });
 
-            if (validate) {
-                AjaxUtil.postAsyncData(this.url+"/save", data, fnSuccess);
-            } else {
-                Alert.alert('', '필수 항목을 입력해주세요.', function () {
+            // 필수 입력값이 없는 경우
+            if (!validate && $target) {
+                Alert.alert('', '필수 입력값을 입력해주세요.', function () {
                     $target.focus();
                 });
             }
         }
 
         // 문서종류 정보 삭제
-        deleteDocForm() {
-            let _this = this;
+        function deleteDocForm() {
+            let url = '/api/definition/doc_form/delete'
             let id = $('#docFormForm').find('#id').val();
-            let data = { id: id };
-            let fnSuccess = function () {
-                Notify.success("삭제되었습니다.");
-                _this.searchMainData();
-            }
+            let data = {'id': id};
 
-            AjaxUtil.postAsyncData(this.url + "/delete", data, fnSuccess);
-        }
-
-        // 엑셀 다운로드
-        exportExcel() {
-            var targetview = this.grid;
-            targetview.exportExcel('문서종류.xls');
-        }
-
-    }
-
-    let page = null;
-
-    $(document.body).ready(function (e) {
-        page = new DocFormPage();
-
-		//그리드 컬럼 설정
-        page.popColSetting = new popColSetting();
-        let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-		
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });
-
-        page.searchMainData();
-
-        // 검색버튼
-        $('#btnSearch').click(function (e) { page.searchMainData(); });
-
-        // 신규버튼
-        $('#btnNew').click(function (e) {
-
-            $('#docFormForm')[0].reset();
-            $('#docFormForm').find('#id').val('');
-
-            $('#detail_box').find('select,input, textarea').each(function () {
-                if ($(this).is(':disabled')) {
-                    $(this).removeAttr('disabled');
-                }
+            Alert.confirm('', '삭제하시겠습니까?', function () {
+                let fnSuccess = function (result) {
+                    if (result.success) {
+                        Alert.alert('', '삭제되었습니다');
+                        searchMainData(); // 저장 후 데이터 갱신
+                    } else {
+                        Alert.alert('삭제 실패', result.message);
+                        console.error('저장 실패:', result.message);
+                    }
+                };
+                // 데이터 저장 요청
+                AjaxUtil.postAsyncData(url, data, fnSuccess);
             });
 
-            //page.setButtonDisable(true, false, true);
-            page.setButtonState();
+        }
+
+        $(document).ready(function (e) {
+
+            $('#btnSearch').click(function (e) {
+                searchMainData();
+            });
+
+            // 신규버튼
+            $('#btnNew').click(function (e) {
+
+                $('#docFormForm')[0].reset();
+                $('#docFormForm').find('#id').val('');
+
+                $('#detail_box').find('select,input, textarea').each(function () {
+                    if ($(this).is(':disabled')) {
+                        $(this).removeAttr('disabled');
+                    }
+                });
+
+                //page.setButtonDisable(true, false, true);
+                /*setButtonState();*/
+            });
+
+            $('#btnSave').click(function (e) {
+                saveDocForm()
+            });
+
+            $('#btnDelete').click(function (e) {
+                deleteDocForm()
+            });
+
         });
 
-        // 저장버튼
-        $('#btnSave').click(function (e) {
-            Alert.confirm('', 
-                "저장하시겠습니까?",
-                function () { page.saveDocForm() },
-                function () { }
-            );
-        });
 
-        // 삭제버튼
-        $('#btnDel').click(function (e) {
-            Alert.confirm('', 
-                '삭제하시겠습니까?',
-                function () { page.deleteDocForm() },
-                function () { }
-            );
-        });
-
-        //엑셀
-        $('#btnExcel').click(function (e) {
-            page.exportExcel();
-        });
-	
-    });
-
-
-
-
-</script>
+    </script>
 </th:block>
+
 </html>

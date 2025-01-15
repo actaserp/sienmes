@@ -26,7 +26,7 @@ public class CustomSvcService {
 		String sql = """
 				select cc.id, row_number() over() as no ,cc."Type" as type, cc."Title" as title,  cc."Qty" as "cusCnt"
 				, cc."CheckDate" as "chkDt", cc."CheckName" as "chkName", cc."CheckState" as "chkState"
-				, cc."FinishDate" as "finishDt"
+				, cc."FinishDate" as "finishDt", cc."Content" as "content"
 				from cust_complain cc 
 				where cc."CheckDate" between cast(:startDt as date) and cast(:endDt as date)
 				""";
