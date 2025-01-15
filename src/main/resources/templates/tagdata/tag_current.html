@@ -1,143 +1,126 @@
 <html layout:decorate="~{layout_page}">
+<head>
+    <style>
+        .wx210{
+            width: 210px !important;
+        }
+        .wx190{
+            width: 150px !important;
+        }
+
+    </style>
+</head>
 <th:block layout:fragment="content">
-<div class="content_wrap">
-
-    <section>
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="태그데이터 현황">태그데이터 현황</h3>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>태그 데이터 현황</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
-        </div>
-    </section>
-        <section>
-        <div class="grid_box" id="divList">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="공정 데이터 현황">공정 데이터 현황</span>
-                <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
-                <button type="button" class="btn-default" id="btnGridRefresh"><i class="fa fa-sync-alt"></i> </button>
-            </div>
-                <div class="h-660" data-ax5grid="equipmentFinalTagdata-grid"></div>  
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>공정 데이터</li>
+                <li>태그 데이터 현황</li>
+            </ul>
         </div>
 
-    </section>
-</div>
+        <section class="section">
+            <div class="search-wrap">
+                <dl>
+                    <dt>
+                    </dt>
+                    <dd>
+                        <button type="button" class="btn-default" id="btnGridRefresh"><i class="fa fa-sync-alt"></i> </button>
+                    </dd>
+                </dl>
+            </div>
+            <div class="container-fluid">
+                <div id="theGrid" style="height: 600px;"></div>
+
+            </div>
+
+            <!--        <div class="grid_box">-->
+
+            <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
+            <!--        </div>-->
+        </section>
+    </div>
 </th:block>
 
-
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-<script type="text/javascript">
-    class EquipmentFinalTagdataPage {
-        constructor() {
-            this.grid = null;
-            this.init(); 
-            this.base_url = '/api/tagdata/tag_current';
-        }
-
-        init() {
-            let _this = this;
-            let config = {
-                target: $('[data-ax5grid="equipmentFinalTagdata-grid"]'),
-                sortable: true,
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        _this.grid.select(this.dindex);
-                    }
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    { key: 'equip_name', label: '설비', width: 150, align: 'left'},
-                    { key: 'tag_code', label: '태그코드', width: 200, align: 'left'},
-                    { key: 'tag_name', label: '태그명', width: 200, align: 'left'},
-                    { key: 'spec', label: '관리기준(lsl~usl)', width: 150, align: 'center' },
-                    { key: 'data_value', label: '현재값', width: 200, align: 'right' },
-                    { key: 'data_date', label: '일시', width: 150, align: 'center' },
-                ]
-            };
-
-            this.grid = new ax5.ui.grid(config);
-            this.grid_config = config; 
-        }
-
-        // 창고 목록 조회
-        searchMainData() {
-            let _this = this;
-            let url = this.base_url+'/read';
-            let param = {
-                action: 'read',
+    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <script type="text/javascript">
+        class EquipmentFinalTagdataPage {
+            constructor() {
+                this.grid = null;
+                this.base_url = '/api/tagdata/tag_current';
+                this.viewData = new wijmo.collections.CollectionView();
+                this.init();
             }
 
-            let result = AjaxUtil.getSyncData(url, param);
-            if (result != null) {
-                let recordsTotal = result.length;
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: recordsTotal,
+            init() {
+                let _this = this;
+                this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    columns: [
+                        {binding: 'equip_name', header: '설비', width: '*', align: 'left'},
+                        {binding: 'tag_code', header: '태그코드', width: '*', align: 'left'},
+                        {binding: 'tag_name', header: '태그명', width: '*', align: 'left'},
+                        {binding: 'spec', header: '관리기준(lsl~usl)', width: '*', align: 'center'},
+                        {binding: 'data_value', header: '현재값', width: '*', align: 'right'},
+                        {binding: 'data_date', header: '일시', width: '*', align: 'center'},
+                    ],
+                    itemsSource: this.viewData,
+                });
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = '태그데이터현황';
+                this.grid.hostElement.addEventListener('dblclick', (e) => {
+                    let hitTest = this.grid.hitTest(e);
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        let row = hitTest.row;
+                        let item = this.grid.rows[row].dataItem;
+                        console.log('zz', item.id);
                     }
                 });
             }
+
+            // 태그 목록 조회
+            searchMainData() {
+                let _this = this;
+                let url = this.base_url + '/read';
+                let param = {
+                    action: 'read',
+                }
+
+                let result = AjaxUtil.getSyncData(url, param);
+                if (result != null) {
+                    _this.viewData.sourceCollection = result.data;
+                }
+
+
+            }
         }
 
-        //엑셀다운로드
-        exportExcel() {
-            var targetview = this.grid;
-            // 현재 html코드로 데이터 만들어 확장자만 xls로 변경해주고 있음
-            targetview.exportExcel('공정 데이터 정보.xls');
-        }
-    }
 
-    let page = null;
+        let page = null;
 
-    $(document.body).ready(function (e) {
-        page = new EquipmentFinalTagdataPage();
-        //엑셀
-        $('#btnExcel').click(function (e) {
-            page.exportExcel();
+        $(document.body).ready(function (e) {
+            page = new EquipmentFinalTagdataPage();
+
+            //새로고침
+            $('#btnGridRefresh').click(function () {
+                page.searchMainData();
+            });
+
+            //page.searchMainData();
         });
 
-        //새로고침
-        $('#btnGridRefresh').click(function () {
-            page.searchMainData();
-        });
-
-		//그리드 컬럼 설정
-        page.popColSetting = new popColSetting();
-        let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-		
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });	
-        //page.searchMainData();
-
-    });
-
-
-
-</script>
+    </script>
 </th:block>
+</html>

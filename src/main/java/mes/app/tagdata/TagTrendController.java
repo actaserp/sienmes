@@ -4,10 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import mes.app.tagdata.service.TagTrendService;
 import mes.domain.model.AjaxResult;
@@ -21,7 +18,7 @@ public class TagTrendController {
 	TagTrendService tagTrendService;
 	
 	
-	@GetMapping("/read")
+	@PostMapping("/read")
 	public AjaxResult getTagTrendList(
 			@RequestParam("start_time") String start_time,
 			@RequestParam("end_time") String end_time,

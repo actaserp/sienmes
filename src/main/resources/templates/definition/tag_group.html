@@ -1,360 +1,369 @@
 <html layout:decorate="~{layout_page}">
+<head>
+    <style>
+        .wx210{
+            width: 210px !important;
+        }
+        .wx190{
+            width: 150px !important;
+        }
+
+    </style>
+</head>
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section class="section ">
-
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="태그그룹">태그그룹</h3>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>태그 그룹</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>공정 데이터</li>
+                <li>태그 그룹</li>
+            </ul>
         </div>
+        <form id="searchForm" autocomplete="off">
+            <section class="section">
+                <div class="section-top">
+                    <div class="search-wrap">
 
-        <div class="table_box search" >
+                        <dl>
+                            <dt>
+                                <label>
+                                    태그그룹코드
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="text" id="txtTagGrpCode" name="txtTagGrpCode">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label>
+                                    태그그룹명<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="text" id="txtTagGrpName" name="txtTagGrpName">
+                                </div>
+                            </dd>
+                        </dl>
 
-        <div class="row">
-            <div class="col-6 col-lg-3 col-xl-2" >
-                <div class="input-group" >
-                    <div class="input-group-prepend">
-                        <span class="input-group-text fit_box_md" data-labelCd="태그그룹코드">태그그룹코드</span>
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+
                     </div>
-                    <input class="form-control2"  id="txtTagGrpCode" name="txtTagGrpCode" />
+                    <div class="button-wrap">
+
+                    </div>
+                </div>
+                <div class="container-fluid">
+                    <div id="theGrid" style="height: 300px;"></div>
 
                 </div>
-            </div>
 
+                <!--        <div class="grid_box">-->
 
-            <div class="col-6 col-lg-3 col-xl-2" >
-                <div class="input-group" >
-                    <div class="input-group-prepend">
-                        <span class="input-group-text fit_box_md" data-labelCd="태그그룹명">태그그룹명</span>
-                    </div>
-                    <input class="form-control2" id="txtTagGrpName" name="txtTagGrpName" />
-
-                </div>
-            </div>
-
-                <div class="col-1" >
-                    <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                </div> 
-        </div>
-
-
-        </div>
-    </section>
-
-
-    <section>
-        <div class="grid_box">
-            <div class="title_box">
-                    <span class="right_align rpt" data-labelCd="태그그룹">태그그룹</span>
-                    <button type="button" class="btn-default" id="btnExcel" title="엑셀 다운로드"><i class="fas fa-file-excel"></i></button>
-                    <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
-            </div>
-            <div class="h-480" data-ax5grid="tag-group-grid" ></div>  
-        </div>
-    </section>
-
-    <section>
-            <div class="title_box mb-2">
-                <span class="right_align rpt" data-labelCd="상세정보">상세정보</span>
-                    <button type="button" class="btn-default" id="btnNew" name="btnNew"><i class="fas fa-plus"></i></button>
-                    <button type="button" class="btn-danger y_write_auth" id="btnDel" style="float:none"><i class="fas fa-trash"></i></button>
-                    <button type="button" class="btn-default y_write_auth" id="btnSave" style="float:none"><i class="fas fa-save"></i></button>
-            </div>
-        <form id="tagGroupForm">
-            <input type="hidden" id="id" name="id" />
-            <div class="table_box sub" id="detail_box">
-                <div class="row">
-
-                    <div class="col-6 col-md-3 col-lg-4" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t7" data-labelCd="*태그그룹코드">*태그그룹코드</span>
-                            </div>
-                            <input class="form-control2" type="text" id="tag_group_code" name="tag_group_code" disabled="disabled" required />
-                        </div>
-                    </div>
-
-                    <div class="col-6 col-md-3 col-lg-4">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t7" data-labelCd="*태그그룹명">*태그그룹명</span>
-                            </div>
-                                <input class="form-control2 " type="text" id="tag_group_name" name="tag_group_name" disabled="disabled" required/>
-                        </div>
-                    </div>
-
-                    <div class="col-12">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t7_area" data-labelCd="설명">설명</span>
-                            </div>
-                                <textarea class="form-control2" id="description" name="description"disabled="disabled" ></textarea>
-                        </div>
-                    </div>
-
-
-                </div>
-            </div>
+                <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
+                <!--        </div>-->
+            </section>
         </form>
-    </section>
-</div>
-</th:block>
 
+
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <h3>상세 정보</h3>
+                </div>
+                <div class="button-wrap">
+                    <ul>
+                        <li>
+                            <a class="btn btn-excell" title="신규" id="btnNew">
+                                <img src="/images/icon/ico-plus.svg" alt="신규 아이콘">
+                                신규
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn btn-delete" title="삭제" id="btnDel">
+                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                삭제
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn btn-edit" title="저장" id="btnSave">
+                                <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
+                                저장
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <form id="tagGroupForm" autocomplete="off">
+                <input type="hidden" id="id" name="id" />
+                <div class="table-wrap" id="detail_box">
+                    <table class="write-table">
+                        <tbody>
+                        <tr>
+                            <th>
+                                <label>
+                                    *태그그룹코드
+                                </label>
+                            </th>
+                            <td>
+                                <input type="text" id="tag_group_code" style="width: 100%" name="tag_group_code" disabled="disabled" required />
+                            </td>
+
+                            <th>
+                                <label>
+                                    *태그그룹명
+                                </label>
+                            </th>
+                            <td>
+                                <input type="text" id="tag_group_name" style="width: 100%" name="tag_group_name" disabled="disabled" required/>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>
+                                <label>설명</label>
+                            </th>
+                            <td colspan="3">
+                                <textarea style="width: 100%" disabled="disabled" id="description" name="description"></textarea>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+            <!--        <div class="grid_box">-->
+
+            <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
+            <!--        </div>-->
+        </section>
+
+    </div>
+</th:block>
 
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-<script type="text/javascript">
-    class TagGroupPage {
-        constructor() {
-            this.grid = null;
-            this.init(); 
-            this.base_url = '/api/definition/tag_group';
-        }
-
-        init() {
-            let _this = this;
-            let config = {
-                target: $('[data-ax5grid="tag-group-grid"]'),
-                sortable: true,
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        _this.grid.select(this.dindex);
-                        _this.showDetailTagGroup(e.item.id);
-                    }
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    { key: 'tag_group_code', label: '태그그룹코드', width: 170, align: 'left',  },
-                    { key: 'tag_group_name', label: '태그그룹명', width: 170, align: 'left',  },
-                    { key: 'description', label: '비고', width: 340, align: 'left', },
-                ]
-            };
-
-            this.grid = new ax5.ui.grid(config);
-            this.grid_config = config;
-
-            // 엔터키 검색
-            $('#txtTagGrpCode').on('keypress', function (e) {
-                if (event.keyCode == 13) {
-                    _this.searchMainData();
-                }
-            });
-            $('#txtTagGrpName').on('keypress', function (e) {
-                if (event.keyCode == 13) {
-                    _this.searchMainData();
-                }
-            });
-        }
-
-        // 버튼 활성화 설정
-        setButtonState() {
-            let pk = $('#tagGroupForm').find('#id').val();
-            $('#btnNew').prop('disabled', false);
-            $('#btnSave').prop('disabled', false);
-            if (pk) {
-                $('#btnDel').prop('disabled', false);
+    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <script type="text/javascript">
+        class TagGroupPage {
+            constructor() {
+                this.grid = null;
+                this.base_url = '/api/definition/tag_group';
+                this.viewData = new wijmo.collections.CollectionView();
+                this.init();
             }
-            else {
-                $('#btnDel').prop('disabled', true);
-            }
-        }
 
-        // 태그그룹 목록 조회
-        searchMainData() {
-            let _this = this;
-            let url = this.base_url+'/read';
-            let param = {
-                'tag_group_code': $('#txtTagGrpCode').val(),
-                'tag_group_name': $('#txtTagGrpName').val()
-            }
-            
-            let result = AjaxUtil.getSyncData(url, param);
-            if (result != null) {
-                let recordsTotal = result.length;
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: recordsTotal,
+            init() {
+                let _this = this;
+                this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    columns: [
+                        {binding: 'tag_group_code', header: '태그그룹코드', width: '*', align : 'left'},
+                        {binding: 'tag_group_name', header: '태그그룹명', width: '*', align: 'center'},
+                        {binding: 'description', header: '비고', width: '*', align: 'left'},
+                    ],
+                    itemsSource: this.viewData,
+                });
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = '태그그룹';
+                this.grid.hostElement.addEventListener('dblclick', (e) => {
+                    let hitTest = this.grid.hitTest(e);
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        let row = hitTest.row;
+                        let item = this.grid.rows[row].dataItem;
+                        console.log('zz', item.id);
+                        _this.showDetailTagGroup(item.id);
+
+
+                        //$("#stop_cause_name").val(item.stop_cause_name);
+                        //$("#description").val(item.description);
                     }
                 });
+
+                // 엔터키 검색
+                $('#txtTagGrpCode').on('keypress', function (e) {
+                    if (event.keyCode == 13) {
+                        _this.searchMainData();
+                    }
+                });
+                $('#txtTagGrpName').on('keypress', function (e) {
+                    if (event.keyCode == 13) {
+                        _this.searchMainData();
+                    }
+                });
+
+
             }
 
-            $('#tagGroupForm')[0].reset();
-            $('#tagGroupForm').find('#id').val('');
-
-            $('#detail_box').find('input, select, textarea').each(function () {
-                if (!$(this).is(':disabled')) {
-                    $(this).attr('disabled', 'disabled');
+            // 태그그룹 목록 조회
+            searchMainData() {
+                let _this = this;
+                let url = this.base_url+'/read';
+                let param = {
+                    'tag_group_code': $('#txtTagGrpCode').val(),
+                    'tag_group_name': $('#txtTagGrpName').val()
                 }
-            });
 
-            _this.setButtonState();
+                let result = AjaxUtil.getSyncData(url, param);
+                if (result != null) {
+                    _this.viewData.sourceCollection = result.data;
+                }
 
-        }
+                $('#tagGroupForm')[0].reset();
+                $('#tagGroupForm').find('#id').val('');
 
-        // 태그그룹 상세정보 조회
-        showDetailTagGroup(id) {
-            let param = { 'id': id};
-            let url = this.base_url+'/detail';
-            let result = AjaxUtil.getSyncData(url, param);
+                $('#detail_box').find('input, select, textarea').each(function () {
+                    if (!$(this).is(':disabled')) {
+                        $(this).attr('disabled', 'disabled');
+                    }
+                });
 
-            if (result != null) {
-                FormUtil.BindDataForm(result.data, $('#tagGroupForm'));
             }
 
-            page.setButtonState();
-        }
+            // 태그그룹 상세정보 조회
+            showDetailTagGroup(id) {
+                let param = { 'id': id};
+                let url = this.base_url+'/detail';
+                let result = AjaxUtil.getSyncData(url, param);
 
-        // 태그그룹 정보 저장
-        saveTagGroup() {
-            let _this = this;
-            let validate = true;
-            let $target = null;
-            let url = this.base_url+'/save';
-
-            //let data = $('#tagGroupForm').serialize();
-            let data = FormUtil.extractForm($('#tagGroupForm'));
-            
-
-            let fnSuccess = function (res) {
-                if (!res.success) {
-                    Alert.alert('', res.message);
-                } else {
-                    Notify.success('저장되었습니다');
-                    _this.searchMainData();
+                if (result != null) {
+                    FormUtil.BindDataForm(result.data, $('#tagGroupForm'));
                 }
             }
 
-            $('#detail_box').find('input, select, textarea').each(function () {
-                if ($(this).is(':required')) {
-                    if (!$(this).val()) {
-                        validate = false;
-                        $target = $(this);
-                        return false;
+            // 태그그룹 정보 저장
+            saveTagGroup() {
+                let _this = this;
+                let validate = true;
+                let $target = null;
+                let url = this.base_url+'/save';
+
+                //let data = $('#tagGroupForm').serialize();
+                let data = FormUtil.extractForm($('#tagGroupForm'));
+
+
+                let fnSuccess = function (res) {
+                    if (!res.success) {
+                        Alert.alert('', res.message);
+                    } else {
+                        Notify.success('저장되었습니다');
+                        _this.searchMainData();
                     }
                 }
-            });
 
-            if (validate) {
+                $('#detail_box').find('input, select, textarea').each(function () {
+                    if ($(this).is(':required')) {
+                        if (!$(this).val()) {
+                            validate = false;
+                            $target = $(this);
+                            return false;
+                        }
+                    }
+                });
+
+                if (validate) {
+                    AjaxUtil.postAsyncData(url, data, fnSuccess);
+                } else {
+                    Alert.alert('', '태그 그룹 코드와 태그 그룹 명을 \n 모두 입력해주세요.', function () {
+                        $target.focus();
+                    });
+                }
+            }
+
+            // 태그그룹 정보 삭제
+            deleteTagGroup() {
+                let _this = this;
+                let url = this.base_url+'/delete';
+                let id = $('#tagGroupForm').find('#id').val();
+                if(id === null || id === '' || id === undefined){
+                    Alert.alert('', '삭제할 태그그룹을 선택하세요.');
+                    return;
+                }
+                let data = { id: id };
+                let fnSuccess = function (res) {
+                    if (res.success) {
+
+                        Alert.alert('', '삭제되었습니다.');
+
+                        _this.searchMainData();
+                    } else {
+                        Alert.alert('', res.message);
+                    }
+                }
+
                 AjaxUtil.postAsyncData(url, data, fnSuccess);
-            } else {
-                Alert.alert('', '태그 그룹 코드와 태그 그룹 명을 \n 모두 입력해주세요.', function () {
-                    $target.focus();
+            }
+
+        }
+
+
+        let page = null;
+
+        $(document.body).ready(function (e) {
+            page = new TagGroupPage();
+
+
+            // 검색버튼
+            $('#btnSearch').click(function (e) { page.searchMainData(); });
+
+            // 신규버튼
+            $('#btnNew').click(function (e) {
+
+                $('#tagGroupForm')[0].reset();
+                $('#tagGroupForm').find('#id').val('');
+
+                $('#detail_box').find('input, select, textarea').each(function () {
+                    if ($(this).is(':disabled')) {
+                        $(this).removeAttr('disabled');
+                    }
                 });
-            }
-        }
 
-        // 태그그룹 정보 삭제
-        deleteTagGroup() {
-            let _this = this;
-            let url = this.base_url+'/delete';
-            let id = $('#tagGroupForm').find('#id').val();
-            let data = { id: id };
-            let fnSuccess = function (res) {
-                if (res.success) {
-                    Notify.success("삭제되었습니다.");
-                    _this.searchMainData();
-                } else {
-                    Alert.alert('', res.message);
-                }
-            }
-
-            AjaxUtil.postAsyncData(url, data, fnSuccess);
-        }
-
-        // 엑셀 다운로드
-        exportExcel() {
-            var targetview = this.grid;
-            targetview.exportExcel('태그그룹.xls');
-        }
-
-    }
-
-    let page = null;
-
-    $(document.body).ready(function (e) {
-        page = new TagGroupPage();
-
-        // 검색버튼
-        $('#btnSearch').click(function (e) { page.searchMainData(); });
-
-        // 신규버튼
-        $('#btnNew').click(function (e) {
-
-            $('#tagGroupForm')[0].reset();
-            $('#tagGroupForm').find('#id').val('');
-
-            $('#detail_box').find('input, select, textarea').each(function () {
-                if ($(this).is(':disabled')) {
-                    $(this).removeAttr('disabled');
-                }
             });
 
-            page.setButtonState();
+            // 저장버튼
+            $('#btnSave').click(function (e) {
+                Alert.confirm('',
+                    "저장하시겠습니까?",
+                    function () { page.saveTagGroup() },
+                    function () { }
+                );
+            });
+
+            // 삭제버튼
+            $('#btnDel').click(function (e) {
+                Alert.confirm('',
+                    '삭제하시겠습니까?',
+                    function () { page.deleteTagGroup() },
+                    function () { }
+                );
+            });
+
+            page.searchMainData();
         });
 
-        // 저장버튼
-        $('#btnSave').click(function (e) {
-            Alert.confirm('', 
-                "저장하시겠습니까?",
-                function () { page.saveTagGroup() },
-                function () { }
-            );
-        });
-
-        // 삭제버튼
-        $('#btnDel').click(function (e) {
-            Alert.confirm('', 
-                '삭제하시겠습니까?',
-                function () { page.deleteTagGroup() },
-                function () { }
-            );
-        });
-
-        // 엑셀 다운로드
-        $('#btnExcel').on('click', function () {
-            page.exportExcel();
-        });
-
-		//그리드 컬럼 설정
-        page.popColSetting = new popColSetting();
-        let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-		
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });	
-
-        page.searchMainData();
-
-
-    });
-
-
-
-</script>
+    </script>
 </th:block>
+</html>

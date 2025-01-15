@@ -44,15 +44,31 @@ public class TagTrendService {
         for(int i=0; i<items.size(); i++) {
         	String tagCode = items.get(i).get("tag_code").toString();
         	//String tagName = items.get(i).get("tag_name").toString();
-        	
-        	
-        	if(items.get(i).get("lsl")!=null){
-        		lsl = Long.valueOf((items.get(i).get("lsl").toString()));
-        	}
-        	
-        	if(items.get(i).get("usl")!=null){
-        		usl = Long.valueOf((items.get(i).get("usl").toString()));
-        	}
+
+
+			if (items.get(i).get("lsl") != null) {
+				String lslString = items.get(i).get("lsl").toString();
+				if (lslString.contains(".")) {
+					// 소수점이 있는 경우 Double로 처리
+					double lslDouble = Double.valueOf(lslString);
+					lsl = (long) lslDouble; // 정수로 변환 (소수점 이하 버림)
+				} else {
+					// 정수인 경우 Long으로 변환
+					lsl = Long.valueOf(lslString);
+				}
+			}
+
+			if (items.get(i).get("usl") != null) {
+				String uslString = items.get(i).get("usl").toString();
+				if (uslString.contains(".")) {
+					// 소수점이 있는 경우 Double로 처리
+					double lslDouble = Double.valueOf(uslString);
+					usl = (long) lslDouble; // 정수로 변환 (소수점 이하 버림)
+				} else {
+					// 정수인 경우 Long으로 변환
+					usl = Long.valueOf(uslString);
+				}
+			}
         	
         	
         	dicParam.addValue("tagCode",tagCode);
