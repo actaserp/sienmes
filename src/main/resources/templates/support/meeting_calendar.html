@@ -37,160 +37,147 @@
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
                 <li>조치 및 통계</li>
-                <li>업무관리</li>
+                <li>업무지원</li>
                 <li>캘린더</li>
             </ul>
         </div>
+
         <section class="section">
-            <div class="section-top">
-                <div class="title_box">
-                    <div class="left_align">
-                        <h4 data-labelCd="캘린더">캘린더</h4>
-                        <!--<a href="https://fullcalendar.io/docs" target="_blank">(캘린더 공식문서)</a>-->
-                    </div>
-                </div>
-                <div class="grid_box">
-                    <div style="position: relative;height:760px;">
-                        <!-- <div data-ax5grid="grid1" style="height: 100%;"></div> -->
-                        <div id='calendar'></div>
-                    </div>
+            <div class="grid_box">
+                <div style="position: relative;height:760px;">
+                    <!-- <div data-ax5grid="grid1" style="height: 100%;"></div> -->
+                    <div id='calendar'></div>
                 </div>
             </div>
         </section>
     </div>
-</th:block>
 
-<script type="text/x-tmpl" id="eventTmpl">
-    <div class="content_wrap popup">
-        <section class="pt-2">
-            <div class="table_box sub">
-                <form id="modalForm" enctype="multipart/form-data">
-                    <input type="hidden" id="edit-id" name="edit-id" value="" />
-                        <div class="row">
+    <script type="text/x-tmpl" id="eventTmpl">
+        <div class="content_wrap popup">
+            <section class="pt-2">
+                <div class="table_box sub">
+                    <form id="modalForm" enctype="multipart/form-data">
+                        <input type="hidden" id="edit-id" name="edit-id" value="" />
+                            <div class="row">
 
-                                    <div class="col-9">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t4" data-labelCd="일정명">일정명</span>
-                                            </div>
-                                             <input class="form-control2 " type="text" name="edit-title" id="edit-title" required="required" />
-                                        </div>
-                                    </div>
-
-                                    <div class="col-3 mt-5 tal" >
-                                            <input type="checkbox" class="allDayNewEvent" id="edit-allDay" />
-                                        하루종일
-                                    </div>
-
-                                    <div class="col-3">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t4" data-labelCd="색상">색상</span>
-                                            </div>
-                                             <input class="form-control2 " type="color" id="edit-color" value="#ffffff" />
-                                        </div>
-                                    </div>
-
-                                    <div class="col-9 mt-5 tal" id="color_code" >
-                                        <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#ED5D47" id="color1">
-                                        <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#FF953F" id="color2">
-                                        <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#FFC325" id="color3">
-                                        <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#9ED900" id="color4">
-                                        <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#4B5CC4" id="color5">
-                                        <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#3B2E7E" id="color6">
-                                        <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#8D4BBB" id="color7">
-                                    </div>
-
-                                    <div class="col-6 ">
-                                        <div class="input-group" data-ax5picker="basic" id="srchDt">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t4" data-labelCd="시작일">시작일</span>
-                                            </div>
-                                            <input class="form-control2 tac" type="text" id="edit-start" name="edit-start">
-                                            <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t4" data-labelCd="시작시간">시작시간</span>
-                                            </div>
-
-                                                    <input class="form-control2" type="text" id="edit-start-time" name="edit-start-time" style="width:30%" />
-                                        </div>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <div class="input-group" data-ax5picker="basic" id="srchDt">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t4" data-labelCd="종료일">종료일</span>
-                                            </div>
-                                            <input class="form-control2 tac" type="text" id="edit-end" name="edit-end">
-                                            <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t4" data-labelCd="종료시간">종료시간</span>
-                                            </div>
-                                                    <input class="form-control2" type="text" id="edit-end-time" name="edit-end-time" style="width:30%" />                                        </div>
-                                    </div>
-
-                                        <!--
-                                        <div class="row">
-                                            <div class="col-xs-12">
-                                                <label class="col-xs-4" for="edit-type" data-labelCd="구분">구분</label>
-                                                <select class="col-xs-8" type="text" name="edit-type" id="edit-type"></select>
+                                        <div class="col-9">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t4" data-labelCd="일정명">일정명</span>
+                                                </div>
+                                                 <input class="form-control2 " type="text" name="edit-title" id="edit-title" required="required" />
                                             </div>
                                         </div>
-                                         -->
 
-                                    <div class="col-12">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text fit_box_t4_area" data-labelCd="설명">설명</span>
-                                            </div>
-                                             <textarea class="form-control2" id="edit-desc" name="edit-desc"></textarea>
+                                        <div class="col-3 mt-5 tal" >
+                                                <input type="checkbox" class="allDayNewEvent" id="edit-allDay" />
+                                            하루종일
                                         </div>
-                                    </div>
+
+                                        <div class="col-3">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t4" data-labelCd="색상">색상</span>
+                                                </div>
+                                                 <input class="form-control2 " type="color" id="edit-color" value="#ffffff" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-9 mt-5 tal" id="color_code" >
+                                            <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#ED5D47" id="color1">
+                                            <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#FF953F" id="color2">
+                                            <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#FFC325" id="color3">
+                                            <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#9ED900" id="color4">
+                                            <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#4B5CC4" id="color5">
+                                            <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#3B2E7E" id="color6">
+                                            <input type="button" class="btn-default" style="height:15px;width:25px;background-color:#8D4BBB" id="color7">
+                                        </div>
+
+                                        <div class="col-6 ">
+                                            <div class="input-group" data-ax5picker="basic" id="srchDt">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t4" data-labelCd="시작일">시작일</span>
+                                                </div>
+                                                <input class="form-control2 tac" type="text" id="edit-start" name="edit-start">
+                                                <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t4" data-labelCd="시작시간">시작시간</span>
+                                                </div>
+
+                                                        <input class="form-control2" type="text" id="edit-start-time" name="edit-start-time" style="width:30%" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6">
+                                            <div class="input-group" data-ax5picker="basic" id="srchDt">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t4" data-labelCd="종료일">종료일</span>
+                                                </div>
+                                                <input class="form-control2 tac" type="text" id="edit-end" name="edit-end">
+                                                <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t4" data-labelCd="종료시간">종료시간</span>
+                                                </div>
+                                                        <input class="form-control2" type="text" id="edit-end-time" name="edit-end-time" style="width:30%" />                                        </div>
+                                        </div>
+
+                                            <!--
+                                            <div class="row">
+                                                <div class="col-xs-12">
+                                                    <label class="col-xs-4" for="edit-type" data-labelCd="구분">구분</label>
+                                                    <select class="col-xs-8" type="text" name="edit-type" id="edit-type"></select>
+                                                </div>
+                                            </div>
+                                             -->
+
+                                        <div class="col-12">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text fit_box_t4_area" data-labelCd="설명">설명</span>
+                                                </div>
+                                                 <textarea class="form-control2" id="edit-desc" name="edit-desc"></textarea>
+                                            </div>
+                                        </div>
 
 
-                        </div>
-                </form>
+                            </div>
+                    </form>
+                </div>
+            </section>
+
+
+        <section class="section">
+            <div class="popup_button_group bottom">
+                <div class="left_align modalBtnContainer-addEvent">
+                    <button type="button" class="btn-popup y_write_auth" id="insertEvent"><span data-labelCd="저장">저장</span></button>
+                    <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+                </div>
+                <div class="left_align modalBtnContainer-modifyEvent">
+                    <button type="button" class="btn-popup y_write_auth" id="updateEvent"><span data-labelCd="저장">저장</span></button>
+                    <button type="button" class="btn-popup y_write_auth" id="deleteEvent"><span data-labelCd="삭제">삭제</span></button>
+                    <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+                </div>
             </div>
         </section>
-
-
-    <section class="section">
-        <div class="popup_button_group bottom">
-            <div class="left_align modalBtnContainer-addEvent">
-                <button type="button" class="btn-popup y_write_auth" id="insertEvent"><span data-labelCd="저장">저장</span></button>
-                <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
-            </div>
-            <div class="left_align modalBtnContainer-modifyEvent">
-                <button type="button" class="btn-popup y_write_auth" id="updateEvent"><span data-labelCd="저장">저장</span></button>
-                <button type="button" class="btn-popup y_write_auth" id="deleteEvent"><span data-labelCd="삭제">삭제</span></button>
-                <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
-            </div>
         </div>
-    </section>
-    </div>
-</script>
+    </script>
+</th:block>
 
 
 <th:block layout:fragment="scripts">
-    <th:block th:replace="/common/approve_box :: approve_box"></th:block>
-    <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
-    <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
-    <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
-    <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
     <script type="text/javascript" src="/resource/fullCalendar/c-main.min.js?v=1001"></script>
     <script type="text/javascript" src="/resource/fullCalendar/ko.js?v=1001"></script>
     <script type="text/javascript">
-
         class CalendarPage {
             constructor() {
                 let _this = this;
@@ -239,6 +226,8 @@
                     return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
                 }
             }
+
+
 
             //이벤트 그리기
             eventRender(event, element, view) {
@@ -663,6 +652,6 @@
             });
             //calendar.render();
         });
-</script>
+    </script>
 </th:block>
 </html>
