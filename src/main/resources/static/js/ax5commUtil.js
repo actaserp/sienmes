@@ -216,6 +216,34 @@ var Alert = {
             onStateChanged: function () {
                 if (this.state === 'open') {
                     mask.open();
+
+                    // 부모 페이지에 중앙으로 이동 요청
+                    parent.postMessage('centerPopup', '*');
+
+                    // 다이얼로그 타이틀에 'X' 버튼 추가
+                    const dialogTitle = document.querySelector('.ax-dialog-body');
+
+                    // 기존에 'X' 버튼이 없으면 추가
+                    if (!dialogTitle.querySelector('.btn-close')) {
+                        const closeButton = document.createElement('img');
+                        closeButton.src = '/images/icon/btn-popup-close.svg'; // 이미지 경로
+                        closeButton.alt = '닫기';
+                        closeButton.className = 'btn-close';
+                        closeButton.style.position = 'absolute';
+                        closeButton.style.right = '40px';
+                        closeButton.style.top = '40px';
+                        closeButton.style.border = 'none';
+                        closeButton.style.background = 'none';
+                        closeButton.style.fontSize = '16px';
+                        closeButton.style.cursor = 'pointer';
+
+                        // 'X' 버튼을 클릭했을 때 다이얼로그를 닫기
+                        closeButton.addEventListener('click', function () {
+                            dialog.close(); // 다이얼로그 닫기
+                        });
+
+                        dialogTitle.appendChild(closeButton);
+                    }
                 }
                 else if (this.state === 'close') {
                     mask.close();
@@ -223,15 +251,56 @@ var Alert = {
             }
         });
         confirmDialog.setConfig({
-            title: i18n.getCommonText('확인'),
+            // title: i18n.getCommonText('확인'),
             lang: {
                 "ok": i18n.getCommonText("확인"),
                 "cancel": i18n.getCommonText("취소")
             },
             theme: 'danger',
+            buttons: [
+                {key: "ok", label: i18n.getCommonText("확인")},       // 확인 버튼을 나중에
+                {key: "cancel", label: i18n.getCommonText("취소")}  // 취소 버튼을 먼저
+
+            ],
             onStateChanged: function () {
                 if (this.state === 'open') {
                     mask.open();
+
+                    // 다이얼로그 타이틀에 'X' 버튼 추가
+                    const dialogTitle = document.querySelector('.ax-dialog-body');
+
+                    // 기존에 'X' 버튼이 없으면 추가
+                    if (!dialogTitle.querySelector('.btn-close')) {
+                        const closeButton = document.createElement('img');
+                        closeButton.src = '/images/icon/btn-popup-close.svg'; // 이미지 경로
+                        closeButton.alt = '닫기';
+                        closeButton.className = 'btn-close';
+                        closeButton.style.position = 'absolute';
+                        closeButton.style.right = '40px';
+                        closeButton.style.top = '40px';
+                        closeButton.style.border = 'none';
+                        closeButton.style.background = 'none';
+                        closeButton.style.fontSize = '16px';
+                        closeButton.style.cursor = 'pointer';
+
+                        // 'X' 버튼을 클릭했을 때 다이얼로그를 닫기
+                        closeButton.addEventListener('click', function () {
+                            confirmDialog.close(); // 다이얼로그 닫기
+                        });
+
+                        dialogTitle.appendChild(closeButton);
+                    }
+
+                    // 버튼 순서를 변경하는 로직
+                    const buttonWrap = document.querySelector('.ax-button-wrap');
+                    const okButton = buttonWrap.querySelector('[data-dialog-btn="ok"]');
+                    const cancelButton = buttonWrap.querySelector('[data-dialog-btn="cancel"]');
+
+                    // 기존 버튼 순서를 교체
+                    if (cancelButton && okButton) {
+                        buttonWrap.appendChild(okButton);    // 확인 버튼을 뒤에 추가
+                        buttonWrap.appendChild(cancelButton); // 취소 버튼을 먼저 추가
+                    }
                 }
                 else if (this.state === 'close') {
                     mask.close();
@@ -318,8 +387,8 @@ var Notify = {
 var Ax5Modal = {
     open: function (_config) {
         var defaultconfig = {
-            width: 700,
-            height: 500,
+            width: 1200,
+            height: 900,
             method: 'get',
             url: '',
             callbackfn: 'setPopUpResult'

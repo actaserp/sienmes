@@ -1,63 +1,74 @@
 <html layout:decorate="~{layout_page}">
 
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section class="section">
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="LOT재고 조정 확인">LOT재고 조정 확인</h3>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>LOT 재고 조정 확인</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>        
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>재고관리</li>
+                <li>LOT 재고 조정 확인</li>
+            </ul>
         </div>
 
-        <div class="table_box search">
-            <form id="searchForm" autocomplete="off">
-                <div class="row">
-
-                    <div class="col-6 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="창고">창고</span>
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label for="cboStoreHouse">
+                                창고
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select class="form-control2" id="cboStoreHouse" name="storehouse_id"></select>
                             </div>
-                            <select class="form-control2" id="cboStoreHouse" name="cboStoreHouse" ></select>
-                        </div>
-                    </div>
+                        </dd>
+                    </dl>
 
-                    <div class="col-5 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t9" data-labelCd="품명/코드/LOT">품명/코드/LOT</span>
+                    <dl>
+                        <dt>
+                            <label for="keyword">
+                                품명/코드/LOT
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input class="form-control2" id="keyword" name="keyword" />
                             </div>
-                            <input class="form-control2" id="keyword" name="keyword" />
-                        </div>
-                    </div>
-
-                    <div class="col-1">
-                            <button type="button" class="btn-default" id="btnSearch" ><i class="fas fa-search"></i></button>
-                    </div>
-
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>&nbsp;</dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
                 </div>
-            </form>
-        </div>
-    </section>
-    <section>
-        <div class="grid_box" >
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="LOT재고 조정 내역">LOT재고 조정 내역</span>
-                <button type="button" class="btn-default" id="btnConfirm" data-labelCd="확인">확인</button>
-                <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
             </div>
-            <div class="h-630" data-ax5grid="inventory-adjustment-grid" ></div>
-        </div>
-
-    </section>
-</div>
+            <div class="grid_box">
+                <div class="search-wrap">
+                    <button type="button" class="btn y_write_auth" id="btnConfirm" data-labelCd="확인">확인</button>
+                </div>
+                <div id="inventory-adjustment-grid" style="height: 680px;"></div>
+            </div>
+        </section>
+    </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
 <script type="text/javascript">
     class AdjustmentConfirmPage {
         constructor() {
@@ -68,64 +79,70 @@
 
         init() {
             let _this = this;
-            let config = {
-                target: $('[data-ax5grid="inventory-adjustment-grid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: true,  // checkbox(선택) 보이기 여부
-                multipleSelect: true, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        if (e.column.key == "confirm") {
-                            _this.saveData(e.item);
+            this.grid = new wijmo.grid.FlexGrid('#inventory-adjustment-grid', {
+                autoGenerateColumns: false,
+                allowSorting: false,
+                selectionMode: wijmo.grid.SelectionMode.ListBox,
+                headersVisibility: wijmo.grid.HeadersVisibility.All,
+                frozenColumns: 0,
+                isReadOnly: true,
+                itemsSource: new wijmo.collections.CollectionView([]),
+                formatItem: (s, e) => {
+
+                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                        e.cell.style.textAlign = 'center';
+                    }
+
+                    if (e.panel.cellType === wijmo.grid.CellType.Cell && s.columns[e.col].binding === 'confirm') {
+                        e.cell.textContent = '';
+                        if (userinfo.can_write()) {
+                            const button = document.createElement('button');
+                            button.className = 'btn-default';
+                            button.style.width = '100%';
+                            button.style.height = '25px';
+                            button.textContent = '확인';
+                            button.onclick = () => {
+                                _this.saveData(_this.grid.selectedItems[0]);
+                            };
+                            e.cell.appendChild(button);
+                        } else {
+                            e.cell.textContent = '권한없음';
                         }
                     }
                 },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [                  //컬럼 key 변경 필요
-                    { key: 'mat_type', label: '품목유형', width: 80, align: 'center' },
-                    { key: 'mat_grp_name', label: '품목그룹', width: 80, align: 'center' },
-                    { key: 'mat_code', label: '품목코드', width: 90, align: 'center' },
-                    { key: 'mat_name', label: '품목명', width: 250, align: 'left' },
-                    { key: 'unit_name', label: '단위', width: 70, align: 'center' },
-                    { key: 'LotNumber', label: 'LOT', width: 150, align: 'center' },
-                    { key: 'store_house_name', label: '창고명', width: 100, align: 'center' },      
-                    { key: 'state', label: '상태', width: 70, align: 'center' },      
-                    { key: 'account_stock', label: '장부재고량', width: 90, align: 'right', formatter:'money'  },
-                    { key: 'real_stock', label: '실재고량', width: 90, align: 'right', formatter:'money'  },
-                    { key: 'gap', label: '차이', width: 90, align: 'right', formatter:'money'  },
-                    { key: 'unit_price', label: '단가', width: 80, align: 'right', formatter:'money'  },
-                    { key: 'gap_money', label: '차이금액', width: 80, align: 'right', formatter:'money'  },
-                    { key: 'take_date_time', label: '실사일시', width: 140, align: 'center' },
-                    { key: 'description', label: '비고', width: 140, align: 'left' },
-                    {
-                        key: 'confirm', label: '확인', width: 80, align: 'center', formatter: function () {
-                            return '<input type="button" value="확인" style="height:1.4em;font-size:1em;padding:0;margin:0"></button>';
-                        }
-                    },
+                columns: [
+                    { binding: 'mat_type', header: '품목유형', width: 100, align: 'center' },
+                    { binding: 'mat_grp_name', header: '품목그룹', width: 100, align: 'center' },
+                    { binding: 'mat_code', header: '품목코드', width: 100, align: 'center'  },
+                    { binding: 'mat_name', header: '품목명', width: 200, align: 'left'  },
+                    { binding: 'unit_name', header: '단위', width: 80, align: 'center'  },
+                    { binding: 'LotNumber', header: 'LOT', width: 150, align: 'center' },
+                    { binding: 'store_house_name', header: '창고명', width: 100, align: 'center'  },
+                    { binding: 'state', header: '상태', width: 70, align: 'center' },
+                    { binding: 'account_stock', header: '장부재고량', width: 100, align: 'right'   },
+                    { binding: 'real_stock', header: '실재고량', width: 100, align: 'right'   },
+                    { binding: 'gap', header: '차이', width: 100, align: 'right'   },
+                    { binding: 'unit_price', header: '단가', width: 100, align: 'right'   },
+                    { binding: 'gap_money', header: '차이금액', width: 100, align: 'right'   },
+                    { binding: 'take_date_time', header: '실사일시', width: 150, align: 'center'  },
+                    { binding: 'description', header: '비고', width: 150, align: 'left' },
+                    { binding: 'confirm', header: '확인', width: 80, align: 'center'  },
                 ]
-            };
+            });
 
-            this.grid = new ax5.ui.grid(config);
-            this.grid_config = config;
+
+            let selector = new wijmo.grid.selector.Selector(this.grid, {
+                itemChecked: function () {
+
+                }
+            })
+
+            new FlexGridContextMenu(this.grid);
+            this.grid.downloadFileName = 'LOT 재고 조정 확인 목록';
+
             AjaxUtil.fillSelectOptions($('#cboStoreHouse'), 'store_house', 'all', false);
         }
 
-        exportExcel() {
-            var targetview = this.grid;
-            targetview.exportExcel('LOT재고조정확인.xls');
-        }
 
         searchMainData() {
             let _this = this;
@@ -136,16 +153,16 @@
 
             let fnsuccess = function(result){
                 if (result.success) {
-                    _this.grid.setData(result.data);
+                    _this.grid.itemsSource.sourceCollection = result.data;
                 }
-                _this.grid.repaint();
+                _this.grid.refresh();
             };
             let url = this.baseUrl + "/lot_adjust_confirm_list";
             AjaxUtil.getAsyncData(url, data, fnsuccess);
         }
 
         chkSelect() {
-            if (this.grid.getList("selected").length > 0) {
+            if (this.grid.selectedItems.length > 0) {
                 return true;
             } else {
                 Alert.alert('', '확인할 품목을 선택하세요.');
@@ -155,6 +172,7 @@
 
         saveData(item) {
             let _this = this;
+            console.log('item', item);
             let fnConfirmOk = function () {
                 let param = {};
                 if (item != undefined) { //그리드내의 확인 클릭시
@@ -162,7 +180,7 @@
                 }
                 else { // 좌측 상단 버튼 클릭시
                     let list = [];
-                    let temp = _this.grid.getList("selected");
+                    let temp = _this.grid.selectedItems;
                     temp.forEach(function (item) {
                         let data = {
                             'id': item.id,
@@ -208,29 +226,12 @@
             if (e.keyCode == 13) 
                 page.searchMainData();
         });
-        
-        $('#btnExcel').on('click', function () {
-            page.exportExcel();
-        });
 
         $('#btnConfirm').click(function (e) {
             if (page.chkSelect()) 
                 page.saveData();
         });
 
-        //그리드 컬럼 설정
-        page.popColSetting = new popColSetting();
-        let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-		
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });	
 
         page.searchMainData();
 

@@ -1,127 +1,126 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-<div class="content_wrap">
-
-    <section class="section">
-
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="수주 업로드">수주 업로드</h3>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>수주 업로드</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>생산 관리</li>
+                <li>수주 업로드</li>
+            </ul>
         </div>
-
-        <div class="table_box search">
-
-            <div class="row">
-
-                <div class="col-12 col-lg-6 col-lg-5 col-xl-4" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend mr-s1">
-                            <select class="input-group-text2 fit_box_sm" id="cboDateKind" name="DateKind" >
-                            <option value="sales" data-labelCd="수주일">수주일</option>
-                            <option value="delivery" data-labelCd="납기일">납기일</option>
-                            </select>
-                        </div> 
-                        <div data-ax5picker="multi" id="ax5Dt">
-                            <div class="input-group-append">
-                            <input class="tac " type="text" id="srchStartDt" name="srchStartDt" />
-                                <span class="input-group-text fs-xl">
-                                    <i class="fas fa-calendar-alt calendar_color" ></i>
-                                </span>
-                            <span class="slow_sign">~</span>
-                            <input class="tac " type="text" id="srchEndDt" name="srchEndDt" />
-                                <span class="input-group-text fs-xl">
-                                    <i class="fas fa-calendar-alt calendar_color"></i>
-                                </span>
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label for="cboDateKind">
+                                검색 구분<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboDateKind" name="cboDateKind">
+                                    <option value="sales">수주일</option>
+                                    <option value="delivery">납기일</option>
+                                </select>
                             </div>
-                        </div>
-                    </div>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>&nbsp;</dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
                 </div>
-
-
-                <div class="col-1" >
-                        <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
+                <div class="button-wrap">
+                    <ul>
+                        <li>
+                            <a class="btn" title="엑셀 업로드" id="btnShowUpload">
+                                엑셀 업로드
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn" title="수주 전환" id="btnSuju">
+                                수주 전환
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn" title="삭제" id="btnDelete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn" title="양식 다운로드" id="btnDownloadTemplate">
+                                양식 다운로드
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-
             </div>
-        </div>
-
-
-    </section>
-
-
-    <section class="section ">
-        <div class="grid_box">
-            <div class="title_box">
-                <div >
-                    <span class="right_align rpt" data-labelCd="수주 내역">수주 내역</span>
-                    <button type="button" class="btn-default" id="btnShowUpload"><span data-labelCd="엑셀 업로드">엑셀 업로드</span></button>
-                    <button type="button" class="btn-default y_write_auth" id="btnSuju"><span data-labelCd="수주 전환">수주 전환</span></button>
-                    <button type="button" class="btn-danger y_write_auth" id="btnDelete" ><i class="fas fa-trash"></i></button>
-                    <button type="button" class="btn-default" id="btnDownloadTemplate"><span data-labelCd="양식 다운로드">양식 다운로드</span></button>
-                    <button type="button" class="btn-default" id="btnExcel" title="엑셀 다운로드"><i class="fas fa-file-excel"></i></button>
-                </div>
+            <div class="container-fluid">
+                <div id="sujuGrid" style="height: 730px;"></div>
             </div>
-            <div class="h-650" data-ax5grid="sujuGrid" ></div>
-        </div>
-    </section>
-</div>
+
+        </section>
+    </div>
 
 <script type="text/x-tmpl" id="excelUploadTemplate">
-<div class="content_wrap popup" id="div_excel_upload">
-    <!--<header>
-        <h4>엑셀 업로드</h4>
-        <div class="popup_close_box"><button class="btn_popup_close" id="modal-close"><i class="fas fa-times"></i></button></div>
-    </header>-->
+    <div class="content_wrap popup" id="div_excel_upload">
 
-    <section class="pt-2">
-
-
-        <form id="excelUploadForm">
-        <div class="table_box sub">
-            <div class="row">
-
-                <div class="col-12" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_md" data-labelCd="일자">일자</span>
-                        </div>
-                        <input class="form-control2 tac" type="date" id="data_date" name="data_date" value=""  />
-                    </div>
-                </div>
-
-                <div class="col-12" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_md" data-labelCd="첨부파일">첨부파일</span>
-                        </div>
-                        <input class="form-control2 tac" type="file" id="upload_file" name="upload_file" enctype="multipart/form-data" accept=".xls, .xlsx"/>
-                    </div>
-                </div>
-
-            </div>
-       </div>
-       </form>
+        <div class="table-wrap">
+            <form id="excelUploadForm">
+            <table class="write-table">
+                <colgroup>
+                    <col style="width: 25%;">
+                    <col style="width: 75%;">
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <th style="text-align: center">
+                            <label>일자</label>
+                        </th>
+                        <td>
+                            <input style="width:300px;" type="date" id="data_date" name="data_date" value=""  />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: center">
+                            <label>첨부파일</label>
+                        </th>
+                        <td>
+                            <input style="width:300px; height: 44px;" type="file" id="upload_file" name="upload_file" enctype="multipart/form-data" accept=".xls, .xlsx"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            </form>
+        </div>
         <div class="pt-2">
             <span style="padding-top:30px;">*업로드 시 상태는 Excel이며, 수주전환 이전데이터만 삭제가능합니다.</span>
             <textarea id="upload_message" style='display:none;width:100%;height:150px;'></textarea>
         </div>
 
-    </section>
+        </section>
 
-   <section class="popupcontent" >
-        <div class="left_align ">
+        <div class="popup-button">
             <button type="button" class="btn-popup y_write_auth" id="btn_excel_save" >저장</button>
             <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
         </div>
-
-
-    </section>
-
-</div>
+    </div>
 </script>
 </th:block>
 
@@ -136,51 +135,44 @@
 
         init() {
             let _this = this;
-            let config = {
-                target: $('[data-ax5grid="sujuGrid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: true,  // checkbox(선택) 보이기 여부
-                multipleSelect: true, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 35  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        this.self.select(this.dindex);
-                    }
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
+            this.grid = new wijmo.grid.FlexGrid('#sujuGrid', {
+                autoGenerateColumns: false,
+                selectionMode: wijmo.grid.SelectionMode.ListBox, // 다중 선택 가능
+                frozenColumns: 0, // 열 고정
+                headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                allowSorting: true, // 모든 컬럼 정렬 가능
                 columns: [
-                    { key: 'state', label: '상태', width: 80, align: 'center' },
-                    { key: 'jumun_number', label: '주문번호', width: 110, align: 'left' },
-                    { key: 'company_code', label: '업체코드', width: 100, align: 'center' },
-                    { key: 'company_name', label: '업체명', width: 400, align: 'left' },
-                    { key: 'product_code', label: '제품코드', width: 100, align: 'center' },
-                    { key: 'product_name', label: '제품명', width: 200, align: 'left' },
-                    { key: 'unit', label: '단위', width: 80, align: 'center' },
-                    { key: 'suju_qty', label: '수량', width: 80, align: 'right' ,formatter:'money'},
-                    { key: 'jumun_date', label: '주문일', width: 120, align: 'center' },
-                    { key: 'due_date', label: '납기일', width: 120, align: 'center' },
-                    
-                ]
-            };
-            this.grid = new ax5.ui.grid(config);
+                    { binding: 'state', header: '상태', width: 80, align: 'center', isReadOnly: true },
+                    { binding: 'jumun_number', header: '주문번호', width: 110, align: 'left', isReadOnly: true },
+                    { binding: 'company_code', header: '업체코드', width: 100, align: 'center', isReadOnly: true },
+                    { binding: 'company_name', header: '업체명', width: 400, align: 'left', isReadOnly: true },
+                    { binding: 'product_code', header: '제품코드', width: 100, align: 'center', isReadOnly: true },
+                    { binding: 'product_name', header: '제품명', width: 200, align: 'left', isReadOnly: true },
+                    { binding: 'unit', header: '단위', width: 80, align: 'center', isReadOnly: true },
+                    { binding: 'suju_qty', header: '수량', width: 80, align: 'right', format: 'n0', isReadOnly: true },
+                    { binding: 'jumun_date', header: '주문일', width: 120, align: 'center', isReadOnly: true },
+                    { binding: 'due_date', header: '납기일', width: 120, align: 'center', isReadOnly: true },
+                ],
+                itemsSource: new wijmo.collections.CollectionView([]), // 빈 데이터로 초기화
+                itemFormatter: (panel, row, col, cell) => {
+                    if (panel.cellType === wijmo.grid.CellType.Cell) {
+                        const column = panel.columns[col];
+                        if (column.binding === 'suju_qty') {
+                            cell.style.textAlign = 'right';
+                        }
+                    }
+                }
+            });
+
+            new FlexGridContextMenu(this.grid);
+            this.grid.downloadFileName = '수주 내역';
 
             let nowDate = CommonUtil.getYYYYMMDD();
             let dueDate = CommonUtil.getYYYYMMDD(10);
 
             // 엔터키 검색
             $('#keyword').on('keypress', function (e) {
-                if (event.keyCode == 13) {
+                if (e.keyCode === 13) {
                     _this.searchDataBind();
                 }
             });
@@ -196,9 +188,9 @@
 
             //팝업공통모듈
             let modalContainer = new PopupDraggable('엑셀 업로드');
-            modalContainer.open({ width: 440, height: 180, $content });
+            modalContainer.open({ width: 440, height: 250, $content });
 
-            $content.find('#data_date').ax5DatePicker({ direction: 'top' });
+
 
             $content.find('#btn_excel_save').on('click', function () {
                 let $form = $content.find('#excelUploadForm');
@@ -211,13 +203,6 @@
                     function () { }
                 );
             });
-        }
-
-        // 엑셀 다운로드
-        exportExcel() {
-            var targetview = this.grid;
-            // 현재 html코드로 데이터 만들어 확장자만 xls로 변경해주고 있음
-            targetview.exportExcel('수주업로드.xls');
         }
 
         // 엑셀 업로드 저장
@@ -244,44 +229,12 @@
                 }
             }
 
-            //formData.append("csrfmiddlewaretoken", $('[name="csrfmiddlewaretoken"]').val());
-            //$.ajax({
-            //    url: '/api/sales/suju_upload?action=upload_save',
-            //    processData: false,
-            //    contentType: false,
-            //    data: formData,
-            //    type: 'POST',
-            //    success: function (result) {
-            //        let message = '저장되었습니다.';
-            //        if (result.success) {
-            //            Notify.success(message);
-            //            _this.searchDataBind();
-            //            modalContainer.close();
-            //        } else {
-            //            let $divMessage = modalContainer.$content.find('#upload_message');
-            //            $divMessage.text(JSON.stringify(result.error_items));
-            //            $divMessage.show();
-            //        }
-
-            //    }
-            //});
         }
 
         //수주 변환
         changeSujuBulkData(items) {
             let _this = this;
-            /*
-            let data = {
-                'list_data': items,
-            }
-            let Q = {
-                value :JSON.stringify(data)
-            }
-			
-			let Q = [
-                   items,
-                ]
-            */      
+
             let data = {
                 Q: JSON.stringify(items)
             }
@@ -300,14 +253,7 @@
         //수주 bulk 데이터 삭제
         deleteSujuBulkData(items) {
             let _this = this;
-            /*
-            let data = {
-                'list_data': items,
-            }
-            let Q = {
-                value :JSON.stringify(data)
-            }
-            */
+
 			let data = {
                 Q: JSON.stringify(items)
             }
@@ -353,14 +299,7 @@
 
             let fnsuccess = function (result) {
                 if (result.data != null) {
-                    let recordsTotal = result.data.length;
-                    _this.grid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: recordsTotal,
-                        }
-                    });
+                    _this.grid.itemsSource.sourceCollection = result.data;
                 }
             };
             AjaxUtil.getAsyncData(_this.baseUrl + '/read', data, fnsuccess);
@@ -368,51 +307,10 @@
     }
 
     let page = null;
-    var picker = new ax5.ui.picker();
+
 
     $(document).ready(function (e) {
         page = new SujuUploadPage();
-
-        picker.bind({
-            target: $('[data-ax5picker="multi"]'),  
-            direction: "top",
-   			locale: {
-				format: 'YY-MM-DD'
-			},
-            content: {
-                width:  212,  // 130, //270,
-                margin: 10,
-                type: 'date',
-                
-                config: {
-                    control: {
-                        left: '<i class="fa fa-arrow-left"></i>',   //fa-chevron-left
-                        yearTmpl: '%s',
-                        monthTmpl: '%s',
-                        right: '<i class="fa fa-arrow-right"></i>'
-                    },
-                    lang: {
-                        yearTmpl: "%s년",
-                        months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-                        dayTmpl: "%s"
-                    }
-                }
-            },
-            btns: {
-                /*ok: {
-                    label: "조회", theme: "default", onClick: function () {
-                        this.self.close();
-                        page.searchDataBind();
-                        
-
-                    }
-                }*/
-            },
-            onStateChanged: function () {
- 
-            }
-        });
-
 
         //$('#divDate').ax5DatePicker({ direction: 'top' });
         $('#srchStartDt').val(CommonUtil.getYYYYMMDD());
@@ -431,7 +329,7 @@
 
         //수주 변환
         $('#btnSuju').click(function (e) {
-            let items = page.grid.getList('selected');
+            let items = page.grid.itemsSource.sourceCollection.filter(item => item.selected);
             if (items.length > 0) {
                 Alert.confirm('', '수주데이터로 전환하시겠습니까?',
                     function () {
@@ -462,7 +360,7 @@
 
         // 삭제 버튼
         $('#btnDelete').click(function (e) {
-            let items = page.grid.getList('selected');
+            let items = page.grid.selectedItems;
             if (items.length > 0) {
                 Alert.confirm('', '삭제하시겠습니까?',
                     function () {

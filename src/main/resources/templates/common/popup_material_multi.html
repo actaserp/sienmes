@@ -123,6 +123,11 @@
                 autoGenerateColumns: false,
                 showMarquee: true,
                 isReadOnly: true,
+                formatItem: (sender, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                        e.cell.style.textAlign = 'center';
+                    }
+                },
                 columns: [
                     { binding: 'MaterialTypeName', header: '품목구분', width: 100, align: 'left' },
                     { binding: 'group_name', header: '품목그룹', width: 110, align: 'left' },

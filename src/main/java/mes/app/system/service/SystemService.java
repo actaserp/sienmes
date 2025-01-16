@@ -221,11 +221,12 @@ public class SystemService {
         , mi."MenuCode" as code 
         , mi."Url" as url
         --, false as ismanual
-        , 0 as ismanual
+        --, 0 as ismanual
+	    , bm."_created" as created
         from bookmark bm 
         inner join menu_item mi on bm."MenuCode" = mi."MenuCode" 
         where bm."User_id" = :user_id
-        order by 1				
+        order by created
 		""";
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
@@ -242,14 +243,17 @@ public class SystemService {
 		namedParameters.addValue("menucode", menucode);
 		namedParameters.addValue("user_id", user.getId());
 
-		String sql = """
-		delete from bookmark where "User_id"=:user_id and "MenuCode"=:menucode
-		""";			
-		iRowEffected = this.jdbcTemplate.update(sql, namedParameters);		
-	    if("true".equals(isbookmark)) {	    	
-			sql = """
-			insert into bookmark ("User_id", "MenuCode", _created) values(:user_id, :menucode, now())
-			""";    	
+		if ("false".equals(isbookmark)) {
+			// isbookmark가 'false'일 경우, 북마크 추가
+			String sql = """
+                insert into bookmark ("User_id", "MenuCode", _created) values(:user_id, :menucode, now())
+                """;
+			iRowEffected = this.jdbcTemplate.update(sql, namedParameters);
+		} else {
+			// isbookmark가 'true'일 경우, 북마크 삭제
+			String sql = """
+                delete from bookmark where "User_id"=:user_id and "MenuCode"=:menucode
+                """;
 			iRowEffected = this.jdbcTemplate.update(sql, namedParameters);
 		}    
 		

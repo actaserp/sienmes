@@ -1,95 +1,108 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section class="section">
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="재고 조정">재고 조정</h3>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>재고조정</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>        
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>재고관리</li>
+                <li>재고조정</li>
+            </ul>
         </div>
 
-        <div class="table_box search">
-            <form id="searchForm" onsubmit="false" autocomplete="off">
-                <div class="row">
-
-                    <div class="col-6 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="창고">창고</span>
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label for="cboStoreHouse">
+                                창고
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select class="form-control2" id="cboStoreHouse" name="storehouse_id"></select>
                             </div>
-                            <select class="form-control2" id="cboStoreHouse" name="cboStoreHouse" ></select>
-
-                        </div>
-                    </div>
-
-                    <div class="col-6 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="품목유형">품목유형</span>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label for="cboMaterialType">
+                                품목유형
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select class="form-control2" id="cboMaterialType" name="cboMaterialType"></select>
                             </div>
-                            <select class="form-control2" id="cboMaterialType" name="cboMaterialType" ></select>
+                        </dd>
+                    </dl>
 
-                        </div>
-                    </div>
-                    <div class="col-6 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="관리등급">관리등급</span>
+                    <dl>
+                        <dt>
+                            <label for="cboManageLevel">
+                                관리등급
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select class="form-control2" id="cboManageLevel" name="cboManageLevel" ></select>
                             </div>
-                            <select class="form-control2" id="cboManageLevel" name="cboManageLevel" ></select>
-
-                        </div>
-                    </div>
-
-                    <div class="col-6 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="품목그룹">품목그룹</span>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label for="cboMaterialGroup">
+                                품목그룹
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select class="form-control2" id="cboMaterialGroup" name="cboMaterialGroup" ></select>
                             </div>
-                            <select class="form-control2" id="cboMaterialGroup" name="cboMaterialGroup" ></select>
-
-                        </div>
-                    </div>
-
-
-                    <div class="col-6 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="품목명">품목명</span>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label for="txtName">
+                                품목명
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input class="form-control2" id="txtName" name="txtName" />
                             </div>
-                            <input class="form-control2" id="txtName" name="txtName" />
-
-                        </div>
-                    </div>
-
-                    <div class="col-1" >
-                        <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                    </div> 
-
-
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>&nbsp;</dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
                 </div>
-            </form>
-        </div>
-    </section>
-    <section>
-        <div class="grid_box">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="재고 조정 내역">재고 조정 내역</span>
-                <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
             </div>
-            <div class="h-630" data-ax5grid="inventory-adjustment-grid" ></div>  
-        </div>
+            <div class="container-fluid">
+                <div id="inventory-adjustment-grid" style="height: 730px;"></div>
+            </div>
+        </section>
+    </div>
 
-    </section>
-</div>
-</script>
 </th:block>
 
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+
 <script type="text/javascript">
     let gUrl = "/api/inventory/mat_stock_take";
     let $content;
@@ -103,127 +116,119 @@
 
         init() {
             let _this = this;
-            let config = {
-                target: $('[data-ax5grid="inventory-adjustment-grid"]'),
-                frozenColumnIndex: 5, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: true, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: false, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    //columnHeight: 25, // body의 기본 높이
-                    columnHeight: 35, // body의 기본 높이
-                    onClick: function (e) {
-                        if (e.column.key == "button") {
-                            //save
-                            let house_pk = e.item.house_pk;
-                            let mat_pk = e.item.id;
-                            let account_stock = e.item.account_stock;
-                            let real_stock = e.item.real_stock;
-                            let gap = e.item.gap;
-                            let description = e.item.gap_description;
-							
-                            if (gap == undefined) {
-                                Alert.alert('', "차이가 입력되어야 합니다.");
-                                return;
-                            }
+            this.grid = new wijmo.grid.FlexGrid('#inventory-adjustment-grid', {
+                autoGenerateColumns: false,
+                allowSorting: true,
+                frozenColumns: 5,
+                selectionMode: wijmo.grid.SelectionMode.Row,
+                isReadOnly: false,
+                headersVisibility: wijmo.grid.HeadersVisibility.All,
+                itemsSource: new wijmo.collections.CollectionView([]),
+                formatItem: (s, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.RowHeader) {
+                        // 헤더에 순번
+                        e.cell.textContent = (e.row + 1).toString();
+                    }
+                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                        e.cell.style.textAlign = 'center';
+                    }
 
-                            let url = gUrl + "/save";
-                            let param = {
-                                'house_pk':house_pk,
-                                'mat_pk':mat_pk,
-                                'account_stock':account_stock,
-                                'real_stock':real_stock,
-                                'gap':gap,
-                                'description':description,
-                            };
-                            let result = AjaxUtil.postSyncData(url, param);
-                            if (result.data != null) {
-                                if (result.data.id) {
-                                    Alert.alert('', "저장했습니다.");
-                                    _this.grid.setValue(this.dindex, 'last_take_date', result.data.takeTime);
-                                    _this.grid.repaint();
-                                }
-                            }
+                    // 헤더가 'button' 컬럼이면 빈칸 처리
+                    if (s.columns[e.col].binding === 'button') {
+                        e.cell.textContent = ''; // 빈칸 처리
+                    }
 
-                        }
-                    },
-                    onDataChanged: function () {
-                        if (this.list.length == 0)
-                            return;
-                        if (this.key == 'real_stock') {
-                            let real_stock = this.item.real_stock;
-                            if (real_stock == undefined || real_stock == null) {
-                                return;
+                    // 이동량 열 헤더 스타일 적용
+                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader
+                        && s.columns[e.col].binding === 'real_stock'
+                        || s.columns[e.col].binding === 'gap_description') {
+                        e.cell.style.color = '#5567ff'; // 글자 색깔 변경
+                    }
+
+                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                        const col = s.columns[e.col];
+                        const item = e.panel.rows[e.row].dataItem;
+
+                        if (col.binding === 'button') {
+                            e.cell.textContent = ''; // 기존 내용 제거
+                            if (userinfo.can_write()) {
+                                const button = document.createElement('button');
+                                button.className = 'btn-default y_write_auth';
+                                button.textContent = '저장';
+                                button.style.width = '100%';
+                                button.style.height = '25px';
+                                button.onclick = () => {
+                                    const house_pk = item.house_pk;
+                                    const mat_pk = item.id;
+                                    const account_stock = item.account_stock;
+                                    const real_stock = item.real_stock;
+                                    const gap = item.gap;
+                                    const description = item.gap_description;
+
+                                    if (gap === undefined) {
+                                        Alert.alert('', '차이가 입력되어야 합니다.');
+                                        return;
+                                    }
+
+                                    const url = gUrl + '/save';
+                                    const param = {
+                                        house_pk,
+                                        mat_pk,
+                                        account_stock,
+                                        real_stock,
+                                        gap,
+                                        description
+                                    };
+
+                                    const result = AjaxUtil.postSyncData(url, param);
+                                    if (result.data?.id) {
+                                        Alert.alert('', '저장했습니다.');
+                                        item.last_take_date = result.data.takeTime;
+                                        s.invalidate(); // 그리드 다시 그리기
+                                    }
+                                };
+                                e.cell.appendChild(button); // 버튼 추가
+                            } else {
+                                e.cell.textContent = '권한없음';
                             }
-                            let gap = real_stock - this.item.account_stock;
-                            this.item.gap = gap;
-                            _this.grid.repaint();
                         }
-                    },
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [                  //컬럼 key 변경 필요
-                    { key: 'id', label: '품목번호', width: 100, align: 'right' },
-                    { key: 'mat_type', label: '품목유형', width: 100, align: 'center' },
-                    { key: 'mat_grp_name', label: '품목그룹', width: 150, align: 'center' },
-                    { key: 'mat_code', label: '품목코드', width: 100, align: 'center' },
-                    { key: 'mat_name', label: '품목명', width: 200, align: 'left' },
-                    { key: 'manage_level', label: '관리등급', width: 100, align: 'center' },
-                    { key: 'unit_name', label: '단위', width: 100, align: 'center' },      
-                    { key: 'account_stock', label: '장부재고', width: 100, align: 'right', formatter: 'money' },
-                    {
-                        key: 'real_stock', label: '<span style="color:blue">실사재고</span>', width: 100, align: 'right',
-                        formatter: 'money', editor: { type: 'number' }
-                    },
-                    {
-                        key: 'gap', label: '차이', width: 80, align: 'right',
-                        formatter: 'money'
-                    },
-                    {
-                        key: 'gap_description', label: '<span style="color:blue">차이설명</span>',
-                        width: 200, align: 'left', editor: { type: 'text' } 
-                    },
-                    {
-                        key: 'button', label: '', width: 80, align: 'center', formatter: function () {
-                            let html = '권한없음';
-                            if (userinfo.can_write())
-                            	html = '<button class="btn-default y_write_auth" value="저장" style="width:100%;height:1em;font-size:1em;padding:0;margin:0">저장</button>';
-                                //html = '<button class="btn-default y_write_auth" value="저장" style="width:100%;height:1.4em;font-size:1em;padding:0;margin:0">저장</button>';
-                            return html;
+                        // 'last_take_date' 컬럼 처리
+                        if (col.binding === 'last_take_date') {
+                            e.cell.textContent =
+                                item.state === 'taked'
+                                    ? `${item.last_take_date} 확인대기`
+                                    : item.last_take_date || ''; // 값이 없을 경우 빈칸 처리
                         }
-                    },
-                    {
-                        key: 'last_take_date', label: '최종실사일', width: 200, align: 'center',
-                        formatter: function () {
-                            if (this.item.state == 'taked')
-                                return this.item.last_take_date + ' 확인대기';
-                            else
-                                return this.item.last_take_date;
-                        },
-                    },
-                    
+                    }
+                },
+                cellEditEnded: (s, e) => { // cellEditEnding -> cellEditEnded
+                    const column = s.columns[e.col];
+                    const item = s.rows[e.row].dataItem;
+
+                    if (column.binding === 'real_stock') {
+                        if (item.real_stock != null && item.account_stock != null) {
+                            item.gap = item.real_stock - item.account_stock;
+                        }
+                    }
+                },
+                columns: [
+                    { binding: 'id', header: '품목번호', width: 100, align: 'right', isReadOnly: true },
+                    { binding: 'mat_type', header: '품목유형', width: 100, align: 'center', isReadOnly: true },
+                    { binding: 'mat_grp_name', header: '품목그룹', width: 150, align: 'center', isReadOnly: true },
+                    { binding: 'mat_code', header: '품목코드', width: 100, align: 'center', isReadOnly: true },
+                    { binding: 'mat_name', header: '품목명', width: 200, align: 'left', isReadOnly: true },
+                    { binding: 'manage_level', header: '관리등급', width: 100, align: 'center', isReadOnly: true },
+                    { binding: 'unit_name', header: '단위', width: 100, align: 'center', isReadOnly: true },
+                    { binding: 'account_stock', header: '장부재고', width: 100, align: 'right', isReadOnly: true },
+                    { binding: 'real_stock', header: '실사재고', width: 100, align: 'right', isReadOnly: false, },
+                    { binding: 'gap', header: '차이', width: 80, align: 'right', isReadOnly: true },
+                    { binding: 'gap_description', header: '차이설명', width: 200, align: 'left', isReadOnly: false },
+                    { binding: 'button', header: '', width: 80, align: 'center', isReadOnly: true },
+                    { binding: 'last_take_date', header: '최종실사일', width: 200, align: 'center', isReadOnly: true }
                 ]
-            };
-
-            this.grid = new ax5.ui.grid(config);
-            this.grid_config = config; 
-
-        }
-
-        exportExcel() {
-            var targetview = this.grid;
-            // 현재 html코드로 데이터 만들어 확장자만 xls로 변경해주고 있음
-            targetview.exportExcel('재고조정.xls');
+            });
+            new FlexGridContextMenu(this.grid);
+            this.grid.downloadFileName = '재고 조정 목록';
         }
 
         searchMainData() {
@@ -236,15 +241,8 @@
                 'material_name': $('#txtName').val(),
             };
             let result = AjaxUtil.getSyncData(gUrl + '/read', data);
-            if (result.data != null) {
-                let count = result.data.length;
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: count,
-                    }
-                });
+            if (result.data) {
+                _this.grid.itemsSource.sourceCollection = result.data;
             }
         }
     }
@@ -283,23 +281,6 @@
         //    page.searchMainData();
         //});
 
-        $('#btnExcel').on('click', function () {
-            page.exportExcel();
-        });
-
-        //그리드 컬럼 설정
-        page.popColSetting = new popColSetting();
-        let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-		
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });	
 
         page.searchMainData();
 

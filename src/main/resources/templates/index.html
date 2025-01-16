@@ -246,54 +246,9 @@
 
     $(document).ready(function () {
 
-        let lang_cd = i18n.getLanguageCode();
+        // let lang_cd = i18n.getLanguageCode();
         //i18n.initializeCommonData(lang_cd);
-        i18n.initializeMenuData(lang_cd);
-
-        //let default_menu = 'wm_dashboard_summary';
-        // let default_menu = $('#default_menu_code').val();
-        // nthTabs = $('#main-tabs').nthTabs();
-        // if (default_menu != '') {
-        //     nthTabs.addTab({
-        //         id: default_menu,
-        //         title: 'Main',
-        //         url: '/gui/' + default_menu + '/default',
-        //         active: true,
-        //         allowClose: false
-        //     });
-        //     if (!$('[href*=#' + default_menu + ']').find('i').hasClass('fa-star')) {
-        //         $('[href*=#' + default_menu + ']').prepend('<i class="fas fa-star' + ('false' == 'true' ? ' bookmark' : '') + '"></i>');
-        //     }
-        //     $('.nav-tabs .fa-star').off('click').on('click', function (e) {
-        //         $(this).toggleClass('bookmark');
-        //         fnBookMarkSave(default_menu, $(this).hasClass('bookmark'));
-        //     });
-        //     setTimeout(function () {
-        //         var $targetMenu = $('#left-menu').find('a[data-objid=' + default_menu + ']').closest('li.has-sub');
-        //         $targetMenu.addClass('open');
-        //         $targetMenu.children('ul').show();
-        //     }, 100);
-        // } else {
-        //     nthTabs.addTab({
-        //         id: default_menu,
-        //         title: 'dddd',
-        //         url: '/gui/' + default_menu + '/default',
-        //         active: true,
-        //         allowClose: false
-        //     });
-        //     if (!$('[href*=' + default_menu + ']').find('i').hasClass('fa-star')) {
-        //         $('[href*=' + default_menu + ']').prepend('<i class="fas fa-star' + ('false' == 'true' ? ' bookmark' : '') + '"></i>');
-        //         $('.nav-tabs .fa-star').off('click').on('click', function (e) {
-        //             $(this).toggleClass('bookmark');
-        //             fnBookMarkSave(default_menu, $(this).hasClass('bookmark'));
-        //         });
-        //     }
-        //     setTimeout(function () {
-        //         let $targetMenu = $('#left-menu').find('a[data-objid=' + default_menu + ']').closest('li.has-sub');
-        //         $targetMenu.addClass('open');
-        //         $targetMenu.children('ul').show();
-        //     }, 100);
-        // }
+        // i18n.initializeMenuData(lang_cd);
 
         // 메뉴 매핑(FrontFolder_id)
         const dep2Mappings = {
@@ -405,9 +360,9 @@
                                     url: '/gui/' + objid + '/default',
                                     active: true,
                                     allowClose: true,
-                                    // isbookmark: _bookmark
+                                    isbookmark: _bookmark
                                 });
-                                // nthTabs.bindBookmarkEvent(objid, _bookmark);
+                                nthTabs.bindBookmarkEvent(objid, _bookmark);
                             }
                         });
                     }

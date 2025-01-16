@@ -7,21 +7,21 @@
         }
 
         .background-blue {
-            background: #dcf0f8;
-            font-weight: bold;
-            text-align: right
+            background-color: #dcf0f8 !important;
+            font-weight: bold !important;
+            text-align: right !important;
         }
 
         .background-order {
-            background: #00ff21;
-            font-weight: bold;
-            text-align: right
+            background-color: #00ff21 !important;
+            font-weight: bold !important;
+            text-align: right !important;
         }
 
         .background-defect {
-            background: #f8d2cb;
-            font-weight: bold;
-            text-align: right
+            background-color: #f8d2cb !important;
+            font-weight: bold !important;
+            text-align: right !important;
         }
 
         .background-loss {
@@ -33,152 +33,45 @@
         .background-scrap {
             background: #c28fbb;
             font-weight: bold;
-            text-align: right
-        }
-
-        .working-status {
-            background: #00ff21;
-            font-weight: bold
-        }
-
-        .finished-status {
-            background: #0026ff;
-            color: #ffffff
-        }
-    </style>
-
-    <style id="print_css">
-        @media print {
-            .pagebreak {
-                page-break-before: always;
-            }
-        }
-
-        .bg_gray {
-            background: #dedede;
-        }
-
-        .table_1 td.tar {
             text-align: right;
         }
 
-        .table_1 td.tal {
-            text-align: left;
+        .working-status {
+            background: #00ff21 !important;
+            font-weight: bold !important;
         }
 
-        .table_1 td.tac {
-            text-align: center;
+        .finished-status {
+            background: #0026ff !important;
+            color: #ffffff !important;
         }
 
-        .table_1 {
+        .write-table td input[type="text"], input[type="number"], input[type="date"], input[type="time"] {
+            width: 160px;
+        }
+
+        .write-table td input[type="text"]:disabled, input[type="number"]:disabled, input[type="date"]:disabled, input[type="time"]:disabled, textarea:disabled {
+            width: 160px;
+            background-color: #EDEFF5 !important;
+        }
+
+        .write-table textarea:disabled {
             width: 100%;
-            border-collapse: collapse;
+            background-color: #EDEFF5 !important;
         }
 
-        .table_1 td.b2lr {
-            border-left: 2px solid #166614;
-            border-right: 2px solid #166614;
+        .write-table select, select:disabled {
+            width: 160px;
         }
 
-        .table_1 td.b2lbr {
-            border-left: 2px solid #166614;
-            border-right: 2px solid #166614;
-            border-bottom: 2px solid #166614;
+        .write-table select:disabled {
+            width: 160px;
+            background-color: #EDEFF5 !important;
         }
 
-        .table_1 td.b2tr {
-            border-top: 2px solid #166614;
-            border-right: 2px solid #166614;
-        }
-
-        .table_1 td.b2t {
-            border-top: 2px solid #166614;
-        }
-
-        .table_1 td.b2tb {
-            border-top: 2px solid #166614;
-            border-bottom: 2px solid #166614;
-        }
-
-        .table_1 td.b2lt {
-            border-left: 2px solid #166614;
-            border-top: 2px solid #166614;
-        }
-
-        .table_1 td.b2ltb {
-            border-left: 2px solid #166614;
-            border-top: 2px solid #166614;
-            border-bottom: 2px solid #166614;
-        }
-
-        .table_1 td.b2rtb {
-            border-right: 2px solid #166614;
-            border-top: 2px solid #166614;
-            border-bottom: 2px solid #166614;
-        }
-
-        .table_1 td.b2l {
-            border-left: 2px solid #166614;
-        }
-
-        .table_1 td.b2r {
-            border-right: 2px solid #166614;
-        }
-
-        .table_1 td.b2lb {
-            border-bottom: 2px solid #166614;
-            border-left: 2px solid #166614;
-        }
-
-        .table_1 td.b2b {
-            border-bottom: 2px solid #166614;
-        }
-
-        .table_1 td.b2rb {
-            border-bottom: 2px solid #166614;
-            border-right: 2px solid #166614;
-        }
-
-        .table_1 th, td {
-            border: 1px solid black;
-            text-align: center;
-            padding-left: 3px;
-            padding-right: 3px;
-        }
-
-        .table_1 .line {
-            border: 1px solid #166614;
-            color: #166614;
-            font-size: 14px;
-        }
-
-        .table_1 .line.clb {
-            color: black;
-            font-weight: 600;
-            font-size: 12px;
-            font-family: 휴먼고딕;
-        }
-
-        .table_1 .line.clb.money {
-            font-size: 20px;
-        }
-
-        .table_1 td > .ts {
-            font-size: 10px;
-        }
-
-        .table_1 td > .ts2 {
-            font-size: 18px;
-            position: relative;
-            top: 10px;
-        }
-
-        .table_1 .title {
-            font-size: 24px;
-            font-weight: 600;
-            padding: 5px;
-        }
     </style>
+
+
 </head>
 <th:block layout:fragment="content">
     <div class="layout-contents">
@@ -278,7 +171,7 @@
                         <dt>&nbsp;</dt>
                         <dd>
                             <li>
-                                <a class="btn btn-delete" title="검색" id="btnMainSearch">
+                                <a class="btn btn-search" title="검색" id="btnMainSearch">
                                     <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
                                     <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                     검색
@@ -305,384 +198,265 @@
                         </dd>
                     </dl>
                 </div>
-                <div id="prod-result-grid" style="height: 400px;"></div>
+                <div id="prod-result-grid" style="height: 300px;"></div>
             </div>
         </section>
 
-        <section>
-            <div class="tabs" data-tab="tabWrap">
-                <div class="title_box">
-                    <div class="left_align">
-                        <ul class="tab_links">
-                            <li><a href="#" data-tablink="#tabBasic" name="tabBasic" class="tab" data-labelCd="기본 정보">기본
-                                정보</a></li>
-                            <li><a href="#" data-tablink="#tabChasu" id="tab2" name="tabChasu" class="tab"
-                                   data-labelCd="차수별 생산">차수별 생산</a></li>
-                            <li><a href="#" data-tablink="#tabDefect" name="tabDefect" class="tab"
-                                   data-labelCd="부적합 정보">부적합 정보</a></li>
-                            <li><a href="#" data-tablink="#tabConsumed" name="tabConsumed" class="tab"
-                                   data-labelCd="투입 내역">투입 내역</a></li>
-                            <li hidden><a href="#" data-tablink="#tabBarcode" name="tabBarcode" class="tab"
-                                          data-labelCd="바코드">바코드</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="tab-content">
-                    <div class="tab" id="tabBasic">
-                        <div class="tab_con_box">
-                            <div class="title_box">
-                                <span class="right_align rpt" data-labelCd="기본 정보">기본 정보</span>
-                                <button type="button" class="btn-default" id="btnWorkStart" disabled data-labelCd="시작">
-                                    시작
-                                </button>
-                                <button type="button" class="btn-default" id="btnSave" title="기본정보 저장" disabled><i
-                                        class="fas fa-save"></i></button>
-                                <button type="button" class="btn-cancel" id="btnDel" title="작업지시 삭제" disabled><i
-                                        class="fas fa-trash"></i></button>
-                                <button type="button" class="btn-default" id="btnWorkFinish" disabled data-labelCd="완료">
-                                    완료
-                                </button>
-                                <button type="button" class="btn-cancel" id="btnFinishCancel" disabled
-                                        data-labelCd="완료 취소">완료 취소
-                                </button>
-                                <button type="button" class="btn-default" id="btnTest" disabled data-labelCd="제품검사">
-                                    제품검사
-                                </button>
-                            </div>
+        <div class="tab-wrap">
 
-                            <div class="table_box sub">
-                                <form id="basicForm">
-                                    <div class="row">
-                                        <input type="text" id="id" name="id" hidden>
-                                        <input type="text" id="mp_id" name="mp_id" hidden>
+            <ul class="tab-links">
+                <li><a href="#tabBasic">기본 정보</a></li>
+                <li><a href="#tabChasu">차수별 생산</a></li>
+                <li><a href="#tabDefect">부적합 정보</a></li>
+                <li><a href="#tabConsumed">투입 내역</a></li>
+                <li hidden><a href="#tabBarcode">바코드</a></li>
+            </ul>
+            <div>
+                <section class="tab-item" id="tabBasic" style="border-top-left-radius: 0;">
+                    <div class="section-top">
+                        <div class="button-wrap">
+                            <ul>
+                                <li>
+                                    <button class="btn" title="시작" disabled id="btnWorkStart">
+                                        시작
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="btn" title="저장" disabled id="btnSave">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="btn" title="삭제" disabled id="btnDel">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="btn" title="완료" disabled id="btnWorkFinish">
+                                        완료
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="btn" title="완료 취소" disabled id="btnFinishCancel">
+                                        완료 취소
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="btn" title="제품검사" disabled id="btnTest">
+                                        제품검사
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
 
-                                        <div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4"
-                                                          data-labelCd="작지번호">작지번호</span>
-                                                </div>
-                                                <input class="form-control2 tac" type="text" id="order_num"
-                                                       name="order_num" readonly>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4"
-                                                          data-labelCd="제품코드">제품코드</span>
-                                                </div>
-                                                <input class="form-control2 tac" type="text" id="mat_code"
-                                                       name="mat_code" readonly>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-6 col-md-4 col-lg-4">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4"
-                                                          data-labelCd="제품">제품</span>
-                                                </div>
-                                                <input type="text" id="mat_pk" name="mat_pk" hidden>
-                                                <input class="form-control2 tac" type="text" id="mat_name"
-                                                       name="mat_name" readonly>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4"
-                                                          data-labelCd="상태">상태</span>
-                                                </div>
-                                                <input type="text" id="state" name="state" hidden>
-                                                <input class="form-control2 tac" type="text" id="job_state"
-                                                       name="job_state" readonly>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4"
-                                                          data-labelCd="단위">단위</span>
-                                                </div>
-                                                <input class="form-control2 tac" type="text" id="unit" name="unit"
-                                                       readonly>
-                                            </div>
-                                        </div>
-
-                                        <!--<div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4" data-labelCd="LOT">LOT</span>
-                                                </div>-->
-                                        <input class="form-control2 tac" type="text" id="lot_num" name="lot_num"
-                                               disabled hidden>
-                                        <!--</div>
-                                    </div>-->
-
-                                        <div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4"
-                                                          data-labelCd="워크센터">워크센터</span>
-                                                </div>
-                                                <!--<input type="hidden" class="form-control2" id="workcenter_id" name="workcenter_id">
-                <input type="text" class="form-control2" id="workcenter_name" name="workcenter_name" readonly-->
-                                                <select class="form-control2" id="workcenter_id" name="workcenter_id"
-                                                        disabled></select>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4"
-                                                          data-labelCd="설비">설비</span>
-                                                </div>
-                                                <select class="form-control2" id="equipment_id" name="equipment_id"
-                                                        disabled></select>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4"
-                                                          data-labelCd="근무조">근무조</span>
-                                                </div>
-                                                <select class="form-control2" id="shift_code" name="shift_code"
-                                                        disabled></select>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-md-6 col-lg-6">
+                        <div class="table-wrap">
+                            <form id="basicForm">
+                                <table class="write-table">
+                                    <caption>작업 지시 테이블</caption>
+                                    <colgroup>
+                                        <col style="width: 10%;">
+                                        <col style="width: 15%;">
+                                        <col style="width: 10%;">
+                                        <col style="width: 15%;">
+                                        <col style="width: 10%;">
+                                        <col style="width: 15%;">
+                                        <col style="width: 10%;">
+                                        <col style="width: 15%;">
+                                    </colgroup>
+                                    <input type="hidden" id="id" name="id"/>
+                                    <input type="hidden" id="mp_id" name="mp_id"/>
+                                    <input type="hidden" id="mat_pk" name="mat_pk"/>
+                                    <input type="hidden" id="state" name="state"/>
+                                    <tbody>
+                                    <tr>
+                                        <th><label for="order_num">작지번호</label></th>
+                                        <td><input type="text" id="order_num" name="order_num" readonly/></td>
+                                        <th><label for="mat_code">제품코드</label></th>
+                                        <td><input type="text" id="mat_code" name="mat_code" readonly/></td>
+                                        <th><label for="mat_name">제품</label></th>
+                                        <td><input type="text" id="mat_name" name="mat_name" readonly/></td>
+                                        <th><label for="unit">단위</label></th>
+                                        <td><input type="text" id="unit" name="unit" readonly/></td>
+                                    </tr>
+                                    <tr>
+                                        <th><label for="job_state">상태</label></th>
+                                        <td><input type="text" id="job_state" name="job_state" readonly/></td>
+                                        <th><label for="workcenter_id">워크센터</label></th>
+                                        <td><select id="workcenter_id" name="workcenter_id" disabled></select></td>
+                                        <th><label for="equipment_id">설비</label></th>
+                                        <td><select id="equipment_id" name="equipment_id" disabled></select></td>
+                                        <th><label for="shift_code">근무조</label></th>
+                                        <td><select id="shift_code" name="shift_code" disabled></select></td>
+                                    </tr>
+                                    <tr>
+                                        <th><label for="prod_date">생산시간</label></th>
+                                        <td colspan="7">
                                             <div class="input-group" id="prod_datepicker">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4"
-                                                          data-labelCd="생산시간">생산시간</span>
-                                                </div>
-                                                <input class="form-control2 tac" data-ax5picker="basic" type="text"
-                                                       id="prod_date" name="prod_date">
-                                                <span class="input-group-text fs-xl"><i
-                                                        class="fas fa-calendar-alt calendar_color"></i></span>
-                                                <input class="form-control2 tac" type="text" id="start_time"
-                                                       name="start_time" disabled/>
+                                                <input type="date" id="prod_date" name="prod_date"/>
+                                                <input type="time" id="start_time" name="start_time" disabled/>
                                                 <span class="slow_sign">~</span>
-                                                <input class="form-control2 tac" data-ax5picker="basic" type="text"
-                                                       id="end_date" name="end_date">
-                                                <span class="input-group-text fs-xl"><i
-                                                        class="fas fa-calendar-alt calendar_color"></i></span>
-                                                <input class="form-control2 tac" type="text" id="end_time"
-                                                       name="end_time" disabled/>
+                                                <input type="date" id="end_date" name="end_date"/>
+                                                <input type="time" id="end_time" name="end_time" disabled/>
                                             </div>
-                                        </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th><label for="order_qty">지시량</label></th>
+                                        <td><input type="number" id="order_qty" name="order_qty"
+                                                   class="background-order" readonly/></td>
+                                        <th><label for="good_qty">양품량</label></th>
+                                        <td><input type="number" id="good_qty" name="good_qty" class="background-blue"
+                                                   readonly disabled/></td>
+                                        <th><label for="defect_qty">부적합량</label></th>
+                                        <td colspan="3"><input type="number" id="defect_qty" name="defect_qty"
+                                                               class="background-defect" value="0" readonly/></td>
+                                    </tr>
+                                    <tr>
+                                        <th><label for="description">비고</label></th>
+                                        <td colspan="7"><textarea id="description" name="description"
+                                                                  disabled></textarea></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
 
+                    </div>
+                </section>
+                <section class="tab-item" id="tabChasu" style="border-top-left-radius: 0;">
+                    <div class="tab_con_box ">
+                        <div class="grid_box">
+                            <div class="button-wrap">
+                                <ul>
+                                    <li>
+                                        지시량 : <label id="ordqty">0</label>, LOT size :
+                                        <input type="number" class="w-80" id="chasuLotSize" name="chasuLotSize"
+                                               value="0"
+                                               min="0">
+                                    </li>
+                                    <li>
+                                        <button type="button" class="btn" id="btnAddChasu" title="차수 추가" disabled><i
+                                                class="fas fa-plus"></i></button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="btn" id="btnSaveChasu" title="생산수량수정" disabled>
+                                            <i class="fas fa-save"></i></button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="btn" id="btnDeleteChasu" title="마지막 차수 삭제"
+                                                disabled><i class="fas fa-trash"></i></button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="btn" id="btnLOTbarcode" data-labelCd="LOT바코드"
+                                                disabled>LOT바코드
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div id="chasu-grid" style="height: 220px;"></div>
+                        </div>
+                    </div>
+                </section>
 
-                                        <div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4"
-                                                          data-labelCd="지시량">지시량</span>
-                                                </div>
-                                                <input class="form-control2 background-order" type="number"
-                                                       id="order_qty" name="order_qty" readonly>
-                                            </div>
-                                        </div>
+                <section class="tab-item" id="tabDefect" style="border-top-left-radius: 0;">
+                    <div class="tab_con_box">
+                        <div class="grid_box">
+                            <div class="button-wrap">
+                                <ul>
+                                    <li>
+                                        <button type="button" class="btn" id="btnDefectSave" title="부적합내역 저장" disabled><i
+                                                class="fas fa-save"></i></button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div id="defect-grid" style="height: 220px;"></div>
+                        </div>
+                    </div>
+                </section>
+                <section class="tab-item" id="tabConsumed" style="border-top-left-radius: 0;">
+                    <div class="tab_con_box">
+                        <div>
+                            <label class="switch">
+                                <input type="checkbox" id="btnLotListToggle"><span class="slider round"></span>
+                            </label>투입로트 보기/감추기
+                        </div>
+                        <div>&nbsp;</div>
+                        <div class="grid_box" id="input_lot_div">
+                            <div class="button-wrap">
+                                <ul>
+                                    <li>
+                                        <button type="button" class="btn" id="btnInputLotList" title="조회"><i
+                                                class="fas fa-search"></i></button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="btn" id="btnInputLotSelect" title="로트검색"><i
+                                                class="fas fa-plus"></i></button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="btn" id="btnLotSelectDel" title="로트삭제"><i
+                                                class="fas fa-trash"></i></button>
+                                    </li>
+                                    <li>
+                                        로트번호 <input type="text" id="txtInputLot" class="w-200 tac" placeholder="로트번호를 스캔하세요"
+                                                    autocomplete="off"/>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="btn" id="btnInputLotGridSetting" title="로트투입 저장"><i
+                                                class="fas fa-edit"></i></button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div id="input-lot-grid" style="height: 220px;"></div>
+                        </div>
 
-                                        <div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4"
-                                                          data-labelCd="양품량">양품량</span>
-                                                </div>
-                                                <input class="form-control2 background-blue" type="number" id="good_qty"
-                                                       name="good_qty" readonly disabled>
-                                            </div>
-                                        </div>
+                        <div class="grid_box">
+                            <div class="title_box">
+                                투입 내역
+                            </div>
+                            <div id="consumed-grid" style="height: 200px;"></div>
+                        </div>
+                    </div>
+                </section>
+                <section class="tab-item" id="tabBarcode">
 
-                                        <div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4"
-                                                          data-labelCd="부적합량">부적합량</span>
-                                                </div>
-                                                <input class="form-control2 background-defect" type="number"
-                                                       id="defect_qty" name="defect_qty" value="0" readonly>
-                                            </div>
-                                        </div>
+                    <div class="table_box sub">
+                        <div class="row">
 
-                                        <!--<div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4" data-labelCd="Loss">Loss</span>
-                                                </div>
-                                                <input class="form-control2 background-loss" type="number" id="loss_qty" name="loss_qty" value="0" disabled>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-6 col-md-3 col-lg-2">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4" data-labelCd="Scrap">Scrap</span>
-                                                </div>
-                                                <input class="form-control2 background-scrap" type="number" id="scrap_qty" name="scrap_qty" value="0" disabled>
-                                            </div>
-                                        </div>-->
-
-                                        <div class="col-6 col-md-3 col-lg-2"></div>
-
-                                        <div class="col-12">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text fit_box_t4_area"
-                                                          data-labelCd="비고">비고</span>
-                                                </div>
-                                                <textarea class="form-control2" id="description" name="description"
-                                                          disabled></textarea>
-                                            </div>
-                                        </div>
-
+                            <div class="col-6">
+                                <div class="title_box">
+                                    <div class="left_align">
+                                        작업지시번호
+                                        <button type="button" class="btn-cancel" id="btnPrintWorkOrderBarcode"
+                                                data-labelCd="프린트">프린트
+                                        </button>
                                     </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tab" id="tabChasu">
-                        <div class="tab_con_box ">
-                            <div class="grid_box">
-                                <div class="title_box">
-                                    <span class="right_align rpt" data-labelCd="차수생산내역">차수생산내역</span>
-                                    지시량 : <label id="ordqty">0</label>, LOT size : <input type="number" class="w-80"
-                                                                                          id="chasuLotSize"
-                                                                                          name="chasuLotSize" value="0"
-                                                                                          min="0">
-                                    <button type="button" class="btn-default" id="btnAddChasu" title="차수 추가" disabled><i
-                                            class="fas fa-plus"></i></button>
-                                    <button type="button" class="btn-default" id="btnSaveChasu" title="생산수량수정" disabled>
-                                        <i class="fas fa-save"></i></button>
-                                    <button type="button" class="btn-danger" id="btnDeleteChasu" title="마지막 차수 삭제"
-                                            disabled><i class="fas fa-trash"></i></button>
-                                    <button type="button" class="btn-default" id="btnExcel2" title="엑셀 다운로드"><i
-                                            class="fas fa-file-excel"></i></button>
-                                    <!--<button type="button" class="btn-default" id="btnChasuLabelPrint" title="라벨출력"><i class="fas fa-print"></i></button>-->
-                                    <button type="button" class="btn-default" id="btnLOTbarcode" data-labelCd="LOT바코드"
-                                            disabled>LOT바코드
-                                    </button>
-
                                 </div>
-                                <div class="h-230" data-ax5grid="chasu-grid"></div>
+                                <div class="col-12" id="workOrderContainerDiv"></div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="tab" id="tabDefect">
-                        <div class="tab_con_box">
 
-                            <div class="grid_box">
+                            <div class="col-6">
                                 <div class="title_box">
-                                    <span class="right_align rpt" data-labelCd="부적합 정보">차수별 부적합 정보</span>
-                                    <button type="button" class="btn-default" id="btnDefectSave" title="부적합내역 저장"
-                                            disabled><i class="fas fa-save"></i></button>
-                                    <button type="button" class="btn-default" id="btnExcel2" title="엑셀 다운로드"><i
-                                            class="fas fa-file-excel"></i></button>
-                                    <button type="button" class="btn-default" id="btnGridSetting2"
-                                            style="visibility:hidden"><i class="fas fa-cog"></i> Setting
-                                    </button>
-                                </div>
-                                <div class="h-250" data-ax5grid="defect-grid"></div>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="tab" id="tabConsumed">
-                        <div class="tab_con_box">
-                            <div>
-                                <label class="switch">
-                                    <input type="checkbox" id="btnLotListToggle"><span class="slider round"></span>
-                                </label>투입로트 보기/감추기
-                            </div>
-                            <div>&nbsp;</div>
-                            <div class="grid_box" id="input_lot_div">
-                                <div class="title_box">
-                                    <span class="right_align rpt" data-labelCd="로트투입">로트투입</span>
-                                    <button type="button" class="btn-default" id="btnInputLotList" title="조회"><i
-                                            class="fas fa-search"></i></button>
-                                    <button type="button" class="btn-default" id="btnInputLotSelect" title="로트검색"><i
-                                            class="fas fa-plus"></i></button>
-                                    <button type="button" class="btn-cancel" id="btnLotSelectDel" title="로트삭제"><i
-                                            class="fas fa-trash"></i></button>
-                                    로트번호 <input type="text" id="txtInputLot" class="w-200 tac" placeholder="로트번호를 스캔하세요"
-                                                autocomplete="off"/>
-                                    <button type="button" class="btn-default" id="btnInputLotSave" title="로트투입 저장"><i
-                                            class="fas fa-edit"></i></button>
-                                    <button type="button" class="btn-default" id="btnInputLotGridSetting"
-                                            style="visibility:hidden"><i class="fas fa-cog"></i> Setting
-                                    </button>
-
-                                </div>
-                                <div class="h-250" data-ax5grid="input_lot_grid"></div>
-                            </div>
-
-                            <div class="grid_box">
-                                <div class="title_box">
-                                    <span class="right_align rpt" data-labelCd="투입 내역">투입 내역</span>
-                                    <!--BOM기준생산량 <input type="text" id="bom_output_amount" class="w-200 tac" placeholder="BOM 기준생산량을 입력하세요." />-->
-                                    <!--<button type="button" class="btn-default" id="btnConsumedView" title="투입내역 조회"><i class="fas fa-search"></i></button>-->
-                                    <!--<button type="button" class="btn-default" id="btnConsumedSave" title="투입내역 저장"><i class="fas fa-save"></i></button>-->
-                                    <!--<button type="button" class="btn-default" id="btnAddMat" title="품목추가" disabled><i class="fas fa-plus"></i></button>-->
-                                    <button type="button" class="btn-default" id="btnExcel3" title="엑셀 다운로드"><i
-                                            class="fas fa-file-excel"></i></button>
-                                    <button type="button" class="btn-default" id="btnGridSetting3"
-                                            style="visibility:hidden"><i class="fas fa-cog"></i> Setting
-                                    </button>
-                                    <!--<span>총생산량 : <label id="lblTotalOutput"></label></span>-->
-                                </div>
-                                <div class="h-250" data-ax5grid="consumed-grid"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="tabBarcode" class="tab" hidden>
-                        <div class="tab_con_box">
-                            <div class="table_box sub">
-                                <div class="row">
-
-                                    <div class="col-6">
-                                        <div class="title_box">
-                                            <div class="left_align">
-                                                작업지시번호
-                                                <button type="button" class="btn-cancel" id="btnPrintWorkOrderBarcode"
-                                                        data-labelCd="프린트">프린트
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="col-12" id="workOrderContainerDiv"></div>
+                                    <div class="left_align">
+                                        Lot number
+                                        <button type="button" class="btn-cancel" id="btnPrintLotNumberBarcode"
+                                                data-labelCd="프린트">프린트
+                                        </button>
                                     </div>
-
-                                    <div class="col-6">
-                                        <div class="title_box">
-                                            <div class="left_align">
-                                                Lot number
-                                                <button type="button" class="btn-cancel" id="btnPrintLotNumberBarcode"
-                                                        data-labelCd="프린트">프린트
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="col-12" id="LotNumberContainerDiv">
-                                        </div>
-                                    </div>
-
+                                </div>
+                                <div class="col-12" id="LotNumberContainerDiv">
                                 </div>
                             </div>
+
                         </div>
                     </div>
-
-                </div>
+                </section>
             </div>
-        </section>
+
+        </div>
+    </div>
+    </section>
     </div>
 
-    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
     <th:block th:replace="/common/popup_consu_material :: materialSearchTemplate"></th:block>
     <th:block th:replace="/common/popup_consu_mat_lot :: matLotSearchTemplate"></th:block>
     <th:block th:replace="/common/popup_lot_input :: LotInputTemplate"></th:block>
@@ -976,6 +750,7 @@
                 this.consumedGrid = null;
                 this.jobres = null;
                 this.selectedIndex = null;
+                this.modifiedItems = [];
                 this.$tabBasic = $('#tabBasic');
                 this.baseUrl = '/api/production/prod_result';
                 this.init();
@@ -996,19 +771,19 @@
                     isReadOnly: true,
                     showMarquee: true,
                     columns: [
-                        { binding: 'order_num', header: '작지번호', width: 150, align: 'center' },
-                        { binding: 'prod_date', header: '생산일', width: 120, align: 'center' },
-                        { binding: 'mat_type', header: '품목구분', width: 100, align: 'center' },
-                        { binding: 'workcenter', header: '워크센터', width: 100, align: 'left' },
-                        { binding: 'work_idx', header: '작업순서', width: 100, align: 'center' },
-                        { binding: 'job_state', header: '상태', width: 100, align: 'center'},
-                        { binding: 'mat_code', header: '품목코드', width: 100, align: 'left' },
-                        { binding: 'mat_name', header: '품목', width: 200, align: 'left' },
-                        { binding: 'unit', header: '단위', width: 80, align: 'center' },
-                        { binding: 'order_qty', header: '지시량', width: 100, align: 'right' },
-                        { binding: 'good_qty', header: '양품량', width: 100, align: 'right' },
-                        { binding: 'defect_qty', header: '부적합량', width: 100, align: 'right'},
-                        { binding: 'description', header: '비고', width: 190, align: 'left' }
+                        {binding: 'order_num', header: '작지번호', width: 150, align: 'center'},
+                        {binding: 'prod_date', header: '생산일', width: 120, align: 'center'},
+                        {binding: 'mat_type', header: '품목구분', width: 100, align: 'center'},
+                        {binding: 'workcenter', header: '워크센터', width: 100, align: 'left'},
+                        {binding: 'work_idx', header: '작업순서', width: 100, align: 'center'},
+                        {binding: 'job_state', header: '상태', width: 100, align: 'center'},
+                        {binding: 'mat_code', header: '품목코드', width: 100, align: 'left'},
+                        {binding: 'mat_name', header: '품목', width: 200, align: 'left'},
+                        {binding: 'unit', header: '단위', width: 80, align: 'center'},
+                        {binding: 'order_qty', header: '지시량', width: 100, align: 'right'},
+                        {binding: 'good_qty', header: '양품량', width: 100, align: 'right'},
+                        {binding: 'defect_qty', header: '부적합량', width: 100, align: 'right'},
+                        {binding: 'description', header: '비고', width: 190, align: 'left'}
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
                     itemFormatter: function (panel, row, col, cell) {
@@ -1061,256 +836,208 @@
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '생산 내역';
 
-                let chasuConfig = {
-                    target: $('[data-ax5grid="chasu-grid"]'),
-                    frozenColumnIndex: 1, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: true,  // checkbox(선택) 보이기 여부
-                    multipleSelect: true, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: false, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30,  // 헤더 높이
-                        selector: false
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onClick: function (e) {
-                            _this.chasuGrid.select(this.dindex, {selected: true});
-                            _this.showDefectList('chasu');
-                            _this.setButtonState();
-                        },
-                        onDataChanged: function () {
-                            if (this.item.__selected__ == true) {
-                                var index = this.index;
-                                // do something
+                this.chasuGrid = new wijmo.grid.FlexGrid('#chasu-grid', {
+                    autoGenerateColumns: false,
+                    selectionMode: wijmo.grid.SelectionMode.MultiRange,
+                    frozenColumns: 1, // 열 고정
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    selectionChanged: (e) => {
+                        // FlexGrid가 초기화되고 itemsSource가 설정되었는지 확인
+                        if (this.chasuGrid && this.chasuGrid.selectedRows) {
+                            const selectedRows = this.chasuGrid.selectedRows;
+                            if (selectedRows.length > 0) {
+                                const item = selectedRows[0].dataItem;
+                                // 클래스 메서드 호출
+                                this.showDefectList('chasu');
+                                this.setButtonState();
                             }
                         }
-
                     },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
                     },
                     columns: [
-                        {key: 'chasu', label: '차수', width: 100, align: 'center', sortable: true},
-                        {key: 'lot_no', label: 'LOT', width: 200, align: 'center', sortable: false},
-                        {
-                            key: 'good_qty',
-                            label: '<span class="editable_clr">양품량</span>',
-                            width: 100,
-                            align: 'right',
-                            editor: {type: 'number'},
-                            formatter: 'money',
-                            styleClass: function () {
-                                return 'background-blue';
-                            }
-                        },
-                        {
-                            key: 'defect_qty',
-                            label: '<span class="editable_clr">부적합량</span>',
-                            width: 100,
-                            align: 'right',
-                            editor: {type: 'number'},
-                            formatter: 'money',
-                            styleClass: function () {
-                                return 'background-defect';
-                            }
-                        },
-                        {key: 'input_time', label: '입력시간', width: 100, align: 'center', sortable: true},
-                        /*
-                        {
-                            key: 'loss_qty', label: '<span class="editable_clr">Loss</span>', width: 100, align: 'right', editor: { type: 'number' }, formatter: 'money',
-                            styleClass: function () {
-                                return 'background-loss';
-                            }
-                        },
-                        {
-                            key: 'scrap_qty', label: '<span class="editable_clr">Scrap</span>', width: 100, align: 'right', editor: { type: 'number' }, formatter: 'money',
-                            styleClass: function () {
-                                return 'background-scrap';
-                            }
-                        },
-                        */
+                        { binding: 'chasu', header: '차수', width: 100, align: 'center', isReadOnly: true },
+                        { binding: 'lot_no', header: 'LOT', width: 200, align: 'center', isReadOnly: true },
+                        { binding: 'good_qty', header: '양품량', width: 100, align: 'right', format: 'n0', isReadOnly: false, cssClass: 'background-blue' },
+                        { binding: 'defect_qty', header: '부적합량', width: 100, align: 'right', format: 'n0', isReadOnly: false, cssClass: 'background-defect' },
+                        { binding: 'input_time', header: '입력시간', width: 100, align: 'center', isReadOnly: true },
                     ],
-                    footSum: [
-                        [
-                            {label: '', align: 'center'},
-                            {label: '양품량 합계', align: 'center'},
-                            {key: 'good_qty', collector: 'sum', formatter: 'money', align: 'right'},
-                            {key: 'defect_qty', collector: 'sum', formatter: 'money', align: 'right'},
-                        ]
-                    ]
-                }
-                this.chasuGrid = new ax5.ui.grid(chasuConfig);
+                    itemsSource: new wijmo.collections.CollectionView([]),
+                    itemFormatter: function (panel, row, col, cell) {
+                        if (panel.cellType === wijmo.grid.CellType.Cell) {
+                            const column = panel.columns[col];
+                            const item = panel.rows[row].dataItem;
 
-                let defectConfig = {
-                    target: $('[data-ax5grid="defect-grid"]'),
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: true, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
+                            // 컬럼 스타일 적용
+                            if (column.binding === 'good_qty') {
+                                cell.style.backgroundColor = '#dcf0f8';
+                            }
+                            if (column.binding === 'defect_qty') {
+                                cell.style.backgroundColor = '#f8d2cb';
+                            }
+                        }
                     },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
+                });
+
+                // 하단 합계 행 추가
+                const footerRow = new wijmo.grid.Row();
+                this.chasuGrid.rows.push(footerRow);
+
+                // 데이터 변경 시 합계 업데이트
+                this.chasuGrid.collectionView.collectionChanged.addHandler(() => {
+                    _this.updateFooter();
+                });
+
+                // Context Menu 추가
+                new FlexGridContextMenu(this.chasuGrid);
+                this.chasuGrid.downloadFileName = '차수별 생산 내역';
+
+
+                this.defectGrid = new wijmo.grid.FlexGrid('#defect-grid', {
+                    autoGenerateColumns: false,
+                    selectionMode: wijmo.grid.SelectionMode.None, // 다중 선택 불가
+                    frozenColumns: 0, // 열 고정
+                    frozenRows: 0, // 행 고정
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    allowSorting: true, // 정렬 가능
                     columns: [
-                        {key: 'defect_type', label: '부적합유형', width: 200, align: 'center', sortable: true},
+                        { binding: 'defect_type', header: '부적합유형', width: 200, align: 'center', isReadOnly: true },
                         {
-                            key: 'defect_qty',
-                            label: '<span class="editable_clr">부적합량</span>',
+                            binding: 'defect_qty',
+                            header: '부적합량',
                             width: 130,
                             align: 'right',
-                            sortable: true,
-                            editor: {type: 'number'},
-                            formatter: 'money'
+                            format: 'n0',
+                            isReadOnly: false, // 편집 가능
+                            cssClass: 'editable-clr'
                         },
                         {
-                            key: 'defect_remark',
-                            label: '<span class="editable_clr">비고</span>',
+                            binding: 'defect_remark',
+                            header: '비고',
                             width: 450,
                             align: 'left',
-                            editor: {type: 'text'}
-                        },
+                            isReadOnly: false, // 편집 가능
+                            cssClass: 'editable-clr'
+                        }
                     ],
-                    footSum: [
-                        [
-                            {label: '부적합량 합계', align: 'center'},
-                            {key: 'defect_qty', collector: 'sum', formatter: 'money', align: 'right'},
-                        ]
-                    ]
-                }
-
-                this.defectGrid = new ax5.ui.grid(defectConfig);
-                this.grid_config2 = defectConfig;  // 컬럼설정 팝업에 넘기기 위한 용도로 저장해 놓음.
-
-
-                let InputLotConfig = {
-                    target: $('[data-ax5grid="input_lot_grid"]'),
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: true, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onDataChanged: function () {
-                            if (this.key == 'consumed_start' || this.key == 'consumed_end') {
-                                _this.validateTime(this);
+                    itemsSource: new wijmo.collections.CollectionView([]), // 빈 데이터로 초기화
+                    itemFormatter: (panel, row, col, cell) => {
+                        if (panel.cellType === wijmo.grid.CellType.Cell) {
+                            const column = panel.columns[col];
+                            if (column.binding === 'defect_qty') {
+                                cell.style.textAlign = 'right';
                             }
-                        },
-                        onClick: function (e) {
-                            _this.InputLotGrid.select(this.dindex);
-                        },
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
+                        }
+                    }
+                });
+
+
+                // 데이터 변경 이벤트 처리
+                this.defectGrid.collectionView.collectionChanged.addHandler((sender, e) => {
+                    if (e.action === wijmo.collections.NotifyCollectionChangedAction.Change) {
+                        const modifiedItem = e.item; // 변경된 항목
+                        if (!this.modifiedItems.includes(modifiedItem)) {
+                            this.modifiedItems.push(modifiedItem); // 수정된 항목 저장
+                        }
+                    }
+                });
+
+
+                // 컬럼 푸터 활성화
+                this.defectGrid.columnFooters.rows.push(new wijmo.grid.Row());
+
+                // 합계 업데이트 함수
+                const updateInputLotFooter = () => {
+                    const cv = this.inputLotGrid.collectionView;
+                    const totalCurStock = cv.items.reduce((sum, item) => sum + (item.cur_stock || 0), 0);
+                    const totalReqQty = cv.items.reduce((sum, item) => sum + (item.req_qty || 0), 0);
+                    const totalConsumedQty = cv.items.reduce((sum, item) => sum + (item.consumed_qty || 0), 0);
+
+                    const footerRow = this.inputLotGrid.columnFooters.rows[0];
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'mat_type_name', '합계');
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'cur_stock', totalCurStock);
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'req_qty', totalReqQty);
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'consumed_qty', totalConsumedQty);
+                };
+
+                // 데이터 변경 시 합계 업데이트
+                this.defectGrid.collectionView.collectionChanged.addHandler(updateInputLotFooter);
+
+
+                this.inputLotGrid = new wijmo.grid.FlexGrid('#input-lot-grid', {
+                    autoGenerateColumns: false,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    frozenColumns: 0, // 열 고정
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    allowSorting: true, // 모든 컬럼 정렬 가능
                     columns: [
-                        //{ key: 'id', label: '번호', width: 50, align: 'left', },
-                        {key: 'mat_type_name', label: '제품구분', width: 100, align: 'left',},
-                        {key: 'mat_code', label: '품목코드', width: 100, align: 'left',},
-                        {key: 'mat_name', label: '품목', width: 250, align: 'left',},
-                        {key: 'unit_name', label: '단위', width: 80, align: 'center'},
-                        {key: 'lot_number', label: '로트번호', width: 150, align: 'center'},
-                        {key: 'StoreHouseName', label: '창고', width: 150, align: 'left'},
-                        {key: 'cur_stock', label: '현재재고', width: 100, align: 'right', formatter: 'money'},
-                        {key: 'req_qty', label: '투입요청량', width: 100, align: 'right', formatter: 'money'},
-                        {key: 'consumed_qty', label: '생산소모량', width: 100, align: 'right', formatter: 'money'},
-                        {key: 'start_date', label: '투입일시', width: 200, align: 'center'},
+                        { binding: 'mat_type_name', header: '제품구분', width: 100, align: 'left', isReadOnly: true },
+                        { binding: 'mat_code', header: '품목코드', width: 100, align: 'left', isReadOnly: true },
+                        { binding: 'mat_name', header: '품목', width: 250, align: 'left', isReadOnly: true },
+                        { binding: 'unit_name', header: '단위', width: 80, align: 'center', isReadOnly: true },
+                        { binding: 'lot_number', header: '로트번호', width: 150, align: 'center', isReadOnly: true },
+                        { binding: 'StoreHouseName', header: '창고', width: 150, align: 'left', isReadOnly: true },
+                        { binding: 'cur_stock', header: '현재재고', width: 100, align: 'right', format: 'n0', isReadOnly: true },
+                        { binding: 'req_qty', header: '투입요청량', width: 100, align: 'right', format: 'n0', isReadOnly: true },
+                        { binding: 'consumed_qty', header: '생산소모량', width: 100, align: 'right', format: 'n0', isReadOnly: true },
+                        { binding: 'start_date', header: '투입일시', width: 200, align: 'center', isReadOnly: true }
                     ],
-                    footSum: [
-                        [
-                            {label: "합계", colspan: 6, align: "center"},
-                            {key: "cur_stock", collector: "sum", formatter: "money", align: "right"},
-                            {key: "req_qty", collector: "sum", formatter: "money", align: "right"},
-                            {key: "consumed_qty", collector: "sum", formatter: "money", align: "right"},
-                        ]
-                    ]
-                }
+                    itemsSource: new wijmo.collections.CollectionView([]), // 빈 데이터로 초기화
+                    itemFormatter: (panel, row, col, cell) => {
+                        if (panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            cell.style.textAlign = 'center';
+                        }
+                    }
+                });
 
-                this.InputLotGrid = new ax5.ui.grid(InputLotConfig);
-                this.InputLotGridConfig = InputLotConfig;  // 컬럼설정 팝업에 넘기기 위한 용도로 저장해 놓음.
+                // 합계 표시를 위한 컬럼 푸터 추가
+                this.inputLotGrid.columnFooters.rows.push(new wijmo.grid.GroupRow());
 
-                let consumedConfig = {
-                    target: $('[data-ax5grid="consumed-grid"]'),
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: true, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onDataChanged: function () {
-                            if (this.key == 'consumed_start' || this.key == 'consumed_end') {
-                                _this.validateTime(this);
-                            }
-                        },
+                // 합계 업데이트 함수
+                const updateFooter = () => {
+                    const cv = this.inputLotGrid.collectionView;
+                    const totalCurStock = cv.items.reduce((sum, item) => sum + (item.cur_stock || 0), 0);
+                    const totalReqQty = cv.items.reduce((sum, item) => sum + (item.req_qty || 0), 0);
+                    const totalConsumedQty = cv.items.reduce((sum, item) => sum + (item.consumed_qty || 0), 0);
 
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
+                    const footerRow = this.inputLotGrid.columnFooters.rows[0];
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'mat_type_name', '합계');
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'cur_stock', totalCurStock);
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'req_qty', totalReqQty);
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'consumed_qty', totalConsumedQty);
+                };
+
+                // 데이터 변경 시 합계 업데이트
+                this.inputLotGrid.collectionView.collectionChanged.addHandler(updateFooter);
+
+                this.consumedGrid = new wijmo.grid.FlexGrid('#consumed-grid', {
+                    autoGenerateColumns: false,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    frozenColumns: 0, // 열 고정
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    allowSorting: true, // 모든 컬럼 정렬 가능
                     columns: [
-                        {key: 'mat_type_name', label: '제품구분', width: 100, align: 'left',},
-                        {key: 'mat_code', label: '품목코드', width: 100, align: 'left',},
-                        {key: 'mat_name', label: '품목', width: 250, align: 'left', sortable: true},
-                        {key: 'unit', label: '단위', width: 80, align: 'center'},
-                        {key: 'lotUseYn', label: 'LOT관리 유무', width: 80, align: 'center'},
-                        {key: 'lot_size', label: '로트 size', width: 80, align: 'right', formatter: 'money'},
-                        {
-                            key: 'current_qty_sum',
-                            label: '로트투입량',
-                            width: 100,
-                            align: 'right',
-                            formatter: 'money',
-                            hidden: true
-                        },
-                        {key: 'bom_consumed', label: '소요량(BOM)', width: 100, align: 'right', formatter: 'money'},
-                        {
-                            key: 'consumed_qty', label: '실생산소모량', width: 100, align: 'right', formatter: 'money',
-                            /**
-                             editor: {
-                             type: 'number',
-                             disabled: function () {
-
-                             let disabled_flag = this.item.lotUseYn == 'Y';
-                             return disabled_flag;
-                             }
-                             },**/
-                        },
-                        {key: 'currentStock', label: '현재재고', width: 100, align: 'right', formatter: 'money'},
-                    ]
-                }
-
-                this.consumedGrid = new ax5.ui.grid(consumedConfig);
-                this.grid_config3 = consumedConfig;  // 컬럼설정 팝업에 넘기기 위한 용도로 저장해 놓음.
+                        { binding: 'mat_type_name', header: '제품구분', width: 100, align: 'left', isReadOnly: true },
+                        { binding: 'mat_code', header: '품목코드', width: 100, align: 'left', isReadOnly: true },
+                        { binding: 'mat_name', header: '품목', width: 250, align: 'left', isReadOnly: true },
+                        { binding: 'unit', header: '단위', width: 80, align: 'center', isReadOnly: true },
+                        { binding: 'lotUseYn', header: 'LOT관리 유무', width: 80, align: 'center', isReadOnly: true },
+                        { binding: 'lot_size', header: '로트 size', width: 80, align: 'right', format: 'n0', isReadOnly: true },
+                        { binding: 'current_qty_sum', header: '로트투입량', width: 100, align: 'right', format: 'n0', isReadOnly: true },
+                        { binding: 'bom_consumed', header: '소요량(BOM)', width: 100, align: 'right', format: 'n0', isReadOnly: true },
+                        { binding: 'consumed_qty', header: '실생산소모량', width: 100, align: 'right', format: 'n0', isReadOnly: false },
+                        { binding: 'currentStock', header: '현재재고', width: 100, align: 'right', format: 'n0', isReadOnly: true }
+                    ],
+                    itemsSource: new wijmo.collections.CollectionView([]), // 빈 데이터로 초기화
+                    itemFormatter: (panel, row, col, cell) => {
+                        if (panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            cell.style.textAlign = 'center';
+                        }
+                    }
+                });
 
                 // 필터
                 AjaxUtil.fillSelectOptions($('#cboMaterialType'), 'system_code', 'all', false, 'mat_type');
@@ -1326,6 +1053,29 @@
                         AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment', 'choose', false, '', '', $('#workcenter_id').val()); // 설비
                         _this.showDefectList('total');
                     }
+                });
+            }
+
+            // 하단 합계 업데이트 함수
+            updateFooter() {
+                let goodQtySum = 0;
+
+                // 양품량 합계 계산
+                this.chasuGrid.collectionView.items.forEach(item => {
+                    goodQtySum += item.good_qty || 0; // undefined일 경우 0 처리
+                });
+
+                // 하단 행에 합계 값 표시
+                const footerIndex = this.chasuGrid.rows.length - 1; // 마지막 행
+                this.chasuGrid.setCellData(footerIndex, 'lot_no', '양품량 합계'); // LOT 열에 "양품량 합계" 표시
+                this.chasuGrid.setCellData(footerIndex, 'good_qty', goodQtySum); // 양품량 합계 표시
+            }
+
+            // LOT 데이터 설정 시 기본값 추가
+            setDefaultData(items) {
+                items.forEach(item => {
+                    item.good_qty = item.good_qty || 0; // 양품량 기본값 0
+                    item.defect_qty = item.defect_qty || 0; // 부적합량 기본값 0
                 });
             }
 
@@ -1353,7 +1103,7 @@
 
                 $('#btnExcel2').removeAttr('disabled');
                 $('#btnExcel3').removeAttr('disabled');
-                let chasu = this.chasuGrid.getList('selected');
+                let chasu = this.chasuGrid.selectedItems;
                 if (chasu.length > 0) {
                     chasu = chasu[0].chasu;
                 } else {
@@ -1415,9 +1165,7 @@
 
                 $('#selected_order_num').val('');
                 $('#basicForm')[0].reset();
-                this.defectGrid.setData([]);
-                this.chasuGrid.setData([]);
-                this.consumedGrid.setData([]);
+
 
                 $('#basicForm').find('input, select, textarea').each(function () {
                     if (!$(this).is(':disabled')) {
@@ -1631,7 +1379,7 @@
 
                 let url = this.baseUrl + '/work_start';
                 let data = FormUtil.extractForm($('#basicForm'));
-                let defectGridList = this.defectGrid.getList();
+                let defectGridList = this.defectGrid.selectedItems;
 
                 let fnSuccess = function (res) {
                     if (res.success) {
@@ -1723,7 +1471,7 @@
                 }
 
                 //작업지시에 불량량과 차수의 불량량 합 맞추기
-                let chassu_grid = _this.chasuGrid.getList();
+                let chassu_grid = _this.chasuGrid.selectedItems;
                 let chasu_def_qty = 0;
 
                 for (let i = 0; i < chassu_grid.length; i++) {
@@ -1784,14 +1532,9 @@
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/chasu_list', param);
                 if (result.data) {
-                    let recordsTotal = result.data.length;
-                    this.chasuGrid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: recordsTotal
-                        }
-                    });
+                    _this.setDefaultData(result.data); // 기본값 설정
+                    _this.chasuGrid.itemsSource = new wijmo.collections.CollectionView(result.data); // 데이터 바인딩
+                    _this.updateFooter(); // 하단 합계 업데이트
                 }
             }
 
@@ -1800,7 +1543,7 @@
                 let _this = this;
 
                 let jr_pk = this.$tabBasic.find('#id').val();
-                let rows = this.chasuGrid.getList();
+                let rows = this.chasuGrid.selectedItems;
 
                 //let newChasu = 1;
                 let workcenter_id = this.$tabBasic.find('#workcenter_id').val()
@@ -1851,7 +1594,7 @@
                 let _this = this;
                 let url = this.baseUrl + '/chasu_del';
                 let jr_pk = this.$tabBasic.find('#id').val();
-                if (this.chasuGrid.getList().length != 0) {
+                if (this.chasuGrid.selecteditems.length != 0) {
                     let fnsuccess = function () {
                         //_this.chasuGrid.removeRow('last');
                         let data = {
@@ -1880,7 +1623,7 @@
                         AjaxUtil.postAsyncData(url, data, fnSuccess);
                     };
 
-                    let chasu_grid = this.chasuGrid.getList();
+                    let chasu_grid = this.chasuGrid.selectedItems;
                     let chasu = chasu_grid.length;
                     let lot_no = chasu_grid[chasu - 1].lot_no;
                     Alert.confirm('차수 삭제', '마지막 차수(' + chasu + '차수) ' + lot_no + '를 삭제하시겠습니까?', fnsuccess);
@@ -1892,7 +1635,7 @@
             // 차수 수량 변경 저장, 선택된 차수만 업데이트
             saveChasu() {
                 let _this = this;
-                let items = this.chasuGrid.getList('selected');
+                let items = this.chasuGrid.selecteditems;
                 if (items.length == 0) {
                     return;
                 }
@@ -1956,7 +1699,7 @@
                 // 작업지시번호 바코드 설정
                 //
                 let select_jr = _this.grid.selectedItems[0];
-                let select_chasu = _this.chasuGrid.getList('selected');
+                let select_chasu = _this.chasuGrid.selectedItems;
                 let select_jr_array = []
                 let totalHtml = []
 
@@ -2128,23 +1871,16 @@
                 }
 
                 if (type == 'chasu') {
-                    param['chasu'] = _this.chasuGrid.getList('selected')[0].chasu
+                    param['chasu'] = _this.chasuGrid.selectedItems[0].chasu
                 }
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/defect_list', param);
                 if (result.data) {
-                    let count = result.data.length;
 
-                    _this.defectGrid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: count
-                        }
-                    });
+                    _this.defectGrid.itemSource = result.data;
                     let chasu_def_qty = 0;
                     for (let i = 0; i < count; i++) {
-                        chasu_def_qty += parseFloat(this.defectGrid.getList()[i].defect_qty)
+                        chasu_def_qty += parseFloat(this.defectGrid.selectedItem()[i].defect_qty)
                     }
                 }
             }
@@ -2221,14 +1957,8 @@
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/consumed_list', param);
                 if (result.data != null) {
-                    let count = result.data.length;
-                    _this.consumedGrid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: count
-                        }
-                    });
+                    _this.consumedGrid = result.data;
+
 
                     let goodQty = parseFloat($('#tabBasic').find('#good_qty').val());
                     let defectQty = parseFloat($('#tabBasic').find('#defect_qty').val());
@@ -2254,7 +1984,7 @@
                 let mp_pk = $('#tabBasic').find('#mp_id').val();
                 let prodDate = $('#tabBasic').find('#prod_date').val();
                 let bom_output_amount = $('#bom_output_amount').val();
-                let gridDataList = this.consumedGrid.getList();
+                let gridDataList = this.consumedGrid.selectedItems;
                 let consumedList = [];
                 let dataDefault = {
                     'mat_pk': '',
@@ -2314,7 +2044,7 @@
 
 
                 let valid = true;
-                let matList = this.consumedGrid.getList();
+                let matList = this.consumedGrid.selectedItems;
                 let poppage = new PopupMaterialPage();
                 let addColumn = {};
 
@@ -2381,7 +2111,7 @@
             // 투입로트삭제
             delMaterialLot() {
                 let _this = this;
-                let select_grid = _this.InputLotGrid.getList('selected')
+                let select_grid = _this.InputLotGrid.selecteditems;
                 let jr_pk = $('#tabBasic').find('#id').val();
                 let url = this.baseUrl + '/del_lot_list';
 
@@ -2527,17 +2257,9 @@
                     'jr_pk': jr_pk,
                 };
 
-                _this.InputLotGrid.setData([]);
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/input_lot_list', param);
                 if (result.success) {
-                    let count = result.data.length;
-                    _this.InputLotGrid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: count
-                        }
-                    });
+                    _this.InputLotGrid = result.data
                 }
             }
 
@@ -2863,7 +2585,7 @@
 
             // 차수저장
             $('#btnSaveChasu').click(function (e) {
-                if (page.chasuGrid.getList().length == 0) {
+                if (page.chasuGrid.selecteditems.length == 0) {
                     Alert.alert('', '차수를 추가해주세요.');
                 } else {
                     page.saveChasu();
@@ -2884,9 +2606,10 @@
                 page.showBarcode();
             });
 
-            // 부적합내역 저장
+            // 저장 메서드 호출
             $('#btnDefectSave').click(function (e) {
-                page.saveDefectList(page.defectGrid.getList('modified'));
+                const modifiedList = page.getModifiedList(); // 수정된 데이터 가져오기
+                page.saveDefectList(modifiedList); // 저장 메서드 호출
             });
 
             // 투입내역 저장

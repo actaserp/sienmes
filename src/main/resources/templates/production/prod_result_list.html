@@ -13,67 +13,91 @@
 </head>
 
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section>
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="생산 실적 조회">생산 실적 조회</h3>
+    <div class="layout-contents">
+
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>생산 실적 조회</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>생산 관리</li>
+                <li>생산 실적 조회</li>
+            </ul>
         </div>
 
-        <div class="table_box search">
-            <div class="row">
-                <div class="col-12 col-lg-5 col-xl-4" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t4" data-labelCd="생산일">생산일</span>
-                        </div>
-                        <div class="input-group-append" data-ax5picker="multi" id="srchdate">
-                            <input class="tac " type="text" id="date_from" name="date_from" />
-                            <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                            <span class="slow_sign">~</span>
-                            <input class="tac " type="text" id="date_to" name="date_to" />
-                            <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="col-6 col-md-3 col-xl-2">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t4" data-labelCd="근무조">근무조</span>
-                        </div>
-                        <select class="form-control2" id="cboShift" name="cboShift"></select>
-                    </div>
-                </div>
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            생산일<span class="eq">*</span>
+                        </dt>
+                        <dd>
+                            <ul class="date-box">
+                                <li>
+                                    <input type="date" id="date_from" name="date_from">
+                                    <label for="date_from" class="hide">시작일</label>
+                                </li>
+                                <li>
+                                    <input type="date" id="date_to" name="date_to">
+                                    <label for="date_to" class="hide">종료일</label>
+                                </li>
+                            </ul>
+                        </dd>
+                    </dl>
 
-                <div class="col-5 col-md-3 col-xl-2">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t4" data-labelCd="워크센터">워크센터</span>
-                        </div>
-                        <select class="form-control2" id="cboWorkCenter" name="cboWorkCenter"></select>
-                    </div>
-                </div>
+                    <dl>
+                        <dt>
+                            <label for="cboShift">
+                                근무조<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboShift" name="cboShift">
 
-                <div class="col-1" >
-                    <button type="button" class="btn-default" id="btnMainSearch" title="조회"><i class="fas fa-search"></i></button>
-                </div> 
+                                </select>
+                            </div>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>
+                            <label for="cboWorkCenter">
+                                워크센터<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboWorkCenter" name="cboWorkCenter">
+                                </select>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>&nbsp;</dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnMainSearch">
+                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
+                </div>
             </div>
-        </div>
-    </section>
 
-    <section>
-        <div class="grid_box" id="prodResultList">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="생산 내역">생산 내역</span>
-                <button type="button" class="btn-default" id="btnExcel" title="엑셀 다운로드"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
+
+            <div class="grid_box" id="prodResultList">
+                <div id="prod-result-grid" style="height: 740px;"></div>
             </div>
-            <div class="h-630" data-ax5grid="prod-result-grid"></div>
-        </div>
     </section>
 </div>
 
@@ -293,7 +317,7 @@
                             </div>
                             <br>
                             <div class="grid_box">
-                                <div class="h-200" data-ax5grid="consumed-grid"></div>
+                                <div id="consumed-grid" style="height: 400px;"></div>
                             </div>
                         </div>
 
@@ -313,7 +337,6 @@
 </th:block>
 
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
 
 <script type="text/javascript">
     class ProdResultPage {
@@ -331,92 +354,48 @@
         init() {
             let _this = this;
 
-            let config = {
-                target: $('[data-ax5grid="prod-result-grid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 30  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        _this.grid.select(this.dindex);
-                        _this.selectedJobId = this.item.pk;
-                    },
-                    mergeCells: ['prod_date','order_num','mat_code','mat_name']
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
+            this.grid = new wijmo.grid.FlexGrid('#prod-result-grid', {
+                autoGenerateColumns: false,
+                selectionMode: wijmo.grid.SelectionMode.Row,
+                frozenColumns: 0,
+                headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                allowSorting: true,
                 columns: [
-                    { key: 'prod_date', label: '생산일', width: 100, align: 'center' },
-                    { key: 'order_num', label: '작지번호', width: 130, align: 'center' },
-                    { key: 'mat_code', label: '제품코드', width: 100, align: 'left' },
-                    { key: 'mat_name', label: '제품', width: 150, align: 'left' },
-                    //{ key: 'work_idx', label: '작업순서', width: 80, align: 'right' },
-                    { key: 'process', label: '공정', width: 120, align: 'left' },
-                    { key: 'workcenter', label: '워크센터', width: 120, align: 'left' },
-                    { key: 'equipment', label: '설비', width: 120, align: 'left' },
+                    { binding: 'prod_date', header: '생산일', width: 100, align: 'center', isReadOnly: true },
+                    { binding: 'order_num', header: '작지번호', width: 130, align: 'center', isReadOnly: true },
+                    { binding: 'mat_code', header: '제품코드', width: 100, align: 'left', isReadOnly: true },
+                    { binding: 'mat_name', header: '제품', width: 150, align: 'left', isReadOnly: true },
+                    { binding: 'process', header: '공정', width: 120, align: 'left', isReadOnly: true },
+                    { binding: 'workcenter', header: '워크센터', width: 120, align: 'left', isReadOnly: true },
+                    { binding: 'equipment', header: '설비', width: 120, align: 'left', isReadOnly: true },
                     {
-                        key: 'job_state', label: '상태', width: 80, align: 'center',
-                        styleClass: function () {
-                            if (this.item.state == 'working')
-                                return 'working-status'; 
-                            if (this.item.state == 'finished')
-                                return 'finished-status'; 
+                        binding: 'job_state', header: '상태', width: 80, align: 'center',
+                        cellTemplate: (cell, item) => {
+                            if (item.job_state === 'working') {
+                                cell.classList.add('working-status');
+                            } else if (item.job_state === 'finished') {
+                                cell.classList.add('finished-status');
+                            }
                         }
                     },
                     {
-                        key: 'detail', label: '상세정보', width: 100, align: 'center', sortable: false,
-                        formatter: function () {
-                            return '<button type="button" class="btn-default" id="btnDetail" style="width:100%;height:1.4em;font-size:1em;padding:0;margin:0" mp_pk=' + this.item.mp_pk + '>보기</button>';
+                        binding: 'detail', header: '상세정보', width: 100, align: 'center', isReadOnly: true,
+                        cellTemplate: (cell, item) => {
+                            cell.innerHTML = `<button type="button" class="btn-default" id="btnDetail" style="width:100%;height:1.4em;font-size:1em;padding:0;margin:0" mp_pk='${item.mp_pk}'>보기</button>`;
                         }
                     },
-                    {
-                        key: 'order_qty', label: '지시량', width: 80, align: 'right', formatter: 'money',
-                        styleClass: function () {
-                            return 'background-order'; 
-                        }
-                    },
-                    {
-                        key: 'good_qty', label: '양품량', width: 80, align: 'right', formatter: 'money',
-                        styleClass: function () {
-                            return 'background-blue'; 
-                        }
-                    },
-                    {
-                        key: 'defect_qty', label: '부적합량', width: 80, align: 'right', formatter: 'money',
-                        styleClass: function () {
-                            return 'background-defect'; 
-                        }
-                    },
-                    {
-                        key: 'loss_qty', label: 'Loss', width: 80, align: 'right', formatter: 'money',
-                        styleClass: function () {
-                            return 'background-loss'; 
-                        }
-                    },
-                    {
-                        key: 'scrap_qty', label: 'Scrap', width: 80, align: 'right', formatter: 'money',
-                        styleClass: function () {
-                            return 'background-scrap'; 
-                        }
-                    },
-                    { key: 'unit', label: '단위', width: 70, align: 'center' },
-                    { key: 'description', label: '비고', width: 150, align: 'left' },
+                    { binding: 'order_qty', header: '지시량', width: 80, align: 'right', format: 'n0', isReadOnly: true },
+                    { binding: 'good_qty', header: '양품량', width: 80, align: 'right', format: 'n0', isReadOnly: true },
+                    { binding: 'defect_qty', header: '부적합량', width: 80, align: 'right', format: 'n0', isReadOnly: true },
+                    { binding: 'loss_qty', header: 'Loss', width: 80, align: 'right', format: 'n0', isReadOnly: true },
+                    { binding: 'scrap_qty', header: 'Scrap', width: 80, align: 'right', format: 'n0', isReadOnly: true },
+                    { binding: 'unit', header: '단위', width: 70, align: 'center', isReadOnly: true },
+                    { binding: 'description', header: '비고', width: 150, align: 'left', isReadOnly: true },
                 ],
-            };
-
-            this.grid = new ax5.ui.grid(config);
-            this.grid_config1 = config;  // 컬럼설정 팝업에 넘기기 위한 용도로 저장해 놓음.
+                itemsSource: new wijmo.collections.CollectionView([])
+            });
+            new FlexGridContextMenu(this.grid);
+            this.grid.downloadFileName = '생산 실적 조회';
 
             // 필터
             AjaxUtil.fillSelectOptions($('#cboShift'), 'shift', 'choose', false); // 근무조
@@ -436,14 +415,7 @@
 
             let result = AjaxUtil.getSyncData(this.baseUrl + "/read", param);
             if (result.data) {
-                let recordsTotal = result.data.length;
-                this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: recordsTotal
-                    }
-                });
+                this.grid.itemsSource.sourceCollection = result.data;
             }
         }
 
@@ -470,14 +442,7 @@
 
             let defect_result = AjaxUtil.getSyncData(this.baseUrl + '/defect_list', defect_param);
             if (defect_result) {
-                let count = defect_result.data.length;
-                _this.defectGrid.setData({
-                    list: defect_result.data,
-                    page: {
-                        display: true,
-                        totalElements: count
-                    }
-                });
+                this.defectGrid.itemsSource.sourceCollection = defect_result.data;
             }
 
             let consumed_param = {
@@ -486,14 +451,7 @@
 
             let consumed_result = AjaxUtil.getSyncData(this.baseUrl + '/consumed_list', consumed_param);
             if (consumed_result) {
-                let count = consumed_result.data.length;
-                _this.consumedGrid.setData({
-                    list: consumed_result.data,
-                    page: {
-                        display: true,
-                        totalElements: count
-                    }
-                });
+                this.consumedGrid.itemsSource.sourceCollection = consumed_result.data;
             }
 
             $content.find('#btnSave').on('click', function () {
@@ -515,89 +473,41 @@
 
         // 팝업 내부 그리드 세팅
         setDetailGrid($form) {
-            let _this = this;
 
-            let defectConfig = {
-                target: $form.find('[data-ax5grid="defect-grid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 30  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
+            this.defectGrid = new wijmo.grid.FlexGrid($form.find('[data-wijmo="defect-grid"]')[0], {
+                autoGenerateColumns: false,
+                selectionMode: wijmo.grid.SelectionMode.None,
+                headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                allowSorting: true,
                 columns: [
-                    { key: 'defect_type', label: '부적합유형', width: 200, align: 'center', sortable: true },
-                    { key: 'defect_qty', label: '부적합량', width: 130, align: 'right', sortable: true, formatter: 'money' },
-                    { key: 'defect_remark', label: '비고', width: 400, align: 'left' },
-                ]
-            }
+                    { binding: 'defect_type', header: '부적합유형', width: 200, align: 'center' },
+                    { binding: 'defect_qty', header: '부적합량', width: 130, align: 'right', format: 'n0' },
+                    { binding: 'defect_remark', header: '비고', width: 400, align: 'left' }
+                ],
+                itemsSource: new wijmo.collections.CollectionView([])
+            });
+            new FlexGridContextMenu(this.defectGrid);
+            this.defectGrid.downloadFileName = '부적합 정보';
 
-            this.defectGrid = new ax5.ui.grid(defectConfig);
-
-            let consumedConfig = {
-                target: $form.find('[data-ax5grid="consumed-grid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 30  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onDataChanged: function () {
-                        if (this.key == 'consumed_start' || this.key == 'consumed_end') {
-                            _this.validateTime(this);
-                        }
-                    },
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
+            this.consumedGrid = new wijmo.grid.FlexGrid($form.find('[data-wijmo="consumed-grid"]')[0], {
+                autoGenerateColumns: false,
+                selectionMode: wijmo.grid.SelectionMode.None,
+                headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                allowSorting: true,
                 columns: [
-                    { key: 'mat_name', label: '품목', width: 250, align: 'left', sortable: true },
-                    { key: 'unit', label: '단위', width: 70, align: 'center' },
-                    { key: 'consumed', label: '실소요량', width: 100, align: 'right', sortable: true, formatter: 'money' },
-                    { key: 'bom_consumed', label: '소요량(BOM)', width: 105, align: 'right', sortable: true, formatter: 'money' },
-                    { key: 'scrap_consumed', label: 'Scrap투입량', width: 100, align: 'right', sortable: true, formatter: 'money' },
-                    { key: 'add_consumed', label: '추가소요량', width: 100, align: 'right', sortable: true, formatter: 'money' },
-                    { key: 'consumed_start', label: '투입시작', width: 80, align: 'center', sortable: true },
-                    { key: 'consumed_end', label: '투입종료', width: 80, align: 'center', sortable: true },
-                ]
-            }
-
-            this.consumedGrid = new ax5.ui.grid(consumedConfig);
-        }
-
-        // 엑셀 다운로드
-        exportExcel(target) {
-            if (target == 'main') {
-                var targetview = this.grid;
-                targetview.exportExcel('생산실적조회.xls');
-            }else if (target == 'input') {
-                var targetview = this.consumedGrid;
-                targetview.exportExcel('투입내역.xls');
-            }else if (target == 'defect') {
-                 var targetview = this.defectGrid;
-                targetview.exportExcel('부적합정보.xls');
-            }
+                    { binding: 'mat_name', header: '품목', width: 250, align: 'left' },
+                    { binding: 'unit', header: '단위', width: 70, align: 'center' },
+                    { binding: 'consumed', header: '실소요량', width: 100, align: 'right', format: 'n0' },
+                    { binding: 'bom_consumed', header: '소요량(BOM)', width: 105, align: 'right', format: 'n0' },
+                    { binding: 'scrap_consumed', header: 'Scrap투입량', width: 100, align: 'right', format: 'n0' },
+                    { binding: 'add_consumed', header: '추가소요량', width: 100, align: 'right', format: 'n0' },
+                    { binding: 'consumed_start', header: '투입시작', width: 80, align: 'center' },
+                    { binding: 'consumed_end', header: '투입종료', width: 80, align: 'center' },
+                ],
+                itemsSource: new wijmo.collections.CollectionView([])
+            });
+            new FlexGridContextMenu(this.consumedGrid);
+            this.consumedGrid.downloadFileName = '투입 내역';
         }
 
     }
@@ -646,27 +556,9 @@
             page.searchMainData();
         });
 
-        $('[data-ax5grid="prod-result-grid"]').on('click', '#btnDetail', function (e) {
+        $('[data-wijmo="prod-result-grid"]').on('click', '#btnDetail', function () {
             let mp_pk = this.getAttribute('mp_pk');
             page.showDetail(mp_pk);
-        });
-
-        // 엑셀 다운로드
-        $('#btnExcel').on('click', function () {
-            page.exportExcel('main');
-        });
-
-        page.popColSetting = new popColSetting();
-        let columns1 = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config1.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config1.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
         });
 
         page.searchMainData();

@@ -129,7 +129,7 @@
                 </div>
             </div>
             <div class="container-fluid">
-                <div id="theGrid" style="height: 500px;"></div>
+                <div id="theGrid" style="height: 680px;"></div>
             </div>
         </section>
     </div>
@@ -178,12 +178,10 @@
                                 </th>
                                 <td colspan="3">
                                     <select id="cboMaterial" name="cboMaterial"></select>
-                                    <button type="button" id="btnMaterialSearch" title="품목검색" disabled>
-                                        <a class="btn btn-delete" title="품목검색">
-                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                            품목 검색
-                                        </a>
-                                    </button>
+                                    <a class="btn btn-delete" id="btnMaterialSearch" title="품목검색">
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        품목 검색
+                                    </a>
                                 </td>
                             </tr>
                             <tr>
@@ -287,6 +285,9 @@
                             {binding: 'description', header: '비고', width: 100, align: 'left'}
                         ]
                     });
+
+                    new FlexGridContextMenu(this.grid);
+                    this.grid.downloadFileName = '작업 지시 등록 내역';
 
                     AjaxUtil.fillSelectOptions($('#cboMatType'), 'system_code', 'all', false, 'mat_type', 'product,semi');
                     AjaxUtil.fillSelectOptions($('#cboMatGroup'), 'material_group', 'all', false, $('#cboMatType').val());

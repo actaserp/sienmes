@@ -1,173 +1,175 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section class="section">
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="재고 조정 이력">재고 조정 이력</h3>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>재고 조정 이력</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>        
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>재고관리</li>
+                <li>재고 조정 이력</li>
+            </ul>
         </div>
 
-        <div class="table_box search">
-            <form id="searchForm" onsubmit="false" autocomplete="off">
-                <div class="row">
-                <div class="col-12 col-lg-5 col-xl-4" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_sm" data-labelCd="실사일">실사일</span>
-                        </div> 
-                        <div data-ax5picker="multi" id="srchDt">
-                            <div class="input-group-append">
-                            <input class="tac " type="text" id="srchStartDt" name="srchStartDt" />
-                                <span class="input-group-text fs-xl">
-                                    <i class="fas fa-calendar-alt calendar_color" ></i>
-                                </span>
-                            <span class="slow_sign">~</span>
-                            <input class="tac " type="text" id="srchEndDt" name="srchEndDt" />
-                                <span class="input-group-text fs-xl">
-                                    <i class="fas fa-calendar-alt calendar_color"></i>
-                                </span>
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            실사일<span class="eq">*</span>
+                        </dt>
+                        <dd>
+                            <ul class="date-box">
+                                <li>
+                                    <input type="date" id="srchStartDt" name="srchStartDt">
+                                    <label for="srchStartDt" class="hide">시작일</label>
+                                </li>
+                                <li>
+                                    <input type="date" id="srchEndDt" name="srchEndDt">
+                                    <label for="srchEndDt" class="hide">종료일</label>
+                                </li>
+                            </ul>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>
+                            <label for="cboStoreHouse">
+                                창고
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboStoreHouse" name="cboStoreHouse"></select>
                             </div>
-                        </div>
-                    </div>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>
+                            <label for="cboMaterialType">
+                                품목유형<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboMaterialType" name="cboMaterialType"></select>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label for="cboManageLevel">
+                                관리등급<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboManageLevel" name="cboManageLevel"></select>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label for="cboMaterialGroup">
+                                품목그룹<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboMaterialGroup" name="cboMaterialGroup"></select>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label for="txtName">
+                                품목명
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input class="form-control2" type="text" id="txtName" name="txtName"/>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>&nbsp;</dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
                 </div>
-
-                    <div class="col-6 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_sm" data-labelCd="창고">창고</span>
-                            </div>
-                            <select class="form-control2" id="cboStoreHouse" name="cboStoreHouse" ></select>
-
-                        </div>
-                    </div>
-
-                    <div class="col-6 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_sm" data-labelCd="품목유형">품목유형</span>
-                            </div>
-                            <select class="form-control2" id="cboMaterialType" name="cboMaterialType" ></select>
-
-                        </div>
-                    </div>
-                    <div class="col-6 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_sm" data-labelCd="관리등급">관리등급</span>
-                            </div>
-                            <select class="form-control2" id="cboManageLevel" name="cboManageLevel" ></select>
-
-                        </div>
-                    </div>
-
-                    <div class="col-6 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_sm" data-labelCd="품목그룹">품목그룹</span>
-                            </div>
-                            <select class="form-control2" id="cboMaterialGroup" name="cboMaterialGroup" ></select>
-
-                        </div>
-                    </div>
-
-
-                    <div class="col-6 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_sm" data-labelCd="품목명">품목명</span>
-                            </div>
-                            <input class="form-control2" id="txtName" name="txtName" />
-
-                        </div>
-                    </div>
-                <div class="col-1" >
-                    <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                </div> 
-
-
-                </div>
-            </form>
-        </div>
-    </section>
-    <section>
+            </div>
             <div class="grid_box">
-                <div class="title_box">
-                    <span class="right_align rpt" data-labelCd="재고 조정 이력">재고 조정 이력</span>
-                    <button type="button" class="btn-default" id="btnExcel" title="엑셀 다운로드"><i class="fas fa-file-excel"></i></button>
-                    <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
-                </div>
-                    <div class="h-630" data-ax5grid="material-grid"></div>
+                <div id="material-grid" style="height: 730px;"></div>
             </div>
-
-    </section>
-
-</div>
+        </section>
+    </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+
 <script type="text/javascript">
     let gUrl = "/api/inventory/mat_stock_take_history";
 
     class Page {
         constructor() {
-            this.grid1 = null;
+            this.grid = null;
             this.init();
         }
 
         init() {
             let _this = this;
-            let config1 = {
-                target: $('[data-ax5grid="material-grid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: true, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
+            this.grid = new wijmo.grid.FlexGrid('#material-grid', {
+                autoGenerateColumns: false,
+                selectionMode: wijmo.grid.SelectionMode.Row,
+                headersVisibility: wijmo.grid.HeadersVisibility.All,
+                isReadOnly: true,
+                frozenColumns: 0,
+                itemsSource: new wijmo.collections.CollectionView([]),
+                formatItem: (s, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.RowHeader) {
+                        // 헤더에 순번
+                        e.cell.textContent = (e.row + 1).toString();
+                    }
+                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                        e.cell.style.textAlign = 'center';
                     }
                 },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [               
-                    { key: 'house_name', label: '창고명', width: 100, align: 'left' },
-                    { key: 'mat_type_name', label: '품목유형', width: 100, align: 'center' },
-                    { key: 'mat_grp_name', label: '품목그룹', width: 100, align: 'center' },
-                    { key: 'mat_code', label: '품목코드', width: 100, align: 'center' },
-                    { key: 'manage_level', label: '관리등급', width: 50, align: 'center' },
-                    { key: 'mat_name', label: '품목명', width: 200, align: 'left' },
-                    { key: 'unit_name', label: '단위', width: 80, align: 'center' },      
-                    { key: 'account_stock', label: '장부재고', width: 100, align: 'right', formatter:'money' },
-                    { key: 'real_stock', label: '실재고', width: 100, align: 'right', formatter:'money' },
-                    { key: 'gap', label: '차이', width: 100, align: 'right', formatter: 'money' },
-                    { key: 'unit_price', label: '단가', width: 100, align: 'right', formatter: 'money' },
-                    { key: 'gap_price', label: '차이금액', width: 100, align: 'right', formatter: 'money' },
-                    { key: 'description', label: '비고', width: 250, align: 'left' },
-                    { key: 'state', label: '상태', width: 80, align: 'center' },
-                    { key: 'taker_name', label: '실사자', width: 100, align: 'center' },
-                    { key: 'take_date_time', label: '실사일시', width: 150, align: 'center' , sortable: true},      
-                    { key: 'confirmer_name', label: '확인자', width: 100, align: 'center' },
-                    { key: 'confirm_date_time', label: '확인일시', width: 150, align: 'center', sortable: true },
+                columns: [
+                    {binding: 'house_name', header: '창고명', width: 100, align: 'left'},
+                    {binding: 'mat_type_name', header: '품목유형', width: 100, align: 'center'},
+                    {binding: 'mat_grp_name', header: '품목그룹', width: 100, align: 'center'},
+                    {binding: 'mat_code', header: '품목코드', width: 100, align: 'center'},
+                    {binding: 'manage_level', header: '관리등급', width: 50, align: 'center'},
+                    {binding: 'mat_name', header: '품목명', width: 200, align: 'left'},
+                    {binding: 'unit_name', header: '단위', width: 80, align: 'center'},
+                    {binding: 'account_stock', header: '장부재고', width: 100, align: 'right' },
+                    {binding: 'real_stock', header: '실재고', width: 100, align: 'right' },
+                    {binding: 'gap', header: '차이', width: 100, align: 'right' },
+                    {binding: 'unit_price', header: '단가', width: 100, align: 'right' },
+                    {binding: 'gap_price', header: '차이금액', width: 100, align: 'right' },
+                    {binding: 'description', header: '비고', width: 250, align: 'left'},
+                    {binding: 'state', header: '상태', width: 80, align: 'center'},
+                    {binding: 'taker_name', header: '실사자', width: 100, align: 'center'},
+                    {binding: 'take_date_time', header: '실사일시', width: 150, align: 'center'},
+                    {binding: 'confirmer_name', header: '확인자', width: 100, align: 'center'},
+                    {binding: 'confirm_date_time', header: '확인일시', width: 150, align: 'center'}
                 ]
-            };
-
-            this.grid1 = new ax5.ui.grid(config1);
-            this.grid_config = config1; 
-            
-            
+            });
+            new FlexGridContextMenu(this.grid);
+            this.grid.downloadFileName = '재고 조정 이력';
         }
 
         searchMainData() {
@@ -183,70 +185,15 @@
             };
             let result = AjaxUtil.getSyncData(gUrl + '/read', data);
             if (result.data != null) {
-                let count = result.data.length;
-                _this.grid1.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: count,
-                    }
-                });
+                _this.grid.itemsSource.sourceCollection = result.data;
             }
         }
-
-        // 엑셀 다운로드
-        exportExcel() {
-            var targetview = this.grid1;
-            targetview.exportExcel('재고조정이력.xls');
-        }
-
-
     }
 
     let page = null;
 
     $(document).ready(function (e) {
         page = new Page();
-
-        picker.bind({
-            target: $('[data-ax5picker="multi"]'),  
-            direction: "top",
-   			locale: {
-				format: 'YYYY-MM-DD'
-			},
-            content: {
-                width:  214,  // 130, //270,
-                margin: 10,
-                type: 'date',
-                
-                config: {
-                    control: {
-                        left: '<i class="fa fa-arrow-left"></i>',   //fa-chevron-left
-                        yearTmpl: '%s',
-                        monthTmpl: '%s',
-                        right: '<i class="fa fa-arrow-right"></i>'
-                    },
-                    lang: {
-                        yearTmpl: "%s년",
-                        months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-                        dayTmpl: "%s"
-                    }
-                }
-            },
-            btns: {
-                /*ok: {
-                    label: "조회", theme: "default", onClick: function () {
-                        this.self.close();
-                        page.searchDataBind();
-                        
-
-                    }
-                }*/
-            },
-            onStateChanged: function () {
- 
-            }
-        });	
 
         AjaxUtil.fillSelectOptions($('#cboMaterialType'), 'system_code', 'all', false, 'mat_type');
         AjaxUtil.fillSelectOptions($('#cboManageLevel'), 'user_code', 'all', false, 'mat_manage_level');
@@ -279,25 +226,6 @@
         $('#srchEndDt').change(function (e) {
             //page.selectDetail();
         });
-
-        // 엑셀 다운로드
-        $('#btnExcel').on('click', function () {
-            page.exportExcel();
-        });	
-
-        //그리드 컬럼 설정
-        page.popColSetting = new popColSetting();
-        let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid1);
-		
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid1, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });	
 
         page.searchMainData();
 
