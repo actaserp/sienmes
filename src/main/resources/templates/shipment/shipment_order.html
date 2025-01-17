@@ -436,10 +436,8 @@
             }
 
             grid_shipment_clear() {
-                let cv = this.grid_shipment.collectionView; // CollectionView 가져오기
+                this.grid_shipment.itemsSource = new wijmo.collections.CollectionView([]);
 
-                cv.sourceCollection = [];
-                cv.refresh();
             }
 
             addShipMat() {
@@ -622,6 +620,7 @@
                         $('#company_id').attr('disabled', false);
 
                         $('#company_id option:eq(0)').prop('selected', true);
+
 
                         page.grid_shipment_clear();
 
