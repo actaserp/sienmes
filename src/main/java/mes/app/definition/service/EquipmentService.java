@@ -151,7 +151,7 @@ public class EquipmentService {
 			""";
 		
 		if (StringUtils.hasText(equipment)) {
-			sql += "  and er.\"Equipment_id\" = :equipment ";
+			sql += "  and er.\"Equipment_id\" = :equipment::INTEGER ";
 		}
 		
 
