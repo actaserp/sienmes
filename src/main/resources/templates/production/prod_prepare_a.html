@@ -216,7 +216,7 @@
 
                 $('#btnWorkIndexSave').click(function (e) {
                     let length = _this.grid.itemsSource.items.length;
-                    if (length == 0 || length == 1) {
+                    if (length === 0 || length === 1) {
                         return;
                     }
                     Alert.confirm('', '순서를 저장하시겠습니까?', function () {
@@ -287,9 +287,14 @@
                     autoGenerateColumns: false,
                     showMarquee: true,
                     isReadOnly: true,
-                    formatItem: (sender, e) => {
+                    formatItem: (s, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
+                        }
+                        // 이동량 열 헤더 스타일 적용
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader
+                            && s.columns[e.col].binding === 'input_req_qty') {
+                            e.cell.style.color = '#5567ff'; // 글자 색깔 변경
                         }
                     },
                     columns: [
@@ -311,12 +316,9 @@
                                 return `<div class="${item.requ_qty > stock ? 'grid-cell-red' : ''}">${wijmo.format('{0:n1}', stock)}</div>`;
                             }
                         },
-                        { binding: 'process_stock', header: '공정창고 재고', width: 150, align: 'right', isReadOnly: true },
-                        { binding: 'proc_safety_stock', header: '공정안전재고', width: 150, align: 'right', isReadOnly: true },
-                        {
-                            binding: 'input_req_qty', header: '<span class="editable_clr">투입 요청량</span>', width: 150, align: 'right',
-                            isReadOnly: false
-                        }
+                        { binding: 'process_stock', header: '공정창고 재고', width: 150, align: 'right', isReadOnly: true, hidden: true },
+                        { binding: 'proc_safety_stock', header: '공정안전재고', width: 150, align: 'right', isReadOnly: true, hidden: true },
+                        { binding: 'input_req_qty', header: '투입 요청량', width: 150, align: 'right',  isReadOnly: false, hidden: true }
                     ]
                 });
 

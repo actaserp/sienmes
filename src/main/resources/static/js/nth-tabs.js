@@ -151,7 +151,6 @@
                 var iframe = document.querySelector('#' + objid + ' iframe');
                 if (iframe) {
                     iframe.onload = function() {
-                        console.log('isbookmark', isbookmark);
                         var bookmarkButton = iframe.contentWindow.document.querySelector('.bookmark.toggle');
                         if (bookmarkButton) {
                             // 북마크 초기 상태 설정

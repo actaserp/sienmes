@@ -256,7 +256,7 @@ var Alert = {
                 "ok": i18n.getCommonText("확인"),
                 "cancel": i18n.getCommonText("취소")
             },
-            theme: 'danger',
+            theme: 'default',
             buttons: [
                 {key: "ok", label: i18n.getCommonText("확인")},       // 확인 버튼을 나중에
                 {key: "cancel", label: i18n.getCommonText("취소")}  // 취소 버튼을 먼저
