@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -46,6 +48,11 @@ public class AccountController {
 	
 	@Autowired
 	SqlRunner sqlRunner;
+
+	private final ConcurrentHashMap<String, String> tokenStore = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, Long> tokenExpiry = new ConcurrentHashMap<>();
+	private Boolean flag;
+	private Boolean flag_pw;
 	
 	@Resource(name="authenticationManager")
     private AuthenticationManager authManager;
@@ -189,6 +196,80 @@ public class AccountController {
         
         
         return result;
-    }   
-    
+    }
+
+	/***
+	 *  아이디 중복 확인
+	 * **/
+	@PostMapping("/useridchk")
+	public AjaxResult IdChk(@RequestParam("userid") final String userid){
+
+		AjaxResult result = new AjaxResult();
+
+
+		Optional<User> user = userRepository.findByUsername(userid);
+
+
+		if(!user.isPresent()){
+
+			result.success = true;
+			result.message = "사용할 수 있는 계정입니다.";
+			return result;
+
+		}else {
+			result.success = false;
+			result.message = "중복된 계정이 존재합니다.";
+			return result;
+		}
+
+
+	}
+
+	@PostMapping("/authentication")
+	public AjaxResult Authentication(@RequestParam(value = "AuthenticationCode") String AuthenticationCode,
+									 @RequestParam(value = "email", required = false) String email,
+									 @RequestParam String type
+	){
+
+		AjaxResult result = verifyAuthenticationCode(AuthenticationCode, email);
+
+		if(type.equals("new")){
+			if(result.success){
+				flag = true;
+				result.message = "인증되었습니다.";
+
+			}
+
+		}else{
+			if(result.success){
+				flag_pw = true;
+				result.message = "인증되었습니다.";
+			}
+		}
+
+		return result;
+	}
+
+	private AjaxResult verifyAuthenticationCode(String code, String mail){
+
+		AjaxResult result = new AjaxResult();
+
+		String storedToken = tokenStore.get(mail);
+		if(storedToken != null && storedToken.equals(code)){
+			long expiryTime = tokenExpiry.getOrDefault(mail, 0L);
+			if(System.currentTimeMillis() > expiryTime){
+				result.success = false;
+				result.message = "인증 코드가 만료되었습니다.";
+				tokenStore.remove(mail);
+				tokenExpiry.remove(mail);
+			} else {
+				result.success = true;
+				result.message = "비밀번호가 변경되었습니다.";
+			}
+		}else{
+			result.success = false;
+			result.message = "인증 코드가 유효하지 않습니다.";
+		}
+		return result;
+	}
 }

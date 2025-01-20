@@ -42,7 +42,8 @@ public class SecurityConfiguration {
         //http.csrf().disable();
         http.csrf().ignoringAntMatchers("/api/files/upload/**");
         
-        http.authorizeRequests().mvcMatchers("/login","/logout").permitAll()
+        http.authorizeRequests().mvcMatchers("/login","/logout" ,"/useridchk/**").permitAll()
+        .mvcMatchers("/authentication/**").permitAll()
         .mvcMatchers("/setup").hasAuthority("admin")		// hasRole -> hasAuthority로 수정
         .anyRequest().authenticated();
 
@@ -78,7 +79,7 @@ public class SecurityConfiguration {
     @Bean
     @Order(0)
     SecurityFilterChain exceptResources(HttpSecurity http) throws Exception {
-    	http.requestMatchers(matchers -> matchers.antMatchers("/resource/**","/img/**", "/js/**","/css/**","/font/**","/robots.txt","/favicon.ico","/intro", "/error", "/alive", "/api/das_device"))
+    	http.requestMatchers(matchers -> matchers.antMatchers("/resource/**","/img/**", "/images/**", "/js/**","/css/**","/font/**","/robots.txt","/favicon.ico","/intro", "/error", "/alive", "/api/das_device"))
 		.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
 		.requestCache(RequestCacheConfigurer::disable)
 		.securityContext(AbstractHttpConfigurer::disable)
