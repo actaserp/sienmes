@@ -1,284 +1,358 @@
 <html layout:decorate="~{layout_page}">
 
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section>
-
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="검사마스터 그룹">검사마스터 그룹</h3>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>검사마스터 그룹</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>관리메뉴</li>
+                <li>검사관리</li>
+                <li>검사마스터 그룹</li>
+            </ul>
         </div>
 
 
-        <div class="table_box search" >
-            <div class="row" >
-                <div class="col-6 col-md-3 col-xl-2" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_sm" data-labelCd="그룹명">그룹명</span>
-                        </div>
-                        <input class="form-control2" id="txtTestGrp" name="txtTestGrp" />
-                    </div>
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label>그룹명</label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input type="text" id="txtTestGrp" name="txtTestGrp" class="form-control2">
+                            </div>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>
+                            <label>검사종류</label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select class="form-control2" id="cboTestClass" name="cboTestClass"></select>
+                            </div>
+                        </dd>
+                    </dl>
+
+
+                    <dl>
+                        <dt><span class="eq"></span></dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
                 </div>
-
-                <div class="col-6 col-md-3 col-xl-2">
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_sm" data-labelCd="검사종류">검사종류</span>
-                        </div>
-                        <select class="form-control2" id="cboTestClass" name="cboTestClass" ></select>
-                    </div>
-                </div>
-
-                <div class="col-1">
-                    <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                </div> 
+            </div> <!--//section-top end -->
+            <div class="container-fluid">
+                <p id="selectedItem"></p>
+                <div id="theGrid" style="height: 630px; max-height: 630px;"></div>
             </div>
-        </div>
-    </section>
-
-    <section>
-        <div class="grid_box">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="검사마스터 그룹">검사마스터 그룹</span>
-                <!--<button type="button" class="btn-default y_write_auth" id="btnSave" style="float:none"><i class="fas fa-save"></i></button>-->
-                <button type="button" class="btn-danger y_write_auth" id="btnDel"><i class="fas fa-trash"></i></button>
-                <button type="button" class="btn-default" id="btnExcel" title="엑셀 다운로드"><i class="fas fa-file-excel"></i></button>
+            <div class="btn-wrap">
             </div>
-            <div class=" h-630" data-ax5grid="test-grp-grid"> </div>
-        </div>
-    </section>
-</div>
+        </section>
+    </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-<script type="text/javascript">
-    class TestGrpPage {
-        constructor() {
-            this.ClassMap = { };
-            this.test_class = AjaxUtil.getSelectData('system_code', 'test_class');
-            this.grid = null;
-            this.init(); 
-        }
+    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+    <script type="text/javascript">
+        class TestGrpPage {
+            constructor() {
+                this.ClassMap = {};
+                this.test_class = AjaxUtil.getSelectData('system_code', 'test_class');
+                this.grid = null;
+                this.viewData = new wijmo.collections.CollectionView();
+                this.init();
+            }
 
-        init() {
-            let _this = this;
-            let config = {
-                target: $('[data-ax5grid="test-grp-grid"]'),
-                sortable: true,
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-
-                        _this.grid.select(this.dindex);
-                        if (e.column.key == 'test_class') {
-                            e.column.editor.config.options = _this.test_class;
-                        }
+            init() {
+                let _this = this;
+                /*let config = {
+                    target: $('[data-ax5grid="test-grp-grid"]'),
+                    sortable: true,
+                    frozenColumnIndex: 0, // 열 고정
+                    frozenRowIndex: 0,    // 행 고정
+                    showLineNumber: false, // 열의 번호 보이기 여부
+                    showRowSelector: false,  // checkbox(선택) 보이기 여부
+                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
+                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
+                    multiSort: true, // 다중 정렬 여부
+                    header: {
+                        align: 'center',  // 헤더의 기본 정렬
+                        columnHeight: 38  // 헤더 높이
                     },
-                    onDataChanged: function (e) {
-                        if (this.key == 'test_grp_name') {
-                            if (!this.item.test_class) {
-                                Alert.alert('', '검사종류를 선택해 주세요')
-                                return false;
-                            }
-                            
-                            _this.saveTestMaterGrp();
-                        } else if (this.key == 'test_class') {
-                            if (!this.item.test_grp_name) {
-                                return false;
-                            }
-                            _this.saveTestMaterGrp();
-                        }
-                    }
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    //{ key: 'id', label: '번호', width: 100, align: 'center', sortable: false },
-                    {
-                        key: 'test_class', label: '<span style="color:blue">검사종류</span>', width: 150, align: 'left', sortable: true,
-                        formatter: function () {
-                            return _this.ClassMap[this.value];
-                        },
-                        editor: {
-                            type: 'select',
-                            config: {
-                                columnKeys: {
-                                    optionValue: 'value',
-                                    optionText: 'text'
-                                },
-                                //options: res
-                                options: [],
+                    body: {
+                        columnHeight: 25, // body의 기본 높이
+                        onClick: function (e) {
+
+                            _this.grid.select(this.dindex);
+                            if (e.column.key == 'test_class') {
+                                e.column.editor.config.options = _this.test_class;
                             }
                         },
-                        
+                        onDataChanged: function (e) {
+                            if (this.key == 'test_grp_name') {
+                                if (!this.item.test_class) {
+                                    Alert.alert('', '검사종류를 선택해 주세요')
+                                    return false;
+                                }
+
+                                _this.saveTestMaterGrp();
+                            } else if (this.key == 'test_class') {
+                                if (!this.item.test_grp_name) {
+                                    return false;
+                                }
+                                _this.saveTestMaterGrp();
+                            }
+                        }
                     },
-                    { key: 'test_grp_name', label: '<span style="color:blue">그룹명</span>', width: 150, align: 'left', sortable: true, editor: { type: 'text' }, },
-                ]
-            };
-
-            this.grid = new ax5.ui.grid(config);
-
-            AjaxUtil.fillSelectOptions($('#cboTestClass'), 'system_code', 'all', false, 'test_class');
-        }
-
-        //버튼 활성화 설정 
-        setButtonState() {
-            let pk = $('#id').val();
-            $('#btnSave').prop('disabled', false);
-            if (pk) {
-                $('#btnDel').prop('disabled', false);
-            }
-            else {
-                $('#btnDel').prop('disabled', true);
-            }
-        }
-
-
-        // 그룹 목록 조회
-        searchMainData() {
-            let _this = this;
-            let url = '/api/test/test_master_group/read';
-            let param = {
-                'action': 'read',
-                'test_grp_name': $('#txtTestGrp').val(),
-                'test_class': $('#cboTestClass').val()
-            }
-		
-            let result = AjaxUtil.getSyncData(url, param);
-            if (result != null) {
-                let recordsTotal = result.data.length;
-                _this.grid.setData({
-                    list: result.data,
                     page: {
-                        display: true,
-                        totalElements: recordsTotal,
-                    }
+                        display: true,  // 페이징 보이기 여부
+                        statusDisplay: true,
+                    },
+                    columns: [
+                        //{ key: 'id', label: '번호', width: 100, align: 'center', sortable: false },
+                        {
+                            key: 'test_class',
+                            label: '<span style="color:blue">검사종류</span>',
+                            width: 150,
+                            align: 'left',
+                            sortable: true,
+                            formatter: function () {
+                                return _this.ClassMap[this.value];
+                            },
+                            editor: {
+                                type: 'select',
+                                config: {
+                                    columnKeys: {
+                                        optionValue: 'value',
+                                        optionText: 'text'
+                                    },
+                                    //options: res
+                                    options: [],
+                                }
+                            },
+
+                        },
+                        {
+                            key: 'test_grp_name',
+                            label: '<span style="color:blue">그룹명</span>',
+                            width: 150,
+                            align: 'left',
+                            sortable: true,
+                            editor: {type: 'text'},
+                        },
+                    ]
+                };*/
+                this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                    },
+                    columns: [
+                        //{ key: 'id', label: '번호', width: 100, align: 'center', sortable: false },
+                        {
+                            binding: 'test_class',
+                            /*header: '<span style="color:blue">검사종류</span>',*/
+                            header:'검사종류',
+                            width: 150,
+                            align: 'left',
+                            /* sortable: true,*/
+                            /*formatter: function () {
+                                return _this.ClassMap[this.value];
+                            },*/
+                           /* editor: {
+                                type: 'select',
+                                config: {
+                                    columnKeys: {
+                                        optionValue: 'value',
+                                        optionText: 'text'
+                                    },
+                                    //options: res
+                                    options: [],
+                                }
+                            },*/
+
+                        },
+                        {
+                            binding: 'test_grp_name',
+                            /*header: '<span style="color:blue">그룹명</span>',*/
+                            header: '그룹명',
+                            width: 150,
+                            align: 'left',
+                            /*  sortable: true,*/
+                            /*editor: {type: 'text'},*/
+                        },
+                        {binding: '', header: '', width: "*", align: 'right'},
+                    ],
+                    itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
+
+                /*this.grid = new ax5.ui.grid(config);*/
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = '검사마스터 그룹';
+
+                AjaxUtil.fillSelectOptions($('#cboTestClass'), 'system_code', 'all', false, 'test_class');
             }
 
-            page.grid.addRow({},'last',{focus: "END"}); 
-
-        }
-
-        // 테스트 마스터 그룹 정보 저장
-        saveTestMaterGrp() {
-            let _this = this;
-            
-            let url = '/api/test/test_master_group';
-            let data = {
-                list: JSON.stringify(this.grid.getList("modified")),
-            }
-            let fnSuccess = function () {
-                Notify.success('저장되었습니다');
-                _this.searchMainData();
-            }
-
-            AjaxUtil.postAsyncData(url+"/save", data, fnSuccess);
-        }
-
-        //  정보 삭제
-        deleteTestMasterGrp() {
-            let _this = this;
-            let url = '/api/test/test_master_group/delete';
-
-            let id = this.grid.getList("selected")[0].id;
-            let data = { 'id': id };
-            let fnSuccess = function (res) {
-                if (res.success) {
-                    Notify.success('삭제되었습니다');
-                    _this.searchMainData();
+            //버튼 활성화 설정
+            setButtonState() {
+                let pk = $('#id').val();
+                $('#btnSave').prop('disabled', false);
+                if (pk) {
+                    $('#btnDel').prop('disabled', false);
                 } else {
-                    Alert.alert('', res.message);
+                    $('#btnDel').prop('disabled', true);
                 }
             }
 
-            AjaxUtil.postAsyncData(url, data, fnSuccess);
+
+            // 그룹 목록 조회
+            searchMainData() {
+                let _this = this;
+                let url = '/api/test/test_master_group/read';
+                let param = {
+                    'action': 'read',
+                    'test_grp_name': $('#txtTestGrp').val(),
+                    'test_class': $('#cboTestClass').val()
+                }
+
+                let result = AjaxUtil.getSyncData(url, param);
+                if (result.success) {
+                    _this.viewData.sourceCollection = result.data;
+                }
+
+              /*  page.grid.addRow({}, 'last', {focus: "END"});*/
+
+            }
+
+            // 테스트 마스터 그룹 정보 저장
+            saveTestMaterGrp() {
+                let _this = this;
+
+                let url = '/api/test/test_master_group';
+                let data = {
+                    list: JSON.stringify(this.grid.getList("modified")),
+                }
+                let fnSuccess = function () {
+                    Notify.success('저장되었습니다');
+                    _this.searchMainData();
+                }
+
+                AjaxUtil.postAsyncData(url + "/save", data, fnSuccess);
+            }
+
+            //  정보 삭제
+            deleteTestMasterGrp() {
+                let _this = this;
+                let url = '/api/test/test_master_group/delete';
+
+                let id = this.grid.getList("selected")[0].id;
+                let data = {'id': id};
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Notify.success('삭제되었습니다');
+                        _this.searchMainData();
+                    } else {
+                        Alert.alert('', res.message);
+                    }
+                }
+
+                AjaxUtil.postAsyncData(url, data, fnSuccess);
+            }
+
+            // 엑셀 다운로드
+            exportExcel() {
+                var targetview = this.grid;
+                targetview.exportExcel('검사마스터그룹.xls');
+            }
+
+
         }
 
-        // 엑셀 다운로드
-        exportExcel() {
-            var targetview = this.grid;
-            targetview.exportExcel('검사마스터그룹.xls');
-        }
+        let page = null;
+
+        $(document.body).ready(function (e) {
+            page = new TestGrpPage();
+
+            page.test_class = AjaxUtil.getSelectData('system_code', 'test_class');
+            $.each(page.test_class, function (index, item) {
+                page.ClassMap[item.value] = item.text;
+            });
+
+            page.searchMainData();
 
 
-    }
+            // 검색버튼 클릭
+            $('#btnSearch').click(function (e) {
+                page.searchMainData();
+            });
 
-    let page = null;
+            // 저장버튼
+            $('#btnSave').click(function (e) {
+                Alert.confirm('',
+                    '저장하시겠습니까?',
+                    function () {
+                        page.saveTestMaterGrp()
+                    },
+                    function () {
+                    }
+                );
+            });
 
-    $(document.body).ready(function (e) {
-        page = new TestGrpPage();
+            // 삭제버튼
+            $('#btnDel').click(function (e) {
+                Alert.confirm('',
+                    '삭제하시겠습니까?',
+                    function () {
+                        page.deleteTestMasterGrp()
+                    },
+                    function () {
+                    }
+                );
+            });
 
-        page.test_class = AjaxUtil.getSelectData('system_code', 'test_class');
-        $.each(page.test_class, function (index, item) {
-            page.ClassMap[item.value] = item.text;
+            // 엑셀 다운로드
+            $('#btnExcel').on('click', function () {
+                page.exportExcel();
+            });
+
+
+            //그룹명에서 엔터키
+            //$(page.grid.column.key == 'test_grp_name').keydown(function (key) {
+            //    if (key.keyCode == 13) {
+            //    }
+            //});
+
+            //$('[data-ax5grid="test-grp-grid"]').keydown(function (key ) {
+            //    if (key === 13) {
+            //    }
+            //})
+
         });
 
-        page.searchMainData();
 
-
-        // 검색버튼 클릭
-        $('#btnSearch').click(function (e) { page.searchMainData(); });
-
-        // 저장버튼
-        $('#btnSave').click(function (e) {
-            Alert.confirm('', 
-                '저장하시겠습니까?',
-                function () { page.saveTestMaterGrp() },
-                function () { }
-            );
-        });
-
-        // 삭제버튼
-        $('#btnDel').click(function (e) {
-            Alert.confirm('', 
-                '삭제하시겠습니까?',
-                function () { page.deleteTestMasterGrp() },
-                function () { }
-            );
-        });
-
-        // 엑셀 다운로드
-        $('#btnExcel').on('click', function () {
-            page.exportExcel();
-        });	
-
-
-
-        //그룹명에서 엔터키
-        //$(page.grid.column.key == 'test_grp_name').keydown(function (key) {
-        //    if (key.keyCode == 13) {
-        //    }
-        //});
-
-        //$('[data-ax5grid="test-grp-grid"]').keydown(function (key ) {
-        //    if (key === 13) {
-        //    }
-        //})
-
-    });
-
-
-
-</script>
+    </script>
 
 
 </th:block>
