@@ -18,7 +18,7 @@
             border-collapse: collapse;
             text-align: left;
             line-height: 1.5;
-            margin: 20px 10px;
+            margin: 20px 0;
         }
 
         table.type01 th {
@@ -35,6 +35,7 @@
             padding: 10px;
             vertical-align: middle;
             border: 1px solid #ccc;
+            text-align: left;
         }
     </style>
 </head>
@@ -70,51 +71,50 @@
             </div>
             <div class="section-card-wrap">
 
-                    <div class="col-6">
-                        <table class="write-table">
-                            <tbody>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="txtTitle">일지명</label>
-                                </th>
-                                <td>
-                                    <input class="form-control2" type="text" id="txtTitle" name="title" value="" readonly/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="dataDate">일자</label>
-                                </th>
-                                <td>
-                                    <input type="date" id="dataDate" name="dataDate" disabled />
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="cboHaccpProcess">CCP가열공정</label>
-                                </th>
-                                <td>
-                                    <select id="cboHaccpProcess" name="hp_id" disabled></select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="txtWriterName">작성자</label>
-                                </th>
-                                <td>
-                                    <input  type="text" id="txtWriterName" name="WriterName" disabled />
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-6">
-                        <div id="approveBox"></div>
-                    </div>
+                <div class="col-6">
+                    <table class="write-table">
+                        <tbody>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="txtTitle">일지명</label>
+                            </th>
+                            <td>
+                                <input class="form-control2" type="text" id="txtTitle" name="title" value="" readonly/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="dataDate">일자</label>
+                            </th>
+                            <td>
+                                <input type="date" id="dataDate" name="dataDate" disabled/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="cboHaccpProcess">CCP가열공정</label>
+                            </th>
+                            <td>
+                                <select id="cboHaccpProcess" name="hp_id" disabled></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="txtWriterName">작성자</label>
+                            </th>
+                            <td>
+                                <input type="text" id="txtWriterName" name="WriterName" disabled/>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-6">
+                    <div id="approveBox"></div>
+                </div>
 
             </div>
             <div class="title_box">
-                <span class="right_align rpt" data-labelcd="관리기준">관리기준</span>
                 <div class="left_align">
                     <label class="switch">
                         <input type="checkbox" id="btnToggle" value="" checked><span class="slider round"></span>
@@ -125,7 +125,7 @@
 
             <div id="standardDIv">
                 <div class="col-12">
-                    <table class="type01" style="width:99%">
+                    <table class="type01">
                         <tr>
                             <th scope="row">한계기준</th>
                             <td id="Standard"></td>
@@ -154,86 +154,110 @@
 
         <section class="section">
 
-            <div class="row">
-                <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-2">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_md" data-labelCd="설비">설비</span>
-                        </div>
-                        <select class="form-control2" id="cboEquipment" name="equ_id"></select>
-                    </div>
-                </div>
-                <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-2">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_md" data-labelCd="측정구분">측정구분</span>
-                        </div>
-                        <select class="form-control2" id="cboDataType" name="DataType">
-                            <option value="S">작업시작 전</option>
-                            <option value="P">제품</option>
-                            <option value="E">작업종료 후</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-2">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_md" data-labelCd="측정시간">측정시간</span>
-                        </div>
-                        <input class="form-control2" type="text" id="StartTime" name="StartTime" placeholder="00:00"
-                               value="00:00"/>
-                    </div>
-                </div>
-                <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-3">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_md" data-labelCd="제품선택">제품선택</span>
-                        </div>
-                        <select class="form-control2" id="cboMaterialGroup" name="MaterialGroup_id"></select>
-                        <select class="form-control2" id="cboMaterial" name="Material_id">
-                            <option value="">선택
-                        </select>&nbsp;
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label for="cboEquipment">
+                                설비
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboEquipment" name="cboEquipment"></select>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label for="cboDataType">
+                                측정구분
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboDataType" name="DataType">
+                                    <option value="S">작업시작 전</option>
+                                    <option value="P">제품</option>
+                                    <option value="E">작업종료 후</option>
+                                </select>
+                            </div>
+                        </dd>
+                    </dl>
 
-                    </div>
+                    <dl>
+                        <dt>
+                            <label for="StartTime">
+                                측정시간
+                            </label>
+                        </dt>
+                        <dd>
+                            <input type="text" id="StartTime" name="StartTime" placeholder="00:00"
+                                   value="00:00"/>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>
+                            <label for="cboMaterialGroup">
+                                제품선택
+                            </label>
+                        </dt>
+                        <dd>
+                            <select class="form-control2" id="cboMaterialGroup" name="MaterialGroup_id"></select>
+                            <select class="form-control2" id="cboMaterial" name="Material_id">
+                                <option value="">선택
+                            </select>&nbsp;
+                        </dd>
+                    </dl>
                 </div>
-                <div class="col-12 col-sm-12 col-md-6 col-lg-5 col-xl-3">
-                    <div class="input-group">
-                        <button type="button" class="btn-default" id="btnAddTestItems"><i class="fas fa-plus"></i><span>검사결과추가</span>
-                        </button>&nbsp;
-                        <button type="button" class="btn-default" id="btnSaveItems"><i class="fas fa-save"></i><span>변경저장</span>
-                        </button>&nbsp;
-                        <button type="button" class="btn-danger" id="btnDeleteItem"><i class="fas fa-trash"></i><span>행 삭제</span>
-                        </button>
-                    </div>
+                <div class="button-wrap">
+                    <ul>
+                        <li>
+                            <button class="btn btn-excell" title="검사결과추가" id="btnAddTestItems">
+                                <i class="fas fa-plus" style="margin-right: 10px;"></i>
+                                검사결과 추가
+                            </button>
+                        </li>
+                        <li>
+                            <button class="btn btn-edit" title="수정" id="btnSaveItems">
+                                <i class="fas fa-save" style="margin-right: 10px;"></i>
+                                변경 저장
+                            </button>
+                        </li>
+                        <li>
+                            <button class="btn btn-delete" title="삭제" id="btnDeleteItem">
+                                <i class="fas fa-trash" style="margin-right: 10px;"></i>
+                                행 삭제
+                            </button>
+                        </li>
+                    </ul>
                 </div>
-                <div class="col-12">
-                    <div class="grid_box">
-                        <div class="h-300" data-ax5grid="haccp-test-grid"></div>
-                    </div>
-                </div>
+            </div>
+            <div class="container-fluid">
+                <div id="haccp-test-grid" style="height: 300px;"></div>
             </div>
         </section>
 
-        <section>
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="이탈발생현황">이탈발생현황</span>
+        <section class="section">
+
+            <div class="section-top">
+                <div class="search-wrap">
+                    <h3>이탈 발생 현황</h3>
+                </div>
+                <div class="button-wrap">
+                    <ul>
+                        <li>
+                            <button class="btn btn-delete" title="삭제" id="btnDeleteDetect">
+                                <i class="fas fa-trash" style="margin-right: 10px;"></i>
+                                행 삭제
+                            </button>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="table_box sub">
-                <form id="detectForm">
-                    <div class="row">
-                        <div class="col-3 col-sm-12 col-md-6 col-lg-5 col-xl-5">
-                            <div class="input-group">
-                                <button type="button" class="btn-danger" id="btnDeleteDetect" disabled><i
-                                        class="fas fa-trash"></i><span>행 삭제</span></button>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="grid_box">
-                                <div class="h-230" data-ax5grid="haccp-detect-grid"></div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+            <div class="container-fluid">
+                <div id="haccp-detect-grid" style="height: 230px;"></div>
             </div>
         </section>
     </div>
@@ -241,7 +265,6 @@
 
 <th:block layout:fragment="scripts">
     <th:block th:replace="/haccp/common/pop_haccp_devi_detect :: pop_devi_detect"></th:block>
-    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
     <th:block th:replace="/common/approve_box :: approve_box"></th:block>
 
     <script type="text/javascript" src="/js/grid.js"></script>
@@ -285,7 +308,7 @@
                 // 일자
                 this.$dataDate = $('#dataDate');
                 this.$dataDate.ax5DatePicker({direction: 'top'});
-                if (this.hd_id == "0" || this.hd_id == "") {
+                if (this.hd_id === "0" || this.hd_id === "") {
                     this.$dataDate.val(CommonUtil.getYYYYMMDD());
                 }
 
@@ -316,154 +339,153 @@
             // haccp_test 그리드 초기화
             initHaccpTestGrid() {
                 let _this = this;
-
-                let cols = [];
-                let editor_ox = {
-                    type: 'select',
-                    config: {
-                        columnKeys: {
-                            optionValue: "value", optionText: "text"
-                        },
-                        options: [{value: 'O', text: 'O'}, {value: "X", text: "X"}]
-                    }
-                };
-                cols.push({key: 'equ_name', label: '설비명', width: 150, sortable: false, align: 'left'});
-                cols.push({key: 'mat_code', label: '제품코드', width: 120, sortable: false, align: 'left'});
-                cols.push({key: 'MaterialName', label: '제품명', width: 250, sortable: false, align: 'left'});
-                cols.push({
-                    key: 'DataType',
-                    label: '측정구분',
-                    width: 100,
-                    sortable: false,
-                    align: 'center',
-                    formatter: function () {
-                        return _this.dicDataType[this.value]
+                let columns = [
+                    {binding: 'equ_name', header: '설비명', width: 150, align: 'left', isReadOnly: true},
+                    {binding: 'mat_code', header: '제품코드', width: 120, align: 'left', isReadOnly: true},
+                    {binding: 'MaterialName', header: '제품명', width: 250, align: 'left', isReadOnly: true},
+                    {
+                        binding: 'DataType',
+                        header: '측정구분',
+                        width: 100,
+                        align: 'center',
+                        isReadOnly: true,
                     },
-                });
-                cols.push({
-                    key: 'StartTime',
-                    label: '<span class="editable_clr">측정시간</span>',
-                    width: 100,
-                    align: 'center',
-                    sortable: false,
-                    editor: {type: 'text'}
-                });
-                $.each(_this.process_items, function (idx, r) {
-                    let kv = 'item_' + r.item_id;
-                    let label = '<span class="editable_clr">' + r.item_name + "</span>";
-                    let c = {};
-                    // ResultType==OX 이면
-                    if (r.ResultType == 'OX') {
-                        c = {
-                            key: kv, label: label, width: 120, align: 'center', editor: editor_ox, sortable: false,
-                            formatter: function () {
-                                let ret = this.value;
-                                if (this.value == null || this.value == 'null') {
-                                    ret = "-";
-                                }
-                                return ret;
-                            }
-                        };
-                    } else if (r.ResultType == 'text') {
-                        c = {
-                            key: kv,
-                            label: label,
-                            width: 120,
-                            align: 'right',
-                            editor: {type: 'text'},
-                            sortable: false
-                        };
+                    {binding: 'StartTime', header: '측정시간', width: 100, align: 'center', isRequired: true, isReadOnly: false},
+                    {
+                        binding: 'Judge',
+                        header: '판정(적합:O/부적합:X)',
+                        width: 150,
+                        align: 'center',
+                        isReadOnly: false, // 수정 가능
+                    },
+                    {binding: 'TesterName', header: '모니터링 담당자', width: 120, align: 'center', isReadOnly: false },
+                    {binding: 'Description', header: '비고', width: 260, align: 'left', isReadOnly: false }
+                ];
+
+                // 'StartTime' 컬럼의 다음 위치를 찾음
+                let startTimeIndex = columns.findIndex(col => col.binding === 'StartTime') + 1;
+
+                // _this.process_items 처리
+                let processColumns = [];
+                let processBindings = [];
+                _this.process_items.forEach(r => {
+                    let binding = 'item_' + r.item_id;
+                    let column = {
+                        binding: binding,
+                        header: r.item_name,
+                        width: 120,
+                        align: 'center',
+                        isReadOnly: false
+                    };
+
+                    if (r.ResultType === 'OX') {
+                        column.dataMap = new wijmo.grid.DataMap([
+                            {value: 'O', text: 'O'},
+                            {value: 'X', text: 'X'}
+                        ], 'value', 'text');
+                    } else if (r.ResultType === 'text') {
+                        column.isRequired = true;
                     } else {
-                        c = {
-                            key: kv,
-                            label: label,
-                            width: 120,
-                            align: 'right',
-                            editor: {type: 'number'},
-                            sortable: false
-                        };
+                        column.format = 'n0';
                     }
-                    cols.push(c);
-                });
-                cols.push({
-                    key: 'Judge',
-                    label: '<span class="editable_clr">판정(적합:O/부적합:X)</span>',
-                    width: 150,
-                    align: 'center',
-                    sortable: false,
-                    formatter: function () {
-                        let ret = this.value;
-                        if (ret == null) {
-                            ret = '-';
-                        }
-                        return ret;
-                    }
-                });
-                cols.push({
-                    key: 'TesterName',
-                    label: '<span class="editable_clr">모니터링 담당자</span>',
-                    width: 120,
-                    align: 'center',
-                    sortable: false,
-                    editor: {type: 'text'}
-                });
-                cols.push({
-                    key: 'Description',
-                    label: '<span class="editable_clr">비고</span>',
-                    width: 260,
-                    sortable: false,
-                    editor: {type: 'text'},
-                    align: 'left'
+
+                    processBindings.push(binding);
+                    processColumns.push(column);
                 });
 
-                let config = {
-                    target: $('[data-ax5grid="haccp-test-grid"]'),
-                    sortable: true,
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: true, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: true, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25,
-                        onClick: function (e) {
-                            e.self.select(this.dindex);
-                            if (e.column.key == 'Judge' && _this.view_mode == false) {
-                                e.item.__modified__ = true;
-                                if (e.item.Judge == null || e.item.Judge == 'null') {
-                                    e.item.Judge = "O";
-                                    e.self.repaint();
-                                } else if (e.item.Judge == 'O') {
-                                    e.item.Judge = 'X';
-                                    e.self.repaint();
-                                } else if (e.item.Judge == 'X') {
-                                    e.item.Judge = "O";
-                                    e.self.repaint();
-                                }
-                            }
-                        },
-                        onDataChanged: function () {
-                            if (this.key == 'StartTime') {
-                                let ret = this
-                                DataValidation.validateTime(ret)
-                                this.item.StartTime = ret.value
-                                return this.item.StartTime
+                // StartTime 다음에 processColumns 삽입
+                columns.splice(startTimeIndex, 0, ...processColumns);
+
+                // 헤더 스타일을 적용할 모든 binding 값을 배열로 저장
+                let styledBindings = ['StartTime', 'Judge', 'TesterName', 'Description', ...processBindings];
+
+                this.haccpTestGrid = new wijmo.grid.FlexGrid('#haccp-test-grid', {
+                    autoGenerateColumns: false,
+                    frozenColumns: 0,
+                    frozenRows: 0,
+                    isReadOnly: false, // 전체적으로 수정 가능
+                    allowSorting: true,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All, // 헤더 표시
+                    itemsSource: new wijmo.collections.CollectionView([]),
+                    columns: columns,
+                    formatItem: (s, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.RowHeader) {
+                            // 헤더에 순번
+                            e.cell.textContent = (e.row + 1).toString();
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                        // 헤더 스타일 적용
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader
+                            && styledBindings.includes(s.columns[e.col].binding)
+                        ) {
+                            e.cell.style.color = '#5567ff';
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            if (s.columns[e.col].binding === 'DataType') {
+                                let value = e.cell.textContent;
+                                e.cell.textContent = _this.dicDataType[value] || '-'; // 매핑된 값 또는 기본값 표시
                             }
                         }
-                    },
-                    page: {
-                        display: true,
-                        statusDisplay: true,
-                    },
-                    columns: cols
-                };
-                this.haccpTestGrid = new ax5.ui.grid(config);
+                    }
+                });
+
+                // 셀 편집 완료 이벤트 - 수정 플래그 설정
+                this.haccpTestGrid.cellEditEnded.addHandler((s, e) => {
+                    const col = s.columns[e.col]; // 현재 수정된 컬럼
+                    const item = s.collectionView.items[e.row]; // 수정된 행 데이터
+
+
+                    if (col.binding === 'Judge') {
+
+                        return;
+                    }
+
+                    // 수정 가능한 컬럼인지 확인
+                    if (['StartTime', 'TesterName', 'Description'].includes(col.binding) || col.binding.startsWith('item_')) {
+                        item.__modified = true; // 수정 플래그 설정
+                    }
+                });
+
+                // formatItem 이벤트에 Judge 셀 클릭 이벤트 추가
+                this.haccpTestGrid.formatItem.addHandler((s, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                        const col = s.columns[e.col];
+                        const item = s.rows[e.row]?.dataItem;
+
+                        // Judge 셀 처리
+                        if (col.binding === 'Judge' && item) {
+                            e.cell.textContent = item.Judge || '-'; // 데이터 값 렌더링
+                            e.cell.style.cursor = 'pointer'; // 클릭 가능한 커서 스타일
+
+                            // 기존 클릭 이벤트 제거
+                            e.cell.removeEventListener('click', e.cell.__clickHandler);
+
+                            // 새로운 클릭 이벤트 추가
+                            e.cell.__clickHandler = () => {
+                                if (!_this.view_mode) { // 읽기 전용이 아닐 경우에만 동작
+                                    const currentValue = item.Judge || '-'; // 현재 값
+                                    const newValue = currentValue === 'O' ? 'X' : 'O'; // 값 토글
+                                    item.Judge = newValue; // 데이터 업데이트
+                                    item.__modified = true; // 수정 플래그 설정
+
+                                    // 셀 값 즉시 업데이트
+                                    e.cell.textContent = newValue;
+
+                                    console.log(`Judge 셀 값 변경됨: ${newValue}`);
+                                }
+                            };
+
+                            // 클릭 이벤트 등록
+                            e.cell.addEventListener('click', e.cell.__clickHandler);
+                        }
+                    }
+                });
+
+
+
 
                 // 목록버튼
                 this.$btnList = $('#btnList');
@@ -524,12 +546,18 @@
 
 
                 this.$btnSaveItems.click(function (e) {
-                    let testItems = _this.haccpTestGrid.getList('modified');
-                    let modifiedCount = testItems.length;
+                    // 수정된 항목 가져오기
+                    let cv = _this.haccpTestGrid.collectionView;
+                    let modifiedItems = cv.items.filter(item => item.__modified); // 수정된 데이터 필터링
+
+                    console.log('수정된 항목:', modifiedItems); // 디버깅 로그
+
+                    let modifiedCount = modifiedItems.length;
                     if (modifiedCount > 0) {
                         Alert.confirm('항목저장', '항목을 저장하시겠습니까?', function () {
                             // 저장함수 호출
-                            _this.saveHaccpTestItems(testItems);
+                            _this.saveHaccpTestItems(modifiedItems);
+                            modifiedItems.forEach(item => delete item.__modified);
                         });
                     } else {
                         Alert.alert('항목저장', '변경된 데이터가 없습니다.');
@@ -537,7 +565,7 @@
                 });
 
                 this.$btnDeleteItem.click(function (e) {
-                    let items = _this.haccpTestGrid.getList('selected');
+                    let items = _this.haccpTestGrid.selectedItems;
                     if (items.length == 0) {
                         Alert.alert('항목삭제', '선택된 행이 없습니다.');
                         return;
@@ -593,84 +621,81 @@
                 AjaxUtil.postAsyncData(url, data, fnsuccess);
             }
 
-
             initDetectList() {
                 let _this = this;
 
-
                 this.$btnDeleteDetect = $('#btnDeleteDetect');
 
-                let config = {
-                    target: $('[data-ax5grid="haccp-detect-grid"]'),
-                    sortable: true,
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: true, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: true, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
+                let columns = [
+                    {binding: 'equ_name', header: '설비명', width: 150, align: 'left', isReadOnly: true},
+                    {binding: 'mat_code', header: '제품코드', width: 100, align: 'center', isReadOnly: true},
+                    {binding: 'MaterialName', header: '제품명', width: 300, align: 'left', isReadOnly: true},
+                    {binding: 'StartTime', header: '측정시간', width: 80, align: 'center', isRequired: true},
+                    {
+                        binding: 'AbnormalDetail',
+                        header: '이탈사항(클릭)',
+                        width: 250,
+                        align: 'center',
+                        isReadOnly: true
                     },
-                    body: {
-                        columnHeight: 25,
-                        onClick: function (e) {
-                            if (_this.view_mode == false) {
-                                e.self.select(this.dindex);
-                                _this.$btnDeleteDetect.removeAttr('disabled');
-                            }
+                    {binding: 'ActionDetail', header: '조치내역', width: 250, align: 'left', isReadOnly: true},
+                    {binding: 'ActorName', header: '조치자', width: 80, align: 'center', isReadOnly: true},
+                    {binding: 'writer', header: '확인자', width: 80, align: 'center', isReadOnly: true},
+                    {binding: 'description', header: '비고', width: 250, align: 'left', isReadOnly: true}
+                ];
 
-                            if (e.column.key == 'AbnormalDetail' && _this.view_mode == false) {
-                                _this.showDeviActionCodeSavePopup(e.item);
-                            }
+                this.detectGrid = new wijmo.grid.FlexGrid('#haccp-detect-grid', {
+                    autoGenerateColumns: false,
+                    frozenColumns: 0,
+                    frozenRows: 0,
+                    isReadOnly: false,
+                    allowSorting: true,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All, // 헤더 표시
+                    itemsSource: new wijmo.collections.CollectionView([]),
+                    columns: columns,
+                    formatItem: (s, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.RowHeader) {
+                            // 헤더에 순번
+                            e.cell.textContent = (e.row + 1).toString();
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader
+                            && s.columns[e.col].binding === 'AbnormalDetail') {
+                            e.cell.style.color = '#5567ff'; // 글자 색깔 변경
+                        }
+                    }
+                });
 
-                        },
-                    },
-                    page: {
-                        display: true,
-                        statusDisplay: true,
-                    },
-                    columns: [
-                        {key: 'equ_name', label: '설비명', width: 150, sortable: false, align: 'left'},
-                        {key: 'mat_code', label: '제품코드', width: 100, sortable: false, align: 'center'},
-                        {key: 'MaterialName', label: '제품명', width: 300, sortable: false, align: 'left'},
-                        {
-                            key: 'StartTime',
-                            label: '측정시간',
-                            width: 80,
-                            sortable: false,
-                            editor: {type: 'text'},
-                            align: 'center'
-                        },
-                        {
-                            key: 'AbnormalDetail',
-                            label: '<span class="editable_clr">이탈사항(클릭)</span>',
-                            width: 250,
-                            sortable: false
-                        },
-                        {key: 'ActionDetail', label: '조치내역', width: 250, sortable: false, align: 'left'},
-                        {key: 'ActorName', label: '조치자', width: 80, sortable: false, align: 'center'},
-                        {key: 'writer', label: '확인자', width: 80, sortable: false, align: 'center'},
-                        {key: 'description', label: '비고', width: 250, sortable: false, align: 'left'},
-                    ]
-                };
-                this.detectGrid = new ax5.ui.grid(config);
-
+                // 클릭 이벤트 추가
+                this.detectGrid.hostElement.addEventListener('click', (e) => {
+                    let ht = this.detectGrid.hitTest(e);
+                    if (ht.cellType === wijmo.grid.CellType.Cell) {
+                        let item = this.detectGrid.rows[ht.row].dataItem;
+                        if (this.detectGrid.columns[ht.col].binding === 'AbnormalDetail' && !_this.view_mode) {
+                            _this.showDeviActionCodeSavePopup(item);
+                        }
+                        if (!_this.view_mode) {
+                            _this.$btnDeleteDetect.removeAttr('disabled');
+                        }
+                    }
+                });
 
                 // 행 삭제
-                this.$btnDeleteDetect.click(function (e) {
-                    let items = _this.detectGrid.getList('selected');
-                    if (items.length == 0) {
+                this.$btnDeleteDetect.click(function () {
+                    let selectedItems = _this.detectGrid.selectedItems;
+                    if (selectedItems.length === 0) {
                         Alert.alert('이탈 항목 삭제', '선택된 데이터가 없습니다.');
                         return;
                     }
                     Alert.confirm('이탈 항목 삭제', '삭제하시겠습니까?', function () {
-                        _this.deleteDetectItem(items[0]);
+                        _this.deleteDetectItem(selectedItems[0]);
                     });
                 });
             }
+
 
             // haccp공정별 데이터 가져옴
             loadHaccpProcessDetail(hp_id) {
@@ -778,7 +803,7 @@
                 let dataType = this.$cboDataType.val();
                 let equipment_id = this.$cboEquipment.val();
 
-                let haccp_grid = _this.haccpTestGrid.getList();
+                let haccp_grid = _this.haccpTestGrid.selectedItems;
                 if (equipment_id == "") {
                     Alert.alert('입력오류', '설비를 선택해 주세요.');
                     return;
@@ -913,8 +938,19 @@
 
                     }
 
-                    _this.haccp_test_items = items
-                    _this.haccpTestGrid.setData(items);
+                    // 기존 CollectionView 업데이트
+                    let collectionView = _this.haccpTestGrid.itemsSource;
+                    if (collectionView) {
+                        collectionView.sourceCollection = items;
+                        collectionView.refresh(); // 변경 사항 반영
+
+                    } else {
+                        // 초기 설정
+                        _this.haccpTestGrid.itemsSource = new wijmo.collections.CollectionView(items);
+
+                    }
+
+                    _this.haccp_test_items = items; // 로컬 데이터 갱신
 
                 };
 
@@ -951,9 +987,12 @@
 
                 let fnsuccess = function (result) {
                     if (result.success) {
-                        _this.detectGrid.setData(result.data);
+                        console.log('result.data', result.data);
+                        _this.detectGrid.itemsSource.sourceCollection = result.data;
+                        _this.detectGrid.itemsSource.refresh();
                     } else {
-                        _this.detectGrid.setData([]);
+                        _this.detectGrid.itemsSource.sourceCollection = [];
+                        _this.detectGrid.itemsSource.refresh();
                     }
                 };
 
