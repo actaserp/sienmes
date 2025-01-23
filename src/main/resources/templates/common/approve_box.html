@@ -38,7 +38,7 @@
 </head>
 <th:block th:fragment="approve_box">
 <script type="text/x-tmpl" id="approveLineBox">
-    <div class="card" style="width: 100%; text-align: center;">
+    <div class="card" style="width: 250px; text-align: center; min-width: 250px;">
         <div class="card-header">
             결재
         </div>
@@ -51,7 +51,7 @@
 <script type="text/x-tmpl" id="approveLineItem">
     <div name="lineItem">
         <div class="col-12" name="apprLineName">검토</div>
-        <div class="col-12" name="apprUserName"></div>
+        <div class="col-12"  name="apprUserName"></div>
         <div class="col-12" name="apprStateName">-</div>
     </div>
 </script>
@@ -201,7 +201,7 @@
             let $apprBox = $('#' + _this.div_name);
             $apprBox.empty();
             $apprBox.removeClass('row');
-            $apprBox.addClass('row');
+           /* $apprBox.addClass('row');*/
             if (result.success) {
                 let apprInfo = result.data.appr_info;
                 let arrLineStep = [];
@@ -210,10 +210,10 @@
                 if (apprInfo.Line3.length > 0) arrLineStep.push(3);
                 if (apprInfo.Line4.length > 0) arrLineStep.push(4);
 				
-                if (arrLineStep.length < 4) {
+                /*if (arrLineStep.length < 4) {
                     let blankSize = ((4 - arrLineStep.length) * 3);
                     $apprBox.append('<div class="col-' + blankSize + ' col-lg-6' + blankSize + ' col-xl-' + blankSize + '"></div >');
-                }
+                }*/
 
                 let apprLineSize = arrLineStep.length * 3;
                 let $apprLine = $('<div class="col-' + apprLineSize + ' col-lg-6' + apprLineSize + ' col-xl-' + apprLineSize + '"></div >');
