@@ -46,25 +46,29 @@
             color: #ffffff !important;
         }
 
-        .write-table td input[type="text"], input[type="number"], input[type="date"], input[type="time"] {
+        .work-table td  {
+            text-align: left;
+        }
+
+        .work-table td input[type="text"], input[type="number"], input[type="date"], input[type="time"] {
             width: 160px;
         }
 
-        .write-table td input[type="text"]:disabled, input[type="number"]:disabled, input[type="date"]:disabled, input[type="time"]:disabled, textarea:disabled {
+        .work-table td input[type="text"]:disabled, input[type="number"]:disabled, input[type="date"]:disabled, input[type="time"]:disabled, textarea:disabled {
             width: 160px;
             background-color: #EDEFF5 !important;
         }
 
-        .write-table textarea:disabled {
+        .work-table textarea:disabled {
             width: 100%;
             background-color: #EDEFF5 !important;
         }
 
-        .write-table select, select:disabled {
+        .work-table select, select:disabled {
             width: 160px;
         }
 
-        .write-table select:disabled {
+        .work-table select:disabled {
             width: 160px;
             background-color: #EDEFF5 !important;
         }
@@ -251,7 +255,7 @@
 
                         <div class="table-wrap">
                             <form id="basicForm">
-                                <table class="write-table">
+                                <table class="work-table">
                                     <caption>작업 지시 테이블</caption>
                                     <colgroup>
                                         <col style="width: 10%;">
@@ -454,8 +458,6 @@
 
         </div>
     </div>
-    </section>
-    </div>
 
     <th:block th:replace="/common/popup_consu_material :: materialSearchTemplate"></th:block>
     <th:block th:replace="/common/popup_consu_mat_lot :: matLotSearchTemplate"></th:block>
@@ -534,128 +536,114 @@
 
     <script type="text/x-tmpl" id="inputTestPopup">
         <div class="content_wrap popup">
-            <section class="pt-2">
-                <div class="table_box sub">
-                    <form id="inputTestForm">
-                        <input hidden="hidden" />
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="검사유형">검사유형</span>
-                                    </div>
+            <div class="table-wrap">
+                <form id="inputTestForm">
+                    <table class="write-table" style="border-top: 1px solid #D4D5D7">
+                        <tbody>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="cboTestMaster">검사유형</label>
+                                </th>
+                                <td colspan="3">
                                     <select class="form-control2 tac" id="cboTestMaster" name="cboTestMaster" ></select>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <input type="hidden" id="testResultId" name="testResultId">
-                            </div>
-                            <div class="col-6">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="품목유형">품목유형</span>
-                                    </div>
+                                    <input type="hidden" id="testResultId" name="testResultId">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="MaterialTypeName">품목유형</label>
+                                </th>
+                                <td>
                                     <input type="text" class="form-control2" id="MaterialTypeName" name="MaterialTypeName" readonly />
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="품목코드">품목코드</span>
-                                    </div>
+                                </td>
+                                <th style="text-align: center">
+                                    <label for="MaterialCode">품목코드</label>
+                                </th>
+                                <td>
                                     <input type="text" class="form-control2" id="MaterialCode" name="MaterialCode" readonly />
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="품목명">품목명</span>
-                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="MaterialName">품목명</label>
+                                </th>
+                                <td>
                                     <input type="text" class="form-control2" id="MaterialName" name="MaterialName" readonly />
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="작업지시번호">작업지시번호</span>
-                                    </div>
+                                </td>
+                                <th style="text-align: center">
+                                    <label for="OrderNum">작업지시번호</label>
+                                </th>
+                                <td>
                                     <input class="form-control2" id="OrderNum" name="OrderNum" readonly />
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+            <div class="table-wrap" style="margin-top:5px;">
+                <table class="write-table">
+                    <tbody>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="TestDate">검사일</label>
+                            </th>
+                            <td>
+                                <input style="width:200px" type="date" id="TestDate" name="testDate" />
+                            </td>
+                            <th style="text-align: center">
+                                <label for="TestName">검사자</label>
+                            </th>
+                            <td>
+                                <input style="width:160px" class="form-control2" id="TestName" name="testName" readonly />
+                                <a class="btn" title="전체적합" id="btnAllItem">
+                                    전체적합
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="container-fluid" style="margin-top:5px;">
+                <div id="prod_test_grid" style="height: 200px;"></div>
+            </div>
 
-                <div class="grid_box">
-                         <div class="row">
-                            <div class="col-4">
-                                <div class="input-group" data-ax5picker="basic" id="popSrchDt2">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="검사일">검사일</span>
-                                    </div>
-                                    <input class="form-control2 tac" id="TestDate" name="testDate" readonly />
-                                    <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="검사자">검사자</span>
-                                    </div>
-                                    <input class="form-control2" id="TestName" name="testName" readonly />
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                         <button type="button" class="btn-default y_write_auth" id="btnAllItem"><span data-labelCd="전체적합">전체적합</span></button>
-                                    </div>
-                                </div>
-                               </div>
-                       </div>
-                    <div class="h-300 pt-2" data-ax5grid="prod_test_grid" ></div>
+            <div class="table-wrap" style="margin-top:5px;">
+                <table class="write-table">
+                    <tbody>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="judgGroup">종합 판정</label>
+                            </th>
+                            <td colspan="3">
+                                <select class="form-control2" id="judgGroup" name="judgGroup"  ></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="ctRemark">검체의 채취방법</label>
+                            </th>
+                            <td colspan="3">
+                                <textarea style="height:36px" id="ctRemark" name="ctRemark"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="ntRemark">검사결과의 통지방법</label>
+                            </th>
+                            <td colspan="3">
+                                <textarea style="height:36px" id="ntRemark" name="ntRemark"></textarea>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t4" data-labelCd="종합 판정">종합 판정</span>
-                                </div>
-                                 <select class="form-control2" id="judgGroup" name="judgGroup"  ></select>
-                            </div>
-                        </div>
-                        <div class="col-8">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t3" data-labelCd="검체의 채취방법">검체의 채취방법</span>
-                                </div>
-                                 <textarea class="form-control2 tal" id="ctRemark" name="ctRemark"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                     <div class="row">
-                        <div class="col-4">
-                        </div>
-                        <div class="col-8">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t3" data-labelCd="검사결과의 통지방법">검사결과의 통지방법</span>
-                                </div>
-                                 <textarea class="form-control2 tal" id="ntRemark" name="ntRemark"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <section class="popupcontent pb-2" style="overflow: hidden;" >
-                <div class="popup_button_group bottom align_left">
-                    <button type="button" class="btn-default y_write_auth" id="btnTestSave"><span data-labelCd="저장">저장</span></button>
-                    <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
-                </div>
-            </section>
+            <div class="popup-button">
+                <button type="button" class="btn-popup" id="btnTestSave" ><span data-labelCd="저장">저장</span></button>
+                <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+            </div>
         </div>
-
     </script>
 
     <script type="text/x-tmpl" id="barcode_tmpl">
@@ -2277,65 +2265,62 @@
                 let content = tmpl('inputTestPopup', {});
                 let $content = $(content);
                 let modalContainer = new PopupDraggable('제품검사');
-                modalContainer.open({width: 800, height: 650, $content});
+                modalContainer.open({width: 1000, height: 670, $content});
 
-                let config = {
-                    target: $content.find('[data-ax5grid="prod_test_grid"]'),
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: true, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: true, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onClick: function (e) {
-                            if (e.column.key == 'result2') {
-                                if (!e.item.result2) {
-                                    e.item.result2 = 'O';
-                                    _this.prodTestGrid.repaint();
-                                } else if (e.item.result2 == 'O') {
-                                    e.item.result2 = 'X';
-                                    _this.prodTestGrid.repaint();
-                                } else if (e.item.result2 == 'X') {
-                                    e.item.result2 = null;
-                                    _this.prodTestGrid.repaint();
-                                }
+                this.prodTestGrid = new wijmo.grid.FlexGrid('#prod_test_grid', {
+                    autoGenerateColumns: false,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    frozenColumns: 0,
+                    frozenRows: 0,
+                    allowSorting: true,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    formatItem: (s, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.RowHeader) {
+                            // 헤더에 순번
+                            e.cell.textContent = (e.row + 1).toString();
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                        // 헤더 스타일 적용
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader
+                            && s.columns[e.col].binding === 'result1' || s.columns[e.col].binding === 'result2') {
+                            e.cell.style.color = '#5567ff'; // 글자 색깔 변경
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            const col = s.columns[e.col];
+                            const item = e.panel.rows[e.row].dataItem;
 
+                            // result1 열
+                            if (col.binding === 'result2') {
+                                e.cell.style.backgroundColor = item.result1 === 'X' ? '#ffd800' : '';
                             }
-                        },
-                    },
-                    page: {
-                        display: true,
-                        statusDisplay: true,
+                        }
+
                     },
                     columns: [
-                        {key: 'name', label: '검사항목', width: 130, align: 'left'},
-                        {key: 'specText', label: '검사기준', width: 130, align: 'left'},
-                        {
-                            key: 'result1',
-                            label: '<span class="editable_clr">검사결과(입력)</span>',
-                            width: 300,
-                            align: 'left',
-                            editor: {type: 'text'}
-                        },
-                        {
-                            key: 'result2',
-                            label: '<span class="editable_clr">판정결과(적합/부적합)</span>',
-                            width: 150,
-                            align: 'center',
-                        },
+                        { binding: 'name', header: '검사항목', width: 130, align: 'left' },
+                        { binding: 'specText', header: '검사기준', width: 130, align: 'left' },
+                        { binding: 'result1', header: '검사결과(입력)', width: 300, align: 'left', isReadOnly: false },
+                        { binding: 'result2', header: '판정결과(적합/부적합)', width: 150, align: 'center' }
+                    ],
+                    itemsSource: new wijmo.collections.CollectionView([]),
+                });
 
-                    ]
-                };
+                this.prodTestGrid.addEventListener(this.prodTestGrid.hostElement, 'click', (e) => {
+                    const ht = this.prodTestGrid.hitTest(e);
+                    if (ht.cellType === wijmo.grid.CellType.Cell) {
+                        const col = this.prodTestGrid.columns[ht.col];
+                        const item = this.prodTestGrid.rows[ht.row]?.dataItem;
 
-                this.prodTestGrid = new ax5.ui.grid(config);
-                this.tabType = this.prodTestGrid;
+                        if (col.binding === 'result2') {
+                            // 데이터 값을 토글
+                            item.result2 = item.result2 === 'O' ? 'X' : 'O';
+                            // 변경된 값을 반영
+                            this.prodTestGrid.collectionView.refresh();
+                        }
+                    }
+                });
 
                 let $OrderNum = $content.find('#OrderNum');
                 let $MaterialTypeName = $content.find('#MaterialTypeName');
@@ -2351,7 +2336,6 @@
                 let $cboTestMaster = $content.find('#cboTestMaster');
                 let $testResultId = $content.find('#testResultId');
 
-                $TestDate.ax5DatePicker({direction: 'top'});
                 $MaterialTypeName.val(item.mat_type);
                 $MaterialName.val(item.mat_name);
                 $MaterialCode.val(item.mat_code);
@@ -2367,7 +2351,7 @@
                 let fnLoadTestList = function (jr_pk) {
                     let fnsuccess = function (result) {
                         if (result.data !== null) {
-                            _this.prodTestGrid.setData(result.data.pdList);
+                            _this.prodTestGrid.itemsSource.sourceCollection = result.data.pdList;
 
                             if (result.data.testDate != null) {
                                 $TestDate.val(result.data.testDate);
@@ -2397,15 +2381,15 @@
                 fnLoadTestList(jr_pk);
 
                 $btnAllItem.click(function (e) {
-                    _this.tabType.list.forEach(function (item, idx) {
+                    _this.prodTestGrid.itemsSource.sourceCollection.forEach(function (item) {
                         item.result2 = 'O';
                     });
-                    _this.tabType.repaint();
+                    _this.prodTestGrid.collectionView.refresh();
                 })
 
                 // 제품검사 저장
                 $btnTestSave.click(function (e) {
-                    let testItems = _this.prodTestGrid.getList()
+                    let testItems = _this.prodTestGrid.selectedItems;
 
                     if (testItems.length == 0) {
                         Alert.alert('제품검사저장', '저장할 제품이 없습니다.', function () {
@@ -2442,23 +2426,6 @@
                     AjaxUtil.postAsyncData(url, sendData, testSaveCallback);
                 });
             }
-
-            exportExcel1() {
-                var targetview = this.grid;
-                targetview.exportExcel('생산목록.xls');
-            }
-
-
-            exportExcel(target) {
-                if (target == 'tabDefect') {
-                    var targetview = this.defectGrid;
-                    targetview.exportExcel('부적합내역.xls');
-                } else if (target == 'tabConsumed') {
-                    var targetview = this.consumedGrid;
-                    targetview.exportExcel('투입내역.xls');
-                }
-            }
-
         }
 
         let page = null;
@@ -2470,50 +2437,9 @@
             let today = CommonUtil.getYYYYMMDD();
             page.today = today;
 
-            picker.bind({
-                target: $('[data-ax5picker="multi"]'),
-                direction: "top",
-                locale: {
-                    format: 'YYYY-MM-DD'
-                },
-                content: {
-                    width: 214,  // 130, //270,
-                    margin: 10,
-                    type: 'date',
-
-                    config: {
-                        control: {
-                            left: '<i class="fa fa-arrow-left"></i>',   //fa-chevron-left
-                            yearTmpl: '%s',
-                            monthTmpl: '%s',
-                            right: '<i class="fa fa-arrow-right"></i>'
-                        },
-                        lang: {
-                            yearTmpl: "%s년",
-                            months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-                            dayTmpl: "%s"
-                        }
-                    }
-                },
-                btns: {},
-            });
-
-            $('#srchdate').ax5DatePicker({direction: 'top'});
             $('#date_from').val(date_from);
             $('#date_to').val(today);
-            $('#prod_date').ax5DatePicker({direction: 'bottom'});
-            $('#end_date').ax5DatePicker({direction: 'bottom'});
 
-            // timepicker
-            $('#start_time').timepicker({
-                show2400: true,
-                timeFormat: 'H:i'
-            }).val('00:00');
-
-            $('#end_time').timepicker({
-                show2400: true,
-                timeFormat: 'H:i'
-            }).val('00:00');
 
             // 보기/감추기 버튼
             $('#btnWorkListToggle').click(function (e) {

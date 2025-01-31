@@ -1,60 +1,87 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-<div class="content_wrap">
+    <div class="layout-contents">
 
-    <section class="section">
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="저수조용수 관리점검표 목록">저수조용수 관리점검표 목록</h3>
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>저수조용수 관리점검표</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderRefresh" title="새로고침"><i class="fas fa-undo-alt"></i></button>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>선행요건 일지</li>
+                <li>저수조용수 관리점검표</li>
+            </ul>
         </div>
 
-        <div class="table_box search">
-            <div class="row">
-                <div class="col-8 col-lg-4 col-xl-3">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_sm" data-labelCd="점검월">점검월</span>
-                        </div>
-                        <input type="month" class="form-control2" value="" id="srchStartDt" name="srchStartDt" placeholder="" title="" />
-                        <span class="slow_sign">~</span>
-                        <input type="month" class="form-control2" value="" id="srchEndDt" name="srchEndDt" placeholder="" title="" />
+        <section class="section">
+            <div class="section-top">
+                <form id="searchForm">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                점검월
+                            </dt>
+                            <dd>
+                                <ul class="date-box">
+                                    <li>
+                                        <input type="month" id="srchStartDt" name="srchStartDt">
+                                        <label for="srchStartDt" class="hide">시작일</label>
+                                    </li>
+                                    <li>
+                                        <input type="month" id="srchEndDt" name="srchEndDt">
+                                        <label for="srchEndDt" class="hide">종료일</label>
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label for="cboState">
+                                    결재상태
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <select class="form-control2" id="cboState" name="cboState" ></select>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
                     </div>
-                </div>
-                <div class="col-4 col-lg-3 col-xl-2" >
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t4">결재상태</span>
-                        </div>
-                            <select class="form-control2" id="cboState" name="cboState" ></select>
-                    </div>
-                </div> 
-                <div class="col-1">
-                    <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
+                </form>
+                <div class="button-wrap">
+                    <ul>
+                        <li>
+                            <a class="btn" title="등록" id="btnAdd">
+                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                등록
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <section class="section">
-        <div id="approveBox"></div>
-        <div class="grid_box" id="prodListGrid">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="일지현황">일지현황</span>
-                <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnAdd">등록</button>
+            <div class="container-fluid">
+                <div id="document_grid" style="height: 730px;"></div>
             </div>
-            <div class="h-600" data-ax5grid="document_grid"></div>
-        </div>
-    </section>
-</div>
+        </section>
+    </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
 <script type="text/javascript">
     class materialStorehouseStat {
         constructor() {
@@ -65,91 +92,99 @@
 
         init() {
             let _this = this;
-            let config = {
-                target: $('[data-ax5grid="document_grid"]'),
-                sortable: true,
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 25,  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {                        
-                        _this.grid.select(this.dindex);
-                        _this.detail(this);
-                    },
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
+            this.grid = new wijmo.grid.FlexGrid('#document_grid', {
+                selectionMode: wijmo.grid.SelectionMode.Row, // 단일 행 선택
+                autoGenerateColumns: false, // 사용자 정의 컬럼 사용
+                headersVisibility: wijmo.grid.HeadersVisibility.Column, // 헤더만 표시
+                isReadOnly: false, // 편집 가능 여부
+                itemsSource: new wijmo.collections.CollectionView([]), // 데이터 소스 초기화
+                formatItem: (s, e) => {
+                    // 헤더 정렬 설정
+                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                        e.cell.style.textAlign = 'center';
+                    }
+                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                        const col = s.columns[e.col];
+                        const item = e.panel.rows[e.row].dataItem;
+
+
+                        // 결재현황 (LineName) 처리
+                        if (col.binding === 'LineName') {
+                            e.cell.innerHTML = CommonUtil.convertApprLineNameHtml(item.LineName, item.LineNameState);
+                        }
+
+                        // 조회 버튼
+                        if (col.binding === 'SearchYN') {
+                            e.cell.innerHTML = '';
+                            if (item.SearchYN === 'Y') {
+                                const button = document.createElement('button');
+                                button.className = 'btn-default';
+                                button.style.cssText = 'width: 100%; height: 25px; font-size: 1em; padding: 0; margin: 0;';
+                                button.textContent = '조회';
+                                button.addEventListener('click', () => {
+                                    _this.grid.select(new wijmo.grid.CellRange(e.row, -1));
+                                    _this.detail({ item, column: { key: 'SearchYN' } });
+                                });
+                                e.cell.appendChild(button);
+                            }
+                        }
+
+                        // 수정 버튼
+                        if (col.binding === 'EditYN') {
+                            e.cell.innerHTML = '';
+                            if (item.EditYN === 'Y') {
+                                const button = document.createElement('button');
+                                button.className = 'btn-default';
+                                button.style.cssText = 'width: 100%; height: 25px; font-size: 1em; padding: 0; margin: 0;';
+                                button.textContent = '수정';
+                                button.addEventListener('click', () => {
+                                    _this.grid.select(new wijmo.grid.CellRange(e.row, -1));
+                                    _this.detail({ item, column: { key: 'EditYN' } });
+                                });
+                                e.cell.appendChild(button);
+                            }
+                        }
+
+                        // 삭제 버튼
+                        if (col.binding === 'DeleteYN') {
+                            e.cell.innerHTML = '';
+                            if (item.DeleteYN === 'Y') {
+                                const button = document.createElement('button');
+                                button.className = 'btn-danger';
+                                button.style.cssText = 'width: 100%; height: 25px; font-size: 1em; padding: 0; margin: 0;';
+                                button.textContent = '삭제';
+                                button.addEventListener('click', () => {
+                                    _this.grid.select(new wijmo.grid.CellRange(e.row, -1));
+                                    _this.detail({ item, column: { key: 'DeleteYN' } });
+                                });
+                                e.cell.appendChild(button);
+                            }
+                        }
+                    }
                 },
                 columns: [
-                    //{ key: 'Title', label: '일지명', width: 350, align: 'center' },
-                    {
-                        key: 'StateName', label: '결재상태', width: 100, align: 'center', styleClass: function () {
-                            return CommonUtil.convertApprStateCss(this.item.StateName, this.item.State);
-                        }
-                    },
-                    {
-                        key: 'LineName', label: '결재현황', width: 350, align: 'left',
-                        formatter: function () {
-                            return CommonUtil.convertApprLineNameHtml(this.item.LineName, this.item.LineNameState);
-                        }
-                    },
-                    { key: 'DataDate', label: '월', width: 120, align: 'center' },
-                    {
-                        key: 'SearchYN', label: '조회', width: 80, align: 'center',
-                        formatter: function () {
-                            let html = '';
-                            if (this.item.SearchYN == 'Y') {
-                                html = '<button class="btn-default" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">조회</button>'
-                            }
-                            return html;
-                        }
-                    },
-                    {
-                        key: 'EditYN', label: '수정', width: 80, align: 'center',
-                        formatter: function () {
-                            let html = '';
-                            if (this.item.EditYN == 'Y') {
-                                html = '<button class="btn-default" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">수정</button>'
-                            }
-                            return html;
-
-                        }
-                    },
-                    {
-                        key: 'DeleteYN', label: '삭제', width: 80, align: 'center',
-                        formatter: function () {
-                            let html = '';
-                            if (this.item.DeleteYN == 'Y') {
-                                html = '<button class="btn-danger" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">삭제</button>'
-                            }
-                            return html;
-
-                        }
-                    },
+                    { binding: 'StateName', header: '결재상태', width: 120, align: 'center', isReadOnly: true },
+                    { binding: 'LineName', header: '결재현황', width: 400, align: 'left', isReadOnly: true },
+                    { binding: 'DataDate', header: '월', width: 120, align: 'center', isReadOnly: true },
+                    { binding: 'SearchYN', header: '조회', width: 80, align: 'center', isReadOnly: true },
+                    { binding: 'EditYN', header: '수정', width: 80, align: 'center', isReadOnly: true },
+                    { binding: 'DeleteYN', header: '삭제', width: 80, align: 'center', isReadOnly: true },
                 ]
-            };
-            this.grid = new ax5.ui.grid(config);
-            this.grid_config = config;
+            });
+
+            new FlexGridContextMenu(this.grid);
+            this.grid.downloadFileName = '저수조 용수관리 일지현황';
         }
+
 
         // 일지 상세
         detail(data) {
             let _this = this;
-            if (data.column.key == 'SearchYN' && data.item.SearchYN == 'Y') {
+            if (data.column.key === 'SearchYN' && data.item.SearchYN === 'Y') {
                 location.href = '/gui/' + gui.gui_code + '/edit?bh_id=' + data.item.id + '&data_date=' + data.item.DataDate + '&view_mode=true' + this.createSearchCond('&');
-            } else if (data.column.key == 'EditYN' && data.item.EditYN == 'Y') {
+            } else if (data.column.key === 'EditYN' && data.item.EditYN === 'Y') {
                 location.href = '/gui/' + gui.gui_code + '/edit?bh_id=' + data.item.id + '&data_date=' + data.item.DataDate + this.createSearchCond('&');
-            } else if (data.column.key == 'DeleteYN' && data.item.DeleteYN == 'Y') {
+            } else if (data.column.key === 'DeleteYN' && data.item.DeleteYN === 'Y') {
                 Alert.confirm('', '삭제하시겠습니까?', function () {
                     // 삭제 서비스 호출                    
                     let param = {
@@ -206,16 +241,9 @@
 
             let result = AjaxUtil.getSyncData(_this.baseUrl + '/appr_stat', param);            
             if (result.data != null) {
-                let count = result.data.length;
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: count,
-                    }
-                });
+                _this.grid.itemsSource = result.data;
                 //_this.grid.setHeight(count * 30 + 100);
-                _this.grid.repaint();
+                _this.grid.refresh();
             }
         }
 
@@ -230,7 +258,7 @@
                 dataList.push(param);
             });
 
-            if (dataList.length == 0) {
+            if (dataList.length === 0) {
                 Alert.alert('', '선택된 일지가 없습니다.');
                 return;
             }

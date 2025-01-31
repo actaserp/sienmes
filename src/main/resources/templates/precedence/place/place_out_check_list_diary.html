@@ -1,780 +1,757 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-<style>
-    .background-yellow {
-		background: #ffd800;
-	}
-	.background-skyblue {
-		background: #00e0ff;
-	}
-	.background-white {
-		background: #ffffff;
-	}
-</style>
-<div class="content_wrap">
-    <input type="hidden" id="bhId" th:value="${bh_id}" />
-    <input type="hidden" id="data_date" th:value="${data_date}" />
-    <input type="hidden" id="search_cond" th:value="${searchcond}" />
-    <input type="hidden" id="viewMode" th:value="${view_mode}" />
-    <section class="section">
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="연료전지 발전설비 점검기록표">연료전지 발전설비 점검기록표</h3>
-            </div>
-            <!--<button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>-->
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
-            <!--<button type="button" class="btn-default pull-right mr-1" id="btnHeaderRefresh" title="새로고침"><i class="fas fa-undo-alt"></i></button>-->
-        </div>
+    <style>
+        .background-yellow {
+            background: #ffd800;
+        }
 
-        <div class="table_box search">
-            <div class="row">
-                <div class="col-6 col-lg-6 col-xl-6">
-                    <div class="row">
-                        <div class="col-12 col-lg-12 col-xl-12">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="일지명">일지명</span>
-                                </div>
-                                <input class="form-control2 tac" type="text" id="title" name="title" />
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-6 col-xl-6">
-                            <div class="input-group" data-ax5picker="multi" id="pickerDate">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="일자">일자</span>
-                                </div>
-                                <input class="form-control2 tac" type="text" id="dataDate" name="dataDate" readonly />
-                                <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" onclick="javascript: $('#dataDate').click()"></i></span>
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-6 col-xl-6">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="작성자">작성자</span>
-                                </div>
-                                <input class="form-control2 tac" type="text" id="firstName" name="firstName" disabled />
-                            </div>
-                        </div>
-                    </div>
+        .background-skyblue {
+            background: #00e0ff;
+        }
+
+        .background-white {
+            background: #ffffff;
+        }
+
+        #check_item_result_grid .wj-cell {
+            padding: 6px !important;
+        }
+    </style>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>작업장 주변 환경 점검표</h2>
+            </div>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>선행요건 일지</li>
+                <li>작업장 주변 환경 점검표</li>
+            </ul>
+        </div>
+        <input type="hidden" id="bhId" th:value="${bh_id}"/>
+        <input type="hidden" id="data_date" th:value="${data_date}"/>
+        <input type="hidden" id="search_cond" th:value="${searchcond}"/>
+        <input type="hidden" id="viewMode" th:value="${view_mode}"/>
+        <section class="section">
+            <div class="section-card-wrap">
+                <div class="col-5">
+                    <table class="write-table">
+                        <tbody>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="title">일지명</label>
+                            </th>
+                            <td>
+                                <input class="form-control2 tac" type="text" id="title" name="title"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="dataDate">일자</label>
+                            </th>
+                            <td>
+                                <input class="form-control2 tac" type="date" id="dataDate" name="dataDate" readonly/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="firstName">작성자</label>
+                            </th>
+                            <td>
+                                <input type="text" id="firstName" name="firstName" disabled/>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="col-6 col-lg-6 col-xl-6">
+                <div class="col-6">
                     <div id="approveBox"></div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <section class="section">
-        <div class="grid_box" id="prodListGrid">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="점검 목록">점검 목록</span>
-                <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnDiaryPrint">일지출력</button>
-                <button type="button" class="btn-default" id="btnAllItem">전체적합</button>
-                <button type="button" class="btn-default" id="btnReqAppr">결재상신</button>
-                <button type="button" class="btn-default" id="btnAppr" style="display:none;">승인</button>
-                <button type="button" class="btn-cancel" id="btnReject" style="display:none;">반려</button>
-                <button type="button" class="btn-default" id="btnSave">저장</button>
-                <button type="button" class="btn-cancel" id="btnDelete">삭제</button>
-                <button type="button" class="btn-default" id="btnList">목록</button>
-            </div>
-            <div class="grid_box" id="complainList">
-                <div class="h-380" data-ax5grid="check_item_result_grid" ></div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="grid_box" id="sub_grid">
-            <div class="title_box" id="button_box2">
-                <span class="right_align rpt" data-labelCd="이탈 목록">이탈 목록</span>
-                <div class="left_align">
-                    <button type="button" class="btn-default" id="btnDeviActionSave" style="display:none">저장</button>
+        </section>
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <h3>점검 목록</h3>
+                </div>
+                <div class="button-wrap">
+                    <button type="button" class="btn" id="btnDiaryPrint">일지출력</button>
+                    <button type="button" class="btn" id="btnAllItem">전체적합</button>
+                    <button type="button" class="btn" id="btnReqAppr">결재상신</button>
+                    <button type="button" class="btn" id="btnAppr" style="display:none;">승인</button>
+                    <button type="button" class="btn" id="btnReject" style="display:none;">반려</button>
+                    <button type="button" class="btn" id="btnSave">저장</button>
+                    <button type="button" class="btn" id="btnDelete">삭제</button>
+                    <button type="button" class="btn" id="btnList">목록</button>
                 </div>
             </div>
-            <div class="h-200" data-ax5grid="devi_action_grid"></div>
-        </div>
-    </section>
-    
-
-</div>
-
-<script type="text/x-tmpl" id="imagePopup">
-<div class="content_wrap modal-content popup">    
-        <section class="pt-2">            
-           <div class="table_box sub" >                                        
-                <div class ="row">
-                    <div class="col-12">   
-                        <div class="input-group"> 
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t5" data-labelCd="점검항목명">점검항목명</span>                                                                                                                                      
-                            </div>
-                            <input class="form-control2 tac" type="text" id="pop_item_name" disabled="disabled" /> 
-                        </div>
-                    </div>
-                    </div>
-                    <div class="col-12 mx-auto" id="image_upload1"></div>                   
-            </div>                                                
+            <div class="grid_box" id="complainList">
+                <div id="check_item_result_grid" style="height: 900px;"></div>
+            </div>
         </section>
         <section>
-            <div class="align_left popup_button_group bottom">            
-                <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
-            </div>    
+            <div class="grid_box" id="sub_grid">
+                <div class="title_box" id="button_box2">
+                    <div class="search-wrap">
+                        <h3>이탈 목록</h3>
+                    </div>
+                    <div class="button-wrap">
+                        <button type="button" class="btn" id="btnDeviActionSave" style="display:none">저장
+                        </button>
+                    </div>
+                </div>
+                <div id="devi_action_grid" style="height: 200px;"></div>
+            </div>
         </section>
-</div>
-</script>
+    </div>
+
+    <script type="text/x-tmpl" id="imagePopup">
+        <div class="content_wrap modal-content popup">
+                <section class="pt-2">
+                   <div class="table_box sub" >
+                        <div class ="row">
+                            <div class="col-12">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text fit_box_t5" data-labelCd="점검항목명">점검항목명</span>
+                                    </div>
+                                    <input class="form-control2 tac" type="text" id="pop_item_name" disabled="disabled" />
+                                </div>
+                            </div>
+                            </div>
+                            <div class="col-12 mx-auto" id="image_upload1"></div>
+                    </div>
+                </section>
+                <section>
+                    <div class="align_left popup_button_group bottom">
+                        <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+                    </div>
+                </section>
+        </div>
+    </script>
 </th:block>
 
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/approve_box :: approve_box"></th:block>
-<th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
-<th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
-<script type="text/javascript">
-    class CheckResultDiaryPage {
-        constructor() {
-            this.grid = null;
-            this.approveBoxUtil = null;
-            this.resultGrid = null;
-            this.checkMasterName = '연료전지 발전설비 점검기록표'
-            this.baseUrl = '/api/precedence/place_out_check_list';
-            this.init();
-        }
-
-        init() {
-            let _this = this;
-            
-			this.gparam = {
-				bh_id : $('#bhId').val(),
-				data_date : $('#data_date').val(),
-				search_cond: $('#search_cond').val(),
-				view_mode: $('#viewMode').val(),
-			};
-			
-            let resultConfig = {
-                target: $('[data-ax5grid="check_item_result_grid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: false, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 25  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    mergeCells: ["group1", "group2"],
-                    onClick: function (e) {
-                        if (e.column.key == 'result1' && !$('#viewMode').val()) {
-                            if (e.item.result1 == null) {
-                                e.item.result1 = 'O';
-								_this.resultGrid.repaint();                                
-							}
-							else if (e.item.result1 == 'O') {
-                                e.item.result1 = 'X';
-								_this.resultGrid.repaint();        
-							}
-							else if (e.item.result1 == 'X') {
-                                e.item.result1 = null;
-								_this.resultGrid.repaint();
-							}
-                            //if (this.item.result_type == 'OX') {
-                            //    this.column.editor.type = 'select';
-                            //} else if (this.item.result_type == 'N') {
-                            //    this.column.editor.type = 'number';
-                            //} else if (this.item.result_type == 'D') {
-                            //    this.column.editor.type = 'text';
-                            //}
-
-                            //this.column.editor.config = _this.setResultTypeConfig(this.column.editor.type);
-                            //_this.setFormatter(this.column.editor.type, this.column);
-                        }
-                        //else if (e.column.key == 'file_id') {
-                        //    _this.setImagePopup(e.item);
-                        //}
-                    }
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    { key: 'id', label: '번호', width: 100, align: 'right', hidden: 'true' },
-                    { key: 'index_order', label: '순번', width: 50, align: 'center' },
-                    { key: 'group1', label: '항목', width: 100, align: 'center' },
-                    { key: 'group2', label: '구분', width: 100, align: 'center', },
-                    { key: 'group3', label: '구분3', width: 130, align: 'left', hidden: true },
-                    /*
-                    {
-                        key: 'file_id', label: '이미지(클릭)', width: 80, align: 'left',
-                        formatter: function () {
-                            let html = '';
-
-                            if (this.item.file_id) {
-                                html =  '<button class="btn-default" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">이미지</button>';
-                            }
-                            return html;
-                        }
-                    },
-                    */
-                    { key: 'item_name', label: '확인사항', width: 450, align: 'left' },
-                    {
-                        key: 'result1', label: '<span class="editable_clr">점검결과</span>', width: 150, align: 'center',
-                        editor: {
-                            type: '', config: {}
-                        },
-                        styleClass: function () {
-                            if (this.item.result1 == 'X') return "background-yellow";
-                            else return "background-white";
-                        },
-                     },
-                ]
+    <th:block th:replace="/common/approve_box :: approve_box"></th:block>
+    <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
+    <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
+    <script type="text/javascript">
+        class CheckResultDiaryPage {
+            constructor() {
+                this.grid = null;
+                this.approveBoxUtil = null;
+                this.resultGrid = null;
+                this.checkMasterName = '작업장 주변 환경 점검표'
+                this.baseUrl = '/api/precedence/place_out_check_list';
+                this.init();
             }
-            this.resultGrid = new ax5.ui.grid(resultConfig);
-            //this.result_grid_config = resultConfig;
 
-            // 조치내역 그리드
-            let devi_action_config = {
-                target: $('[data-ax5grid="devi_action_grid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: false, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 25  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        _this.deviGrid.select(this.dindex);
+            init() {
+                let _this = this;
 
-                        if (e.column.key == 'action_detail' && !$('#viewMode').val()) {
-                            _this.showDeviActionCodeSavePopup(e.item);
-                        }
-                    },
-                    onDataChanged: function (e) {
-                    }
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: false,
-                },
-                columns: [
-                    { key: 'id', label: '번호', width: 80, align: 'right', hidden: true },
-                    { key: 'index_order', label: '순번', width: 50, align: 'center' },
-                    { key: 'src_data_pk', label: '점검항목결과번호', width: 80, align: 'right', hidden: true },
-                    //{ key: 'happen_date', label: '발생일', width: 80, align: 'left' },
-                    { key: '_order', label: '순번', width: 50, align: 'center', hidden: true },
-                    { key: 'abnormal_detail', label: '이상발생내역', width: 400, align: 'left' },
-                    { key: 'action_detail', label: '<span class="editable_clr">조치내역및결과</span>', width: 250, align: 'left', editor: {} },
-                    { key: 'actor_name', label: '조치자', width: 80, align: 'left' },
-                    { key: 'creater_name', label: '작성자', width: 80, align: 'left' },
-                    { key: 'confirm_state', label: '확인', width: 80, align: 'left', hidden: true },
-                ]
-            };
-            this.deviGrid = new ax5.ui.grid(devi_action_config);
-        }
-
-        setResultTypeConfig(editorType) {
-            let config = {};
-            if (editorType == 'select') {
-                config = {
-                    columnKeys: {
-                        optionValue: "val",
-                        optionText: "text"
-                    },
-                    options: [
-                        { val: "", text: "" },
-                        { val: "O", text: "O:적합" },
-                        { val: "X", text: "X:부적합" }
-                    ]
+                this.gparam = {
+                    bh_id: $('#bhId').val(),
+                    data_date: $('#data_date').val(),
+                    search_cond: $('#search_cond').val(),
+                    view_mode: $('#viewMode').val(),
                 };
-            }
-            return config;
-        }
 
-        checkAllItem() {
-            let _this = this;
-            let items = [];
-            _this.resultGrid.list.forEach(function (item, idx) {
-                if (item.result_type == 'OX')
+                let viewMode = $('#viewMode').val();
+                this.view_mode = viewMode == "true" ? true : false;
+                // 점검 항목 결과 그리드
+                this.resultGrid = new wijmo.grid.FlexGrid('#check_item_result_grid', {
+                    autoGenerateColumns: false,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    frozenColumns: 0, // 열 고정
+                    frozenRows: 0,    // 행 고정
+                    allowSorting: true, // 정렬 가능 여부
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
+                    allowMerging: wijmo.grid.AllowMerging.Cells, // 병합 활성화 (셀 단위 병합)
+                    itemsSource: new wijmo.collections.CollectionView([]),
+                    formatItem: (s, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.RowHeader) {
+                            // 헤더에 순번
+                            e.cell.textContent = (e.row + 1).toString();
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                        // 헤더 스타일 적용
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader
+                            && s.columns[e.col].binding === 'result1') {
+                            e.cell.style.color = '#5567ff'; // 글자 색깔 변경
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            const col = s.columns[e.col];
+                            const item = e.panel.rows[e.row].dataItem;
+
+                            // result1 열
+                            if (col.binding === 'result1') {
+                                e.cell.style.backgroundColor = item.result1 === 'X' ? '#ffd800' : '';
+                            }
+                        }
+                        // 병합된 셀 확인
+                        const range = s.getMergedRange(e.panel, e.row, e.col);
+                        if (range) {
+                            e.cell.style.display = 'flex';
+                            e.cell.style.alignItems = 'center'; // 세로 가운데 정렬
+                        }
+                    },
+                    columns: [
+                        {
+                            binding: 'id',
+                            header: '번호',
+                            width: 100,
+                            align: 'left',
+                            isReadOnly: true,
+                            allowMerging: false,
+                            visible: false
+                        },
+                        {
+                            binding: 'index_order',
+                            header: '순번',
+                            width: 50,
+                            align: 'center',
+                            isReadOnly: true,
+                            visible: false
+                        },
+                        {
+                            binding: 'group1',
+                            header: '항목',
+                            width: 100,
+                            align: 'center',
+                            isReadOnly: true,
+                            allowMerging: true
+                        },
+                        {
+                            binding: 'group2',
+                            header: '구분',
+                            width: 100,
+                            align: 'center',
+                            isReadOnly: true,
+                            allowMerging: true
+                        },
+                        {binding: 'group3', header: '구분3', width: 130, align: 'left', isReadOnly: true, visible: false},
+                        {
+                            binding: 'item_name',
+                            header: '확인사항',
+                            width: 450,
+                            align: 'left',
+                            isReadOnly: true,
+                            allowMerging: false
+                        },
+                        {
+                            binding: 'result1',
+                            header: '점검결과(O,X)',
+                            width: 110,
+                            align: 'center',
+                            isReadOnly: true,
+                            allowMerging: false
+                        }
+                    ]
+                });
+
+                this.resultGrid.addEventListener(this.resultGrid.hostElement, 'click', (e) => {
+                    const ht = this.resultGrid.hitTest(e);
+                    if (ht.cellType === wijmo.grid.CellType.Cell) {
+                        const col = this.resultGrid.columns[ht.col];
+                        const item = this.resultGrid.rows[ht.row]?.dataItem;
+
+                        if (col.binding === 'result1' && !_this.view_mode) {
+                            // 데이터 값을 토글
+                            item.result1 = item.result1 === 'O' ? 'X' : 'O';
+                            // 변경된 값을 반영
+                            this.resultGrid.collectionView.refresh();
+                        }
+                    }
+                });
+
+                // 조치내역 그리드
+                this.deviGrid = new wijmo.grid.FlexGrid('#devi_action_grid', {
+                    autoGenerateColumns: false,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    frozenColumns: 0, // 열 고정
+                    frozenRows: 0,    // 행 고정
+                    allowSorting: false, // 정렬 비활성화
+                    isReadOnly: true,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column, // 헤더만 표시
+                    itemsSource: new wijmo.collections.CollectionView([]),
+                    formatItem: (s, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                        // 헤더 스타일 적용
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader
+                            && s.columns[e.col].binding === 'action_detail') {
+                            e.cell.style.color = '#5567ff'; // 글자 색깔 변경
+                        }
+                    },
+                    columns: [
+                        {binding: 'id', header: '번호', width: 80, align: 'right', visible: false},
+                        {binding: 'src_data_pk', header: '점검항목결과번호', width: 80, align: 'right', visible: false},
+                        {binding: 'index_order', header: '순번', width: 50, align: 'center'},
+                        {binding: 'abnormal_detail', header: '이상발생내역', width: 400, align: 'left'},
+                        {
+                            binding: 'action_detail',
+                            header: '조치내역및결과',
+                            width: 250,
+                            align: 'left',
+                            isReadOnly: false // 편집 가능
+                        },
+                        {binding: 'actor_name', header: '조치자', width: 80, align: 'left'},
+                        {binding: 'creater_name', header: '작성자', width: 80, align: 'left'},
+                        {binding: 'confirm_state', header: '확인', width: 80, align: 'left', visible: false}
+                    ]
+                });
+                // 클릭 이벤트 추가
+                this.deviGrid.hostElement.addEventListener('click', (e) => {
+                    let ht = this.deviGrid.hitTest(e);
+                    if (ht.cellType === wijmo.grid.CellType.Cell) {
+                        let item = this.deviGrid.rows[ht.row].dataItem;
+                        if (this.deviGrid.columns[ht.col].binding === 'action_detail' && !_this.view_mode) {
+                            _this.showDeviActionCodeSavePopup(item);
+                        }
+                    }
+                });
+            }
+
+            setResultTypeConfig(editorType) {
+                let config = {};
+                if (editorType == 'select') {
+                    config = {
+                        columnKeys: {
+                            optionValue: "val",
+                            optionText: "text"
+                        },
+                        options: [
+                            {val: "", text: ""},
+                            {val: "O", text: "O:적합"},
+                            {val: "X", text: "X:부적합"}
+                        ]
+                    };
+                }
+                return config;
+            }
+
+            checkAllItem() {
+                let _this = this;
+                let items = [];
+                _this.resultGrid.itemsSource.items.forEach(item => {
                     item.result1 = 'O';
-            });
-            _this.resultGrid.repaint();
-        }
-
-        showDeviActionCodeSavePopup(item) {
-
-            // 점검내역 조치내역 팝업
-            let _this = this;
-            let popupPage = new PopupSelectUserCodePage({
-
-                'title': '조치내역 선택',
-                'gridValueLabel': '점검항목',
-                'infoData': [
-                    { label: '이상발생내역', value: item.check_name },
-                ],
-                'parentCode': _this.checkMasterName, 'closeManual': true,
-            });
-            popupPage.show(function (data) {
-                if (data && data.selected.Code == '직접입력') {
-                    item.action_detail = data.input;
-                } else {
-                    item.action_detail = data.selected.Value;
-                }
-                popupPage.close();
-                _this.deviGrid.repaint();
-                if (item.action_detail) {
-					_this.saveDeviAction(item.check_result_id);
-                }
-                
-            });
-        }
-
-        saveDeviAction(id) {
-            let _this = this;
-			let url = '/api/common/devi_action';
-            let list = _this.deviGrid.getList('selected')[0]
-            if (!list) return;
-			let happen_place = _this.checkMasterName
-            let data = {
-                id : list.id,
-                source_pk : list.src_data_pk,
-                source_table_name : 'place_out_check_list',
-                happen_date : list.happen_date,
-                abnormal_detail : list.abnormal_detail,
-                action_detail : list.action_detail,
-                happen_place: happen_place,
-                confirm_detail : list.confirm_detail,
+                });
+                _this.resultGrid.refresh();
             }
 
-			let fnSuccess = function () {
-				Notify.success('저장되었습니다');
-			}
-			AjaxUtil.postAsyncData(url + '/save_dev_action', data, fnSuccess);
-        }
+            showDeviActionCodeSavePopup(item) {
 
-        // 일지 조회
-        searchMainData() {
-            let _this = this;
-            $('#btnDiaryPrint').hide();
-            $('#btnDelete').hide();
+                // 점검내역 조치내역 팝업
+                let _this = this;
+                let popupPage = new PopupSelectUserCodePage({
 
-            $('#firstName').val(userinfo.username);
-            $('#title').val(_this.checkMasterName);
+                    'title': '조치내역 선택',
+                    'gridValueLabel': '점검항목',
+                    'infoData': [
+                        {label: '이상발생내역', value: item.check_name},
+                    ],
+                    'parentCode': _this.checkMasterName, 'closeManual': true,
+                });
+                popupPage.show(function (data) {
+                    if (data && data.selected.Code === '직접입력') {
+                        item.action_detail = data.input;
+                    } else {
+                        item.action_detail = data.selected.Value;
+                    }
+                    popupPage.close();
+                    _this.deviGrid.refresh();
+                    if (item.action_detail) {
+                        _this.saveDeviAction(item.check_result_id);
+                    }
 
-            if ($('#bhId').val() > 0) {
+                });
+            }
+
+            saveDeviAction(id) {
+                let _this = this;
+                let url = '/api/common/devi_action';
+                let list = _this.deviGrid.getList('selected')[0]
+                if (!list) return;
+                let happen_place = _this.checkMasterName
+                let data = {
+                    id: list.id,
+                    source_pk: list.src_data_pk,
+                    source_table_name: 'place_out_check_list',
+                    happen_date: list.happen_date,
+                    abnormal_detail: list.abnormal_detail,
+                    action_detail: list.action_detail,
+                    happen_place: happen_place,
+                    confirm_detail: list.confirm_detail,
+                }
+
+                let fnSuccess = function () {
+                    Notify.success('저장되었습니다');
+                }
+                AjaxUtil.postAsyncData(url + '/save_dev_action', data, fnSuccess);
+            }
+
+            // 일지 조회
+            searchMainData() {
+                let _this = this;
+                $('#btnDiaryPrint').hide();
+                $('#btnDelete').hide();
+
+                $('#firstName').val(userinfo.username);
+                $('#title').val(_this.checkMasterName);
+
+                if ($('#bhId').val() > 0) {
+                    let param = {
+                        'bh_id': $('#bhId').val(),
+                    };
+
+                    let result = AjaxUtil.getSyncData(_this.baseUrl + '/read', param);
+
+                    if (result != null) {
+                        let headInfo = result.data.head_info;
+                        let diaryInfo = result.data.diary_info;
+                        let actionInfo = result.data.action_info;
+
+
+                        $('#title').val(headInfo.Title);
+                        $('#dataDate').val(headInfo.DataDate);
+                        $('#firstName').val(headInfo.FirstName);
+
+                        _this.resultGrid.itemsSource.sourceCollection = diaryInfo; // 데이터 설정
+                        _this.resultGrid.refresh(); // 그리드 새로고침
+
+                        _this.deviGrid.itemsSource.sourceCollection = actionInfo; // 데이터 설정
+                        _this.deviGrid.refresh(); // 그리드 새로고침
+
+                        _this.viewModeSetting(headInfo)
+                    }
+
+                } else {
+                    _this.searchItemList();
+                }
+
+                // head_id, task_code, src_data_pk, src_table_name, dept_id, shift
+                _this.approveBoxUtil = new ApproveBoxUtil(0, _this.checkMasterName, $('#bhId').val(), 'bundle_head', false, false);
+                _this.approveBoxUtil.print($('#viewMode').val());
+                if (_this.approveBoxUtil.isApprUser()) {
+                    // 결재자의 경우 버튼 처리
+                    $('#btnAppr').show();
+                    $('#btnReject').show();
+                }
+            }
+
+            searchItemList() {
+                let _this = this;
+
                 let param = {
+                    'srch_check_name': _this.checkMasterName
+                }
+
+                let resp = AjaxUtil.getSyncData('/api/check/check_master' + '/read', param);
+                let check_master_info = resp.data;
+
+                let check_master_id = check_master_info[0].id
+
+                let data = {
+                    'check_master_id': check_master_id,
+                    'check_date': $('#dataDate').val(),
+                }
+
+                resp = AjaxUtil.getSyncData('/api/check/check_item' + '/read', data);
+                let result = resp.data;
+
+                result.forEach(function (item, idx) {
+                    item.result1 = null;
+                })
+
+                _this.resultGrid.itemsSource.sourceCollection = result;
+                _this.resultGrid.refresh();
+
+            }
+
+            viewModeSetting(headInfo) {
+                // 데이터에 따른 버튼 설정
+                if ($('#viewMode').val().toLowerCase() == 'true') {
+                    //보기 모드일 경우 CRUD 버튼 숨김
+                    $('#btnDiaryPrint').hide();
+                    $('#btnReqAppr').hide();
+                    $('#btnSave').hide();
+                    $('#btnDelete').hide();
+                    $('#btnAllItem').hide();
+                    if (headInfo.State === 'approval') {
+                        $('#btnDiaryPrint').show();
+                    }
+
+                    $('#title').attr('disabled', 'disabled');
+                    $('#dataDate').attr('disabled', 'disabled');
+
+                } else {
+                    // State : 작성, 미결재, 승인, 반려, 재상신
+                    $('#btnDelete').show();
+                    $('#btnDiaryPrint').hide();
+                    if (headInfo.State === 'process' || headInfo.State === 'reprocess') {
+                        $('#btnReqAppr').hide();
+                        $('#btnSave').hide();
+                        $('#btnDelete').hide();
+                        $('#btnAllItem').hide();
+                    } else if (headInfo.State === 'approval') {
+                        $('#btnDiaryPrint').show();
+                        $('#btnReqAppr').hide();
+                        $('#btnSave').hide();
+                        $('#btnDelete').hide();
+                        $('#btnAllItem').hide();
+                    }
+
+                    if (parseInt($('#bhId').val(), 10) > 0) {
+                        $('#dataDate').attr('disabled', 'disabled');
+                    } else {
+                        $('#btnDelete').hide();
+                    }
+                }
+            }
+
+            // 일지 출력
+            printDiary() {
+                let param = {
+                    'title': $('#title').val(),
                     'bh_id': $('#bhId').val(),
                 };
 
-                let result = AjaxUtil.getSyncData(_this.baseUrl + '/read', param);
-
-                if (result != null) {
-                    let headInfo = result.data.head_info;
-                    let diaryInfo = result.data.diary_info;
-                    let actionInfo = result.data.action_info;
-
-
-                    $('#title').val(headInfo.Title);
-                    $('#dataDate').val(headInfo.DataDate);
-                    $('#firstName').val(headInfo.FirstName);
-
-                    _this.resultGrid.setData({
-                        list: diaryInfo,
-                        page: {
-                            display: true,
-                            totalElements: diaryInfo.length,
-                        }
-                    });
-                    _this.deviGrid.setData({
-                        list: actionInfo,
-                        page: {
-                            display: true,
-                            totalElements: actionInfo.length,
-                        }
-                    });
-
-                    _this.resultGrid.setHeight(diaryInfo.length * 25 + 100);
-                    _this.deviGrid.setHeight(actionInfo.length * 25 + 100);
-
-                    _this.viewModeSetting(headInfo)
-                }
-
-            } else {
-                _this.searchItemList();
-            }
-
-            // head_id, task_code, src_data_pk, src_table_name, dept_id, shift
-            _this.approveBoxUtil = new ApproveBoxUtil(0, _this.checkMasterName, $('#bhId').val(), 'bundle_head', false, false);
-            _this.approveBoxUtil.print($('#viewMode').val());
-            if (_this.approveBoxUtil.isApprUser()) {
-                // 결재자의 경우 버튼 처리
-                $('#btnAppr').show();
-                $('#btnReject').show();
-            }
-        }
-
-        searchItemList() {
-            let _this = this;
-
-            let param = {
-                'srch_check_name': _this.checkMasterName
-            }
-            
-            let resp = AjaxUtil.getSyncData('/api/check/check_master' + '/read', param);
-            let check_master_info = resp.data;
-            
-            let check_master_id = check_master_info[0].id
-
-            let data = {
-                'check_master_id': check_master_id,
-                'check_date': $('#dataDate').val(),
-            }
-
-            resp = AjaxUtil.getSyncData('/api/check/check_item' + '/read', data);
-			let result = resp.data;
-			
-            result.forEach(function (item, idx) {
-                item.result1 = null;
-            })
-
-            _this.resultGrid.setData({
-                list: result,
-                page: {
-                    display: true,
-                    totalElements: result.length,
-                }
-            });
-
-            _this.resultGrid.setHeight(result.length * 25 + 100);
-            _this.deviGrid.setHeight(100);
-        }
-
-        viewModeSetting(headInfo) {
-             // 데이터에 따른 버튼 설정
-            if ($('#viewMode').val().toLowerCase() == 'true') {
-                //보기 모드일 경우 CRUD 버튼 숨김
-                $('#btnDiaryPrint').hide();
-                $('#btnReqAppr').hide();
-                $('#btnSave').hide();
-                $('#btnDelete').hide();
-                $('#btnAllItem').hide();
-                if (headInfo.State == 'approval') {
-                    $('#btnDiaryPrint').show();
-                }
-
-                $('#title').attr('disabled', 'disabled');
-                $('#dataDate').attr('disabled', 'disabled');
-
-            }
-            else {
-                // State : 작성, 미결재, 승인, 반려, 재상신
-                $('#btnDelete').show();
-                $('#btnDiaryPrint').hide();
-                if (headInfo.State == 'process' || headInfo.State == 'reprocess') {
-                    $('#btnReqAppr').hide();
-                    $('#btnSave').hide();
-                    $('#btnDelete').hide();
-                    $('#btnAllItem').hide();
-                } else if (headInfo.State == 'approval') {
-                    $('#btnDiaryPrint').show();
-                    $('#btnReqAppr').hide();
-                    $('#btnSave').hide();
-                    $('#btnDelete').hide();
-                    $('#btnAllItem').hide();
-                }
-
-                if (parseInt($('#bhId').val(), 10) > 0) {
-                    $('#dataDate').attr('disabled', 'disabled');
-                } else {
-                    $('#btnDelete').hide();
-                }
-            }
-        }
-
-        // 일지 출력
-        printDiary() {
-            let param = {
-                'title': $('#title').val(),
-                'bh_id': $('#bhId').val(),
-            };
-
-            let result = AjaxUtil.postSyncData(this.baseUrl + '/print', param, function () { });
-            if (result.success) {
-                CommonUtil.openWindow('/api/files/pdf_viewer?file_id=' + result.file_id)
-            }
-            else {
-                Alert.alert('', '일지 생성 중 오류가 발생했습니다. 관리자에게 문의하세요.');
-            }
-        }
-
-        //결재
-        appr(isAppr) {
-            let _this = this;
-            _this.approveBoxUtil.approval(isAppr, function () {
-                $('#btnList').click();
-            });
-        }
-
-        //결재상신
-        reqAppr() {
-            let _this = this;
-            let title = $('#title').val();
-            let url = '/gui/' + gui.gui_code + '/edit';
-            let urlParam = {
-                'bh_id': $('#bhId').val(),
-                'data_date': $('#dataDate').val(),
-            };
-
-            let ret = _this.approveBoxUtil.request($('#bhId').val(), title, url, JSON.stringify(urlParam));
-            if (ret.success) {
-                Notify.success('결재상신하였습니다.');
-                $('#btnList').click();
-            }
-        }
-
-        //저장
-        save(isAppr) {
-            let _this = this;
-            let resultNullCheck = false;
-
-            for (let i = 0; i < _this.resultGrid.list.length; i++) {
-                if (_this.resultGrid.list[i].result1 == null || _this.resultGrid.list[i].result1 == '') 
-                    resultNullCheck = true;    
-            }
-
-            let callback = function () {
-            
-                let items = [];
-                $.each(_this.resultGrid.list, function (idx, item) {
-                    items.push({ id: item.id, 'result1': item.result1, 'order': item.__original_index });
+                let result = AjaxUtil.postSyncData(this.baseUrl + '/print', param, function () {
                 });
-          
-                let data = {
-                    bh_id: $('#bhId').val(),
-                    title: $('#title').val(),
-                    data_date: $('#dataDate').val(),
-                    Q: JSON.stringify(items),
-                };
-                
-                let fnSuccess = function (resp) {
-                    if (resp.success) {
-                        $('#bhId').val(resp.data.id);
-                        if (isAppr) {
-                            // 결재요청
-                            _this.reqAppr();
-                        } else {
-                            // 임시저장
-                            Notify.success('저장하였습니다.');
-                            $('#btnDelete').show();
-                            $('#dataDate').attr('disabled', 'disabled');
-                            _this.searchMainData();
-                        }
-                    } else {
-                        Alert.alert('', resp.message);
-                    }
-                };
-                
-                if (isAppr) {
-	                let checkGrid1 = _this.resultGrid.getList()
-	                let checkGrid2 = _this.deviGrid.getList()
-	                
-	                let result = checkGrid1.filter(function(e){
-					    return e.result1 == "X";
-					})
-	               	
-	               	if (result.length > 0) {
-						if(checkGrid2.length == 0) {
-							Alert.alert('결재상신','조치내역을 입력해주세요.');
-							return
-						}
-					}
-					
-					let result2 = checkGrid2.filter(function(e){
-					    return e.action_detail == "" || e.action_detail == null;
-					})
-					
-					if (result2.length > 0) {
-						Alert.alert('결재상신','조치내역을 입력해주세요.');
-						return
-					}
+                if (result.success) {
+                    CommonUtil.openWindow('/api/files/pdf_viewer?file_id=' + result.file_id)
+                } else {
+                    Alert.alert('', '일지 생성 중 오류가 발생했습니다. 관리자에게 문의하세요.');
                 }
-                AjaxUtil.postAsyncData(_this.baseUrl + '/save', data, fnSuccess);
             }
 
-            if (isAppr) {
-                if (resultNullCheck) {
-                    Alert.alert("", "점검결과를 모두 입력해주세요.");
-                    return;
+            //결재
+            appr(isAppr) {
+                let _this = this;
+                _this.approveBoxUtil.approval(isAppr, function () {
+                    $('#btnList').click();
+                });
+            }
+
+            //결재상신
+            reqAppr() {
+                let _this = this;
+                let title = $('#title').val();
+                let url = '/gui/' + gui.gui_code + '/edit';
+                let urlParam = {
+                    'bh_id': $('#bhId').val(),
+                    'data_date': $('#dataDate').val(),
+                };
+
+                let ret = _this.approveBoxUtil.request($('#bhId').val(), title, url, JSON.stringify(urlParam));
+                if (ret.success) {
+                    Notify.success('결재상신하였습니다.');
+                    $('#btnList').click();
+                }
+            }
+
+            //저장
+            save(isAppr) {
+                let _this = this;
+                let resultNullCheck = false;
+
+                for (let i = 0; i < _this.resultGrid.itemsSource.sourceCollection.length; i++) {
+                    if (_this.resultGrid.itemsSource.sourceCollection[i].result1 == null
+                        || _this.resultGrid.itemsSource.sourceCollection[i].result1 === '')
+                        resultNullCheck = true;
+                }
+
+                let callback = function () {
+
+                    let items = [];
+                    _this.resultGrid.itemsSource.sourceCollection.forEach((item, idx) => {
+                        items.push({id: item.id, result1: item.result1, order: idx});
+                    });
+
+                    let data = {
+                        bh_id: $('#bhId').val(),
+                        title: $('#title').val(),
+                        data_date: $('#dataDate').val(),
+                        Q: JSON.stringify(items),
+                    };
+
+                    let fnSuccess = function (resp) {
+                        if (resp.success) {
+                            $('#bhId').val(resp.data.id);
+                            if (isAppr) {
+                                // 결재요청
+                                _this.reqAppr();
+                            } else {
+                                // 임시저장
+                                Notify.success('저장하였습니다.');
+                                $('#btnDelete').show();
+                                $('#dataDate').attr('disabled', 'disabled');
+                                _this.searchMainData();
+                            }
+                        } else {
+                            Alert.alert('', resp.message);
+                        }
+                    };
+
+                    if (isAppr) {
+                        let checkGrid1 = _this.resultGrid.selectedItems;
+                        let checkGrid2 = _this.deviGrid.selectedItems;
+
+                        let result = checkGrid1.filter(function (e) {
+                            return e.result1 == "X";
+                        })
+
+                        if (result.length > 0) {
+                            if (checkGrid2.length === 0) {
+                                Alert.alert('결재상신', '조치내역을 입력해주세요.');
+                                return
+                            }
+                        }
+
+                        let result2 = checkGrid2.filter(function (e) {
+                            return e.action_detail === "" || e.action_detail == null;
+                        })
+
+                        if (result2.length > 0) {
+                            Alert.alert('결재상신', '조치내역을 입력해주세요.');
+                            return
+                        }
+                    }
+                    AjaxUtil.postAsyncData(_this.baseUrl + '/save', data, fnSuccess);
+                }
+
+                if (isAppr) {
+                    if (resultNullCheck) {
+                        Alert.alert("", "점검결과를 모두 입력해주세요.");
+                        return;
+                    } else {
+                        Alert.confirm('', '결재상신하시겠습니까?', function () {
+                            callback();
+                        });
+                    }
                 } else {
-                    Alert.confirm('', '결재상신하시겠습니까?', function () {
+                    Alert.confirm('', '저장하시겠습니까?', function () {
                         callback();
                     });
                 }
             }
-            else {
-                Alert.confirm('', '저장하시겠습니까?', function () {
-                    callback();
+
+            //삭제
+            delete() {
+                let _this = this;
+                Alert.confirm('', '삭제하시겠습니까?', function () {
+                    // 삭제 서비스 호출
+                    let param = {
+                        bh_id: $('#bhId').val(),
+                    }
+                    let fnSuccess = function (resp) {
+                        if (resp.success) {
+                            Notify.success('삭제하였습니다.');
+                            $('#btnList').click();
+                        } else {
+                            Alert.alert('', resp.message);
+                        }
+                    };
+                    AjaxUtil.postAsyncData(_this.baseUrl + '/delete', param, fnSuccess);
                 });
             }
-        }
 
-        //삭제
-        delete() {
-            let _this = this;
-            Alert.confirm('', '삭제하시겠습니까?', function () {
-                // 삭제 서비스 호출
-                let param = {
-                    bh_id: $('#bhId').val(),
+            // 이미지 팝업
+            setImagePopup(data) {
+                let _this = this;
+                let content = tmpl('imagePopup', data);
+                let $content = $(content);
+                let modalContainer;
+
+                if (data && data.file_id) {
+                    modalContainer = new PopupDraggable('점검항목 이미지');
+                    modalContainer.open({width: 500, height: 350, $content});
                 }
-                let fnSuccess = function (resp) {
-                    if (resp.success) {
-                        Notify.success('삭제하였습니다.');
-                        $('#btnList').click();
-                    } else {
-                        Alert.alert('', resp.message);
-                    }
+
+                let fncCallback = function () {
                 };
-                AjaxUtil.postAsyncData(_this.baseUrl + '/delete', param, fnSuccess);
-            });
-        }
+                _this.upload = new UploadOneImage(1, {
+                    table_name: 'check_item',
+                    data_pk: data.checkItem_id,
+                    attach_name: 'check_item_image',
+                    file_id: data.file_id,
+                    upload_form_id: 'upload_form1',
+                    upload_div_id: 'image_upload1',
+                    image_width: '100%',
+                    image_height: 'auto',
+                    callback: fncCallback,
+                });
 
-        // 이미지 팝업
-        setImagePopup(data) {            
-            let _this = this;
-            let content = tmpl('imagePopup', data);
-            let $content = $(content);
-            let modalContainer;
-
-            if (data && data.file_id) {
-                modalContainer = new PopupDraggable('점검항목 이미지');
-                modalContainer.open({ width: 500, height: 350, $content });                
+                _this.upload.printFormDiv();
+                $('#pop_item_name').val(data.item_name);
+                $('#btnUpload1').hide();
+                $('#btnRemoveFile1').hide();
+                $('#attachFileId1').hide();
             }
 
-            let fncCallback = function () {                
-            };
-            _this.upload = new UploadOneImage(1, {
-                table_name: 'check_item',
-                data_pk: data.checkItem_id,
-                attach_name: 'check_item_image',
-                file_id: data.file_id,
-                upload_form_id: 'upload_form1',
-                upload_div_id: 'image_upload1',
-                image_width: '100%',
-                image_height: 'auto',
-                callback: fncCallback,
+        }
+
+        let page = null;
+
+        $(document).ready(function (e) {
+            page = new CheckResultDiaryPage();
+
+            $('#dataDate').val(page.gparam.data_date);
+
+            $('#btnAllItem').click(function (e) {
+                page.checkAllItem();
             });
 
-            _this.upload.printFormDiv();
-            $('#pop_item_name').val(data.item_name);
-            $('#btnUpload1').hide();
-            $('#btnRemoveFile1').hide();
-            $('#attachFileId1').hide();
-        }
+            // 일자 변경
+            $('#dataDate').change(function () {
+                page.searchMainData();
+            });
 
-        // 엑셀 다운로드
-        exportExcel() {
-            var targetview = this.resultGrid;
-            targetview.exportExcel('작업장 주변 환경 점검목록.xls');
-        }
+            // 일지 출력
+            $('#btnDiaryPrint').on('click', function () {
+                page.printDiary();
+            });
 
-    }
+            // 결재상신
+            $('#btnReqAppr').on('click', function () {
+                page.save(true);
+            });
 
-    let page = null;
+            // 승인
+            $('#btnAppr').on('click', function () {
+                page.appr(true);
+            });
 
-    $(document).ready(function (e) {
-        page = new CheckResultDiaryPage();
+            // 반려
+            $('#btnReject').on('click', function () {
+                page.appr(false);
+            });
 
-        $('#pickerDate').ax5DatePicker({ direction: 'top' });
-        picker.bind({
-            target: $('[data-ax5picker="multi"]'),
-            direction: "top",
-            content: {
-                width: 206,  //130 270
-                margin: 10,
-                type: 'date',
-                config: {
-                    control: {
-                        left: '<i class="fa fa-chevron-left"></i>',
-                        yearTmpl: '%s',
-                        monthTmpl: '%s',
-                        right: '<i class="fa fa-chevron-right"></i>'
-                    },
-                    lang: {
-                        yearTmpl: "%s년",
-                        months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-                        dayTmpl: "%s"
-                    }
+            // 임시저장
+            $('#btnSave').on('click', function () {
+                page.save(false);
+            });
+
+            // 삭제
+            $('#btnDelete').on('click', function () {
+                page.delete();
+            });
+
+            // 목록
+            $('#btnList').on('click', function () {
+                if (page.gparam.appr_view) {
+                    location.href = encodeURI('/gui/' + page.gparam.appr_view + '?searchcond=' + page.gparam.searchcond);
+                } else {
+                    location.href = encodeURI('/gui/' + gui.gui_code + '?searchcond=' + page.gparam.searchcond);
                 }
-            }
+            });
 
-        });
-
-        $('#dataDate').val(page.gparam.data_date);
-
-        $('#btnAllItem').click(function (e) {
-            page.checkAllItem();
-        });
-
-        // 일자 변경
-        $('#dataDate').change(function () {
             page.searchMainData();
+
         });
-
-        // 일지 출력
-        $('#btnDiaryPrint').on('click', function () {
-            page.printDiary();
-        });
-
-        // 결재상신
-        $('#btnReqAppr').on('click', function () {
-            page.save(true);
-        });
-
-        // 승인
-        $('#btnAppr').on('click', function () {
-            page.appr(true);
-        });
-
-        // 반려
-        $('#btnReject').on('click', function () {
-            page.appr(false);
-        });
-
-        // 임시저장
-        $('#btnSave').on('click', function () {
-            page.save(false);
-        });
-
-        // 삭제
-        $('#btnDelete').on('click', function () {
-            page.delete();
-        });
-
-        // 목록
-        $('#btnList').on('click', function () {
-            if (page.gparam.appr_view) {
-                location.href = encodeURI('/gui/' + page.gparam.appr_view + '?searchcond=' + page.gparam.searchcond);
-            }
-            else {
-                location.href = encodeURI('/gui/' + gui.gui_code + '?searchcond=' + page.gparam.searchcond);
-            }
-        });
-
-        // 엑셀 다운로드
-        $('#btnExcel').on('click', function () {
-            page.exportExcel();
-        });
-
-        page.searchMainData();
-
-    });
-</script>
+    </script>
 </th:block>
 </html>

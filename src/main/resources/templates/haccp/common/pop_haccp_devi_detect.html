@@ -82,29 +82,32 @@
                 frozenColumns: 0, // 열 고정
                 frozenRows: 0, // 행 고정
                 selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
-                isReadOnly: false, // 읽기 전용 비활성화
+                isReadOnly: true, // 읽기 전용 비활성화
                 headersVisibility: wijmo.grid.HeadersVisibility.Column, // 헤더만 표시
                 itemsSource: new wijmo.collections.CollectionView([]),
                 columns: [
                     { binding: 'id', header: 'ID', width: 0, isReadOnly: true, visible: false }, // 숨김 열
-                    { binding: 'Code', header: '코드', width: '*', align: 'center', isReadOnly: true }, // 코드 열
+                    { binding: 'Code', header: '코드', width: 0, align: 'center', isReadOnly: true, visible: false }, // 코드 열
                     { binding: 'Value', header: '코드명', width: '*', align: 'left', isReadOnly: true }, // 코드명 열
                 ],
                 formatItem: (s, e) => {
                     if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                         e.cell.style.textAlign = 'center'; // 헤더 텍스트 정렬
                     }
+                    if (e.panel.cellType === wijmo.grid.CellType.Cell && s.columns[e.col].binding === 'Value') {
+                        e.cell.style.textAlign = 'left'; // 'Value' 열에 명시적으로 좌측 정렬 설정
+                    }
                 }
             });
 
             // 두 번 클릭 시 아이템 선택 및 동작
             this.grid.addEventListener(this.grid.hostElement, 'dblclick', (e) => {
-                const ht = this.grid.hitTest(e);
+                const ht = this.grid.hitTest(e); // 클릭한 셀의 위치 정보 가져오기
                 if (ht.cellType === wijmo.grid.CellType.Cell) {
-                    const selectedItem = this.grid.collectionView.items[ht.row];
-                    _this.grid.select(ht.row); // 선택
-                    _this.selectedItem = selectedItem;
-                    _this.select(selectedItem); // 동작 수행
+                    const selectedItem = this.grid.collectionView.items[ht.row]; // 선택된 행 데이터
+                    this.grid.select(new wijmo.grid.CellRange(ht.row, -1)); // 행 전체 선택
+                    this.selectedItem = selectedItem; // 선택된 데이터 저장
+                    this.select(selectedItem); // 동작 수행
                 }
             });
 
