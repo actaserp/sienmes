@@ -5,7 +5,7 @@
 
         <div class="page-title-wrap">
             <div class="left">
-                <h2>CCP가열(굽기)일지</h2>
+                <h2>CCP 가열(굽기) 일지</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
@@ -13,7 +13,7 @@
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
                 <li>중요관리점(CCP) 일지</li>
-                <li>CCP가열(굽기)일지</li>
+                <li>CCP 가열(굽기) 일지</li>
             </ul>
         </div>
 
@@ -186,7 +186,7 @@
                     columns: [
                         {binding: 'TaskName', header: '일지명', width: 150, isReadOnly: true, align: 'center'},
                         {binding: 'DataDate', header: '일자', width: 150, isReadOnly: true, align: 'center'},
-                        {binding: 'process_name', header: 'HACCP 공정', width: 150, align: 'center', isReadOnly: true},
+                        {binding: 'process_name', header: 'HACCP 공정', width: 150, align: 'left', isReadOnly: true},
                         {binding: 'StateName', header: '결재상태', width: 100, align: 'center', isReadOnly: true},
                         {binding: 'LineName', header: '결재현황', width: 650, isReadOnly: true, align: 'left'},
                         { binding: 'SearchYN', header: '조회', width: 80, align: 'center' },
@@ -194,6 +194,9 @@
                         { binding: 'DeleteYN', header: '삭제', width: 80, align: 'center' }
                     ]
                 });
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = 'CCP가열(굽기) 일지';
+
 
                 this.$cboHaccpProcess = $('#cboHaccpProcess');
 
@@ -280,7 +283,7 @@
                     let fnSuccess = function (resp) {
                         if (resp.success) {
                             Notify.success('삭제하였습니다.');
-                            _this.searchMainData();
+                            _this.searchDataBind();
                         } else {
                             Alert.alert('', resp.message);
                         }

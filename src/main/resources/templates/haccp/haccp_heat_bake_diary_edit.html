@@ -44,12 +44,12 @@
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
-                <h2>CCP가열(굽기)일지</h2>
+                <h2>CCP 가열(굽기)일지</h2>
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
                 <li>중요관리점(CCP) 일지</li>
-                <li>CCP가열(굽기)일지</li>
+                <li>CCP 가열(굽기)일지</li>
             </ul>
         </div>
 
@@ -71,7 +71,7 @@
             </div>
             <div class="section-card-wrap">
 
-                <div class="col-6">
+                <div class="col-5">
                     <table class="write-table">
                         <tbody>
                         <tr>
@@ -340,24 +340,12 @@
             initHaccpTestGrid() {
                 let _this = this;
                 let columns = [
-                    {binding: 'equ_name', header: '설비명', width: 150, align: 'left', isReadOnly: true},
-                    {binding: 'mat_code', header: '제품코드', width: 120, align: 'left', isReadOnly: true},
-                    {binding: 'MaterialName', header: '제품명', width: 250, align: 'left', isReadOnly: true},
-                    {
-                        binding: 'DataType',
-                        header: '측정구분',
-                        width: 100,
-                        align: 'center',
-                        isReadOnly: true,
-                    },
-                    {binding: 'StartTime', header: '측정시간', width: 100, align: 'center', isRequired: true, isReadOnly: false},
-                    {
-                        binding: 'Judge',
-                        header: '판정(적합:O/부적합:X)',
-                        width: 150,
-                        align: 'center',
-                        isReadOnly: false, // 수정 가능
-                    },
+                    {binding: 'equ_name', header: '설비명', width: 150, align: 'left', isReadOnly: true },
+                    {binding: 'mat_code', header: '제품코드', width: 120, align: 'left', isReadOnly: true },
+                    {binding: 'MaterialName', header: '제품명', width: 250, align: 'left', isReadOnly: true },
+                    {binding: 'DataType', header: '측정구분', width: 100, align: 'center', isReadOnly: true },
+                    {binding: 'StartTime', header: '측정시간', width: 100, align: 'center', isRequired: true, isReadOnly: false },
+                    {binding: 'Judge', header: '판정(적합:O/부적합:X)', width: 150, align: 'center', isReadOnly: false },
                     {binding: 'TesterName', header: '모니터링 담당자', width: 120, align: 'center', isReadOnly: false },
                     {binding: 'Description', header: '비고', width: 260, align: 'left', isReadOnly: false }
                 ];
@@ -484,9 +472,6 @@
                     }
                 });
 
-
-
-
                 // 목록버튼
                 this.$btnList = $('#btnList');
                 this.$btnList.click(function (e) {
@@ -550,8 +535,6 @@
                     let cv = _this.haccpTestGrid.collectionView;
                     let modifiedItems = cv.items.filter(item => item.__modified); // 수정된 데이터 필터링
 
-                    console.log('수정된 항목:', modifiedItems); // 디버깅 로그
-
                     let modifiedCount = modifiedItems.length;
                     if (modifiedCount > 0) {
                         Alert.confirm('항목저장', '항목을 저장하시겠습니까?', function () {
@@ -566,7 +549,7 @@
 
                 this.$btnDeleteItem.click(function (e) {
                     let items = _this.haccpTestGrid.selectedItems;
-                    if (items.length == 0) {
+                    if (items.length === 0) {
                         Alert.alert('항목삭제', '선택된 행이 없습니다.');
                         return;
                     }
@@ -591,7 +574,7 @@
                 this.$cboDataType.change(function (e) {
                     let DataType = _this.$cboDataType.val();
 
-                    if (DataType == "P") {
+                    if (DataType === "P") {
                         _this.$cboMaterialGroup.removeAttr('disabled');
                         _this.$cboMaterial.removeAttr('disabled');
                     } else {
@@ -631,13 +614,7 @@
                     {binding: 'mat_code', header: '제품코드', width: 100, align: 'center', isReadOnly: true},
                     {binding: 'MaterialName', header: '제품명', width: 300, align: 'left', isReadOnly: true},
                     {binding: 'StartTime', header: '측정시간', width: 80, align: 'center', isRequired: true},
-                    {
-                        binding: 'AbnormalDetail',
-                        header: '이탈사항(클릭)',
-                        width: 250,
-                        align: 'center',
-                        isReadOnly: true
-                    },
+                    {binding: 'AbnormalDetail', header: '이탈사항(클릭)', width: 250, align: 'center', isReadOnly: true},
                     {binding: 'ActionDetail', header: '조치내역', width: 250, align: 'left', isReadOnly: true},
                     {binding: 'ActorName', header: '조치자', width: 80, align: 'center', isReadOnly: true},
                     {binding: 'writer', header: '확인자', width: 80, align: 'center', isReadOnly: true},
@@ -734,7 +711,7 @@
             loadDiaryData() {
                 let _this = this;
 
-                if (this.hd_id == "0" || this.hd_id == "") {
+                if (this.hd_id === "0" || this.hd_id === "") {
                     this.$txtWriterName.val(userinfo.username);
                     this.$dataDate.removeAttr("disabled");
                     // 신규 작성이면 데이터 로드 필요없음
@@ -793,7 +770,7 @@
             addTestItems() {
                 let _this = this;
 
-                if (this.hd_id == "0") {
+                if (this.hd_id === "0") {
                     Alert.alert('알림', "일지를 먼저 저장후 결과를 입력하세요");
                     return;
                 }
@@ -804,22 +781,22 @@
                 let equipment_id = this.$cboEquipment.val();
 
                 let haccp_grid = _this.haccpTestGrid.selectedItems;
-                if (equipment_id == "") {
+                if (equipment_id === "") {
                     Alert.alert('입력오류', '설비를 선택해 주세요.');
                     return;
                 }
 
-                if (dataType == "P" && material_id == "") {
+                if (dataType === "P" && material_id === "") {
                     Alert.alert('입력오류', '제품을 선택하세요.');
                     return;
                 }
 
-                if (this.checkTimeFormat(startTime) == false) {
+                if (this.checkTimeFormat(startTime) === false) {
                     Alert.alert('입력오류', '측정시간 입력 오류');
                     return;
                 }
                 if (haccp_grid.length > 0) {
-                    if (haccp_grid[haccp_grid.length - 1].DataType == "S" && dataType == "E") {
+                    if (haccp_grid[haccp_grid.length - 1].DataType === "S" && dataType === "E") {
                         Alert.alert('입력오류', '제품데이터를 입력하세요.');
                         return;
                     }
@@ -947,7 +924,6 @@
                     } else {
                         // 초기 설정
                         _this.haccpTestGrid.itemsSource = new wijmo.collections.CollectionView(items);
-
                     }
 
                     _this.haccp_test_items = items; // 로컬 데이터 갱신
@@ -987,7 +963,6 @@
 
                 let fnsuccess = function (result) {
                     if (result.success) {
-                        console.log('result.data', result.data);
                         _this.detectGrid.itemsSource.sourceCollection = result.data;
                         _this.detectGrid.itemsSource.refresh();
                     } else {
@@ -1023,18 +998,18 @@
                     this.$btnSaveItems.attr('disabled', 'disabled');
                     this.$btnDeleteItem.attr('disabled', 'disabled');
 
-                    if (_this.diary.State == 'approval') {
+                    if (_this.diary.State === 'approval') {
                         $('#btnDiaryPrint').show();
                     }
                     $('#btnDelete').hide();
                     $('#btnReqAppr').hide();
                     $('#btnSave').hide();
                 } else {
-                    if (this.diary.State == 'process' || this.diary.State == 'reprocess') {
+                    if (this.diary.State === 'process' || this.diary.State === 'reprocess') {
                         $('#btnReqAppr').hide();
                         $('#btnSave').hide();
                         $('#btnDelete').hide();
-                    } else if (this.diary.State == 'approval') {
+                    } else if (this.diary.State === 'approval') {
                         $('#btnDiaryPrint').show();
                         $('#btnReqAppr').hide();
                         $('#btnSave').hide();

@@ -1,74 +1,93 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section class="section">
-        <div class="title_box">
-            <div class="left_align">
-                <h3 data-labelCd="CCP급속동결일지">CCP급속동결일지</h3>
-            </div>
-            <button type="button" class="btn-default pull-right" id="btnHeaderFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress"></i></button>
-        </div>
-        <div class="table_box search">
-            <form id="searchForm">
-            <div class="row">
-                <div class="col-11 col-md-6 col-lg-5 col-xl-3" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_sm" data-labelCd="작성일">작성일</span>
-                        </div> 
-                        <div data-ax5picker="multi" id="srchDt">
-                            <div class="input-group-append">
-                                <input class="tac " type="text" id="srchStartDt" name="srchStartDt" />
-                                <span class="input-group-text fs-xl">
-                                    <i class="fas fa-calendar-alt calendar_color" ></i>
-                                </span>
-                                <span class="slow_sign">~</span>
-                                <input class="tac " type="text" id="srchEndDt" name="srchEndDt" />
-                                <span class="input-group-text fs-xl">
-                                    <i class="fas fa-calendar-alt calendar_color"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-12 col-lg-3 col-xl-3">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t8" data-labelCd="HACCP공정">HACCP공정</span>
-                        </div>
-                        <select class="form-control2" id="cboHaccpProcess" name="HaccpProcess_id" disabled></select>
-                    </div>
-                </div>
+    <div class="layout-contents">
 
-                <div class="col-1">
-                    <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>CCP 급속동결 일지</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
+            </div>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>중요관리점(CCP) 일지</li>
+                <li>CCP 급속동결 일지</li>
+            </ul>
+        </div>
+
+        <section class="section">
+            <div class="section-top">
+                <form id="searchForm">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                작성일
+                            </dt>
+                            <dd>
+                                <ul class="date-box">
+                                    <li>
+                                        <input type="date" id="srchStartDt" name="srchStartDt">
+                                        <label for="srchStartDt" class="hide">시작일</label>
+                                    </li>
+                                    <li>
+                                        <input type="date" id="srchEndDt" name="srchEndDt">
+                                        <label for="srchEndDt" class="hide">종료일</label>
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label for="cboHaccpProcess">
+                                    HACCP 공정
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <select id="cboHaccpProcess" name="cboHaccpProcess" disabled></select>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+                    </div>
+                </form>
+                <div class="button-wrap">
+                    <ul>
+                        <li>
+                            <a class="btn" title="등록" id="btnNewDiary">
+                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                등록
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn" title="출력" id="btnDiaryPrint">
+                                <i class="fas fa-print" style="margin-right: 10px;"></i>
+                                출력
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            </form>
-        </div>
-    </section>    
-    <section>
-        <div class="grid_box">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="HACCP일지목록">HACCP일지목록</span>
-                <button type="button" class="btn-default" id="btnNewDiary" name="btnNew"><i class="fas fa-plus"></i></button>
-                <!-- 
-                <button type="button" class="btn-default" id="btnEditDiary" title="상세입력편집"><i class="fas fa-edit"></i></button>
-                -->
-                <button type="button" class="btn-default" id="btnDiaryPrint" title="출력"><i class="fas fa-print"></i></button>
-                <button type="button" class="btn-default " id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
+            <div class="container-fluid">
+                <div id="haccp-diary-grid" style="height: 730px;"></div>
             </div>
-            <div class="h-600" data-ax5grid="haccp-diary-grid"></div>
-        </div>
-    </section>   
-</div>
+        </section>
+    </div>
 </th:block>
 <th:block layout:fragment="scripts">
 
-<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
 <th:block th:replace="/common/approve_box :: approve_box"></th:block>
 <script type="text/javascript" src="/js/grid.js"></script>
 <script type="text/javascript">
@@ -83,83 +102,99 @@ class HaccpDiaryPage {
 
     init() {
         let _this = this;
-        let config = {
-            target: $('[data-ax5grid="haccp-diary-grid"]'),
-            sortable: true,
-            frozenColumnIndex: 0, // 열 고정
-            frozenRowIndex: 0,    // 행 고정
-            showLineNumber: false, // 열의 번호 보이기 여부
-            showRowSelector: false,  // checkbox(선택) 보이기 여부
-            multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-            sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-            multiSort: true, // 다중 정렬 여부
-            header: {
-                align: 'center',  // 헤더의 기본 정렬
-                columnHeight: 30  // 헤더 높이
-            },
-            body: {
-                columnHeight: 25,
-                onClick: function (e) {
-                    _this.grid.select(this.dindex);
-                    _this.detail(this);
-                    //_this.$btnEditDiary.removeAttr('disabled');
-                    _this.$btnDiaryPrint.removeAttr('disabled');
-                },
-            },
-            page: {
-                display: true,
-                statusDisplay: true,
+        this.grid = new wijmo.grid.FlexGrid('#haccp-diary-grid', {
+            selectionMode: wijmo.grid.SelectionMode.Row,
+            autoGenerateColumns: false, // 사용자 정의 컬럼 사용
+            headersVisibility: wijmo.grid.HeadersVisibility.Column,
+            isReadOnly: false, // 편집 가능 여부
+            itemsSource: new wijmo.collections.CollectionView([]),
+            formatItem: (s, e) => {
+                if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                    e.cell.style.textAlign = 'center';
+                }
+                if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                    const col = s.columns[e.col];
+                    const item = e.panel.rows[e.row].dataItem;
+
+                    // 결재현황 (LineName) 처리
+                    if (col.binding === 'LineName') {
+                        e.cell.innerHTML = CommonUtil.convertApprLineNameHtml(item.LineName, item.LineNameState);
+                    }
+
+                    // SearchYN 버튼 처리
+                    if (col.binding === 'SearchYN') {
+                        if (item.SearchYN === 'Y') {
+                            e.cell.innerHTML = ''; // 기존 셀 콘텐츠 제거
+                            const button = document.createElement('button');
+                            button.className = 'btn-default';
+                            button.style.cssText = 'width: 100%; height: 25px;';
+                            button.textContent = '조회';
+                            button.addEventListener('click', () => {
+                                _this.grid.select(new wijmo.grid.CellRange(e.row, -1));
+                                _this.detail({item, column: {key: 'SearchYN'}});
+                                _this.$btnDiaryPrint.removeAttr('disabled');
+                            });
+                            e.cell.appendChild(button);
+                        } else {
+                            // 해당 셀을 빈 셀로 유지
+                            e.cell.innerHTML = ''; // 셀 비우기
+                        }
+                    }
+
+                    // EditYN 버튼 처리
+                    if (col.binding === 'EditYN') {
+                        if (item.EditYN === 'Y') {
+                            e.cell.innerHTML = '';
+                            const button = document.createElement('button');
+                            button.className = 'btn-default';
+                            button.style.cssText = 'width: 100%; height: 25px;';
+                            button.textContent = '수정';
+                            button.addEventListener('click', () => {
+                                _this.grid.select(new wijmo.grid.CellRange(e.row, -1));
+                                _this.detail({item, column: {key: 'EditYN'}});
+                                _this.$btnDiaryPrint.removeAttr('disabled');
+                            });
+                            e.cell.appendChild(button);
+                        } else {
+                            // 해당 셀을 빈 셀로 유지
+                            e.cell.innerHTML = ''; // 셀 비우기
+                        }
+                    }
+
+                    // DeleteYN 버튼 처리
+                    if (col.binding === 'DeleteYN') {
+                        if (item.DeleteYN === 'Y') {
+                            e.cell.innerHTML = '';
+                            const button = document.createElement('button');
+                            button.className = 'btn-danger';
+                            button.style.cssText = 'width: 100%; height: 25px;';
+                            button.textContent = '삭제';
+                            button.addEventListener('click', () => {
+                                _this.grid.select(new wijmo.grid.CellRange(e.row, -1));
+                                _this.detail({item, column: {key: 'DeleteYN'}});
+                                _this.$btnDiaryPrint.removeAttr('disabled');
+                            });
+                            e.cell.appendChild(button);
+                        } else {
+                            // 해당 셀을 빈 셀로 유지
+                            e.cell.innerHTML = ''; // 셀 비우기
+                        }
+                    }
+                }
             },
             columns: [
-            	{ key: 'TaskName', label: '일지명', width: 150, align: 'center', sortable: true },
-                { key: 'DataDate', label: '일자', width: 150, align: 'center', sortable: true },
-                { key: 'process_name', label: 'HACCP 공정', width: 150, sortable: true },
-                { key: 'StateName', label: '결재상태', width: 100, align: 'center' },
-                {
-                    key: 'LineName', label: '결재현황', width: 650, align: 'left',
-                    formatter: function () {
-                        return CommonUtil.convertApprLineNameHtml(this.item.LineName, this.item.LineNameState);
-                    }
-                },
-                { key: 'DataDate', label: '일자', width: 120, align: 'center' },
-                {
-                    key: 'SearchYN', label: '조회', width: 80, align: 'center',
-                    formatter: function () {
-                        let html = '';
-                        if (this.item.SearchYN == 'Y') {
-                            html = '<button class="btn-default" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">조회</button>'
-                        }
-                        return html;
-
-                    }
-                },
-                {
-                    key: 'EditYN', label: '수정', width: 80, align: 'center',
-                    formatter: function () {
-                        let html = '';
-                        if (this.item.EditYN == 'Y') {
-                            html = '<button class="btn-default" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">수정</button>'
-                        }
-                        return html;
-                    }
-                },
-                {
-                    key: 'DeleteYN', label: '삭제', width: 80, align: 'center',
-                    formatter: function () {
-                        let html = '';
-                        if (this.item.DeleteYN == 'Y') {
-                            html = '<button class="btn-danger" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">삭제</button>'
-                        }
-                        return html;
-
-                    }
-                },
-                
+                {binding: 'TaskName', header: '일지명', width: 150, isReadOnly: true, align: 'center'},
+                {binding: 'DataDate', header: '일자', width: 150, isReadOnly: true, align: 'center'},
+                {binding: 'process_name', header: 'HACCP 공정', width: 150, align: 'left', isReadOnly: true},
+                {binding: 'StateName', header: '결재상태', width: 100, align: 'center', isReadOnly: true},
+                {binding: 'LineName', header: '결재현황', width: 650, isReadOnly: true, align: 'left'},
+                { binding: 'SearchYN', header: '조회', width: 80, align: 'center' },
+                { binding: 'EditYN', header: '수정', width: 80, align: 'center' },
+                { binding: 'DeleteYN', header: '삭제', width: 80, align: 'center' }
             ]
-        };
-
-        this.grid = new ax5.ui.grid(config);
-        this.grid_config = config;
+        });
+        new FlexGridContextMenu(this.grid);
+        this.grid.downloadFileName = 'CCP 급속동결 일지';
 
         this.$cboHaccpProcess = $('#cboHaccpProcess');
 
@@ -191,8 +226,8 @@ class HaccpDiaryPage {
         this.$btnEditDiary = $('#btnEditDiary');
         this.$btnEditDiary.click(function (e) {
 
-            let items = _this.grid.getList('selected');
-            if (items.length == 0) {
+            let items = _this.grid.selectedItems;
+            if (items.length === 0) {
                 return;
             }
             let item = items[0];
@@ -204,8 +239,8 @@ class HaccpDiaryPage {
         // 출력버튼
         this.$btnDiaryPrint = $('#btnDiaryPrint');
         this.$btnDiaryPrint.click(function (e) {
-            let items = _this.grid.getList('selected');
-            if (items.length == 0) {
+            let items = _this.grid.selectedItems;
+            if (items.length === 0) {
                 return;
             }
             let hd_id = items[0].hd_id;
@@ -227,11 +262,11 @@ class HaccpDiaryPage {
         
         
         
-        if (data.column.key == 'SearchYN' && data.item.SearchYN == 'Y') {
+        if (data.column.key === 'SearchYN' && data.item.SearchYN === 'Y') {
             location.href = '/gui/' + gui.gui_code + '/edit?hd_id=' + hd_id + '&data_date=' + dataDate + '&view_mode=true&hp_id=' + hp_id + this.createSearchCond();
-        } else if (data.column.key == 'EditYN' && data.item.EditYN == 'Y') {
+        } else if (data.column.key === 'EditYN' && data.item.EditYN === 'Y') {
             location.href = '/gui/' + gui.gui_code + '/edit?hd_id=' + hd_id + '&data_date=' + dataDate + '&view_mode=false&hp_id=' + hp_id + this.createSearchCond();
-        } else if (data.column.key == 'DeleteYN' && data.item.DeleteYN == 'Y') {
+        } else if (data.column.key === 'DeleteYN' && data.item.DeleteYN === 'Y') {
         	_this.deleteDiary(data.item.hd_id);
         }
     }    
@@ -247,7 +282,7 @@ class HaccpDiaryPage {
             let fnSuccess = function (resp) {
                 if (resp.success) {
                     Notify.success('삭제하였습니다.');
-                    _this.searchMainData();
+                    _this.searchDataBind();
                 } else {
                     Alert.alert('', resp.message);
                 }
@@ -266,21 +301,14 @@ class HaccpDiaryPage {
 
     searchDataBind() {
         let _this = this;
-        _this.grid.setData([]);
+        _this.grid.itemsSource.sourceCollection = [];
 
         let param = FormUtil.extractForm($('#searchForm'));
         param.hp_id = this.hp_id;
         param.task_code = this.taskCode;
         let fnsuccess = function (result) {
             if (result.success) {
-                let recordsTotal = result.data.length;
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: recordsTotal,
-                    }
-                });
+                _this.grid.itemsSource = result.data;
             }
         };
 
@@ -301,47 +329,6 @@ class HaccpDiaryPage {
 
 $(document).ready(function (e) {
     let page = new HaccpDiaryPage();
-
-
-    $('#srchDt').ax5DatePicker({ direction: 'top' });
-    picker.bind({
-        target: $('[data-ax5picker="multi"]'),
-        direction: "top",
-        content: {
-            width: 206,  //130 270
-            margin: 10,
-            type: 'date',
-            config: {
-                control: {
-                    left: '<i class="fa fa-chevron-left"></i>',
-                    yearTmpl: '%s',
-                    monthTmpl: '%s',
-                    right: '<i class="fa fa-chevron-right"></i>'
-                },
-                lang: {
-                    yearTmpl: "%s년",
-                    months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-                    dayTmpl: "%s"
-                }
-            }
-        }
-
-    });
-    
-    
-    //그리드 컬럼 설정
-    page.popColSetting = new popColSetting();
-    let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid', page.grid);
-
-    if (userinfo.group_code == 'admin') {
-        $('#btnGridSetting').css('visibility', 'visible');
-    }
-
-    $('#btnGridSetting').click(function (e) {
-        let _this = this;
-        let fix_cols = page.grid_config.frozenColumnIndex;
-        page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix': false, 'fix_cols': fix_cols });
-    });
 
     page.searchDataBind();
 
