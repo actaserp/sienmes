@@ -1,100 +1,130 @@
 <html layout:decorate="~{layout_page}">
+<head>
+    <style>
+        .wx210{
+            width: 210px !important;
+        }
+        .wx190{
+            width: 150px !important;
+        }
+
+    </style>
+</head>
 <th:block layout:fragment="content">
-    <div class="content_wrap">
-        <section>
-
-            <div class="title_box ">
-                <div class="left_align">
-                    <h3 data-labelCd="HACCP 관리항목">HACCP 관리항목</h3>
-                </div>
-                <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-                <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>CCP 관리항목</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-
-
-            <div class="table_box search">
-
-                <div class="row">
-                    <div class="col-12 col-lg-3 col-xl-3">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_sm" data-labelCd="항목명">항목명</span>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>HACCP 기준정보</li>
+                <li>CCP 관리항목</li>
+            </ul>
+        </div>
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label>
+                                항목명<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input type="text" class="form-control2" id="txtKeyword" name="keyword" />
                             </div>
-                            <input type="text" class="form-control2" id="txtKeyword" name="keyword" />
-                        </div>
-                    </div>
-                    <div class="col-1">
-                        <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                    </div>
+                        </dd>
+                    </dl>
+
+
+                    <dl>
+                        <dt>&nbsp;</dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
+
                 </div>
-
             </div>
+            <div id="theGrid" style="height: 350px;"></div>
+
         </section>
-        <section>
-            <div class="grid_box">
-                <div class="title_box">
-                    <span class="right_align rpt" data-labelCd="HACCP 항목 목록">HACCP 항목 목록</span>
-                    <button type="button" class="btn-default " id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                    <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
+
+
+
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <h3>상세 정보</h3>
                 </div>
-                <div class="h-530" data-ax5grid="haccp-item-grid"></div>
-            </div>
-        </section>
-        <section>
-
-            <div class="title_box mb-2">
-                <span class="right_align rpt" data-labelCd="상세정보">상세정보</span>
-                <button type="button" class="btn-default" id="btnNew" name="btnNew"><i class="fas fa-plus"></i></button>
-                <button type="button" class="btn-danger" id="btnDel" style="float:none"><i class="fas fa-trash"></i></button>
-                <button type="button" class="btn-default" id="btnSave" style="float:none"><i class="fas fa-save"></i></button>
+                <div class="title_box mb-2">
+                    <button type="button" class="btn-default" id="btnNew" name="btnNew"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn-danger"  id="btnDel" style="float:none; width: 124px; height: 48px;"><i class="fas fa-trash"></i></button>
+                    <button type="button" class="btn-default" id="btnSave" style="float:none"><i class="fas fa-save"></i></button>
+                </div>
             </div>
 
-            <form id="itemForm">
+            <form id="itemForm" autocomplete="off">
                 <input type="hidden" id="id" name="id" />
-                <div class="table_box sub">
-                    <div class="row">
+                <div class="table-wrap" id="detail_box">
+                    <table class="write-table">
+                        <tbody>
+                        <tr>
+                            <th>
+                                <label>
+                                    *항목코드
+                                </label>
+                            </th>
+                            <td>
+                                <input class="wx210" type="text" id="item_code" name="item_code" disabled required />
+                            </td>
 
-                        <div class="col-12 col-md-3 col-lg-3 col-xl-3">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t4" data-labelCd="*항목코드">*항목코드</span>
-                                </div>
-                                <input class="form-control2" type="text" id="item_code" name="item_code" disabled required />
-                            </div>
-                        </div>
+                            <th>
+                                <label>
+                                    항목명
+                                </label>
+                            </th>
+                            <td>
+                                <input class="wx210" type="text" id="item_name" name="item_name" disabled required />
+                            </td>
 
-                        <div class="col-12 col-md-3 col-lg-3 col-xl-3">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t4" data-labelCd="*항목명">*항목명</span>
-                                </div>
-                                <input class="form-control2" type="text" id="item_name" name="item_name" disabled required />
-                            </div>
-                        </div>
+                            <th>
+                                <label>
+                                    결과값 유형
+                                </label>
+                            </th>
+                            <td>
+                                <select class="wx210" type="text" id="ResultType" name="ResultType" disabled></select>
+                            </td>
 
-                        <div class="col-12 col-md-3 col-lg-3" col-xl-3>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t6" data-labelCd="결과값 유형">결과값 유형</span>
-                                </div>
-                                <select class="form-control2" type="text" id="ResultType" name="ResultType" disabled></select>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-3 col-lg-3 col-xl-3">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t4" data-labelCd="단위">단위</span>
-                                </div>
-                                <select class="form-control2" type="Unit_id" id="Unit_id" name="Unit_id" disabled></select>
-                            </div>
-                        </div>
+                            <th>
+                                <label>
+                                    단위
+                                </label>
+                            </th>
+                            <td>
+                                <select class="wx210" type="Unit_id" id="Unit_id" name="Unit_id" disabled></select>
+                            </td>
+                        </tr>
 
-                    </div>
+
+                        </tbody>
+                    </table>
                 </div>
             </form>
         </section>
     </div>
-    </script>
 
 </th:block>
 
@@ -107,47 +137,54 @@
                 this.url = '/api/haccp/haccp_item';
                 this.grid = null;
 
+                this.viewData = new wijmo.collections.CollectionView();
+
+
                 this.init();
+
             }
 
-            init() {
+            init(){
                 let _this = this;
-                let config = {
-                    target: $('[data-ax5grid="haccp-item-grid"]'),
-                    sortable: true,
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: true, // 다중 정렬 여부
-                    header: {
-                        align: 'center',
-                        columnHeight: 30
-                    },
-                    body: {
-                        columnHeight: 25,
-                        onClick: function (e) {
-                            _this.grid.select(this.dindex);
-                            _this.showDetail(e.item.id);
-                        },
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
+                this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
                     columns: [
-                        { key: 'item_code', label: '항목코드', width: 100,  },
-                        { key: 'item_name', label: '항목명', width: 200, },
-                        { key: 'ResultTypeName', label: '결과값 유형', width: 100, align: 'center', },
-                        { key: 'unit_name', label: '단위', width: 100, align: 'center', },
-                        { key: '_created', label: '생성일', width: 150, align: 'center', },
-                    ]
-                };
+                        { binding: 'item_code', header: '항목코드', width: '*',  },
+                        { binding: 'item_name', header: '항목명', width: '*', },
+                        { binding: 'ResultTypeName', header: '결과값 유형', width: '*', align: 'center', },
+                        { binding: 'unit_name', header: '단위', width: '*', align: 'center', },
+                        { binding: '_created', header: '생성일', width: '*', align: 'center', },
 
-                this.grid = new ax5.ui.grid(config);
-                this.grid_config = config;
+                    ],
+                    itemsSource: this.viewData,
+                    formatItem: function (s, e) {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center'; // 헤더 텍스트 가운데 정렬
+                        }
+                    },
+                });
+
+                this.grid.selectionChanged.addHandler((s, e) => {
+
+
+                    let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
+                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
+                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
+
+                        _this.showDetail(selectedRowData.id);
+
+                        console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
+                        console.log('선택된 행 데이터:', selectedRowData);
+
+                    }
+                });
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = 'CCP 관리항목';
+
 
                 this.$btnNew = $('#btnNew');
                 this.$btnDel = $('#btnDel');
@@ -158,7 +195,6 @@
                 let $Unit_id = $('#Unit_id');
                 AjaxUtil.fillSelectOptions($ResultType, 'system_code', 'choose', false, 'haccp_result_type');
                 AjaxUtil.fillSelectOptions($Unit_id, 'unit', 'choose', false);
-
 
                 $('#btnSearch').click(function (ex) {
                     _this.searchDataBind();
@@ -178,7 +214,7 @@
 
                 this.$btnDel.click(function (e) {
 
-                    let items = _this.grid.getList('selected');
+                    let items = _this.grid.selectedItems;
                     if (items.length == 0) {
                         Alert.alert('삭제 오류', '선택된 데이터가 없습니다.');
                         return;
@@ -189,6 +225,7 @@
                         _this.deleteItem(item);
                     });
                 });
+
             }
 
             deleteItem(item) {
@@ -249,16 +286,9 @@
                 let param = { keyword: keyword };
 
                 let result = AjaxUtil.getSyncData(this.url + '/read', param);
-                _this.grid.setData([]);
+                _this.grid.itemsSource = new wijmo.collections.CollectionView([]);
                 if (result.data != null) {
-                    let recordsTotal = result.data.length;
-                    _this.grid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: recordsTotal,
-                        }
-                    });
+                    _this.grid.itemsSource = result.data;
                 }
 
                 this.resetForm();
@@ -268,25 +298,16 @@
                 this.$btnSave.attr('disabled', 'disabled');
 
             }//searchDataBind
+
         }
+
 
         $(document).ready(function (e) {
             let page = new HACCPItemPage();
 
-            //그리드 컬럼 설정
-            page.popColSetting = new popColSetting();
-            let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-            if (userinfo.group_code == 'admin') {
-                $('#btnGridSetting').css('visibility','visible');
-            }
-            $('#btnGridSetting').click(function (e) {
-                let _this = this;
-                let fix_cols = page.grid_config.frozenColumnIndex;
-                page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-            });
-
             page.searchDataBind();
-        });
+        })
     </script>
+
 </th:block>
 </html>
