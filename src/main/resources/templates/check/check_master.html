@@ -1,168 +1,207 @@
 <html layout:decorate="~{layout_page}">
+<head>
+    <style>
+        .wx210{
+            width: 210px !important;
+        }
+        .wx190{
+            width: 150px !important;
+        }
+
+    </style>
+</head>
 <th:block layout:fragment="content">
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>선행요건 점검등록</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
+            </div>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>HACCP 기준정보</li>
+                <li>선행요건 점검등록</li>
+            </ul>
+        </div>
 
-    <div class="content_wrap">
         <section class="section">
-            <div class="title_box">
-                <div class="left_align">
-                    <h3 data-labelCd="점검등록">점검등록</h3>
-                </div>
-                <button type="button" class="btn-default pull-right" id="btnHeaderFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-                <button type="button" class="btn-default pull-right" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress"></i></button>
-            </div>
-            <div class="table_box search">
-                <div class="row">
-                    <div class="col-6 col-md-3 col-lg-2">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="점검명">점검명</span>
-                            </div>
+            <div class="section-top">
+
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label>
+                                점검명<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
                             <input type="text" class="form-control2" id="srch_check_name" name="srch_check_name" />
-                        </div>
-                    </div>
+                        </dd>
+                    </dl>
 
-                    <div class="col-1">
-                        <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                    </div>
+                    <dl>
+                        <dt>&nbsp;</dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
                 </div>
+
             </div>
+            <div id="theGrid" style="height: 450px;"></div>
         </section>
 
-        <section>
-            <div class="grid_box">
-                <div class="title_box">
-                    <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                    <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class=" fast fa-cog"></i>Setting</button>
-                </div>
-                <div class="h-300" data-ax5grid="check-grid"></div>
-            </div>
-        </section>
+        <section class="section">
+            <div class="button-wrap">
+                <ul>
+                    <li style="cursor: default; list-style-image: none;">
+                        <button class="btn" id="btnNew" ><i class="fas fa-plus"></i></button>
+                    </li>
+                    <li style="cursor: default; list-style-image: none;">
+                        <button class="btn y_write_auth" id="btnDelete" disabled><i class="fas fa-trash"></i></button>
+                    </li>
+                    <li style="cursor: default; list-style-image: none;">
+                        <button class="btn y_write_auth" id="btnSave" disabled><i class="fas fa-save"></i></button>
+                    </li>
 
-
-        <section>
-            <div class="title_box mb-2">
-                <button type="button" class="btn-default" id="btnNew" ><i class="fas fa-plus"></i></button>
-                <button type="button" class="btn-danger y_write_auth" id="btnDelete" disabled><i class="fas fa-trash"></i></button>
-                <button type="button" class="btn-default y_write_auth" id="btnSave" disabled><i class="fas fa-save"></i></button>
+                </ul>
             </div>
+            <!--<div class="title_box mb-2" style="margin-top: 0">
+                <button type="button" class="btn" id="btnNew" ><i class="fas fa-plus"></i></button>
+                <button type="button" class="btn y_write_auth" id="btnDelete" disabled><i class="fas fa-trash"></i></button>
+                <button type="button" class="btn y_write_auth" id="btnSave" disabled><i class="fas fa-save"></i></button>
+            </div>-->
             <form id="checkForm">
-                <div class="table_box sub" id="detailBox">
-                    <div class="row">
-                        <input class="form-control2" type="text" id="id" name="id" hidden />
-                        <div class="col-6 col-md-4">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t7" data-labelCd="점검명">*점검명</span>
-                                </div>
-                                <input class="form-control2" type="text" id="check_name" name="check_name" disabled="disabled" required/>
-                            </div>
-                        </div>
+                <input class="form-control2" type="text" id="id" name="id" hidden />
+                <div class="section-top">
+                    <div class="table-wrap" id="detailBox">
 
-                        <div class="col-6 col-md-4">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t7" data-labelCd="점검종류코드">점검종류코드</span>
-                                </div>
-                                <input class="form-control2" type="text" id="check_class_code" name="check_class_code" disabled="disabled" />
-                            </div>
-                        </div>
-
-                        <div class="col-6 col-md-4">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t7" data-labelCd="코드">*코드</span>
-                                </div>
-                                <input class="form-control2" type="text" id="code" name="code" disabled="disabled" required/>
-                            </div>
-                        </div>
-
-                        <div class="col-6 col-md-4">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t7" data-labelCd="담당부서">담당부서</span>
-                                </div>
-                                <input class="form-control2" type="text" id="charger_department" name="charger_department" disabled="disabled" />
-                            </div>
-                        </div>
-
-                        <div class="col-6 col-md-2">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t7" data-labelCd="점검주기">점검주기</span>
-                                </div>
-                                <input class="form-control2" type="text" id="check_cycle" name="check_cycle" disabled="disabled" />
-                            </div>
-                        </div>
-
-                        <div class="col-6 col-md-7">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_t7" data-labelCd="비고">비고</span>
-                                </div>
-                                <input class="form-control2" type="text" id="description" name="description" disabled="disabled" />
-                            </div>
-                        </div>
+                        <table class="write-table">
+                            <caption>작업 지시 테이블</caption>
+                            <tbody>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label>점검명</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" type="text" id="check_name" name="check_name" disabled="disabled" required/>
+                                </td>
+                                <th style="text-align: center">
+                                    <label>점검종류코드</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" type="text" id="check_class_code" name="check_class_code" disabled="disabled" />
+                                </td>
+                                <th style="text-align: center">
+                                    <label>코드</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" type="text" id="code" name="code" disabled="disabled" required/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label>담당부서</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" type="text" id="charger_department" name="charger_department" disabled="disabled" />
+                                </td>
+                                <th style="text-align: center">
+                                    <label>점검주기</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" type="text" id="check_cycle" name="check_cycle" disabled="disabled" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label>비고</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" type="text" id="description" name="description" disabled="disabled" />
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </form>
         </section>
     </div>
+
+
+
 </th:block>
 
 <th:block layout:fragment="scripts">
-    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+
     <script type="text/javascript">
+
         class CheckPage {
+
             constructor() {
-                this.grid = null;
                 this.url = '/api/check/check_master';
+                this.grid = null;
+
+                this.viewData = new wijmo.collections.CollectionView();
+
                 this.init();
 
-
             }
-
 
             init() {
                 let _this = this;
-                let config = {
-                    target: $('[data-ax5grid="check-grid"]'),
-                    sortable: true,
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: true, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 38  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onClick: function (e) {
-                            _this.grid.select(this.dindex);
-                            _this.showDetail(e.item.id);
+                this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    columns: [
+                        //TODO: checking
+                        {binding: 'id', header: '번호', width: 100, align: 'left'},
+                        {binding: 'check_name', header: '점검명', width: '*', align: 'left'},
+                        {binding: 'check_class_code', header: '점검종류코드', width: '*', align: 'left'},
+                        {binding: 'code', header: '코드', width: '*', align: 'left'},
+                        {binding: 'charger_department', header: '담당부서', width: '*', align: 'left'},
+                        {binding: 'check_cycle', header: '점검주기', width: '*', align: 'right'},
+                        {binding: 'description', header: '비고', width: '*', align: 'left'},
+                    ],
+                    itemsSource: this.viewData,
+                    formatItem: function (s, e) {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center'; // 헤더 텍스트 가운데 정렬
+
                         }
                     },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
-                    columns: [
-                        { key: 'id', label: '번호', width: 120, align: 'left' },
-                        { key: 'check_name', label: '점검명', width: 120, align: 'left' },
-                        { key: 'check_class_code', label: '점검종류코드', width: 120, align: 'left' },
-                        { key: 'code', label: '코드', width: 120, align: 'left' },
-                        { key: 'charger_department', label: '담당부서', width: 120, align: 'left' },
-                        { key: 'check_cycle', label: '점검주기', width: 120, align: 'right' },
-                        { key: 'description', label: '비고', width: 200, align: 'left' },
-                    ]
-                };
-                this.grid = new ax5.ui.grid(config);
-                this.grid_config = config;
-            }
+                });
 
+                this.grid.selectionChanged.addHandler((s, e) => {
+
+
+                    let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
+                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
+                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
+
+                        _this.showDetail(selectedRowData.id);
+
+                        console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
+                        console.log('선택된 행 데이터:', selectedRowData);
+
+                    }
+                });
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = '선행요건 점검항목관리';
+            }
 
             setButtonState() {
                 let pk = $('#id').val();
@@ -186,14 +225,9 @@
 
                 let result = AjaxUtil.getSyncData(_this.url + '/read', data);
                 if (result != null) {
-                    let recordsTotal = result.data.length;
-                    _this.grid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: recordsTotal,
-                        }
-                    });
+
+                    _this.viewData.sourceCollection = result.data;
+
                 }
 
                 $('#checkForm')[0].reset();
@@ -207,7 +241,6 @@
 
                 this.setButtonState();
             }
-
 
             showDetail(check_id) {
                 let _this = this;
@@ -237,7 +270,7 @@
                         Alert.alert('', res.message);
                     }
                 }
-                AjaxUtil.postAsyncData(_this.url+'/delete', data, fnSuccess);
+                AjaxUtil.postAsyncData(_this.url + '/delete', data, fnSuccess);
             }
 
             saveCheck() {
@@ -274,18 +307,10 @@
                     });
                 }
             }
-            // 엑셀 다운로드
-            exportExcel() {
-                var targetview = this.grid;
-                targetview.exportExcel('점검등록.xls');
-            }
-
         }
 
-
-
-
         let page = null;
+
 
         $(document).ready(function (e) {
             page = new CheckPage();
@@ -313,8 +338,11 @@
             $('#btnDelete').click(function (e) {
                 Alert.confirm('',
                     '삭제하시겠습니까?',
-                    function () { page.deleteCheck() },
-                    function () { }
+                    function () {
+                        page.deleteCheck()
+                    },
+                    function () {
+                    }
                 );
             });
 
@@ -322,19 +350,21 @@
             $('#btnSave').click(function (e) {
                 Alert.confirm('',
                     '저장하시겠습니까?',
-                    function () { page.saveCheck() },
-                    function () { }
+                    function () {
+                        page.saveCheck()
+                    },
+                    function () {
+                    }
                 );
             });
 
-            // 엑셀 다운로드
-            $('#btnExcel').on('click', function () {
-                page.exportExcel();
-            });
-
             page.searchMainData();
-        });
 
+            let searchVal = document.getElementById('srch_check_name');
+            searchVal.addEventListener('keyup', event => submitTextarea(event, () => page.searchMainData()))
+
+        });
     </script>
+
 </th:block>
 </html>

@@ -454,6 +454,7 @@
             //TODO: checking
             changeGridOrder(g, direction) {
 
+                let _this = this;
                 /*if (g.selectedItems("selected").length == 0) {
                     Alert.alert('', '순서를 변경할 제품을 선택하세요.');
                     return;
@@ -479,32 +480,8 @@
 
                     cv.sourceCollection = [...sourceList];
                     cv.refresh();
+                    _this.procMatGrid.select(selectedRowIndex - 1, 0);
 
-                    /*
-                                        setTimeout(() => {
-                                            g.select(selectedRowIndex - 1, 0);
-                                        }, 10);
-                    */
-
-
-                    // let selected = g.selectedItems("selected");
-                    // $.each(selected, function (index, self_item) {
-                    //     let self_index = self_item.__index;
-                    //     let upper_index = self_index - 1;
-                    //     if (upper_index == - 1) {
-                    //         Alert.alert('', "첫번째 제품이 선택되었습니다.");
-                    //         return;
-                    //     }
-                    //     let upper_item = g.list[upper_index];
-                    //     upper_item.__index = self_index;
-                    //     self_item.__index = upper_index;
-                    //
-                    //     g.updateRow(self_item, upper_index);
-                    //     g.updateRow(upper_item, self_index);
-                    //     g.select(self_item, { __selected__: true });
-                    //     g.select(upper_item, { __selected__: false });
-                    //     g.repaint();
-                    // });
                 } else {
                     //console.log('select', g.selection)
                     let sourceList = cv.sourceCollection;
@@ -518,9 +495,7 @@
 
                     cv.sourceCollection = [...sourceList];
                     cv.refresh();
-
-
-
+                    _this.procMatGrid.select(selectedRowIndex + 1, 0);
                     /* let selected = g.getList("selected");
                      selected.reverse();
                      $.each(selected, function (index, self_item) {
