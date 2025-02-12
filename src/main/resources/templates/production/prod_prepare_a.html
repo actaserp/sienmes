@@ -147,9 +147,7 @@
 </th:block>
 
 <th:block layout:fragment="scripts">
-<!--    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
-<!--    <script type="text/javascript" src="/js/grid.js"></script>-->
-
+    <script type="text/javascript" src="/js/grid.js"></script>
     <script type="text/javascript">
 
 
@@ -172,7 +170,6 @@
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
-                    showMarquee: true,
                     isReadOnly: true,
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
@@ -274,8 +271,6 @@
                 };
                 AjaxUtil.getAsyncData(this.url + '/job_order_list', data, fnsuccess);
 
-                this.matreqGrid.itemsSource = new wijmo.collections.CollectionView([]);
-                this.inputReqGrid.itemsSource = new wijmo.collections.CollectionView([]);
             }
 
             // 해당소요자재
@@ -316,9 +311,9 @@
                                 return `<div class="${item.requ_qty > stock ? 'grid-cell-red' : ''}">${wijmo.format('{0:n1}', stock)}</div>`;
                             }
                         },
-                        { binding: 'process_stock', header: '공정창고 재고', width: 150, align: 'right', isReadOnly: true, hidden: true },
-                        { binding: 'proc_safety_stock', header: '공정안전재고', width: 150, align: 'right', isReadOnly: true, hidden: true },
-                        { binding: 'input_req_qty', header: '투입 요청량', width: 150, align: 'right',  isReadOnly: false, hidden: true }
+                        { binding: 'process_stock', header: '공정창고 재고', width: 150, align: 'right', isReadOnly: true, visible: false },
+                        { binding: 'proc_safety_stock', header: '공정안전재고', width: 150, align: 'right', isReadOnly: true, visible: false },
+                        { binding: 'input_req_qty', header: '투입 요청량', width: 150, align: 'right',  isReadOnly: false, visible: false }
                     ]
                 });
 
@@ -532,7 +527,6 @@
             pagePrepareProduction = new PrepareProduction();
             pagePrepareProduction.jobOrderSearch();
 
-            pagePrepareProduction.popColSetting = new popColSetting();
 
         });
 
