@@ -1,195 +1,181 @@
 <html layout:decorate="~{layout_page}">
+<head>
+    <style>
+        .select2-container--open {
+            z-index: 9001;
+        }
+
+    </style>
+</head>
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section class="section">
-        <div class="title_box">
-            <div class="left_align">
-                <h3 data-labelCd="선행요건 이상발생 내역">선행요건 이상발생 내역</h3>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>선행요건 이상발생 내역</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right" id="btnHeaderFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress"></i></button>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>이상발생 및 조치/결재</li>
+                <li>선행요건 이상발생 내역</li>
+            </ul>
         </div>
-        <div class="table_box search">
-            <div class="row">
-                <div class="col-11 col-md-6 col-lg-5" >
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_sm" data-labelCd="점검일">점검일</span>
-                        </div> 
-                        <div data-ax5picker="multi" id="srchDt">
-                            <div class="input-group-append">
-                                <input class="tac " type="text" id="srchStartDt" name="srchStartDt" />
-                                <span class="input-group-text fs-xl">
-                                    <i class="fas fa-calendar-alt calendar_color" ></i>
-                                </span>
-                                <span class="slow_sign">~</span>
-                                <input class="tac " type="text" id="srchEndDt" name="srchEndDt" />
-                                <span class="input-group-text fs-xl">
-                                    <i class="fas fa-calendar-alt calendar_color"></i>
-                                </span>
-                            </div>
-                        </div>
+        <form id="searchForm" autocomplete="off">
+            <section class="section">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label>
+                                    점검일
+                                </label>
+                            </dt>
+                            <dd>
+                                <ul class="date-box">
+                                    <li>
+                                        <input type="date" id="srchStartDt" name="srchStartDt">
+                                        <label for="srchStartDt" class="hide">시작일</label>
+                                    </li>
+                                    <li>
+                                        <input type="date" id="srchEndDt" name="srchEndDt">
+                                        <label for="srchEndDt" class="hide">종료일</label>
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
+
+
+
+                        <dl>
+                            <dt>
+                                <label>
+                                    일지명<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="text" class="form-control2" id="keyword" name="keyword"/>
+                                </div>
+                            </dd>
+                        </dl>
+
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+
                     </div>
                 </div>
+                <div class="container-fluid">
+                    <div id="theGrid" style="height: 700px;"></div>
 
-                 <div class="col-6 col-md-3 col-lg-3 col-xl-2">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_md" data-labelCd="일지명">일지명</span>
-                        </div>
-                        <input type="text" class="form-control2" id="keyword" name="keyword"/>
-                    </div>
                 </div>
 
-                <div class="col-1">
-                    <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                </div>
-            </div>
-        </div>
-    </section>
+                <!--        <div class="grid_box">-->
 
-    <section>
-                
-        <div class="grid_box">
-            <div class="title_box">
-                 <span class="right_align rpt" data-labelCd="이상발생 내역">이상발생 내역</span>
-                <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class=" fast fa-cog"></i>Setting</button>
-            </div>
-            <div class="h-500" data-ax5grid="devi_action_grid" id="checkResultList"></div>
-        </div>
-    </section>
-</div>
+                <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
+                <!--        </div>-->
+            </section>
+        </form>
+
+    </div>
+
 </th:block>
 
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-<th:block th:replace="/common/approve_box :: approve_box"></th:block>
-<script type="text/javascript" src="/js/grid.js"></script>
-<!--<script type="text/javascript" src="/static/js/grid.js?ver=22080801"></script>-->
-<script type="text/javascript">
-    
-    class DeviActionPage {
-        constructor() {
-            this.grid = null;
-            this.url = '/api/haccp/devi_action_list';
-            this.init();
-        } 
+    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <script type="text/javascript">
+        class DeviActionPage {
+            constructor() {
+                this.grid = null;
+                this.url = '/api/haccp/devi_action_list';
 
-        init() {
-            let _this = this;
+                this.viewData = new wijmo.collections.CollectionView();
+                this.init();
 
-            let devi_action_config = {
-                target: $('[data-ax5grid="devi_action_grid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: false, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                    },
-                    onDataChanged: function (e) {
-                        //_this.saveDeviationResult();
-                    }
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    { key: 'happen_date', label: '점검일', width: 100, align: 'left' },
-                    { key: 'happen_place', label: '일지명', width: 250, align: 'left' },
-                    { key: 'abnormal_detail', label: '이상발생내역', width: 600, align: 'left' },
-                    { key: 'action_detail', label: '조치내역 및 결과', width: 200, align: 'left' },
-                    { key: 'creater_name', label: '조치자', width: 80, align: 'left' },
-                    { key: 'action_name', label: '작성자', width: 80, align: 'left' },
-                ]
-            };
-            this.grid = new ax5.ui.grid(devi_action_config);
-            this.grid_config = devi_action_config;
-        }
-
-        searchMainData() {
-            let _this = this;
-            
-            let param = {
-                'keyword':  $('#keyword').val(),
-                'date_from': $('#srchStartDt').val(),
-                'date_to': $('#srchEndDt').val()
-            };
-
-            let result = AjaxUtil.getSyncData(_this.url + '/read', param);
-            
-            if (result != null) {
-                let count = result.data.length;
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: count,
-                    }
-                });
-
-                //GridUtil.adjustHeight(_this.grid_config, count);
 
             }
 
-        }
-    }
-        
-    let page = null;
-    let popup = null;
-    let modalContainer = null;
-    var picker = new ax5.ui.picker();
+            init() {
+                let _this = this;
 
-    $(document).ready(function (e) {
-        page = new DeviActionPage();
+                this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    columns: [
 
-        $('#srchDt').ax5DatePicker({ direction: 'top' });
-        picker.bind({
-            target: $('[data-ax5picker="multi"]'),
-            direction: "top",
-            content: {
-                width: 206,  //130 270
-                margin: 10,
-                type: 'date',
-                config: {
-                    control: {
-                        left: '<i class="fa fa-chevron-left"></i>',
-                        yearTmpl: '%s',
-                        monthTmpl: '%s',
-                        right: '<i class="fa fa-chevron-right"></i>'
+                        {binding: 'happen_date', header: '점검일', width: '*', align: 'left' },
+                        {binding: 'happen_place', header: '일지명', width: '*', align: 'left' },
+                        {binding: 'abnormal_detail', header: '이상발생내역', width: '*', align: 'left' },
+                        {binding: 'action_detail', header: '조치내역 및 결과', width: '*', align: 'left' },
+                        {binding: 'creater_name', header: '조치자', width: '*', align: 'left' },
+                        {binding: 'action_name', header: '작성자', width: '*', align: 'left' },
+
+                    ],
+                    itemsSource: this.viewData,
+                    formatItem: function (s, e) {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center'; // 헤더 텍스트 가운데 정렬
+
+                        }
                     },
-                    lang: {
-                        yearTmpl: "%s년",
-                        months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-                        dayTmpl: "%s"
-                    }
+                });
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = '선행요건이상발생내역';
+
+            }
+
+            searchMainData() {
+                let _this = this;
+
+                let param = {
+                    'keyword':  $('#keyword').val(),
+                    'date_from': $('#srchStartDt').val(),
+                    'date_to': $('#srchEndDt').val()
+                };
+
+
+                let result = AjaxUtil.getSyncData(_this.url + '/read', param);
+                if (result.data != null) {
+                    _this.viewData.sourceCollection = result.data;
                 }
             }
-           
-        });
-                
-        $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-15));
-        $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
-        $('#srchDt').ax5DatePicker({ direction: 'top' });
+
+        }
 
 
-        $('#btnSearch').click(function (e) {
+        let page = null;
+        let popup = null;
+        let modalContainer = null;
+
+        $(document.body).ready(function (e) {
+            page = new DeviActionPage();
+
+
+            $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-15));
+            $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
+
+            $('#btnSearch').click(function (e) {
+                page.searchMainData();
+            });
+
             page.searchMainData();
-        });
-        
-        page.searchMainData();
-    });
 
-</script>
+        });
+
+    </script>
 </th:block>
 </html>

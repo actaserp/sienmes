@@ -1,287 +1,278 @@
 <html layout:decorate="~{layout_page}">
+<head>
+    <style>
+        .select2-container--open {
+            z-index: 9001;
+        }
 
+    </style>
+</head>
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section class="section">
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="나의 결재 현황">나의 결재 현황</h3>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>나의 결재 현황</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderRefresh" title="새로고침"><i class="fas fa-undo-alt"></i></button>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>이상발생 및 조치/결재</li>
+                <li>결재할 내문서</li>
+            </ul>
         </div>
 
-        <div class="table_box search">
-            <div class="row">
-                <div class="col-8 col-lg-4 col-xl-3">
-                    <div class="input-group" data-ax5picker="basic" id="srchDt">
-                        <div class="input-group-append">
-                            <span class="input-group-text fit_box_sm" data-labelCd="일자">일자</span>
-                            <input class="tac" type="text" id="date_from" name="date_from" />
-                            <span class="input-group-text fs-xl">
-                                <i class="fas fa-calendar-alt calendar_color"></i>
-                            </span>
-                            <span class="slow_sign">~</span>
-                            <input class="tac" type="text" id="date_to" name="date_to" />
-                            <span class="input-group-text fs-xl">
-                                <i class="fas fa-calendar-alt calendar_color"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label>
+                                일자
+                            </label>
+                        </dt>
+                        <dd>
+                            <ul class="date-box">
+                                <li>
+                                    <input type="date" id="date_from" name="date_from">
+                                    <label for="date_from" class="hide">시작일</label>
+                                </li>
+                                <li>
+                                    <input type="date" id="date_to" name="date_to">
+                                    <label for="date_to" class="hide">종료일</label>
+                                </li>
+                            </ul>
+                        </dd>
+                    </dl>
 
-                <div class="col-4 col-lg-3 col-xl-3">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_sm" data-labelCd="업무명">업무명</span>
-                        </div>
-                        <select class="form-control2" id="cboTaskName" name="cboTaskName"></select>
-                    </div>
-                </div>
+                    <dl>
+                        <dt>
+                            <label>
+                                업무명
+                            </label>
+                        </dt>
+                        <dd>
+                            <ul class="date-box">
+                                <li>
+                                    <select class="form-control2" id="cboTaskName" name="cboTaskName"></select>
+                                </li>
+                            </ul>
+                        </dd>
+                    </dl>
 
-                <div class="col-4 col-lg-3 col-xl-2">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_sm" data-labelCd="상태">상태</span>
-                        </div>
-                        <select class="form-control2" id="cboState" name="cboState">
-                            <option value="do_list">결재할문서</option>
-                            <option value="appr_list">승인(반려)한문서</option>
-                            <option value="req_list">상신한문서</option>
-                        </select>
-                    </div>
-                </div>
+                    <dl>
+                        <dt>
+                            <label>
+                                상태<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select class="form-control2" id="cboState" name="cboState">
+                                    <option value="do_list">결재할문서</option>
+                                    <option value="appr_list">승인(반려)한문서</option>
+                                    <option value="req_list">상신한문서</option>
+                                </select>
+                            </div>
+                        </dd>
+                    </dl>
 
+                    <dl>
+                        <dt>&nbsp;</dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
 
-                <div class="col-1">
-                    <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
                 </div>
             </div>
-        </div>
+            <div class="container-fluid">
+                <div id="theGrid" style="height: 700px;"></div>
 
-    </section>
-
-    <section class="section">
-        <div class="grid_box">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="결재현황">결재현황</span>
             </div>
-            <div class="h-630" data-ax5grid="document_grid"></div>
-        </div>
-    </section>
-</div>
+
+            <!--        <div class="grid_box">-->
+
+            <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
+            <!--        </div>-->
+        </section>
+
+
+    </div>
+
 </th:block>
 
-
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-<th:block th:replace="/common/approve_box :: approve_box"></th:block>
-<script type="text/javascript" src="/js/grid.js"></script>
-<!--<script type="text/javascript" src="/static/js/grid.js?ver=22080801"></script>-->
-<script type="text/javascript">
-    
-    class MyApprove {
-        constructor() {
-            this.grid = null;
+    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <th:block th:replace="/common/approve_box :: approve_box"></th:block>
+    <script type="text/javascript">
+        class MyApprove {
+            constructor() {
+                this.grid = null;
+                this.baseUrl = '/api/common/appr_result';
 
-            this.baseUrl = '/api/common/appr_result';
-            this.init();
-        }
-        init() {
-            let _this = this;
-            let config = {
-                target: $('[data-ax5grid="document_grid"]'),
-                sortable: true,
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 25,  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 33, // body의 기본 높이
-                    onClick: function (e) {
-                        _this.grid.select(this.dindex);
-                        _this.detail(this);
-                    },
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    {
-                        key: 'BtnSearchState', label: '조회', width: 80, align: 'center',
-                        formatter: function () {
-                            return '<button class="btn-default" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">조회</button>';
+                this.viewData = new wijmo.collections.CollectionView();
+                this.init();
+
+
+            }
+
+            init() {
+                let _this = this;
+
+                this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    columns: [
+
+
+
+                        { binding: 'BtnSearchState', header: '조회', width: 80, align: 'center' },
+                        { binding: 'BtnCollectYN', header: '회수', width: 80, align: 'center' },
+                        { binding: 'task_name', header: '업무명', width: '*', align: 'left' },
+                        { binding: 'Title', header: '결재명', width: '*', align: 'left' },
+                        { binding: 'StateName', header: '결재상태', width: 100, align: 'center' },
+                        { binding: 'LineName', header: '결재현황', width: '*', minWidth: 200, align: 'left' },
+                        { binding: 'ReqDate', header: '상신일', width: 200, align: 'center' },
+                    ],
+                    itemsSource: this.viewData,
+                    formatItem: function (s, e) {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center'; // 헤더 텍스트 가운데 정렬
+
                         }
-                    },
-                    {
-                        key: 'BtnCollectYN', label: '회수', width: 80, align: 'center',
-                        formatter: function () {
-                            let html = ''
-                            if (this.item.CollectYN == 'Y') {
-                                html = '<button class="btn-danger" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">회수</button>';
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            const col = s.columns[e.col];
+                            const item = e.panel.rows[e.row].dataItem;
+
+                            // 결재현황 (LineName) 처리
+                            if (col.binding === 'LineName') {
+                                e.cell.innerHTML = CommonUtil.convertApprLineNameHtml(item.LineName, item.LineNameState);
                             }
-                            return html;
-                        }
-                    },
-                    { key: 'task_name', label: '업무명', width: 250, align: 'left' },
-                    { key: 'Title', label: '결재명', width: 300, align: 'left' },
-                    { key: 'StateName', label: '결재상태', width: 100, align: 'center' },
-                    {
-                        key: 'LineName', label: '결재현황', width: 550, align: 'left',
-                        formatter: function () {
-                            return CommonUtil.convertApprLineNameHtml(this.item.LineName, this.item.LineNameState);
-                        }
-                    },
-                    { key: 'ReqDate', label: '상신일', width: 160, align: 'center' },
-                ]
-            };
-            this.grid = new ax5.ui.grid(config);
-            this.grid_config = config;
-        }
 
-        // 일지 상세
-        detail(data) {
-            let _this = this;
-            if (data.column.key == 'BtnSearchState') {
-				
+                            if (col.binding === 'BtnSearchState') {
+
+                                e.cell.innerHTML = ''; // 기존 셀 콘텐츠 제거
+                                const button = document.createElement('button');
+                                button.className = 'btn-default';
+                                button.style.cssText = 'width: 100%; height: 25px;';
+                                button.textContent = '조회';
+                                button.addEventListener('click', () => {
+
+                                    _this.detail({item}, 'search');
+
+                                });
+                                e.cell.appendChild(button);
+
+                            }
+                        }
+                    },
+                });
+
+                /*this.grid.selectionChanged.addHandler((s, e) => {
+
+
+                    let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
+                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
+                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
+
+                        /!*_this.detail(selectedRowData.id);*!/
+
+                        console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
+                        console.log('선택된 행 데이터:', selectedRowData);
+
+                    }
+                });*/
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = '결재문서';
+
+
+            }
+
+            detail(data, flag){
+                let _this = this;
+                console.log(JSON.stringify(data, null, 2)); // JSON 형태로 보기
+                console.dir(data, { depth: null }); // 모든 속성을 펼쳐보기
+
+
+
+                // console.log('data', data.item);
+                // console.log('data', data);
+                // console.log('data2', [data]);
+                //
+
                 let guiUrl = data.item.OriginGui;
                 let guiParam = JSON.parse(data.item.OriginGuiParam);
                 let param = '?appr_view=wm_common_my_approve';
                 for (let key in guiParam) {
                     param += '&' + key + '=' + guiParam[key];
                 }
-                //CCP가열(굽기일지)
-                /*if(data.item.HaccpProcess_id != null){
-					let hp_id = data.item.HaccpProcess_id;
-					location.href = guiUrl + param + '&view_mode=true' + _this.createSearchCond('&')+'&hp_id='+hp_id;
-				}else if(data.item.Text1 != null){ // 개인위생일지
-					let diary_type = data.item.HaccpProcess_id;
-					location.href = guiUrl + param + '&view_mode=true' + _this.createSearchCond('&')+'&diary_type='+diary_type;
-				}else{
-					location.href = guiUrl + param + '&view_mode=true' + _this.createSearchCond('&');
-				}*/
-                
+
+                console.log('url2', guiUrl + param + '&view_mode=true' + _this.createSearchCond('&'));
+
                 location.href = guiUrl + param + '&view_mode=true' + _this.createSearchCond('&');
-                
-               //location.href = guiUrl + param + '&view_mode=true' + _this.createSearchCond('&');
-               
-                
-                
-              // window.open(guiUrl + param + '&view_mode=true' + _this.createSearchCond('&'));
+
+                //TODO: 이거 결재 회수도 있는데 동작원리를 모르겠음.
             }
-            else if (data.column.key == 'BtnCollectYN' && data.item.CollectYN == 'Y') {
-                Alert.confirm('', '결재 회수하시겠습니까?', function () {
-                    // 삭제 서비스 호출                    
-                    let param = {
-                        id: data.item.id,
-                    }
-                    let fnSuccess = function (resp) {
-                        if (resp.success) {
-                            Notify.success('결재 회수하였습니다.');
-                            _this.searchMainData();
-                        } else {
-                            Alert.alert('', resp.message);
-                        }
-                    };
-                    AjaxUtil.postAsyncData(_this.baseUrl + '/appr_collect', param, fnSuccess);
-                });
+
+            // 검색조건만들기
+            createSearchCond(t) {
+                return t + 'date_from=' + $('#date_from').val() + '&date_to' + $('#date_to').val() + '&cboState' + $('#cboState').val() + '&cboTaskName' + $('#cboTaskName').val();
             }
-        }
 
-        // 검색조건만들기
-        createSearchCond(t) {
-            return t + 'date_from=' + $('#date_from').val() + '&date_to' + $('#date_to').val() + '&cboState' + $('#cboState').val() + '&cboTaskName' + $('#cboTaskName').val();
-        }
+            searchMainData() {
+                let _this = this;
 
-        // 검색조건설정
-        setSearchCond() {
-            if (gparam && gparam.searchcond && gparam.searchcond != 'undefined') {
-                let arr = gparam.searchcond.split('|');
-                $('#date_from').val(arr[0]);
-                $('#date_to').val(arr[1]);
-                $('#cboState').val(arr[2]);
-                $('#cboTaskName').val(arr[3]);
-            }
-        }
+                let param = {
+                    'from_date': $('#date_from').val(),
+                    'to_date': $('#date_to').val(),
+                    'tm_id': $('#cboTaskName').val(),
+                    'state': $('#cboState').val(),
+                }
 
-        // 일지 조회
-        searchMainData() {
-            let _this = this;
-            let param = {
-                'from_date': $('#date_from').val(),
-                'to_date': $('#date_to').val(),
-                'tm_id': $('#cboTaskName').val(),
-                'state': $('#cboState').val(),
-            }
-            
-            let result = AjaxUtil.getSyncData(_this.baseUrl+'/my_approve_list', param);
-            
-            
-            if (result != null) {
-                _this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: result.data.length,
-                    }
-                });
-            }
-        }
-    }
 
-    $(document).ready(function (e) {
-        page = new MyApprove();
+                let result = AjaxUtil.getSyncData(_this.baseUrl+'/my_approve_list', param);
 
-        //AjaxUtil.fillSelectOptions($('#cboTaskName'), 'task_master', 'choose', '');
-        
-        AjaxUtil.fillSelectOptions($('#cboTaskName'), 'task_master', 'choose', '');
-
-        $('#srchDt').ax5DatePicker({ direction: 'top' });
-        picker.bind({
-            target: $('[data-ax5picker="multi"]'),
-            direction: "top",
-            content: {
-                width: 206,  //130 270
-                margin: 10,
-                type: 'date',
-                config: {
-                    control: {
-                        left: '<i class="fa fa-chevron-left"></i>',
-                        yearTmpl: '%s',
-                        monthTmpl: '%s',
-                        right: '<i class="fa fa-chevron-right"></i>'
-                    },
-                    lang: {
-                        yearTmpl: "%s년",
-                        months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-                        dayTmpl: "%s"
-                    }
+                if (result.data != null) {
+                    _this.viewData.sourceCollection = result.data;
                 }
             }
 
-        });
-
-        $('#date_from').val(CommonUtil.getYYYYMMDD(-30));
-        $('#date_to').val(CommonUtil.getYYYYMMDD());
+        }
 
 
-        $('#btnSearch').click(function (e) {
+        let page = null;
+
+
+        $(document.body).ready(function (e) {
+            page = new MyApprove();
+
+
+            AjaxUtil.fillSelectOptions($('#cboTaskName'), 'task_master', 'choose', '');
+
+            $('#date_from').val(CommonUtil.getYYYYMMDD(-30));
+            $('#date_to').val(CommonUtil.getYYYYMMDD());
+
+
+            $('#btnSearch').click(function (e) {
+                page.searchMainData();
+            });
+
+            // page.setSearchCond();
             page.searchMainData();
+
         });
 
-       // page.setSearchCond();
-       page.searchMainData();
-    });
-
-</script>
+    </script>
 </th:block>
 </html>
