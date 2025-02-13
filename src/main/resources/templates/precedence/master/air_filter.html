@@ -22,7 +22,7 @@
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
                 <li>HACCP 기준정보</li>
-                <li>조도 관리 기준</li>
+                <li>공조필터</li>
             </ul>
         </div>
 
@@ -82,7 +82,7 @@
                         <button class="btn" id="btnNew" ><i class="fas fa-plus"></i></button>
                     </li>
                     <li style="cursor: default; list-style-image: none;">
-                        <button class="btn y_write_auth" id="btnDelete" disabled><i class="fas fa-trash"></i></button>
+                        <button class="btn y_write_auth" id="btnDel" disabled><i class="fas fa-trash"></i></button>
                     </li>
                     <li style="cursor: default; list-style-image: none;">
                         <button class="btn y_write_auth" id="btnSave" disabled><i class="fas fa-save"></i></button>
@@ -110,29 +110,52 @@
                             <tbody>
                             <tr>
                                 <th style="text-align: center">
-                                    <label>구분</label>
+                                    <label>*용도</label>
                                 </th>
                                 <td>
-                                    <select class="form-control2" id="Type" name="Type" disabled="disabled"  ></select>
+                                    <input class="form-control2 tal" type="text" id="Name" name="Name" disabled="disabled" required>
 
                                 </td>
 
                                 <th style="text-align: center">
-                                    <label>*조도기준(lux)</label>
+                                    <label>코드</label>
                                 </th>
                                 <td>
-                                    <input class="form-control2 tar" type="number" id="Number1" name="Number1" disabled="disabled" required>
+                                    <input class="form-control2 tal" type="text" id="Code" name="Code" disabled="disabled" required>
+                                </td>
+
+                                <th style="text-align: center">
+                                    <label>종류</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" id="Type2" name="Type2" disabled="disabled"  />
                                 </td>
                             </tr>
 
                             <tr>
                                 <th style="text-align: center">
-                                    <label>비고</label>
+                                    <label>필터종류</label>
+                                </th>
+                                <td>
+                                    <select class="form-control2" id="Type" name="Type" disabled="disabled"  ></select>
+                                </td>
+
+                                <th style="text-align: center">
+                                    <label>주기</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" id="Char2" name="Char2" disabled="disabled"  />
+                                </td>
+
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label>설치장소</label>
                                 </th>
                                 <td colspan="8">
                                     <textarea class="form-control2" id="Description" name="Description" disabled="disabled"></textarea>
                                 </td>
-
                             </tr>
 
                             <tr>
@@ -166,16 +189,16 @@
                 this.viewData = new wijmo.collections.CollectionView();
 
                 this.baseUrl = '/api/system/master_t';
-                this.master_class = 'illum_zone_standard';
+                this.master_class = 'air_filter';
 
-                this.type_class_code = 'illum_zone_class';
+                this.type_class_code = 'air_filter_class';
                 this.type_class_table = 'user_code';
 
                 this.init();
 
             }
 
-            init(){
+            init() {
                 let _this = this;
 
                 this.grid = new wijmo.grid.FlexGrid('#theGrid', {
@@ -186,11 +209,13 @@
                     isReadOnly: true,
                     columns: [
 
-                        { binding: 'id', header: '번호', width: '*', align: 'left', visible: false  },
-                        { binding: 'name', header: '이름', width: '*', align: 'left' },
-                        { binding: 'code_type_name', header: '구분', width: '*', align: 'left' },
-                        { binding: 'number1', header: '조도기준(lux)', width: '*', align: 'right' },
-                        { binding: 'description', header: '비고', width: '*', align: 'left' },
+                        { binding: 'id', header: '번호', width: '*', align: 'left' },
+                        { binding: 'code', header: '코드', width: '*', align: 'left' },
+                        { binding: 'name', header: '용도', width: '*', align: 'left' },
+                        { binding: 'description', header: '설치장소', width: '*', align: 'left' },
+                        { binding: 'code_type_name2', header: '종류', width: '*', align: 'left' },
+                        { binding: 'code_type_name', header: '필터종류', width: '*', align: 'left' },
+                        { binding: 'char2', header: '주기', width: '*', align: 'center' },
                         { binding: 'start_date', header: '적용시작일', width: '*', align: 'center' },
                         { binding: 'end_date', header: '적용종료일', width: '*', align: 'center' },
 
@@ -226,7 +251,6 @@
             // 버튼 활성화 설정
             setButtonState() {
                 let pk = $('#id').val();
-                console.log('id', pk);
                 $('#btnNew').prop('disabled', false);
                 $('#btnSave').prop('disabled', false);
                 if (pk) {
@@ -279,9 +303,9 @@
             showDetail(id) {
                 let param = { 'id': id, 'action': 'detail' };
                 let url = this.baseUrl;
-                let result = AjaxUtil.getSyncData(url + '/detail', param);
+                let result = AjaxUtil.getSyncData(url + "/detail", param);
 
-                if (result.data != null) {
+                if (result != null) {
                     FormUtil.BindDataForm(result.data, $('#detailForm'));
                 }
 
@@ -298,7 +322,7 @@
                 //let data = $('#detailForm').serialize();
                 let data = FormUtil.extractForm($('#detailForm'));
                 data['master_class'] = _this.master_class;
-                data['Name'] = $('#Type option:selected').text();
+
                 if (bSaveAsNew)
                     data.id = '';
 
@@ -331,7 +355,7 @@
                 }
             }
 
-            //// 정보 삭제
+            // 정보 삭제
             deleteData() {
                 let _this = this;
                 let url = this.baseUrl + '/delete';
@@ -341,7 +365,7 @@
                     if (res.success) {
                         Notify.success('삭제되었습니다');
                         _this.searchMainData();
-                        _this.clearInfo()
+                        page.clearInfo();
                     } else {
                         Alert.alert('', res.message);
                     }
@@ -352,7 +376,7 @@
 
             changeGridOrder(g, direction) {
                 let _this = this;
-                let cv =  g.collectionView;
+                let cv = g.collectionView;
                 let selectedRowIndex = g.selection.row;
 
                 if (selectedRowIndex < 0) {
@@ -363,7 +387,7 @@
                 if (direction === "U") {
 
 
-                    if(selectedRowIndex === 0) return;
+                    if (selectedRowIndex === 0) return;
 
                     let sourceList = cv.sourceCollection; // 데이터 리스트 가져오기
 
@@ -380,10 +404,10 @@
                     //console.log('select', g.selection)
                     let sourceList = cv.sourceCollection;
 
-                    if(selectedRowIndex >= sourceList.length - 1) return;
+                    if (selectedRowIndex >= sourceList.length - 1) return;
 
 
-                    let temp  = sourceList[selectedRowIndex + 1];
+                    let temp = sourceList[selectedRowIndex + 1];
                     sourceList[selectedRowIndex + 1] = sourceList[selectedRowIndex];
                     sourceList[selectedRowIndex] = temp;
 
@@ -398,6 +422,7 @@
             }
 
         }
+
         let page = null;
 
         $(document).ready(function (e) {
@@ -443,15 +468,21 @@
             $('#btnSave').click(function (e) {
                 Alert.confirm('',
                     "저장하시겠습니까?",
-                    function () { page.saveInfo(false) },
-                    function () { }
+                    function () {
+                        page.saveInfo(false)
+                    },
+                    function () {
+                    }
                 );
             });
             $('#btnSaveAsNew').click(function (e) {
                 Alert.confirm('',
                     '새 항목으로 저장하시겠습니까?',
-                    function () { page.saveInfo(true) },
-                    function () { }
+                    function () {
+                        page.saveInfo(true)
+                    },
+                    function () {
+                    }
                 )
             });
 
@@ -459,8 +490,11 @@
             $('#btnDel').click(function (e) {
                 Alert.confirm('',
                     "삭제하시겠습니까?",
-                    function () { page.deleteData() },
-                    function () { }
+                    function () {
+                        page.deleteData()
+                    },
+                    function () {
+                    }
                 );
             });
 
