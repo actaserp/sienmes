@@ -55,7 +55,11 @@ class WijmoFlexGrid {
         }
     }
 
-
+    //근데 이거 순수한 리스트만 얻으려면
+    /**
+     * _this.grid.collectionView.sourceCollection.map(item => ({ ...item }));
+     *
+     * **/
     getGridList(){
 
         return this.gridEle.collectionView.items;

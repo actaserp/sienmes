@@ -1,648 +1,562 @@
 <html layout:decorate="~{layout_page}">
 <head>
-<style>
-    td, th {
-        font-size: 13px;
-        vertical-align: middle !important;
-    }
-    .filelabel {
-        /*margin-right: 5px;*/
-        font-size: 11px;
-        vertical-align: middle;
-        line-height: 2.2em;
-        cursor: pointer;
-    }
-    .filedel {
-        vertical-align: middle;
-        padding-left: 8px;
-        cursor: pointer;
-    }
-</style>
+    <style>
+        td, th {
+            font-size: 13px;
+            vertical-align: middle !important;
+        }
+        .filelabel {
+            /*margin-right: 5px;*/
+            font-size: 11px;
+            vertical-align: middle;
+            line-height: 2.2em;
+            cursor: pointer;
+        }
+        .filedel {
+            vertical-align: middle;
+            padding-left: 8px;
+            cursor: pointer;
+        }
+    </style>
+
 </head>
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <input type="hidden" id="bhId" th:value="${bh_id}" />
-    <input type="hidden" id="data_date" th:value="${data_date}" />
-    <input type="hidden" id="data_year" th:value="${data_year}" />
-    <input type="hidden" id="search_cond" th:value="${searchcond}" />
-    <input type="hidden" id="viewMode" th:value="${view_mode}" />
-    <section class="section">
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="연간 교육훈련 계획서">연간 교육훈련 계획서</h3>
+    <div class="layout-contents">
+        <input type="hidden" id="bhId" th:value="${bh_id}" />
+        <input type="hidden" id="data_date" th:value="${data_date}" />
+        <input type="hidden" id="data_year" th:value="${data_year}" />
+        <input type="hidden" id="search_cond" th:value="${searchcond}" />
+        <input type="hidden" id="viewMode" th:value="${view_mode}" />
+
+
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>연간 교육훈련 계획서</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>HACCP 관리</li>
+                <li>연간 교육훈련 계획서</li>
+            </ul>
         </div>
 
-        <div class="table_box search">
-            <div class="row">
-                <div class="col-6 col-lg-6 col-xl-6">
-                    <div class="row">
-                        <div class="col-12 col-lg-12 col-xl-12">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="일지명">일지명</span>
-                                </div>
+        <section class="section">
+            <div class="section-card-wrap" style="margin-bottom: 0;">
+                <div class="col-5">
+                    <table class="write-table">
+                        <tbody>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="title">일지명</label>
+                            </th>
+                            <td>
                                 <input class="form-control2 tac" type="text" id="title" name="title" />
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-6 col-xl-6">
-                            <div class="input-group" data-ax5picker="multi" id="pickerDate">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="점검일">점검일</span>
-                                </div>
-                                <input class="form-control2 tac" type="text" id="dataDate" name="dataDate"/>
-                                <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color"></i></span>
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-6 col-xl-6">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="작성자">작성자</span>
-                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="check_date">점검일</label>
+                            </th>
+                            <td>
+                                <input class="form-control2 tac" type="date" id="dataDate" name="dataDate">
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="firstName">작성자</label>
+                            </th>
+                            <td>
                                 <input class="form-control2 tac" type="text" id="firstName" name="firstName" disabled />
-                            </div>
-                        </div>
-                    </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="col-6 col-lg-6 col-xl-6">
+                <div class="col-6">
                     <div id="approveBox"></div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="section">
-        <div class="grid_box" id="prodListGrid">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="교육계획">교육계획</span>
-                <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnDiaryPrint">일지출력</button>
-                <button type="button" class="btn-default" id="btnReqAppr">결재상신</button>
-                <button type="button" class="btn-default" id="btnAppr" style="display:none;">승인</button>
-                <button type="button" class="btn-cancel" id="btnReject" style="display:none;">반려</button>
-                <button type="button" class="btn-default" id="btnSave">저장</button>
-                <button type="button" class="btn-cancel" id="btnDelete">삭제</button>
-                <button type="button" class="btn-default" id="btnList">목록</button>
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <h3>교육계획</h3>
+                </div>
+                <div class="button-wrap">
+                    <button type="button" class="btn" id="btnReqAppr">결재상신</button>
+                    <button type="button" class="btn" id="btnAppr" style="display:none;">승인</button>
+                    <button type="button" class="btn" id="btnReject" style="display:none;">반려</button>
+                    <button type="button" class="btn" id="btnSave">저장</button>
+                    <button type="button" class="btn" id="btnDelete">삭제</button>
+                    <button type="button" class="btn" id="btnList">목록</button>
+                </div>
+
             </div>
-            <div class="grid_box" id="complainList">
-            	<div class="title_box">
-            		<div class="row">
-		            	<div class="col-4">
-	                        <div class="input-group">
-	                            <div class="input-group-prepend">
-	                                <span class="input-group-text fit_box_t4" data-labelCd="계획년도">계획년도</span>
-	                            </div>
-	                            <select class="form-control2 tac" type="text" id="cboDataYear" name="cboDataYear"></select>
-	                        </div>
-	                    </div>
-	                    <div class="col-3" id="grid_control_button_group">
-				            <button type="button" class="btn-default" id="btnUp" title="순서 조정-위로"><i class="fas fa-arrow-up"></i></button>
-				            <button type="button" class="btn-default" id="btnDown" title="순서 조정-아래로"><i class="fas fa-arrow-down"></i></button>
-            				<button type="button" class="btn-default" id="btnNew"><i class="fas fa-plus"></i>행추가</button>
-		                	<button type="button" class="btn-cancel" id="btnDel"><i class="fas fa-trash"></i>행삭제</button>
-            			</div>
-            		</div>
-	            </div>
-                <div class="h-650" data-ax5grid="result_grid" ></div>
+            <div>
+                <div>
+                    <dl>
+                        <dt>
+                            <label>
+                                계획년도
+                            </label>
+                        </dt>
+                        <dd>
+                            <select class="form-control2 tac" type="text" id="cboDataYear" name="cboDataYear"></select>
+                            <button type="button" class="btn" id="popBtnExcel" style="display:none">프린트</button>
+                            <button type="button" class="btn" id="btnNew" name="btnNew" ><i class="fas fa-plus"></i></button>
+                            <button type="button" class="btn" id="btnDel" name="btnDel" ><i class="fas fa-trash"></i></button>
+                            <button type="button" class="btn" id="btnUp" title="순서 조정-위로"><i class="fas fa-arrow-up"></i></button>
+                            <button type="button" class="btn" id="btnDown" title="순서 조정-아래로"><i class="fas fa-arrow-down"></i></button>
+
+                        </dd>
+                    </dl>
+
+                </div>
+                <div class="container-fluid">
+                    <div id="result_grid" style="height: 700px;"></div>
+                </div>
             </div>
-        </div>
-    </section>
-</div>
+
+        </section>
+
+    </div>
 
 </th:block>
 
 <th:block layout:fragment="scripts">
-<th:block th:replace="/common/approve_box :: approve_box"></th:block>
-<script src="/js/grid.js?v=1000"></script>
-<script type="text/javascript">
-    class CheckResultDiaryPage {
-        constructor() {
-            this.grid = null;
-            this.approveBoxUtil = null;
-            this.resultGrid = null;
-            this.checkMasterName = '연간교육훈련계획서'
-            this.baseUrl = '/api/haccp/edu_year_plan';
-            this.init();
-        }
+    <th:block th:replace="/common/approve_box :: approve_box"></th:block>
+    <script src="/js/grid.js?v=1000"></script>
+    <script type="text/javascript">
+        class CheckResultDiaryPage {
+            constructor() {
+                this.grid = null;
+                this.approveBoxUtil = null;
 
-        init() {
-            let _this = this;
-            
-			this.gparam = {
-				bh_id : $('#bhId').val(),
-				data_date : $('#data_date').val(),
-				data_year : $('#data_year').val(),
-				search_cond: $('#search_cond').val(),
-				view_mode: $('#viewMode').val(),
-			};
-			
-            let resultConfig = {
-                target: $('[data-ax5grid="result_grid"]'),
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: true, // 열의 번호 보이기 여부
-                showRowSelector: true,  // checkbox(선택) 보이기 여부
-                multipleSelect: true, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: false,
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-						if (!$('#viewMode').val()){
-                        	_this.resultGrid.select(this.dindex);
-                    	}
-                    }
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-               columns: [
-                    { key: 'edu_title', label: '교육명', width: 100, align: 'left', 
-                    	editor: {
-							type: 'text',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},                    
-                    { key: 'edu_target', label: '교육대상', width: 100, align: 'left', 
-                    	editor: {
-							type: 'text',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},                         
-                    { key: 'edu_content', label: '교육내용', width: 100, align: 'left', 
-                    	editor: {
-							type: 'text',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},                 
-                    { key: 'plan_1', label: '1월', width: 60, align: 'center', 
-                    	editor: {
-							type: 'checkbox',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},    
-                    { key: 'plan_2', label: '2월', width: 60, align: 'center', 
-                    	editor: {
-							type: 'checkbox',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},  
-                    { key: 'plan_3', label: '3월', width: 60, align: 'center', 
-                    	editor: {
-							type: 'checkbox',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},   
-                    { key: 'plan_4', label: '4월', width: 60, align: 'center', 
-                    	editor: {
-							type: 'checkbox',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},   
-                    { key: 'plan_5', label: '5월', width: 60, align: 'center', 
-                    	editor: {
-							type: 'checkbox',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},   
-                    { key: 'plan_6', label: '6월', width: 60, align: 'center', 
-                    	editor: {
-							type: 'checkbox',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},   
-                    { key: 'plan_7', label: '7월', width: 60, align: 'center', 
-                    	editor: {
-							type: 'checkbox',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},   
-                    { key: 'plan_8', label: '8월', width: 60, align: 'center', 
-                    	editor: {
-							type: 'checkbox',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},   
-                    { key: 'plan_9', label: '9월', width: 60, align: 'center', 
-                    	editor: {
-							type: 'checkbox',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},   
-                    { key: 'plan_10', label: '10월', width: 60, align: 'center', 
-                    	editor: {
-							type: 'checkbox',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},   
-                    { key: 'plan_11', label: '11월', width: 60, align: 'center', 
-                    	editor: {
-							type: 'checkbox',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},   
-                    { key: 'plan_12', label: '12월', width: 60, align: 'center', 
-                    	editor: {
-							type: 'checkbox',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},   
-                    { key: 'remark', label: '비고', width: 250, align: 'left', 
-                    	editor: {
-							type: 'text',
-							disabled: function () {
-                            	return $('#viewMode').val();
-                        	}
-                    	}
-                	},   
-                ]
-            };
-            this.resultGrid = new ax5.ui.grid(resultConfig);
-            this.result_grid_config = resultConfig;
-        }
-        
-        // 일지 조회
-        searchMainData() {
-            let _this = this;
-            $('#btnDiaryPrint').hide();
-            $('#btnDelete').hide();
+                this.checkMasterName = '연간교육훈련계획서'
+                this.baseUrl = '/api/haccp/edu_year_plan';
 
-            $('#firstName').val(userinfo.username);
-            $('#title').val(_this.checkMasterName);
+                this.viewData = new wijmo.collections.CollectionView();
+                this.init();
+            }
+            //TODO: 그리드 입력되게
+            init() {
+                let _this = this;
 
-            if ($('#bhId').val() > 0) {
-                let param = {
-                    'bh_id': $('#bhId').val(),
+                this.gparam = {
+                    bh_id : $('#bhId').val(),
+                    data_date : $('#data_date').val(),
+                    data_year : $('#data_year').val(),
+                    search_cond: $('#search_cond').val(),
+                    view_mode: $('#viewMode').val(),
                 };
 
-                let result = AjaxUtil.getSyncData(_this.baseUrl + '/read', param);
-
-                if (result != null) {
-                    let headInfo = result.data.head_info;
-                    let diaryInfo = result.data.diary_info;
-
-                    $('#title').val(headInfo.Title);
-                    $('#dataDate').val(headInfo.DataDate);
-                    $('#firstName').val(headInfo.FirstName);
-                    $('#cboDataYear').val(headInfo.DataYear),
-
-                    _this.resultGrid.setData({
-                        list: diaryInfo,
-                        page: {
-                            display: true,
-                            totalElements: diaryInfo.length,
+                this.grid = new wijmo.grid.FlexGrid('#result_grid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: $('#viewMode').val() === 'true',
+                    columns: [
+                        { binding: 'edu_title', header: '교육명', width: 150, align: 'left' },
+                        { binding: 'edu_target', header: '교육대상', width: 150, align: 'left' },
+                        { binding: 'edu_content', header: '교육내용', width: 150, align: 'left' },
+                        { binding: 'plan_1', header: '1월', width: 60, align: 'center', dataType: wijmo.DataType.Boolean },
+                        { binding: 'plan_2', header: '2월', width: 60, align: 'center', dataType: wijmo.DataType.Boolean },
+                        { binding: 'plan_3', header: '3월', width: 60, align: 'center', dataType: wijmo.DataType.Boolean },
+                        { binding: 'plan_4', header: '4월', width: 60, align: 'center', dataType: wijmo.DataType.Boolean },
+                        { binding: 'plan_5', header: '5월', width: 60, align: 'center', dataType: wijmo.DataType.Boolean },
+                        { binding: 'plan_6', header: '6월', width: 60, align: 'center', dataType: wijmo.DataType.Boolean },
+                        { binding: 'plan_7', header: '7월', width: 60, align: 'center', dataType: wijmo.DataType.Boolean },
+                        { binding: 'plan_8', header: '8월', width: 60, align: 'center', dataType: wijmo.DataType.Boolean },
+                        { binding: 'plan_9', header: '9월', width: 60, align: 'center', dataType: wijmo.DataType.Boolean },
+                        { binding: 'plan_10', header: '10월', width: 60, align: 'center', dataType: wijmo.DataType.Boolean },
+                        { binding: 'plan_11', header: '11월', width: 60, align: 'center', dataType: wijmo.DataType.Boolean },
+                        { binding: 'plan_12', header: '12월', width: 60, align: 'center', dataType: wijmo.DataType.Boolean },
+                        { binding: 'remark', header: '비고', width: '*', align: 'left' },
+                    ],
+                    itemsSource: this.viewData,
+                    formatItem: (s, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
                         }
-                    });
-                    		            
-                    _this.viewModeSetting(headInfo)
-                } 
+                    }
+                });
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = '일지목록';
 
             }
 
-            // head_id, task_code, src_data_pk, src_table_name, dept_id, shift
-            _this.approveBoxUtil = new ApproveBoxUtil(0, _this.checkMasterName, $('#bhId').val(), 'bundle_head', false, false);
-            _this.approveBoxUtil.print($('#viewMode').val());
-            if (_this.approveBoxUtil.isApprUser()) {
-                // 결재자의 경우 버튼 처리
-                $('#btnAppr').show();
-                $('#btnReject').show();
-            }
-        }
-
-        viewModeSetting(headInfo) {
-             // 데이터에 따른 버튼 설정
-            if ($('#viewMode').val().toLowerCase() == 'true') {
-                //보기 모드일 경우 CRUD 버튼 숨김
+            // 일지 조회
+            searchMainData() {
+                let _this = this;
                 $('#btnDiaryPrint').hide();
-                $('#btnReqAppr').hide();
-                $('#btnSave').hide();
                 $('#btnDelete').hide();
-                if (headInfo.State == 'approval') {
-                    $('#btnDiaryPrint').show();
-                }
 
-                $('#title').attr('disabled', 'disabled');
-                $('#dataDate').attr('disabled', 'disabled');
-                $('#cboDataYear').attr('disabled', 'disabled');
-                $('#grid_control_button_group').hide();
+                $('#firstName').val(userinfo.username);
+                $('#title').val(_this.checkMasterName);
+
+                if ($('#bhId').val() > 0) {
+                    let param = {
+                        'bh_id': $('#bhId').val(),
+                    };
+
+                    let result = AjaxUtil.getSyncData(_this.baseUrl + '/read', param);
+
+                    if (result != null) {
+                        let headInfo = result.data.head_info;
+                        let diaryInfo = result.data.diary_info;
+
+                        $('#title').val(headInfo.Title);
+                        $('#dataDate').val(headInfo.DataDate);
+                        $('#firstName').val(headInfo.FirstName);
+                        $('#cboDataYear').val(headInfo.DataYear)
+
+                            _this.viewData.sourceCollection = diaryInfo;
+                        _this.viewModeSetting(headInfo)
+                    }
+
+                }
+                // head_id, task_code, src_data_pk, src_table_name, dept_id, shift
+                _this.approveBoxUtil = new ApproveBoxUtil(0, _this.checkMasterName, $('#bhId').val(), 'bundle_head', false, false);
+                _this.approveBoxUtil.print($('#viewMode').val());
+                if (_this.approveBoxUtil.isApprUser()) {
+                    // 결재자의 경우 버튼 처리
+                    $('#btnAppr').show();
+                    $('#btnReject').show();
+                }
             }
-            else {
-                // State : 작성, 미결재, 승인, 반려, 재상신
-                $('#btnDelete').show();
-                $('#btnDiaryPrint').hide();
-                if (headInfo.State == 'process' || headInfo.State == 'reprocess') {
+            viewModeSetting(headInfo) {
+                // 데이터에 따른 버튼 설정
+                if ($('#viewMode').val().toLowerCase() == 'true') {
+                    //보기 모드일 경우 CRUD 버튼 숨김
+                    $('#btnDiaryPrint').hide();
                     $('#btnReqAppr').hide();
                     $('#btnSave').hide();
                     $('#btnDelete').hide();
-                } else if (headInfo.State == 'approval') {
-                    $('#btnDiaryPrint').show();
-                    $('#btnReqAppr').hide();
-                    $('#btnSave').hide();
-                    $('#btnDelete').hide();
-                }
+                    if (headInfo.State == 'approval') {
+                        $('#btnDiaryPrint').show();
+                    }
 
-                if (parseInt($('#bhId').val(), 10) > 0) {
+                    $('#title').attr('disabled', 'disabled');
                     $('#dataDate').attr('disabled', 'disabled');
                     $('#cboDataYear').attr('disabled', 'disabled');
                     $('#grid_control_button_group').hide();
-                } else {
-                    $('#btnDelete').hide();
+                }
+                else {
+                    // State : 작성, 미결재, 승인, 반려, 재상신
+                    $('#btnDelete').show();
+                    $('#btnDiaryPrint').hide();
+                    if (headInfo.State == 'process' || headInfo.State == 'reprocess') {
+                        $('#btnReqAppr').hide();
+                        $('#btnSave').hide();
+                        $('#btnDelete').hide();
+                    } else if (headInfo.State == 'approval') {
+                        $('#btnDiaryPrint').show();
+                        $('#btnReqAppr').hide();
+                        $('#btnSave').hide();
+                        $('#btnDelete').hide();
+                    }
+
+                    if (parseInt($('#bhId').val(), 10) > 0) {
+                        $('#dataDate').attr('disabled', 'disabled');
+                        $('#cboDataYear').attr('disabled', 'disabled');
+                        $('#grid_control_button_group').hide();
+                    } else {
+                        $('#btnDelete').hide();
+                    }
                 }
             }
-        }
 
-        // 일지 출력
-        printDiary() {
-            let param = {
-                'title': $('#title').val(),
-                'bh_id': $('#bhId').val(),
-            };
-
-            let result = AjaxUtil.postSyncData(this.baseUrl + '/print', param, function () { });
-            if (result.success) {
-                CommonUtil.openWindow('/api/files/pdf_viewer?file_id=' + result.file_id)
-            }
-            else {
-                Alert.alert('', '일지 생성 중 오류가 발생했습니다. 관리자에게 문의하세요.');
-            }
-        }
-
-        //결재
-        appr(isAppr) {
-            let _this = this;
-            _this.approveBoxUtil.approval(isAppr, function () {
-                $('#btnList').click();
-            });
-        }
-
-        //결재상신
-        reqAppr() {
-            let _this = this;
-            let title = $('#title').val();
-            let url = '/gui/' + gui.gui_code + '/edit';
-            let urlParam = {
-                'bh_id': $('#bhId').val(),
-                'data_date': $('#dataDate').val(),
-            };
-
-            let ret = _this.approveBoxUtil.request($('#bhId').val(), title, url, JSON.stringify(urlParam));
-            if (ret.success) {
-                Notify.success('결재상신하였습니다.');
-                $('#btnList').click();
-            }
-        }
-
-        //저장
-        save(isAppr) {
-            let _this = this;
-            let resultNullCheck = false;
-            
-            for (let i = 0; i < _this.resultGrid.list.length; i++) {
-                if ((_this.resultGrid.list[i].edu_title == null || _this.resultGrid.list[i].edu_title == '') 
-                	&& (_this.resultGrid.list[i].edu_target == null || _this.resultGrid.list[i].edu_target == '')
-                	&& (_this.resultGrid.list[i].edu_content == null || _this.resultGrid.list[i].edu_content == ''))
-                    resultNullCheck = true;    
-            }
-
-            let callback = function () {
-            
-            	/*
-                let items = [];
-                $.each(_this.resultGrid.list, function (idx, item) {
-                    items.push({ id: item.id, 'result1': item.result1, 'order': item.__original_index });
-                });
-                */
-          
-                let data = {
-                    bh_id: $('#bhId').val(),
-                    title: $('#title').val(),
-                    data_date: $('#dataDate').val(),
-                    data_year: $('#cboDataYear').val(),
-                    Q: JSON.stringify(_this.resultGrid.list),
-                };
-                
-                let fnSuccess = function (resp) {
-                    if (resp.success) {
-                        $('#bhId').val(resp.data.id);
-                        if (isAppr) {
-                            // 결재요청
-                            _this.reqAppr();
-                        } else {
-                            // 임시저장
-                            Notify.success('저장하였습니다.');
-                            $('#btnDelete').show();
-                            $('#dataDate').attr('disabled', 'disabled');
-                            _this.searchMainData();
-                        }
-                    } else {
-                        Alert.alert('', resp.message);
-                    }
-                };
-                let action = $('#bhId').val() > 0 ? '/save' : '/insert';
-                
-                AjaxUtil.postAsyncData(_this.baseUrl + action, data, fnSuccess);
-            }
-
-            if (resultNullCheck) {
-                Alert.alert("", "교육명, 교육대상, 교육내용을 모두 입력해주세요.");
-                return;
-            }
-            if (isAppr) {
-                Alert.confirm('', '결재상신하시겠습니까?', function () {
-                    callback();
-                });
-            }
-            else {
-                Alert.confirm('', '저장하시겠습니까?', function () {
-                    callback();
-                });
-            }
-        }
-
-        //삭제
-        delete() {
-            let _this = this;
-            Alert.confirm('', '삭제하시겠습니까?', function () {
-                // 삭제 서비스 호출
+            // 일지 출력
+            printDiary() {
                 let param = {
-                    bh_id: $('#bhId').val(),
-                }
-                let fnSuccess = function (resp) {
-                    if (resp.success) {
-                        Notify.success('삭제하였습니다.');
-                        $('#btnList').click();
-                    } else {
-                        Alert.alert('', resp.message);
-                    }
+                    'title': $('#title').val(),
+                    'bh_id': $('#bhId').val(),
                 };
-                AjaxUtil.postAsyncData(_this.baseUrl + '/delete', param, fnSuccess);
-            });
-        }
 
-        // 엑셀 다운로드
-        exportExcel() {
-            var targetview = this.resultGrid;
-            targetview.exportExcel('연간교육훈련계획서.xls');
-        }
-
-    }
-
-    let page = null;
-
-    $(document).ready(function (e) {
-        page = new CheckResultDiaryPage();
-        
-        let today_string = CommonUtil.getYYYYMMDD();
-        let this_year = today_string.substring(0, 4);
-        
-        if(page.gparam.data_year){
-			AjaxUtil.fillSelectOptions($('#cboDataYear'), 'data_year', '', page.gparam.data_year);
-		}else{
-        	AjaxUtil.fillSelectOptions($('#cboDataYear'), 'data_year', '', this_year);
-		}
-
-        $('#pickerDate').ax5DatePicker({ direction: 'top' });
-        picker.bind({
-            target: $('[data-ax5picker="multi"]'),
-            direction: "top",
-            content: {
-                width: 206,  //130 270
-                margin: 10,
-                type: 'date',
-                config: {
-                    control: {
-                        left: '<i class="fa fa-chevron-left"></i>',
-                        yearTmpl: '%s',
-                        monthTmpl: '%s',
-                        right: '<i class="fa fa-chevron-right"></i>'
-                    },
-                    lang: {
-                        yearTmpl: "%s년",
-                        months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-                        dayTmpl: "%s"
-                    }
+                let result = AjaxUtil.postSyncData(this.baseUrl + '/print', param, function () { });
+                if (result.success) {
+                    CommonUtil.openWindow('/api/files/pdf_viewer?file_id=' + result.file_id)
+                }
+                else {
+                    Alert.alert('', '일지 생성 중 오류가 발생했습니다. 관리자에게 문의하세요.');
                 }
             }
 
-        });
-			
-        $('#dataDate').val(page.gparam.data_date);
+            //결재
+            appr(isAppr) {
+                let _this = this;
+                _this.approveBoxUtil.approval(isAppr, function () {
+                    $('#btnList').click();
+                });
+            }
 
-        // 일자 변경
-        $('#dataDate').change(function () {
+            //결재상신f
+            reqAppr() {
+                let _this = this;
+                let title = $('#title').val();
+                let url = '/gui/' + gui.gui_code + '/edit';
+                let urlParam = {
+                    'bh_id': $('#bhId').val(),
+                    'data_date': $('#dataDate').val(),
+                };
+
+                let ret = _this.approveBoxUtil.request($('#bhId').val(), title, url, JSON.stringify(urlParam));
+                if (ret.success) {
+                    Notify.success('결재상신하였습니다.');
+                    $('#btnList').click();
+                }
+            }
+
+            //저장
+            save(isAppr) {
+                let _this = this;
+                let resultNullCheck = false;
+                let gridList = _this.grid.collectionView.sourceCollection.map(item => ({ ...item }));
+
+                for (let i = 0; i < gridList.length; i++) {
+                    if ((gridList[i].edu_title == null || gridList[i].edu_title == '')
+                        && (gridList[i].edu_target == null || gridList[i].edu_target == '')
+                        && (gridList[i].edu_content == null || gridList[i].edu_content == ''))
+                        resultNullCheck = true;
+                }
+
+                let callback = function () {
+                    console.log('list', gridList);
+                    let data = {
+                        bh_id: $('#bhId').val(),
+                        title: $('#title').val(),
+                        data_date: $('#dataDate').val(),
+                        data_year: $('#cboDataYear').val(),
+                        Q: JSON.stringify(gridList),
+                    };
+
+                    let fnSuccess = function (resp) {
+                        if (resp.success) {
+                            $('#bhId').val(resp.data.id);
+                            if (isAppr) {
+                                // 결재요청
+                                _this.reqAppr();
+                            } else {
+                                // 임시저장
+                                Notify.success('저장하였습니다.');
+                                $('#btnDelete').show();
+                                $('#dataDate').attr('disabled', 'disabled');
+                                _this.searchMainData();
+                            }
+                        } else {
+                            Alert.alert('', resp.message);
+                        }
+                    };
+                    let action = $('#bhId').val() > 0 ? '/save' : '/insert';
+
+                    AjaxUtil.postAsyncData(_this.baseUrl + action, data, fnSuccess);
+                }
+
+                if (resultNullCheck) {
+                    Alert.alert("", "교육명, 교육대상, 교육내용을 모두 입력해주세요.");
+                    return;
+                }
+                if (isAppr) {
+                    Alert.confirm('', '결재상신하시겠습니까?', function () {
+                        callback();
+                    });
+                }
+                else {
+                    Alert.confirm('', '저장하시겠습니까?', function () {
+                        callback();
+                    });
+                }
+            }
+
+            //삭제
+            delete() {
+                let _this = this;
+                Alert.confirm('', '삭제하시겠습니까?', function () {
+                    // 삭제 서비스 호출
+                    let param = {
+                        bh_id: $('#bhId').val(),
+                    }
+                    let fnSuccess = function (resp) {
+                        if (resp.success) {
+                            Notify.success('삭제하였습니다.');
+                            $('#btnList').click();
+                        } else {
+                            Alert.alert('', resp.message);
+                        }
+                    };
+                    AjaxUtil.postAsyncData(_this.baseUrl + '/delete', param, fnSuccess);
+                });
+            }
+
+            addRow() {
+                let cv = this.grid.collectionView;
+                cv.addNew([]);
+                cv.commitNew();
+
+                //_this.addNewRow(row);
+            }
+
+            removeRow() {
+                let _this = this;
+                _this.deleteRow(_this.grid);
+            }
+
+            deleteRow(grid) {
+
+                let _this = this;
+
+                let cv = grid.collectionView;
+
+                let selectedItems = grid.selectedItems; // 선택된 데이터 가져오기
+
+                if (selectedItems.length > 0) {
+                    selectedItems.forEach(item => {
+                        console.log(item.id);
+                        if(item.id !== null && item.id !== undefined){
+                            _this.deletedRow.push(item)
+                        }
+                        cv.remove(item); // 데이터 삭제
+
+                    });
+
+                    cv.refresh(); // UI 업데이트
+                }
+            }
+
+            changeGridOrder(g, direction) {
+                let _this = this;
+                let cv = g.collectionView;
+                let selectedRowIndex = g.selection.row;
+
+                if (selectedRowIndex < 0) {
+                    Alert.alert('', '순서를 변경할 제품을 선택하세요.');
+                    return;
+                }
+
+                if (direction === "U") {
+
+
+                    if (selectedRowIndex === 0) return;
+
+                    let sourceList = cv.sourceCollection; // 데이터 리스트 가져오기
+
+                    let temp = sourceList[selectedRowIndex - 1]; // 위의 행과 교환
+                    sourceList[selectedRowIndex - 1] = sourceList[selectedRowIndex];
+                    sourceList[selectedRowIndex] = temp;
+
+                    cv.sourceCollection = [...sourceList];
+
+                    cv.refresh();
+                    g.select(selectedRowIndex - 1, 0);
+
+                } else {
+                    //console.log('select', g.selection)
+                    let sourceList = cv.sourceCollection;
+
+                    if (selectedRowIndex >= sourceList.length - 1) return;
+
+
+                    let temp = sourceList[selectedRowIndex + 1];
+                    sourceList[selectedRowIndex + 1] = sourceList[selectedRowIndex];
+                    sourceList[selectedRowIndex] = temp;
+
+                    cv.sourceCollection = [...sourceList];
+
+                    cv.refresh();
+                    g.select(selectedRowIndex + 1, 0);
+
+
+                }
+
+            }
+        }
+
+        let page = null;
+
+        $(document).ready(function (e) {
+            page = new CheckResultDiaryPage();
+
+            let today_string = CommonUtil.getYYYYMMDD();
+            let this_year = today_string.substring(0, 4);
+
+            if(page.gparam.data_year){
+                AjaxUtil.fillSelectOptions($('#cboDataYear'), 'data_year', '', page.gparam.data_year);
+            }else{
+                AjaxUtil.fillSelectOptions($('#cboDataYear'), 'data_year', '', this_year);
+            }
+
+            $('#dataDate').val(page.gparam.data_date);
+
+            // 일자 변경
+            $('#dataDate').change(function () {
+                page.searchMainData();
+            });
+
+            // 일지 출력
+            $('#btnDiaryPrint').on('click', function () {
+                page.printDiary();
+            });
+
+            // 결재상신
+            $('#btnReqAppr').on('click', function () {
+                page.save(true);
+            });
+
+            // 승인
+            $('#btnAppr').on('click', function () {
+                page.appr(true);
+            });
+
+            // 반려
+            $('#btnReject').on('click', function () {
+                page.appr(false);
+            });
+
+            // 임시저장
+            $('#btnSave').on('click', function () {
+                page.save(false);
+            });
+
+            // 삭제
+            $('#btnDelete').on('click', function () {
+                page.delete();
+            });
+
+            $('#btnNew').click(function(){
+                page.addRow();
+            })
+            $('#btnDel').click(function(){
+                page.removeRow();
+            })
+
+            $('#btnUp').click(function(){
+                page.changeGridOrder(page.grid, "U");
+            })
+
+            $('#btnDown').click(function(){
+                page.changeGridOrder(page.grid, "D");
+            })
+
+
+            // 목록
+            $('#btnList').on('click', function () {
+                if (page.gparam.appr_view) {
+                    location.href = encodeURI('/gui/' + page.gparam.appr_view + '?searchcond=' + page.gparam.search_cond);
+                }
+                else {
+                    location.href = encodeURI('/gui/' + gui.gui_code + '?searchcond=' + page.gparam.search_cond);
+                }
+            });
+
             page.searchMainData();
         });
+    </script>
 
-        // 일지 출력
-        $('#btnDiaryPrint').on('click', function () {
-            page.printDiary();
-        });
-
-        // 결재상신
-        $('#btnReqAppr').on('click', function () {
-            page.save(true);
-        });
-
-        // 승인
-        $('#btnAppr').on('click', function () {
-            page.appr(true);
-        });
-
-        // 반려
-        $('#btnReject').on('click', function () {
-            page.appr(false);
-        });
-
-		// 행추가
-		$('#btnNew').click(function (e) {
-            let row = {
-                __index: undefined,
-            };
-            for (var i = 1; i <= 12; i++) {
-                row['plan_' + String(i)] = '';
-            }
-            page.resultGrid.addRow($.extend({}, row),"last");
-        });
-        
-        // 행삭제
-        $("#btnDel").click(function (e) {
-            page.resultGrid.deleteRow("selected");
-        });
-
-        $("#btnUp").click(function (e) {
-            GridUtil.changeOrder("U", page.resultGrid);
-        });
-
-        $("#btnDown").click(function (e) {
-            GridUtil.changeOrder("D", page.resultGrid);
-        });
-
-
-        // 임시저장
-        $('#btnSave').on('click', function () {
-            page.save(false);
-        });
-
-        // 삭제
-        $('#btnDelete').on('click', function () {
-            page.delete();
-        });
-
-        // 목록
-        $('#btnList').on('click', function () {
-            if (page.gparam.appr_view) {
-                location.href = encodeURI('/gui/' + page.gparam.appr_view + '?searchcond=' + page.gparam.search_cond);
-            }
-            else {
-                location.href = encodeURI('/gui/' + gui.gui_code + '?searchcond=' + page.gparam.search_cond);
-            }
-        });
-
-        // 엑셀 다운로드
-        $('#btnExcel').on('click', function () {
-            page.exportExcel();
-        });
-        
-        page.searchMainData();
-        
-    });
-</script>
 </th:block>
 </html>
