@@ -203,13 +203,21 @@ public class MaterialController {
         data.set("user_id", user.getId());
         
         AjaxResult result = new AjaxResult();
-		
-        if (this.unitPriceService.saveCompanyUnitPrice(data) > 0) {
-        	
-        } else {
-        	result.success = false;
-        }; 
-        
+
+		try {
+			int saveCount = this.unitPriceService.saveCompanyUnitPrice(data);
+
+			if (saveCount > 0) {
+				result.success = true;
+			} else {
+				result.success = false;
+				result.message = "저장 실패: 중복된 데이터이거나 입력값이 올바르지 않습니다.";
+			}
+		} catch (Exception e) {
+			result.success = false;
+			result.message = "서버 오류: " + e.getMessage();  // 예외 메시지 포함
+		}
+
 		return result;
 	}
 	

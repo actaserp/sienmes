@@ -44,219 +44,170 @@
 		border: 1px solid #ccc;
 	}
 </style>
-
-<div class="content_wrap">
+    <div class="layout-contents">
     <input type="hidden" id="bhId" th:value="${bh_id}" />
     <input type="hidden" id="viewMode" th:value="${view_mode}" />
     <input type="hidden" id="data_year" th:value="${cboYear}" />
     <input type="hidden" id="data_month" th:value="${cboMonth}" />
+
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>영업장 조도점검 일지</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
+            </div>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>일지 및 데이터</li>
+                <li>선행요건일지</li>
+                <li>영업장 조도점검 일지</li>
+            </ul>
+        </div>
+
     <section class="section">
-    <div class="title_box">
-        <div class="left_align">
-        <h3 data-labelCd="영업장 조도점검 일지">영업장 조도점검 일지</h3>
-        </div>
-        <!--<button type="button" class="btn-default pull-right" id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>-->
-        <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
-    </div>
+        <div class="section-top">
+            <div class="search-wrap">
+                <dl>
+                    <dt>
+                        <label>일지명</label>
+                    </dt>
+                    <dd>
+                        <input class="form-control2 tac" type="text" id="title"name="title" >
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        연도<span class="eq"></span>
+                    </dt>
+                    <dd>
+                        <select class="form-control2 tac" type="text" id="cboYear" name="cboYear" style="width: 130px;" ></select>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <label>월</label>
+                    </dt>
+                    <dd>
+                        <select class="form-control2 tac" type="text" id="cboMonth" name="cboMonth" style="width: 130px;"></select>
+                    </dd>
+                </dl>
 
-    <div class="table_box search">
-        <div class="row">
-        <div class="col-6 col-lg-6 col-xl-6">
-            <div class="row">
-            <div class="col-12 col-lg-12 col-xl-12">
-                <div class="input-group">
-                <div class="input-group-prepend">
-                    <span
-                    class="input-group-text fit_box_sm"
-                    data-labelCd="일지명"
-                    >일지명</span
-                    >
-                </div>
-                <input
-                    class="form-control2 tac"
-                    type="text"
-                    id="title"
-                    name="title"
-                />
-                </div>
-            </div>
-            <div class="col-6 col-lg-6 col-xl-6">
-                <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text fit_box_sm" data-labelCd="연도"
-                    >연도</span
-                    >
-                </div>
-                <select
-                    class="form-control2 tac"
-                    type="text"
-                    id="cboYear"
-                    name="cboYear"
-                ></select>
-                </div>
-            </div>
-            <div class="col-6 col-lg-6 col-xl-6">
-                <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text fit_box_sm" data-labelCd="월"
-                    >월</span
-                    >
-                </div>
-                <select
-                    class="form-control2 tac"
-                    type="text"
-                    id="cboMonth"
-                    name="cboMonth"
-                ></select>
-                </div>
-            </div>
-            <div class="col-6 col-lg-6 col-xl-6">
-                <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text fit_box_sm" data-labelCd="층"
-                    >층</span
-                    >
-                </div>
-                <select
-                    class="form-control2"
-                    id="cboType2"
-                    name="cboType2"
-                ></select>
-                </div>
-            </div>
-            <div class="col-6 col-lg-6 col-xl-6">
-                <div class="input-group">
-                <div class="input-group-prepend">
-                    <span
-                    class="input-group-text fit_box_sm"
-                    data-labelCd="작성자"
-                    >작성자</span
-                    >
-                </div>
-                <input
-                    class="form-control2 tac"
-                    type="text"
-                    id="firstName"
-                    name="firstName"
-                    disabled
-                />
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-6 col-xl-6">
-            <div id="approveBox"></div>
-        </div>
-        </div>
-    </div>
+                <dl>
+                    <dt>
+                        <label>층</label>
+                    </dt>
+                    <dd>
+                        <select class="form-control2" id="cboType2" name="cboType2" style="width: 130px;"></select>
+                    </dd>
+                </dl>
 
-    <div class="title_box">
-        <span class="right_align rpt" data-labelCd="점검기준">점검기준</span>
-        <div class="left_align">
-        <label class="switch">
-            <input type="checkbox" checked id="btnToggle" /><span
-            class="slider round"
-            ></span>
-        </label>
-        점검기준 보기/감추기
-        </div>
-    </div>
+                <dl>
+                    <dt>
+                        <label>작성자</label>
+                    </dt>
+                    <dd>
+                        <input class="form-control2 tac" type="text" id="firstName" name="firstName" style="width: 130px;" disabled/>
+                    </dd>
+                </dl>
 
-    <div id="standardDIv">
-        <div class="row">
-        <div class="col-12">
-            <table class="standard-table">
-                <colgroup>
-                    <col style="width: 15%;" />
-                    <col style="width: 85%;" />
-                </colgroup>
-                <tr>
-                    <th scope="row">방법</th>
-                    <td>
-                        * 위치 : 작업대 위 (선별공정작업실 선별대 위, CCP공정작업
-                        CCP모니터링장소) <br />
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;&nbsp;작업대가 없을 시 80cm 작업자의 눈높이를 기준
-                        <br />* 시간 : 20초 동안 유지 측정값에 변화가 없는 시점 <br />*
-                        개소 : 조도 측정평면도 (SF6-SP-01-별첨3) 참고
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row">주기</th>
-                    <td>* 1회 / 월</td>
-                </tr>
-                <tr>
-                    <th scope="row">담당자</th>
-                    <td>* HACCP파트 담당자</td>
-                </tr>
-                <tr>
-                    <th scope="row">조도기준</th>
-                    <td>
-                        * 전수검사 및 선별구역 : 540 LUX 이상 <br />* 작업장 : 220 LUX
-                        이상 <br />* 창고 및 부대시설 : 110 LUX 이상
-                    </td>
-                </tr>
-            </table>
+                <div>
+                    <div id="approveBox"></div>
+                </div>
+            </div>
         </div>
-        </div>
-    </div>
-    </section>
-
-    <section>
-    <div class="grid_box">
         <div class="title_box">
-            <span class="right_align rpt" data-labelCd="점검 목록">점검 목록</span>
-            <button type="button" class="btn-default" id="btnExcel">
-                <i class="fas fa-file-excel"></i>
-            </button>
-            <button type="button" class="btn-default" id="btnDiaryPrint">
-                일지출력
-            </button>
-            <button type="button" class="btn-default" id="btnReqAppr">
-                결재상신
-            </button>
-            <button
-                type="button"
-                class="btn-default"
-                id="btnAppr"
-                style="display: none"
-            >
-                승인
-            </button>
-            <button
-                type="button"
-                class="btn-cancel"
-                id="btnReject"
-                style="display: none"
-            >
-                반려
-            </button>
-            <button type="button" class="btn-default" id="btnSaveMulti">
-                저장
-            </button>
-            <button type="button" class="btn-cancel" id="btnDelete">삭제</button>
-            <button type="button" class="btn-default" id="btnList">목록</button>
-            <!--
-            <button type="button" class="btn-default" id="btnFloor1Image">
-                1층도면
-            </button>
-            <button type="button" class="btn-default" id="btnFloor2Image">
-                2층도면
-            </button>
-            <button type="button" class="btn-default" id="btnFloor3Image">
-                3층도면
-            </button>
-            <button type="button" class="btn-default" id="btnFloor4Image">
-                4층도면
-            </button>
-            -->
+            <!--<span class="right_align rpt" data-labelCd="관리기준">관리기준</span>-->
+            <div class="left_align">
+                <label class="switch">
+                    <input type="checkbox" checked id="btnToggle"><span class="slider round"></span>
+                </label>
+                관리기준 보기/감추기
+            </div>
         </div>
-        <div class="grid_box" id="complainList">
-            <div class="h-500" data-ax5grid="master_grid"></div>
+
+        <div id="standardDIv">
+            <div class="row">
+            <div class="col-12">
+                <table class="standard-table">
+                    <colgroup>
+                        <col style="width: 15%;" />
+                        <col style="width: 85%;" />
+                    </colgroup>
+                    <tr>
+                        <th scope="row">방법</th>
+                        <td>
+                            * 위치 : 작업대 위 (선별공정작업실 선별대 위, CCP공정작업
+                            CCP모니터링장소) <br />
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            &nbsp;&nbsp;&nbsp;작업대가 없을 시 80cm 작업자의 눈높이를 기준
+                            <br />* 시간 : 20초 동안 유지 측정값에 변화가 없는 시점 <br />*
+                            개소 : 조도 측정평면도 (SF6-SP-01-별첨3) 참고
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">주기</th>
+                        <td>* 1회 / 월</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">담당자</th>
+                        <td>* HACCP파트 담당자</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">조도기준</th>
+                        <td>
+                            * 전수검사 및 선별구역 : 540 LUX 이상 <br />* 작업장 : 220 LUX
+                            이상 <br />* 창고 및 부대시설 : 110 LUX 이상
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            </div>
         </div>
-    </div>
     </section>
-    <section>
+
+    <section class="section">
+        <div class="grid_box">
+            <div class="title_box">
+                <span class="right_align rpt" data-labelCd="점검 목록">점검 목록</span>
+
+                <button type="button" class="btn-default" id="btnReqAppr">
+                    결재상신
+                </button>
+                <button type="button" class="btn-default" id="btnAppr"style="display: none">
+                    승인
+                </button>
+                <button type="button" class="btn-cancel" id="btnReject" style="display: none">
+                    반려
+                </button>
+                <button type="button" class="btn-default" id="btnSaveMulti">
+                    저장
+                </button>
+                <button type="button" class="btn-cancel" id="btnDelete">삭제</button>
+                <button type="button" class="btn-default" id="btnList">목록</button>
+                <!--
+                <button type="button" class="btn-default" id="btnFloor1Image">
+                    1층도면
+                </button>
+                <button type="button" class="btn-default" id="btnFloor2Image">
+                    2층도면
+                </button>
+                <button type="button" class="btn-default" id="btnFloor3Image">
+                    3층도면
+                </button>
+                <button type="button" class="btn-default" id="btnFloor4Image">
+                    4층도면
+                </button>
+                -->
+            </div>
+
+            <div class="grid_box" id="complainList">
+                <div class="h-500" data-ax5grid="master_grid"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
         <div class="grid_box" id="sub_grid">
             <div class="title_box" id="button_box2">
                 <span class="right_align rpt" data-labelCd="이탈 목록">이탈 목록</span>

@@ -322,30 +322,26 @@ public class SystemService {
 
 	public List<Map<String, Object>> getSystemLogList(Timestamp start, Timestamp end, String type, String source) {
 		String sql = """
-           SELECT 
-               ROW_NUMBER() OVER (ORDER BY _created DESC) AS row_num,
-               id,
-               "Type" as type,
-               "Source" as source,
-       			"Message" as message,
-              to_char("_created" ,'yyyy-mm-dd hh24:mi:ss') as created
-           FROM sys_log sl
-           WHERE _created BETWEEN :start AND :end
-        """;
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY sl."_created" DESC) AS row_num,
+            sl.id,
+            sl."Type" AS type,
+            sl."Source" AS source,
+            sl."Message" AS message,
+            TO_CHAR(sl."_created", 'yyyy-mm-dd hh24:mi:ss') AS created
+        FROM sys_log sl
+        WHERE sl."_created" BETWEEN :start AND :end
+    """;
 
 		if (StringUtils.hasText(type)) {
-			sql += """
-            AND Type LIKE '%' + :type + '%'
-            """;
+			sql += " AND sl.\"Type\" LIKE CONCAT('%', :type, '%') ";
 		}
 
 		if (StringUtils.hasText(source)) {
-			sql += """
-            AND Source LIKE '%' + :source + '%'		
-            """;
+			sql += " AND sl.\"Source\" LIKE CONCAT('%', :source, '%') ";
 		}
 
-		sql += " ORDER BY _created DESC";
+		sql += " ORDER BY sl.\"_created\" DESC";
 
 		MapSqlParameterSource namedParameters = new MapSqlParameterSource();
 		namedParameters.addValue("start", start, java.sql.Types.TIMESTAMP);
@@ -355,8 +351,9 @@ public class SystemService {
 
 		return this.jdbcTemplate.queryForList(sql, namedParameters);
 	}
-    
-    public Map<String, Object> getSystemLogDetail(Long id){
+
+
+	public Map<String, Object> getSystemLogDetail(Long id){
     	String sql = """
             select id, "Type" as type, "Source" as source,"Message" as message
             , to_char("_created" ,'yyyy-mm-dd hh24:mi:ss') as created

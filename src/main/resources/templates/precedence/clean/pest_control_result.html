@@ -15,7 +15,7 @@
 </style>
 </head>
 <th:block layout:fragment="content">
-<div class="content_wrap">
+    <div class="layout-contents">
     <input type="hidden" id="bhId" th:value="${bh_id}" />
     <input type="hidden" id="viewMode" th:value="${view_mode}" />
     <input type="hidden" id="apprView" th:value="${appr_view}" />
@@ -23,59 +23,64 @@
     <input type="hidden" id="createrName" th:value="${creater_name}" />
     <input type="hidden" id="searchcond" th:value="${searchcond}" />
     <input type="hidden" id="trapType" th:value="${trapType}" />
-    <section class="section">
-        <div class="title_box">
-            <div class="left_align">
-                <h3 data-labelCd="방역개선조치결과보고서">방역개선조치결과보고서</h3>
+
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>방역개선조치결과보고서</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
             </div>
-            <!--<button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>-->
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
-            <!--<button type="button" class="btn-default pull-right mr-1" id="btnHeaderRefresh" title="새로고침"><i class="fas fa-undo-alt"></i></button>-->
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>일지 및 데이터</li>
+                <li>선행요건일지</li>
+                <li>방역개선조치결과보고서</li>
+            </ul>
         </div>
 
-        <div class="table_box search">
-            <div class="row">
-                <div class="col-6 col-lg-6 col-xl-6">
-                    <div class="row">
-                        <div class="col-12 col-lg-12 col-xl-12">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="일지명">일지명</span>
-                                </div>
-                                <input class="form-control2 tac" type="text" id="title" name="title" />
-                            </div>
+
+    <section class="section">
+        <div class="section-top">
+            <div class="search-wrap">
+                <dl>
+                    <dt>
+                        <label>일지명</label>
+                    </dt>
+                    <dd>
+                        <input class="form-control2 tac" type="text" id="title" name="title" />
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                      일자<span class="eq"></span>
+                    </dt>
+                    <dd>
+                        <input class="form-control2 tac" type="text" id="dataDate" name="dataDate" readonly />
+                       <!-- <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" onclick="javascript: $('#dataDate').click()"></i></span>-->
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <label>트랩구분</label>
+                    </dt>
+                    <dd>
+                        <select class="form-control2" id="cboTrapClass" name="cboTrapClass"></select>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <label>작성자</label>
+                    </dt>
+                    <dd>
+                        <div class="srch-box">
+                            <input class="form-control2 tac" type="text" id="firstName" name="firstName" disabled />
                         </div>
-                        <div class="col-6 col-lg-6 col-xl-6">
-                            <div class="input-group" data-ax5picker="basic" id="srchDt">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="일자">일자</span>
-                                </div>
-                                <input class="form-control2 tac" type="text" id="dataDate" name="dataDate" readonly />
-                                <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" onclick="javascript: $('#dataDate').click()"></i></span>
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-6 col-xl-6">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="트랩구분">트랩구분</span>
-                                </div>
-                                <select class="form-control2" id="cboTrapClass" name="cboTrapClass"></select>
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-6 col-xl-6">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="작성자">작성자</span>
-                                </div>
-                                <input class="form-control2 tac" type="text" id="firstName" name="firstName" disabled />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-6 col-xl-6">
+                    </dd>
+                </dl>
+                <div>
                     <div id="approveBox"></div>
                 </div>
-
             </div>
         </div>
 
@@ -91,38 +96,34 @@
         <div id="standardDIv" style="padding-top: 5px;">
             <div class="h-200" data-ax5grid="standard_grid"></div>
         </div>
-
     </section>
 
-    <section>
+    <section class="section">
         <div class="title_box">
             <span class="right_align rpt" data-labelCd="* 해충명 클릭시 해충 이미지를 볼 수 있습니다.">* 해충명 클릭시 해충 이미지를 볼 수 있습니다.</span>
-            <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
-            <button type="button" class="btn-default" id="btnDiaryPrint">일지출력</button>
-            <button type="button" class="btn-default" id="btnReqAppr">결재상신</button>
-            <button type="button" class="btn-default" id="btnAppr" style="display:none;">승인</button>
-            <button type="button" class="btn-cancel" id="btnReject" style="display:none;">반려</button>
-            <button type="button" class="btn-default" id="btnSave">저장</button>
-            <button type="button" class="btn-cancel" id="btnDelete">삭제</button>
-            <button type="button" class="btn-default" id="btnList">목록</button>
-            <button type="button" class="btn-default" id="btnFloor1Image">
-                1층도면
-            </button>
-            <button type="button" class="btn-default" id="btnAllItem">전체적합</button>
-        </div>
-        <div class="table_box sub" id="divDetail">
-            <div class="row">
-                <div class="col-3 col-lg-3 col-xl-3">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_sm" data-labelCd="층">층</span>
-                        </div>
+            <div class="section-top">
+                <dl>
+                    <dt>
+                        <label>층</label>
+                    </dt>
+                    <dd>
                         <select class="form-control2" id="cboFloor" name="cboFloor"></select>
-                    </div>
-                </div>
+                    </dd>
+                </dl>
             </div>
+                <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
+                <button type="button" class="btn-default" id="btnDiaryPrint">일지출력</button>
+                <button type="button" class="btn-default" id="btnReqAppr">결재상신</button>
+                <button type="button" class="btn-default" id="btnAppr" style="display:none;">승인</button>
+                <button type="button" class="btn-cancel" id="btnReject" style="display:none;">반려</button>
+                <button type="button" class="btn-default" id="btnSave">저장</button>
+                <button type="button" class="btn-cancel" id="btnDelete">삭제</button>
+                <button type="button" class="btn-default" id="btnList">목록</button>
+                <button type="button" class="btn-default" id="btnFloor1Image">
+                    1층도면
+                </button>
+             <button type="button" class="btn-default" id="btnAllItem">전체적합</button>
         </div>
-
         <div class="h-250" data-ax5grid="pest_grid"></div>
     </section>
 

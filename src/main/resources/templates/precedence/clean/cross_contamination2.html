@@ -65,30 +65,16 @@
                         </dd>
                     </dl>
                 </div>
-            </div>
-            <!--<div class="container-fluid">
-                <p id="selectedItem"></p>
-                <div id="theGrid" style="height: 520px; max-height: 520px;"></div>
-            </div>-->
-        </section>
-
-
-    <section class="section">
-        <div id="approveBox"></div>
-        <div class="grid_box" id="prodListGrid">
-            <div class="title_box">
-                <!--<span class="right_align rpt" data-labelCd="점검현황">점검현황</span>
-                <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>-->
-                <button type="button" class="btn-default" id="btnAdd">등록</button>
+                <div class="button-wrap">
+                    <button type="button" class="btn-default" id="btnNew">등록</button>
+                </div>
             </div>
 
             <div class="container-fluid">
                 <p id="selectedItem"></p>
-                <div id="theGrid" style="height: 630px; max-height:630px;"></div>
+                <div id="document_grid" style="height: 630px; max-height:630px;"></div>
             </div>
-            <!--<div class="h-630" data-ax5grid="document_grid"></div>-->
-        </div>
-    </section>
+        </section>
 </div>
 </th:block>
 
@@ -106,80 +92,8 @@
 
         init() {
             let _this = this;
-            /*let config = {
-                target: $('[data-ax5grid="document_grid"]'),
-                sortable: true,
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: false, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 25,  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        _this.grid.select(this.dindex);
-                        _this.detail(this);
-                    },
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-                columns: [
-                    //{ key: 'Title', label: '일지명', width: 350, align: 'center' },
-                    { key: 'StateName', label: '결재상태', width: 100, align: 'center' },
-                    {
-                        key: 'LineName', label: '결재현황', width: 350, align: 'left',
-                        formatter: function () {
-                            return CommonUtil.convertApprLineNameHtml(this.item.LineName, this.item.LineNameState);
-                        }
-                    },
-                    { key: 'DataDate', label: '월', width: 120, align: 'center' },
-                    {
-                        key: 'SearchYN', label: '조회', width: 80, align: 'center',
-                        formatter: function () {
-                            let html = '';
-                            if (this.item.SearchYN == 'Y') {
-                                html = '<button class="btn-default" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">조회</button>'
-                            }
-                            return html;
-                        }
-                    },
-                    {
-                        key: 'EditYN', label: '수정', width: 80, align: 'center',
-                        formatter: function () {
-                            let html = '';
-                            if (this.item.EditYN == 'Y' || (parseInt(this.item.CheckStep, 10) <= 5 && this.item.State == 'approval')) {
-                                html = '<button class="btn-default" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">수정</button>'
-                            }
-                            return html;
 
-                        }
-                    },
-                    {
-                        key: 'DeleteYN', label: '삭제', width: 80, align: 'center',
-                        formatter: function () {
-                            let html = '';
-                            if (this.item.DeleteYN == 'Y' && parseInt(this.item.CheckStep, 10) == 1) {
-                                html = '<button class="btn-danger" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">삭제</button>'
-                            }
-                            return html;
-
-                        }
-                    },
-                ]
-            };
-            this.grid = new ax5.ui.grid(config);
-            this.grid_config = config;*/
-
-
-            this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+            this.grid = new wijmo.grid.FlexGrid('#document_grid', {
                 selectionMode: wijmo.grid.SelectionMode.Row,
                 headersVisibility: wijmo.grid.HeadersVisibility.Column,
                 autoGenerateColumns: false,
@@ -189,50 +103,81 @@
                     if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                         e.cell.style.textAlign = 'center';
                     }
+                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                        const col = s.columns[e.col];
+                        const item = e.panel.rows[e.row].dataItem;
+
+                        // 결재현황 (LineName) 처리
+                        if (col.binding === 'LineName') {
+                            e.cell.innerHTML = CommonUtil.convertApprLineNameHtml(item.LineName, item.LineNameState);
+                        }
+
+                        // SearchYN 버튼 처리
+                        if (col.binding === 'SearchYN') {
+                            if (item.SearchYN === 'Y') {
+                                e.cell.innerHTML = ''; // 기존 셀 콘텐츠 제거
+                                const button = document.createElement('button');
+                                button.className = 'btn-default';
+                                button.style.cssText = 'width: 100%; height: 25px;';
+                                button.textContent = '조회';
+                                button.addEventListener('click', () => {
+                                    _this.grid.select(new wijmo.grid.CellRange(e.row, -1));
+                                    _this.detail({item, column: {key: 'SearchYN'}});
+                                });
+                                e.cell.appendChild(button);
+                            } else {
+                                // 해당 셀을 빈 셀로 유지
+                                e.cell.innerHTML = ''; // 셀 비우기
+                            }
+                        }
+
+                        // EditYN 버튼 처리
+                        if (col.binding === 'EditYN') {
+                            if (item.EditYN === 'Y') {
+                                e.cell.innerHTML = '';
+                                const button = document.createElement('button');
+                                button.className = 'btn-default';
+                                button.style.cssText = 'width: 100%; height: 25px;';
+                                button.textContent = '수정';
+                                button.addEventListener('click', () => {
+                                    _this.grid.select(new wijmo.grid.CellRange(e.row, -1));
+                                    _this.detail({item, column: {key: 'EditYN'}});
+                                });
+                                e.cell.appendChild(button);
+                            } else {
+                                // 해당 셀을 빈 셀로 유지
+                                e.cell.innerHTML = ''; // 셀 비우기
+                            }
+                        }
+
+                        // DeleteYN 버튼 처리
+                        if (col.binding === 'DeleteYN') {
+                            if (item.DeleteYN === 'Y') {
+                                e.cell.innerHTML = '';
+                                const button = document.createElement('button');
+                                button.className = 'btn-danger';
+                                button.style.cssText = 'width: 100%; height: 25px;';
+                                button.textContent = '삭제';
+                                button.addEventListener('click', () => {
+                                    _this.grid.select(new wijmo.grid.CellRange(e.row, -1));
+                                    _this.detail({item, column: {key: 'DeleteYN'}});
+                                });
+                                e.cell.appendChild(button);
+                            } else {
+                                // 해당 셀을 빈 셀로 유지
+                                e.cell.innerHTML = ''; // 셀 비우기
+                            }
+                        }
+                    }
                 },
                 columns: [
                     //{ key: 'Title', label: '일지명', width: 350, align: 'center' },
-                    { binding: 'StateName', header: '결재상태', width: 150, align: 'center' },
-                    {
-                        binding: 'LineName', header: '결재현황', width: 350, align: 'left',
-                        /*formatter: function () {
-                            return CommonUtil.convertApprLineNameHtml(this.item.LineName, this.item.LineNameState);
-                        }*/
-                    },
                     { binding: 'DataDate', header: '월', width: 120, align: 'center' },
-                    {
-                        binding: 'SearchYN', header: '조회', width: 120, align: 'center',
-                        /*formatter: function () {
-                            let html = '';
-                            if (this.item.SearchYN == 'Y') {
-                                html = '<button class="btn-default" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">조회</button>'
-                            }
-                            return html;
-                        }*/
-                    },
-                    {
-                        binding: 'EditYN', header: '수정', width: 120, align: 'center',
-                        /*formatter: function () {
-                            let html = '';
-                            if (this.item.EditYN == 'Y' || (parseInt(this.item.CheckStep, 10) <= 5 && this.item.State == 'approval')) {
-                                html = '<button class="btn-default" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">수정</button>'
-                            }
-                            return html;
-
-                        }*/
-                    },
-                    {
-                        binding: 'DeleteYN', header: '삭제', width: 120, align: 'center',
-                        /*formatter: function () {
-                            let html = '';
-                            if (this.item.DeleteYN == 'Y' && parseInt(this.item.CheckStep, 10) == 1) {
-                                html = '<button class="btn-danger" style="width:100%; height:0.9em; font-size:1em; padding:0; margin:0">삭제</button>'
-                            }
-                            return html;
-
-                        }*/
-                    },
-                    {binding: '', header: '', width: "*", align: 'center',}
+                    {binding: 'StateName', header: '결재상태', width: 100, align: 'center', isReadOnly: true},
+                    {binding: 'LineName', header: '결재현황', width: 650, isReadOnly: true, align: 'left'},
+                    { binding: 'SearchYN', header: '조회', width: '*', align: 'center' },
+                    { binding: 'EditYN', header: '수정', width: '*', align: 'center' },
+                    { binding: 'DeleteYN', header: '삭제', width: '*', align: 'center' }
                 ],
                 itemsSource: this.viewData, // 데이터를 설정할 배열
             });

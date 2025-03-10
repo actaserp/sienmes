@@ -147,10 +147,12 @@
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                         <label for="outsourcing_yn">외주여부</label>
                                     </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="checkbox" style="width: 100%;" id="outsourcing_yn"
-                                               name="outsourcing_yn" value="Y" disabled>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd; text-align: center; vertical-align: middle;">
+                                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                                            <input type="checkbox" id="outsourcing_yn" name="outsourcing_yn" value="Y" >
+                                        </div>
                                     </td>
+
                                     <th></th>
                                     <td></td>
                                 </tr>
@@ -197,6 +199,7 @@
     <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
     <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
     <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
+    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
     <th:block th:replace="/common/popup_equipment :: popup_equipment" ></th:block>
     <script type="text/javascript">
 
@@ -221,6 +224,7 @@
             {binding: 'EquipmentCode', header: '설비코드', width: 150, align: 'left'},
             {binding: 'EquipmentName', header: '설비명', width: 200, align: 'left'},
             {binding: '_created', header: '생성일', width: 200, align: 'center'},
+            {binding: '', header: '', width: "*", align: 'center'},
         ];
 
         document.readyState === 'complete' ? init() : window.onload = init;
@@ -256,7 +260,7 @@
 
             theGrid.hostElement.addEventListener('dblclick', function (e) {
                 let selectedItem = theGrid.selectedItems[0];
-                console.log(selectedItem);
+                /*console.log(selectedItem);*/
 
 
                 document.getElementById('id').value = selectedItem.id;
@@ -280,7 +284,7 @@
                 setSelectValue('process_storehouse_id', selectedItem.process_storehouse_id);
 
                 showEquipmentList(selectedItem.id);
-                /* setButtonState();*/
+                 setButtonState();
             });
 
             theGrid.rowHeaders.columns.splice(0, 1);
@@ -316,7 +320,7 @@
             //equipGrid.setData([]);
 
             setButtonState();
-            $('#btnNewEquip').prop('disabled', true);
+            /*$('#btnNewEquip').prop('disabled', true);*/
             $('#btnDelEquip').prop('disabled', true);
         }
 
@@ -462,7 +466,6 @@
                 theGrid2.dispose();  // 기존 그리드를 제거합니다.
             }
 
-
             viewdata2 = new wijmo.collections.CollectionView(data2);
 
             theGrid2 = new wijmo.grid.FlexGrid('#workcenter-equip-grid', {
@@ -541,11 +544,16 @@
         //버튼 활성화
         function setButtonState() {
             let pk = $('#id').val();
+
             $('#btnNewWorkcenter').prop('disabled', false);
             $('#btnSaveWorkcenter').prop('disabled', false);
 
             if (pk) {
                 $('#btnDelWorkcenter').prop('disabled', false);
+
+                $('#workcenterForm select, #workcenterForm input, #workcenterForm :checkbox').each(function () {
+                    $(this).prop('disabled', false);
+                });
             } else {
                 $('#btnDelWorkcenter').prop('disabled', true);
             }
@@ -553,6 +561,7 @@
         }
 
         $(document).ready(function (e) {
+            setButtonState();
 
             AjaxUtil.fillSelectOptions($('#factory_id'), 'factory', 'choose', false);
             AjaxUtil.fillSelectOptions($('#area_id'), 'area', 'choose', false);
@@ -620,7 +629,7 @@
                 if (workcenter_id != '') {
                     popupPage = new PopupEquipmentPage();
                     selectCallback = function (item) {
-                        console.log('selectCallback진입');
+                        /*console.log('selectCallback진입');*/
                         let equipment_id = item.id;
                         addEquipment(workcenter_id, equipment_id);
                         popupPage.close();
@@ -639,7 +648,7 @@
                 }
 
                 let data = selectedItems[0]; // 첫 번째 선택된 항목 가져오기
-                console.log('선택된 데이터:', data);
+                /*console.log('선택된 데이터:', data);*/
 
                 // 확인 창 표시
                 Alert.confirm('', '삭제하시겠습니까?', function () {

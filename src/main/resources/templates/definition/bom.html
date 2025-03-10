@@ -2,20 +2,21 @@
 <head>
     <style>
         .back_current {
-            background: #ffffff;
+            background-color: #d4edda !important; /* 연한 초록 */
         }
 
         .back_past {
-            background: #808080;
+            background-color: #f8d7da !important; /* 연한 빨강 */
         }
 
         .back_future {
-            background: #f8d2cb;
+            background-color: #d1ecf1 !important; /* 연한 파랑 */
         }
 
         .back_error {
-            background: #ff0000;
+            background-color: #f5c6cb !important; /* 연한 분홍 */
         }
+
     </style>
 </head>
 
@@ -97,15 +98,19 @@
                     </dl>
                 </div>
                 <div class="button-wrap">
-                    <button type="button" class="btn-default" id="btnBomNew"><i class="fas fa-plus"></i></button>
-                    <button type="button" class="btn-danger y_write_auth" id="btnBomDelete"><i class="fas fa-trash"></i>
+                    <button type="button" class="btn-default" id="btnBomNew"
+                            style="width: 90px; height: 36px; float: none;">등록</button>
+                    <button type="button" class="btn-danger y_write_auth" id="btnBomDelete"
+                            style="width: 90px; height: 36px; float: none;">삭제
                     </button>
-                    <button type="button" class="btn-default" id="btnBomEdit"><i class="fas fa-edit"></i></button>
-                    <button type="button" class="btn-default y_write_auth" id="btnBomReplicate" data-labelCd="복제">복제
+                    <button type="button" class="btn-default" id="btnBomEdit"
+                            style="width: 90px; height: 36px; float: none;">수정</button>
+                    <button type="button" class="btn-default y_write_auth" id="btnBomReplicate" data-labelCd="복제"
+                            style="width: 90px; height: 36px; float: none;">
                     </button>
-                    <button type="button" class="btn-default y_write_auth" id="btnBomRevision" data-labelCd="개정">개정
+                    <button type="button" class="btn-default y_write_auth" id="btnBomRevision" data-labelCd="개정"
+                            style="width: 90px; height: 36px; float: none;">
                     </button>
-
                 </div>
             </div>
 
@@ -113,7 +118,7 @@
                  <div class="h-280" data-ax5grid="bom-grid" ></div>
              </div>-->
             <div class="container-fluid">
-                <div id="theGrid" style="height: 280px; max-height: 280px;"></div>
+                <div id="bom-grid" style="height: 280px; max-height: 280px;"></div>
             </div>
         </section>
 
@@ -129,29 +134,40 @@
                         <div class="button-wrap">
                             <ul>
                                 <li>
-                                    <button type="button" class="btn-default" id="btnBomCompNew"><i
-                                            class="fas fa-plus"></i></button>
+                                    <button type="button" class="btn-default" id="btnBomCompNew"
+                                            style="width: 115px; height: 36px;"><i
+                                            class="fas fa-plus"></i>등록
+                                    </button>
                                 </li>
 
                                 <li>
-                                    <button type="button" class="btn-danger y_write_auth" id="btnBomCompDelete"><i
-                                            class="fas fa-trash"></i></button>
+                                    <button type="button" class="btn-danger y_write_auth" id="btnBomCompDelete"
+                                            style="width: 115px; height: 36px;"><i
+                                            class="fas fa-trash"></i>삭제
+                                    </button>
                                 </li>
 
                                 <li>
-                                    <button type="button" class="btn-default" id="btnBomCompEdit"><i
-                                            class="fas fa-edit"></i></button>
+                                    <button type="button" class="btn-default" id="btnBomCompEdit"
+                                            style="width: 115px; height: 36px;"><i
+                                            class="fas fa-edit"></i>수정
+                                    </button>
                                 </li>
                                 <li>
-                                    <button type="button" class="btn-default" id="btnCompUp" title="순서 조정-위로"><i
-                                            class="fas fa-arrow-up"></i></button>
+                                    <button type="button" class="btn-default" id="btnCompUp" title="순서 조정-위로"
+                                            style="width: 130px; height: 36px;"><i
+                                            class="fas fa-arrow-up"></i>순서 조정-위로
+                                    </button>
                                 </li>
                                 <li>
-                                    <button type="button" class="btn-default" id="btnCompDown" title="순서 조정-아래로"><i
-                                            class="fas fa-arrow-down"></i></button>
+                                    <button type="button" class="btn-default" id="btnCompDown" title="순서 조정-아래로"
+                                            style="width: 130px; height: 36px;"><i
+                                            class="fas fa-arrow-down"></i>순서 조정-아래로
+                                    </button>
                                 </li>
                                 <li>
-                                    <button type="button" class="btn-default y_write_auth" id="btnCompOrderSave"><span
+                                    <button type="button" class="btn-default y_write_auth" id="btnCompOrderSave"
+                                            style="width: 115px; height: 36px;"><span
                                             data-labelCd="순서 저장">순서 저장</span></button>
                                 </li>
                             </ul>
@@ -222,131 +238,123 @@
                 <div class="popup_close_box"><button class="btn_popup_close" id="modal-close-x"><i class="fas fa-times"></i></button></div>
             </header>-->
 
-            <section class="pt-2">
-                <form id="bomForm">
-                    <input type="hidden" id="id" name="id" value="{%=o.id%}">
-                    <div class="table_box search">
-                        <div class="row">
+    <div class="table-wrap">
+           <form id="bomForm">
+                <table class="write-table">
+                <input type="hidden" id="id" name="id" value="{%=o.id%}">
+                <caption>주문등록 테이블</caption>
+                <tbody>
+                    <tr>
+                        <th style="text-align: center">
+                            <label for="popMaterialType">품목구분</label>
+                        </th>
+                        <td>
+                            <select class="form-control2" id='popMaterialType' name="popMaterialType"></select>
+                        </td>
 
-                                <div class="col-3">
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text fit_box_t4" data-labelCd="품목구분">품목구분</span>
-                                        </div>
-                                            <select class="form-control2" id='popMaterialType' name="popMaterialType" ></select>
-                                    </div>
-                                </div>
+                        <th style="text-align: center">
+                            <label for="popMaterialGroup">품목그룹</label>
+                        </th>
+                        <td>
+                            <select class="form-control2" id="popMaterialGroup" name="popMaterialGroup"></select>
+                        </td>
+                    </tr>
 
-                                <div class="col-4">
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text fit_box_t4" data-labelCd="품목그룹">품목그룹</span>
-                                        </div>
-                                            <select class="form-control2" id="popMaterialGroup" name="popMaterialGroup"></select>
-                                    </div>
-                                </div>
+                    <tr>
+                        <th style="text-align: center">
+                            <label for="txtProductName">품목명</label>
+                        </th>
+                        <td>
+                            <input class="form-control2" type="text" id="keyword" name="keyword" />
+                        </td>
+                       &nbsp;
+                        <td colspan="2" style="text-align: center;">
+                            <button type="button" class="btn-default" id="btnMatSearch" title="조회"><i class="fas fa-search"></i>검색</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-                                <div class="col-4">
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text fit_box_t4" data-labelCd="품목명">품목명</span>
-                                        </div>
-                                        <input class="form-control2" type="text" id="keyword" name="keyword" />
-                                    </div>
-                                </div>
-
-                                <div class="col-1" >
-                                        <button type="button" class="btn-default" id="btnMatSearch" title="조회"><i class="fas fa-search"></i></button>
-                                </div>
-                        </div>
-                     </div>
-                    <div class="grid_box">
-                            <div class="h-250" data-ax5grid="material-search-grid" ></div>
-                    </div>
-
-                     <div class="table_box sub">
-                       <div class="row">
-
-                            <div class="col-12">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="*(반)제품명">*(반)제품명</span>
-                                    </div>
-                                    <input class="form-control2" type="hidden" id="Material_id" name="Material_id" value="{%=o.Material_id%}" />
-                                    <input class="form-control2" type="text" id="MaterialName" name="MaterialName"  readonly="readonly" value="{%=o.MaterialName%}" />
-                                </div>
-                            </div>
-
-                            <div class="col-12">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="*BOM명">*BOM명</span>
-                                    </div>
-                                     <input class="form-control2" type="text" id="Name" name="Name" value="{%=o.Name%}" />
-                                </div>
-                            </div>
-
-                            <div class="col-12">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="*기준수량">*기준수량</span>
-                                    </div>
-                                     <input class="form-control2 tar" type="number" id="OutputAmount" name="OutputAmount" value="{%=o.OutputAmount%}" />
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="*BOM종류">*BOM종류</span>
-                                    </div>
-                                     <select class="form-control2" id="BOMType" name="BOMType" ></select>
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="버전">버전</span>
-                                    </div>
-                                     <input class="form-control2 tar" id="Version" name="Version" value="{%=o.Version%}" />
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <div class="input-group" data-ax5picker="basic" id="popSrchDt1">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="*적용시작일">*적용시작일</span>
-                                    </div>
-                                    <input class="form-control2 tac" type="text" id="StartDate" name="StartDate" value="{%=o.StartDate%}">
-                                    <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <div class="input-group" data-ax5picker="basic" id="popSrchDt2">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text fit_box_md" data-labelCd="*적용종료일">*적용종료일</span>
-                                    </div>
-                                    <input class="form-control2 tac" type="text" id="EndDate" name="EndDate" value="{%=o.EndDate%}">
-                                    <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                                </div>
-                            </div>
-                         </div>
-                     </div>
-                </form>
-            </section>
-
-            <section class="popupcontent" >
-                <div class="align_left">
-                    <button type="button" class="btn-popup y_write_auth" id="btnBomSave" ><span data-labelCd="저장">저장</span></button>
-                    <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
-                    <button type="button" class="btn-popup" id="btnTest"><span data-labelCd="새로고침">새로고침</span></button>
-                </div>
-            </section>
-
+        <div class="grid_box" style="margin-top: 10px;">
+            <div id="material-search-grid" style="height: 250px; max-height: 250px;"></div>
         </div>
 
+<!-- tfoot을 grid_box 아래로 이동 -->
+<table class="write-table">
+    <tfoot>
+        <tr>
+            <th style="text-align: center">
+                <label for="Material_id">*(반)제품명</label>
+            </th>
+            <td>
+                <input class="form-control2" type="hidden" id="Material_id" name="Material_id" value="{%=o.Material_id%}" />
+                <input class="form-control2" type="text" id="MaterialName" name="MaterialName"  value="{%=o.MaterialName%}" />
+            </td>
+
+            <th style="text-align: center">
+                <label for="Name">*BOM명</label>
+            </th>
+            <td>
+                <input class="form-control2" type="text" id="Name" name="Name" value="{%=o.Name%}" />
+            </td>
+        </tr>
+
+        <tr>
+            <th style="text-align: center">
+                <label for="OutputAmount">*기준수량</label>
+            </th>
+            <td>
+                <input class="form-control2 tar" type="number" id="OutputAmount" name="OutputAmount" value="{%=o.OutputAmount%}" />
+            </td>
+
+            <th style="text-align: center">
+                <label for="BOMType">*BOM종류</label>
+            </th>
+            <td>
+                <select class="form-control2" id="BOMType" name="BOMType"></select>
+            </td>
+        </tr>
+
+        <tr>
+            <th style="text-align: center">
+                <label for="Version">버전</label>
+            </th>
+            <td>
+                <input class="form-control2 tar" id="Version" name="Version" value="{%=o.Version%}" />
+            </td>
+            <th></th>
+            <td></td>
+        </tr>
+
+        <tr>
+            <th style="text-align: center">
+                <label for="StartDate">*적용시작일</label>
+            </th>
+            <td>
+                <input class="form-control2 tac" type="date" id="StartDate" name="StartDate" value="{%=o.StartDate%}">
+                <!--<span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color"></i></span>-->
+            </td>
+
+            <th style="text-align: center">
+                <label for="EndDate">*적용종료일</label>
+            </th>
+            <td>
+                <input class="form-control2 tac" type="date" id="EndDate" name="EndDate" value="{%=o.EndDate%}">
+               <!-- <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color"></i></span>-->
+            </td>
+        </tr>
+    </tfoot>
+</table>
+                </form>
+            </div>
+
+             <div class="popup-button">
+                <button type="button" class="btn-popup y_write_auth" id="btnBomSave" ><span data-labelCd="저장">저장</span></button>
+                <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+                <button type="button" class="btn-popup" id="btnTest"><span data-labelCd="새로고침">새로고침</span></button>
+            </div>
+
+        </div>
     </script>
 
     <script type="text/x-tmpl" id="bomMaterialTemplate">
@@ -402,8 +410,8 @@
                         </div>
                     </div>
 
-                    <div class="grid_box">
-                            <div class="h-250" data-ax5grid="material-search-grid" ></div>
+                   <div class="grid_box">
+                       <div id="material-search-grid" style="height: 250px; max-height: 250px;"></div>
                     </div>
 
                     <div class="table_box sub">
@@ -480,6 +488,7 @@
                 this.viewData = new wijmo.collections.CollectionView();
                 this.viewData2 = new wijmo.collections.CollectionView();
                 this.viewData3 = new wijmo.collections.CollectionView();
+                this.viewData4 = new wijmo.collections.CollectionView();
                 this.init();
             }
 
@@ -548,7 +557,9 @@
                     ]
 
                 };*/
-                this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+
+                //메인 그리드
+                this.grid = new wijmo.grid.FlexGrid('#bom-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
@@ -558,14 +569,34 @@
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            let item = sender.rows[e.row].dataItem; // 현재 행의 데이터 가져오기
+                            if (e.col === sender.columns.indexOf(sender.columns.getColumn('Name'))) {
+                                if (item.current_flag === 'current') {
+                                    e.cell.classList.add('back_current');
+                                } else if (item.current_flag === 'past') {
+                                    e.cell.classList.add('back_past');
+                                } else if (item.current_flag === 'future') {
+                                    e.cell.classList.add('back_future');
+                                } else if (item.current_flag === 'error') {
+                                    e.cell.classList.add('back_error');
+                                }
+                            }
+                        }
                     },
                     columns: [
+                        {binding: 'id', header: '번호', width: 100, align: 'left'},
+                        {binding: 'mat_type', header: '품목구분', width: 110, align: 'center'},
+                        {binding: 'mat_group_name', header: '품목그룹', width: 110, align: 'left'},
+                        {binding: 'mat_code', header: '(반)제품코드', width: 110, align: 'center'},
+                        {binding: 'mat_name', header: '(반)제품명', width: 200, align: 'left'},
+                        {binding: 'bom_type_name', header: 'BOM종류', width: 120, align: 'center'},
+                        {binding: 'Name', header: 'BOM명', width: 200, align: 'left'},
                         {binding: 'OutputAmount', header: '기준수량', width: 110, align: 'right'},
                         {binding: 'unit', header: '단위', width: 110, align: 'center'},
                         {binding: 'Version', header: 'Ver.', width: 110, align: 'center'},
                         {binding: 'StartDate', header: '적용시작일', width: 130, align: 'center'},
                         {binding: 'EndDate', header: '적용종료일', width: 130, align: 'center'},
-                        {binding: 'Description', header: '설명', width: "*", align: 'center' },
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
@@ -573,53 +604,15 @@
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = 'BOM';
 
-                /*let configBomComp = {
-                    target: $('[data-ax5grid="bomcomp-grid"]'),
-                    sortable: true,
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: true, // 열의 번호 보이기 여부
-                    showRowSelector: true,  // checkbox(선택) 보이기 여부
-                    multipleSelect: true, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: false, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onClick: function (e) {
-                            //this.self.selectAll({ selected: false });
-                            this.self.select(this.dindex, {__selected__: true});
-                            //e.self.select(this.dindex, {selected: true});
-                            //_this.gridBomComp.select(this.dindex);
-                            //this.self.select(this.dindex, {__selected__: true});
-                        },
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
-                    columns: [
-                        {binding: '_order', header: '순서', width: 120, align: 'center'},
-                        {binding: 'mat_type', header: '품목구분', width: 120, align: 'center'},
-                        {binding: 'mat_code', header: '품목코드', width: 150, align: 'center'},
-                        {binding: 'mat_name', header: '품목명', width: 350, align: 'left'},
-                        {binding: 'Amount', header: '필요수량', width: 80, align: 'right'},
-                        {binding: 'unit', header: '단위', width: 100, align: 'center'},
-                        {
-                            binding: 'Description', header: '비고', width: 300, align: 'left',
-                            editor: {type: 'textarea'}
-                        },
-                    ],
-                };*/
+
+                // 1레벨 그리드
                 this.grid2 = new wijmo.grid.FlexGrid('#bomcomp-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
                     showMarquee: true,
-                    isReadOnly: true,
+                    isReadOnly: false, // 편집 가능하도록 변경
+                    allowSorting: false, // 정렬 비활성화 (선택 사항)
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
@@ -632,17 +625,20 @@
                         {binding: 'mat_name', header: '품목명', width: 350, align: 'left'},
                         {binding: 'Amount', header: '필요수량', width: 120, align: 'right'},
                         {binding: 'unit', header: '단위', width: 100, align: 'center'},
-                        {  binding: 'Description', header: '비고', width: "*", align: 'left',}
-                       /* {
-                            binding: 'Description', header: '비고', width: 300, align: 'left',
-                            editor: {type: 'textarea'}
-                        },*/
+                        {
+                            binding: 'Description',
+                            header: '비고',
+                            width: 300,
+                            align: 'left',
+                            isReadOnly: false, // 편집 가능
+                            multiLine: true // 여러 줄 입력 허용
+                        }
                     ],
                     itemsSource: this.viewData2, // 데이터를 설정할 배열
                 });
 
                 new FlexGridContextMenu(this.grid2);
-                this.grid.downloadFileName = '1레벨';
+                this.grid2.downloadFileName = '1레벨';
 
 
                 /*let configBomTree = {
@@ -705,12 +701,13 @@
                     },
                 };
 */
-                this.grid = new wijmo.grid.FlexGrid('#bomtree-grid', {
+                // 전체레벨 그리드
+                this.grid3 = new wijmo.grid.FlexGrid('#bomtree-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
                     showMarquee: true,
-                    isReadOnly: true,
+                    isReadOnly: false,
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
@@ -721,25 +718,42 @@
                         {binding: 'mat_code', header: '품목코드', width: 150, align: 'center'},
                         {binding: 'lvl', header: '레벨', width: 100, align: 'right'},
                         {binding: 'mat_name', header: '품목명', width: 350, align: 'left'},
-                        {binding: 'bom_ratio', header: '투입비(최종생산품기준)', width: 120, align: 'right'},
-                        {binding: 'bom_qty', header: '필요량(중간생산품기준)', width: 120, align: 'right'},
+                        {binding: 'bom_ratio', header: '투입비(최종생산품기준)', width: 80, align: 'right'},
+                        {binding: 'bom_qty', header: '필요량(중간생산품기준)', width: 80, align: 'right'},
                         {binding: 'unit', header: '단위', width: 100, align: 'center'},
-                        {binding: 'Description', header: '비고', width: "*", align: 'left',}
-                       /* {, treeControl: true
-                            binding: 'Description', header: '비고', width: 300, align: 'left',
-                            editor: {type: 'textarea'}
-                        },*/
+                        {
+                            binding: 'Description',
+                            header: '비고',
+                            width: 300,
+                            align: 'left',
+                            isReadOnly: false, // 편집 가능
+                            multiLine: true // 여러 줄 입력 허용
+                        },
                     ],
+                    /* itemsSource: new wijmo.collections.CollectionView(this.viewData3, {
+                         getChildren: (item) => {
+                             return this.viewData3.filter(child => child.parent_key === item.my_key);
+                         }
+                     })*/
                     itemsSource: this.viewData3, // 데이터를 설정할 배열
                 });
 
+// 트리 기능 활성화
+                /*let tree = new wijmo.grid.detail.FlexGridDetailProvider(this.grid3, {
+                    createDetailCell: (row) => {
+                        let cell = document.createElement('div');
+                        cell.innerHTML = '<i class="fa fa-minus-square" aria-hidden="true"></i>';
+                        return cell;
+                    },
+                    isDetailAvailable: (row) => {
+                        return this.viewData3.some(child => child.parent_key === row.dataItem.my_key);
+                    }
+                });*/
 
-              /*  this.gridBom = new ax5.ui.grid(configBom);
-                this.gridBomComp = new ax5.ui.grid(configBomComp);
-                this.gridBomCompTree = new ax5.ui.grid(configBomTree);
-                this.grid_config1 = configBom;
-                this.grid_config2 = configBomComp;
-                this.grid_config_tree = configBomTree;*/
+
+                new FlexGridContextMenu(this.grid3);
+                this.grid3.downloadFileName = '전체레벨';
+
 
                 AjaxUtil.fillSelectOptions($('#cboMaterialType'), 'system_code', 'all', false, 'mat_type');
                 AjaxUtil.fillSelectOptions($('#cboMaterialGroup'), 'material_group', 'all', false);
@@ -763,13 +777,9 @@
                 let content = tmpl('bomCreateTemplate', data);
                 let $content = $(content);
 
-                let modalContainer = null;
-                if (!data.id) {
-                    modalContainer = new PopupDraggable('BOM 등록');
-                } else {
-                    modalContainer = new PopupDraggable('BOM 수정');
-                }
-                modalContainer.open({width: 600, height: 650, $content});
+                let modalContainer = new PopupDraggable(data.id ? 'BOM 수정' : 'BOM 등록');
+                modalContainer.open({width: 1025, height: 700, $content});
+
                 $('#popSrchDt1').ax5DatePicker({direction: 'top'});
                 $('#popSrchDt2').ax5DatePicker({direction: 'top'});
 
@@ -779,60 +789,51 @@
 
                 let $matSearchGrid = null;
                 let selectedItem = null;
-                let target = $content.find('[data-ax5grid="material-search-grid"]');
-                let config = {
-                    target: target,
-                    sortable: true,
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: true, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onClick: function () {
-                            $matSearchGrid.select(this.dindex);
-                        },
-                        onDBLClick: function () {
-                            $matSearchGrid.select(this.dindex);
-                            //_this.selectData(this.item);
-                            selectedItem = this.item;
-                            $Material_id.val(selectedItem.id);
-                            $MaterialName.val(selectedItem.Name);
-                            $BomName.val(selectedItem.Name);
-                        },
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
+                let target = $content.find('#material-search-grid');
+
+                // 🔍 데이터가 배열인지 확인하고 기본값 설정
+                this.viewData4 = Array.isArray(this.viewData4) ? this.viewData4 : [];
+
+                this.grid4 = new wijmo.grid.FlexGrid('#material-search-grid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: false,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
                     },
                     columns: [
-                        {binding: 'MaterialTypeName', header: '품목구분', width: 100, align: 'left', sortable: false},
-                        {binding: 'group_name', header: '품목그룹', width: 100, align: 'left', sortable: false},
-                        {binding: 'Code', header: '품목코드', width: 100, align: 'center', sortable: false},
-                        {binding: 'Name', header: '품목명', width: 200, align: 'left', sortable: false},
+                        {binding: 'MaterialTypeName', header: '품목구분', width: 100, align: 'left'},
+                        {binding: 'group_name', header: '품목그룹', width: 150, align: 'left'},
+                        {binding: 'Code', header: '품목코드', width: 150, align: 'center'},
+                        {binding: 'Name', header: '품목명', width: 200, align: 'left'},
+                        {binding: '', header: '', width: '*', align: 'left'}
+                    ],
+                    itemsSource: this.viewData4 // 🚀 기본값 확인 후 설정
+                });
 
-                        //{ binding: 'Description', header: '설명', width: 250, align: 'center', sortable: false },
-                    ]
-                };
 
-                $matSearchGrid = new ax5.ui.grid(config);
+                this.grid4.hostElement.addEventListener('dblclick', (e) => {
+                    let hitTest = this.grid4.hitTest(e);
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        let row = hitTest.row;
+                        let selectedItem = this.grid4.rows[row].dataItem;
+                        $Material_id.val(selectedItem.id);
+                        $MaterialName.val(selectedItem.Name);
+                        $BomName.val(selectedItem.Name);
+                    }
+                });
+
+                $matSearchGrid = this.grid4; // 기존 grid4를 할당
+
                 $content.find('#btnBomSave').on('click', function () {
                     let $form = $content.find('#bomForm');
-                    Alert.confirm('',
-                        '저장하시겠습니까?',
-                        function () {
-                            _this.saveBOMData($form);
-                        },
-                        function () {
-                        }
-                    );
+                    Alert.confirm('', '저장하시겠습니까?', function () {
+                        _this.saveBOMData($form);
+                    });
                 });
 
                 let $popMaterialType = $content.find('#popMaterialType');
@@ -844,55 +845,43 @@
 
                 AjaxUtil.fillSelectOptions($popMaterialGroup, 'material_group', 'all', '', 'product');
 
-                $popMaterialType.change(function (e) {
+                $popMaterialType.change(function () {
                     AjaxUtil.fillSelectOptions($popMaterialGroup, 'material_group', 'all', '', $popMaterialType.val());
                 });
 
                 let $bomType = $content.find('#BOMType');
-                AjaxUtil.fillSelectOptions($bomType, 'system_code', "", data.BOMType, 'bom_type');
+                AjaxUtil.fillSelectOptions($bomType, 'system_code', '', data.BOMType, 'bom_type');
 
-
-                // 검색버튼 클릭
-                $content.find('#btnMatSearch').click(function (e) {
-
+                // 검색 버튼 클릭 이벤트
+                $content.find('#btnMatSearch').click(function () {
                     let matType = $popMaterialType.val();
                     let matGroup = $popMaterialGroup.val();
                     let keyword = $keyword.val();
                     let url = '/api/popup/search_material';
-                    let data = {
+                    let requestData = {
                         'material_type': matType,
                         'material_group': matGroup,
-                        'keyword': keyword,
+                        'keyword': keyword
                     };
 
                     let fncallback = function (result) {
                         if (result.success) {
-
                             let recordsTotal = result.data.length;
-                            $matSearchGrid.setData({
-                                list: result.data,
-                                page: {
-                                    display: true,
-                                    totalElements: recordsTotal,
-                                }
-                            });
+                            $matSearchGrid.itemsSource = result.data || [];
                         }
                     };
-                    AjaxUtil.getAsyncData(url, data, fncallback);
 
-                    //검색버튼을 누르고 초기화한다
+                    AjaxUtil.getAsyncData(url, requestData, fncallback);
                     selectedItem = null;
-
                 });
 
-                //새로고침
+                // 새로고침 버튼 이벤트
                 let $btnTest = $content.find('#btnTest');
-
-                $btnTest.click(function (e) {
-                    $matSearchGrid.init().repaint();
+                $btnTest.click(function () {
+                    $matSearchGrid.collectionView.refresh();
                 });
-
             }
+
 
             showBomCompEdit(data) {
                 let _this = this;
@@ -1130,7 +1119,7 @@
 
                 let fnSuccess = function (result) {
                     if (result.success) {
-                        Notify.success('저장되었습니다');
+                        Alert.alert('','저장되었습니다');
                         _this.searchBomList();
                     } else {
                         Notify.error(result.message);
@@ -1294,27 +1283,27 @@
                 $('#btnBomCompGridSetting').css('visibility', 'visible');
             }
 
-           /* //그리드 컬럼 설정
-            page.popColSetting = new popColSetting();
-            let columns1 = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid1', page.gridBom);
-            let columns2 = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid2', page.gridBomComp);
+            /* //그리드 컬럼 설정
+             page.popColSetting = new popColSetting();
+             let columns1 = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid1', page.gridBom);
+             let columns2 = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid2', page.gridBomComp);
 
-            $('#btnGridSetting').click(function (e) {
-                let _this = this;
-                let fix_cols = page.grid_config1.frozenColumnIndex;
-                page.popColSetting.show(gui.gui_code, gui.template_key, 'grid1', page.grid_config1.columns, page.gridBom, {
-                    'order_fix': false,
-                    'fix_cols': fix_cols
-                });
-            });
-            $('#btnBomCompGridSetting').click(function (e) {
-                let _this = this;
-                let fix_cols = page.grid_config2.frozenColumnIndex;
-                page.popColSetting.show(gui.gui_code, gui.template_key, 'grid2', page.grid_config2.columns, page.gridBomComp, {
-                    'order_fix': false,
-                    'fix_cols': fix_cols
-                });
-            });*/
+             $('#btnGridSetting').click(function (e) {
+                 let _this = this;
+                 let fix_cols = page.grid_config1.frozenColumnIndex;
+                 page.popColSetting.show(gui.gui_code, gui.template_key, 'grid1', page.grid_config1.columns, page.gridBom, {
+                     'order_fix': false,
+                     'fix_cols': fix_cols
+                 });
+             });
+             $('#btnBomCompGridSetting').click(function (e) {
+                 let _this = this;
+                 let fix_cols = page.grid_config2.frozenColumnIndex;
+                 page.popColSetting.show(gui.gui_code, gui.template_key, 'grid2', page.grid_config2.columns, page.gridBomComp, {
+                     'order_fix': false,
+                     'fix_cols': fix_cols
+                 });
+             });*/
 
             page.searchBomList();
 
@@ -1325,7 +1314,7 @@
             $('#btnBomNew').click(function (e) {
 
                 let start_date = CommonUtil.getYYYYMMDD();
-                let end_date = '2100-12-31'
+                let end_date = CommonUtil.getYYYYMMDD();
                 let data = {
                     'id': '',
                     'Material_id': '',
@@ -1435,11 +1424,15 @@
             });
 
 
+
+
             $('#btnBomEdit').click(function (e) {
-                let items = page.gridBom.getList("selected");
+                let items = this.grid.getList("selected");
+
+
                 if (items.length > 0) {
                     let id = items[0].id;
-                    //데이터는 그리드에서 가져오는것이 아니라 서버에서 가져온다
+
                     let url = '/api/definition/bom/detail';
                     let result = AjaxUtil.getSyncData(url, {id: id})
                     if (result.success) {

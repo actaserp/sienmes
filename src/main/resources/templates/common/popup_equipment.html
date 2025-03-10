@@ -11,7 +11,7 @@
         <div class="table_box search">
                 <div class="row">
 
-                    <div class="col-6">
+                    <div class="col-5">
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text fit_box_t4" data-commonCd="설비그룹">설비그룹</span>
@@ -29,8 +29,9 @@
                         </div>
                     </div>
                     
-                    <div class="col-1" >
-                            <button type="button" class="btn-default" id="btnEquipmentSearch" title="조회"><i class="fas fa-search"></i></button>
+                    <div class="col-2">
+                            <button type="button" class="btn btn-delete" id="btnEquipmentSearch" title="조회">
+                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘"></button>
                     </div> 
 
                 </div>
@@ -43,13 +44,13 @@
     </section>
 
 
-    <section class="popupcontent" >
-        <div class="popup_button_group bottom align_left">
-            <button type="button" class="btn-popup" id="btnEquipmentSelect" ><span data-commonCd="선택">선택</span></button>
-            <button type="button" class="btn-popup" id="btn-material-search-close"><span data-commonCd="닫기">닫기</span></button>
-            <button type="button" class="btn-popup" id="btnTest"><span data-commonCd="새로고침">새로고침</span></button>
-        </div>
-    </section>
+    <section class="popupcontent" style="height:45px;">
+    <div class="popup_button_group bottom align_left">
+        <button type="button" class="btn-popup" id="btnEquipmentSelect"><span data-commonCd="선택">선택</span></button>
+        <button type="button" class="btn-popup" id="btn-material-search-close"><span data-commonCd="닫기">닫기</span></button>
+        <button type="button" class="btn-popup" id="btnTest"><span data-commonCd="새로고침">새로고침</span></button>
+    </div>
+</section>
 
 </div>
 </script>
@@ -79,7 +80,7 @@
 
             let content = tmpl('equipmentSearchTemplate', {});
             let $content = $(content);
-            this.modalContainer.open({ width: 650, height: 430, $content });
+            this.modalContainer.open({ width: 650, height: 500, $content });
 
             let config = {
                 target: $('[data-ax5grid="equipment-search-grid"]'),

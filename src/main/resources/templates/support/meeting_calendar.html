@@ -269,7 +269,8 @@
                 let modalContainer;
                 modalContainer = new PopupDraggable('일정 수정');
 
-                modalContainer.open({ width: 600, height: 300, $content });
+                modalContainer.open({ width: 600, height: 420, $content });
+
                 $('#edit-start-time').timepicker({
                     show2400: true,
                     timeFormat: 'H:i'
@@ -344,7 +345,7 @@
                         let url = '/api/support/calendar/save';
                         let fnSuccess = function (res) {
                             modalContainer.close();
-                            Notify.success('저장되었습니다.');
+                            Alert.alert('','저장되었습니다.');
                         }
                         AjaxUtil.postAsyncData(url, eventData, fnSuccess);
 
@@ -372,7 +373,7 @@
                         let fnSuccess = function () {
                             $("#calendar").fullCalendar('removeEvents', $('#edit-id').val());
                             modalContainer.close();
-                            Notify.success('삭제되었습니다.');
+                            Alert.alert('','삭제되었습니다.');
                             $('#edit-id').val('');
                             //_this.refreshEvents();
                         }
@@ -399,7 +400,7 @@
                 //주,일 view일때 종일 <-> 시간 변경불가
                 if (view.type === 'agendaWeek' || view.type === 'agendaDay') {
                     if (dd !== event.allDay) {
-                        alert('드래그앤드롭으로 종일<->시간 변경은 불가합니다.');
+                        Alert.alert('','드래그앤드롭으로 종일<->시간 변경은 불가합니다.');
                         location.reload();
                         return false;
                     }
@@ -413,7 +414,7 @@
                         //...
                     },
                     success: function (response) {
-                        alert('수정: ' + moment(event.start._d).format('YYYY-MM-DD HH:mm') + ' ~ ' + moment(event.end._d).format('YYYY-MM-DD HH:mm'));
+                        Alert.alert('','수정: ' + moment(event.start._d).format('YYYY-MM-DD HH:mm') + ' ~ ' + moment(event.end._d).format('YYYY-MM-DD HH:mm'));
                     }
                 });
             }
@@ -428,7 +429,7 @@
                 let modalContainer;
                 modalContainer = new PopupDraggable('일정 등록');
 
-                modalContainer.open({ width: 600, height: 300, $content });
+                modalContainer.open({ width: 600, height: 420, $content });
 
                 $('#edit-start-time').timepicker({
                     show2400: true,
@@ -482,7 +483,7 @@
                     }
 
                     if (eventData.title === '') {
-                        alert('일정명은 필수입니다.');
+                        Alert.alert('','일정명은 필수입니다.');
                         return false;
                     }
                     Alert.confirm('', "저장하시겠습니까?", function (x) {
@@ -490,7 +491,7 @@
                         let url = '/api/support/calendar/save';
                         let fnSuccess = function (res) {
                             modalContainer.close();
-                            Notify.success('저장되었습니다.');
+                            Alert.alert('','저장되었습니다.');
                             //_this.refreshEvents();
                             $('#calendar').fullCalendar('removeEvents');
                             $("#calendar").fullCalendar('refetchEvents')

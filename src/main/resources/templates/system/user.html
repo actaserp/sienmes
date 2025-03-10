@@ -91,7 +91,7 @@
             </div> <!--//section-top end -->
             <div class="container-fluid">
                 <p id="selectedItem"></p>
-                <div id="theGrid" style="height: 500px; max-height: 500px;"></div>
+                <div id="theGrid" style="height: 440px; max-height: 440px;"></div>
             </div>
             <div class="btn-wrap">
             </div>
@@ -250,7 +250,7 @@
                         </div>
                         <div class="container-fluid">
                             <p id="selectedItem"></p>
-                            <div id="user_group_grid" style="height: 150px; max-height: 150px;"></div>
+                            <div id="user_group_grid" style="height: 200px; max-height: 200px;"></div>
                         </div>
                     </div>
                 </section>
@@ -327,7 +327,7 @@
         var viewdata2;
 
         let columns = [
-            {binding: 'id', header: 'id', width: 100, align: 'center',visible:false},
+            {binding: 'id', header: 'id', width: 100, align: 'center', visible: false},
             {binding: 'login_id', header: '사원번호', width: 100, align: 'center'},
             {binding: 'Name', header: '이름', width: 160, align: 'center'},
             {binding: 'group_name', header: '사용자그룹', width: 120, align: 'center'},
@@ -348,24 +348,22 @@
             {binding: 'date_joined', header: '생성일', width: 200, align: 'center'},
             {binding: '', header: '', width: "*", align: 'center'},
         ];
+        /*header: '<span class="editable_clr">소속 여부</span>',*/
 
         let columns2 = [
-            { binding: 'grp_name', header: '사용자 그룹명', width: 400, align: 'left' },
+            {binding: 'grp_name', header: '사용자 그룹명', width: 150, align: 'left'},
             {
                 binding: 'grp_check',
-                /*header: '<span class="editable_clr">소속 여부</span>',*/
                 header: '소속 여부',
                 width: 150,
                 align: 'center',
-                /*editor: {
-                    type: 'checkbox',
-                    config: { height: 15, trueValue: 'Y', falseValue: 'N' }
-                },*/
+                dataMap: new wijmo.grid.DataMap([
+                    {key: 'Y', value: 'Y'},
+                    {key: 'N', value: 'N'}
+                ], 'key', 'value'),
             },
-            { binding: '', header: '', width: "*", align: 'left' },
+            {binding: '', header: '', width: "*", align: 'left'},
         ];
-
-
 
         document.readyState === 'complete' ? init() : window.onload = init;
 
@@ -409,9 +407,9 @@
 
             theGrid.hostElement.addEventListener('dblclick', function (e) {
                 let selectedItem = theGrid.selectedItems[0];
-                console.log('확인', selectedItem);
-                document.getElementById('id').value = selectedItem.id;
+                /*console.log('확인', selectedItem);*/
 
+                document.getElementById('id').value = selectedItem.id;
                 document.getElementById('login_id').value = selectedItem.login_id;
                 document.getElementById('Name').value = selectedItem.Name;
                 document.getElementById('Depart_id').value = selectedItem.dept_name;
@@ -426,6 +424,7 @@
                         }
                     }
                 }
+
                 setSelectValue('UserGroup_id', selectedItem.group_name);
                 setSelectValue('Factory_id', selectedItem.factory_name);
                 setSelectValue('Depart_id', selectedItem.dept_name);
@@ -518,6 +517,7 @@
             }
 
             let menulogData = data.map(item => ({
+                id: item.id,
                 login_id: item.login_id,
                 Name: item.Name,
                 group_name: item.group_name,
@@ -557,9 +557,21 @@
             let url = '/api/system/user/save';
 //데이터입력체크루틴 누락
             let data = FormUtil.extractForm($('#userForm'));
+
+            if (!data.login_id) {
+                Alert.alert('', '사번을 입력해 주세요');
+                return;
+            } else if (!data.Name) {
+                Alert.alert('', '이름을 입력해 주세요');
+                return;
+            }/*else if(!data.UserGroup_id){
+                Alert.alert('','사용자그룹을 선택해 주세요');
+                return;
+            }*/
+
             let fnSuccess = function (res) {
                 if (res.success) {
-                    Notify.success("저장되었습니다."); // Notification
+                    Alert.alert('', '저장되었습니다.');
                     searchDataBind();
                 } else if (!res.success) {
                     Alert.alert('', res.message);
@@ -580,7 +592,7 @@
                     Alert.alert('', res.message);
                 }
             };
-            AjaxUtil.postAsyncData( url+ '/delete', data, fnsuccess);
+            AjaxUtil.postAsyncData(url + '/delete', data, fnsuccess);
         }
 
         function validatePassword(pw, options) {
@@ -674,7 +686,7 @@
             let $content = $(content);
 
             let popContainer = new PopupDraggable('패스워드 설정');
-            popContainer.open({width: 450, height: 210, $content});
+            popContainer.open({width: 635, height: 240, $content});
 
             let $pass1 = $content.find('#pass1');
             let $pass2 = $content.find('#pass2');
@@ -698,8 +710,6 @@
 //    Alert.alert('', '패스워드 정책위반');
 //    return;
 //}
-
-
                 if (p1 != p2) {
                     Alert.alert('', "패스워드가 일치하지 않습니다.");
                 } else {
@@ -716,33 +726,38 @@
                 }
             });
 
-        }
+        } /*error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Error fetching log_count data:', textStatus, errorThrown);
+                }*/
+        /* userGroupGrid.list.forEach(function (item, idx) {
+               if (item.grp_check == 'Y') {
 
-
-
+               }
+           })*/
 
         function user_group_grid(user_id) {
             let data2 = [];
-            let param = {
-                'action': 'user_grp_list',
-                'id': user_id,
-            };
 
             $.ajax({
                 url: '/api/system/user/user_grp_list',
                 type: 'GET',
                 data: {
-                    'param':param
+                    'id': user_id
                 },
                 async: false,
                 success: function (data) {
-                    data2 = data.data;
+                    /*console.log(data);*/
+                    data2 = data.data.map(item => ({
+                        ...item,
+                        grp_check: item.grp_check ?? 'N'  // null 또는 undefined일 경우 'N'으로 설정
+                    }));
                 },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    console.error('Error fetching log_count data:', textStatus, errorThrown);
-                }
+
             })
 
+            if (theGrid2) {
+                theGrid2.dispose();  // 기존 그리드를 제거합니다.
+            }
 
             viewdata2 = new wijmo.collections.CollectionView(data2);
 
@@ -750,42 +765,62 @@
                 autoGenerateColumns: false,
                 showMarquee: true,
                 columns: columns2,
-                isReadOnly: true,
+                isReadOnly: false,
                 itemsSource: viewdata2
             });
 
-           /* userGroupGrid.list.forEach(function (item, idx) {
-                if (item.grp_check == 'Y') {
-
-
+            // Grid 생성 후 formatItem 이벤트로 헤더에 HTML 적용
+            theGrid2.formatItem.addHandler((s, e) => {
+                if (e.panel === s.columnHeaders) {
+                    let col = s.columns[e.col];
+                    if (col.binding === 'grp_check') {
+                        e.cell.innerHTML = '<span class="editable_clr">소속 여부</span>';
+                    }
                 }
-            })*/
+            });
+
+            // 체크박스 값을 'Y' 또는 'N'으로 저장
+            theGrid2.cellEditEnding.addHandler((s, e) => {
+                let col = s.columns[e.col];
+                if (col.binding === 'grp_check') {
+                    let item = s.rows[e.row].dataItem;
+                    item.grp_check = e.panel.getCellData(e.row, e.col) ? 'Y' : 'N';
+                }
+            });
+
             theGrid2.rowHeaders.columns.splice(0, 1);
         }
 
 
         function saveUserGroup(user_id) {
             let _this = this;
-//let items = [];
-// $.each(_this.userGroupGrid.list, function (idx, item) {
+            let url = '/api/system/user/save_user_grp';
 
-//    items.push({ grp_id: item.grp_id, 'grp_check': item.grp_check });
-//});
             let param = {
-                Q: JSON.stringify(_this.userGroupGrid.getList()),
-                'id': user_id
+                Q: JSON.stringify(theGrid2.itemsSource.items), // 현재 그리드 데이터 가져오기
+                id: user_id
             };
-            let fnSuccess = function (res) {
-                if (res.success) {
-                    Notify.success('저장되었습니다.');
-                    _this.searchDataBind();
-                } else {
-                    Alert.alert('', res.message);
+
+
+            Alert.confirm('', '저장하시겠습니까?', function () {
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('', '저장되었습니다.');
+                        searchDataBind();
+                    } else {
+                        Alert.alert('', res.message);
+                    }
                 }
-            }
-            AjaxUtil.postAsyncData(_this.baseUrl + '/save_user_grp', param, fnSuccess);
+                AjaxUtil.postAsyncData(url, param, fnSuccess, 'application/json');
+            });
         }
 
+
+        //let items = [];
+        // $.each(_this.userGroupGrid.list, function (idx, item) {
+
+        //    items.push({ grp_id: item.grp_id, 'grp_check': item.grp_check });
+        //});
 
         $(document).ready(function (e) {
             setButtonState();
@@ -880,21 +915,18 @@
             });
 
             $('#btnUserGroupSave').click(function (e) {
-                let pk = page.grid.getList('selected')[0].id;
-                if (pk) {
-                    Alert.confirm('',
-                        '저장하시겠습니까?',
-                        function () {
-                            saveUserGroup(pk)
-                        },
-                        function () {
-                        }
-                    )
-                }
+                /*let pk = page.grid.getList('selected')[0].id;*/
+                let pk = $('#userForm').find('#id').val();
 
+                if (!pk) {
+                    Alert.alert('', '정보를 선택해 주세요.');
+                    return false;
+                }
+                saveUserGroup(pk)
             });
 
         });
 
     </script>
+</th:block>
 </html>

@@ -1,58 +1,66 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-<div class="content_wrap">
+    <div class="layout-contents">
+
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>용수검사성적서</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
+            </div>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>일지 및 데이터</li>
+                <li>선행요건일지</li>
+                <li>용수검사성적서</li>
+            </ul>
+        </div>
 
     <section class="section">
-        <div class="title_box">
-            <div class="left_align">
-                <h3 data-labelCd="용수검사성적서">용수검사성적서</h3>
-            </div>
-            <button type="button" class="btn-default pull-right" id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress"></i></button>
-            <button class="btn-default pull-right mr-1" onClick="CommonUtil.toggleFullScreen('body');">
-                <i class="fas fa-expand"></i>
-            </button>
-        </div>
-        <div class="table_box search">
-            <div class="row">
-                <div class="col-8 col-lg-4 col-xl-3">
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_sm" data-labelCd="일자">일자</span>
-                        </div> 
-                        <div data-ax5picker="multi" id="srchDt">
-                            <div class="input-group-append">
-                                <input class="tac " type="text" id="srchStartDt" name="srchStartDt" />
-                                <span class="input-group-text fs-xl">
-                                    <i class="fas fa-calendar-alt calendar_color" ></i>
-                                </span>
-                                <span class="slow_sign">~</span>
-                                <input class="tac " type="text" id="srchEndDt" name="srchEndDt" />
-                                <span class="input-group-text fs-xl">
-                                    <i class="fas fa-calendar-alt calendar_color"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-               
+        <div class="section-top">
+            <div class="search-wrap">
+                <dl>
+                    <dt>
+                        <label>일자</label>
+                    </dt>
+                    <dd>
+                        <ul class="date-box">
+                            <li>
+                                <input class="tac " type="date" id="srchStartDt" name="srchStartDt" />
+                                <label for="srchStartDt" class="hide">시작일</label>
+                            </li>
+                            <li>
+                                <input class="tac " type="date" id="srchEndDt" name="srchEndDt" />
+                                <label for="srchEndDt" class="hide">종료일</label>
+                            </li>
+                        </ul>
+                    </dd>
+                </dl>
 
-                <div class="col-1">
-                    <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                </div>
+                <dl>
+                    <dt><span class="eq"></span></dt>
+                    <dd>
+                        <li>
+                            <a class="btn btn-delete" title="검색" id="btnSearch">
+                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                검색
+                            </a>
+                        </li>
+                    </dd>
+                </dl>
             </div>
-        </div>
-    </section>
+            <div class="button-wrap">
+                <dl>
+                    <dt></dt>
+                    <dd>
+                        <button type="button" class="btn-default" id="btnAdd">등록</button>
+                    </dd>
+                </dl>
+            </div>
 
-    <section style="width:100%; height:100%;">
-        <div class="grid_box">
-            <div class="title_box">
-                 <span class="right_align rpt" data-labelCd="점검 현황">점검 현황</span>
-                <button type="button" class="btn-default" id="btnAdd">등록</button>
-                <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>                
-            </div>
-            <div class="h-600" data-ax5grid="check_result_grid"></div>
         </div>
+        <div class="h-600" data-ax5grid="check_result_grid"></div>
     </section>
 </div>
 </th:block>

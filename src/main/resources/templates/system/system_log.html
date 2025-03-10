@@ -36,12 +36,12 @@
                         <dd>
                             <ul class="date-box">
                                 <li>
-                                    <input class="tac w150 date_from" type="date" id="srchStartDt"
+                                    <input class="tac date_from" type="date" id="srchStartDt"
                                            name="srchStartDt"/>
                                     <label for="srchStartDt" class="hide">시작일</label>
                                 </li>
                                 <li>
-                                    <input class="tac w150 date_to" type="date" id="srchEndDt"
+                                    <input class="tac date_to" type="date" id="srchEndDt"
                                            name="srchEndDt"/>
                                     <label for="srchEndDt" class="hide">종료일</label>
                                 </li>
@@ -89,12 +89,13 @@
             </div> <!--//section-top end -->
             <div class="container-fluid">
                 <p id="selectedItem"></p>
-                <div id="theGrid" style="height: 500px; max-height: 500px;"></div>
+                <div id="theGrid" style="height: 440px; max-height: 440px;"></div>
             </div>
             <div class="btn-wrap">
             </div>
+        </section>
 
-
+        <section class="section">
             <div class="table-wrap" style="margin-top: 10px;">
                 <table class="write-table">
                     <caption>시스템로그 상세테이블</caption>
@@ -202,14 +203,14 @@
                 }
             });
 
-            // 데이터 배열이 비어있을 경우 여러 개의 빈 객체 추가
+            /*// 데이터 배열이 비어있을 경우 여러 개의 빈 객체 추가
             if (data2.length === 0) {
                 let emptyRowsCount = 8;  // 원하는 빈 행의 수
                 for (let i = 0; i < emptyRowsCount; i++) {
                     data2.push({});
                 }
                 console.log('Grid initialized with empty data.');
-            }
+            }*/
 
             viewdata = new wijmo.collections.CollectionView(data2);
             // 데이터 그리드에 바인딩
@@ -252,8 +253,9 @@
                 data: data,
                 success: function (result) {
                     if (result.success) {
-                        console.log("Result data:", result.data);
+                        /*console.log("Result data:", result.data);*/
                         grid_binding(result.data);
+                        resetSearchFields();
                     } else {
                         console.log("Error occurred");
                     }
@@ -262,8 +264,12 @@
                     console.error('Error fetching log_list data:', textStatus, errorThrown);
                 }
             });
+        }
 
-
+        // 입력 필드 초기화
+        function resetSearchFields() {
+            let fields = ['#id', '#type', '#source', '#created', '#message'];
+            fields.forEach(field => $(field).val(''));
         }
 
         function grid_binding(data) {

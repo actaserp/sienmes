@@ -31,57 +31,84 @@ table.type01 {
 
 
 <th:block layout:fragment="content">
-<div class="content_wrap">
+    <div class="layout-contents">
     <input type="hidden" id="bhId" th:value="${bh_id}" />
     <input type="hidden" id="data_date" th:value="${data_date}" />
     <input type="hidden" id="search_cond" th:value="${searchcond}" />
     <input type="hidden" id="viewMode" th:value="${view_mode}" />
+
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>용수검사성적서</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
+            </div>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>일지 및 데이터</li>
+                <li>선행요건일지</li>
+                <li>용수검사성적서</li>
+            </ul>
+        </div>
+
     <section class="section">
-        <div class="title_box ">
+        <!--<div class="title_box ">
             <div class="left_align">
                 <h3 data-labelCd="용수검사성적서">용수검사성적서</h3>
             </div>
             <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
             <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
-        </div>
+        </div>-->
 
-        <div class="table_box search">
-            <div class="row">
-                <div class="col-6 col-lg-6 col-xl-6">
-                    <div class="row">
-                        <div class="col-12 col-lg-12 col-xl-12">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="일지명">일지명</span>
-                                </div>
-                                <input class="form-control2 tac" type="text" id="title" name="title" />
-                            </div>
+        <div class="section-top">
+            <div class="search-wrap">
+                <dl>
+                    <dt>
+                        <label>일지명</label>
+                    </dt>
+                    <dd>
+                        <input class="form-control2 tac" type="text" id="title" name="title" />
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        일자<span class="eq"></span>
+                    </dt>
+                    <dd>
+                        <input class="form-control2 tac" type="text" id="dataDate" name="dataDate" readonly />
+                        <!-- <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" onclick="javascript: $('#dataDate').click()"></i></span>-->
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <label>작성자</label>
+                    </dt>
+                    <dd>
+                        <div class="srch-box">
+                            <input class="form-control2 tac" type="text" id="firstName" name="firstName" disabled />
                         </div>
-                        <div class="col-6 col-lg-6 col-xl-6">
-                            <div class="input-group" data-ax5picker="multi" id="pickerDate">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="일자">일자</span>
-                                </div>
-                                <input class="form-control2 tac" type="text" id="dataDate" name="dataDate"/>
-                                <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color"></i></span>
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-6 col-xl-6">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text fit_box_sm" data-labelCd="작성자">작성자</span>
-                                </div>
-                                <input class="form-control2 tac" type="text" id="firstName" name="firstName" disabled />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-6 col-xl-6">
+                    </dd>
+                </dl>
+
+                <dl>
+                    <dt>
+                        <label>종합판정</label>
+                    </dt>
+                    <dd>
+                        <select class="form-control2 "  id="judgment" name="judgment" disabled>
+                            <option value = "적합">적합</option>
+                            <option value = "부적합">부적합</option>
+                        </select>
+                    </dd>
+                </dl>
+
+                <div>
                     <div id="approveBox"></div>
                 </div>
             </div>
         </div>
-        
+
         <div class="title_box">
             <span class="right_align rpt" data-labelCd="관리기준">관리기준</span>
             <div class="left_align">
@@ -140,12 +167,38 @@ table.type01 {
                 </div>
             </div>
         </div>
-        
-        
-        
+
     </section>
 
     <section class="section">
+        <div class="section-top">
+            <div class="search-wrap">
+                <dl>
+                    <dt>
+                        구역명
+                    </dt>
+                    <dd>
+                        <input class="form-control2 tac" type="text" id="location" name="location" placeholder="직접입력해주세요"/>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        채취일자
+                    </dt>
+                    <dd>
+                        <input class="form-control2 tac" type="date" id="pickupDate1" name="pickupDate1"/>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        검사마스터
+                    </dt>
+                    <dd>
+                        <input class="form-control2 tac" type="text" id="mast" name="mast" value="용수검사성적서"/>
+                    </dd>
+                </dl>
+            </div>
+        </div>
         <div class="grid_box" id="prodListGrid">
             <div class="title_box">
                 <span class="right_align rpt" data-labelCd="점검 목록">점검 목록</span>
@@ -161,41 +214,14 @@ table.type01 {
                 <button type="button" class="btn-default" id="btnList">목록</button>
                 <button type="button" class="btn-default" id="btnNew" name="btnNew"><i class="fas fa-plus"></i></button>
             </div>
-            <div class="col-6 col-lg-6 col-xl-6">
-		                    <div class="row">
-		                        <div class="col-12 col-lg-12 col-xl-12">
-		                            <div class="input-group">
-		                                <div class="input-group-prepend">
-		                                    <span class="input-group-text fit_box_sm" data-labelCd="구역명">구역명</span>
-		                                </div>
-		                                <input class="form-control2 tac" type="text" id="location" name="location" placeholder="직접입력해주세요"/>
-		                            </div>
-		                        </div>
-		                        <div class="col-6 col-lg-6 col-xl-6">
-		                            <div class="input-group" data-ax5picker1="multi" id="pickupDate">
-		                                <div class="input-group-prepend">
-		                                    <span class="input-group-text fit_box_sm" data-labelCd="채취일자">채취일자</span>
-		                                </div>
-		                                <input class="form-control2 tac" type="text" id="pickupDate1" name="pickupDate1"/>
-		                                <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color"></i></span>
-		                            </div>
-		                        </div>
-		                        <div class="col-6 col-lg-6 col-xl-6">
-		                            <div class="input-group">
-		                                <div class="input-group-prepend">
-		                                    <span class="input-group-text fit_box_sm" data-labelCd="검사마스터">검사마스터</span>
-		                                </div>
-		                                <input class="form-control2 tac" type="text" id="mast" name="mast" value="용수검사성적서"/>
-		                            </div>
-		                        </div>
-		                    </div>
-		                </div>
+
+
+
             <div class="grid_box" id="complainList">
                 <div class="h-380" data-ax5grid="check_item_result_grid" ></div>
             </div>
         </div>
-    </section>
-    <section>
+
         <div class="grid_box" id="sub_grid">
             <div class="title_box" id="button_box2">
                 <div class="left_align">
@@ -205,29 +231,6 @@ table.type01 {
             <div class="h-200" data-ax5grid="devi_action_grid"></div>
         </div>
     </section>
-    
-    
-    
-    <section>
-        <div class="table_box sub" id="detailBox">
-            <div class="row">
-                <div class="col-6 col-md-3 col-lg-2">
-                    <div class="input-group" >
-                        <div class="input-group-prepend">
-                            <span class="input-group-text fit_box_t7" data-labelCd="종합판정">종합판정</span>
-                        </div>
-                        <select class="form-control2 "  id="judgment" name="judgment" disabled>
-                        	<option value = "적합">적합</option>
-		                    <option value = "부적합">부적합</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    
-    
 
 </div>
 </th:block>

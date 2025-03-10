@@ -4,7 +4,10 @@
         .wj-header {
             text-align: center !important;
         }
-        #thumbnail div img:hover{opacity:0.5}
+
+        #thumbnail div img:hover {
+            opacity: 0.5
+        }
     </style>
 </head>
 <th:block layout:fragment="content">
@@ -86,7 +89,7 @@
         <div class="tab-wrap">
             <ul class="tab-links">
                 <li><a href="#tab_basic">설비정보</a></li>
-                <li><a href="#tab_photo">사진</a></li>
+                <li><a href="#tab_photo" name="tab_photo" class="tab">사진</a></li>
             </ul>
             <div>
                 <section class="tab-item" id="tab_basic" style="border-top-left-radius: 0;">
@@ -335,7 +338,8 @@
                                          <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
                                          작업 지시 상세
                                      </a>-->
-                                    <button disabled type="button" class="btn-default y_write_auth" id="btnPhotoSave"><i class="fas fa-save"></i></button>
+                                    <button disabled type="button" class="btn-default y_write_auth" id="btnPhotoSave"><i
+                                            class="fas fa-save"></i></button>
                                 </li>
                             </ul>
                         </div>
@@ -375,7 +379,7 @@
     <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
     <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
     <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
-    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
     <script type="text/javascript" src="/js/fileupload.js?v=100000006"></script>
     <script type="text/javascript">
         /*'/api/definition/equipment*/
@@ -386,30 +390,30 @@
 
         let columns = [
             {binding: 'id', header: '번호', width: 80, align: 'right', visible: false},
-            {binding: 'group_name', header: '설비그룹', width: 120, align: 'left'},
-            {binding: 'Usage', header: '용도', width: 120, align: 'left'},
-            {binding: 'Code', header: '설비코드', width: 150, align: 'left'},
-            {binding: 'Name', header: '설비명', width: 200, align: 'left'},
-            {binding: 'workcenter_name', header: '워크센터', width: 150, align: 'left'},
-            {binding: 'ManageNumber', header: '관리번호', width: 250, align: 'left'},
-            {binding: 'Model', header: '모델명', width: 150, align: 'left'},
-            {binding: 'Maker', header: '제조사', width: 150, align: 'left'},
-            {binding: 'Voltage', header: '사용전압', width: 150, align: 'left'},
-            {binding: 'PowerWatt', header: '용량', width: 150, align: 'left'},
-            {binding: 'InputDate', header: '입고일', width: 150, align: 'left'},
-            {binding: 'DepartName', header: '사용부서', width: 150, align: 'left'},
-            {binding: 'ASTelNumber', header: 'AS전화번호', width: 150, align: 'left'},
-            {binding: 'SerialNumber', header: '시리얼번호', width: 150, align: 'left'},
+            {binding: 'group_name', header: '설비그룹', width: 120, align: 'center'},
+            {binding: 'Usage', header: '용도', width: 120, align: 'center'},
+            {binding: 'Code', header: '설비코드', width: 150, align: 'center'},
+            {binding: 'Name', header: '설비명', width: 200, align: 'center'},
+            {binding: 'workcenter_name', header: '워크센터', width: 150, align: 'center'},
+            {binding: 'ManageNumber', header: '관리번호', width: 120, align: 'center'},
+            {binding: 'Model', header: '모델명', width: 150, align: 'center'},
+            {binding: 'Maker', header: '제조사', width: 150, align: 'center'},
+            {binding: 'Voltage', header: '사용전압', width: 150, align: 'center'},
+            {binding: 'PowerWatt', header: '용량', width: 150, align: 'center'},
+            {binding: 'InputDate', header: '입고일', width: 150, align: 'center'},
+            {binding: 'DepartName', header: '사용부서', width: 150, align: 'center'},
+            {binding: 'ASTelNumber', header: 'AS전화번호', width: 150, align: 'center'},
+            {binding: 'SerialNumber', header: '시리얼번호', width: 150, align: 'center'},
             {binding: 'ProductionYear', header: '제작년도', width: 150, align: 'center'},
             {binding: 'PurchaseDate', header: '구매일', width: 150, align: 'center'},
             {binding: 'InstallDate', header: '설치일', width: 150, align: 'center'},
-            {binding: 'SupplierName', header: '공급업체', width: 150, align: 'left'},
+            {binding: 'SupplierName', header: '공급업체', width: 150, align: 'center'},
             {binding: 'PurchaseCost', header: '구매금액', width: 150, align: 'right'},
             {binding: 'OperationRateYN', header: '가동률표시', width: 100, align: 'center'},
             {binding: 'Manager', header: '관리책임자', width: 150, align: 'center'},
-            {binding: 'DisposalDate', header: '폐기일', width: 150, align: 'left'},
-            {binding: 'Description', header: '설명', width: 150, align: 'left'},
-            {binding: 'AttentionRemark', header: '점검 및 사용상 주의점', width: 150, align: 'left'}
+            {binding: 'DisposalDate', header: '폐기일', width: 150, align: 'center'},
+            {binding: 'Description', header: '설명', width: 150, align: 'center'},
+            {binding: 'AttentionRemark', header: '점검 및 사용상 주의점', width: 150, align: 'center'}
         ]
 
         document.readyState === 'complete' ? init() : window.onload = init;
@@ -449,6 +453,54 @@
                 itemsSource: viewdata
             });
 
+
+            theGrid.hostElement.addEventListener('dblclick', function (e) {
+                let selectedItem = theGrid.selectedItems[0];
+                document.getElementById('id').value = selectedItem.id,
+
+                    document.getElementById('Usage').value = selectedItem.Usage, //용도
+                    document.getElementById('Code').value = selectedItem.Code, // 설비코드
+                    document.getElementById('Name').value = selectedItem.Name, // 설비명
+
+                    document.getElementById('ManageNumber').value = selectedItem.ManageNumber, // 관리번호
+                    document.getElementById('Model').value = selectedItem.Model, // 모델명
+                    document.getElementById('Maker').value = selectedItem.Maker, // 제조사
+                    document.getElementById('Voltage').value = selectedItem.Voltage, // 사용전압
+                    document.getElementById('PowerWatt').value = selectedItem.PowerWatt, // 용량
+                    document.getElementById('InputDate').value = selectedItem.InputDate, // 입고일
+
+                    document.getElementById('ASTelNumber').value = selectedItem.ASTelNumber, //as번호
+                    document.getElementById('SerialNumber').value = selectedItem.SerialNumber, // 시리얼넘버
+                    document.getElementById('ProductionYear').value = selectedItem.ProductionYear, // 제작년도
+                    document.getElementById('PurchaseDate').value = selectedItem.PurchaseDate, //구매일
+                    document.getElementById('InstallDate').value = selectedItem.InstallDate, // 설치일
+                    document.getElementById('SupplierName').value = selectedItem.SupplierName, //공급업체
+                    document.getElementById('PurchaseCost').value = selectedItem.PurchaseCost, // 구매금액
+
+                    document.getElementById('Manager').value = selectedItem.Manager, //  관리책임자
+                    document.getElementById('DisposalDate').value = selectedItem.DisposalDate, // 폐기일
+                    document.getElementById('Description').value = selectedItem.Description  // 설명
+                    document.getElementById('AttentionRemark').value = selectedItem.AttentionRemark // 점검 및 사용상 주의점
+
+                function setSelectValue(selectId, valueToMatch) {
+                    let selectElement = document.getElementById(selectId);
+                    if (selectElement) {
+                        for (let option of selectElement.options) {
+                            option.selected = option.text === valueToMatch;
+                        }
+                    }
+                }
+
+                setSelectValue('EquipmentGroup_id', selectedItem.group_name);
+                setSelectValue('WorkCenter_id', selectedItem.workcenter_name);
+                setSelectValue('Depart_id', selectedItem.DepartName);
+                setSelectValue('OperationRateYN', selectedItem.OperationRateYN);
+
+                setButtonState();
+
+            });
+
+
             theGrid.rowHeaders.columns.splice(0, 1);
         }
 
@@ -456,6 +508,7 @@
             let pk = $('#equipmentForm').find('#id').val();
             $('#btnBasicNew').prop('disabled', false);
             $('#btnBasicSave').prop('disabled', false);
+
             if (pk) {
                 $('#btnBasicDel').prop('disabled', false);
                 $('#btnPhotoSave').prop('disabled', false);
@@ -505,7 +558,6 @@
             }
 
             let menulogData = data.map(item => ({
-
                 id: item.id,
                 group_name: item.group_name,
                 Usage: item.Usage,
@@ -640,7 +692,7 @@
             //$('#fileUploadBox').show();
 
             //파일조회
-            let attparam = {"action": 'detailFiles', "TableName": "equ", 'DataPk': eq_pk, "attachName": 'photo'};
+            let attparam = { "action": 'detailFiles', "TableName": "equ", 'DataPk': eq_pk, "attachName": 'photo' };
             YuFileUploader.getAttachFiles(attparam);
         }
 
@@ -658,7 +710,7 @@
             if (result != null) {
                 for (let i = 0; i < result.length; i++) {
                     let url = '/api/files/image?id=' + result[i].id;
-                    $("#thumbnail").append('<div align="center" width="50px"><img id="thumbnail_show' + i + '" src="' + url + '" width="50" height="50" onclick="javascript:expand(' + result[i].id + ')"/></div>');
+                    $("#thumbnail").append('<div align="center" width="50px"><img id="thumbnail_show' + i +'" src="' + url + '" width="50" height="50" onclick="javascript:expand(' + result[i].id + ')"/></div>');
                 }
             }
             result = [];
@@ -666,7 +718,6 @@
 
         // 사진파일 저장
         function savePhotoFiles() {
-            let url = '/api/definition/equipment';
             let param = {
                 'eq_id': $('#equipmentForm').find('#id').val(),
                 'file_id': $("#srchFileId").val(),
@@ -681,11 +732,11 @@
                 }
             };
 
-            AjaxUtil.postAsyncData(url + "/save_photo", param, fnSuccess);
+            AjaxUtil.postAsyncData(_this.url+"/save_photo", param, fnSuccess);
         }
 
         //파일 업로더
-        function setUploader() {
+       function setUploader() {
             let _this = this;
             //$('#addFile').prop('disabled', false);
 
@@ -724,12 +775,19 @@
         }
 
 
-        expand = function (id) {
+
+        expand = function(id) {
             let url = '/api/files/image?id=' + id;
             $('#image_expand').attr('src', url);
         }
 
         $(document.body).ready(function (e) {
+
+            $('#PurchaseDate').ax5DatePicker({ direction: 'bottom' });
+            $('#InstallDate').ax5DatePicker({ direction: 'bottom' });
+            $('#DisposalDate').ax5DatePicker({ direction: 'bottom' });
+            $('#InputDate').ax5DatePicker({ direction: 'bottom' });
+
             AjaxUtil.fillSelectOptions($('#cboEquipmentGroup'), 'equipment_group', 'all', false);
             AjaxUtil.fillSelectOptions($('#cboWorkcenter'), 'workcenter', 'all', false);
             AjaxUtil.fillSelectOptions($('#Depart_id'), 'depart', 'choose', false);
@@ -804,16 +862,17 @@
 
             // 사진파일 저장버튼
             $('#btnPhotoSave').click(function (e) {
-                Alert.confirm('',
-                    '사진을 저장하시겠습니까?',
-                    function () {
-                        savePhotoFiles()
-                    },
-                    function () {
-                    }
-                );
+                let eq_pk = $('#equipmentForm').find('#id').val();
+
+                if(!eq_pk){
+                    Alert.alert('', '정보를 선택해 주세요.');
+                    return false;
+                }
+                savePhotoFiles();
+              /*savePhotoFiles();*/
             });
         });
+
     </script>
 </th:block>
 </html>

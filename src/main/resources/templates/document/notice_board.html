@@ -215,7 +215,7 @@
                     //bSkipXssFilter : true,		// client-side xss filter 무시 여부 (true:사용하지 않음 / 그외:사용)
                     //aAdditionalFontList : aAdditionalFontSet,		// 추가 글꼴 목록
                     fOnBeforeUnload: function () {
-                        alert("완료!");
+                        Alert.alert('',"완료!");
                     }
                 }, //boolean
                 fOnAppLoad: function () {
@@ -354,7 +354,7 @@
             } else {
                 modalContainer = new PopupDraggable('공지 사항 수정');
             }
-            modalContainer.open({width: 785, height: 690, $content});
+            modalContainer.open({width: 785, height: 780, $content});
             $content.find('#srchDt').ax5DatePicker({direction: 'top'});
             edit();
 
@@ -535,9 +535,12 @@
 
             //수정버튼
             $("#btnUpdate").click(function (e) {
-                let items = page.grid.getList("selected");
-                if (items.length > 0) {
-                    let id = items[0].id;
+                /*let items = page.grid.getList("selected");*/
+                let selectedRow  = theGrid.selection.row;
+                let selectedItem = theGrid.rows[selectedRow]?.dataItem; // 선택된 행이 없는 경우 undefined 방지
+
+                if (selectedItem) {  // 객체 존재 여부 확인
+                    let id = selectedItem.id;  // 배열이 아니라 객체이므로 selectedItem[0]이 아니라 selectedItem.id 사용
                     data = AjaxUtil.getSyncData('/api/support/notice/detail', {'id': id});
                     showNoticeEdit(data.data);
                     setUploader(id);
@@ -548,12 +551,13 @@
                     $('editorForm').find('#srchDt').ax5DatePicker({direction: 'top'});
                     $('#notice_yn').val(data.data.notice_yn).prop('selected', true);
 
-                    //파일조회
+                    // 파일 조회
                     let attparam = {"action": 'detailFiles', "TableName": "NOTICE", 'DataPk': id, attachName: 'basic'};
                     YuFileUploader.getAttachFiles(attparam);
                 } else {
                     Alert.alert('', '수정할 공지를 선택해 주세요');
                 }
+
             });
 
             //삭제버튼
