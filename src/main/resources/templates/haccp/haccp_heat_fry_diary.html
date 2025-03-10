@@ -288,7 +288,7 @@ class HaccpDiaryPage {
                     Alert.alert('', resp.message);
                 }
             };
-            AjaxUtil.postAsyncData(_this.baseUrl + '/delete', param, fnSuccess);
+            AjaxUtil.postAsyncData(_this.url + '/delete', param, fnSuccess);
         });
     }
     
@@ -310,6 +310,7 @@ class HaccpDiaryPage {
         let fnsuccess = function (result) {
             if (result.success) {
                 _this.grid.itemsSource = result.data;
+                console.log('유탕 데이터' , result.data);
             }
         };
 

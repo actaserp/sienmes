@@ -104,6 +104,13 @@ public class HaccpDiaryController {
 		return result;
 	}
 
+	@PostMapping("/delete")
+	public AjaxResult deleteDiary(@RequestParam(value="hd_id", required=true) int id) {
+		AjaxResult result = new AjaxResult();
+		this.haccpDiaryRepository.deleteById(id);
+		return result;
+	}
+
 	@GetMapping("/haccp_process")
 	public AjaxResult getHaccpProcessDetail(@RequestParam(value = "hp_id", required = false) Integer hp_id,
 			HttpServletRequest request) {

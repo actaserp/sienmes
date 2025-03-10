@@ -275,6 +275,7 @@
             // 일지 삭제
             deleteDiary(hd_id) {
                 let _this = this;
+                console.log('hd_id', hd_id);
                 Alert.confirm('', '삭제하시겠습니까?', function () {
                     let param = {
                         hd_id: hd_id
@@ -288,7 +289,7 @@
                             Alert.alert('', resp.message);
                         }
                     };
-                    AjaxUtil.postAsyncData(_this.baseUrl + '/delete', param, fnSuccess);
+                    AjaxUtil.postAsyncData(_this.url + '/delete', param, fnSuccess);
                 });
             }
 
@@ -311,6 +312,7 @@
                 let fnsuccess = function (result) {
                     if (result.success) {
                         _this.grid.itemsSource = result.data;
+                        console.log('굽기 데이터' , result.data);
                     }
                 };
 

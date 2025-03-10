@@ -57,11 +57,11 @@ public class HaccpDiaryService {
 		String sql = """
 		select
 		hd."DataDate"
-		, tm."TaskName" 
+		, tm."TaskName"
 		, hd.id as hd_id
 		, hp.id as hp_id
 		, hp."Name" as process_name
-		, hp."Code" as process_code 
+		, hp."Code" as process_code
 		, coalesce(ar."SearchYN", 'Y') as "SearchYN"
 		, coalesce(ar."EditYN", 'Y') as "EditYN"
 		, coalesce(ar."DeleteYN", 'Y') as "DeleteYN"
@@ -71,14 +71,14 @@ public class HaccpDiaryService {
 		, e."Name" as equ_name
 		, e.id as equ_id
 		, wc."Name" as workcenter_name
-		, wc.id as wc_id		
+		, wc.id as wc_id
 		from haccp_diary hd
-		inner join haccp_proc hp on hp.id = hd."HaccpProcess_id" 
+		inner join haccp_proc hp on hp.id = hd."HaccpProcess_id"
 		left join equ e on e.id = hd."Equipment_id"
-		left join work_center wc on wc.id=e."WorkCenter_id" 
+		left join work_center wc on wc.id=e."WorkCenter_id"
 		left join v_appr_result ar on ar."SourceDataPk" =hd.id and ar."SourceTableName" ='haccp_diary'
 		left join task_master tm on tm."Code"=:taskCode
-		where 1=1	
+		where 1=1
 		and hd."DataDate" between :start_date and :end_date
 		and hp.id = :hp_id
 		""";
