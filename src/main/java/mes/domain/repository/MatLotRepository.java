@@ -15,4 +15,8 @@ public interface MatLotRepository extends JpaRepository<MaterialLot, Integer>{
 	MaterialLot findBySourceDataPk(int id);
 
 	MaterialLot getByLotNumber(String lotNumber);
+
+	boolean existsByStoreHouseId(Integer storeHouseId);
+
+
 }

@@ -254,4 +254,6 @@ public class BomController {
 		return this.bomService.bomRevision(bom_id, user);
 	}
 
+	// 텍스트 + 순서저장은 저장 코드가 없음
+
 }
