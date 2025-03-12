@@ -192,17 +192,19 @@ public class UnitPriceService {
 		dicParam.addValue("unitPrice", unitPrice);
 		dicParam.addValue("changerName", changerName);
 		dicParam.addValue("userId", userId);
-        
+
 		String sql = """
-				update mat_comp_uprice
-                set "UnitPrice" = :unitPrice
-                , "ApplyStartDate" = :applyStartDate
-                , "ChangeDate" = now()
-                , "ChangerName" = :changerName
-                where id = :priceId
-				""";
-		
-    	return this.sqlRunner.execute(sql, dicParam);
+			update mat_comp_uprice
+			set "FormerUnitPrice" = "UnitPrice"
+			, "UnitPrice" = :unitPrice
+			, "ApplyStartDate" = :applyStartDate
+			, "ChangeDate" = now()
+			, "ChangerName" = :changerName
+			where id = :priceId
+        """;
+
+
+		return this.sqlRunner.execute(sql, dicParam);
 	}
 	
 	public int deleteCompanyUnitPrice(int priceId){

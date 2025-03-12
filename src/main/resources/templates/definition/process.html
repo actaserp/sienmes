@@ -74,7 +74,7 @@
                                          <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
                                          신규등록
                                      </a>-->
-                                    <button type="button" class="btn-default" id="btnNew" name="btnNew"><i
+                                    <button type="button" class="btn-default" id="btnNew" name="btnNew" style="width: 115px; height: 36px;"><i
                                             class="fas fa-plus"></i>신규등록
                                     </button>
                                 </li>
@@ -84,7 +84,7 @@
                                         <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
                                         삭제
                                     </a>-->
-                                    <button type="button" class="btn-danger" id="btnDel"><i class="fas fa-trash"></i>삭제
+                                    <button type="button" class="btn-danger" id="btnDel" style="width: 115px; height: 36px;"><i class="fas fa-trash"></i>삭제
                                     </button>
                                 </li>
 
@@ -93,7 +93,7 @@
                                          <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
                                          저장
                                      </a>-->
-                                    <button type="button" class="btn-default" id="btnSave"><i class="fas fa-save"></i>저장
+                                    <button type="button" class="btn-default" id="btnSave" style="width: 115px; height: 36px;"><i class="fas fa-save"></i>저장
                                     </button>
                                 </li>
 
@@ -163,16 +163,16 @@
                                 </li>
                                 <li>
                                     <button type="button" class="btn-default" id="btnAddDefectType"
-                                            style="height: 36px; width:115px;"><i class="fas fa-plus"></i></button>
+                                            style="height: 36px; width:115px;"><i class="fas fa-plus"></i>추가</button>
                                 </li>
                                 <li>
-                                    <button type="button" class="btn-cancel y_write_auth" id="btnDelDefectType"
-                                            style="float:none; height: 36px; width:115px;"><i class="fas fa-trash"></i>
+                                    <button type="button" class="btn-cancel y_write_auth btn-danger" id="btnDelDefectType"
+                                            style="float:none; height: 36px; width:115px;"><i class="fas fa-trash">삭제</i>
                                     </button>
                                 </li>
                                 <li>
                                     <button type="button" class="btn-default y_write_auth" id="btnSaveDefectType"
-                                            style="float:none; height: 36px; width:115px;"><i class="fas fa-save"></i>
+                                            style="float:none; height: 36px; width:115px;"><i class="fas fa-save">저장</i>
                                     </button>
                                 </li>
                             </ul>
@@ -195,16 +195,16 @@
                                 </li>
                                 <li>
                                     <button type="button" class="btn-default" id="btnAddStopCause"
-                                            style="height: 36px; width:115px;"><i class="fas fa-plus"></i></button>
+                                            style="height: 36px; width:115px;"><i class="fas fa-plus"></i>추가</button>
                                 </li>
                                 <li>
-                                    <button type="button" class="btn-cancel y_write_auth" id="btnDelStopCause"
-                                            style="float:none; height: 36px; width:115px;"><i class="fas fa-trash"></i>
+                                    <button type="button" class="btn-cancel y_write_auth btn-danger" id="btnDelStopCause"
+                                            style="float:none; height: 36px; width:115px;"><i class="fas fa-trash">삭제</i>
                                     </button>
                                 </li>
                                 <li>
                                     <button type="button" class="btn-default y_write_auth" id="btnSaveStopCause"
-                                            style="float:none; height: 36px; width:115px;"><i class="fas fa-save"></i>
+                                            style="float:none; height: 36px; width:115px;"><i class="fas fa-save">저장</i>
                                     </button>
                                 </li>
                             </ul>
@@ -303,6 +303,18 @@
                 document.getElementById('process_code').value = selectedItem.process_code;
                 document.getElementById('process_name').value = selectedItem.process_name;
                 document.getElementById('description').value = selectedItem.description;
+
+
+                function setSelectValue(selectId, valueToMatch) {
+                    let selectElement = document.getElementById(selectId);
+                    if (selectElement) {
+                        for (let option of selectElement.options) {
+                            option.selected = option.text === valueToMatch;
+                        }
+                    }
+                }
+
+                setSelectValue('factory_id', selectedItem. factory_name);
 
                  /*setButtonState();*/
                 showProcDefectType(selectedItem.id);

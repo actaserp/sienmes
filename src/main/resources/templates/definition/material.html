@@ -1,5 +1,24 @@
 <html layout:decorate="~{layout_page}">
 
+<head>
+    <style>
+        .button-list {
+            display: flex;
+            justify-content: flex-end; /* 버튼들을 오른쪽으로 정렬 */
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            gap: 10px; /* 버튼 간 간격 조정 */
+        }
+
+        .button-list li {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+
+
 <th:block layout:fragment="content">
     <script type="text/javascript" src="/js/fileupload.js?v=20220503"></script> <!--?v=1003-->
     <div class="layout-contents">
@@ -717,34 +736,40 @@
                                 </form>
                             </div>
                             <div class="button-wrap">
-                                <ul>
+                                <small2>단가정보는 왼쪽 버튼을 통해 별도로 저장됩니다. 기존 이력을 남기려면 단가등록/변경 버튼을 누르시고 이력을 남기지 않으시려면 단가 수정 버튼을
+                                    누르십시오.
+                                </small2>
+                                <ul class="button-list">
                                     <li>
-                                        <button type="button" class="btn-default" id="btnPriceHistory"><span
+                                        <button type="button" class="btn-default" id="btnPriceHistory"
+                                                style="width: 115px; height: 36px;"><span
                                                 data-labelCd="히스토리조회">히스토리조회</span></button>
                                     </li>
 
                                     <li>
-                                        <button type="button" class="btn-default" id="btnPriceNew"><span
+                                        <button type="button" class="btn-default" id="btnPriceNew"
+                                                style="width: 115px; height: 36px;"><span
                                                 data-labelCd="신규">신규</span></button>
                                     </li>
 
                                     <li>
-                                        <button type="button" class="btn-default" id="btnPriceSave"><span
+                                        <button type="button" class="btn-default" id="btnPriceSave"
+                                                style="width: 115px; height: 36px;"><span
                                                 data-labelCd="단가등록/변경">단가등록/변경</span></button>
                                     </li>
 
                                     <li>
-                                        <button type="button" class="btn-danger" id="btnPriceDelete"><span
+                                        <button type="button" class="btn-danger" id="btnPriceDelete"
+                                                style="width: 115px; height: 36px;"><span
                                                 data-labelCd="단가삭제">단가삭제</span>
                                         </button>
                                     </li>
                                     <li>
-                                        <button type="button" class="btn-default" id="btnPriceUpdate"><span
+                                        <button type="button" class="btn-default" id="btnPriceUpdate"
+                                                style="width: 115px; height: 36px;"><span
                                                 data-labelCd="단가수정">단가수정</span>
                                         </button>
                                     </li>
-                                    <!--    <small2>단가정보는 왼쪽 버튼을 통해 별도로 저장됩니다. 기존 이력을 남기려면 단가등록/변경 버튼을 누르시고 이력을 남기지 않으시려면 단가 수정 버튼을 누르십시오.</small2>-->
-
                                 </ul>
                             </div>
                         </div>
@@ -792,62 +817,61 @@
 
                     <!--section7-->
                     <section class="tab-item" id="tab_test_master" style="border-top-left-radius: 0;">
+
                         <div class="section-top">
-                            <!--<div class="search-wrap">
-                                <ul>
-                                    <li>
-                                        <button type="button" class="btn-default" id="btnNew" name="btnNew"
-                                                style="width: 115px; height: 36px;">
-                                            <i class="fas fa-plus"></i>신규등록
-                                        </button>
-                                    </li>
-
-                                    <li>
-                                        <button type="button" class="btn-danger" id="btnDelete"
-                                                style="width: 115px; height: 36px;">
-                                            <i class="fas fa-trash"></i>삭제
-                                        </button>
-                                    </li>
-
-                                    <li>
-                                        <button disabled type="button" class="btn-default" id="btnSave"
-                                                style="width: 115px; height: 36px;">
-                                            <i class="fas fa-save"></i>저장
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>-->
-                            <div class="button-wrap">
-                                <form id="matTestForm">
-                                    <ul>
-                                        <li>
-                                            수입 검사 필수 <input type="checkbox" id="InTestYN" name="InTestYN" value="Y"/>
-                                        </li>
-                                        <li>
-                                            출하 검사 필수 <input type="checkbox" id="OutTestYN" name="OutTestYN" value="Y"/>
-                                        </li>
-                                        <li>
+                            <form id="matTestForm">
+                                <div class="search-wrap">
+                                    <dl>
+                                        <dt>
+                                            <label>수입 검사 필수</label>
+                                        </dt>
+                                        <dd>
+                                            <input type="checkbox" id="InTestYN" name="InTestYN" value="Y"/>
+                                        </dd>
+                                    </dl>
+                                    <dl>
+                                        <dt>
+                                            <label>출하 검사 필수</label>
+                                        </dt>
+                                        <dd>
+                                            <input type="checkbox" id="OutTestYN" name="OutTestYN" value="Y"/>
+                                        </dd>
+                                    </dl>
+                                    <dl>
+                                        <dt></dt>
+                                        <dd>
                                             <select class="s-150" id="cboTestMasterGroup"
                                                     name="cboTestMasterGroup"></select>
-                                        </li>
-                                        <li>
+                                        </dd>
+                                    </dl>
+                                    <dl>
+                                        <dt></dt>
+                                        <dd>
                                             <select class="s-150" id="cboTestMaster" name="cboTestMaster"></select>
-                                        </li>
-                                        <li>
-                                            <button type="button" class="btn-default" id="btnAddTestMaster"><i
-                                                    class="fas fa-plus"></i></button>
-                                        </li>
-                                        <li>
-                                            <button type="button" class="btn-danger y_write_auth" id="btnDelTestMaster"
-                                                    style="float:none"><i class="fas fa-trash"></i></button>
-                                        </li>
-                                        <li>
-                                            <button type="button" class="btn-default y_write_auth"
-                                                    id="btnSaveTest"><span
-                                                    data-labelCd="저장">저장</span></button>
-                                        </li>
-                                    </ul>
-                                </form>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </form>
+                            <div class="button-wrap">
+                                <ul>
+                                    <li>
+                                        <button type="button" class="btn-default" id="btnAddTestMaster"
+                                                style="width: 115px; height: 36px;"><i
+                                                class="fas fa-plus"></i>추가
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="btn-danger y_write_auth" id="btnDelTestMaster"
+                                                style="float:none; width: 115px; height: 36px;"><i
+                                                class="fas fa-trash"></i>삭제
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="btn-default y_write_auth"
+                                                id="btnSaveTest" style="width: 115px; height: 36px;"><span
+                                                data-labelCd="저장">저장</span></button>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
 
@@ -1020,45 +1044,43 @@
                         // 상세 정보 표시
                         _this.showDetail(mat_pk);
 
-                       /* // 기존 데이터 초기화
-                        _this.price_grid.setData([]);
-                        $('#companyPriceForm')[0].reset();
-                        _this.test_grid.setData([]);
-                        _this.setPriceButtonState();*/
+                        /* // 기존 데이터 초기화
+                         _this.price_grid.setData([]);
+                         $('#companyPriceForm')[0].reset();
+                         _this.test_grid.setData([]);
+                         _this.setPriceButtonState();*/
 
                         // 현재 활성화된 탭에 따라 추가 기능 실행
                         if (_this.current_tab == 'tab_unitcost') {
                             _this.showPriceList(mat_pk);
-                        }
-                        else if (_this.current_tab == 'tab_bom') {
+                        } else if (_this.current_tab == 'tab_bom') {
                             if (mat_pk) page.showBomList(mat_pk);
-                        }
-                        else if (_this.current_tab == 'tab_bom_reverse') {
+                        } else if (_this.current_tab == 'tab_bom_reverse') {
                             if (mat_pk) page.showBomReverseList(mat_pk);
-                        }
-                        else if (_this.current_tab == 'tab_routing') {
+                        } else if (_this.current_tab == 'tab_routing') {
                             let routing_pk = $('#Routing_id').val();
                             if (routing_pk) page.showRoutingProcessList(routing_pk);
-                        }
-                        else if (_this.current_tab == 'tab_test_master') {
+                        } else if (_this.current_tab == 'tab_test_master') {
                             if (mat_pk) page.showTestList(mat_pk);
                         }
 
-                        console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
-                        console.log('선택된 행 데이터:', selectedRowData);
+                        /*console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
+                        console.log('선택된 행 데이터:', selectedRowData);*/
                     }
                 });
 
-
-                /* this.grid.hostElement.addEventListener('dblclick', (e) => {
-                 let hitTest = this.grid.hitTest(e);
-                 if (hitTest.cellType === wijmo.grid.CellType.Cell) {
-                     let row = hitTest.row;
-                     let item = this.grid.rows[row].dataItem;
-                     console.log('zz', item.id);
-
-                 }
-             });*/
+                this.grid.hostElement.addEventListener('dblclick', (e) => {
+                    let hitTest = this.grid.hitTest(e);
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        let row = hitTest.row;
+                        let selectedItem = this.grid.rows[row].dataItem;
+                        _this.showBomList(selectedItem.id)
+                        _this.showBomReverseList(selectedItem.id)
+                        _this.showTestList(selectedItem.id)
+                        _this.showRoutingProcessList(selectedItem.id)
+                        /* _this.showBomCompTreeList(selectedItem.id)*/
+                    }
+                });
 
 
                 /*let config = {
@@ -1218,6 +1240,16 @@
                     itemsSource: this.viewData2, // 데이터를 설정할 배열
 
                 });
+
+                this.price_grid.hostElement.addEventListener('dblclick', (e) => {
+                    let hitTest = this.price_grid.hitTest(e);
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        let row = hitTest.row;
+                        let selectedItem = this.price_grid.rows[row].dataItem;
+                        _this.showPriceDetail(selectedItem.id);
+                    }
+                });
+
                 new FlexGridContextMenu(this.price_grid);
                 this.grid.downloadFileName = '단가 정보';
 
@@ -1273,17 +1305,19 @@
                         {binding: '_level', header: '레벨', width: 100, align: 'left'},
                         {binding: 'my_key', header: 'my_key', width: 100, align: 'left'},
                         {binding: 'mat_type', header: '구분', width: 100, align: 'center'},
-                        {binding: 'mat_name', header: '품목', width: 200, align: 'left'},
+                        {binding: 'mat_name', header: '품목', width: 250, align: 'left'},
                         {binding: 'unit', header: '단위', width: 100, align: 'center'},
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'center'},
                         {binding: 'bom_ratio', header: '소요량', width: 120, align: 'right'},
+                        {binding: '', header: '', width: '*', align: 'right'},
                     ],
+                    childItemsPath: 'children', // 계층 구조를 위한 속성 설정
                     itemsSource: this.viewData3, // 데이터를 설정할 배열
-                    /*, treeControl: true*/
                 });
 
                 new FlexGridContextMenu(this.bom_grid);
                 this.grid.downloadFileName = 'BOM 정보';
+
 
                 /*let bomConfig = {
                     target: $('[data-ax5grid="bom-grid"]'),
@@ -1359,9 +1393,10 @@
                         {binding: 'bom_ratio', header: '투입량', width: 120, align: 'right'},
                         {binding: '', header: '', width: "*", align: 'right'},
                     ],
+                    childItemsPath: 'children', // 계층 구조를 위한 속성 설정
                     itemsSource: this.viewData4, // 데이터를 설정할 배열
-                    /*  , treeControl: true*/
                 });
+
                 new FlexGridContextMenu(this.bom_reverse_grid);
                 this.grid.downloadFileName = 'BOM역전개 정보';
 
@@ -1480,27 +1515,34 @@
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
                     showMarquee: true,
-                    isReadOnly: true,
+                    isReadOnly: false, // 체크박스 클릭 가능하도록 설정
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
                     },
                     columns: [
-                        {binding: 'id', header: '번호', width: 100, align: 'center'},
-                        /* {
-                             binding: 'delete', header: '삭제', width: 100, align: 'center',
-                             editor: { type: 'checkbox', config: { height: 17, trueValue: 'Y', falseValue: 'N' } },
-                         },*/
-                        {binding: 'test_master_id', header: '검사마스터번호', visible: false, width: 200, align: 'left'},
-                        {binding: 'test_class_name', header: '검사종류', width: 120, align: 'left'},
-                        {binding: 'test_master_group_name', header: '검사마스터그룹', width: 120, align: 'left'},
-                        {binding: 'test_master_name', header: '검사마스터', width: 120, align: 'left'},
-                        {binding: '', header: '', width: "*", align: 'left'},
+                        { binding: 'id', header: '번호', width: 100, align: 'center' },
+                        {
+                            binding: 'delete',
+                            header: '삭제',
+                            width: 100,
+                            align: 'center',
+                            dataMap: new wijmo.grid.DataMap([
+                                { key: true, value: 'Y' },   // 체크 표시
+                                { key: false, value: 'N' }   // 빈 값
+                            ], 'key', 'value'),
+                            isReadOnly: false,  // 체크박스 활성화
+                        },
+                        { binding: 'test_master_id', header: '검사마스터번호', visible: false, width: 200, align: 'left' },
+                        { binding: 'test_class_name', header: '검사종류', width: 120, align: 'left' },
+                        { binding: 'test_master_group_name', header: '검사마스터그룹', width: 120, align: 'left' },
+                        { binding: 'test_master_name', header: '검사마스터', width: 120, align: 'left' },
+                        { binding: '', header: '', width: "*", align: 'left' },
                     ],
                     itemsSource: this.viewData6, // 데이터를 설정할 배열
-
                 });
+
                 new FlexGridContextMenu(this.test_master_grid);
                 this.grid.downloadFileName = '검사정보 정보';
 
@@ -1739,7 +1781,7 @@
                     if (!res.success) {
                         Alert.alert('', res.message);
                     } else {
-                        Notify.success("저장되었습니다.");
+                        Alert.alert('', "저장되었습니다.");
                         _this.searchDataBind();
                     }
                 };
@@ -1771,7 +1813,7 @@
                     if (!res.success) {
                         Alert.alert('', res.message);
                     } else {
-                        Notify.success("저장되었습니다.");
+                        Alert.alert('', "저장되었습니다.");
                         //_this.searchDataBind();
                     }
                 };
@@ -1788,7 +1830,7 @@
                 let data = {id: id};
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Notify.success('삭제되었습니다'); // Notification
+                        Alert.alert('', '삭제되었습니다'); // Notification
                         _this.searchDataBind();
                     } else {
                         Alert.alert('', res.message);
@@ -1805,14 +1847,14 @@
 
                 let result = AjaxUtil.getSyncData(this.url + '/readPrice', data);
                 if (result != null) {
-                 /*   let count = result.data.length;
-                    _this.price_grid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: count,
-                        }
-                    });*/
+                    /*   let count = result.data.length;
+                       _this.price_grid.setData({
+                           list: result.data,
+                           page: {
+                               display: true,
+                               totalElements: count,
+                           }
+                       });*/
                     _this.viewData2.sourceCollection = result.data;
 
                     $('#companyPriceForm')[0].reset();
@@ -1880,7 +1922,6 @@
                 let url = this.url + '/savePrice';
                 let data = FormUtil.extractForm($('#companyPriceForm'));
 
-
                 let price_grid = this.price_grid.itemsSource; // itemsSource로 변경
                 for (let i = 0; i < price_grid.length; i++) {
                     if (price_grid[i].Company_id == data.Company_id) {
@@ -1937,7 +1978,7 @@
                     if (!res.success) {
                         Alert.alert('', res.message);
                     } else {
-                        Notify.success('저장되었습니다');
+                        Alert.alert('', '저장되었습니다');
                         _this.showPriceList(mat_id);
                     }
                 };
@@ -1979,7 +2020,7 @@
                 let mat_id = $('#matBasicForm').find('#id').val();
                 let data = {id: id};
                 let fnSuccess = function () {
-                    Notify.success('삭제되었습니다'); // Notification
+                    Alert.alert('', '삭제되었습니다'); // Notification
                     _this.showPriceList(mat_id);
                 };
 
@@ -1997,19 +2038,47 @@
 
                 let result = AjaxUtil.getSyncData(this.url + '/bom', data);
 
-                //if (result.data != null) {
-                let count = result.data.length;
-                _this.bom_grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: count,
+                if (result.data && Array.isArray(result.data)) {
+                    // 데이터를 계층 구조로 변환
+                    let treeData = _this.buildTree(result.data);
+
+                    // FlexGrid의 데이터 갱신
+                    _this.bom_grid.itemsSource = treeData;
+                } else {
+                    // 데이터가 없을 경우 빈 배열 설정
+                    _this.bom_grid.itemsSource = [];
+                }
+
+                // 데이터 바인딩을 다시 렌더링
+                _this.bom_grid.collectionView.refresh();
+            }
+
+            /**
+             * 부모-자식 관계를 반영하여 계층 구조로 변환하는 함수
+             */
+            buildTree(flatData) {
+                let tree = [];
+                let map = {};
+
+                // 모든 항목을 매핑 (my_key를 키로)
+                flatData.forEach(item => {
+                    map[item.my_key] = {...item, children: []};
+                });
+
+                // 부모-자식 관계를 설정
+                flatData.forEach(item => {
+                    if (item.parent_mat_pk !== null) {
+                        if (map[item.parent_mat_pk]) {
+                            map[item.parent_mat_pk].children.push(map[item.my_key]);
+                        }
+                    } else {
+                        tree.push(map[item.my_key]); // 최상위 레벨
                     }
                 });
-                //}
-                //_this.bom_grid.setData([]);
-                _this.bom_grid.repaint();
+
+                return tree;
             }
+
 
             // BOM역전개 조회
             showBomReverseList(mat_id) {
@@ -2019,17 +2088,51 @@
                 };
 
                 let result = AjaxUtil.getSyncData(this.url + '/bomReverse', data);
-                if (result.success != null) {
-                    let count = result.data.length;
-                    _this.bom_reverse_grid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: count,
-                        }
-                    });
+
+               /* console.log("result: ", result);
+                console.log(JSON.stringify(result, null, 2));*/
+
+                if (result.data && Array.isArray(result.data)) {
+                    // 데이터를 계층 구조로 변환
+                    let treeData = _this.buildTree2(result.data);
+
+                    // FlexGrid의 데이터 갱신
+                    _this.bom_reverse_grid.itemsSource = treeData;
+                } else {
+                    // 데이터가 없을 경우 빈 배열 설정
+                    _this.bom_reverse_grid.itemsSource = [];
                 }
+
+                // 데이터 바인딩을 다시 렌더링
+                _this.bom_reverse_grid.collectionView.refresh();
             }
+
+            /**
+             * 부모-자식 관계를 반영하여 계층 구조로 변환하는 함수
+             */
+            buildTree2(flatData) {
+                let tree = [];
+                let map = {};
+
+                // 모든 항목을 매핑 (my_key를 키로)
+                flatData.forEach(item => {
+                    map[item.my_key] = {...item, children: []};
+                });
+
+                // 부모-자식 관계를 설정
+                flatData.forEach(item => {
+                    if (item.parent_key !== null) {
+                        if (map[item.parent_key]) {
+                            map[item.parent_key].children.push(map[item.my_key]);
+                        }
+                    } else {
+                        tree.push(map[item.my_key]); // 최상위 레벨
+                    }
+                });
+
+                return tree;
+            }
+
 
             // ROUTING 공정정보 조회
             showRoutingProcessList(routing_pk) {
@@ -2039,15 +2142,20 @@
                 };
 
                 let result = AjaxUtil.getSyncData(this.url + '/routingProcess', data);
+
+                console.log("result: ", result);
+                console.log(JSON.stringify(result, null, 2));
+
                 if (result != null) {
                     let count = result.data.length;
-                    _this.routing_grid.setData({
+                    /*_this.routing_grid.setData({
                         list: result.data,
                         page: {
                             display: true,
                             totalElements: count,
                         }
-                    });
+                    });*/
+                    _this.viewData5.sourceCollection = result.data;
                 }
             }
 
@@ -2105,13 +2213,14 @@
                 let result = AjaxUtil.getSyncData(url, data);
                 if (result.data != null) {
                     let count = result.data.length;
-                    _this.test_grid.setData({
+                    /*_this.test_grid.setData({
                         list: result.data,
                         page: {
                             display: true,
                             totalElements: count,
                         }
-                    });
+                    });*/
+                    _this.viewData6.sourceCollection = result.data;
                 }
             }
         }
@@ -2287,41 +2396,49 @@
                 AjaxUtil.fillSelectOptions($('#cboTestMaster'), 'test_master', 'choose', '', group_pk);
             });
 
+
+            /* let newRow = {
+                    id: 0,
+                    delete: false, // 체크박스 기본값
+                    test_master_id: test_master_id,
+                    test_class_name: '',
+                    test_master_group_name: $('#cboTestMasterGroup option:selected').text(),
+                    test_master_name: $('#cboTestMaster option:selected').text()
+                };*/
+
             //검사정보 신규버튼
             $('#btnAddTestMaster').click(function (e) {
                 let mat_id = $('#matBasicForm').find('#id').val();
                 let test_master_id = $('#cboTestMaster').val();
-                if (!test_master_id)
-                    return;
 
-                // 중복체크
-                let already = false;
-                $.each(page.test_grid.list, function (index, row) {
-                    if (test_master_id == row.test_master_id) {
-                        already = true;
-                        return false;   // break
-                    }
-                });
+                if (!test_master_id) return;
 
-                if (already)
-                    return;
+                // 그리드 객체 가져오기
+                let grid = page.test_master_grid;
 
+                // itemsSource를 배열로 변환
+                let data = grid.collectionView ? grid.collectionView.sourceCollection : [];
+
+                // 중복 체크
+                let already = data.some(row => row.test_master_id == test_master_id);
+                if (already) return;
+
+                // 새 행 데이터 생성
                 row = {};
                 row["id"] = 0;
                 row["test_master_id"] = test_master_id;
                 row["test_class_name"] = '';
                 row["test_master_group_name"] = $('#cboTestMasterGroup option:selected').text();
-                ;
                 row["test_master_name"] = $('#cboTestMaster option:selected').text();
 
-                page.test_grid.addRow(
-                    row,
-                    'last',
-                    {__index: undefined}
-                );
+                // 데이터 추가
+                data.push(row);
 
-                return;
+                // 그리드 갱신
+                grid.collectionView.refresh();
             });
+
+
 
             //검사정보 저장버튼
             $('#btnSaveTest').click(function (e) {
@@ -2330,7 +2447,10 @@
                 let InTestYN = $('#matTestForm').find('#InTestYN').prop('checked') ? 'Y' : '';
                 let OutTestYN = $('#matTestForm').find('#OutTestYN').prop('checked') ? 'Y' : '';
 
-                let list = page.test_grid.getList();
+                let grid = page.test_master_grid;
+
+                // collectionView.sourceCollection을 사용하여 데이터 가져오기
+                let list = grid.collectionView ? grid.collectionView.sourceCollection : [];
                 list = JSON.stringify(list);
 
                 let data = {
@@ -2342,10 +2462,11 @@
 
                 let result = AjaxUtil.postSyncData(url, data);
                 if (result.data != null) {
-                    Notify.success("저장되었습니다.");
+                    Alert.alert('',"저장되었습니다.");
                     page.showTestList(mat_id);
                 }
             });
+
 
             // 단가정보 신규버튼
             $('#btnPriceNew').click(function (e) {
