@@ -121,7 +121,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div id="materialRequiredGrid" style="height: 300px;"></div>
+                        <div id="matreqGrid" style="height: 300px;"></div>
                     </div>
                 </section>
                 <section class="tab-item" id="tab2" style="border-top-left-radius: 0;">
@@ -136,7 +136,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div id="inputRequestGrid" style="height: 300px;"></div>
+                        <div id="inputReqGrid" style="height: 300px;"></div>
                     </div>
                 </section>
             </div>
@@ -184,7 +184,7 @@
                         { binding: 'work_index', header: '작업 순서', width: 100, align: 'center' },
                         { binding: 'mat_name', header: '제품', width: 200, align: 'left' },
                         { binding: 'unit_name', header: '단위', width: 100, align: 'center' },
-                        { binding: 'order_qty', header: '지시량', width: 100, align: 'right', format: 'n2' },
+                        { binding: 'order_qty', header: '지시량', width: 100, align: 'right'},
                         { binding: 'state_name', header: '상태', width: 100, align: 'center' }
                     ]
                 });
@@ -276,7 +276,7 @@
             // 해당소요자재
             initMaterialRequired() {
                 let _this = this;
-                this.matreqGrid = new wijmo.grid.FlexGrid('#materialRequiredGrid', {
+                this.matreqGrid = new wijmo.grid.FlexGrid('#matreqGrid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
@@ -298,23 +298,27 @@
                         { binding: 'mat_code', header: '품목 코드', width: 120, align: 'left' },
                         { binding: 'mat_name', header: '품목 명', width: 200, align: 'left' },
                         { binding: 'unit_name', header: '단위', width: 100, align: 'center' },
-                        {
-                            binding: 'requ_qty', header: '소요량', width: 120, align: 'right',
-                            format: 'n1',
-                            cellTemplate: (item) => wijmo.format('{0:n1}', item.requ_qty || 0)
-                        },
-                        {
-                            binding: 'cur_stock', header: '기본 재고창고 재고', width: 160, align: 'right',
-                            format: 'n1',
-                            cellTemplate: (item) => {
-                                let stock = item.cur_stock || 0;
-                                return `<div class="${item.requ_qty > stock ? 'grid-cell-red' : ''}">${wijmo.format('{0:n1}', stock)}</div>`;
-                            }
-                        },
+                        { binding: 'requ_qty', header: '소요량', width: 120, align: 'right' },
+                        { binding: 'cur_stock', header: '기본 재고창고 재고', width: 160, align: 'right' },
                         { binding: 'process_stock', header: '공정창고 재고', width: 150, align: 'right', isReadOnly: true, visible: false },
                         { binding: 'proc_safety_stock', header: '공정안전재고', width: 150, align: 'right', isReadOnly: true, visible: false },
                         { binding: 'input_req_qty', header: '투입 요청량', width: 150, align: 'right',  isReadOnly: false, visible: false }
-                    ]
+                    ],
+                    itemFormatter: function (panel, row, col, cell) {
+                        if (panel.cellType === wijmo.grid.CellType.Cell) {
+                            let column = panel.columns[col];
+                            let item = panel.rows[row].dataItem;
+
+                            if (item && column.binding === 'cur_stock') {
+                                // 'cur_stock'이 'requ_qty'보다 작으면 배경색 변경
+                                if (item.cur_stock < item.requ_qty) {
+                                    cell.style.backgroundColor = '#f8d2cb'; // 연한 빨간색 배경
+                                } else {
+                                    cell.style.backgroundColor = ''; // 원래대로 되돌리기
+                                }
+                            }
+                        }
+                    },
                 });
 
                 new FlexGridContextMenu(this.matreqGrid);
@@ -423,7 +427,7 @@
             loadMatReqList() {
                 let _this = this;
                 let items = _this.grid.selectedItems;
-                if (items.length == 0) {
+                if (items.length === 0) {
                     return;
                 }
                 let arrTmp = [];
@@ -434,12 +438,16 @@
                     //    return;
                     //}
                 });
+                console.log('arrTmp', arrTmp);
                 let jr_pks = arrTmp.join(',');
                 let data_date = $('#srchStartDt').val();
+                console.log('jr_pks', jr_pks);
                 let data = {
                     jr_pks: jr_pks,
                     data_date: data_date
                 };
+
+                console.log('data', data);
                 let fnsuccess = function (result) {
                     if (result != null) {
                         _this.matreqGrid.itemsSource = result.data;
@@ -454,7 +462,7 @@
             initInputRequest() {
                 let _this = this;
 
-                this.inputReqGrid = new wijmo.grid.FlexGrid('#inputRequestGrid', {
+                this.inputReqGrid = new wijmo.grid.FlexGrid('#inputReqGrid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,

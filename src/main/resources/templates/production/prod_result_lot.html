@@ -209,11 +209,11 @@
         <div class="tab-wrap">
 
             <ul class="tab-links">
-                <li><a href="#tabBasic">기본 정보</a></li>
-                <li><a href="#tabChasu">차수별 생산</a></li>
-                <li><a href="#tabDefect">부적합 정보</a></li>
-                <li><a href="#tabConsumed">투입 내역</a></li>
-                <li hidden><a href="#tabBarcode">바코드</a></li>
+                <li><a href="#tabBasic" name="tabBasic">기본 정보</a></li>
+                <li><a href="#tabChasu" name="tabChasu">차수별 생산</a></li>
+                <li><a href="#tabDefect" name="tabDefect">부적합 정보</a></li>
+                <li><a href="#tabConsumed" name="tabConsumed">투입 내역</a></li>
+                <li hidden><a href="#tabBarcode" name="tabBarcode">바코드</a></li>
             </ul>
             <div>
                 <section class="tab-item" id="tabBasic" style="border-top-left-radius: 0;">
@@ -381,7 +381,7 @@
                     <div class="tab_con_box">
                         <div>
                             <label class="switch">
-                                <input type="checkbox" id="btnLotListToggle"><span class="slider round"></span>
+                                <input type="checkbox" id="btnToggle"><span class="slider round"></span>
                             </label>투입로트 보기/감추기
                         </div>
                         <div>&nbsp;</div>
@@ -402,7 +402,7 @@
                                     </li>
                                     <li>
                                         로트번호 <input type="text" id="txtInputLot" class="w-200 tac" placeholder="로트번호를 스캔하세요"
-                                                    autocomplete="off"/>
+                                                    autocomplete="off" style="height: 36px;"/>
                                     </li>
                                     <li>
                                         <button type="button" class="btn" id="btnInputLotGridSetting" title="로트투입 저장"><i
@@ -733,8 +733,9 @@
         class ProdResultPage {
             constructor() {
                 this.grid = null;
+                this.chasuGrid = null;
                 this.defectGrid = null;
-                this.InputLotGrid = null;
+                this.inputLotGrid = null;
                 this.consumedGrid = null;
                 this.jobres = null;
                 this.selectedIndex = null;
@@ -783,8 +784,10 @@
                             if (column.binding === 'job_state') {
                                 if (item.state === 'working') {
                                     cell.style.backgroundColor = '#00ff21';
+                                    cell.style.color = '#000'
                                 } else if (item.state === 'finished') {
                                     cell.style.backgroundColor = '#0026ff';
+                                    cell.style.color = '#FFFFFF'
                                 }
                             }
                             if (column.binding === 'order_qty') {
@@ -809,7 +812,7 @@
                         _this.showDefectList('total');
                         _this.showChasuList(jr_pk);
 
-                        _this.selectedIndex = e.selectedRow;
+                        // _this.selectedIndex = e.selectedRow;
                         if (_this.currentTab === 'tabChasu') {
                             let $tabChasu = $('#tabChasu');
                             $tabChasu.find('#ordqty').text(Number(_this.$tabBasic.find('#order_qty').val()).toLocaleString());
@@ -826,9 +829,9 @@
 
                 this.chasuGrid = new wijmo.grid.FlexGrid('#chasu-grid', {
                     autoGenerateColumns: false,
-                    selectionMode: wijmo.grid.SelectionMode.MultiRange,
+                    selectionMode: wijmo.grid.SelectionMode.ListBox,
                     frozenColumns: 1, // 열 고정
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
                     selectionChanged: (e) => {
                         // FlexGrid가 초기화되고 itemsSource가 설정되었는지 확인
                         if (this.chasuGrid && this.chasuGrid.selectedRows) {
@@ -841,6 +844,7 @@
                             }
                         }
                     },
+
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
@@ -869,10 +873,14 @@
                         }
                     },
                 });
+                let selector = new wijmo.grid.selector.Selector(this.chasuGrid, {
+                    itemChecked: function () {
+
+                    }
+                })
 
                 // 하단 합계 행 추가
-                const footerRow = new wijmo.grid.Row();
-                this.chasuGrid.rows.push(footerRow);
+                this.chasuGrid.columnFooters.rows.push(new wijmo.grid.GroupRow());
 
                 // 데이터 변경 시 합계 업데이트
                 this.chasuGrid.collectionView.collectionChanged.addHandler(() => {
@@ -984,22 +992,10 @@
                 // 합계 표시를 위한 컬럼 푸터 추가
                 this.inputLotGrid.columnFooters.rows.push(new wijmo.grid.GroupRow());
 
-                // 합계 업데이트 함수
-                const updateFooter = () => {
-                    const cv = this.inputLotGrid.collectionView;
-                    const totalCurStock = cv.items.reduce((sum, item) => sum + (item.cur_stock || 0), 0);
-                    const totalReqQty = cv.items.reduce((sum, item) => sum + (item.req_qty || 0), 0);
-                    const totalConsumedQty = cv.items.reduce((sum, item) => sum + (item.consumed_qty || 0), 0);
-
-                    const footerRow = this.inputLotGrid.columnFooters.rows[0];
-                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'mat_type_name', '합계');
-                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'cur_stock', totalCurStock);
-                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'req_qty', totalReqQty);
-                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'consumed_qty', totalConsumedQty);
-                };
-
                 // 데이터 변경 시 합계 업데이트
-                this.inputLotGrid.collectionView.collectionChanged.addHandler(updateFooter);
+                this.inputLotGrid.collectionView.collectionChanged.addHandler(() => {
+                    _this.updateFooter();
+                });
 
                 this.consumedGrid = new wijmo.grid.FlexGrid('#consumed-grid', {
                     autoGenerateColumns: false,
@@ -1012,11 +1008,11 @@
                         { binding: 'mat_code', header: '품목코드', width: 100, align: 'left', isReadOnly: true },
                         { binding: 'mat_name', header: '품목', width: 250, align: 'left', isReadOnly: true },
                         { binding: 'unit', header: '단위', width: 80, align: 'center', isReadOnly: true },
-                        { binding: 'lotUseYn', header: 'LOT관리 유무', width: 80, align: 'center', isReadOnly: true },
-                        { binding: 'lot_size', header: '로트 size', width: 80, align: 'right', format: 'n0', isReadOnly: true },
+                        { binding: 'lotUseYn', header: 'LOT관리 유무', width: 120, align: 'center', isReadOnly: true },
+                        { binding: 'lot_size', header: '로트 size', width: 120, align: 'right', format: 'n0', isReadOnly: true },
                         { binding: 'current_qty_sum', header: '로트투입량', width: 100, align: 'right', format: 'n0', isReadOnly: true },
-                        { binding: 'bom_consumed', header: '소요량(BOM)', width: 100, align: 'right', format: 'n0', isReadOnly: true },
-                        { binding: 'consumed_qty', header: '실생산소모량', width: 100, align: 'right', format: 'n0', isReadOnly: false },
+                        { binding: 'bom_consumed', header: '소요량(BOM)', width: 120, align: 'right', format: 'n0', isReadOnly: true },
+                        { binding: 'consumed_qty', header: '실생산소모량', width: 120, align: 'right', format: 'n0', isReadOnly: false },
                         { binding: 'currentStock', header: '현재재고', width: 100, align: 'right', format: 'n0', isReadOnly: true }
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]), // 빈 데이터로 초기화
@@ -1047,17 +1043,45 @@
             // 하단 합계 업데이트 함수
             updateFooter() {
                 let goodQtySum = 0;
+                let defectQtySum = 0;
 
-                // 양품량 합계 계산
-                this.chasuGrid.collectionView.items.forEach(item => {
-                    goodQtySum += item.good_qty || 0; // undefined일 경우 0 처리
-                });
+                let totalCurStock = 0;
+                let totalReqQty = 0;
+                let totalConsumedQty = 0;
 
-                // 하단 행에 합계 값 표시
-                const footerIndex = this.chasuGrid.rows.length - 1; // 마지막 행
-                this.chasuGrid.setCellData(footerIndex, 'lot_no', '양품량 합계'); // LOT 열에 "양품량 합계" 표시
-                this.chasuGrid.setCellData(footerIndex, 'good_qty', goodQtySum); // 양품량 합계 표시
+                // chasuGrid 합계 계산 (양품량 & 부적합량)
+                if (this.chasuGrid && this.chasuGrid.collectionView) {
+                    this.chasuGrid.collectionView.items.forEach(item => {
+                        goodQtySum += item.good_qty || 0; // undefined일 경우 0 처리
+                        defectQtySum += item.defect_qty || 0; // undefined일 경우 0 처리
+                    });
+
+                    // columnFooters의 첫 번째 행을 가져와 합계 업데이트
+                    let footerRow = this.chasuGrid.columnFooters.rows[0];
+
+                    this.chasuGrid.columnFooters.setCellData(footerRow.index, 'lot_no', '합계');
+                    this.chasuGrid.columnFooters.setCellData(footerRow.index, 'good_qty', goodQtySum);
+                    this.chasuGrid.columnFooters.setCellData(footerRow.index, 'defect_qty', defectQtySum);
+                }
+
+                // inputLotGrid 합계 계산 (현재재고, 투입요청량, 생산소모량)
+                if (this.inputLotGrid && this.inputLotGrid.collectionView) {
+                    console.log('this.inputLotGrid.collectionView.items', this.inputLotGrid.collectionView.items);
+                    this.inputLotGrid.collectionView.items.forEach(item => {
+                        totalCurStock += item.cur_stock || 0;
+                        totalReqQty += item.req_qty || 0;
+                        totalConsumedQty += item.consumed_qty || 0;
+                    });
+
+                    let footerRow = this.inputLotGrid.columnFooters.rows[0];
+
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'StoreHouseName', '합계');
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'cur_stock', totalCurStock);
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'req_qty', totalReqQty);
+                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'consumed_qty', totalConsumedQty);
+                }
             }
+
 
             // LOT 데이터 설정 시 기본값 추가
             setDefaultData(items) {
@@ -1197,11 +1221,11 @@
 
                     if (result.state != 'ordered') {
                         $('#workcenter_id').on('focus', function () {
-                            this.initialSelect = this.selectedIndex;
+                            // this.initialSelect = this.selectedIndex;
                         });
 
                         $('#workcenter_id').on('change', function () {
-                            this.selectedIndex = this.initialSelect;
+                            // this.selectedIndex = this.initialSelect;
                         });
                     }
                     let total_prod_qty = result.good_qty + result.defect_qty + result.loss_qty + result.scrap_qty;
@@ -1303,7 +1327,7 @@
                     if (res.success) {
                         Notify.success('저장되었습니다.');
                         _this.searchMainData();
-                        _this.grid.select(parseInt(_this.selectedIndex));
+                        // _this.grid.select(parseInt(_this.selectedIndex));
                         _this.showBasicInfo(res.data.jr_pk);
                     }
                 }
@@ -1374,7 +1398,7 @@
                         Notify.success('작업이 시작되었습니다.');
                         _this.saveDefectList(defectGridList, 'workStart', res.data.jr_pk); // 작업시작 시 해당 워크센터에 등록된 공정별 부적합 내역 저장
                         _this.searchMainData();
-                        _this.grid.select(parseInt(_this.selectedIndex));
+                        // _this.grid.select(parseInt(_this.selectedIndex));
                         _this.showBasicInfo(res.data.jr_pk);
                     }
                 }
@@ -1413,7 +1437,7 @@
                     } else {
                         Notify.success('작업이 완료되었습니다.');
                         _this.searchMainData();
-                        _this.grid.select(parseInt(_this.selectedIndex));
+                        // _this.grid.select(parseInt(_this.selectedIndex));
                         _this.showBasicInfo(res.data.jr_pk);
                     }
                 }
@@ -1498,7 +1522,7 @@
                     if (res.success) {
                         Notify.success('취소되었습니다.');
                         _this.searchMainData();
-                        _this.grid.select(parseInt(_this.selectedIndex));
+                        // _this.grid.select(parseInt(_this.selectedIndex));
                         _this.showBasicInfo(res.data.jr_pk);
                     }
                 }
@@ -1531,9 +1555,6 @@
                 let _this = this;
 
                 let jr_pk = this.$tabBasic.find('#id').val();
-                let rows = this.chasuGrid.selectedItems;
-
-                //let newChasu = 1;
                 let workcenter_id = this.$tabBasic.find('#workcenter_id').val()
                 let lotSize = $('#chasuLotSize').val();
 
@@ -1541,33 +1562,26 @@
                     Alert.alert('차수저장오류', '기본정보 탭의 워크센터를 선택해주세요.');
                     return;
                 }
-                if (lotSize == "" || lotSize == "0") {
+                if (lotSize === "" || lotSize === "0") {
                     Alert.alert('차수추가오류', '차수의 LOT size 를 확인하세요');
                     return;
                 }
-                //if (rows.length != 0) {
-                //    newChasu = rows[rows.length - 1].chasu + 1;
-                //}
 
-                //this.chasuGrid.addRow({ chasu: newChasu, lot_no: '', good_qty: lotSize, defect_qty: 0, loss_qty: 0, scrap_qty: 0}, 'last', { focus: 'END' } );
 
-                //let data = { jr_pk: jr_pk, chasu: newChasu, good_qty: lotSize, defect_qty: 0, loss_qty: 0, scrap_qty: 0 };
                 let data = {jr_pk: jr_pk, good_qty: lotSize, defect_qty: 0, loss_qty: 0, scrap_qty: 0};
                 let addChasuCallbackSuccess = function (result) {
                     if (result.success) {
                         Notify.success('저장되었습니다.');
                         _this.showChasuList(result.data.jr_pk);
-                        //_this.printChasuLabel({ chasu: result.chasu, good_qty: result.good_qty_sum, lot_no: result.lot_number });
                         _this.showBasicInfo(result.data.jr_pk);
-                        // `grid_index`에 해당하는 행 데이터 가져오기
-                        let item = _this.grid.itemsSource.items[grid_index];
 
+                        let item = _this.grid.selectedItems;
                         // `good_qty` 값 업데이트
                         if (item) {
                             item.good_qty = result.data.good_qty_sum;
 
                             // 데이터 변경 사항 반영
-                            _this.grid.itemsSource.refresh();
+                            _this.chasuGrid.itemsSource.refresh();
                         }
                     } else {
                         Alert.alert('차수 추가 오류', result.message);
@@ -1577,54 +1591,52 @@
                 AjaxUtil.postAsyncData(url, data, addChasuCallbackSuccess);
             }
 
-            // 마지막 차수삭제
+            // 차수삭제
             deleteChasu() {
                 let _this = this;
                 let url = this.baseUrl + '/chasu_del';
                 let jr_pk = this.$tabBasic.find('#id').val();
-                if (this.chasuGrid.selecteditems.length != 0) {
-                    let fnsuccess = function () {
-                        //_this.chasuGrid.removeRow('last');
-                        let data = {
-                            'jr_pk': jr_pk,
-                        }
-                        let fnSuccess = function (res) {
-                            if (res.success) {
-                                Alert.alert('마지막 차수삭제', '삭제되었습니다.');
-                                _this.showChasuList(res.data.jr_pk);
-                                _this.showBasicInfo(res.data.jr_pk);
-                                // 선택된 행의 인덱스 가져오기
-                                let selectedItem = _this.grid.selectedItems[0];
-                                if (selectedItem) {
-                                    // `itemsSource`에서 해당 행 데이터 업데이트
-                                    selectedItem.good_qty = res.data.good_qty_sum;
-                                    selectedItem.defect_qty = res.data.defect_qty_sum;
+                let selectedItems = this.chasuGrid.selectedItems; // 체크된 항목 가져오기
 
-                                    // 변경 사항 반영
-                                    _this.grid.itemsSource.refresh();
-                                }
-                                _this.showChasuList(res.data.jr_pk);
-                            } else {
-                                Alert.alert('차수삭제오류', res.message);
-                            }
-                        }
-                        AjaxUtil.postAsyncData(url, data, fnSuccess);
-                    };
+                if (selectedItems.length === 0) {
+                    Alert.alert('차수 삭제오류', '선택된 차수가 없습니다.');
+                    return;
+                }
 
-                    let chasu_grid = this.chasuGrid.selectedItems;
-                    let chasu = chasu_grid.length;
-                    let lot_no = chasu_grid[chasu - 1].lot_no;
-                    Alert.confirm('차수 삭제', '마지막 차수(' + chasu + '차수) ' + lot_no + '를 삭제하시겠습니까?', fnsuccess);
-                } else {
-                    Alert.alert('마지막 차수 삭제오류', '차수 데이터가 없습니다.');
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('마지막 차수 삭제', '삭제되었습니다.');
+                        _this.showChasuList(res.data.jr_pk);
+                        _this.showBasicInfo(res.data.jr_pk);
+
+                        // 변경 사항 반영
+                        _this.chasuGrid.collectionView.refresh();
+                    } else {
+                        Alert.alert('차수 삭제 오류', res.message);
+                    }
+                };
+
+                let lastChasu = Math.max(...this.chasuGrid.collectionView.items.map(item => item.chasu));
+                let lastItem = this.chasuGrid.collectionView.items.find(item => item.chasu === lastChasu);
+                if (lastItem) {
+                    Alert.confirm(
+                        '차수 삭제',
+                        `마지막 차수(${lastChasu}차수) ${lastItem.lot_no}를 삭제하시겠습니까?`,
+                        function () {
+                            let data = { 'jr_pk': jr_pk };
+                            AjaxUtil.postAsyncData(url, data, fnSuccess);
+                        }
+                    );
                 }
             }
+
 
             // 차수 수량 변경 저장, 선택된 차수만 업데이트
             saveChasu() {
                 let _this = this;
-                let items = this.chasuGrid.selecteditems;
-                if (items.length == 0) {
+                let items = this.chasuGrid.selectedItems;
+
+                if (items.length === 0) {
                     return;
                 }
 
@@ -1634,7 +1646,7 @@
                 let good_qty = item.good_qty;
                 let defect_qty = item.defect_qty;
 
-                if (good_qty == "0" || good_qty == "") {
+                if (good_qty === "0" || good_qty === "") {
                     Alert.alert('차수 양품량 수정', '잘못된 수량을 입력하셨습니다.');
                     return;
                 }
@@ -1649,19 +1661,18 @@
                 let fnSuccess = function (res) {
                     if (res.success) {
                         // result.good_qty_sum, result.defect_qty_sum, result.lot_number
-                        Notify.success('수정 되었습니다');
+                        Alert.alert('', '수정 되었습니다');
                         _this.showChasuList(res.data.jr_pk);
-                        // result.good_qty_sum
-                        let gridIndex = parseInt(_this.selectedIndex);
-                        let selectedItem = _this.grid.itemsSource.items[gridIndex];
 
-                        // 값 업데이트
-                        if (selectedItem) {
-                            selectedItem.good_qty = res.data.good_qty_sum;
+                        // 체크된 항목을 직접 찾아서 업데이트
+                        items.forEach(item => {
+                            if (item.id === res.data.mp_id) {
+                                item.good_qty = res.data.good_qty_sum;
+                            }
+                        });
 
-                            // 변경 사항 반영
-                            _this.grid.itemsSource.refresh();
-                        }
+                        // 변경 사항 반영
+                        _this.chasuGrid.collectionView.refresh();
                         // _this.getWorkList();
                         // _this.grid.select(parseInt(_this.selectedIndex));
                         _this.showBasicInfo(res.data.jr_pk);
@@ -1864,11 +1875,12 @@
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/defect_list', param);
                 if (result.data) {
+                    let count = result.data.length;
 
-                    _this.defectGrid.itemSource = result.data;
+                    _this.defectGrid.itemsSource = result.data;
                     let chasu_def_qty = 0;
                     for (let i = 0; i < count; i++) {
-                        chasu_def_qty += parseFloat(this.defectGrid.selectedItem()[i].defect_qty)
+                        chasu_def_qty += parseFloat(this.defectGrid.selectedItems([i]).defect_qty)
                     }
                 }
             }
@@ -1944,8 +1956,9 @@
                 };
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/consumed_list', param);
+                console.log('result', result);
                 if (result.data != null) {
-                    _this.consumedGrid = result.data;
+                    _this.consumedGrid.itemsSource = result.data;
 
 
                     let goodQty = parseFloat($('#tabBasic').find('#good_qty').val());
@@ -2025,7 +2038,7 @@
             addMaterial() {
                 let _this = this;
 
-                if (this.jobres.state == "ordered") {
+                if (this.jobres.state === "ordered") {
                     Alert.alert('LOT 투입오류', '작업이 시작되지 않았습니다.');
                     return;
                 }
@@ -2075,7 +2088,7 @@
                 let lot_info = {};
 
                 let searchcallback = function (lot) {
-                    if (lot.length == 1) {
+                    if (lot.length === 1) {
                         // 단일 로트투입
                         if (valid) {
                             lot_info['lot_id'] = lot[0].id;
@@ -2099,11 +2112,11 @@
             // 투입로트삭제
             delMaterialLot() {
                 let _this = this;
-                let select_grid = _this.InputLotGrid.selecteditems;
+                let select_grid = _this.inputLotGrid.selectedItems;
                 let jr_pk = $('#tabBasic').find('#id').val();
                 let url = this.baseUrl + '/del_lot_list';
 
-                if (select_grid.length == 0) {
+                if (select_grid.length === 0) {
                     Alert.alert('', '투입요청 제외할 그리드를 선택해주세요.');
                     return;
                 }
@@ -2235,11 +2248,9 @@
             }
 
             // 투입로트 조회
-            // 투입목록 조회
             showInputLotList() {
                 let _this = this;
                 let jr_pk = this.jobres.id;
-
 
                 let param = {
                     'jr_pk': jr_pk,
@@ -2247,7 +2258,8 @@
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/input_lot_list', param);
                 if (result.success) {
-                    _this.InputLotGrid = result.data
+                    _this.inputLotGrid.itemsSource = result.data
+                    _this.updateFooter();
                 }
             }
 
@@ -2261,6 +2273,7 @@
                     return;
                 }
                 let items = _this.grid.selectedItems;
+                console.log('items', items);
                 let item = items[0];
                 let content = tmpl('inputTestPopup', {});
                 let $content = $(content);
@@ -2345,12 +2358,13 @@
                 $TestName.val(userinfo.username);
 
                 AjaxUtil.fillSelectOptions($cboTestMaster, 'test_master', 'choose', false, '');
-                $cboTestMaster.val(13)
+                // $cboTestMaster.val(13)
                 AjaxUtil.fillSelectOptions($judgGroup, 'system_code', 'choose', false, 'judg_code');
 
                 let fnLoadTestList = function (jr_pk) {
                     let fnsuccess = function (result) {
                         if (result.data !== null) {
+                            console.log('TestList', result.data);
                             _this.prodTestGrid.itemsSource.sourceCollection = result.data.pdList;
 
                             if (result.data.testDate != null) {
@@ -2362,8 +2376,10 @@
                             if (result.data.testResultId != null) {
                                 $testResultId.val(result.data.testResultId)
                             }
+
+                            // 검사 유형 ID 설정 (서버 데이터 우선)
                             if (result.data.testMasterId != null) {
-                                $cboTestMaster.val(result.data.testMasterId)
+                                $cboTestMaster.val(result.data.testMasterId).change(); // 값 설정 후 change 이벤트 트리거
                             }
 
                             $judgGroup.val(result.data.JudgeCode);
@@ -2371,15 +2387,42 @@
                             $ctRemark.val(result.data.ctRemark);
                         }
                     };
+
                     let testParam = {
                         jr_pk: jr_pk,
                         action: 'prod_test_list'
                     };
                     AjaxUtil.getAsyncData(_this.baseUrl + '/prod_test_list', testParam, fnsuccess);
-
                 };
+
+                // 검사 유형 선택 변경 시 prodTestGrid 값 갱신
+                $cboTestMaster.change(function () {
+                    let selectedTestMasterId = $(this).val();
+
+                    if (!selectedTestMasterId) {
+                        return;
+                    }
+
+                    let testParam = {
+                        jr_pk: jr_pk,
+                        testMasterId: selectedTestMasterId, // 변경된 검사유형 ID
+                        action: 'prod_test_list'
+                    };
+
+                    let fnsuccess = function (result) {
+                        if (result.data !== null) {
+                            console.log('Updated Test List', result.data);
+                            _this.prodTestGrid.itemsSource.sourceCollection = result.data.pdList;
+                        }
+                    };
+
+                    AjaxUtil.getAsyncData(_this.baseUrl + '/prod_test_list', testParam, fnsuccess);
+                });
+
+                // fnLoadTestList 실행 (서버 데이터 로드 후 검사유형 값이 설정됨)
                 fnLoadTestList(jr_pk);
 
+                // 전체 적합 버튼
                 $btnAllItem.click(function (e) {
                     _this.prodTestGrid.itemsSource.sourceCollection.forEach(function (item) {
                         item.result2 = 'O';
@@ -2445,7 +2488,7 @@
             $('#btnWorkListToggle').click(function (e) {
                 $("#prodResultList").toggle(300);
             });
-            $('#btnLotListToggle').click(function (e) {
+            $('#btnToggle').click(function (e) {
                 $("#input_lot_div").toggle(300);
             });
             $("#input_lot_div").toggle(300);
@@ -2462,16 +2505,20 @@
 
             // tab클릭
             let target;
-            $('.tab_links .tab').click(function (e) {
+            $('.tab-links a').click(function (e) {
                 let jr_pk = $('#tabBasic').find('#id').val();
                 let workcenter_pk = $('#tabBasic').find('#workcenter_id').val();
+                console.log('tab jr_pk', jr_pk);
 
                 target = e.currentTarget.name;
+                console.log('target', target);
                 page.currentTab = target;
 
-                if (target == 'tabDefect') {
+                if (target === 'tabDefect') {
+                    console.log('tabDefect click');
                     if (jr_pk && workcenter_pk) page.showDefectList('total');
-                } else if (target == 'tabConsumed') {
+                } else if (target === 'tabConsumed') {
+                    console.log('tabConsumed click');
                     if (jr_pk) {
                         page.showInputLotList();
                         page.showConsumedList(jr_pk);
@@ -2511,7 +2558,7 @@
 
             // 차수저장
             $('#btnSaveChasu').click(function (e) {
-                if (page.chasuGrid.selecteditems.length == 0) {
+                if (page.chasuGrid.selectedRows.length === 0) {
                     Alert.alert('', '차수를 추가해주세요.');
                 } else {
                     page.saveChasu();
@@ -2556,7 +2603,7 @@
             });
 
             $('#defect_qty').click(function (e) {
-                $(".tabs .tab_links [name='tabDefect'").trigger('click');
+                $(".tab-wrap .tab-links [name='tabDefect']").trigger('click');
             });
 
             $('#btnInputLotList').click(function (e) {

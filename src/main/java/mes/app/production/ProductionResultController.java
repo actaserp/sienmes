@@ -834,7 +834,7 @@ public class ProductionResultController {
 			HttpServletRequest request,
 			Authentication auth) {
 		
-		AjaxResult result = new AjaxResult();		
+		AjaxResult result = new AjaxResult();
 		User user = (User)auth.getPrincipal();		
 		Timestamp now = DateUtil.getNowTimeStamp();
 		
@@ -1203,7 +1203,7 @@ public class ProductionResultController {
 			HttpServletRequest request,
 			Authentication auth) {
 		
-		AjaxResult result = new AjaxResult();		
+		AjaxResult result = new AjaxResult();
 		User user = (User)auth.getPrincipal();		
 		Timestamp now = DateUtil.getNowTimeStamp();
 		// 현재 일자
