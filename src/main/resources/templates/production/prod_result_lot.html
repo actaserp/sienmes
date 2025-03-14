@@ -790,6 +790,7 @@
                                 } else if (item.state === 'finished') {
                                     cell.style.backgroundColor = '#0026ff';
                                     cell.style.color = '#FFFFFF'
+                                    cell.style.borderBottom = '1px solid #FFFFFF'
                                 }
                             }
                             if (column.binding === 'order_qty') {
@@ -811,7 +812,6 @@
                             : _this.grid.itemsSource;
 
                         if (!dataSource || !Array.isArray(dataSource) || dataSource.length === 0) {
-                            console.warn("🚨 itemsSource가 비어 있거나 데이터가 없음.");
                             return;
                         }
 
@@ -1497,7 +1497,6 @@
                 let data = FormUtil.extractForm($('#basicForm'));
                 let defectGridList = this.defectGrid.collectionView.items;
                 let previousIndex = _this.selectedIndex;
-                console.log('workStart', defectGridList);
 
                 let fnSuccess = function (res) {
                     if (res.success) {
@@ -1728,8 +1727,6 @@
                             ? _this.grid.itemsSource.sourceCollection
                             : _this.grid.itemsSource;
                         let updatedItem = dataSource[parseInt(_this.selectedIndex)];
-
-                        console.log('res.data', res.data);
 
                         if (updatedItem) {
                             // `good_qty` 값 업데이트
@@ -2014,7 +2011,6 @@
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/defect_list', param);
                 if (result.data) {
-                    console.log('showDefectList의 result.data', result.data);
                     let count = result.data.length;
 
                     _this.defectGrid.itemsSource = result.data;
@@ -2060,9 +2056,6 @@
 
                     defectList.push(defectItem);
                 });
-
-                console.log('saveDefectList의 defectGridList', defectGridList);
-
 
                 let data = {
                     'jr_pk': jr_pk,
