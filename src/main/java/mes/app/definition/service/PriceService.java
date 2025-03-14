@@ -104,7 +104,8 @@ public class PriceService {
         
 		String sql = """
 				update mat_comp_uprice
-                set "UnitPrice" = :unitPrice
+                set "FormerUnitPrice" = "UnitPrice"
+                ,"UnitPrice" = :unitPrice
                 , "ApplyStartDate" = :applyStartDate
                 , "ChangeDate" = now()
                 , "ChangerName" = :changerName

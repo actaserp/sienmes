@@ -7,82 +7,107 @@
 </head>
 
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section >
-        <div class="mb-2">
-            <button type="button" class="btn-default" id="btnSave" style="display:none !important;" title="저장"><i class="fas fa-save"></i></button>
-            <button type="button" class="btn-danger" id="btnDel" style="display:none !important;" title="삭제"><i class="fas fa-trash"></i></button>
-            <button type="button" class="btn-default" id="btnBack" title="뒤로"><i class="fa fa-arrow-circle-left"></i></button>
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>엑셀양식</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
+            </div>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>일지 및 데이터</li>
+                <li>기준정보</li>
+                <li>엑셀양식</li>
+            </ul>
         </div>
-        <div class="table_box sub">
-            <form id="excelForm">
-                <div class="row">
-                    <input type="hidden" id="id" name="id" th:value="${pk}" />
-					<input type="hidden" id="action" name="action" th:value="${action}" />
 
-                    <div class="col-6 col-md-4 col-lg-2">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t4" data-labelCd="양식명">양식명</span>
-                            </div>
-                            <input class="form-control2" type="text" id="form_name" name="form_name">
-                        </div>
+
+    <section class="section">
+        <div class="section-top">
+            <div class="search-wrap">
+                <form id="excelForm">
+                    <div class="search-wrap">
+                        <input type="hidden" id="id" name="id" th:value="${pk}" />
+                        <input type="hidden" id="action" name="action" th:value="${action}" />
+                        <dl>
+                            <dt>
+                                <label for="form_name">양식명</label>
+                            </dt>
+                            <dd>
+                                <input class="form-control2" type="text" id="form_name" name="form_name">
+                            </dd>
+                        </dl>
+
+                        <dl>
+                            <dt>
+                                <label>
+                                    적용기간
+                                </label>
+                            </dt>
+                            <dd>
+                                <ul class="date-box">
+                                    <li>
+                                        <input class="tac " type="date" id="start_date" name="start_date" />
+                                        <label for="start_date" class="hide">시작일</label>
+                                    </li>
+                                    <li>
+                                        <input class="tac " type="date" id="end_date" name="end_date" />
+                                        <label for="end_date" class="hide">종료일</label>
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
+
                     </div>
+                </form>
+            </div>
+            <div class="button-wrap">
+                <ul>
+                    <li>
+                        <button type="button" class="btn-default" id="btnSave" style="display:none !important;" title="저장"><i class="fas fa-save"></i></button>
+                    </li>
+                    <li>
+                        <button type="button" class="btn-danger" id="btnDel" style="display:none !important;" title="삭제"><i class="fas fa-trash"></i></button>
+                    </li>
+                    <li>
+                        <button type="button" class="btn-default" id="btnBack" title="뒤로"><i class="fa fa-arrow-circle-left"></i></button>
+                    </li>
+                    <li>
+                        <button type="button" class="btn-default" id="btnImport"><span>Import</span></button>
+                    </li>
+                    <li>
+                        <button type="button" class="btn-default" id="btnExport"><span>Export</span></button>
+                    </li>
+                </ul>
+            </div>
+        </div>
 
-                    <div class="col-12 col-md-6 col-lg-6 col-xl-4">
-                    	
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t4" data-labelCd="적용기간">적용기간</span>
-                            </div>
-                            <div class="input-group-append" data-ax5picker="multi" id="srchDt">
-                                <input class="tac " type="text" id="start_date" name="start_date" />
-                                <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                                <span class="slow_sign">~</span>
-                                <input class="tac " type="text" id="end_date" name="end_date" />
-                                <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                            </div>
-                        </div>
-                        <!--
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="적용기간">적용기간</span>
-                            </div> 
-                            <div data-ax5picker="multi" id="srchDt">
-                                <div class="input-group-append">
-                                <input class="tac " type="text" id="start_date" name="start_date" />
-                                    <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                                <span class="slow_sign">~</span>
-                                <input class="tac " type="text" id="end_date" name="end_date" />
-                                    <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>
-                                </div>
-                            </div>
-                        </div>
-                        -->
-                    </div>
-
-                    <div class="col-12">
-                        <div class="mb-2">
-                            <button type="button" class="btn-default" id="btnImport"><span>Import</span></button>
-                            <button type="button" class="btn-default" id="btnExport"><span>Export</span></button>
-                        </div>
-                        <div class="input-group">
-                            <div id="spread_sheet" name="spread_sheet" style="width:100%;height:650px;"></div>
-                        </div>
-                    </div>
-
-                    <div class="col-12">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_t4_area" data-labelCd="비고">비고</span>
-                            </div>
-                            <textarea class="form-control2" id="description" name="description"></textarea>
-                        </div>
-                    </div>
-
+        <div id="spread_sheet" name="spread_sheet" style="width:100%;height:650px;"></div>
+        <!--<div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text fit_box_t4_area" data-labelCd="비고">비고</span>
                 </div>
-            </form>
+                <textarea class="form-control2" id="description" name="description"></textarea>
+            </div>-->
+
+        <div class="table-wrap" style=" overflow-x: auto;">
+            <table class="write-table"
+                   style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                <tbody>
+                <tr>
+                    <th style="text-align: center; width: 2%; padding: 5px; border: 1px solid #ddd;">
+                        <label for="description">비고</label>
+                    </th>
+                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                        <textarea class="form-control2" id="description" name="description"></textarea>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
+
     </section>
 </div>
 
@@ -207,8 +232,14 @@
             };
 
             let result = AjaxUtil.getSyncData(this.baseUrl + '/detail', param);
+
             if (result.data != null) {
                 FormUtil.BindDataForm(result.data, $('#excelForm'));
+                let $description = $('#description');
+                if ($description.length > 0) {
+                    $description.val(result.data.description);
+                }
+
                 this.handleSpreadsheet('set', result.data.form_value);
             }
         }
@@ -217,13 +248,15 @@
         saveExcelForm() {
             let _this = this;
             let $formName = $('#excelForm').find('#form_name');
+            let $description = $('#description'); // excelForm 외부의 요소 찾기
             let data = FormUtil.extractForm($('#excelForm'))
+
 
             let fnSuccess = function (res) {
                 if (!res.success) {
                     Alert.alert('', res.message);
                 } else {
-                    Notify.success('저장되었습니다');
+                    Alert.alert('','저장되었습니다');
                     _this.showDetailExcelForm(res.data.id);
                 }
             }
@@ -239,6 +272,12 @@
 
             data['form_value'] = formValue;
 
+            // description이 존재하면 추가
+            if ($description.length > 0) {
+                data['description'] = $description.val();
+            }
+
+
             AjaxUtil.postAsyncData(_this.baseUrl + '/save', data, fnSuccess);
         }
 
@@ -249,7 +288,7 @@
             let data = { id: id }
 
             let fnSuccess = function () {
-                Notify.success("삭제되었습니다.");
+                Alert.alert('',"삭제되었습니다.");
                 $('#btnBack').click();
             }
 
@@ -322,7 +361,10 @@
 
         // 저장
         $('#btnSave').click(function (e) {
-            page.saveExcelForm();
+            Alert.confirm('','저장하시겠습니까?',
+                function () { page.saveExcelForm()},
+                function () { }
+            );
         });
 
         // 삭제

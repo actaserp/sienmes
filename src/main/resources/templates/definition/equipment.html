@@ -101,16 +101,16 @@
                                          <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
                                          작업 지시 상세
                                      </a>-->
-                                    <button type="button" class="btn-default" id="btnBasicNew" name="btnBasicNew"><i
-                                            class="fas fa-plus"></i></button>
+                                    <button type="button" class="btn-default" id="btnBasicNew" name="btnBasicNew" style="width: 115px; height: 36px;"><i
+                                            class="fas fa-plus"></i>신규등록</button>
                                 </li>
                                 <li>
-                                    <button type="button" class="btn-cancel y_write_auth" id="btnBasicDel"><i
-                                            class="fas fa-trash"></i></button>
+                                    <button type="button" class="btn-cancel y_write_auth btn-danger" id="btnBasicDel" style="width: 115px; height: 36px;"><i
+                                            class="fas fa-trash"></i>삭제</button>
                                 </li>
                                 <li>
-                                    <button type="button" class="btn-default y_write_auth" id="btnBasicSave"><i
-                                            class="fas fa-save"></i></button>
+                                    <button type="button" class="btn-default y_write_auth" id="btnBasicSave" style="width: 115px; height: 36px;"><i
+                                            class="fas fa-save"></i>저장</button>
                                 </li>
                             </ul>
                         </div>
@@ -338,8 +338,8 @@
                                          <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
                                          작업 지시 상세
                                      </a>-->
-                                    <button disabled type="button" class="btn-default y_write_auth" id="btnPhotoSave"><i
-                                            class="fas fa-save"></i></button>
+                                    <button disabled type="button" class="btn-default y_write_auth" id="btnPhotoSave" style="width: 115px; height: 36px;"><i
+                                            class="fas fa-save"></i>저장</button>
                                 </li>
                             </ul>
                         </div>
@@ -718,6 +718,7 @@
 
         // 사진파일 저장
         function savePhotoFiles() {
+            let url= '/api/definition/equipment';
             let param = {
                 'eq_id': $('#equipmentForm').find('#id').val(),
                 'file_id': $("#srchFileId").val(),
@@ -732,7 +733,7 @@
                 }
             };
 
-            AjaxUtil.postAsyncData(_this.url+"/save_photo", param, fnSuccess);
+            AjaxUtil.postAsyncData(url+"/save_photo", param, fnSuccess);
         }
 
         //파일 업로더
@@ -743,8 +744,8 @@
             let accept_files = 'jpg,jpeg,gif,png,xlsx,xls';
             let accept = '.' + accept_files.split(',').join(',.');
 
-            if (_this.uploader)
-                return;
+            /*if (_this.uploader)
+                return;*/
 
             _this.uploader = $('#fileUploadDiv').yuFileUploader(
                 {

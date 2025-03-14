@@ -1,4 +1,5 @@
 <html layout:decorate="~{layout_page}">
+
 <th:block layout:fragment="content">
     <div class="layout-contents">
         <div class="page-title-wrap">
@@ -49,7 +50,7 @@
                                  <img src="/images/icon/ico-plus.svg" alt="신규 아이콘">
                                  신규
                              </a>-->
-                            <button type="button" class="btn-default" id="btnNew" title="신규"><i class="fas fa-plus">신규등록</i>
+                            <button type="button" class="btn-default" id="btnNew" title="신규" style="width: 115px; height: 36px;"><i class="fas fa-plus">신규등록</i>
                             </button>
                         </li>
                         <li>
@@ -57,14 +58,14 @@
                                 <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
                                 삭제
                             </a>-->
-                            <button type="button" class="btn-danger" id="btnDel" title="삭제"><i class="fas fa-trash">삭제</i></button>
+                            <button type="button" class="btn-danger" id="btnDel" title="삭제" style="width: 115px; height: 36px;"><i class="fas fa-trash">삭제</i></button>
                         </li>
                         <li>
                             <!--<a class="btn btn-edit" title="저장" id="btnSave">
                                 <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
                                 저장
                             </a>-->
-                            <button type="button" class="btn-default" id="btnEdit" title="수정"><i class="fas fa-edit"></i>수정</button>
+                            <button type="button" class="btn-default" id="btnEdit" title="수정" style="width: 115px; height: 36px;"><i class="fas fa-edit"></i>수정</button>
                         </li>
                     </ul>
                 </div>
@@ -110,7 +111,7 @@
                     },
                     columns: [
                         {binding: 'form_name', header: '양식명', width: 200, align: 'left'},
-                        {binding: 'apply_date', header: '적용기간', width: 200, align: 'left'},
+                        {binding: 'apply_date', header: '적용기간', width: 250, align: 'left'},
                         {binding: 'created_date', header: '등록일', width: 200, align: 'center'},
                         {binding: 'description', header: '비고', width: 400, align: 'left'},
                         {binding: '', header: '', width: "*", align: 'left'},
@@ -123,7 +124,7 @@
                     if (hitTest.cellType === wijmo.grid.CellType.Cell) {
                         let row = hitTest.row;
                         let item = this.grid.rows[row].dataItem;
-                        _this.showEditPage(item.id);
+                        _this.showEditPage(item.id,'edit');
                         //$("#stop_cause_name").val(item.stop_cause_name);
                         //$("#description").val(item.description);
                     }
@@ -198,12 +199,28 @@
 
             // 신규
             $('#btnNew').click(function (e) {
-                page.showEditPage('new')
+                let id = null; // ID 값 가져오기
+                page.showEditPage(id,'new')
             });
 
             // 수정
             $('#btnEdit').click(function (e) {
-                page.showEditPage('edit')
+                let grid = wijmo.Control.getControl('#theGrid'); // 그리드 객체 가져오기
+                let selection = grid.selection; // 현재 선택된 셀의 정보 가져오기
+
+                if (selection.length == 0) {
+                    Alert.alert('제품이 선택되지 않았습니다.');
+                    return;
+                }
+
+                if (selection.row > -1) { // 선택된 행이 있을 경우
+                    let item = grid.rows[selection.row].dataItem; // 선택된 행의 데이터 가져오기
+
+                    if (item) {
+                        let id = item.id; // ID 값 가져오기
+                        page.showEditPage(id,'edit')
+                    }
+                }
             });
 
             // 삭제
