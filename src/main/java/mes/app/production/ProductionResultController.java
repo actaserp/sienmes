@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,67 +75,67 @@ public class ProductionResultController {
 
 	@Autowired
 	private ProductionResultService productionResultService;
-	
+
 	@Autowired
 	private LotService lotService;
-	
+
 	@Autowired
 	MatConsuRepository matConsuRepository;
-	
+
 	@Autowired
 	JobResRepository jobResRepository;
-	
+
 	@Autowired
 	MatProcInputReqRepository matProcInputReqRepository;
-	
+
 	@Autowired
 	JobResDefectRepository jobResDefectRepository;
-	
+
 	@Autowired
 	MatProduceRepository matProduceRepository;
-	
+
 	@Autowired
 	MaterialRepository materialRepository;
-	
+
 	@Autowired
 	WorkcenterRepository workcenterRepository;
-	
+
 	@Autowired
 	StorehouseRepository storehouseRepository;
-	
+
 	@Autowired
 	SystemOptionRepository systemOptionRepository;
-	
+
 	@Autowired
 	MatLotRepository matLotRepository;
-	
+
 	@Autowired
 	MatProcInputRepository matProcInputRepository;
-	
+
 	@Autowired
 	MaterialGroupRepository materialGroupRepository;
-	
+
 	@Autowired
 	MatLotConsRepository matLotConsRepository;
-	
+
 	@Autowired
 	MatInoutRepository matInoutRepository;
-	
+
 	@Autowired
 	SujuRepository sujuRepository;
-	
+
 	@Autowired
 	TransactionTemplate transactionTemplate;
-	
+
 	@Autowired
 	TestResultRepository testResultRepository;
-	
+
 	@Autowired
 	TestItemResultRepository testItemResultRepository;
-	
+
 	@Autowired
 	SqlRunner sqlRunner;
-	
+
 	@GetMapping("/read")
 	public AjaxResult getProdResult(
 			@RequestParam(value="date_from" , required=false) String dateFrom,
@@ -143,78 +144,78 @@ public class ProductionResultController {
 			@RequestParam(value="workcenter_pk" , required=false) String workcenterPk,
 			@RequestParam(value="mat_type" , required=false) String mat_type,
 			@RequestParam(value="is_include_comp" , required=false) String isIncludeComp) {
-		
+
 		List<Map<String, Object>> items = this.productionResultService.getProdResult(dateFrom,dateTo,shiftCode,workcenterPk,mat_type,isIncludeComp);
-		
+
 		AjaxResult result = new AjaxResult();
 		result.data = items;
-		
+
 		return result;
 	}
-	
+
 	@GetMapping("/detail")
 	public AjaxResult getProdResultDetail(
 			@RequestParam(value="jr_pk" , required=false) Integer jrPk) {
-		
+
 		Map<String, Object> items = this.productionResultService.getProdResultDetail(jrPk);
-		
+
 		AjaxResult result = new AjaxResult();
 		result.data = items;
-		
+
 		return result;
 	}
-	
+
 	@GetMapping("/defect_list")
 	public AjaxResult getDefectList(
 			@RequestParam(value="jr_pk" , required=false) Integer jrPk,	@RequestParam(value="workcenter_id" , required=false) Integer workcenterId) {
 
-		List<Map<String, Object>> items = this.productionResultService.getDefectList(jrPk,workcenterId);		
+		List<Map<String, Object>> items = this.productionResultService.getDefectList(jrPk,workcenterId);
 		AjaxResult result = new AjaxResult();
 		result.data = items;
-		
+
 		return result;
 	}
-	
+
 	@GetMapping("/chasu_list")
 	public AjaxResult getChasuList(
 			@RequestParam(value="jr_pk" , required=false) Integer jrPk) {
-		
+
 		List<Map<String, Object>> items = this.productionResultService.getChasuList(jrPk);
-		
+
 		AjaxResult result = new AjaxResult();
 		result.data = items;
-		
+
 		return result;
 	}
-	
+
 	@GetMapping("/input_lot_list")
 	public AjaxResult getInputLotList(
 			@RequestParam(value="jr_pk" , required=false) Integer jrPk) {
-		
+
 		List<Map<String, Object>> items = this.productionResultService.getInputLotList(jrPk);
-		
+
 		AjaxResult result = new AjaxResult();
 		result.data = items;
-		
+
 		return result;
 	}
-	
+
 	@GetMapping("/consumed_list")
 	public AjaxResult getConsumedList(
 			@RequestParam(value="jr_pk" , required=false) Integer jrPk,
 			@RequestParam(value="prod_pk" , required=false) Integer prodPk,
 			@RequestParam(value="prod_date" , required=false) String prodDate) {
-		
-		
+
+
 		//int cnt = this.matConsuRepository.countByJobResponseId(jrPk);
-		
+
 		JobRes jr = this.jobResRepository.getJobResById(jrPk);
-		
+
 		if(jr != null) {
 			prodDate = jr.getProductionDate().toString();
 			prodPk = jr.getMaterialId();
 		}
-		
+
 		List<Map<String, Object>> items;
 		items = this.productionResultService.getConsumedListFirst(jrPk,prodPk,prodDate);
 		/*
@@ -224,13 +225,13 @@ public class ProductionResultController {
 			items = this.productionResultService.getConsumedListSecond(jrPk,prodPk,prodDate);
 		}
 		*/
-		
+
 		AjaxResult result = new AjaxResult();
 		result.data = items;
-		
+
 		return result;
 	}
-	
+
 	@PostMapping("/save")
 	@Transactional
 	public AjaxResult saveProdResult(
@@ -251,29 +252,29 @@ public class ProductionResultController {
 			@RequestParam(value="mat_pk" , required=false) Integer matPk,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
 
 		User user = (User)auth.getPrincipal();
-		
+
 		Timestamp start_time = null;
 		Timestamp end_time = null;
 		Timestamp prod_date = CommonUtil.tryTimestamp(prodDate);
-		
+
 		if (!startTime.equals("")) {
-			start_time = Timestamp.valueOf(prodDate + ' ' + startTime + ":00");			
+			start_time = Timestamp.valueOf(prodDate + ' ' + startTime + ":00");
 		} else {
 			start_time = null;
 		}
-		
+
 		if (!endTime.equals("")) {
-			end_time = Timestamp.valueOf(prodDate + ' ' + endTime + ":00");			
+			end_time = Timestamp.valueOf(prodDate + ' ' + endTime + ":00");
 		} else {
 			end_time = null;
 		}
-		        
+
 		JobRes jr = this.jobResRepository.getJobResById(jrPk);
-		
+
 		jr.setLotNumber(lotNum);
 		jr.setGoodQty(CommonUtil.tryFloatNull(goodQty));
 		jr.setDefectQty(CommonUtil.tryFloatNull(defectQty));
@@ -295,16 +296,17 @@ public class ProductionResultController {
 		jr.setDescription(description);
 		jr.set_audit(user);
 		jr = this.jobResRepository.save(jr);
-		
+
+
 	    Map<String,Object> item = new HashMap<String,Object>();
 	    item.put("jr_pk", jrPk);
-	    
+
 	    result.success = true;
 	    result.data = item;
-	    
+
 	    return result;
 	}
-	
+
 	@PostMapping("/work_start")
 	@Transactional
 	public AjaxResult workStart(
@@ -324,24 +326,24 @@ public class ProductionResultController {
 			@RequestParam(value="mat_pk" , required=false) Integer matPk,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
 
 		User user = (User)auth.getPrincipal();
-		
+
 		Timestamp start_time = Timestamp.valueOf(prodDate + ' ' + startTime + ":00");
 		Timestamp end_time = null;
-		
+
 		if (!endTime.equals("")) {
-			end_time = Timestamp.valueOf(prodDate + ' ' + endTime + ":00");			
+			end_time = Timestamp.valueOf(prodDate + ' ' + endTime + ":00");
 		} else {
 			end_time = null;
 		}
 		Timestamp prod_date = CommonUtil.tryTimestamp(prodDate);
 		Timestamp now = DateUtil.getNowTimeStamp();
-		
+
 		JobRes jr = this.jobResRepository.getJobResById(jrPk);
-		
+
 		MatProcInputReq mir = null;
 		if (jr != null && jr.getMaterialProcessInputRequestId() == null) {
 			mir = new MatProcInputReq();
@@ -349,10 +351,10 @@ public class ProductionResultController {
 			mir.setRequesterId(user.getId());
 			mir.set_audit(user);
 			mir = this.matProcInputReqRepository.save(mir);
-			
+
 			jr.setMaterialProcessInputRequestId(mir.getId());
 		} else {
-			
+
 		}
 		jr.setState("working");
 		jr.setProductionDate(prod_date);
@@ -371,12 +373,12 @@ public class ProductionResultController {
 		jr.setDescription(description);
 		jr.set_audit(user);
 		jr = this.jobResRepository.save(jr);
-		
+
 		result.data = jr;
-		
+
 		return result;
 	}
-	
+
 	@PostMapping("/defect_save")
 	@Transactional
 	public AjaxResult defectSave(
@@ -384,64 +386,72 @@ public class ProductionResultController {
 			@RequestBody MultiValueMap<String, Object> defect_list,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
 
 		User user = (User)auth.getPrincipal();
-		
+
 	    List<Map<String, Object>> items = CommonUtil.loadJsonListMap(defect_list.getFirst("defect_list").toString());
-	    
+
+		System.out.println("🚀 defect_list 원본 데이터: " + defect_list);
+		System.out.println("🚀 defect_list JSON 변환 데이터: " + defect_list.getFirst("defect_list").toString());
+
 	    JobRes jr = this.jobResRepository.getJobResById(jrPk);
-	    	
+
 	    JobResDefect jrd = null;
-	    		
+
 	    for(int i = 0; i < items.size(); i++) {
-	    	
+
 	    	Integer defectId = Integer.parseInt(items.get(i).get("defect_id").toString());
 	    	Float defectQty = Float.parseFloat(items.get(i).get("defect_qty").toString());
 	    	String defectRemark = items.get(i).get("defect_remark") != null ? items.get(i).get("defect_remark").toString() : null;
-	    	
+
 	    	jrd = this.jobResDefectRepository.findByJobResponseIdAndDefectTypeId(jrPk,defectId);
-	    	
-	    	if (jrd == null) {
-	    		jrd = new JobResDefect();
-	    		jrd.setJobResponseId(jrPk);
-	    		jrd.setDefectTypeId(defectId);
-	    		jrd.setDefectQty(defectQty);
-	    		jrd.setDescription(defectRemark);
-	    		// not null 제약조건으로 추가 ----
-	    		jrd.setProcessOrder(0);
-	    		jrd.setLotIndex(0);
-	    		// --------------------
-	    		jrd.set_audit(user);
-	    		jrd = this.jobResDefectRepository.save(jrd);
-	    	} else {
-	    		jrd.setDefectQty(defectQty);
-	    		jrd.setDescription(defectRemark);
-	    		jrd.set_audit(user);
-	    		jrd = this.jobResDefectRepository.save(jrd);
-	    	}
-	    }
-	    
+
+            if (jrd == null) {
+                jrd = new JobResDefect();
+                jrd.setJobResponseId(jrPk);
+                jrd.setDefectTypeId(defectId);
+                jrd.setDefectQty(defectQty);
+                jrd.setDescription(defectRemark);
+                jrd.setProcessOrder(0);
+                jrd.setLotIndex(0);
+                jrd.set_audit(user);
+                this.jobResDefectRepository.save(jrd);
+                System.out.println("🚀 새 job_res_defect 저장: " + jrd);
+            } else {
+                if (defectQty > 0) { // ✅ defectQty가 0 이상인 경우만 업데이트
+                    jrd.setDefectQty(defectQty);
+                    jrd.setDescription(defectRemark);
+                    jrd.set_audit(user);
+                    this.jobResDefectRepository.save(jrd);
+                    System.out.println("🚀 기존 job_res_defect 업데이트: " + jrd);
+                } else {
+                    System.out.println("❌ defectQty가 0이므로 저장되지 않음.");
+                }
+            }
+        }
+
+
 	    List<JobResDefect> jrdList = this.jobResDefectRepository.findByJobResponseId(jrPk);
-	    
+
 	    Float jobresTotalDefectQty = (float)0;
-	    
+
 	    for(JobResDefect sum : jrdList) {
 	    	jobresTotalDefectQty += sum.getDefectQty();
 	    }
-	    
+
 	    jr.setDefectQty(jobresTotalDefectQty);
 	    jr.set_audit(user);
-	    
+
 	    jr = this.jobResRepository.save(jr);
-	    
+
 	    Map<String,Object> item = new HashMap<String,Object>();
 	    item.put("jr_pk", jrPk);
 	    item.put("total_defect", jobresTotalDefectQty);
-	    
+
 	    float chasu_defect_qty = this.productionResultService.getChasuDefectQty(jrPk);
-	    
+
 	    // 차수에 등록된 부적합품이랑 부적합 텝의 총합계 비교
 	    if (Float.compare(chasu_defect_qty, Float.parseFloat(jobresTotalDefectQty.toString())) != 0) {
 	    	result.message = "차수별 생산의 부적합량 합계와 값이 일치하지 않습니다";
@@ -449,12 +459,12 @@ public class ProductionResultController {
 	    	TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 	    	return result;
 	    }
-	    
+
 	    result.success = true;
 	    result.data = item;
-	    return result;	    
+	    return result;
 	}
-	
+
 	@PostMapping("/work_finish")
 	@Transactional
 	public AjaxResult workFinish(
@@ -476,33 +486,33 @@ public class ProductionResultController {
 			@RequestParam(value="description" , required=false) String description,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
 
 		User user = (User)auth.getPrincipal();
-		
+
 		Timestamp start_time = Timestamp.valueOf(prodDate + ' ' + startTime + ":00");
 		Timestamp end_time = Timestamp.valueOf(prodDate + ' ' + endTime + ":00");
 		Timestamp prod_date = CommonUtil.tryTimestamp(prodDate);
-		
+
 		List<MaterialConsume> mcList = this.matConsuRepository.findByJobResponseId(jrPk);
-		
+
 		if (mcList.size() == 0) {
 			result.success = false;
 			result.message = "저장된 투입내역이 없습니다. \n 투입내역을 저장해주세요.";
 			return result;
 		}
-		
+
 		List<MaterialProduce> mp = this.matProduceRepository.findByJobResponseIdAndMaterialId(jrPk,materialId);
-		
+
 		if(mp.size() == 0) {
 			result.success = false;
 			result.message = "저장된 차수내역이 없습니다. \n 차수내역을 저장해주세요.";
 			return result;
 		}
-				
+
 		JobRes jr = this.jobResRepository.getJobResById(jrPk);
-		
+
 		jr.set_audit(user);
 		jr.setLotNumber(lotNum);
 		jr.setGoodQty(goodQty);
@@ -518,51 +528,52 @@ public class ProductionResultController {
 		jr.setEquipment_id(equipmentId);
 		jr.setDescription(description);
 		jr.setState("finished");
-		
-		jr = this.jobResRepository.save(jr);
-		
+
 		this.productionResultService.add_jobres_defectqty_inout(jrPk,user.getId());
-		
+
+		jr = this.jobResRepository.save(jr);
+		System.out.println("jr data" + jr);
+
 		Map<String,Object> item = new HashMap<String,Object>();
 		item.put("jr_pk", jrPk);
-		
+
 		result.success = true;
 		result.data = item;
-		
+
 		return result;
 	}
-	
+
 	@PostMapping("/finish_cancel")
 	@Transactional
 	public AjaxResult finishCancel(
 			@RequestParam(value="jr_pk" , required=false) Integer jrPk,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
-		
+
 		User user = (User)auth.getPrincipal();
-		
+
 		JobRes jr = this.jobResRepository.getJobResById(jrPk);
-		
+
 		jr.setEndTime(null);
 		jr.setState("working");
 		jr.set_audit(user);
-		
+
 		jr = this. jobResRepository.save(jr);
-		
+
 		this.productionResultService.delete_jobres_defectqty_inout(jrPk);
-		
+
 		Map<String,Object> item = new HashMap<String,Object>();
 		item.put("jr_pk", jrPk);
-		
+
 		result.success = true;
 		result.data = item;
-		
+
 		return result;
-		
+
 	}
-	
+
 	@PostMapping("/consumed_save")
 	@Transactional
 	public AjaxResult consumedSave(
@@ -573,28 +584,28 @@ public class ProductionResultController {
 			@RequestBody MultiValueMap<String, Object> Q,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
-		
+
 		User user = (User)auth.getPrincipal();
-		
+
 	    List<Map<String, Object>> items = CommonUtil.loadJsonListMap(Q.getFirst("Q").toString());
-	    
+
 	    if (!mpPk.equals("")) {
-	    	MaterialProduce mp = this.matProduceRepository.getMatProduceById(Integer.parseInt(mpPk));	
-	    	
+	    	MaterialProduce mp = this.matProduceRepository.getMatProduceById(Integer.parseInt(mpPk));
+
 		    if (mp != null) {
 		    	mp.setBomOutputAmount(bomOutputAmount.equals("") || bomOutputAmount == null ? null : Float.parseFloat(bomOutputAmount));
 		    	mp = this.matProduceRepository.save(mp);
 		    }
 	    }
-	   
+
 	    SystemOption so = this.systemOptionRepository.getByCode("consume_from_house_option");
-	    
+
 	    String consumeHouseOption = "master";
-	    
+
 	    Integer baseStorehouseId = null;
-	    
+
 	    if(so.getCode().equals("process")) {
 	    	consumeHouseOption = "process";
 	    	List<StoreHouse> shList = this.storehouseRepository.findByHouseType("process");
@@ -602,18 +613,18 @@ public class ProductionResultController {
 	    		baseStorehouseId = Integer.parseInt(shList.get(0).getId().toString());
 	    	}
 	    }
-	    
+
 	    for(int i = 0; i < items.size(); i++) {
 	    	Integer matPk = Integer.parseInt(items.get(i).get("mat_pk").toString());
 	    	Float bomConsumed = items.get(i).get("bom_consumed").equals("") ? 0 : Float.parseFloat(items.get(i).get("bom_consumed").toString());
 	    	Float consumed = items.get(i).get("consumed_qty").equals("") ? 0 : Float.parseFloat(items.get(i).get("consumed_qty").toString());
 	    	String consumedStart = items.get(i).get("consumed_start").equals("") ? null :  prodDate + ' ' + items.get(i).get("consumed_start").toString() + ":00";
 	    	String consumedEnd = items.get(i).get("consumed_end").equals("") ? null :  prodDate + ' ' + items.get(i).get("consumed_end").toString() + ":00";
-	    	
+
 	    	Float totalConsumed = consumed;
-	    	
+
 	    	Float addConsumed = totalConsumed - bomConsumed;
-	    	
+
 	    	Integer storehouseId = null;
 	    	if (baseStorehouseId != null) {
 	    		storehouseId = baseStorehouseId;
@@ -621,9 +632,9 @@ public class ProductionResultController {
 	    		Material m = this.materialRepository.getMaterialById(matPk);
 	    		storehouseId = (int) Math.floor(m.getStoreHouseId());
 	    	}
-	    	
+
 	    	List<MaterialConsume> mcList = this.matConsuRepository.findByJobResponseIdAndMaterialId(jrPk,matPk);
-	    	
+
 	    	if (mcList.size() == 0) {
 	    		MaterialConsume mc = new MaterialConsume();
 	    		mc.setJobResponseId(jrPk);
@@ -638,7 +649,7 @@ public class ProductionResultController {
 	    		mc.setStoreHouseId(storehouseId);
 	    		mc.set_audit(user);
 	    		mc = this.matConsuRepository.save(mc);
-	    		
+
 	    	} else {
 	    		for (int j = 0; j < mcList.size(); j++) {
 	    			MaterialConsume mc = mcList.get(j);
@@ -653,16 +664,16 @@ public class ProductionResultController {
 	    		}
 	    	}
 	    }
-	    		
+
 	    Map<String, Object> item = new HashMap<String,Object>();
 	    item.put("jr_Pk", jrPk);
-	    
+
 	    result.success = true;
 	    result.data = item;
-	    
-		return result;		
+
+		return result;
 	}
-	
+
 	@PostMapping("/add_lot_input")
 	@Transactional
 	public AjaxResult addLotInput(
@@ -672,30 +683,30 @@ public class ProductionResultController {
 			@RequestParam(value="input_qty" , required=false) Float inputQty,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
-		
+
 		User user = (User)auth.getPrincipal();
-		
+
 		Timestamp inoutTime = DateUtil.getNowTimeStamp();
-		
+
 		JobRes jr = this.jobResRepository.getJobResById(jrPk);
-		
+
 		MaterialLot ml = this.matLotRepository.getMatLotById(lotId);
-		
+
 		if (ml != null) {
 			if (ml.getCurrentStock() <= 0) {
 				result.message = "가용한 재고가 없는 LOT을 지정했습니다.(" + ml.getLotNumber() + ")";
 				result.success = false;
 				return result;
 			}
-			
+
 			if (ml.getStoreHouseId() == null) {
 				result.message = "해당 품목의 기본창고가 지정되지 않았습니다(" + ml.getLotNumber() + ")";
 				result.success = false;
 				return result;
 			}
-			
+
 			List<MatProcInput> mpiList = this.matProcInputRepository.findByMaterialProcessInputRequestIdAndMaterialLotId(jr.getMaterialProcessInputRequestId(),ml.getId());
 			Integer mpiCount = mpiList.size();
 			if (mpiCount > 0) {
@@ -703,9 +714,9 @@ public class ProductionResultController {
 				result.success = false;
 				return result;
 			}
-			
+
 			MatProcInputReq mir = null;
-			
+
 			if (jr != null) {
 				if (jr.getMaterialProcessInputRequestId() == null) {
 					mir = new MatProcInputReq();
@@ -714,12 +725,12 @@ public class ProductionResultController {
 					mir.set_audit(user);
 					mir = this.matProcInputReqRepository.save(mir);
 					jr.setMaterialProcessInputRequestId(mir.getId());
-					
+
 				} else {
 					mir = this.matProcInputReqRepository.getMatProcInputReqById(jr.getMaterialProcessInputRequestId());
 				}
 			}
-			
+
 			MatProcInput mpi = new MatProcInput();
 			mpi.setMaterialProcessInputRequestId(mir.getId());
 			mpi.setMaterialId(ml.getMaterialId());
@@ -732,16 +743,16 @@ public class ProductionResultController {
 			mpi.setActorId(user.getId());
 			mpi.set_audit(user);
 			mpi = this.matProcInputRepository.save(mpi);
-			
+
 			result.success = true;
 			result.data = mpi;
 		} else {
 			result.success = false;
 		}
-		
-		return result;	
+
+		return result;
 	}
-	
+
 	@PostMapping("/multi_add_lot_input")
 	@Transactional
 	public AjaxResult multiAddLotInput(
@@ -750,48 +761,48 @@ public class ProductionResultController {
 			@RequestBody MultiValueMap<String, Object> Q,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
-		
+
 		User user = (User)auth.getPrincipal();
-		
+
 		Timestamp inoutTime = DateUtil.getNowTimeStamp();
-		
+
 		JobRes jr = this.jobResRepository.getJobResById(jrPk);
-		
+
 		List<Map<String, Object>> data = CommonUtil.loadJsonListMap(Q.getFirst("Q").toString());
-		
+
 		for (int i = 0; i < data.size(); i++) {
 			Map<String,Object> lotMap = data.get(i);
-			
+
 			int lotId = Integer.parseInt(lotMap.get("id").toString());
 			Float inputQty = Float.parseFloat(lotMap.get("cur_stock").toString());
-			
+
 			MaterialLot ml = this.matLotRepository.getMatLotById(lotId);
-			
+
 			if (ml.getCurrentStock() <= 0) {
 				result.message = "가용한 재고가 없는 LOT을 지정했습니다.(" + ml.getLotNumber() + ")";
 				result.success = false;
 				return result;
 			}
-			
+
 			if (ml.getStoreHouseId() == null) {
 				result.message = "해당 품목의 기본창고가 지정되지 않았습니다(" + ml.getLotNumber() + ")";
 				result.success = false;
 				return result;
 			}
-			
+
 			List<MatProcInput> mpiList = this.matProcInputRepository.findByMaterialProcessInputRequestIdAndMaterialLotId(jr.getMaterialProcessInputRequestId(),ml.getId());
-			
+
 			Integer mpiCount = mpiList.size();
 			if (mpiCount > 0) {
 				result.message = "이미 지정된 로트입니다.(" + ml.getLotNumber() + ")";
 				result.success = false;
 				return result;
 			}
-			
+
 			MatProcInputReq mir = null;
-			
+
 			if (jr != null) {
 				if (jr.getMaterialProcessInputRequestId() == null) {
 					mir = new MatProcInputReq();
@@ -800,12 +811,12 @@ public class ProductionResultController {
 					mir.set_audit(user);
 					mir = this.matProcInputReqRepository.save(mir);
 					jr.setMaterialProcessInputRequestId(mir.getId());
-					
+
 				} else {
 					mir = this.matProcInputReqRepository.getMatProcInputReqById(jr.getMaterialProcessInputRequestId());
 				}
 			}
-			
+
 			MatProcInput mpi = new MatProcInput();
 			mpi.setMaterialProcessInputRequestId(mir.getId());
 			mpi.setMaterialId(ml.getMaterialId());
@@ -818,14 +829,14 @@ public class ProductionResultController {
 			mpi.setActorId(user.getId());
 			mpi.set_audit(user);
 			mpi = this.matProcInputRepository.save(mpi);
-			
+
 			result.success = true;
 			result.data = mpi;
 		}
-			
-		return result;	
+
+		return result;
 	}
-	
+
 	@PostMapping("/chasu_add")
 	@Transactional(isolation = Isolation.READ_UNCOMMITTED)
 	public AjaxResult chasuAdd(
@@ -833,56 +844,56 @@ public class ProductionResultController {
 			@RequestParam(value="good_qty" , required=false) float goodQty,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
-		User user = (User)auth.getPrincipal();		
+		User user = (User)auth.getPrincipal();
 		Timestamp now = DateUtil.getNowTimeStamp();
-		
+
 		// 현재 일자
 		LocalDate date = LocalDate.now();
 		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		
+
 		// 현재 시간
 		LocalTime time = LocalTime.now();
 		DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss");
-		
+
 		JobRes jr = this.jobResRepository.getJobResById(jrPk);
-		
+
 		if (jr.getWorkCenter_id() == null) {
 			result.message = "워크센터가 지정되지 않았습니다.";
 			result.success = false;
 			return result;
 		}
-		
+
 		Material m = this.materialRepository.getMaterialById(jr.getMaterialId());
-		
+
 		if (m.getStoreHouseId() == null) {
 			result.message = "생산제품의 기본 창고가 설정되어 있지 않습니다.";
 			result.success = false;
 			return result;
 		}
-		
+
 		Integer storehouseId = m.getStoreHouseId();
 
 		// matprods 개수로
 		List<MaterialProduce> mpList = this.matProduceRepository.findByJobResponseId(jr.getId());
 		Integer chasu = mpList.size() + 1;
-		
+
 		// lot_size = material.LotSize
-		Workcenter wc = this.workcenterRepository.getWorkcenterById(jr.getWorkCenter_id());		
+		Workcenter wc = this.workcenterRepository.getWorkcenterById(jr.getWorkCenter_id());
 		Integer processId = wc.getProcessId();
-		
-		// 1. 로트번호 생성 
+
+		// 1. 로트번호 생성
 		// lot 자동 생성
 		String lotPrefix = "B";
-		
+
 		MaterialGroup mg = this.materialGroupRepository.getMatGrpById(m.getMaterialGroupId());
 		if (mg.getMaterialType().equals("product")) {
 			lotPrefix = "P";
 		}
-		
+
 		String lotNumber = this.lotService.make_production_lot_in_number(lotPrefix);
-		
+
 		// 차수별 mat_produce
 		MaterialProduce mp = new MaterialProduce();
 		mp.setJobResponseId(jr.getId());
@@ -906,7 +917,7 @@ public class ProductionResultController {
 		mp.setLastProcessYN("Y");
 		mp.setLotNumber(lotNumber);
 		mp = this.matProduceRepository.save(mp); // mat_prod 생성
-		
+
 		// 2.생산품 mat_lot 생성
 		MaterialLot ml = new MaterialLot();
 		ml.setLotNumber(lotNumber);
@@ -918,19 +929,19 @@ public class ProductionResultController {
 		ml.setSourceDataPk(mp.getId());
 		ml.setSourceTableName("mat_produce");
 		ml.setStoreHouseId(mp.getStoreHouseId());
-		ml.set_audit(user);		
+		ml.set_audit(user);
 		ml = this.matLotRepository.save(ml); // materialLot 저장
-		
+
 		// 차수생산량 만큼 good_qty량 만큼 BOM 수량조회
 		List<Map<String,Object>> bomMatItems = this.productionResultService.get_chasu_bom_mat_qty_list(mp.getId());
-		
+
 		if (bomMatItems.size() == 0) {
 			result.success = false;
 			result.message = "BOM구성이 없습니다.";
 			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 			return result;
 		}
-		
+
 		for(int i = 0; i < bomMatItems.size(); i++) {
 			Map<String,Object> bomMap = bomMatItems.get(i);
 			float chasuBomQty = Float.parseFloat(bomMap.get("chasu_bom_qty").toString());
@@ -944,24 +955,24 @@ public class ProductionResultController {
              차감하면서 mat_lot_cons 생성 
              투입되어야할 수량보다 적으면 재고량 부족으로 return 
              */
-			
+
 			if ("Y".equals(lotUseYn)) {
 				// 수정시작
 				// 1. mat_proc_input 에서 해당 품목의 로트리스트를 가져온다.
-				
+
 				List<Map<String,Object>> mpiList = this.productionResultService.getMaterialProcessInputList(jr.getId(), consumeMatPk);
 				// 투입요청에서 해당 품목이 로트 투입인지 조회한다
-				
+
 				float totalLotQty = 0;
 				for(int j = 0 ; j < mpiList.size(); j++) {
 					Map<String,Object> mpiMap = mpiList.get(j);
-					
+
 					float currQty = Float.parseFloat(mpiMap.get("curr_qty").toString());
 					totalLotQty += currQty;
 				}
-				
+
 				if(totalLotQty < chasuBomQty) {
-					result.message = "가용한 LOT 재고가 없습니다.(" +  matName + ")"; 
+					result.message = "가용한 LOT 재고가 없습니다.(" +  matName + ")";
 					result.success = false;
 					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 					return result;
@@ -970,7 +981,7 @@ public class ProductionResultController {
 				// 작업준비에 설정된 lot 투입 품목이면
 				// 로트 사용량 추가
 				float remainQty = chasuBomQty;
-				
+
 				// MaterialProcessInput 조회
 				for (int k = 0; k < mpiList.size(); k++) {
 					Map<String,Object> mpiMap = mpiList.get(k);
@@ -979,7 +990,7 @@ public class ProductionResultController {
 					if (currentStock == 0) {
 						continue;
 					}
-					
+
 					MatLotCons mlc = new MatLotCons();
 					mlc.setMaterialLotId(matLotId);
 					mlc.setOutputDateTime(now);
@@ -987,38 +998,38 @@ public class ProductionResultController {
 					mlc.setSourceTableName("mat_produce");
 					mlc.set_audit(user);
 					mlc.setCurrentStock(ml.getCurrentStock()); // 당시 재고량
-					
+
 					if (currentStock >= remainQty) {
 						// 해당로트의현재수량 가능
 						mlc.setOutputQty(remainQty);
 						remainQty = (float)0;
 						mlc = this.matLotConsRepository.save(mlc);
-						
+
 						break;
 					} else {
 						mlc.setOutputQty(currentStock);
 						mlc = this.matLotConsRepository.save(mlc);
 						remainQty = remainQty - currentStock;
 					}
-					
+
 				}
-				
+
 				if (remainQty > 0) {
-					result.message = "로트 수량이 부족합니다.(" +  matName + ")"; 
+					result.message = "로트 수량이 부족합니다.(" +  matName + ")";
 					result.success = false;
 					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 					return result;
-				}				
+				}
 			} else {
-				
+
 				if(consMat.getCurrentStock() <= 0) {
-					result.message = "가용한 품목 재고가 없습니다.(" +  matName + ")"; 
+					result.message = "가용한 품목 재고가 없습니다.(" +  matName + ")";
 					result.success = false;
 					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 					return result;
 				}
 			}
-			
+
 			// mat_cons 생성
 			MaterialConsume mc = new MaterialConsume();
 			mc.setJobResponseId(jr.getId());
@@ -1035,7 +1046,7 @@ public class ProductionResultController {
 			mc.set_status("a");
 			mc.setStoreHouseId(consMat.getStoreHouseId());
 			mc = this.matConsuRepository.save(mc);
-			
+
 			//1. mat_inout 생성=> BOM 수량만큼 재고를 차감한다.
 			MaterialInout mic = new MaterialInout();
 			mic.setMaterialInoutHeadId(null);
@@ -1053,10 +1064,10 @@ public class ProductionResultController {
 			mic.set_status("a");
 			mic.setDescription("차수생산 투입재고 차감");
 			mic.set_audit(user);
-			
+
 			mic = this.matInoutRepository.save(mic);
 		} // for문 끝
-		
+
 		// 2. mat_inout 생성=> 차수 수량만큼 재고를 증감한다.
 		MaterialInout mip = new MaterialInout();
 		mip.setMaterialInoutHeadId(null);
@@ -1074,30 +1085,30 @@ public class ProductionResultController {
 		mip.set_status("a");
 		mip.setDescription("차수생산입고");
 		mip.set_audit(user);
-		
+
 		mip = this.matInoutRepository.save(mip);
-		
+
 		this.productionResultService.calculate_balance_mat_lot_with_job_res(jr.getId());
-		
+
 		// 양품량 합계 업데이트
-		Map<String,Object> mapSum = this.productionResultService.getJobResponseGoodDefectQty(jrPk);		
-		
+		Map<String,Object> mapSum = this.productionResultService.getJobResponseGoodDefectQty(jrPk);
+
 		float goodQtySum = Float.parseFloat(mapSum.get("good_qty").toString());
 		float defectQtySum = Float.parseFloat(mapSum.get("defect_qty").toString());
 		jr.setGoodQty(goodQtySum);
 		jr.setDefectQty(defectQtySum);
 		jr.set_audit(user);
-		
+
 		jr = this.jobResRepository.save(jr);
-		
+
 		Map<String,Object> item = new HashMap<String,Object>();
 		item.put("jr_pk", jrPk);
 		item.put("lot_number", lotNumber);
 		item.put("good_qty_sum", jr.getGoodQty());
 		item.put("chasu", chasu);
-		
+
 		result.data = item;
-		
+
 		return result;
 	}
 
@@ -1107,37 +1118,40 @@ public class ProductionResultController {
 			@RequestParam(value="jr_pk" , required=false) Integer jrPk,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
-		
+
 		User user = (User)auth.getPrincipal();
-		
+
 		JobRes jr = this.jobResRepository.getJobResById(jrPk);
-		
+
 		// mat_prod 마지막 차수 가져오기
 		List<MaterialProduce> mpList = this.matProduceRepository.findByJobResponseIdOrderByLotIndexDesc(jrPk);
 		Integer matProdCount = mpList.size();
-		
+
 		if ( matProdCount == 0) {
 			result.message = "차수생산이력이 존재하지 않습니다.";
 			result.success = false;
 			return result;
 		}
-		
+
 		MaterialProduce mp = mpList.get(0);
 		String lotNumber = mp.getLotNumber();
-		
+		float removedGoodQty = (mp.getGoodQty() != null) ? mp.getGoodQty() : 0;
+		float removedDefectQty = (mp.getDefectQty() != null) ? mp.getDefectQty() : 0;
+
+
 		// mat_cons 가져오기
 		List<MaterialConsume> mcList = this.matConsuRepository.findByJobResponseIdAndProcessOrderAndLotIndex(jr.getId(),mp.getProcessOrder(),mp.getLotIndex());
 		// Integer matConsumeCount = mcList.size();
-		
+
 		// 생산된차수LOT의 mat_lot_consu 존재 확인
 		MaterialLot ml = this.matLotRepository.getByLotNumber(lotNumber);
-		
+
 		List<MatProcInput> mpiList = this.matProcInputRepository.findByMaterialLotId(ml.getId());
-		
+
 		List<MatLotCons> mlcList = this.matLotConsRepository.findByMaterialLotId(ml.getId());
-		
+
 		if (mpiList.size() > 0) {
 			result.message = "생산LOT(" +  lotNumber + ")이 투입요청 중에 있어 차수 삭제가 불가능합니다.";
 			result.success = false;
@@ -1150,17 +1164,17 @@ public class ProductionResultController {
 			result.success = false;
 			return result;
 		}
-		
+
 		// 2. mat_lot 삭제
 		this.matLotRepository.deleteById(ml.getId());
-		
+
 		// mat_lot_cons 삭제
 		this.matLotConsRepository.deleteBySourceTableNameAndSourceDataPk("mat_produce",mp.getId());
-		
+
 		// mat_inout 삭제
 		this.matInoutRepository.deleteBySourceTableNameAndSourceDataPkAndInOutAndInputType("mat_produce",mp.getId(),"in","produced_in");
-		
-		// 5. mat_inout 생산 재고 차감 이력 삭제 (재고원복), mat_cons삭제 
+
+		// 5. mat_inout 생산 재고 차감 이력 삭제 (재고원복), mat_cons삭제
 		// mat_cons 삭제(투입 자재별로 등록된 mat_consu)
 		for (int i = 0; i < mcList.size(); i++) {
 			this.matInoutRepository.deleteBySourceTableNameAndSourceDataPkAndInOutAndOutputType("mat_consu",mcList.get(i).getId(),"out","consumed_out");
@@ -1169,30 +1183,37 @@ public class ProductionResultController {
 
 		// 6.해당 차수 mat_prod 삭제
 		this.matProduceRepository.deleteById(mp.getId());
-		
+
 		this.productionResultService.calculate_balance_mat_lot_with_job_res(jr.getId());
-		
+
 		// 양품량 합계 업데이트
-		Map<String,Object> mapSum = this.productionResultService.getJobResponseGoodDefectQty(jrPk);		
-		
+		Map<String,Object> mapSum = this.productionResultService.getJobResponseGoodDefectQty(jrPk);
+
 		float goodQtySum = Float.parseFloat(mapSum.get("good_qty").toString());
 		float defectQtySum = Float.parseFloat(mapSum.get("defect_qty").toString());
-		
+
+		goodQtySum -= removedGoodQty;
+		defectQtySum -= removedDefectQty;
+
+		// 음수가 되지 않도록 보정
+		if (goodQtySum < 0) goodQtySum = 0;
+		if (defectQtySum < 0) defectQtySum = 0;
+
 		jr.setGoodQty(goodQtySum);
 		jr.setDefectQty(defectQtySum);
 		jr.set_audit(user);
 		jr = this.jobResRepository.save(jr);
-		
+
 		Map<String,Object> item = new HashMap<String,Object>();
 		item.put("jr_pk", jrPk);
 		item.put("good_qty_sum", goodQtySum);
 		item.put("defect_qty_sum", defectQtySum);
-		
-		result.data = item;	
-		
+
+		result.data = item;
+
  		return result;
 	}
-	
+
 	@PostMapping("/chasu_save")
 	@Transactional(isolation = Isolation.READ_UNCOMMITTED)
 	public AjaxResult chasuSave(
@@ -1202,61 +1223,61 @@ public class ProductionResultController {
 			@RequestParam(value="defect_qty" , required=false, defaultValue = "0") Float defectQty,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
-		User user = (User)auth.getPrincipal();		
+		User user = (User)auth.getPrincipal();
 		Timestamp now = DateUtil.getNowTimeStamp();
 		// 현재 일자
 		LocalDate date = LocalDate.now();
 		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		
+
 		// 현재 시간
 		LocalTime time = LocalTime.now();
 		DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss");
-		
+
 		JobRes jr = this.jobResRepository.getJobResById(jrPk);
-		
+
 		MaterialProduce mpe = this.matProduceRepository.getMatProduceById(mpId);
-		
+
 		MaterialLot prodMatLot = this.matLotRepository.getByLotNumber(mpe.getLotNumber());
-		
+
 		List<MatLotCons> prodMatLotConsCount = this.matLotConsRepository.findByMaterialLotId(prodMatLot.getId());
-		
+
 		if (prodMatLotConsCount.size()> 0) {
 			result.message = "해당차수의 로트가 이미 사용되어 수정할 수 없습니다.";
 			result.success = false;
 		    return result;
 		}
-		
+
 		float mpGoodQty = mpe.getGoodQty() != null ? mpe.getGoodQty() : 0;
 		float mpDefectQty = mpe.getDefectQty() != null ? mpe.getDefectQty() : 0;
-		
+
 		if (Float.compare(mpGoodQty, goodQty) == 0 && Float.compare(mpDefectQty, defectQty) == 0) {	//if (Float.compare(mpe.getGoodQty(), goodQty) == 0 && Float.compare(mpe.getDefectQty(), defectQty) == 0) {
 			result.message = "수량변경이 없습니다.("+	mpe.getLotNumber()+ ")";
 			result.success = false;
 		    return result;
 		}
-		
+
 		MaterialProduce mp = this.matProduceRepository.getMatProduceById(mpId);
-		
+
 		if (mp.getGoodQty() == null) mp.setGoodQty((float)0);
 		if (mp.getDefectQty() == null) mp.setDefectQty((float)0);
-		
+
 		Float diffGoodQty = goodQty - mp.getGoodQty();
 		Float diffDefectQty = defectQty - mp.getDefectQty();
 		Float diffTotal = diffGoodQty + diffDefectQty;
-		
+
 		// 1. mat_produce 변경
 		Float prevMatProdGoodQty = mp.getGoodQty();
 		mp.setGoodQty(goodQty);
 		mp.setDefectQty(defectQty);
 		mp.setDescription("차수생산 수량변경");
 		mp.setActorId(user.getId());
-		mp.set_audit(user);			
+		mp.set_audit(user);
 		this.matProduceRepository.saveAndFlush(mp);
-				
+
 		MaterialLot ml = this.matLotRepository.findBySourceTableNameAndSourceDataPkAndLotNumber("mat_produce", mp.getId(), mp.getLotNumber());
-		
+
 		// 2.생산입고 mat_inout 수량 조절
 		if (diffGoodQty != 0) {
 			MaterialInout mi = this.matInoutRepository.findBySourceTableNameAndSourceDataPkAndInOutAndInputTypeAndMaterialId("mat_produce", mp.getId(), "in", "produced_in",mp.getMaterialId());
@@ -1265,82 +1286,82 @@ public class ProductionResultController {
 			mi.setDescription(message);
 			mi.setInoutDate(LocalDate.parse(date.format(dateFormat)));
 			mi.setInoutTime(LocalTime.parse(time.format(timeFormat)));
-			mi = this.matInoutRepository.saveAndFlush(mi);		
-			
+			mi = this.matInoutRepository.saveAndFlush(mi);
+
 			ml.setInputQty(mp.getGoodQty());
-			ml = this.matLotRepository.saveAndFlush(ml);			
+			ml = this.matLotRepository.saveAndFlush(ml);
 		}
-		
+
 		// 합산물량이 변경이 없으면 소모물량은 변경없다
 		if (diffTotal == 0) {
 			// jobres 양품량 업데이트
-			Map<String,Object> mapSum = this.productionResultService.getJobResponseGoodDefectQty(jrPk);		
-			
+			Map<String,Object> mapSum = this.productionResultService.getJobResponseGoodDefectQty(jrPk);
+
 			float goodQtySum = Float.parseFloat(mapSum.get("good_qty").toString());
 			float defectQtySum = Float.parseFloat(mapSum.get("defect_qty").toString());
-			
+
 			jr.setGoodQty(goodQtySum);
 			jr.setDefectQty(defectQtySum);
 			jr.set_audit(user);
 			jr = this.jobResRepository.save(jr);
-			
+
 			Map<String,Object> item = new HashMap<String,Object>();
 			item.put("jr_pk", jrPk);
 			item.put("lot_number", mp.getLotNumber());
 			item.put("good_qty_sum", goodQtySum);
 			item.put("defect_qty_sum", defectQtySum);
-			
+
 			result.success = true;
 			result.data = item;
 			return result;
 		}
-		
+
 		// 변경된 물량만큼 소모 BOM 조회함
 		List<Map<String, Object>> bomMatItems = this.productionResultService.get_chasu_bom_mat_qty_list(mp.getId());
-		
+
 		// mat_lot_cons 삭제 및 mat_lot 정산
-		// this.productionResultService.delete_mlc_and_rebalance_ml(mp.getId());		
-		
+		// this.productionResultService.delete_mlc_and_rebalance_ml(mp.getId());
+
 		this.matLotConsRepository.deleteBySourceTableNameAndSourceDataPk("mat_produce", mp.getId());
-		
+
 		for (Map<String,Object> bomMap :bomMatItems) {
 			float chasuBomQty = Float.parseFloat(bomMap.get("chasu_bom_qty").toString());
 			int consumeMatPk = (int)bomMap.get("mat_pk");
 			String matName = bomMap.get("mat_name").toString();
 			Material consMat = this.materialRepository.getMaterialById(consumeMatPk);
 			String lotUseYn = bomMap.get("lotUseYn").toString();
-			
+
 			// 3.변경된 물량 만큼 consume 물량 변경
 			MaterialConsume mc = this.matConsuRepository.getByJobResponseIdAndProcessOrderAndLotIndexAndMaterialId(jr.getId(), mp.getProcessOrder(), mp.getLotIndex(),consumeMatPk);
 			mc.setBomQty(chasuBomQty);
 			mc.setConsumedQty(chasuBomQty);
 			mc.set_audit(user);
 			mc = this.matConsuRepository.saveAndFlush(mc);
-			
+
 			// mat_inout 물량 조정
 			MaterialInout mi = this.matInoutRepository.findBySourceTableNameAndSourceDataPkAndInOutAndOutputTypeAndMaterialId("mat_consu", mc.getId(), "out", "consumed_out", consumeMatPk);
 			mi.set_audit(user);
 			mi.setDescription("'차수생산수량변경" + mi.getOutputQty() + " -> " + chasuBomQty);
 			mi.setOutputQty(chasuBomQty);
 			mi = this.matInoutRepository.saveAndFlush(mi);
-			
+
 			if ("Y".equals(lotUseYn)) {
 				// 수정시작
 				// 1. mat_proc_input 에서 해당 품목의 로트리스트를 가져온다.
-				
+
 				List<Map<String,Object>> mpiList = this.productionResultService.getMaterialProcessInputList(jr.getId(), consumeMatPk);
 				// 투입요청에서 해당 품목이 로트 투입인지 조회한다
-				
+
 				float totalLotQty = 0;
 				for(int j = 0 ; j < mpiList.size(); j++) {
 					Map<String,Object> mpiMap = mpiList.get(j);
-					
+
 					float currQty = Float.parseFloat(mpiMap.get("curr_qty").toString());
 					totalLotQty += currQty;
 				}
-				
+
 				if(totalLotQty < chasuBomQty) {
-					result.message = "가용한 LOT 재고가 없습니다.(" +  matName + ")"; 
+					result.message = "가용한 LOT 재고가 없습니다.(" +  matName + ")";
 					result.success = false;
 					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 					return result;
@@ -1349,7 +1370,7 @@ public class ProductionResultController {
 				// 작업준비에 설정된 lot 투입 품목이면
 				// 로트 사용량 추가
 				float remainQty = chasuBomQty;
-				
+
 				// MaterialProcessInput 조회
 				for (int k = 0; k < mpiList.size(); k++) {
 					Map<String,Object> mpiMap = mpiList.get(k);
@@ -1358,7 +1379,7 @@ public class ProductionResultController {
 					if (currentStock == 0) {
 						continue;
 					}
-					
+
 					MatLotCons mlc = new MatLotCons();
 					mlc.setMaterialLotId(matLotId);
 					mlc.setOutputDateTime(now);
@@ -1366,32 +1387,32 @@ public class ProductionResultController {
 					mlc.setSourceTableName("mat_produce");
 					mlc.set_audit(user);
 					mlc.setCurrentStock(ml.getCurrentStock()); // 당시 재고량
-					
+
 					if (currentStock >= remainQty) {
 						// 해당로트의현재수량 가능
 						mlc.setOutputQty(remainQty);
 						remainQty = (float)0;
 						mlc = this.matLotConsRepository.save(mlc);
-						
+
 						break;
 					} else {
 						mlc.setOutputQty(currentStock);
 						mlc = this.matLotConsRepository.save(mlc);
 						remainQty = remainQty - currentStock;
 					}
-					
+
 				}
-				
+
 				if (remainQty > 0) {
-					result.message = "로트 수량이 부족합니다.(" +  matName + ")"; 
+					result.message = "로트 수량이 부족합니다.(" +  matName + ")";
 					result.success = false;
 					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 					return result;
-				}				
+				}
 			} else {
-				
+
 				if(consMat.getCurrentStock() <= 0) {
-					result.message = "가용한 품목 재고가 없습니다.(" +  matName + ")"; 
+					result.message = "가용한 품목 재고가 없습니다.(" +  matName + ")";
 					result.success = false;
 					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 					return result;
@@ -1402,29 +1423,29 @@ public class ProductionResultController {
 		//this.productionResultService.calculate_balance_mat_lot_with_mat_prod(mp.getId());
 		this.productionResultService.calculate_balance_mat_lot_with_job_res(jr.getId());
 		// 양품량 합계 업데이트
-		Map<String,Object> mapSum = this.productionResultService.getJobResponseGoodDefectQty(jrPk);		
-		
+		Map<String,Object> mapSum = this.productionResultService.getJobResponseGoodDefectQty(jrPk);
+
 		float goodQtySum = Float.parseFloat(mapSum.get("good_qty").toString());
 		float defectQtySum = Float.parseFloat(mapSum.get("defect_qty").toString());
-		
+
 		jr.setGoodQty(goodQtySum);
 		jr.setDefectQty(defectQtySum);
 		jr.set_audit(user);
 		jr = this.jobResRepository.save(jr);
-		
+
 		Map<String,Object> item = new HashMap<String,Object>();
 		item.put("jr_pk", jrPk);
 		item.put("lot_number", mp.getLotNumber());
 		item.put("good_qty_sum", goodQtySum);
 		item.put("defect_qty_sum", defectQtySum);
-		
+
 		result.data = item;
 		result.success = true;
-	
-		
+
+
 		return result;
 	}
-	
+
 	// 생산정보 삭제
 	@PostMapping("/del")
 	@Transactional
@@ -1432,11 +1453,11 @@ public class ProductionResultController {
 			@RequestParam(value="id" , required=false) Integer jobresId,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
-		
+
 		List<MaterialConsume> mcList = this.matConsuRepository.findByJobResponseId(jobresId);
-		
+
 		if(mcList.size() > 0) {
 			result.success = false;
 			result.message = "등록된 차수가 있어 삭제 할 수 없습니다.";
@@ -1444,9 +1465,9 @@ public class ProductionResultController {
 		} else {
 			this.jobResRepository.deleteById(jobresId);
 		}
-		
+
 		return result;
-		
+
 	}
 	// 생산정보 삭제
 //	@PostMapping("/del")
@@ -1455,7 +1476,7 @@ public class ProductionResultController {
 //			@RequestParam(value="id" , required=false) Integer jobresId,
 //			HttpServletRequest request,
 //			Authentication auth) {
-		
+
 //		AjaxResult result = new AjaxResult();
 //		
 //		JobRes jr = this.jobResRepository.getJobResById(jobresId);
@@ -1547,29 +1568,40 @@ public class ProductionResultController {
 			@RequestParam(value="mpi_pk" , required=false) Integer mpi_pk,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
 
-		this.matProcInputRepository.deleteById(mpi_pk);		
+		this.matProcInputRepository.deleteById(mpi_pk);
  		return result;
 	}
-	
+
 	@GetMapping("/prod_test_list")
 	public AjaxResult prodTestList(
 			@RequestParam("jr_pk") Integer jrPk) {
-		
+
 		List<TestResult> trList = this.testResultRepository.findBySourceTableNameAndSourceDataPk("job_res",jrPk);
-		
+
 		List<Map<String, Object>> items = null;
-		
-		if (trList.size() > 0) {
+		Integer testMasterId = null;
+
+		if (!trList.isEmpty()) {
+//			items = this.productionResultService.prodTestList(jrPk, trList.get(0).getId());
+//			testMasterId = items.get(0).get("testMasterId") != null ? (Integer) items.get(0).get("testMasterId") : null;
 			items = this.productionResultService.prodTestList(jrPk,trList.get(0).getId());
 		} else {
-			items = this.productionResultService.prodTestDefaultList();
+			// 검사 유형이 등록된 경우 조회 (품목별 1개 강제)
+			testMasterId = this.productionResultService.getTestMasterByItem(jrPk);
+
+			if (testMasterId != null) {
+				items = this.productionResultService.prodTestListByTestMaster(testMasterId);
+			} else {
+				// 검사 유형이 없으면 기본 리스트를 불러옴 (제품검사)
+				items = this.productionResultService.prodTestDefaultList();
+			}
 		}
-		
+
 		Map<String, Object> item = new HashMap<>();
-		
+
 		item.put("testDate", items.get(0).get("testDate"));
 		item.put("CheckName", items.get(0).get("CheckName"));
 		item.put("JudgeCode", items.get(0).get("JudgeCode"));
@@ -1578,12 +1610,12 @@ public class ProductionResultController {
 		item.put("testMasterId", items.get(0).get("testMasterId"));
 		item.put("testResultId", items.get(0).get("testResultId"));
 		item.put("pdList", items);
-		
+
 		AjaxResult result = new AjaxResult();
 		result.data = item;
 		return result;
 	}
-	
+
 	@PostMapping("/test_save")
 	@Transactional
 	public AjaxResult testSave(
@@ -1598,29 +1630,29 @@ public class ProductionResultController {
 			@RequestParam(value = "jr_pk", required = false) Integer jrPk,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		User user = (User)auth.getPrincipal();
-		
+
 		AjaxResult result = new AjaxResult();
-		
+
 		Timestamp testDate = Timestamp.valueOf(test_date+ " 00:00:00");
-		
+
 		if (StringUtils.hasText(testResultId)) {
 			List<TestItemResult> trList = this.testItemResultRepository.findByTestResultId(Integer.parseInt(testResultId));
-			
+
 			// 결과 삭제
 			if(trList.size() > 0) {
 				for (int i = 0; i < trList.size(); i++) {
 					this.testItemResultRepository.deleteById(trList.get(i).getId());
 				}
 			}
-			
+
 			this.testItemResultRepository.flush();
-		
+
 		}
-		
+
 		TestResult tr = new TestResult();
-		
+
 		if (StringUtils.hasText(testResultId)) {
 			tr = this.testResultRepository.getTestResultById(Integer.parseInt(testResultId));
 		} else {
@@ -1628,15 +1660,15 @@ public class ProductionResultController {
 			tr.setSourceTableName("job_res");
 			tr.setMaterialId(materialId);
 		}
-		
+
 		tr.setTestMasterId(Integer.parseInt(testMastId));
 		tr.setTestDateTime(testDate);
 		tr.set_audit(user);
-		
+
 		this.testResultRepository.saveAndFlush(tr);
-		
+
 		List<Map<String, Object>> data = CommonUtil.loadJsonListMap(Q.getFirst("Q").toString());
-		
+
 		for(int i = 0; i < data.size(); i++) {
 			TestItemResult tir = new TestItemResult();
 			tir.setJudgeCode(judgGrp);
@@ -1645,25 +1677,25 @@ public class ProductionResultController {
 			tir.setCharResult(ntRemark);
 			tir.setTestItemId(Integer.parseInt(data.get(i).get("id").toString()));
 			tir.setTestResultId(tr.getId());
-			
+
 			if(data.get(i).get("result1") != null) {
 				tir.setChar1(data.get(i).get("result1").toString());
 			}
-			
+
 			if(data.get(i).get("result2") != null) {
 				tir.setChar2(data.get(i).get("result2").toString());
 			}
 			tir.set_audit(user);
-			
+
 			this.testItemResultRepository.save(tir);
 		}
-		
-		
+
+
 		Map<String, Object> item = new HashMap<>();
 		item.put("id", jrPk);
-		
+
 		result.data = item;
-		
+
 		return result;
 	}
 }
