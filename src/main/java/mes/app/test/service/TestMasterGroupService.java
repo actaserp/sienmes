@@ -28,12 +28,15 @@ public class TestMasterGroupService {
             from test_mast_grp tmg 
             where 1=1
 			""";
-		
-		if (StringUtils.isEmpty(testGroupName) == false) sql += "and tmg.\"Name\" like concat('%%',:test_grp_name,'%%')";
-		if (StringUtils.isEmpty(testClass) == false) sql += "and tmg.\"TestClass\" = :test_class";
-		
-		sql += "order by tmg.id";
-		
+
+		if (StringUtils.isEmpty(testGroupName) == false)
+			sql += " and tmg.\"Name\" like concat('%%',:test_grp_name,'%%')";
+		if (StringUtils.isEmpty(testClass) == false)
+			sql += " and tmg.\"TestClass\" = :test_class";
+
+		sql += " order by tmg.id";
+
+
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		
 		return items;	

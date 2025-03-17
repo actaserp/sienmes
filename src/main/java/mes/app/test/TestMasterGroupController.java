@@ -44,39 +44,55 @@ public class TestMasterGroupController {
 		
 		return result;
 	}
-	
-	
+
+
 	@PostMapping("/save")
 	public AjaxResult saveTestMasterGroup(
 			@RequestParam("list") String list,
-			//@RequestParam(value="id", required=false) Integer id,
-			//@RequestParam(value="Name") String name, 
-			//@RequestParam(value="TestClass", required=false) String testClass,
 			HttpServletRequest request,
-			Authentication auth	) {
-		List<Map<String,Object>> items = CommonUtil.loadJsonListMap(list);
-		Map<String,Object> item = items.get(0);
-		Integer id = (Integer)item.get("id");
-		String name = (String)item.get("test_grp_name");
-		String testClass = (String)item.get("test_class");
-		User user = (User)auth.getPrincipal();
+			Authentication auth) {
+
+		// list가 비어 있지 않은지 확인
+		if (list == null || list.trim().isEmpty()) {
+			throw new IllegalArgumentException("전달된 list 파라미터가 비어 있습니다.");
+		}
+
+		// JSON 문자열을 List로 변환
+		List<Map<String, Object>> items = CommonUtil.loadJsonListMap(list);
+
+		// items가 비어 있지 않은지 확인
+		if (items.isEmpty()) {
+			throw new IllegalArgumentException("파싱된 데이터가 없습니다.");
+		}
+
+		Map<String, Object> item = items.get(0); // 첫 번째 아이템 가져오기
+		Integer id = (Integer) item.get("id");
+		String name = (String) item.get("test_grp_name");
+		String testClass = (String) item.get("test_class");
+
+		// 인증된 사용자 정보 가져오기
+		User user = (User) auth.getPrincipal();
 		System.out.println(item);
-		
+
 		TestMasterGroup tmg = null;
+
 		if (id == null) {
 			tmg = new TestMasterGroup();
 		} else {
 			tmg = this.testMasterGroupRepository.getTestMasterGroupById(id);
 		}
+
 		tmg.setName(name);
 		tmg.setTestclass(testClass);
 		tmg.set_audit(user);
 		tmg = this.testMasterGroupRepository.save(tmg);
+
 		AjaxResult result = new AjaxResult();
 		result.data = tmg;
 		return result;
 	}
-	
+
+
 	@PostMapping("/delete")
 	public AjaxResult deleteEquipment(@RequestParam("id") Integer id) {
 		this.testMasterGroupRepository.deleteById(id);
