@@ -48,7 +48,7 @@
 
             <div class="container-fluid">
                 <p id="selectedItem"></p>
-                <div id="theGrid" style="height: 350px; max-height: 350px;"></div>
+                <div id="process-grid" style="height: 350px; max-height: 350px;"></div>
             </div>
            <!-- <div class="grid_box">
                 <div class="h-300" data-ax5grid="process-grid"></div>
@@ -70,16 +70,16 @@
                         <div class="button-wrap">
                             <ul>
                                 <li>
-                                    <button type="button" class="btn-default" id="btnNew" name="btnNew"><i
-                                            class="fas fa-plus"></i></button>
+                                    <button type="button" class="btn-default" id="btnNew" name="btnNew" style="width: 115px; height: 36px;"><i
+                                            class="fas fa-plus"></i>신규등록</button>
                                 </li>
 
                                 <li>
-                                    <button type="button" class="btn-cancel" id="btnDel"><i class="fas fa-trash"></i></button>
+                                    <button type="button" class="btn-cancel btn-danger y_write_auth" id="btnDel" style="width: 115px; height: 36px;"><i class="fas fa-trash"></i>삭제</button>
                                 </li>
 
                                 <li>
-                                    <button disabled type="button" class="btn-default" id="btnSave"><i class="fas fa-save"></i>
+                                    <button disabled type="button" class="btn-default" id="btnSave" style="width: 115px; height: 36px;"><i class="fas fa-save">저장</i>
                                     </button>
                                 </li>
                             </ul>
@@ -152,6 +152,7 @@
             constructor() {
                 this.url = '/api/test/test_method';
                 this.grid = null;
+                this.grid2 = null;
                 this.test_item_grid = null;
                 this.viewData = new wijmo.collections.CollectionView();
                 this.viewData2 = new wijmo.collections.CollectionView();
@@ -161,7 +162,7 @@
             init() {
                 let _this = this;
 
-                this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+                this.grid = new wijmo.grid.FlexGrid('#process-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
@@ -181,6 +182,45 @@
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
+
+                this.grid.loadedRows.addHandler(() => {
+                    setTimeout(() => {
+                        this.grid.select(-1, -1); // 선택 상태 초기화
+                    }, 0); // 비동기로 처리하여 초기 선택 해제
+                });
+
+                let isInitialLoad = true; // 초기 상태 플래그
+
+                this.grid.selectionChanged.addHandler((s, e) => {
+                    if (isInitialLoad) {
+                        isInitialLoad = false; // 초기 로드 이후 플래그 해제
+                        return;
+                    }
+
+                    let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
+                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
+                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
+                        let id = selectedRowData.id; // 품목 ID 가져오기
+
+                        _this.showDetail(id);
+                        _this.showTestItem();
+
+                        /*console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
+                        console.log('선택된 행 데이터:', selectedRowData);*/
+                    }
+                });
+
+                this.grid.hostElement.addEventListener('dblclick', (e) => {
+                    let hitTest = this.grid.hitTest(e);
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        let row = hitTest.row;
+                        let selectedItem = this.grid.rows[row].dataItem;
+                        _this.showDetail(selectedItem.id);
+                        _this.showTestItem();
+
+                    }
+                });
+
 
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '검사방법 정보';
@@ -344,7 +384,7 @@
                 let data = FormUtil.extractForm($('#testMethodForm'));
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Notify.success('저장되었습니다');
+                        Alert.alert('','저장되었습니다');
                         _this.searchMainData();
                         _this.showDetail(res.data);
                     } else {
@@ -363,7 +403,7 @@
                 let data = {'id': id};
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Notify.success('삭제되었습니다');
+                        Alert.alert('','삭제되었습니다');
                         _this.searchMainData();
                     } else {
                         Alert.alert('', res.message);
@@ -385,13 +425,14 @@
 
                 if (result.success) {
                     let count = result.data.length;
-                    _this.test_item_grid.setData({
+                    /*_this.test_item_grid.setData({
                         list: result.data,
                         page: {
                             display: true,
                             totalElements: count,
                         }
-                    });
+                    });*/
+                    _this.viewData2.sourceCollection = result.data;
                 }
             }
 
@@ -477,6 +518,14 @@
                         $(this).removeAttr('disabled');
                     }
                 });
+
+
+                if (page.grid2 && page.grid2.collectionView) {
+                    page.grid2.collectionView.sourceCollection.length = 0;  // 기존 CollectionView 유지하면서 데이터만 비움
+                    page.grid2.collectionView.refresh();  // 갱신
+                } else {
+                    console.log("grid2가 아직 생성되지 않았습니다.");
+                }
 
                 //page.setButtonDisable(true, false, true);
                 page.setButtonState();

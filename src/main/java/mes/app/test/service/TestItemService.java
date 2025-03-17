@@ -1,5 +1,6 @@
 package mes.app.test.service;
 
+import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
@@ -18,51 +19,57 @@ public class TestItemService {
 
 	// 목록 조회
 	public List<Map<String, Object>> getTestItemList(String testMethodId, String testItemName, String testResType, Integer unit) {
-		
+
+		Integer testMethodIdInt = null;
+		if (StringUtils.isNotEmpty(testMethodId)) {
+			testMethodIdInt = Integer.valueOf(testMethodId);
+		}
+
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
-		dicParam.addValue("test_method_id", testMethodId);
+		dicParam.addValue("test_method_id", testMethodIdInt, Types.INTEGER);
 		dicParam.addValue("test_item_name", testItemName);
 		dicParam.addValue("test_res_type", testResType);
 		dicParam.addValue("unit", unit);
 
-		String sql = """
-			select ti.id
-	             , ti."Code" as item_code 
-	             , ti."Name" as item_name 
-	             , ti."EngName" as item_eng_name 
-	             , ti."ResultType" as res_type 
-	             , sc."Value" as item_res_type
-	             , ti."Unit_id" as item_unit 
-	             , ti."ItemType" as item_type
-	             , u."Name" as unit_name 
-	             , ti."RoundDigit" as item_round_digit 
-	             , tm."Name" as test_method_name
-              from test_item ti 
-              left join test_method tm on tm.id = ti."TestMethod_id"
-              left join unit u on ti."Unit_id" = u.id 
-             inner join sys_code sc on ti."ResultType" = sc."Code" 
-             where sc."CodeType" = 'result_type'
-			""";
+		StringBuilder sql = new StringBuilder("""
+        select ti.id
+             , ti."Code" as item_code
+             , ti."Name" as item_name 
+             , ti."EngName" as item_eng_name 
+             , ti."ResultType" as res_type 
+             , sc."Value" as item_res_type
+             , ti."Unit_id" as item_unit 
+             , ti."ItemType" as item_type
+             , u."Name" as unit_name 
+             , ti."RoundDigit" as item_round_digit 
+             , tm."Name" as test_method_name
+          from test_item ti 
+          left join test_method tm on tm.id = ti."TestMethod_id"
+          left join unit u on ti."Unit_id" = u.id 
+         inner join sys_code sc on ti."ResultType"::text = sc."Code" 
+         where sc."CodeType" = 'result_type'
+    """);
 
-		if (StringUtils.isEmpty(testMethodId) == false) 
-			sql += "and ti.\"TestMethod_id\" = :test_method_id ";
-		
-		if (StringUtils.isEmpty(testItemName) == false) 
-			sql += "and ti.\"Name\"  like concat('%%', :test_item_name,'%%') ";
-		
-		if (StringUtils.isEmpty(testResType) == false)
-			sql += "and ti.\"ResultType\" = :test_res_type ";
-		
+		if (StringUtils.isNotEmpty(testMethodId))
+			sql.append("and ti.\"TestMethod_id\" = :test_method_id ");
+
+		if (StringUtils.isNotEmpty(testItemName))
+			sql.append("and ti.\"Name\" like concat('%%', :test_item_name, '%%') ");
+
+		if (StringUtils.isNotEmpty(testResType))
+			sql.append("and ti.\"ResultType\" = :test_res_type ");
+
 		if (unit != null)
-			sql += "and ti.\"Unit_id\" = :unit ";
-		
-		sql += "order by ti.id";
-		
-		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
-		
+			sql.append("and ti.\"Unit_id\" = :unit ");
+
+		sql.append(" order by ti.id");
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
+
 		return items;
 	}
-	
+
+
 	// 상세정보 조회
 	public Map<String, Object> getTestItemDetailItem(Integer id) {
 
