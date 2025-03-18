@@ -2,10 +2,9 @@
 <th:block layout:fragment="content">
     <div class="layout-contents">
 	<input type="hidden" id="searchCond" th:value="${searchcond}" />
-
         <div class="page-title-wrap">
             <div class="left">
-                <h2>설비이력카드 목록</h2>
+                <h2>설비관리대장</h2>
                 <a title="북마크" class="bookmark toggle">
                     내메뉴
                 </a>
@@ -14,7 +13,7 @@
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
                 <li>일지 및 데이터</li>
                 <li>선행요건일지</li>
-                <li>설비이력카드목록</li>
+                <li>설비관리대장</li>
             </ul>
         </div>
 
@@ -103,7 +102,7 @@
                 autoGenerateColumns: false,
                 showMarquee: true,
                 isReadOnly: true,
-                formatItem: (sender, e) => {
+                formatItem: (s, e) => {
                     if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                         e.cell.style.textAlign = 'center';
                     }
@@ -287,7 +286,7 @@
                     }
                     let fnSuccess = function (resp) {
                         if (resp.success) {
-                            Notify.success('삭제하였습니다.');
+                            Alert.alert('','삭제하였습니다.');
                             _this.searchMainData();
                         } else {
                             Alert.alert('', resp.message);
@@ -328,20 +327,17 @@
             }
 
             let result = AjaxUtil.getSyncData(_this.baseUrl + '/appr_stat', param);
+            console.log(result); // 응답 데이터 확인
 
-            if (result != null) {
-                let documentInfo = result.data.document_info;
-                _this.grid.setData({
-                    list: documentInfo,
-                    page: {
-                        display: true,
-                        totalElements: documentInfo.length,
-                    }
-                });
-
-                //_this.grid.setHeight(documentInfo.length * 25 + 100);
+            if (result && result.data && Array.isArray(result.data.document_info)) {
+                _this.viewData.sourceCollection = result.data.document_info;
+            } else {
+                console.warn("서버 응답 데이터가 올바르지 않습니다.", result);
+                _this.viewData.sourceCollection = [];
             }
         }
+
+
 
         // 엑셀 다운로드
         exportExcel() {

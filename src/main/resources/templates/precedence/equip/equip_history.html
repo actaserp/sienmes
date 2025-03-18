@@ -2,8 +2,6 @@
 <th:block layout:fragment="content">
     <div class="layout-contents">
 	<input type="hidden" id="searchCond" th:value="${searchcond}" />
-
-
         <div class="page-title-wrap">
             <div class="left">
                 <h2>설비점검이력</h2>
@@ -66,7 +64,7 @@
                 </div>
             </div>
             <div class="container-fluid">
-                <div id="theGrid" style="height: 600px; max-height: 600px;"></div>
+                <div id="document_grid" style="height: 600px; max-height: 600px;"></div>
             </div>
 
         </section>
@@ -91,13 +89,13 @@
                 searchcond : $('#searchCond').val(),
 			};
 
-            this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+            this.grid = new wijmo.grid.FlexGrid('#document_grid', {
                 selectionMode: wijmo.grid.SelectionMode.Row,
                 headersVisibility: wijmo.grid.HeadersVisibility.Column,
                 autoGenerateColumns: false,
                 showMarquee: true,
                 isReadOnly: true,
-                formatItem: (sender, e) => {
+                formatItem: (s, e) => {
                     if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                         e.cell.style.textAlign = 'center';
                     }
@@ -313,6 +311,7 @@
             }
 
             let result = AjaxUtil.getSyncData(_this.baseUrl + '/appr_stat', param);
+            console.log(result);
 
             if (result != null) {
                 _this.viewData.sourceCollection = result.data;

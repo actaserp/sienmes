@@ -9,7 +9,7 @@
         <input type="hidden" id="equip_id" th:value="${equip_id}"/>
         <div class="page-title-wrap">
             <div class="left">
-                <h2>설비이력카드 목록</h2>
+                <h2>설비관리대장 등록</h2>
                 <a title="북마크" class="bookmark toggle">
                     내메뉴
                 </a>
@@ -18,7 +18,7 @@
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
                 <li>일지 및 데이터</li>
                 <li>선행요건일지</li>
-                <li>설비이력카드목록</li>
+                <li>설비관리대장등록</li>
             </ul>
         </div>
 
@@ -50,17 +50,6 @@
 
                     <dl>
                         <dt>
-                            <label for="pickerDate">점검일</label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <input type="date" class="form-control2" id="pickerDate" name="pickerDate">
-                            </div>
-                        </dd>
-                    </dl>
-
-                    <dl>
-                        <dt>
                             <!--<label> <span class="input-group-text fit_box_sm" data-labelCd="작성자">작성자</span></label>-->
                             <label for="firstName">작성자</label>
                         </dt>
@@ -76,7 +65,7 @@
                             기간<span class="eq"></span>
                         </dt>
                         <dd>
-                            <ul class="date-box" id="pickerDate">
+                            <ul class="date-box">
                                 <li>
                                     <input class="tac date_from " type="date" id="srchStartDt" name="srchStartDt"/>
                                     <label for="srchStartDt" class="hide">시작일</label>
@@ -99,13 +88,14 @@
 
         <section class="section">
             <div class="title_box">
-                <!--<button type="button" class="btn-default" id="btnDiaryPrint">일지출력</button>-->
+                <span class="right_align rpt" data-labelCd="설비점검이력">설비점검이력</span>
+                <button type="button" class="btn-default" id="btnDiaryPrint">일지출력</button>
                 <!--<button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>-->
                 <button type="button" class="btn-default" id="btnReqAppr">결재상신</button>
                 <button type="button" class="btn-default" id="btnAppr" style="display:none;">승인</button>
-                <button type="button" class="btn-cancel" id="btnReject" style="display:none;">반려</button>
+                <button type="button" class="btn-cancel" id="btnReject" style="display:none; width: 124px; height: 48px;">반려</button>
                 <button type="button" class="btn-default" id="btnSave">저장</button>
-                <button type="button" class="btn-cancel" id="btnDelete">삭제</button>
+                <button type="button" class="btn-cancel btn-danger" id="btnDelete"  style="width: 124px; height: 48px;" >삭제</button>
                 <button type="button" class="btn-default" id="btnList">목록</button>
             </div>
             <div class="grid_box" id="repair_section">
@@ -145,7 +135,7 @@
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" id="Usage" name="Usage" style="width: 100%;">
                             </td>
-                            <!--설비 코드 부터 id값 부여 -->
+
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                 <label for="Code">설비코드</label>
                             </th>
@@ -698,7 +688,7 @@
                                 _this.reqAppr();
                             } else {
                                 // 임시저장
-                                Notify.success('저장하였습니다.');
+                                Alert.alert('','저장하였습니다.');
                                 $('#btnDelete').show();
                                 _this.searchMainData();
                             }
@@ -734,7 +724,7 @@
                     }
                     let fnSuccess = function (resp) {
                         if (resp.success) {
-                            Notify.success('삭제하였습니다.');
+                            Alert.alert('','삭제하였습니다.');
                             $('#btnList').click();
                         } else {
                             Alert.alert('', resp.message);
