@@ -85,7 +85,7 @@
                         <dt>&nbsp;</dt>
                         <dd>
                             <li>
-                                <a class="btn btn-delete" title="검색" id="btnMainSearch">
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
                                     <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
                                     <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                     검색
@@ -239,10 +239,13 @@
             page = new MaterialStockPage();
 
             AjaxUtil.fillSelectOptions($('#cboMatType'), 'system_code', 'all', null, 'mat_type');
-            $('#cboMatType').change(function () {
+            AjaxUtil.fillSelectOptions($('#cboMatGrp'), 'material_group', 'all', false);
+
+            $('#cboMatType').on('change', function (e) {
                 let mat_type = $('#cboMatType').val();
-                AjaxUtil.fillSelectOptions($('#cboMatGrp'), 'material_group', 'all', null, mat_type);
+                AjaxUtil.fillSelectOptions($('#cboMatGrp'), 'material_group', 'all', false, mat_type);
             });
+
             $('#cboMatGrp').change(function () {
                 let grp_pk = $('#cboMatGrp').val();
 

@@ -157,13 +157,45 @@ public class MaterialInoutService {
 		return items;
 	}
 
+	public Integer getTestMasterByItem(Integer mioId) {
+		MapSqlParameterSource param = new MapSqlParameterSource();
+		param.addValue("mioId", mioId);
+
+		String sql = """
+                    SELECT tmm."TestMaster_id" AS testMasterId
+                            FROM mat_inout mi
+                            INNER JOIN test_mast_mat tmm ON mi."Material_id" = tmm."Material_id"
+                            WHERE mi.id = :mioId
+                            LIMIT 1
+                """;
+
+		List<Map<String, Object>> result = this.sqlRunner.getRows(sql, param);
+		return result.isEmpty() ? null : (Integer) result.get(0).get("testMasterId");
+	}
+
+	public List<Map<String, Object>> prodTestListByTestMaster(Integer testMasterId) {
+		MapSqlParameterSource param = new MapSqlParameterSource();
+		param.addValue("testMasterId", testMasterId);
+
+		String sql = """
+                    SELECT tm.id AS testMasterId, ti.id, ti."Name" AS name, ti."ResultType" AS "resultType",
+                           tim."SpecText" AS "specText", '' AS result1
+                    FROM test_item_mast tim
+                    INNER JOIN test_mast tm ON tim."TestMaster_id" = tm.id
+                    INNER JOIN test_item ti ON tim."TestItem_id" = ti.id
+                    WHERE tm.id = :testMasterId
+                """;
+
+		return this.sqlRunner.getRows(sql, param);
+	}
+
 	public List<Map<String, Object>> mioTestDefaultList() {
 		
 		String sql = """
 				select ti.id,ti."Name" as name, ti."ResultType" as "resultType", '' as result1
 				from test_item ti
 				inner join test_method tm on ti."TestMethod_id"  = tm.id 
-				where tm."Code"  = 'tm_001'
+				where tm."Code"  = 'inout_test'
 				order by ti.id
 			    """;
 		

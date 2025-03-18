@@ -16,10 +16,10 @@ public class MaterialMoveService {
 	@Autowired
 	SqlRunner sqlRunner;
 	
-	public List<Map<String, Object>> getMaterialMoveList(Integer storehouse_id, Integer mat_grp_pk, String keyword) {
+	public List<Map<String, Object>> getMaterialMoveList(Integer storehouse_id, Integer material_id, String keyword) {
 		MapSqlParameterSource param = new MapSqlParameterSource();		
 		param.addValue("storehouse_id", storehouse_id);
-		param.addValue("mat_grp_pk", mat_grp_pk);
+		param.addValue("material_id", material_id);
 		param.addValue("keyword", keyword);
 		
 		String sql = """
@@ -35,9 +35,9 @@ public class MaterialMoveService {
 			""";
 		}
 
-		if(mat_grp_pk!=null) {
+		if(material_id!=null) {
 			sql+="""
-			and m."MaterialGroup_id" = :mat_grp_pk
+			and m.id = :material_id
 			""";
 		}
 
@@ -57,6 +57,7 @@ public class MaterialMoveService {
         , m."Name" as material
         , sh.id as storehouse_id
         , sh."Name" as storehouse
+        , un."Name" as unit_name
         , m."CurrentStock" as total_stock
         , mh."CurrentStock" as current_stock
         , count(*) over (partition by m.id) as house_count
@@ -67,6 +68,7 @@ public class MaterialMoveService {
         inner join AA on AA.mat_id = m.id
         left join mat_in_house mh on mh."Material_id" = m.id
         left join store_house sh on sh.id = mh."StoreHouse_id"
+        left join unit un on un.id = m."Unit_id"
         where 1 = 1
 		""";
 		if(storehouse_id!=null) {
@@ -75,9 +77,9 @@ public class MaterialMoveService {
 			""";
 		}
 		
-		if(mat_grp_pk!=null) {
+		if(material_id!=null) {
 			sql+="""
-			and mg.id = :mat_grp_pk
+			and m.id = :material_id
 			""";
 		}
 		

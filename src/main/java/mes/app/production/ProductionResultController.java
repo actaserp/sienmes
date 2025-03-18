@@ -1585,8 +1585,6 @@ public class ProductionResultController {
 		Integer testMasterId = null;
 
 		if (!trList.isEmpty()) {
-//			items = this.productionResultService.prodTestList(jrPk, trList.get(0).getId());
-//			testMasterId = items.get(0).get("testMasterId") != null ? (Integer) items.get(0).get("testMasterId") : null;
 			items = this.productionResultService.prodTestList(jrPk,trList.get(0).getId());
 		} else {
 			// 검사 유형이 등록된 경우 조회 (품목별 1개 강제)

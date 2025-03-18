@@ -178,7 +178,7 @@
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
-                <h2>자재 입출고</h2>
+                <h2>재고 입출고</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
@@ -186,7 +186,7 @@
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
                 <li>재고관리</li>
-                <li>자재 입출고</li>
+                <li>재고 입출고</li>
             </ul>
         </div>
         <section class="section">
@@ -399,7 +399,7 @@
     <script type="text/x-tmpl" id="addMultiDataPopup">
         <div class="content_wrap popup">
             <div class="table-wrap">
-                <form id="sujuForm">
+                <form id="mat_multi_input_form">
                     <table class="write-table">
                         <tbody>
                             <tr>
@@ -513,14 +513,7 @@
                                     <select id="cboMaterial" name="cboMaterial" ></select>
                                 </td>
                             </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="mat_name">기준수량</label>
-                                </th>
-                                <td colspan="3">
-                                    <input type="number" id='moveQuantity' name="moveQuantity" />
-                                </td>
-                            </tr>
+
                         </tbody>
                     </table>
                 </form>
@@ -534,7 +527,6 @@
             </div>
 
             <div class="popup-button">
-                <button type="button" class="btn-popup" id="btnPopJobOrderSave" ><span data-labelCd="저장">저장</span></button>
                 <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
             </div>
         </div>
@@ -683,7 +675,7 @@
                                     <input type="date" id="EffectiveDate" name="EffectiveDate" readonly />
                                 </td>
                                 <th style="text-align: center">
-                                    <label for="inputQty">입고량</label>
+                                    <label for="inputQty">가입고량</label>
                                 </th>
                                 <td>
                                     <input type="text" class="form-control2 text-center" id="inputQty" name="inputQty" readonly />
@@ -750,7 +742,7 @@
             </div>
 
             <div class="popup-button">
-                <button type="button" class="btn-popup" id="btn_save" ><span data-labelCd="저장">저장</span></button>
+                <button type="button" class="btn-popup" id="btnTestSave" ><span data-labelCd="저장">저장</span></button>
                 <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
             </div>
         </div>
@@ -1263,23 +1255,22 @@
                         }
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
-                    itemFormatter: (panel, row, col, cell) => {
-                        if (panel.cellType === wijmo.grid.CellType.Cell) {
-                            const item = panel.rows[row].dataItem;
-                            const column = panel.columns[col];
-                            if (column.binding === 'result1' && item.resultType === 'S') {
-                                if (!item.result1) {
-                                    item.result1 = 'O';
-                                } else if (item.result1 === 'O') {
-                                    item.result1 = 'X';
-                                } else if (item.result1 === 'X') {
-                                    item.result1 = null;
-                                }
-                                this.matTestGrid.invalidate();
-                            }
+                });
+
+                this.matTestGrid.addEventListener(this.matTestGrid.hostElement, 'click', (e) => {
+                    const ht = this.matTestGrid.hitTest(e);
+                    if (ht.cellType === wijmo.grid.CellType.Cell) {
+                        const col = this.matTestGrid.columns[ht.col];
+                        const item = this.matTestGrid.rows[ht.row]?.dataItem;
+
+                        if (col.binding === 'result1' && item.resultType === 'S') {
+                            col.isReadOnly = true;
+                            // 데이터 값을 토글
+                            item.result1 = item.result1 === 'O' ? 'X' : 'O';
+                            // 변경된 값을 반영
+                            this.matTestGrid.collectionView.refresh();
                         }
                     }
-
                 });
                 new FlexGridContextMenu(this.matTestGrid);
                 this.matTestGrid.downloadFileName = '입고 검사 내역';
@@ -1305,7 +1296,7 @@
                 $MaterialCode.val(item.material_code);
                 $InoutDate.val(item.InoutDate);
                 $InoutTime.val(item.InoutTime);
-                $inputQty.val(item.InputQty)
+                $inputQty.val(item.potentialInputQty);
 
                 if (item.ValidDays) {
                     let valDate = CommonUtil.getYYYYMMDD(item.ValidDays);
@@ -1316,13 +1307,13 @@
 
                 AjaxUtil.fillSelectOptions($cboTestMaster, 'test_master', 'choose', false, '', '', 'import');
 
-                $cboTestMaster.val(12)
+                // $cboTestMaster.val(12)
                 AjaxUtil.fillSelectOptions($judgGroup, 'system_code', 'choose', false, 'judg_code');
 
                 let fnLoadTestList = function (mio_pk) {
                     let fnsuccess = function (result) {
                         if (result.data !== null) {
-                            _this.matTestGrid.setData(result.data.mioList);
+                            _this.matTestGrid.itemsSource.sourceCollection = result.data.mioList;
 
                             if (result.data.testDate != null) {
                                 $TestDate.val(result.data.testDate);
@@ -1340,7 +1331,9 @@
                             }
 
                             if (result.data.testMasterId != null) {
-                                $cboTestMaster.val(result.data.testMasterId)
+                                $cboTestMaster.val(result.data.testMasterId).prop("disabled", true);
+                            } else {
+                                $cboTestMaster.val("").prop("disabled", true); // 검사 유형이 없으면 비활성화
                             }
                             $judgGroup.val(result.data.JudgeCode);
                             $testRemark.val(result.data.CharResult);
@@ -1358,16 +1351,16 @@
                 fnLoadTestList(item.mio_pk);
 
                 $btnAllItem.click(function (e) {
-                    this.matTestGrid.itemsSource.sourceCollection.forEach(function (item, idx) {
-                        if (item.resultType == 'S') {
+                    _this.matTestGrid.itemsSource.sourceCollection.forEach(function (item) {
+                        if (item.resultType === 'S') {
                             item.result1 = 'O';
                         }
                     });
-                    this.matTestGrid.invalidate();
+                    _this.matTestGrid.collectionView.refresh();
                 })
                 // 입고검사 저장
                 $btnTestSave.click(function (e) {
-                    let testItems = this.matTestGrid.itemsSource.items;
+                    let testItems = _this.matTestGrid.itemsSource.sourceCollection;
 
                     if (testItems.length === 0) {
                         Alert.alert('검사저장', '저장할 입고내역이 없습니다.', function () {
@@ -1624,17 +1617,9 @@
                 }
 
                 data['Q'] = JSON.stringify(grid_data);
-                //let fnSuccess = function (res) {
-                //    if (!res.success) {
-                //        Alert.alert('', res.message);
-                //    } else {
-                //        Notify.success('저장되었습니다');
-                //        page.searchDataBind();
-                //    }
-                //};
 
-                //AjaxUtil.postAsyncData(url, data, fnSuccess);
                 let res = AjaxUtil.postSyncData(url, data);
+                console.log('data', data);
                 if (!res.success) {
                     Alert.alert('', res.message);
                     return false;
@@ -1655,20 +1640,19 @@
             initGrid(gridElement) {
                 this.grid = new wijmo.grid.FlexGrid(gridElement, {
                     autoGenerateColumns: false,
-                    selectionMode: wijmo.grid.SelectionMode.MultiRange,
-                    frozenColumns: 0,
-                    frozenRows: 0,
+                    selectionMode: wijmo.grid.SelectionMode.ListBox,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
                     },
                     columns: [
-                        {binding: 'mat_type_name', header: '품목구분', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'mat_type', header: '품목구분', width: 100, align: 'center', isReadOnly: true},
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'left', isReadOnly: true},
-                        {binding: 'mat_name', header: '품목', width: 250, align: 'left', isReadOnly: true},
+                        {binding: 'material', header: '품목', width: 250, align: 'left', isReadOnly: true},
                         {binding: 'unit_name', header: '단위', width: 100, align: 'center', isReadOnly: true},
-                        {binding: 'house_stock', header: '창고재고', width: 100, align: 'right', isReadOnly: true},
+                        {binding: 'current_stock', header: '창고재고', width: 100, align: 'right', isReadOnly: true},
                         {binding: 'move_qty', header: '이동량(입력수정)', width: 150, align: 'right', isReadOnly: false}
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
@@ -1691,8 +1675,13 @@
                         }
                     }
                 });
+                let selector = new wijmo.grid.selector.Selector(this.grid, {
+                    itemChecked: function () {
+
+                    }
+                })
                 new FlexGridContextMenu(this.grid);
-                this.grid.downloadFileName = '내역';
+                this.grid.downloadFileName = '품목 내역';
             }
 
             searchMaterial() {
@@ -1701,22 +1690,12 @@
                 let from = this.$cboFrom.val();
                 let to = this.$cboTo.val();
                 let material_id = this.$cboMaterial.val();
-                let quantity = this.$moveQuantity.val()
-
-                if (material_id !== '' && (quantity === "" || quantity === '0')) {
-
-                    Alert.alert('', "제품을 선택한 경우에는 이동수량을 입력해야 합니다.");
-                    return false;
-                } else {
-
-                }
 
                 let url = '/api/inventory/material_move';
                 let data = {
                     action: 'read',
-                    from: from,
-                    material_id: material_id,
-                    quantity: quantity
+                    storehouse_id: from,
+                    material_id: material_id
                 };
 
                 let fnsuccess = function (result) {
@@ -1791,16 +1770,16 @@
                 $.each(seletectedItems, function (idx, item) {
                     let move_qty = item.move_qty;
                     if (move_qty > 0) {
-                        items.push({material_id: item.id, move_qty: move_qty});
+                        items.push({material_id: item.mat_id, move_qty: move_qty});
                     }
                 });
 
                 let strItems = JSON.stringify(items);
-                let url = '/api/inventory/material_move/move';
+                let url = '/api/inventory/material_move/material_move';
                 let data = {
-                    from: from,
-                    to: to,
-                    items: strItems
+                    from_storehouse_id: from,
+                    to_storehouse_id: to,
+                    move_list: strItems
                 };
                 let fnsuccess = function (result) {
                     if (result.success) {
@@ -1821,7 +1800,7 @@
                 let content = tmpl('matMovePopup', defaultData);
                 let $content = $(content);
                 this.modalContainer = new PopupDraggable('품목 창고이동');
-                this.modalContainer.open({width: 1000, height: 620, $content});
+                this.modalContainer.open({width: 1000, height: 580, $content});
 
                 this.$cboFrom = $content.find('#cboFrom');
                 this.$cboTo = $content.find('#cboTo');
@@ -1842,7 +1821,7 @@
 
                 let $btnMatSearch = $content.find('#btnMatSearch');
                 let $btnMoveAction = $content.find('#btnMoveAction');
-
+                _this.searchMaterial();
 
                 $btnMatSearch.click(function (e) {
                     _this.searchMaterial();
@@ -1857,13 +1836,12 @@
                 });
 
                 this.$cboFrom.on('change', function (e) {
-                    let result = _this.searchMaterial();
-                    return result;
+                    return _this.searchMaterial();
                 });
 
                 this.$cboMaterial.on('change', function (e) {
                     let mat = $(this).val();
-                    if (mat == '') {
+                    if (mat === '') {
                         _this.$moveQuantity.val('');
                     }
                 });

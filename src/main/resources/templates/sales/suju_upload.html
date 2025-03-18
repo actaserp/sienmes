@@ -32,6 +32,23 @@
                             </div>
                         </dd>
                     </dl>
+                    <dl>
+                        <dt>
+                            조회기간<span class="eq">*</span>
+                        </dt>
+                        <dd>
+                            <ul class="date-box">
+                                <li>
+                                    <input type="date" id="srchStartDt" name="srchStartDt">
+                                    <label for="srchStartDt" class="hide">시작일</label>
+                                </li>
+                                <li>
+                                    <input type="date" id="srchEndDt" name="srchEndDt">
+                                    <label for="srchEndDt" class="hide">종료일</label>
+                                </li>
+                            </ul>
+                        </dd>
+                    </dl>
 
                     <dl>
                         <dt>&nbsp;</dt>
@@ -140,7 +157,7 @@
                 autoGenerateColumns: false,
                 selectionMode: wijmo.grid.SelectionMode.ListBox, // 다중 선택 가능
                 frozenColumns: 0, // 열 고정
-                headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                headersVisibility: wijmo.grid.HeadersVisibility.All,
                 allowSorting: true, // 모든 컬럼 정렬 가능
                 columns: [
                     { binding: 'state', header: '상태', width: 80, align: 'center', isReadOnly: true },
@@ -162,8 +179,15 @@
                             cell.style.textAlign = 'right';
                         }
                     }
-                }
+                },
+
             });
+
+            let selector = new wijmo.grid.selector.Selector(this.grid, {
+                itemChecked: function () {
+
+                }
+            })
 
             new FlexGridContextMenu(this.grid);
             this.grid.downloadFileName = '수주 내역';
@@ -330,7 +354,7 @@
 
         //수주 변환
         $('#btnSuju').click(function (e) {
-            let items = page.grid.itemsSource.sourceCollection.filter(item => item.selected);
+            let items = page.grid.selectedItems;
             if (items.length > 0) {
                 Alert.confirm('', '수주데이터로 전환하시겠습니까?',
                     function () {
@@ -362,7 +386,7 @@
         // 삭제 버튼
         $('#btnDelete').click(function (e) {
             let items = page.grid.selectedItems;
-            if (items.length > 0) {
+            if (iㄹtems.length > 0) {
                 Alert.confirm('', '삭제하시겠습니까?',
                     function () {
                         page.deleteSujuBulkData(items);

@@ -547,7 +547,7 @@
                                     <label for="cboTestMaster">검사유형</label>
                                 </th>
                                 <td colspan="3">
-                                    <select class="form-control2 tac" id="cboTestMaster" name="cboTestMaster" ></select>
+                                    <select class="form-control2" id="cboTestMaster" name="cboTestMaster" ></select>
                                     <input type="hidden" id="testResultId" name="testResultId">
                                 </td>
                             </tr>
@@ -2440,34 +2440,20 @@
                     allowSorting: true,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     formatItem: (s, e) => {
-                        if (e.panel.cellType === wijmo.grid.CellType.RowHeader) {
-                            // 헤더에 순번
-                            e.cell.textContent = (e.row + 1).toString();
-                        }
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
-                        }
-                        // 헤더 스타일 적용
-                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader
-                            && s.columns[e.col].binding === 'result1' || s.columns[e.col].binding === 'result2') {
-                            e.cell.style.color = '#5567ff'; // 글자 색깔 변경
-                        }
-                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
-                            const col = s.columns[e.col];
-                            const item = e.panel.rows[e.row].dataItem;
 
-                            // result1 열
-                            if (col.binding === 'result2') {
-                                e.cell.style.backgroundColor = item.result1 === 'X' ? '#ffd800' : '';
+                            if (s.columns[e.col].binding === 'result1' || s.columns[e.col].binding === 'result2') {
+                                e.cell.style.color = '#5567ff'; // 헤더 글자색 변경
                             }
                         }
 
                     },
                     columns: [
-                        {binding: 'name', header: '검사항목', width: 130, align: 'left'},
-                        {binding: 'specText', header: '검사기준', width: 130, align: 'left'},
+                        {binding: 'name', header: '검사항목', width: 200, align: 'left', isReadOnly: true},
+                        {binding: 'specText', header: '검사기준', width: 130, align: 'left', isReadOnly: true},
                         {binding: 'result1', header: '검사결과(입력)', width: 300, align: 'left', isReadOnly: false},
-                        {binding: 'result2', header: '판정결과(적합/부적합)', width: 150, align: 'center'}
+                        {binding: 'result2', header: '판정결과(적합/부적합)', width: 170, align: 'center', isReadOnly: true}
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
                 });

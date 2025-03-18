@@ -281,11 +281,19 @@ public class MaterialInoutController {
 		List<TestResult> trList = this.testResultRepository.findBySourceTableNameAndSourceDataPk("mat_inout", mioId);
 		
 		List<Map<String, Object>> items = null;
+		Integer testMasterId = null;
 		
-		if (trList.size() > 0) {
+		if (!trList.isEmpty()) {
 			items = this.materialInoutService.mioTestList(mioId,trList.get(0).getId());
 		} else {
-			items = this.materialInoutService.mioTestDefaultList();
+			testMasterId = this.materialInoutService.getTestMasterByItem(mioId);
+
+			if (testMasterId != null) {
+				items = this.materialInoutService.prodTestListByTestMaster(testMasterId);
+			} else{
+				items = this.materialInoutService.mioTestDefaultList();
+			}
+
 		}
 		
 		Map<String, Object> effectDt = this.materialInoutService.getEffectDate(mioId);

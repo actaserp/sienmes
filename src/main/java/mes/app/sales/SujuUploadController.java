@@ -90,7 +90,6 @@ public class SujuUploadController {
 	    #company_name_col = 3   # 업체명
 	    #prod_code_col = 4      # 제품코드
 	    #prod_name_col = 5      # 제품명
-	    #qty_col = 6            # 수량 
 	    #due_date_col = 7       # 납기일
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
@@ -106,12 +105,12 @@ public class SujuUploadController {
 			User user = (User)auth.getPrincipal();
 			
 			int jumun_number_col = 0;
-			int prod_code_col = 1;
-			int prod_name_col = 2;
-			int qty_col = 3;
-			int jumnun_date_col = 4;
-			int company_code_col = 5;
-			int company_name_col = 6;
+			int jumnun_date_col = 1;
+			int company_code_col = 2;
+			int company_name_col = 3;
+			int prod_code_col = 4;
+			int prod_name_col = 5;
+			int qty_col = 6;
 			int due_date_col = 7;
 			
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
