@@ -84,7 +84,7 @@
             </div>-->
             <div class="container-fluid">
                 <p id="selectedItem"></p>
-                <div id="theGrid" style="height: 630px; max-height: 630px;"></div>
+                <div id="document_grid" style="height: 630px; max-height: 630px;"></div>
             </div>
         </section>
 
@@ -107,13 +107,13 @@
         init() {
             let _this = this;
 
-            this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+            this.grid = new wijmo.grid.FlexGrid('#document_grid', {
                 selectionMode: wijmo.grid.SelectionMode.Row,
                 headersVisibility: wijmo.grid.HeadersVisibility.Column,
                 autoGenerateColumns: false,
                 showMarquee: true,
                 isReadOnly: true,
-                formatItem: (sender, e) => {
+                formatItem: (s, e) => {
                     if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                         e.cell.style.textAlign = 'center';
                     }
@@ -185,8 +185,8 @@
                     }
                 },
                 columns: [
-                    { binding: 'Title', header: '일지명', width: 200, align: 'center' },
-                    { binding: 'DataDate', header: '일자', width: 200, align: 'center' },
+                    { binding: 'Title', header: '일지명', width: 150, align: 'center' },
+                    { binding: 'DataDate', header: '일자', width: 250, align: 'center' },
                     { binding: 'Code', header: '점검', width: 250, align: 'center' },
                     {binding: 'StateName', header: '결재상태', width: 100, align: 'center', isReadOnly: true},
                     {binding: 'LineName', header: '결재현황', width: 400, isReadOnly: true, align: 'left'},
@@ -330,16 +330,19 @@
                 'appr_state': $('#apprState').val(),
             }
             let result = AjaxUtil.getSyncData(_this.baseUrl + '/appr_stat', param);
-			
-            if (result.data != null) {
-                let documentInfo = result.data.document_info;
-                //일자 범위로 변경
-                documentInfo.map((data, index) => {
-                    data['DataDate'] = data.StartDate + ' ~ ' + data.EndDate
-                })
 
-                _this.viewData.sourceCollection = result.data;
+            if (result.data != null) {
+                let documentInfo = result.data.document_info; // document_info는 배열
+
+                // 일자 범위로 변경
+                documentInfo.forEach((data) => {
+                    data['DataDate'] = data.StartDate + ' ~ ' + data.EndDate;
+                });
+
+                // sourceCollection에 배열을 할당
+                _this.viewData.sourceCollection = documentInfo;
             }
+
         }
 
         // 엑셀 다운로드

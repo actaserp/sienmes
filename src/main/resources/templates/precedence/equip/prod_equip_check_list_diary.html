@@ -83,15 +83,15 @@
         <section class="section">
             <div class="grid_box" id="prodListGrid">
                 <div class="title_box">
-                  <!--  <span class="right_align rpt" data-labelCd="점검 목록">점검 목록</span>
-                    <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>-->
+                   <span class="right_align rpt" data-labelCd="점검 목록">점검 목록</span>
+                    <!-- <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>-->
                     <button type="button" class="btn-default" id="btnDiaryPrint">일지출력</button>
                     <button type="button" class="btn-default" id="btnAllItem">전체적합</button>
                     <button type="button" class="btn-default" id="btnReqAppr">결재상신</button>
                     <button type="button" class="btn-default" id="btnAppr" style="display:none;">승인</button>
                     <button type="button" class="btn-cancel" id="btnReject" style="display:none;">반려</button>
                     <button type="button" class="btn-default" id="btnSave">저장</button>
-                    <button type="button" class="btn-cancel" id="btnDelete">삭제</button>
+                    <button type="button" class="btn-cancel btn-danger" id="btnDelete" style="width: 124px; height: 48px;">삭제</button>
                     <button type="button" class="btn-default" id="btnList">목록</button>
                 </div>
                 <!-- <div class="grid_box" id="complainList">
@@ -123,8 +123,8 @@
         class EquipResultDiaryPage {
             constructor() {
                 this.grid = null;
+                this.grid2 = null;
                 this.approveBoxUtil = null;
-                this.resultGrid = null;
                 this.check_class_code = '시설/설비/제조도구 점검표';
                 this.viewData = new wijmo.collections.CollectionView();
                 this.viewData2 = new wijmo.collections.CollectionView();
@@ -293,26 +293,67 @@
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
                     showMarquee: true,
-                    isReadOnly: true,
-                    formatItem: (sender, e) => {
+                    isReadOnly: true, // 편집 가능하도록 설정
+                    allowSorting: false, // 정렬 비활성화 (선택 사항)
+                    formatItem: (s, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
+
+                            // "조치내역및결과" 헤더에 클래스 적용
+                            if (s.columns[e.col].binding === 'action_detail') {
+                                e.cell.innerHTML = '<span class="editable_clr">조치내역및결과</span>';
+                            }
                         }
                     },
                     columns: [
-                        {binding: 'id', header: '번호', width: 120, align: 'right', visible: false},
-                        {binding: 'src_data_pk', header: '점검항목결과번호', width: 100, align: 'right', visible: false},
-                        //{ binding: 'happen_date', header: '발생일', width: 80, align: 'left' },
-                        {binding: '_order', header: '순번', width: 50, align: 'center'},
-                        {binding: 'abnormal_detail', header: '이상발생내역', width: 400, align: 'left'},
-                        /*{ binding: 'action_detail', header: '<span class="editable_clr">조치내역및결과</span>', width: 250, align: 'left', editor: {} },*/
-                        {binding: 'action_detail', header: '조치내역및결과', width: 250, align: 'left'},
-                        {binding: 'actor_name', header: '조치자', width: 120, align: 'left'},
-                        {binding: 'creater_name', header: '작성자', width: 120, align: 'left'},
-                        {binding: 'confirm_state', header: '확인', width: 80, align: 'left', visible: false},
-                        {binding: '', header: '', width: "*", align: 'left'},
+                        { binding: 'id', header: '번호', width: 120, align: 'right', visible: false },
+                        { binding: 'src_data_pk', header: '점검항목결과번호', width: 100, align: 'right', visible: false },
+                        { binding: '_order', header: '순번', width: 50, align: 'center', visible: false },
+                        { binding: 'abnormal_detail', header: '이상발생내역', width: 500, align: 'left' },
+                        {
+                            binding: 'action_detail',
+                            header: '조치내역및결과',
+                            width: 300,
+                            align: 'left',
+                            isReadOnly: false // 편집 가능
+                        },
+                        { binding: 'actor_name', header: '조치자', width: 150, align: 'center' },
+                        { binding: 'creater_name', header: '작성자', width: 150, align: 'center' },
+                        { binding: 'confirm_state', header: '확인', width: 80, align: 'left', visible: false },
+                        { binding: '', header: '', width: "*", align: 'left' },
                     ],
                     itemsSource: this.viewData2, // 데이터를 설정할 배열
+                });
+
+                this.grid2.hostElement.addEventListener("click", function (e) {
+                    let ht = _this.grid2.hitTest(e);
+
+                    if (!ht || ht.cellType !== wijmo.grid.CellType.Cell) {
+                        console.log("셀 클릭이 아님");
+                        return;
+                    }
+
+                    let col = _this.grid2.columns[ht.col];
+                    let item = _this.grid2.rows[ht.row]?.dataItem;
+
+                    // action_detail 컬럼 클릭 시, viewMode가 비어있거나 "true"일 때 팝업 실행
+                    if (col?.binding === 'action_detail' && (!$('#viewMode').val() || $('#viewMode').val() === "" || $('#viewMode').val() === "true")) {
+                        console.log("팝업 실행");
+
+                        // action_detail이 null이면 빈 문자열로 설정
+                        item.action_detail = item.action_detail || "";
+
+                        // 유효한 행인지 체크 후 select 실행
+                        if (ht.row != null && ht.row >= 0 && ht.row < _this.grid2.rows.length) {
+                            // 셀 범위로 선택 처리
+                            let cellRange = new wijmo.grid.CellRange(ht.row, ht.col);  // 셀 범위 객체 생성
+                            _this.grid2.select(cellRange); // CellRange 객체로 셀 선택
+                        }
+
+                        _this.showDeviActionCodeSavePopup(item);
+                    } else {
+                        console.log("팝업 실행 안 됨");
+                    }
                 });
 
                 new FlexGridContextMenu(this.grid2);
@@ -323,13 +364,28 @@
 
             checkAllItem() {
                 let _this = this;
-                let items = [];
-                _this.resultGrid.list.forEach(function (item, idx) {
-                    if (item.result_type == 'OX')
-                        item.result1 = 'O';
-                });
-                _this.resultGrid.repaint();
+                let itemsSource = _this.grid.itemsSource;
+
+                // itemsSource가 CollectionView인 경우 내부 데이터 배열을 접근
+                if (itemsSource && itemsSource.items) {
+                    let items = itemsSource.items;  // CollectionView의 내부 배열 접근
+
+                    // 각 항목을 순회하여 result1 값을 'O'로 설정
+                    items.forEach(function (item) {
+                        if (item.result_type === 'OX') {
+                            item.result1 = 'O';
+                        }
+                    });
+
+                    // CollectionView의 변경 사항 반영
+                    itemsSource.refresh();  // 데이터를 갱신하여 그리드에 반영
+                } else {
+                    console.error('itemsSource가 CollectionView이 아니거나 내부 배열에 접근할 수 없습니다.');
+                }
             }
+
+
+
 
             // 일지 조회
             searchMainData() {
@@ -359,9 +415,12 @@
 
                         _this.apprSetting(headInfo.CheckMasterId)
 
-                        _this.viewData.sourceCollection = result.data;
+                        console.log(result.data);
+                        // diaryInfo 배열을 viewData.sourceCollection에 할당
+                        _this.viewData.sourceCollection = Array.isArray(diaryInfo) ? diaryInfo : [diaryInfo];
 
-                        _this.viewData2.sourceCollection = result.data;
+
+                        _this.viewData2.sourceCollection = itemDeviResult;
 
                         _this.viewModeSetting(headInfo)
                     }
@@ -456,15 +515,6 @@
                 })
 
                 _this.viewData.sourceCollection = result.data;
-
-                /*_this.resultGrid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: result.data.length,
-                    }
-                });*/
-
             }
 
             // 일지 출력
@@ -498,68 +548,98 @@
                 }
             }
 
+            // 점검내역 조치내역 팝업
             showDeviActionCodeSavePopup(item) {
-
-                // 점검내역 조치내역 팝업
                 let _this = this;
-                let tempResult = _this.deviResultGrid.getList('selected')[0];
-                let popupPage = new PopupSelectUserCodePage({
 
+                // grid2에서 선택된 행 가져오기
+                let selectedRow = _this.grid2.selection.row > -1 ? _this.grid2.rows[_this.grid2.selection.row] : null;
+                let tempResult = selectedRow ? selectedRow.dataItem : {};
+
+                // item이 없을 경우 대비
+                let checkName = item?.check_name || tempResult?.abnormal_detail || "N/A";
+
+                let popupPage = new PopupSelectUserCodePage({
                     'title': '점검내역 선택',
                     'gridValueLabel': '점검항목',
                     'infoData': [
-                        {label: '이상발생내역', value: item.check_name},
+                        {label: '이상발생내역', value: checkName},
                     ],
-                    'parentCode': '설비관리점검표', 'closeManual': true,
+                    'parentCode': '설비관리점검표',
+                    'closeManual': true,
                 });
+
                 popupPage.show(function (data) {
-                    if (data && data.selected.Code == '직접입력') {
-                        item.action_detail = data.input;
+                    if (data && data.selected?.Code === '직접입력') {
+                        tempResult.action_detail = data.input;
                     } else {
-                        item.action_detail = data.selected.Value;
+                        tempResult.action_detail = data.selected?.Value || "";
                     }
                     popupPage.close();
-                    _this.deviTabType.repaint();
-                    if (item.action_detail) {
+                    _this.grid2.refresh();
+
+                    if (tempResult.action_detail) {
                         _this.saveDeviAction();
                     }
                 });
             }
 
+
             saveDeviAction() {
                 let _this = this;
                 let url = '/api/common/devi_action/save_multi_devi_action';
                 let happen_place = $('#cboCheck').text();
+
+                // `itemsSource`에서 실제 데이터를 추출하여 JSON으로 변환 (sourceCollection 사용)
                 let data = {
                     data_pk: $('#bhId').val(),
                     table_name: 'prod_equip_check_list',
                     happen_date: CommonUtil.getYYYYMMDD(),
                     happen_place: happen_place,
-                    Q: JSON.stringify(_this.deviTabType.getList()),
+                    // itemsSource에서 데이터를 가져와 배열로 처리
+                    Q: JSON.stringify(_this.grid2.itemsSource.sourceCollection.slice()) // sourceCollection을 배열로 변환 후 복사
                 };
+
                 let fnSuccess = function () {
-                    Notify.success('저장되었습니다');
+                    Alert.alert('', '저장되었습니다');
                 }
+
                 AjaxUtil.postAsyncData(url, data, fnSuccess);
             }
+
+
+
 
             //저장
             save(isAppr) {
                 let _this = this;
                 let resultNullCheck = false;
 
-                for (let i = 0; i < _this.resultGrid.list.length; i++) {
-                    if (_this.resultGrid.list[i].result1 == null || _this.resultGrid.list[i].result1 == '')
-                        resultNullCheck = true;
+                // CollectionView의 sourceCollection을 사용하여 데이터 가져오기
+                let gridData = _this.grid.itemsSource.sourceCollection;
+
+                // 데이터가 비어 있거나 정의되지 않은 경우 처리
+                if (!gridData || gridData.length === 0) {
+                    Alert.alert("", "점검결과를 모두 입력해주세요.");
+                    return;
                 }
 
+                // 데이터의 각 항목에 대해 점검
+                for (let i = 0; i < gridData.length; i++) {
+                    if (gridData[i].result1 == null || gridData[i].result1 === '') {
+                        resultNullCheck = true;
+                    }
+                }
+
+                /*console.log(_this.grid.itemsSource);*/
+
                 let callback = function () {
-
                     let items = [];
-                    $.each(_this.resultGrid.list, function (idx, item) {
-                        items.push({id: item.id, 'result1': item.result1, 'order': item.__original_index});
-                    });
 
+                    // gridData에서 데이터를 추출하여 배열로 추가
+                    $.each(gridData, function (idx, item) {
+                        items.push({ id: item.id, 'result1': item.result1, 'order': item.__original_index });
+                    });
 
                     let data = {
                         bh_id: $('#bhId').val(),
@@ -570,7 +650,6 @@
                         end_date: $('#srchEndDt').val(),
                         Q: JSON.stringify(items),
                     };
-
 
                     let fnSuccess = function (resp) {
                         if (resp.success) {
@@ -592,33 +671,40 @@
                         }
                     };
 
+                    // 결재요청 시 추가 체크
                     if (isAppr) {
-                        let checkGrid1 = _this.resultGrid.getList()
-                        let checkGrid2 = _this.deviResultGrid.getList()
+                        // Grid1과 Grid2에서 데이터를 가져옵니다. getList() 대신 itemsSource로 접근할 수 있습니다.
+                        let checkGrid1 = _this.grid.itemsSource ? _this.grid.itemsSource.sourceCollection : [];
+                        let checkGrid2 = _this.grid2.itemsSource ? _this.grid2.itemsSource.sourceCollection : [];
 
+                        // checkGrid1에서 result1이 "X"인 항목을 필터링
                         let result = checkGrid1.filter(function (e) {
-                            return e.result1 == "X";
-                        })
+                            return e.result1 === "X";
+                        });
 
-                        if (result.length > 0) {
-                            if (checkGrid2.length == 0) {
-                                Alert.alert('결재상신', '조치내역을 입력해주세요.');
-                                return
-                            }
+                        // result가 존재하면 checkGrid2가 비어있는지 체크
+                        if (result.length > 0 && checkGrid2.length === 0) {
+                            Alert.alert('결재상신', '조치내역을 입력해주세요.');
+                            return;
                         }
 
+                        // checkGrid2에서 action_detail이 빈 값인 항목을 필터링
                         let result2 = checkGrid2.filter(function (e) {
-                            return e.action_detail == "" || e.action_detail == null;
-                        })
+                            return !e.action_detail || e.action_detail.trim() === "";
+                        });
 
                         if (result2.length > 0) {
                             Alert.alert('결재상신', '조치내역을 입력해주세요.');
-                            return
+                            return;
                         }
                     }
-                    AjaxUtil.postAsyncData(_this.baseUrl + '/save', data, fnSuccess);
-                }
 
+
+                    // 데이터 전송
+                    AjaxUtil.postAsyncData(_this.baseUrl + '/save', data, fnSuccess);
+                };
+
+                // 점검결과가 비어 있는 경우 처리
                 if (resultNullCheck) {
                     Alert.alert("", "점검결과를 모두 입력해주세요.");
                     return;
@@ -632,6 +718,8 @@
                     });
                 }
             }
+
+
 
             //삭제
             delete() {
