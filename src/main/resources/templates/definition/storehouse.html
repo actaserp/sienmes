@@ -19,7 +19,7 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>일지 및 데이터</li>
+                <li>시스템설정</li>
                 <li>기준정보</li>
                 <li>창고정보</li>
             </ul>
@@ -76,17 +76,6 @@
                         </li>
 
                         <li>
-                            <!-- <a class="btn btn-edit" id="btnSave" title="저장">
-                                 <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
-                                 저장
-                             </a>-->
-                            <button type="button" class="btn-default y_write_auth" id="btnSave"
-                                    style="float:none; height: 36px; width:115px;">
-                                <i class="fas fa-save"></i>저장
-                            </button>
-                        </li>
-
-                        <li>
                             <!--  <a class="btn btn-delete" title="삭제" id="btnDel">
                                   <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
                                   삭제
@@ -94,6 +83,17 @@
                             <button type="button" class="btn-danger y_write_auth" id="btnDel"
                                     style="float:none; height: 36px; width:115px;"><i
                                     class="fas fa-trash"></i>삭제
+                            </button>
+                        </li>
+
+                        <li>
+                            <!-- <a class="btn btn-edit" id="btnSave" title="저장">
+                                 <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
+                                 저장
+                             </a>-->
+                            <button type="button" class="btn-default y_write_auth" id="btnSave"
+                                    style="float:none; height: 36px; width:115px;">
+                                <i class="fas fa-save"></i>저장
                             </button>
                         </li>
                     </ul>
@@ -108,25 +108,25 @@
                         <tbody>
                         <tr>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="storehouse_type">창고 구분</label>
+                                <label for="storehouse_type"><span class="eq"></span>창고 구분</label>
                             </th>
                             <td style="width: 7%; padding: 5px; border: 1px solid #ddd;">
                                 <select id="storehouse_type" name="storehouse_type" style="width: 100%;"></select>
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="storehouse_code">창고코드</label>
+                                <label for="storehouse_code"><span class="eq"></span>창고코드</label>
                             </th>
                             <td style="width: 7%;; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" id="storehouse_code" name="storehouse_code" style="width: 100%;">
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="storehouse_name">창고명</label>
+                                <label for="storehouse_name"><span class="eq"></span>창고명</label>
                             </th>
                             <td style="width: 7%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" style="width: 100%;" id="storehouse_name" name="storehouse_name">
                             </td>
                             <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
-                                <label for="factory_id">공장</label>
+                                <label for="factory_id"><span class="eq"></span>공장</label>
                             </th>
                             <td style="width: 7%; padding: 5px; border: 1px solid #ddd;">
                                 <select type="text" style="width: 100%;" id="factory_id" name="factory_id"></select>
@@ -347,27 +347,23 @@
             //let data = $('#storehouseForm').serialize();
             let data = FormUtil.extractForm($('#storehouseForm'));
 
-            /*// 필수 항목 검증
-            if (!data.storehouse_code || !data.storehouse_name || !data.factory_id) {
-                Alert.alert('', '필수 항목 [ 창고 코드, 창고명, 공장 ]을 입력해주세요.', function () {
-                    if ($target) $target.focus();
-                });
-                return;
-            }*/
-
             // 필수입력 check routine
 
             if (!data.storehouse_type) {
                 Alert.alert('', '창고구분을 선택해주세요.');
+                $('#storehouseForm #storehouse_type').focus();
                 return;
             } else if (!data.storehouse_code) {
                 Alert.alert('', '창고 코드를 입력해주세요.');
+                $('#storehouseForm #storehouse_code').focus();
                 return;
             } else if (!data.storehouse_name) {
                 Alert.alert('', '창고명을 입력해주세요.');
+                $('#storehouseForm #storehouse_name').focus();
                 return;
             } else if (!data.factory_id) {
                 Alert.alert('', '공장을 선택해주세요.');
+                $('#storehouseForm #factory_id').focus();
                 return;
             }
 

@@ -18,7 +18,7 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>일지 및 데이터</li>
+                <li>시스템설정</li>
                 <li>기준정보</li>
                 <li>공정정보</li>
             </ul>
@@ -109,28 +109,28 @@
                                     <tbody>
                                     <tr>
                                         <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                            <label for="factory_id">공장</label>
+                                            <label for="factory_id"><span class="eq">*</span>공장</label>
                                         </th>
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                             <select  id="factory_id" name="factory_id"
                                                     style="width: 100%;"></select>
                                         </td>
                                         <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                            <label for="process_type">공정구분</label>
+                                            <label for="process_type"><span class="eq">*</span>공정구분</label>
                                         </th>
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                             <input type="text" id="process_type" name="process_type"
                                                    style="width: 100%;">
                                         </td>
                                         <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                            <label for="process_code">공정코드</label>
+                                            <label for="process_code"><span class="eq">*</span>공정코드</label>
                                         </th>
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                             <input type="text" style="width: 100%;" id="process_code"
                                                    name="process_code">
                                         </td>
                                         <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
-                                            <label for="process_name">공정명</label>
+                                            <label for="process_name"><span class="eq">*</span>공정명</label>
                                         </th>
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                             <input type="text" style="width: 100%;" id="process_name"
@@ -159,7 +159,7 @@
                         <div class="button-wrap">
                             <ul>
                                 <li>
-                                    <select  id="cboDefectType" name="cboDefectType"></select>
+                                    <select  id="cboDefectType" name="cboDefectType" style="width: 220px;"></select>
                                 </li>
                                 <li>
                                     <button type="button" class="btn-default" id="btnAddDefectType"
@@ -191,7 +191,7 @@
                         <div class="button-wrap">
                             <ul>
                                 <li>
-                                    <select class="s-150" id="cboStopCause" name="cboStopCause"></select>
+                                    <select class="s-150" id="cboStopCause" name="cboStopCause" style="width: 220px;"></select>
                                 </li>
                                 <li>
                                     <button type="button" class="btn-default" id="btnAddStopCause"
@@ -440,14 +440,22 @@
             let data = FormUtil.extractForm($('#processForm'));
 
             // 필수입력 check routine
-            if(!data.process_type){
+
+            if(!data.factory_id){
+                Alert.alert('','공장을 선택해주세요')
+                $('#processForm #factory_id').focus();
+                return;
+            }else if(!data.process_type){
                 Alert.alert('', '공정구분을 선택해주세요.');
+                $('#processForm #process_type').focus();
                 return;
             } else if (!data.process_code) {
                 Alert.alert('', '공정 코드를 입력해주세요.');
+                $('#processForm #process_code').focus();
                 return;
             }else if(!data.process_name){
                 Alert.alert('', '공정명을 입력해주세요.');
+                $('#processForm #process_name').focus();
                 return;
             }
 

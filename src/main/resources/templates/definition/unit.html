@@ -19,7 +19,7 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>일지 및 데이터</li>
+                <li>시스템설정</li>
                 <li>기준정보</li>
                 <li>단위정보</li>
             </ul>
@@ -107,7 +107,7 @@
                         <tbody>
                         <tr>
                             <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="name">단위명</label>
+                                <label for="name"><span class="eq">*</span>단위명</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" id="name" name="name" style="width: 100%;">
@@ -125,7 +125,7 @@
 
                         <tr>
                             <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="description">설명</label>
+                                <label for="description"><span class="eq">*</span>설명</label>
                             </th>
                             <td style="padding: 5px; border: 1px solid #ddd;" colspan="3">
                                 <textarea id="description" name="description"></textarea>
@@ -302,9 +302,11 @@
             // 필수입력 check routine
             if (!data.name) {
                 Alert.alert('', '단위명을 입력해주세요.');
+                $('#unitForm #name').focus();
                 return false;
             } else if (!data.description) {
                 Alert.alert('', '설명를 입력해주세요.');
+                $('#unitForm #description').focus();
                 return false;
             }
 

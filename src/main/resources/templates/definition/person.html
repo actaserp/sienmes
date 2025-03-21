@@ -19,7 +19,7 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>일지 및 데이터</li>
+                <li>시스템설정</li>
                 <li>기준정보</li>
                 <li>작업자정보</li>
             </ul>
@@ -126,20 +126,20 @@
                                 <select id="WorkCenter_id" name="WorkCenter_id" style="width: 100%;"></select>
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="Code">사번</label>
+                                <label for="Code"><span class="eq">*</span>사번</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" id="Code" name="Code" style="width: 100%;">
                             </td>
 
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="Name">성명</label>
+                                <label for="Name"><span class="eq">*</span>성명</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" style="width: 100%;" id="Name" name="Name">
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="WorkHour">기본근무시간</label>
+                                <label for="WorkHour"><span class="eq">*</span>기본근무시간</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" style="width: 100%;" id="WorkHour" name="WorkHour">
@@ -148,21 +148,21 @@
 
                         <tr>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="Factory_id">공장</label>
+                                <label for="Factory_id"><span class="eq">*</span>공장</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <select style="width: 100%;" id="Factory_id" name="Factory_id"></select>
                             </td>
 
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="ShiftCode">근무조</label>
+                                <label for="ShiftCode"><span class="eq">*</span>근무조</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <select style="width: 100%;" id="ShiftCode" name="ShiftCode"></select>
                             </td>
 
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="Depart_id">부서</label>
+                                <label for="Depart_id"><span class="eq">*</span>부서</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <select style="width: 100%;" id="Depart_id" name="Depart_id"></select>
@@ -386,10 +386,33 @@
             let data = FormUtil.extractForm($('#personForm'));
 
             // 필수입력 check routine
-            if (!data.Name) {
+            if (!data.Code) {
+                Alert.alert('', '사번을 입력해주세요.');
+                $('#personForm #Code').focus();
+                return false;
+            }else if (!data.Name) {
                 Alert.alert('', '이름을 입력해주세요.');
+                $('#personForm #Name').focus();
+                return false;
+            }  else if (!data.WorkHour) {
+                Alert.alert('', '기본근무시간을 입력해주세요.');
+                $('#personForm #WorkHour').focus();
+                return false;
+            }else if (!data.Factory_id) {
+                Alert.alert('', '공장을 선택해주세요.');
+                $('#personForm #Factory_id').focus();
+                return false;
+            } else if (!data.ShiftCode) {
+                Alert.alert('', '근무조를 선택해주세요.');
+                $('#personForm #ShiftCode').focus();
+                return false;
+            }else if (!data.Depart_id) {
+                Alert.alert('', '부서를 선택해주세요.');
+                $('#personForm #Depart_id').focus();
                 return false;
             }
+
+
             //else if (!data.Factory_id) {
             //    Alert.alert('', '공장을 입력해주세요.');
             //    return false;

@@ -17,11 +17,11 @@ public class CompanyService {
 	SqlRunner sqlRunner;
 	
 	//업체 목록 조회
-	public List<Map<String, Object>> getCompnayList(String compType, String groupName, String keyword) {
+	public List<Map<String, Object>> getCompnayList(String compType, String keyword) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("comp_type", compType);
-		paramMap.addValue("group_name", groupName);
+		/*paramMap.addValue("group_name", groupName);*/
 		paramMap.addValue("keyword", keyword);
 		
 		String sql = """
@@ -59,7 +59,7 @@ public class CompanyService {
             where 1 = 1
 			""";
 		if (StringUtils.isEmpty(compType)==false) sql +="and c.\"CompanyType\" = :comp_type ";
-		if (StringUtils.isEmpty(groupName)==false) sql +="and upper(c.\"GroupName\") like concat('%%',upper(:group_name),'%%')";
+		/*if (StringUtils.isEmpty(groupName)==false) sql +="and upper(c.\"GroupName\") like concat('%%',upper(:group_name),'%%')";*/
 		if (StringUtils.isEmpty(keyword)==false) sql+="and upper(c.\"Name\") like concat('%%',upper(:keyword),'%%')";
 		
 		sql += "order by c.\"id\" desc";

@@ -19,7 +19,7 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>일지 및 데이터</li>
+                <li>시스템설정</li>
                 <li>기준정보</li>
                 <li>설비그룹</li>
             </ul>
@@ -108,20 +108,20 @@
                         <tbody>
                         <tr>
                             <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="equipment_type">설비구분</label>
+                                <label for="equipment_type"><span class="eq">*</span>설비구분</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <select id="equipment_type" name="equipment_type" style="width: 100%;"></select>
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="equipment_group_code">설비그룹코드</label>
+                                <label for="equipment_group_code"><span class="eq">*</span>설비그룹코드</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" id="equipment_group_code" name="equipment_group_code"
                                        style="width: 100%;">
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="equipment_group_name">설비그룹명</label>
+                                <label for="equipment_group_name"><span class="eq">*</span>설비그룹명</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" style="width: 100%;" id="equipment_group_name"
@@ -314,12 +314,15 @@
             // 필수입력 check routine
             if (!data.equipment_type) {
                 Alert.alert('', '설비구분을 선택해주세요.');
+                $('#equipmentGroupForm #equipment_type').focus();
                 return false;
             } else if (!data.equipment_group_code) {
                 Alert.alert('', '설비그룹 코드를 입력해주세요.');
+                $('#equipmentGroupForm #equipment_group_code').focus();
                 return false;
             } else if (!data.equipment_group_name) {
                 Alert.alert('', '설비그룹 명을 입력해주세요.');
+                $('#equipmentGroupForm #equipment_group_name').focus();
                 return false;
             }
 

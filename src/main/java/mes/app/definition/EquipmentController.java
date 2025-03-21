@@ -221,11 +221,21 @@ public class EquipmentController {
 	// 설비 삭제
 	@PostMapping("/delete")
 	public AjaxResult deleteEquipment(@RequestParam("id") Integer id) {
-		this.equipmentRepository.deleteById(id);
-		AjaxResult result = new AjaxResult();
-		return result;
+		// EquipmentHistory 테이블에서 해당 equipment_id를 가진 레코드 조회
+		List<EquipmentHistory> historyList = equipmentHistoryRepository.findByEquipmentId(id);
+
+		// 조회된 EquipmentHistory 레코드 삭제
+		if (!historyList.isEmpty()) {
+			equipmentHistoryRepository.deleteAll(historyList);
+		}
+
+		// Equipment 테이블에서 해당 id를 가진 레코드 삭제
+		equipmentRepository.deleteById(id);
+
+		return new AjaxResult();
 	}
-	
+
+
 	// 사진 저장
 	@PostMapping("/save_photo")
 	public AjaxResult savePhoto(

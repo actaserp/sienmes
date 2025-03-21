@@ -48,10 +48,10 @@ public class CompanyController {
 	@GetMapping("/read")
 	public AjaxResult getCompanyList(
 			@RequestParam("comp_type") String compType,
-			@RequestParam("group_name") String groupName,
+			/*@RequestParam("group_name") String groupName,*/
 			@RequestParam("keyword") String keyword) {
 		
-		List<Map<String, Object>> items = this.companyService.getCompnayList(compType, groupName, keyword);
+		List<Map<String, Object>> items = this.companyService.getCompnayList(compType, keyword);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;

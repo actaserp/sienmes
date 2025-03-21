@@ -19,7 +19,7 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>일지 및 데이터</li>
+                <li>시스템설정</li>
                 <li>기준정보</li>
                 <li>부서정보</li>
             </ul>
@@ -108,19 +108,19 @@
                         <tbody>
                         <tr>
                             <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="Code">코드</label>
+                                <label for="Code"><span class="eq">*</span>코드</label>
                             </th>
                             <td style="width: 10%; padding: 5px; border: 1px solid #ddd;">
                                 <input id="Code" name="Code" style="width: 100%;">
                             </td>
                             <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="Name">부서명</label>
+                                <label for="Name"><span class="eq">*</span>부서명</label>
                             </th>
                             <td style="width: 10%;; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" id="Name" name="Name" style="width: 100%;">
                             </td>
                             <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="Type">부서구분</label>
+                                <label for="Type"><span class="eq">*</span>부서구분</label>
                             </th>
                             <td style="width: 10%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" style="width: 100%;" id="Type" name="Type">
@@ -312,9 +312,20 @@
 
             let data = FormUtil.extractForm($('#basicForm'));
 
-            // 필수입력 check routine
-            if (!data.Name) {
+            // 필수입력 check routineCode Name Type
+            if (!data.Code) {
+                Alert.alert('', '코드를 입력해주세요.');
+                $('#basicForm #Code').focus();
+                return false;
+            }
+            else if (!data.Name) {
                 Alert.alert('', '부서명을 입력해주세요.');
+                $('#basicForm #Name').focus();
+                return false;
+            }
+            else if (!data.Type) {
+                Alert.alert('', '부서구분을 입력해주세요.');
+                $('#basicForm #Type').focus();
                 return false;
             }
 

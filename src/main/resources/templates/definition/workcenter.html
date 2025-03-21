@@ -17,7 +17,7 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>일지 및 데이터</li>
+                <li>시스템설정</li>
                 <li>기준정보</li>
                 <li>워크센터</li>
             </ul>
@@ -100,12 +100,29 @@
                                 <tbody>
                                 <tr>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="factory_id">공장</label>
+                                        <label for="factory_id"><span class="eq">*</span>공장</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <select id="factory_id" name="factory_id"
                                                 style="width: 100%;"></select>
                                     </td>
+
+                                    <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
+                                        <label for="code"><span class="eq">*</span>워크센터 코드</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <input type="text" style="width: 100%;" id="code"
+                                               name="code">
+                                    </td>
+
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="factory_id"><span class="eq">*</span>워크센터명</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <input type="text" id="name" name="name"
+                                               style="width: 100%;">
+                                    </td>
+
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                         <label for="area_id">에어리어</label>
                                     </th>
@@ -113,29 +130,15 @@
                                         <select id="area_id" name="area_id"
                                                 style="width: 100%;"></select>
                                     </td>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="Process_id">공정</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select style="width: 100%;" id="Process_id"
-                                                name="Process_id"></select>
-                                    </td>
-                                    <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
-                                        <label for="code">워크센터 코드</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="text" style="width: 100%;" id="code"
-                                               name="code">
-                                    </td>
                                 </tr>
 
                                 <tr>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="factory_id">워크센터명</label>
+                                        <label for="Process_id"><span class="eq">*</span>공정</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="text" id="name" name="name"
-                                               style="width: 100%;">
+                                        <select style="width: 100%;" id="Process_id"
+                                                name="Process_id"></select>
                                     </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                         <label for="process_storehouse_id">공정창고</label>
@@ -374,15 +377,19 @@
 
             if (!data.factory_id) {
                 Alert.alert('', '공장을 선택해주세요.');
+                $('#workcenterForm #factory_id').focus();
                 return false;
             } else if (!data.code) {
                 Alert.alert('', '워크센터 코드를 입력해주세요.');
+                $('#workcenterForm #code').focus();
                 return false;
             } else if (!data.name) {
                 Alert.alert('', '워크센터 명을 입력해주세요.');
+                $('#workcenterForm #name').focus();
                 return false;
             } else if (!data.Process_id) {
                 Alert.alert('', '공정을 선택해주세요.');
+                $('#workcenterForm #Process_id').focus();
                 return false;
             }
 

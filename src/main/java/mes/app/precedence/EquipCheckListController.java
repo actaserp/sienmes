@@ -225,14 +225,20 @@ public class EquipCheckListController {
 			this.checkResultRepository.saveAndFlush(cr);
 			
 			Integer checkResultId = cr.getId();
-			
+
+
+
 			for(int i = 0; i < items.size(); i++ ) {
 				CheckItemResult cir = new CheckItemResult();
 				cir.setCheckResultId(checkResultId);
 				cir.setCheckItemId(Integer.parseInt(items.get(i).get("id").toString()));
 				cir.setResult1(items.get(i).get("result1").toString());
+
+				// "order" 값이 null인 경우 기본값 설정
+				String orderValue = items.get(i).get("order") != null ? items.get(i).get("order").toString() : "0";
+				cir.setOrder(Integer.parseInt(orderValue));
+
 				cir.set_audit(user);
-				cir.setOrder(Integer.parseInt(items.get(i).get("order").toString()));
 				this.checkItemResultRepository.saveAndFlush(cir);
 				
 			}

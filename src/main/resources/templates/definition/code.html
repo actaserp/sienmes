@@ -20,7 +20,7 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>일지 및 데이터</li>
+                <li>시스템설정</li>
                 <li>기준정보</li>
                 <li>코드정보</li>
             </ul>
@@ -107,13 +107,13 @@
                                                style="width: 100%;">
                                     </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="code">코드</label>
+                                        <label for="code"><span class="eq">*</span>코드</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <input type="text" id="code" name="code" style="width: 100%;">
                                     </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="name">코드명</label>
+                                        <label for="name"><span class="eq">*</span>코드명</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <input type="text" style="width: 100%;" id="name" name="name">
@@ -394,8 +394,19 @@
                 //let data = $('#codeForm').serialize();
                 let data = FormUtil.extractForm($('#codeForm'));
 
-                if (!data.code || !data.name) {
+                /*if (!data.code || !data.name) {
                     Alert.alert('', '필수항목을 입력해주세요');
+                    return;
+                }*/
+
+                if (!data.code) {
+                    Alert.alert('', '코드를 입력해 주세요');
+                    $('#codeForm #code').focus();
+                    return;
+                }
+                if (!data.name) {
+                    Alert.alert('', '코드명을 입력해 주세요');
+                    $('#codeForm #name').focus();
                     return;
                 }
 
@@ -435,6 +446,12 @@
                 page.searchMainData();
             });
 
+
+            $('#txtCode').on('keypress', function (e) {
+                if (event.keyCode == 13) {
+                    page.searchMainData();
+                }
+            });
 
             $('#btnNew').click(function (e) {
                 $('#codeForm')[0].reset();

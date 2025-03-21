@@ -30,9 +30,9 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>일지 및 데이터</li>
+                <li>시스템설정</li>
                 <li>기준정보</li>
-                <li>워크센터</li>
+                <li>업체정보</li>
             </ul>
         </div>
 
@@ -47,14 +47,14 @@
                             <select class="form-control2" id="cboCompanyType" name="cboCompanyType"></select>
                         </dd>
                     </dl>
-                    <dl>
+                    <!--<dl>
                         <dt>
                             <label>분류</label>
                         </dt>
                         <dd>
                             <select class="form-control2" id="cboGroupName" name="cboGroupName"></select>
                         </dd>
-                    </dl>
+                    </dl>-->
                     <dl>
                         <dt>
                             <label>업체명</label>
@@ -132,7 +132,7 @@
                                     <tbody>
                                     <tr>
                                         <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                            <label for="name">업체명</label>
+                                            <label for="name"><span class="eq">*</span>업체명</label>
                                         </th>
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                             <input type="text" id="name" name="name"
@@ -140,28 +140,29 @@
                                         </td>
 
                                         <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                            <label for="company_type">업체구분</label>
+                                            <label for="company_type"><span class="eq">*</span>업체구분</label>
                                         </th>
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                             <select id="company_type" name="company_type"
                                                     style="width: 100%;"></select>
                                         </td>
 
-                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                            <label for="eng_name">영문명</label>
+                                        <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
+                                            <label for="comp_code"><span class="eq">*</span>업체코드</label>
                                         </th>
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                            <input type="text" style="width: 100%;" id="eng_name"
-                                                   name="eng_name">
+                                            <input type="text" style="width: 100%;" id="comp_code"
+                                                   name="comp_code">
                                         </td>
 
-                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                            <label for="tel_number">연락처</label>
+                                        <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
+                                            <label for="business_number"><span class="eq">*</span>사업자번호</label>
                                         </th>
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                            <input type="text" id="tel_number" name="tel_number"
-                                                   style="width: 100%;">
+                                            <input type="text" style="width: 100%;" id="business_number"
+                                                   name="business_number">
                                         </td>
+
                                     </tr>
 
                                     <tr>
@@ -173,12 +174,13 @@
                                             <input type="text" id="fax_number" name="fax_number"
                                                    style="width: 100%;">
                                         </td>
-                                        <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
-                                            <label for="comp_code">업체코드</label>
+
+                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label for="eng_name">영문명</label>
                                         </th>
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                            <input type="text" style="width: 100%;" id="comp_code"
-                                                   name="comp_code">
+                                            <input type="text" style="width: 100%;" id="eng_name"
+                                                   name="eng_name">
                                         </td>
 
                                         <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
@@ -189,14 +191,14 @@
                                                    name="comp_code2">
                                         </td>
 
-                                        <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
-                                            <label for="business_number">사업자번호</label>
+
+                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label for="tel_number">연락처</label>
                                         </th>
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                            <input type="text" style="width: 100%;" id="business_number"
-                                                   name="business_number">
+                                            <input type="text" id="tel_number" name="tel_number"
+                                                   style="width: 100%;">
                                         </td>
-
                                     </tr>
 
                                     <tr>
@@ -626,10 +628,10 @@
                         $('#priceForm')[0].reset();
                         page.setPriceButtonState();
 
-                        if (_this.current_tab == 'tabs_unitcost') {
+                        /*if (_this.current_tab == 'tabs_unitcost') {
                             let comp_id = $('#basicForm').find('#id').val();
                             _this.showPriceList(comp_id);
-                        }
+                        }*/
 
                         /*console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
                         console.log('선택된 행 데이터:', selectedRowData);*/
@@ -722,6 +724,22 @@
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+                        // change_date 컬럼의 값을 변환
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            let col = sender.columns[e.col];
+                            if (col.binding === 'change_date') {
+                                let value = sender.getCellData(e.row, e.col, false);
+                                if (value) {
+                                    let date = new Date(value);
+                                    let hours = date.getHours();
+                                    let minutes = date.getMinutes().toString().padStart(2, '0');
+                                    let period = hours >= 12 ? '오후' : '오전';
+                                    hours = hours % 12 || 12; // 12시간제 변환
+                                    let formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${period}${hours}:${minutes}`;
+                                    e.cell.textContent = formattedDate;
+                                }
+                            }
+                        }
                     },
                     columns: [
                         {binding: 'mat_type_name', header: '품목유형', width: 100, align: 'center',},
@@ -734,7 +752,7 @@
                         {binding: 'apply_start_date', header: '적용시작일', width: 120, align: 'center',},
                         {binding: 'apply_end_date', header: '적용종료일', width: 120, align: 'center',},
                         {binding: 'changer_name', header: '변경자', width: 120, align: 'left',},
-                        {binding: 'change_date', header: '변경일', width: 120, align: 'center',},
+                        {binding: 'change_date', header: '변경일', width: 200, align: 'center',},
                         {binding: '', header: '', width: "*", align: 'center',},
                     ],
                     itemsSource: this.viewData2, // 데이터를 설정할 배열
@@ -838,9 +856,8 @@
             searchMainData1() {
                 let _this = this;
                 let data = {
-                    'action': 'read',
                     'comp_type': $('#cboCompanyType').val(),
-                    'group_name': $('#cboGroupName').val(),
+                    /*'group_name': $('#cboGroupName').val(),*/
                     'keyword': $('#txtCompany').val(),
                 };
                 let result = AjaxUtil.getSyncData(this.url + '/read', data);
@@ -858,8 +875,7 @@
                 $('#priceForm').find('#Material_id').val('');
                 /*this.price_grid.setData([]);*/
 
-                _this.viewData2.sourceCollection = result.data;
-
+                /*_this.viewData2.sourceCollection = result.data;*/
                 page.setButtonState();
                 page.setPriceButtonState();
             }
@@ -1142,6 +1158,7 @@
             page = new CompanyPage();
 
             AjaxUtil.fillSelectOptions($('#cboCompanyType'), 'system_code', 'choose', false, 'company_type');
+            AjaxUtil.fillSelectOptions($('#cboGroupName'), 'groupName', 'choose', false);
 
             AjaxUtil.fillSelectOptions($('#company_type'), 'system_code', 'choose', false, 'company_type');
 
@@ -1154,6 +1171,12 @@
 
             $('#btnSearch').click(function (ex) {
                 page.searchMainData1();
+            });
+
+            $('#txtCompany').on('keypress', function (e) {
+                if (event.keyCode == 13) {
+                    page.searchMainData1();
+                }
             });
 
             $('.tab_links .tab').click(function (e) {
@@ -1253,6 +1276,30 @@
             });
 
             $('#btnSave').click(function (e) {
+                let basicData = FormUtil.extractForm($('#basicForm'));
+                let data = $.extend({}, basicData);
+
+                if (!data.name) {
+                    Alert.alert('', '업체명을 입력해 주세요');
+                    $('#basicForm #name').focus();
+                    return;
+                }
+                if (!data.company_type) {  // 업체구분 체크
+                    Alert.alert('', '업체구분을 선택해 주세요');
+                    $('#basicForm #company_type').focus();
+                    return;
+                }
+                if (!data.comp_code) {  // 업체코드 체크
+                    Alert.alert('', '업체코드를 입력해 주세요');
+                    $('#basicForm #comp_code').focus();
+                    return;
+                }
+                if (!data.business_number) {  // 사업자번호 체크
+                    Alert.alert('', '사업자번호를 입력해 주세요');
+                    $('#basicForm #business_number').focus();
+                    return;
+                }
+
                 Alert.confirm('',
                     '저장하시겠습니까?',
                     function () {
@@ -1262,6 +1309,7 @@
                     }
                 );
             });
+
 
             $('#btnDelete').click(function (e) {
                 Alert.confirm('',

@@ -12,16 +12,16 @@
         <!-- Page Title -->
         <div class="page-title-wrap">
             <div class="left">
-                <h2>근무조 조회</h2>
+                <h2>근무조</h2>
                 <a title="북마크" class="bookmark toggle">
                     내메뉴
                 </a>
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>일지 및 데이터</li>
+                <li>시스템설정</li>
                 <li>기준정보</li>
-                <li>근무조조회</li>
+                <li>근무조</li>
             </ul>
         </div>
 
@@ -114,26 +114,26 @@
                                 <input type="text" id="id" name="id" style="width: 100%;" readonly disabled>
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="Code">근무조코드</label>
+                                <label for="Code"><span class="eq">*</span>근무조코드</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" id="Code" name="Code" style="width: 100%;">
                             </td>
 
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="Name">근무조명</label>
+                                <label for="Name"><span class="eq">*</span>근무조명</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" style="width: 100%;" id="Name" name="Name">
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="StartTime">근무시작시간</label>
+                                <label for="StartTime"><span class="eq">*</span>근무시작시간</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="time" style="width: 100%;" id="StartTime" name="StartTime" value="00:00">
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="EndTime">근무종료시간</label>
+                                <label for="EndTime"><span class="eq">*</span>근무종료시간</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="time" style="width: 100%;" id="EndTime" name="EndTime" value="12:00">
@@ -328,18 +328,22 @@
 
             if (!data.Code) {
                 Alert.alert('', '근무조코드를 입력해주세요')
+                $('#shiftForm #Code').focus();
                 return false;
             }
             if (!data.Name) {
                 Alert.alert('', '근무조명을 입력해주세요')
+                $('#shiftForm #Name').focus();
                 return false;
             }
             if (!data.StartTime) {
                 Alert.alert('', '시작시간을 입력해주세요')
+                $('#shiftForm #StartTime').focus();
                 return false;
             }
             if (!data.EndTime) {
                 Alert.alert('', '종료시간을 입력해주세요')
+                $('#shiftForm #EndTime').focus();
                 return false;
             }
 

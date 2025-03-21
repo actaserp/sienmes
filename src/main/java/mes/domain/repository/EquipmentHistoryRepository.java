@@ -13,4 +13,6 @@ public interface EquipmentHistoryRepository extends JpaRepository<EquipmentHisto
 	void deleteByApprDataPk(Integer pk);
 	
 	List<EquipmentHistory> findBySourceDataPkAndSourceTableName(Integer sourceDataPk, String sourceTableName);
+
+	List<EquipmentHistory> findByEquipmentId(Integer equipmentId);
 }

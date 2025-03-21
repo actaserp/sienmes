@@ -22,7 +22,7 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>일지 및 데이터</li>
+                <li>시스템설정</li>
                 <li>기준정보</li>
                 <li>설비정보</li>
             </ul>
@@ -89,7 +89,7 @@
         <div class="tab-wrap">
             <ul class="tab-links">
                 <li><a href="#tab_basic">설비정보</a></li>
-                <li><a href="#tab_photo" name="tab_photo" class="tab">사진</a></li>
+                <!--<li><a href="#tab_photo" name="tab_photo" class="tab">사진</a></li>-->
             </ul>
             <div>
                 <section class="tab-item" id="tab_basic" style="border-top-left-radius: 0;">
@@ -132,24 +132,24 @@
                                     </td>
 
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="Usage">용도</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="text" id="Usage" name="Usage" style="width: 100%;">
-                                    </td>
-                                    <!--설비 코드 부터 id값 부여 -->
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="Code">설비코드</label>
+                                        <label for="Code"><span class="eq">*</span>설비코드</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <input type="text" style="width: 100%;" id="Code"
                                                name="Code">
                                     </td>
                                     <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
-                                        <label for="Name">설비명</label>
+                                        <label for="Name"><span class="eq">*</span>설비명</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <input type="text" style="width: 100%;" id="Name" name="Name">
+                                    </td>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="WorkCenter_id"><span class="eq">*</span>워크센터</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select id="WorkCenter_id" name="WorkCenter_id"
+                                                style="width: 100%;"></select>
                                     </td>
                                 </tr>
 
@@ -162,13 +162,14 @@
                                         <input type="text" id="ManageNumber" name="ManageNumber"
                                                style="width: 100%;">
                                     </td>
+
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="WorkCenter_id">워크센터</label>
+                                        <label for="Usage">용도</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select id="WorkCenter_id" name="WorkCenter_id"
-                                                style="width: 100%;"></select>
+                                        <input type="text" id="Usage" name="Usage" style="width: 100%;">
                                     </td>
+
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                         <label for="Model">모델명</label>
                                     </th>
@@ -615,14 +616,17 @@
             let url = '/api/definition/equipment/save';
             let data = FormUtil.extractForm($('#equipmentForm'));
 
-            if (!data.WorkCenter_id) {
-                Alert.alert('', '워크센터를 선택해주세요.');
-                return false;
-            } else if (!data.Code) {
+            if (!data.Code) {
                 Alert.alert('', '설비코드를 입력해주세요.');
+                $('#equipmentForm #Code').focus();
                 return false;
-            } else if (!data.Name) {
+            }else if (!data.Name) {
                 Alert.alert('', '설비명을 입력해주세요.');
+                $('#equipmentForm #Name').focus();
+                return false;
+            } else if (!data.WorkCenter_id) {
+                Alert.alert('', '워크센터를 선택해주세요.');
+                $('#equipmentForm #WorkCenter_id').focus();
                 return false;
             }
 
@@ -650,7 +654,7 @@
             let data = {id: id};
             let fnsuccess = function (res) {
                 if (res.success) {
-                    Notify.success('삭제했습니다.');
+                    Alert.alert('','삭제했습니다.');
 
                     $('#equipmentForm')[0].reset();
                     $('#equipmentForm').find('#id').val('');
@@ -783,6 +787,15 @@
         }
 
         $(document.body).ready(function (e) {
+
+
+            $('#txtEquipment').on('keypress', function (e) {
+                if (event.keyCode == 13) {
+                    searchMainData();
+                }
+            });
+
+
 
             $('#PurchaseDate').ax5DatePicker({ direction: 'bottom' });
             $('#InstallDate').ax5DatePicker({ direction: 'bottom' });

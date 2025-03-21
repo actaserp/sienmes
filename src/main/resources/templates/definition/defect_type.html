@@ -19,7 +19,7 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>일지 및 데이터</li>
+                <li>시스템설정</li>
                 <li>기준정보</li>
                 <li>부적합유형</li>
             </ul>
@@ -110,13 +110,13 @@
                         <tbody>
                         <tr>
                             <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="defect_type_code">코드</label>
+                                <label for="defect_type_code"><span class="eq">*</span>코드</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" id="defect_type_code" name="defect_type_code" style="width: 100%;">
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="defect_type_name">부적합유형명</label>
+                                <label for="defect_type_name"><span class="eq">*</span>부적합유형명</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" id="defect_type_name" name="defect_type_name" style="width: 100%;">
@@ -307,10 +307,12 @@
 
             if (!data.defect_type_code) {
                 Alert.alert('', '부적합코드를 입력해 주세요');
+                $('#defectTypeForm #defect_type_code').focus();
                 return;
             }
             if (!data.defect_type_name) {
                 Alert.alert('', '부적합명을 입력해 주세요');
+                $('#defectTypeForm #defect_type_name').focus();
                 return;
             }
 
