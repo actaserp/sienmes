@@ -45,7 +45,6 @@ public class MaterialMoveController {
 	@PostMapping("/material_move")
 	@Transactional
 	public AjaxResult saveMaterialMove(
-			@RequestParam(value="from_storehouse_id", required = true) Integer from_storehouse_id,
 			@RequestParam(value="to_storehouse_id", required = true) Integer to_storehouse_id,
 			@RequestParam(value="move_list", required = true) String moveItems,
 			Authentication auth) {
@@ -61,12 +60,12 @@ public class MaterialMoveController {
 		List<Map<String, Object>> moveList = CommonUtil.loadJsonListMap(moveItems);
 		
 		for (Map<String, Object> map : moveList) {
-			int mat_id = (int)map.get("material_id");
+			int mat_id = (int)map.get("mat_id");
 			float moveQty = Float.parseFloat(map.get("move_qty").toString());
 			
 			// 출고
 			MaterialInout mo = new MaterialInout();
-			mo.setStoreHouseId(from_storehouse_id);
+			mo.setStoreHouseId((int)map.get("storehouse_id"));
 			mo.setMaterialId(mat_id);
 			mo.setInOut("out");
 			mo.setOutputType("move_out");

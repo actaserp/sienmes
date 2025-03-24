@@ -28,26 +28,6 @@ public class MaterialMoveService {
         from material m 
         left join mat_lot ml on m.id = ml."Material_id"
         where 1=1
-        """;
-		if(storehouse_id!=null) {
-			sql+="""
-			and ml."StoreHouse_id" = :storehouse_id
-			""";
-		}
-
-		if(material_id!=null) {
-			sql+="""
-			and m.id = :material_id
-			""";
-		}
-
-		if(StringUtils.hasText(keyword)){
-			sql+="""
-			and ( upper(m."Name") like concat('%%',upper(:keyword),'%%') or upper(m."Code") = upper(:keyword) )
-			""";
-		}
-
-        sql+="""
         group by m.id
         )
         select m.id as mat_id

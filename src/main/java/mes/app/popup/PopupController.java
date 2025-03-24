@@ -317,5 +317,50 @@ public class PopupController {
 		return items;
 		
 	}
+
+	@RequestMapping("/search_Comp")
+	public AjaxResult getSearchComp(
+			@RequestParam(value = "compCode", required = false) String compCode,
+			@RequestParam(value = "compName", required = false) String compName,
+			@RequestParam(value = "business_number", required = false) String business_number){
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("compCode", compCode);
+		paramMap.addValue("compName", compName);
+		paramMap.addValue("business_number", business_number);
+		AjaxResult result = new AjaxResult();
+
+		String sql = """
+			select id as id
+            , "Name" as compName
+            , "Code" as compCode
+            , "BusinessNumber" as business_number
+            , "TelNumber" as tel_number
+            from company
+            WHERE "CompanyType" = 'sale'
+            OR "CompanyType" = 'sale-purchase'
+			""";
+
+		if (compCode != null && !compCode.isEmpty()) {
+			sql += " AND \"Code\" LIKE :compCode ";
+			paramMap.addValue("compCode", "%" + compCode + "%");
+		}
+
+		if (compName != null && !compName.isEmpty()) {
+			sql += " AND \"Name\" LIKE :compName ";
+			paramMap.addValue("compName", "%" + compName + "%");
+		}
+
+		if (business_number != null && !business_number.isEmpty()) {
+			sql += " AND \"BusinessNumber\" LIKE :business_number ";
+			paramMap.addValue("business_number", "%" + business_number + "%");
+		}
+
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+
+		return result;
+
+
+	}
 	
 }

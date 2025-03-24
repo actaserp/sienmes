@@ -838,10 +838,10 @@ let AjaxUtil = {
     getSelectDataWithNull: function (combo_type, null_option, condition1, condition2, condition3) {
         let ret = AjaxUtil.getSelectData(combo_type, condition1, condition2, condition3);
         let text = null_option;
-        if (null_option == 'choose') {
+        if (null_option === 'choose') {
             text = i18n.getCommonText('선택');//'선택하세요(Choose)';
         }
-        else if (null_option == 'all') {
+        else if (null_option === 'all') {
             text = i18n.getCommonText('전체'); //'전체(All
         }
         else {

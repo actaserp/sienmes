@@ -5,7 +5,6 @@
         <div class="page-title-wrap">
             <div class="left">
                 <h2>작업 지시 등록</h2>
-                <small2>A</small2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
@@ -163,7 +162,8 @@
                                     <label for="cboMaterialGrp">품목그룹</label>
                                 </th>
                                 <td>
-                                    <select class="form-control2" id="cboMaterialGrp" name="cboMaterialGrp"></select>
+                                    <input class="form-control2" id="cboMaterialGrp" name="cboMaterialGrp" readonly type="hidden">
+                                    <input class="form-control2" id="cboMaterialGrpName" name="cboMaterialGrpName" readonly>
                                 </td>
                                 <th style="text-align: center">
                                     <label for="mat_code">품목코드</label>
@@ -174,10 +174,11 @@
                             </tr>
                             <tr>
                                 <th style="text-align: center">
-                                    <label for="cboMaterial">*제품</label>
+                                    <label for="cboMaterial">제품*</label>
                                 </th>
                                 <td colspan="3">
-                                    <select id="cboMaterial" name="cboMaterial"></select>
+                                    <input id="cboMaterial" type="hidden" name="cboMaterial" readonly >
+                                    <input id="cboMaterialName" name="cboMaterialName" readonly placeholder="검색버튼을 클릭하여 제품을 검색하세요">
                                     <a class="btn btn-delete" id="btnMaterialSearch" title="품목검색">
                                         <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                         품목 검색
@@ -186,7 +187,7 @@
                             </tr>
                             <tr>
                                 <th style="text-align: center">
-                                    <label for="txtOrderQty">*지시량</label>
+                                    <label for="txtOrderQty">지시량*</label>
                                 </th>
                                 <td>
                                     <input class="form-control2 tar" type="number" id="txtOrderQty" name="txtOrderQty" value="{%=o.order_qty%}" min="1" />
@@ -206,7 +207,7 @@
                                     <input class="form-control2 tac" type="date" id="production_date" name="production_date" value="{%=o.production_date%}" />
                                 </td>
                                 <th style="text-align: center">
-                                    <label for="cboShiftCode">*근무조</label>
+                                    <label for="cboShiftCode">근무조*</label>
                                 </th>
                                 <td>
                                     <select class="form-control2" id="cboShiftCode" name="cboShiftCode" value="{%=o.shift_name%}"></select>
@@ -214,7 +215,7 @@
                             </tr>
                             <tr>
                                 <th style="text-align: center">
-                                    <label for="cboWorcenter">*워크센터</label>
+                                    <label for="cboWorcenter">워크센터*</label>
                                 </th>
                                 <td>
                                     <select class="form-control2" id="cboWorcenter" name="cboWorcenter"></select>
@@ -368,10 +369,10 @@
                     let today = CommonUtil.getYYYYMMDD();
 
                     let modalContainer = null;
-                    if (action == 'update') {
+                    if (action === 'update') {
                         modalContainer = new PopupDraggable('작업 지시 수정');
                         modalContainer.open({width: 1000, height: 550, $content});
-                    } else if (action == 'new') {
+                    } else if (action === 'new') {
                         modalContainer = new PopupDraggable('작업 지시 등록');
                         modalContainer.open({width: 1000, height: 480, $content});
                     }
@@ -387,11 +388,14 @@
                     AjaxUtil.fillSelectOptions($content.find('#cboEquipment'), 'equipment', 'choose', false);
                     AjaxUtil.fillSelectOptions($content.find('#cboMaterial'), 'material', 'choose', false);
 
-                    if (action == 'update') {
+                    if (action === 'update') {
+                        console.log('data', data);
                         AjaxUtil.fillSelectOptions($content.find('#cboMaterial'), 'material', 'choose', false, data.mat_grp_id);
                         $content.find('#cboShiftCode').val(data.shift_code);
                         $content.find('#cboMaterialGrp').val(data.mat_grp_id);
                         $content.find('#cboMaterial').val(data.mat_id);
+                        $content.find('#cboMaterialGrpName').val(data.mat_grp_name);
+                        $content.find('#cboMaterialName').val(data.mat_name);
                         $content.find('#cboWorcenter').val(data.workcenter_id);
                         $content.find('#cboEquipment').val(data.equip_id);
                     } else {
@@ -403,13 +407,15 @@
                             pop.show(function (item) {
                                 $content.find('#cboMaterial').val(item.id);
                                 $content.find('#cboMaterialGrp').val(item.MaterialGroup_id);
+                                $content.find('#cboMaterialName').val(item.Name);
+                                $content.find('#cboMaterialGrpName').val(item.group_name);
                                 $content.find('#mat_code').val(item.Code);
                                 //$txtProductName.val(item.Name);
                                 //$Material_id.val(item.id);
                                 //$product_code.val(item.Code);
                                 //$MaterialGroupName.val(item.group_name);
                             });
-
+                            pop.searchDataBind();
 
                         });
 

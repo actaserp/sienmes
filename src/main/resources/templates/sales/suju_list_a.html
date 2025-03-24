@@ -5,8 +5,7 @@
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
-                <h2>수주 내역</h2>
-                <small2>A</small2>
+                <h2>수주 및 계획량 등록(개별)</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
@@ -14,7 +13,7 @@
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
                 <li>생산 관리</li>
-                <li>수주 내역</li>
+                <li>수주 및 계획량 등록(개별)</li>
             </ul>
         </div>
 
@@ -138,7 +137,7 @@
                         </tr>
                         <tr>
                             <th style="text-align: center">
-                                <label for="SujuQty">수주량</label>
+                                <label for="SujuQty">수주량*</label>
                             </th>
                             <td>
                                 <input class="form-control2 tar" type="text" id="SujuQty" name="SujuQty" onkeyup="numberSujuQty(this.value)">
@@ -152,16 +151,23 @@
                         </tr>
                         <tr>
                             <th style="text-align: center">
-                                <label for="cboCompany">판매처</label>
+                                <label for="cboCompany">판매처*</label>
                             </th>
-                            <td>
-                                <select id="cboCompany" name="Company_id"></select>
-                                <input class="form-control2 tac" type="text" id="CompanyName" name="CompanyName" placeholder="제작회사" style="display:none"/>
+                            <td colspan="3">
+                                <input id="cboCompany" name="Company_id" type="hidden">
+                                <input class="form-control2" type="text" id="CompanyName" name="CompanyName" readonly/>
+                                &nbsp;
+                                <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    판매처 검색
+                                </a>
                             </td>
+                        </tr>
+                        <tr>
                             <th style="text-align: center">
                                 <label for="cboSujuType">수주구분</label>
                             </th>
-                            <td>
+                            <td colspan="3">
                                 <select id="cboSujuType" name="SujuType"></select>
                             </td>
                         </tr>
@@ -220,6 +226,7 @@
 <th:block layout:fragment="scripts">
     <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
     <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
+    <th:block th:replace="/common/popup_company :: popup_company"></th:block>
 
     <script type="text/javascript">
 
@@ -255,13 +262,13 @@
                     columns: [
                         {binding: 'CompanyName', header: '판매처', width: 120},
                         {binding: 'SujuTypeName', header: '수주구분', width: 100, align: 'center'},
-                        {binding: 'JumunDate', header: '수주일', width: 100, align: 'center'},
+                        {binding: 'JumunDate', header: '수주일', width: 120, align: 'center'},
                         {binding: 'MaterialGroupName', header: '제품그룹', width: 100},
                         {binding: 'product_code', header: '제품코드', width: 100},
                         {binding: 'product_name', header: '제품명', width: 200},
                         {binding: 'unit', header: '단위', width: 80, align: 'center'},
                         {binding: 'SujuQty', header: '수량', width: 80, align: 'right', format: 'n0'},
-                        {binding: 'DueDate', header: '납기일', width: 100, align: 'center'},
+                        {binding: 'DueDate', header: '납기일', width: 120, align: 'center'},
                         {binding: 'StateName', header: '상태', width: 100, align: 'center'},
                         {binding: 'ShipmentStateName', header: '출하상태', width: 100, align: 'center'},
                         {binding: 'plan_state', header: '생산계획', width: 100, align: 'center'},
@@ -273,6 +280,13 @@
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '수주 내역';
 
+                this.grid.hostElement.addEventListener('dblclick', function (e) {
+                    let items = _this.grid.selectedItems;
+                    if (items.length === 0) {
+                        return false;
+                    }
+                    _this.$btnEdit.trigger('click');
+                });
 
                 let nowDate = CommonUtil.getYYYYMMDD();
                 let dueDate = CommonUtil.getYYYYMMDD(10);
@@ -348,17 +362,18 @@
                 let $content = $(content);
 
                 let modalContainer = null;
-                if (data.mode == 'new') {
+                if (data.mode === 'new') {
                     modalContainer = new PopupDraggable('등록');
                 } else {
                     modalContainer = new PopupDraggable('수정');
                 }
-                modalContainer.open({width: 1050, height: 550, $content});
+                modalContainer.open({width: 1050, height: 580, $content});
                 $('#popSrchDt1').ax5DatePicker({direction: 'top'});
                 $('#popSrchDt2').ax5DatePicker({direction: 'top'});
 
                 // 제품검색
                 let $btnProductSearch = $content.find('#btnProductSearch');
+                let $btnCompanySearch = $content.find('#btnCompanySearch');
                 let $MaterialGroupName = $content.find('#MaterialGroupName');
                 let $product_code = $content.find('#product_code');
                 let $txtProductName = $content.find('#txtProductName');
@@ -378,8 +393,9 @@
                 let $quantity = $('#quantity');
                 let $SujuQty = $('#SujuQty');
 
-                if (data.mode == 'new') {
+                if (data.mode === 'new') {
                     $btnProductSearch.removeAttr('disabled');
+
                 }
 
                 $btnProductSearch.click(function (e) {
@@ -391,8 +407,19 @@
                         $product_code.val(item.Code);
                         $MaterialGroupName.val(item.group_name);
                     });
+                    pop.searchDataBind();
                 });
 
+                $content.find('#btnCompanySearch').click(function () {
+                    let poppage = new PopCompComponent();
+                    let $poppage = $(poppage);
+                    let searchcallback = function (items) {
+                        $content.find('#cboCompany').val(items.id);
+                        $content.find('#CompanyName').val(items.compname);
+                    };
+
+                    poppage.show(searchcallback);
+                });
 
                 // 저장버튼
                 let $btnPopSujuSave = $('#btnPopSujuSave');
@@ -402,13 +429,9 @@
                 AjaxUtil.fillSelectOptions($cboSujuType, 'system_code', 'choose', null, 'suju_type');
 
 
-                AjaxUtil.fillSelectOptions($cboCompany, 'company', 'choose', null, 'sale');
-                //AjaxUtil.fillSelectOptions($cboState, 'system_code', null, data.State, 'suju_state');
-
-
                 //팝업타이틀 설정
                 let $popTitle = $content.find('#popTitle');
-                if (data.mode == 'new') {
+                if (data.mode === 'new') {
                     $popTitle.text('수주 등록');
                 } else {
                     // 수주 수정시 제품그룹과 제품을 수정하게 할 것 인지?
@@ -425,18 +448,6 @@
                     $SujuQty.val(data.SujuQty.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
                 }
 
-                // 업체 변경
-                $cboCompany.on('change', function (e) {
-                    let selectedValue = $cboCompany.val();
-                    $CompanyName.val('');
-                    if (selectedValue == '') {
-                        $CompanyName.removeAttr('readonly');
-                    } else {
-                        let optText = $cboCompany.find('option:selected').text();
-                        $CompanyName.val(optText);
-                        $CompanyName.attr('readonly', true);
-                    }
-                });
 
                 // 수주등록 팝업 저장버튼 클릭
                 $btnPopSujuSave.click(function (e) {
@@ -444,17 +455,17 @@
                     //수주일, 납기일 체크?
                     let data = FormUtil.extractForm($sujuForm);
 
-                    if ((data.Material_id == null) || (data.Material_id == '')) {
+                    if ((data.Material_id == null) || (data.Material_id === '')) {
                         Alert.alert('', '제품을 선택하세요.');
                         return;
                     }
 
-                    if (($CompanyName.val() == null) || ($CompanyName.val() == '')) {
+                    if (($CompanyName.val() == null) || ($CompanyName.val() === '')) {
                         Alert.alert('', '판매처를 선택하세요.');
                         return;
                     }
 
-                    if ($SujuQty.val() == '') {
+                    if ($SujuQty.val() === '') {
                         Alert.alert('', '수주량을 입력하세요.');
                         return;
                     }
