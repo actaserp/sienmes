@@ -64,7 +64,7 @@
             background-color: #EDEFF5 !important;
         }
 
-        .work-table select, select:disabled {
+        .work-table select {
             width: 160px;
         }
 
@@ -82,7 +82,7 @@
 
         <div class="page-title-wrap">
             <div class="left">
-                <h2>생산 실적 입력 A3(차수추가)</h2>
+                <h2>생산 실적 입력(LOT)</h2>
                 <small2>라우팅이 없는 품목에 대한 실적 입력. 로트투입 가능</small2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
@@ -255,6 +255,10 @@
 
                         <div class="table-wrap">
                             <form id="basicForm">
+                                <input type="hidden" id="id" name="id"/>
+                                <input type="hidden" id="mp_id" name="mp_id"/>
+                                <input type="hidden" id="mat_pk" name="mat_pk"/>
+                                <input type="hidden" id="state" name="state"/>
                                 <table class="work-table">
                                     <caption>작업 지시 테이블</caption>
                                     <colgroup>
@@ -267,10 +271,6 @@
                                         <col style="width: 10%;">
                                         <col style="width: 15%;">
                                     </colgroup>
-                                    <input type="hidden" id="id" name="id"/>
-                                    <input type="hidden" id="mp_id" name="mp_id"/>
-                                    <input type="hidden" id="mat_pk" name="mat_pk"/>
-                                    <input type="hidden" id="state" name="state"/>
                                     <tbody>
                                     <tr>
                                         <th><label for="order_num">작지번호</label></th>
@@ -791,6 +791,11 @@
                                     cell.style.backgroundColor = '#0026ff';
                                     cell.style.color = '#FFFFFF'
                                     cell.style.borderBottom = '1px solid #FFFFFF'
+                                } else {
+                                    // 명시적으로 초기화
+                                    cell.style.backgroundColor = '';
+                                    cell.style.color = '';
+                                    cell.style.borderBottom = '';
                                 }
                             }
                             if (column.binding === 'order_qty') {
@@ -1121,12 +1126,13 @@
                 AjaxUtil.fillSelectOptions($('#shift_code'), 'shift', 'choose', false); // 근무조
                 AjaxUtil.fillSelectOptions($('#workcenter_id'), 'workcenter', 'choose', false); // 워크센터
 
-                $('#workcenter_id').change(function () {
-                    if ($('#state').val() == 'ordered') {
-                        AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment', 'choose', false, '', '', $('#workcenter_id').val()); // 설비
+                $('#workcenter_id').off('change').on('change', function () {
+                    if ($('#state').val() === 'ordered') {
+                        AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment', 'choose', false, '', '', $(this).val());
                         _this.showDefectList('total');
                     }
                 });
+
             }
 
             // 하단 합계 업데이트 함수
@@ -1250,7 +1256,7 @@
                         $('#btnConsumedSave').removeAttr('disabled');
                         $('#btnAddMat').removeAttr('disabled');
                         $('#btnLOTbarcode').attr('disabled', false);
-                    } else if (state == 'finished') {
+                    } else if (state === 'finished') {
                         $('#btnLOTbarcode').attr('disabled', false);
                         $('#btnConsumedSave').attr('disabled', 'disabled');
                         $('#btnDel').attr('disabled', 'disabled');
@@ -1321,14 +1327,10 @@
                         $('#job_state').addClass('finished-status');
                     }
 
-                    if (result.state !== 'ordered') {
-                        $('#workcenter_id').on('focus', function () {
-                            this.initialSelect = this.selectedIndex;
-                        });
-
-                        $('#workcenter_id').on('change', function () {
-                            this.selectedIndex = this.initialSelect;
-                        });
+                    if (result.state === 'ordered') {
+                        $('#workcenter_id').prop('disabled', false);
+                    } else {
+                        $('#workcenter_id').prop('disabled', true);
                     }
                     let total_prod_qty = result.good_qty + result.defect_qty + result.loss_qty + result.scrap_qty;
                     //$('#lblTotalOutput').text(total_prod_qty);
@@ -1427,6 +1429,7 @@
                 let previousIndex = _this.selectedIndex;
 
                 let data = FormUtil.extractForm($('#basicForm'));
+                data.workcenter_id = $('#workcenter_id').val();
                 let fnSuccess = function (res) {
                     if (res.success) {
                         Notify.success('저장되었습니다.');
@@ -2028,7 +2031,7 @@
                 let _this = this;
 
                 if (defectGridList.length === 0) {
-                    Alert.alert('알림', '수정된 데이터가 없습니다.');
+                    // Alert.alert('알림', '수정된 데이터가 없습니다.');
                     return;
                 }
 

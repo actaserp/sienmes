@@ -17,7 +17,7 @@
         </div>
 
         <section class="section">
-            <div class="section-top">
+            <div class="section-top" style="justify-content: flex-start;">
                 <div class="search-wrap">
                     <dl>
                         <dt>
@@ -32,43 +32,31 @@
                             </ul>
                         </dd>
                     </dl>
-
-                    <dl>
-                        <dt>&nbsp;</dt>
-                        <dd>
-                            <li>
-                                <a class="btn btn-excell" title="등록" id="btnSearchItem">
-                                    제품 조회
-                                </a>
-                            </li>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>&nbsp;</dt>
-                        <dd>
-                            <li>
-                                <a class="btn btn-delete" title="삭제" id="btnExceptItem">
-                                    제품 제외
-                                </a>
-                            </li>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>&nbsp;</dt>
-                        <dd>
-                            <li>
-                                <a class="btn btn-edit" title="수정" id="btnInitItem">
-                                    초기화
-                                </a>
-                            </li>
-                        </dd>
-                    </dl>
+                </div>
+                <div class="button-wrap" style=" margin-left: 20px">
+                    <ul>
+                        <li>
+                            <a class="btn btn-excell" title="등록" id="btnSearchItem">
+                                제품 조회
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn btn-delete" title="삭제" id="btnExceptItem">
+                                제품 제외
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn btn-edit" title="수정" id="btnInitItem">
+                                초기화
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
             <div class="container-fluid">
-                <div id="prod-grid" style="height: 300px;"></div>
+                <div id="prod-grid" style="height: 310px;"></div>
             </div>
-            <div class="button-wrap" style="margin-top: 16px;">
+            <div class="button-wrap" style="margin-top: 16px;margin-bottom:0;">
                 <ul>
                     <li>
                         <a class="btn btn-excell" title="계산기" id="btnCalulation">
@@ -124,23 +112,27 @@
                 this.grid1 = new wijmo.grid.FlexGrid('#prod-grid', {
                     autoGenerateColumns: false,
                     selectionMode: wijmo.grid.SelectionMode.Row,
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
                     showMarquee: true,
-                    formatItem: (sender, e) => {
+                    formatItem: (s, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader &&
+                            s.columns[e.col].binding === 'quantity') {
+                            e.cell.style.color = '#5567ff'; // 글자 색깔 변경
+                        }
                     },
                     columns: [                  //컬럼 key 변경 필요
-                        { binding: 'prod_id', header: '제품번호', width: 100, align: 'right', visible: false},
-                        {binding: 'prod_group_name', header: '제품그룹', width: 150, align: 'left', isReadOnly: true},
-                        {binding: 'prod_code', header: '제품코드', width: 100, align: 'left', isReadOnly: true},
+                        {binding: 'prod_id', header: '제품번호', width: 100, align: 'right', visible: false},
+                        {binding: 'prod_group_name', header: '제품그룹', width: 150, align: 'center', isReadOnly: true},
+                        {binding: 'prod_code', header: '제품코드', width: 100, align: 'center', isReadOnly: true},
                         {binding: 'product_name', header: '제품명', width: 200, align: 'left', isReadOnly: true},
                         {binding: 'unit', header: '단위', width: 100, align: 'center', isReadOnly: true},
                         {
                             binding: 'quantity',
                             header: '수량',
-                            width: 100,
+                            width: 130,
                             align: 'right',
                             isReadOnly: false
                         }
@@ -150,6 +142,14 @@
                 });
                 new FlexGridContextMenu(this.grid1);
                 this.grid1.downloadFileName = '작업 지시 목록';
+
+                // this.grid1.select(-1, -1);
+
+                let selector = new wijmo.grid.selector.Selector(this.grid1, {
+                    itemChecked: function () {
+
+                    }
+                })
 
 
                 this.grid2 = new wijmo.grid.FlexGrid('#raw-grid', {
@@ -165,7 +165,7 @@
                     columns: [
                         //{ key: 'mat_pk', label: '<span style="color:orange">품목번호</span>', width: 100, align: 'right' },
                         {binding: 'mat_type_name', header: '품목구분', width: 100, align: 'center'},
-                        {binding: 'mat_code', header: '품목코드', width: 100, align: 'left'},
+                        {binding: 'mat_code', header: '품목코드', width: 100, align: 'center'},
                         {binding: 'mat_name', header: '품목명', width: 300, align: 'left'},
                         {binding: 'unit_name', header: '단위', width: 100, align: 'center'},
                         {binding: 'requ_qty', header: '소요량', width: 100, align: 'right'},
@@ -189,9 +189,9 @@
                     columns: [
                         //{ key: 'mat_pk', label: '<span style="color:orange">품목번호</span>', width: 100, align: 'right' },
                         {binding: 'mat_type_name', header: '품목구분', width: 100, align: 'center'},
-                        {binding: 'mat_code', header: '품목코드', width: 100, align: 'left'},
+                        {binding: 'mat_code', header: '품목코드', width: 100, align: 'center'},
                         {binding: 'mat_name', header: '품목명', width: 300, align: 'left'},
-                        {binding: 'unit_name', header: '단위', width: 100, align: 'left'},
+                        {binding: 'unit_name', header: '단위', width: 100, align: 'center'},
                         {binding: 'requ_qty', header: '소요량', width: 100, align: 'right'},
                         {binding: 'cur_stock', header: '현재고', width: 100, align: 'right'},
                         {binding: 'available_stock', header: '가용재고', width: 100, align: 'right'},
