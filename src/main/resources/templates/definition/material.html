@@ -1385,7 +1385,7 @@
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
                     showMarquee: true,
-                    isReadOnly: false, // 체크박스 클릭 가능하도록 설정
+                    isReadOnly: true, // 체크박스 클릭 가능하도록 설정
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
@@ -1393,7 +1393,7 @@
                     },
                     columns: [
                         { binding: 'id', header: '번호', width: 100, align: 'center' },
-                        {
+                        /*{
                             binding: 'delete',
                             header: '삭제',
                             width: 100,
@@ -1403,7 +1403,7 @@
                                 { key: false, value: 'N' }   // 빈 값
                             ], 'key', 'value'),
                             isReadOnly: false,  // 체크박스 활성화
-                        },
+                        },*/
                         { binding: 'test_master_id', header: '검사마스터번호', visible: false, width: 200, align: 'left' },
                         { binding: 'test_class_name', header: '검사종류', width: 120, align: 'left' },
                         { binding: 'test_master_group_name', header: '검사마스터그룹', width: 120, align: 'left' },
@@ -2016,8 +2016,8 @@
 
                 let result = AjaxUtil.getSyncData(this.url + '/routingProcess', data);
 
-                console.log("result: ", result);
-                console.log(JSON.stringify(result, null, 2));
+                /*console.log("result: ", result);
+                console.log(JSON.stringify(result, null, 2));*/
 
                 if (result != null) {
                     let count = result.data.length;
@@ -2085,14 +2085,6 @@
 
                 let result = AjaxUtil.getSyncData(url, data);
                 if (result.data != null) {
-                    let count = result.data.length;
-                    /*_this.test_grid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: count,
-                        }
-                    });*/
                     _this.viewData6.sourceCollection = result.data;
                 }
             }
@@ -2361,8 +2353,6 @@
                 grid.collectionView.refresh();
             });
 
-
-
             //검사정보 저장버튼
             $('#btnSaveTest').click(function (e) {
                 let url = page.url + '/save_test_master';
@@ -2384,11 +2374,71 @@
                 };
 
                 let result = AjaxUtil.postSyncData(url, data);
+                /*console.log(result);*/
                 if (result.data != null) {
                     Alert.alert('',"저장되었습니다.");
                     page.showTestList(mat_id);
                 }
+
             });
+
+            $('#btnDelTestMaster').click(function (e) {
+                let url = page.url + '/save_test_master';
+                let mat_id = $('#matBasicForm').find('#id').val();
+                let InTestYN = $('#matTestForm').find('#InTestYN').prop('checked') ? 'Y' : '';
+                let OutTestYN = $('#matTestForm').find('#OutTestYN').prop('checked') ? 'Y' : '';
+
+                let grid = page.test_master_grid;
+                let selectedRow = grid.selection.row; // 선택된 행 인덱스
+                /*console.log("선택된 행의 인덱스:", selectedRow);*/
+
+                if (selectedRow >= 0) {
+                    let viewdata2 = grid.collectionView.items; // 데이터를 올바르게 가져오기
+                    /*console.log("전체 데이터 목록:", viewdata2);*/
+
+                    let selectedItem = viewdata2[selectedRow];
+                    /*console.log("선택된 행의 데이터:", selectedItem);*/
+
+                    if (!selectedItem || !selectedItem.id) {
+                        /*console.log("삭제할 데이터의 ID가 없음:", selectedItem);*/
+                        /*Alert.alert('삭제할 데이터의 ID를 찾을 수 없습니다.');*/
+                        return;
+                    }
+
+                    let deletedId = selectedItem.id;
+                    /*console.log("삭제할 ID:", deletedId);*/
+
+                    // 행 제거
+                    grid.collectionView.remove(selectedItem);
+
+                    // 최신 데이터 리스트 변환
+                    let list = JSON.stringify(grid.collectionView.items);
+
+                    let data = {
+                        'mat_id': mat_id,
+                        'InTestYN': InTestYN,
+                        'OutTestYN': OutTestYN,
+                        'Q': list,
+                        'deletedId': deletedId
+                    };
+
+                    // 서버에 데이터 전송
+                    AjaxUtil.postAsyncData(url, data, function(result) {
+                        console.log(result);
+                        if (result.data != null) {
+                            Alert.alert('', "삭제되었습니다.");
+                            page.showTestList(mat_id); // 갱신된 데이터 반영
+                        } else {
+                            Alert.alert('', '서버 처리에 실패했습니다.');
+                        }
+                    });
+                } else {
+                    Alert.alert('삭제할 행을 선택하세요.');
+                }
+            });
+
+
+
 
 
             // 단가정보 신규버튼

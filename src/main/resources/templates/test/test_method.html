@@ -94,14 +94,14 @@
                                 <tbody>
                                 <tr>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="test_method_code">코드</label>
+                                        <label for="test_method_code"><span class="eq">*</span>코드</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <input type="text" id="test_method_code" name="test_method_code"
                                                style="width: 100%;">
                                     </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="test_method_name">검사방법명</label>
+                                        <label for="test_method_name"><span class="eq">*</span>검사방법명</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <input type="text" id="test_method_name" name="test_method_name"
@@ -540,10 +540,12 @@
                 //}
                 if (!data.test_method_code) {
                     Alert.alert('', '코드를 입력해주세요.');
+                    $('#testMethodForm #test_method_code').focus();
                     return false;
                 }
                 if (!data.test_method_name) {
                     Alert.alert('', '검사방법명을 입력해주세요.');
+                    $('#testMethodForm #test_method_name').focus();
                     return false;
                 }
                 Alert.confirm('',

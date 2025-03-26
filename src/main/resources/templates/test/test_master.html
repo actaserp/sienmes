@@ -108,21 +108,21 @@
                                 <tbody>
                                 <tr>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="master_grp">마스터 그룹</label>
+                                        <label for="master_grp"><span class="eq">*</span>마스터 그룹</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <select id="master_grp" name="master_grp"
                                                 style="width: 100%;"></select>
                                     </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="master_name">마스터명</label>
+                                        <label for="master_name"><span class="eq">*</span>마스터명</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <input type="text" id="master_name" name="master_name"
                                                style="width: 100%;">
                                     </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="test_type">검사항목 사용 여부</label>
+                                        <label for="test_type"><span class="eq">*</span>검사항목 사용 여부</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <select style="width: 100%;" id="test_type"
@@ -224,7 +224,7 @@
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
                     showMarquee: true,
-                    isReadOnly: false,
+                    isReadOnly: true,
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
@@ -652,7 +652,6 @@
                 let param = {
                     'id': id
                 };
-
                 let result = AjaxUtil.getSyncData(this.baseUrl + "/detail", param);
                 if (result.data) {
                     FormUtil.BindDataForm(result.data, $('#testMasterForm'))
@@ -671,18 +670,22 @@
                     } else {
                         Alert.alert('','저장되었습니다.');
                         _this.searchMainData();
-                        _this.showDetail(res.data.id);
+                        /*_this.showDetail(res.data.id);*/
+
                     }
                 }
 
                 if (!data.master_grp) {
                     Alert.alert('', '마스터 그룹을 선택해주세요.');
+                    $('#testMasterForm #master_grp').focus();
                     return;
                 } else if (!data.master_name) {
                     Alert.alert('', '마스터명을 입력해주세요.');
+                    $('#testMasterForm #master_name').focus();
                     return;
                 } else if (!data.test_type) {
                     Alert.alert('', '검사유형을 선택해주세요.');
+                    $('#testMasterForm #test_type').focus();
                     return;
                 }
 

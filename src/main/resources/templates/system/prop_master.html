@@ -8,8 +8,6 @@
 </head>
 
 <th:block layout:fragment="content">
-
-
     <div class="layout-contents">
         <!-- Page Title -->
         <div class="page-title-wrap">
@@ -118,12 +116,6 @@
                                 <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                     <input type="text" id="table_code" name="table_code" style="width: 100%;">
                                 </td>
-                                <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                    <label for="description">설명</label>
-                                </th>
-                                <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                    <input type="text" style="width: 100%;" id="description" name="description">
-                                </td>
                                 <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
                                     <label for="val_type">값유형</label>
                                 </th>
@@ -137,6 +129,14 @@
                                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                                         <input type="checkbox" id="new_data" name="new_data" value="Y" disabled>
                                     </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                    <label for="description">설명</label>
+                                </th>
+                                <td style="width: 15%; padding: 5px; border: 1px solid #ddd;" colspan="7">
+                                    <input type="text" style="width: 100%;" id="description" name="description">
                                 </td>
                             </tr>
                             </tbody>
@@ -164,11 +164,11 @@
         var viewdata;
 
         let columns = [
-            {binding: 'table_name', header: '테이블', width: 200, align: 'center'},
-            {binding: 'table_code', header: '코드', width: 200, align: 'center'},
-            {binding: 'description', header: '설명', width: 250, align: 'center'},
+            {binding: 'table_name', header: '테이블', width: 180, align: 'center'},
+            {binding: 'table_code', header: '코드', width: 150, align: 'center'},
             {binding: 'val_type', header: '값유형', width: 160, align: 'center'},
-            {binding: '', header: '', width: "*", align: 'center'}
+            {binding: 'description', header: '설명', width: '*', align: 'center'},
+            /*{binding: '', header: '', width: "*", align: 'center'}*/
         ];
 
         document.readyState === 'complete' ? init() : window.onload = init;

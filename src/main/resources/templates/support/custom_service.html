@@ -163,7 +163,7 @@
                                 <input type="text" id="chkName" name="chkName" style="width: 100%;" readonly disabled>
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="cboType">유형</label>
+                                <label for="cboType"><span class="eq">*</span>유형</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <select style="width: 100%;" id="cboType" name="cboType"></select>
@@ -179,7 +179,7 @@
 
                         <tr>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="title">제목</label>
+                                <label for="title"><span class="eq">*</span>제목</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" style="width: 100%;" id="title" name="title">
@@ -482,10 +482,20 @@
             let data = FormUtil.extractForm($('#customForm'));
             data.type = type;
 
-            if (!data.title || !data.cboType) {
+            /*if (!data.title || !data.cboType) {
                 Alert.alert('', '필수 항목 [ 제목, 유형 ]을 입력해주세요.', function () {
                     if ($target) $target.focus();
                 });
+                return;
+            }*/
+
+            if (!data.title) {
+                Alert.alert('', '제목을 입력해주세요.');
+                $('#customForm #title').focus();
+                return;
+            } else if (!data.cboType) {
+                Alert.alert('', '유형을 입력해주세요.');
+                $('#customForm #cboType').focus();
                 return;
             }
 

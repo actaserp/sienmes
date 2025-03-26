@@ -131,7 +131,7 @@
                                 <tbody>
                                 <tr>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="test_method_id">검사방법</label>
+                                        <label for="test_method_id"><span class="eq">*</span>검사방법</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <select type="text" id="test_method_id" name="test_method_id"
@@ -145,18 +145,18 @@
                                                style="width: 100%;">
                                     </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="item_code">코드</label>
+                                        <label for="item_code"><span class="eq">*</span>코드</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <input type="text" style="width: 100%;" id="item_code"
                                                name="item_code">
                                     </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="item_name">항목명</label>
+                                        <label for="item_name"><span class="eq">*</span>항목명</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <input type="text" style="width: 100%;" id="item_name"
-                                               name="item_name"></input>
+                                               name="item_name">
                                     </td>
                                 </tr>
                                 <tr>
@@ -168,7 +168,7 @@
                                                style="width: 100%;">
                                     </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="res_type">결과값유형</label>
+                                        <label for="res_type"><span class="eq">*</span>결과값유형</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <select type="text" id="res_type" name="res_type"
@@ -524,7 +524,7 @@
                     if (res.success) {
                         Alert.alert('','저장되었습니다');
                         _this.searchMainData();
-                        _this.showDetailItem(res.data.id);
+                        /*_this.showDetailItem(res.data.id);*/
                     } else if (!res.success) {
                         Alert.alert('', res.message);
                     }
@@ -678,14 +678,18 @@
             // 저장버튼
             $('#btnSave').click(function (e) {
                 let data = FormUtil.extractForm($('#testItemForm'));
-                if (!data.res_type) {
-                    Alert.alert('', '결과값 유형을 선택해주세요.');
+
+                if(!data.test_method_id){
+                    Alert.alert('', '검사방법을 선택해주세요.');
                     return false;
                 } else if (!data.item_code) {
                     Alert.alert('', '코드를 입력해주세요.');
                     return false;
                 } else if (!data.item_name) {
                     Alert.alert('', '항목명을 입력해주세요.');
+                    return false;
+                }else if (!data.res_type) {
+                    Alert.alert('', '결과값 유형을 선택해주세요.');
                     return false;
                 }
 

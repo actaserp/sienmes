@@ -1,7 +1,9 @@
 package mes.app.definition;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
@@ -328,52 +330,61 @@ public class MaterialController {
         
 		return result;
 	}
-	
+
 	@PostMapping("/save_test_master")
 	@Transactional
 	public AjaxResult saveTestMaster(
-			@RequestParam(value = "mat_id", required=false) Integer matId,
-			@RequestParam(value = "InTestYN", required=false) String inTestYN,
-			@RequestParam(value = "OutTestYN", required=false) String outTestYN,
-			@RequestParam MultiValueMap<String,Object> Q,
+			@RequestParam(value = "mat_id", required = false) Integer matId,
+			@RequestParam(value = "InTestYN", required = false) String inTestYN,
+			@RequestParam(value = "OutTestYN", required = false) String outTestYN,
+			@RequestParam MultiValueMap<String, Object> Q,
+			@RequestParam(value = "deletedId", required = false) Integer deletedId, // 삭제할 ID 추가
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		AjaxResult result = new AjaxResult();
-		
-		User user = (User)auth.getPrincipal();
-		
-		if (matId > 0) {
-			Material m = this.materialRepository.getMaterialById(matId);
+		User user = (User) auth.getPrincipal();
+		List<TestMastMat> savedData = new ArrayList<>();
+
+		// Material 업데이트
+		if (matId != null && matId > 0) {
+			Material m = materialRepository.getMaterialById(matId);
 			m.setInTestYN(inTestYN);
 			m.setOutTestYN(outTestYN);
 			m.set_audit(user);
-			this.materialRepository.save(m);
+			materialRepository.save(m);
 		}
-		
+
+		// 삭제 처리
+		if (deletedId != null && deletedId > 0) {
+			testMastMatRepository.deleteById(deletedId);
+		}
+
+		// 남은 데이터 업데이트
 		List<Map<String, Object>> data = CommonUtil.loadJsonListMap(Q.getFirst("Q").toString());
-		
-		for(int i = 0; i < data.size(); i++) {
-			Integer id = Integer.parseInt(data.get(i).get("id").toString());
-			Integer testMasterId = Integer.parseInt(data.get(i).get("test_master_id").toString());
-			String delete = "";
-			if (data.get(i).containsKey("delete")) {
-				delete = data.get(i).get("delete").toString();
-			}
-			
-			if(delete.equals("Y")) {
-				if(id > 0) {
-					this.testMastMatRepository.deleteById(id);
-				}
+		for (Map<String, Object> item : data) {
+			Integer id = item.get("id") != null ? Integer.parseInt(item.get("id").toString()) : null;
+			Integer testMasterId = Integer.parseInt(item.get("test_master_id").toString());
+
+			Optional<TestMastMat> existing = testMastMatRepository.findByMaterialIdAndTestMasterId(matId, testMasterId);
+
+			if (existing.isPresent()) {
+				TestMastMat tm = existing.get();
+				tm.set_audit(user);
+				savedData.add(testMastMatRepository.save(tm)); // 수정된 데이터 추가
 			} else {
 				TestMastMat tm = new TestMastMat();
 				tm.setMaterialId(matId);
 				tm.setTestMasterId(testMasterId);
 				tm.set_audit(user);
-				this.testMastMatRepository.save(tm);
+				savedData.add(testMastMatRepository.save(tm)); // 새 데이터 추가
 			}
 		}
-		
+
+		// 최신 데이터 조회 및 반환
+		List<TestMastMat> finalData = testMastMatRepository.findByMaterialId(matId);
+		result.data = finalData;
+
 		return result;
 	}
 }
