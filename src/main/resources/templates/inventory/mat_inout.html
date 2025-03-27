@@ -330,13 +330,15 @@
                                     <label for="cboMaterialType">품목유형</label>
                                 </th>
                                 <td>
-                                    <select class="form-control2" id="cboMaterialType" name="cboMaterialType"  ></select>
+                                    <input class="form-control2" id="cboMaterialType" name="cboMaterialType" readonly type="hidden"/>
+                                    <input class="form-control2" id="cboMaterialTypeName" name="cboMaterialTypeName" readonly />
                                 </td>
                                 <th style="text-align: center">
                                     <label for="cboMaterialGroup">품목그룹</label>
                                 </th>
                                 <td>
-                                    <select id="cboMaterialGroup" name="cboMaterialGroup"  ></select>
+                                    <input id="cboMaterialGroup" name="cboMaterialGroup" readonly type="hidden"/>
+                                    <input id="cboMaterialGroupName" name="cboMaterialGroupName" readonly />
                                 </td>
                             </tr>
                             <tr>
@@ -344,9 +346,10 @@
                                     <label for="Material_id">품목</label>
                                 </th>
                                 <td colspan="3">
-                                    <select id="Material_id" name="Material_id"></select>
+                                    <input id="Material_id" name="Material_id" readonly type="hidden" />
+                                    <input id="Material_name" name="Material_name" readonly placeholder="품목 조회 버튼을 클릭하여 선택하세요." />
                                     &nbsp;
-                                    <a class="btn" title="품목조회" id="btnMaterial">
+                                    <a class="btn" title="품목 조회" id="btnMaterial">
                                         <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                         품목조회
                                     </a>
@@ -956,8 +959,11 @@
                 $content.find('#btnMaterial').click(function () {
                     let searchcallback = function (items) {
                         $content.find('#cboMaterialType').val(items[0].MaterialTypeCode)
+                        $content.find('#cboMaterialTypeName').val(items[0].MaterialTypeName)
                         $content.find('#cboMaterialGroup').val(items[0].MaterialGroup_id)
+                        $content.find('#cboMaterialGroupName').val(items[0].group_name)
                         $content.find('#Material_id').val(items[0].id)
+                        $content.find('#Material_name').val(items[0].Name)
                     };
 
                     let poppage = new PopupMaterialPage('single');

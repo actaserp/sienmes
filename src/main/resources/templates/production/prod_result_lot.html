@@ -286,7 +286,10 @@
                                         <th><label for="job_state">상태</label></th>
                                         <td><input type="text" id="job_state" name="job_state" readonly/></td>
                                         <th><label for="workcenter_id">워크센터</label></th>
-                                        <td><select id="workcenter_id" name="workcenter_id" disabled></select></td>
+                                        <td>
+                                            <input id="workcenter_id" name="workcenter_id" readonly type="hidden"/>
+                                            <input id="workcenter_name" name="workcenter_name" readonly style="width: 160px"/>
+                                        </td>
                                         <th><label for="equipment_id">설비</label></th>
                                         <td><select id="equipment_id" name="equipment_id" disabled></select></td>
                                         <th><label for="shift_code">근무조</label></th>
@@ -991,7 +994,6 @@
                 });
 
 
-
                 // 컬럼 푸터 활성화
                 this.defectGrid.columnFooters.rows.push(new wijmo.grid.Row());
 
@@ -1124,7 +1126,7 @@
 
                 // form내부
                 AjaxUtil.fillSelectOptions($('#shift_code'), 'shift', 'choose', false); // 근무조
-                AjaxUtil.fillSelectOptions($('#workcenter_id'), 'workcenter', 'choose', false); // 워크센터
+                // AjaxUtil.fillSelectOptions($('#workcenter_id'), 'workcenter', 'choose', false); // 워크센터
 
                 $('#workcenter_id').off('change').on('change', function () {
                     if ($('#state').val() === 'ordered') {
@@ -1311,7 +1313,7 @@
 
                     $('#selected_order_num').val(result.order_num);
 
-                    AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment', 'choose', false, '', '', result.workcenter_id); // 설비
+                    AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment', 'choose', false, '', '', result.workcenter_id);
 
                     FormUtil.BindDataForm(result, $('#basicForm'));
                     $('#bom_output_amount').val(result.bom_output_amount);
@@ -1327,11 +1329,11 @@
                         $('#job_state').addClass('finished-status');
                     }
 
-                    if (result.state === 'ordered') {
-                        $('#workcenter_id').prop('disabled', false);
-                    } else {
-                        $('#workcenter_id').prop('disabled', true);
-                    }
+                    // if (result.state === 'ordered') {
+                    //     $('#workcenter_id').prop('disabled', false);
+                    // } else {
+                    //     $('#workcenter_id').prop('disabled', true);
+                    // }
                     let total_prod_qty = result.good_qty + result.defect_qty + result.loss_qty + result.scrap_qty;
                     //$('#lblTotalOutput').text(total_prod_qty);
 
@@ -1701,6 +1703,8 @@
                         _this.showBasicInfo(result.data.jr_pk);
 
                     } else {
+                        console.log("서버 응답:", result);
+
                         Alert.alert('차수 추가 오류', result.message);
                     }
                 }
@@ -2461,17 +2465,36 @@
                     itemsSource: new wijmo.collections.CollectionView([]),
                 });
 
-                this.prodTestGrid.addEventListener(this.prodTestGrid.hostElement, 'click', (e) => {
-                    const ht = this.prodTestGrid.hitTest(e);
-                    if (ht.cellType === wijmo.grid.CellType.Cell) {
-                        const col = this.prodTestGrid.columns[ht.col];
-                        const item = this.prodTestGrid.rows[ht.row]?.dataItem;
+                this.prodTestGrid.addEventListener(this.prodTestGrid.hostElement, 'lostFocus', () => {
+                    this.prodTestGrid.finishEditing();
+                });
 
-                        if (col.binding === 'result2') {
-                            // 데이터 값을 토글
-                            item.result2 = item.result2 === 'O' ? 'X' : 'O';
-                            // 변경된 값을 반영
-                            this.prodTestGrid.collectionView.refresh();
+                this.prodTestGrid.formatItem.addHandler((s, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                        const col = s.columns[e.col];
+                        const item = s.rows[e.row]?.dataItem;
+
+                        // Judge 셀 처리
+                        if (col.binding === 'result2' && item) {
+                            e.cell.textContent = item.result2; // 데이터 값 렌더링
+                            e.cell.style.cursor = 'pointer'; // 클릭 가능한 커서 스타일
+
+                            // 기존 클릭 이벤트 제거
+                            e.cell.removeEventListener('click', e.cell.__clickHandler);
+
+                            // 새로운 클릭 이벤트 추가
+                            e.cell.__clickHandler = () => {
+                                const currentValue = item.result2; // 현재 값
+                                const newValue = currentValue === 'O' ? 'X' : 'O'; // 값 토글
+                                item.result2 = newValue; // 데이터 업데이트
+
+                                // 셀 값 즉시 업데이트
+                                e.cell.textContent = newValue;
+
+                            };
+
+                            // 클릭 이벤트 등록
+                            e.cell.addEventListener('click', e.cell.__clickHandler);
                         }
                     }
                 });
@@ -2500,6 +2523,7 @@
 
                 AjaxUtil.fillSelectOptions($cboTestMaster, 'test_master', 'choose', false, '');
                 // $cboTestMaster.val(13)
+
                 AjaxUtil.fillSelectOptions($judgGroup, 'system_code', 'choose', false, 'judg_code');
 
                 let fnLoadTestList = function (jr_pk) {
@@ -2521,6 +2545,7 @@
                             if (result.data.testMasterId != null) {
                                 $cboTestMaster.val(result.data.testMasterId).prop("disabled", true);
                             } else {
+                                Alert.alert('', '등록된 검사 유형이 없습니다. \n검사관리 메뉴에서 검사 유형을 등록하세요.');
                                 $cboTestMaster.val("").prop("disabled", true); // 검사 유형이 없으면 비활성화
                             }
 

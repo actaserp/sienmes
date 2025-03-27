@@ -41,6 +41,17 @@ public class MaterialMoveController {
         result.data = this.materialMoveService.getMaterialMoveList(storehouse_id, material_id, keyword);
 		return result;
 	}
+
+	@GetMapping("/read_house")
+	public AjaxResult getHouseMoveList(
+			@RequestParam(value="storehouse_id", required = false) Integer storehouse_id,
+			@RequestParam(value="mat_grp_pk", required = false) Integer mat_grp_pk,
+			@RequestParam(value="keyword", required = false) String keyword) {
+
+		AjaxResult result = new AjaxResult();
+		result.data = this.materialMoveService.getHouseMoveList(storehouse_id, mat_grp_pk, keyword);
+		return result;
+	}
 	
 	@PostMapping("/material_move")
 	@Transactional

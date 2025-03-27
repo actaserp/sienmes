@@ -351,8 +351,6 @@
                                 input.style.font = 'inherit';
                                 input.style.zIndex = '0';
 
-
-
                                 input.value = item.prod_date ? item.prod_date.substring(0, 10) : '';
 
                                 // 값 변경 시 dataItem에 반영
@@ -490,6 +488,11 @@
 
                     if (selectedItem.AdditionalQty === 0) {
                         Alert.alert('', '지시량을 입력해주세요.');
+                        return;
+                    }
+
+                    if (!selectedItem.workcenter_id) {
+                        Alert.alert('', '워크센터를 선택해주세요.');
                         return;
                     }
 
@@ -729,7 +732,7 @@
                     columns: [
                         {binding: 'id', header: '수주pk', visible: false, isReadOnly: true},
                         {binding: 'mat_suju_num', header: '제품주문번호', width: 140, isReadOnly: true, align: 'center'},
-                        {binding: 'group_name', header: '제품그룹', width: 120, isReadOnly: true, align: 'center'},
+                        {binding: 'group_name', header: '제품그룹', width: 140, isReadOnly: true, align: 'center'},
                         {binding: 'mat_pk', header: '제품pk', visible: false, isReadOnly: true},
                         {binding: 'mat_code', header: '제품코드', width: 120, align: 'center', isReadOnly: true},
                         {binding: 'mat_name', header: '제품명', width: 120, isReadOnly: true, align: 'left'},
@@ -737,7 +740,7 @@
                         {binding: 'order_qty', header: '필요량', width: 120, align: 'right', isReadOnly: true},
                         {binding: 'ordered_qty', header: '기지시량', width: 120, align: 'right', isReadOnly: true},
                         {binding: 'AdditionalQty', header: '지시량', width: 120, align: 'right', isReadOnly: false},
-                        {binding: 'workcenter_id', header: '워크센터', width: 100, dataMap: workcenterMap, isReadOnly: false},
+                        {binding: 'workcenter_id', header: '워크센터', width: 120, dataMap: workcenterMap, isReadOnly: false},
                         {binding: 'prod_date', header: '생산일', width: 140, align: 'center', isReadOnly: true},
                         {binding: 'workshift', header: '근무조', width: 120, dataMap: workshiftMap, isReadOnly: false},
                         {binding: 'order_action', header: '지시', width: 80, align: 'center', isReadOnly: true}

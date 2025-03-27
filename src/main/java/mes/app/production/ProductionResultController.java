@@ -1022,8 +1022,15 @@ public class ProductionResultController {
 				}
 			} else {
 
-				if(consMat.getCurrentStock() <= 0) {
-					result.message = "가용한 품목 재고가 없습니다.(" +  matName + ")";
+				Float currentStock = consMat.getCurrentStock();
+				if (currentStock == null || currentStock == 0f) {
+					result.message = "가용한 품목 재고가 없습니다.(" + matName + ")";
+					result.success = false;
+					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+					return result;
+				} else if (currentStock < goodQty) {
+					result.message = "가용한 품목 재고가 부족합니다. \n(" +
+							matName + ", 필요 수량: " + goodQty + ", 가용 수량: " + currentStock + ")";
 					result.success = false;
 					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 					return result;
@@ -1410,12 +1417,20 @@ public class ProductionResultController {
 					return result;
 				}
 			} else {
+				Float availableStock = consMat.getCurrentStock();
+				if (diffTotal > 0) {
+					if (availableStock == null || availableStock == 0f) {
+						result.message = "가용한 품목 재고가 없습니다.(" + matName + ")";
+						result.success = false;
+						TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+						return result;
 
-				if(consMat.getCurrentStock() <= 0) {
-					result.message = "가용한 품목 재고가 없습니다.(" +  matName + ")";
-					result.success = false;
-					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-					return result;
+					} else if (availableStock < diffTotal) {
+						result.message = "가용한 품목 재고가 부족합니다. \n(" + matName + ", 가용 수량: " + availableStock + ")";
+						result.success = false;
+						TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+						return result;
+					}
 				}
 			}
 		}

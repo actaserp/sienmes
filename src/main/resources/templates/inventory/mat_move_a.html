@@ -191,6 +191,9 @@
                         if (sender.columns[e.col].binding === 'mat_lot_check') {
                             e.cell.style.justifyContent = 'center';
                         }
+                        if (sender.columns[e.col].binding === 'total_stock') {
+                            e.cell.style.justifyContent = 'right';
+                        }
                     }
 
                     if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
@@ -204,7 +207,7 @@
                 },
                 columns: [
                     { binding: 'mat_type', header: '품목유형', width: 80, align: 'left', isReadOnly: true },
-                    { binding: 'mat_group', header: '품목그룹', width: 100, align: 'left', isReadOnly: true },
+                    { binding: 'mat_group', header: '품목그룹', width: 120, align: 'left', isReadOnly: true },
                     { binding: 'class1', header: '소분류', width: 100, align: 'left', isReadOnly: true },
                     { binding: 'mat_code', header: '품목코드', width: 100, align: 'left', isReadOnly: true }, // 병합 안함
                     { binding: 'material', header: '품목', width: 350, align: 'left', isReadOnly: true }, // 병합 안함
@@ -234,7 +237,7 @@
                     $('#btnLotMove').prop('disabled', true);
                 }
             });
-            this.grid.cellEditEnding.addHandler((s, e) => {
+            this.grid.beginningEdit.addHandler((s, e) => {
                 const col = s.columns[e.col];
                 const item = s.rows[e.row].dataItem;
 
@@ -303,10 +306,11 @@
                 'mat_grp_pk': $('#cboMatGrp').val(),
                 'keyword': $('#keyword').val(),
             }
-
-            let url = this.baseUrl + "/read"
+            console.log('param',param);
+            let url = this.baseUrl + "/read_house"
             AjaxUtil.getAsyncData(url, param, function(result){
                 if (result.success) {
+                    console.log('result.data', result.data);
                     _this.grid.itemsSource.sourceCollection = result.data;
                 }
             });

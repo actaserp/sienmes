@@ -337,22 +337,22 @@ public class PopupController {
             , "BusinessNumber" as business_number
             , "TelNumber" as tel_number
             from company
-            WHERE "CompanyType" = 'sale'
-            OR "CompanyType" = 'sale-purchase'
+            WHERE ("CompanyType" = 'sale'
+            OR "CompanyType" = 'sale-purchase')
 			""";
 
 		if (compCode != null && !compCode.isEmpty()) {
-			sql += " AND \"Code\" LIKE :compCode ";
+			sql += " AND \"Code\" ILIKE :compCode ";
 			paramMap.addValue("compCode", "%" + compCode + "%");
 		}
 
 		if (compName != null && !compName.isEmpty()) {
-			sql += " AND \"Name\" LIKE :compName ";
+			sql += " AND \"Name\" ILIKE :compName ";
 			paramMap.addValue("compName", "%" + compName + "%");
 		}
 
 		if (business_number != null && !business_number.isEmpty()) {
-			sql += " AND \"BusinessNumber\" LIKE :business_number ";
+			sql += " AND \"BusinessNumber\" ILIKE :business_number ";
 			paramMap.addValue("business_number", "%" + business_number + "%");
 		}
 
