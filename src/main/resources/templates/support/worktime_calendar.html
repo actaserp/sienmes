@@ -15,6 +15,12 @@
         #checkTable td {
             text-align: center;
         }
+
+        .checkbox-container {
+            display: flex;
+            gap: 10px; /* 각 체크박스 사이 간격 */
+            align-items: center;
+        }
     </style>
 </head>
 
@@ -87,9 +93,120 @@
         </section>
     </div>
 
+
+    <!-- 근무시간 캘린더 일정등록 스크립트 -->
     <script type="text/x-tmpl" id="eventTmpl">
         <div class="content_wrap popup">
-            <section class="pt-2">
+        <div class="table-wrap">
+                <form id="modalForm" enctype="multipart/form-data">
+                    <table class="write-table">
+                          <input type="hidden" id="_id" value="" />
+                        <caption>주문등록 테이블</caption>
+                        <tbody>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="factory_pk">공장</label>
+                                </th>
+                                <td>
+                                     <select class="form-control2 "name="factory_pk" id="factory_pk"></select>
+                                </td>
+
+                                <th style="text-align: center">
+                                    <label>휴일여부</label>
+                                </th>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                                        <input type="checkbox" id="holiday_yn" name="holiday_yn" value="Y" />
+                                    </div>
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="start">시작일자</label>
+                                </th>
+                                <td>
+                                <div data-ax5picker="multi" id="srchDt">
+                                     <input class="tac " type="text" id="start" name="start" />
+                                     <span class="input-group-text fs-xl">
+                                            <i class="fas fa-calendar-alt calendar_color" ></i>
+                                     </span>
+                                </div>
+                                </td>
+                                <th style="text-align: center">
+                                    <label for="end">종료일자</label>
+                                </th>
+                                <td>
+                                <!--<div data-ax5picker="multi" id="srchDt">-->
+                                     <input class="tac " type="text" id="end" name="end" />
+                                        <span class="input-group-text fs-xl">
+                                          <i class="fas fa-calendar-alt calendar_color"></i>
+                                        </span>
+                                        <!--</div>-->
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="startTime">출근시간</label>
+                                </th>
+                                <td>
+                                     <input class="form-control2" type="text" id="startTime" name="startTime"/>
+                                </td>
+                                <th style="text-align: center">
+                                    <label for="edit-end-time">퇴근시간</label>
+                                </th>
+                                <td>
+                                     <input class="form-control2" type="text" id="endTime" name="endTime" />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="worktime">순근무시간(hr)</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" type="number" name="worktime" id="worktime" />
+                                </td>
+                                <th></th>
+                                <td></td>
+                                <td>
+                                    <div id="batchSection" style="display:none;">
+                                        <div id="checkTable">
+                                            <div class="mt-5 tal checkbox-container">
+                                                <input type="checkbox" value="0"> 일
+                                                <input type="checkbox" value="1" checked> 월
+                                                <input type="checkbox" value="2" checked> 화
+                                                <input type="checkbox" value="3" checked> 수
+                                                <input type="checkbox" value="4" checked> 목
+                                                <input type="checkbox" value="5" checked> 금
+                                                <input type="checkbox" value="6"> 토
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+
+            <div class="popup-button popup_button_group bottom">
+                <div class="left_align modalBtnContainer-addEvent">
+                      <button type="button" class="btn-popup y_write_auth" id="btnInsert" ><span data-labelCd="저장">저장</span></button>
+                      <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+                </div>
+                <div class="left_align modalBtnContainer-modifyEvent">
+                   <button type="button" class="btn-popup y_write_auth" id="btnUpdate" data-labelCd="저장">저장</button>
+                    <button type="button" class="btn-popup y_write_auth" id="btnDelete" data-labelCd="삭제">삭제</button>
+                    <button type="button" class="btn-popup"  id="modal-close-button" data-labelCd="닫기">닫기</button>
+                </div>
+            </div>
+
+
+            <!--<section class="pt-2">
                     <div class="table_box sub">
                         <form id="modalForm" enctype="multipart/form-data">
                             <input type="hidden" id="_id" value="" />
@@ -191,7 +308,10 @@
                     <button type="button" class="btn-popup y_write_auth" id="btnDelete" data-labelCd="삭제">삭제</button>
                     <button type="button" class="btn-popup"  id="modal-close-button" data-labelCd="닫기">닫기</button>
                 </div>
-            </section>
+            </section>-->
+
+
+
         </div>
     </script>
 </th:block>
@@ -298,7 +418,16 @@
                     let $content = $(content);
                     let modalContainer;
                     modalContainer = new PopupDraggable('일괄 등록');
-                    modalContainer.open({width: 600, height: 250, $content});
+                    modalContainer.open({width: 1340, height: 315, $content});
+
+                    // 빈 <td></td> 숨기기
+                    $('.table-wrap td').each(function () {
+                        // <td> 내부에 요소가 없거나, 공백만 있는 경우 숨김 처리
+                        if ($(this).is(':empty')) {
+                            $(this).hide();
+                        }
+                    });
+
                     AjaxUtil.fillSelectOptions($('#factory_pk'), 'factory', 'choose', false);
 
                     page.timeSetting();
@@ -587,7 +716,7 @@
                 let $content = $(content);
                 let modalContainer;
                 modalContainer = new PopupDraggable('일정 등록');
-                modalContainer.open({width: 600, height: 250, $content});
+                modalContainer.open({width: 1220, height: 320, $content});
                 AjaxUtil.fillSelectOptions($('#factory_pk'), 'factory', 'choose', false);
                 page.timeSetting();
                 $('#start').attr('disabled', true);

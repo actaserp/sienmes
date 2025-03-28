@@ -60,6 +60,7 @@
         <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
     </footer>
 
+    <!--스토리보드 메뉴항목추가 스크립트-->
     <script type="text/x-tmpl" id="createMenuItemTemplate">
         <div class="content_wrap popup">
             <!--<header>
@@ -67,7 +68,41 @@
                 <div class="popup_close_box"><button class="btn_popup_close" id="modal-close"><i class="fas fa-times"></i></button></div>
             </header>-->
 
-            <section class="pt-2">
+
+            <div class="table-wrap">
+                  <form id="bomForm">
+                    <table class="write-table">
+                         <input type="hidden" id="edit-id" name="edit-id" value="" />
+                        <caption>주문등록 테이블</caption>
+                        <tbody>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="cboMenuCode">메뉴선택</label>
+                                </th>
+                                <td>
+                                    <select class="form-control2 " type="text" id="cboMenuCode" name="MenuCode" ></select>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="Duration">지속 시간 (초)</label>
+                                </th>
+                                <td>
+                                     <input class="form-control2 " type="number" id="Duration" name="Duration" value="10"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+
+            <div class="popup-button">
+               <button type="button" class="btn-popup y_write_auth" id="btnSaveMenuItem" ><span data-labelCd="저장">저장</span></button>
+               <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+            </div>
+
+            <!--<section class="pt-2">
                 <form id="bomForm">
                     <div class="table_box sub">
                         <div class="row">
@@ -100,19 +135,68 @@
                     <button type="button" class="btn-popup" id="btnSaveMenuItem" ><span data-labelCd="저장">저장</span></button>
                     <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
                 </div>
-            </section>
+            </section>-->
 
         </div>
 
     </script>
 
+
+    <!--스토리보드 HMI양식 스크립트-->
     <script type="text/x-tmpl" id="createHMIItemTemplate">
         <div class="content_wrap popup">
             <!--<header>
                 <h4 id="popTitle">HMI양식 추가</h4>
                 <div class="popup_close_box"><button class="btn_popup_close" id="modal-close"><i class="fas fa-times"></i></button></div>
             </header>-->
-            <section class="pt-2">
+
+
+
+            <div class="table-wrap">
+                   <form id="bomForm">
+                    <table class="write-table">
+                         <input type="hidden" id="edit-id" name="edit-id" value="" />
+                        <caption>주문등록 테이블</caption>
+                        <tbody>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="cboHMIType">HMI 양식 구분</label>
+                                </th>
+                                <td>
+                                    <select class="form-control2 " type="text" id="cboHMIType" name="hmi_type">
+                                        <option value='hmi_a'>A</option>
+                                        <option value='hmi_b'>B</option>
+                                    </select>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="cboHMI">HMI 양식 선택</label>
+                                </th>
+                                <td>
+                                     <select class="form-control2 " type="text" id="cboHMI" name="hmi_id" ></select>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="Duration">지속 시간 (초)</label>
+                                </th>
+                                <td>
+                                     <input class="form-control2 " type="number" id="Duration" name="Duration" value="10"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+            <div class="popup-button">
+               <button type="button" class="btn-popup y_write_auth" id="btnSaveHmiItem" ><span data-labelCd="저장">저장</span></button>
+               <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+            </div>
+
+            <!--<section class="pt-2">
                 <form id="bomForm">
                     <div class="table_box sub">
                         <div class="row">
@@ -146,8 +230,6 @@
                                     <input class="form-control2 " type="number" id="Duration" name="Duration" value="10"/>
                                 </div>
                             </div>
-
-
                         </div>
                     </div>
                 </form>
@@ -157,7 +239,7 @@
                     <button type="button" class="btn-popup" id="btnSaveHmiItem" ><span data-labelCd="저장">저장</span></button>
                     <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
                 </div>
-            </section>
+            </section>-->
         </div>
     </script>
 
@@ -291,7 +373,7 @@
             let $content = $(content);
 
             let modalContainer = new PopupDraggable('메뉴 항목 추가');
-            modalContainer.open({width: 440, height: 190, $content});
+            modalContainer.open({width: 525, height: 205, $content});
 
             let $cboMenuCode = $content.find('#cboMenuCode');
             let $Duration = $content.find('#Duration');
@@ -324,7 +406,7 @@
             let content = tmpl('createHMIItemTemplate', {});
             let $content = $(content);
             let modalContainer = new PopupDraggable('HMI 양식 추가');
-            modalContainer.open({width: 440, height: 240, $content});
+            modalContainer.open({width: 535, height: 265, $content});
 
             let $cboHMIType = $content.find('#cboHMIType');
             let $cboHMI = $content.find('#cboHMI');

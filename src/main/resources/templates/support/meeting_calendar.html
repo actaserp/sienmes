@@ -52,9 +52,112 @@
         </section>
     </div>
 
+
+    <!--캘린더 일정등록 스크립트 -->
     <script type="text/x-tmpl" id="eventTmpl">
         <div class="content_wrap popup">
-            <section class="pt-2">
+            <div class="table-wrap">
+                <form id="modalForm" enctype="multipart/form-data">
+                    <table class="write-table">
+                         <input type="hidden" id="edit-id" name="edit-id" value="" />
+                        <caption>주문등록 테이블</caption>
+                        <tbody>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="edit-title">일정명</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2 " type="text" name="edit-title" id="edit-title" required="required" />
+                                </td>
+                                <th style="text-align: center">
+                                    <label>하루종일</label>
+                                </th>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                                        <input type="checkbox" class="allDayNewEvent" id="edit-allDay" style="height:30px;width:30px" />
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="edit-color">색상</label>
+                                </th>
+                                <td>
+                                    <input class="form-control2 " type="color" id="edit-color" value="#ffffff" />
+                                </td>
+                                <td style="text-align: center; vertical-align: middle;" colspan="2">
+                                     <div class="mt-5 tal" id="color_code" style="display: flex; justify-content: center; gap: 5px; flex-wrap: wrap;">
+                                        <input type="button" class="btn-default" style="height:30px;width:30px;background-color:#ED5D47" id="color1">
+                                        <input type="button" class="btn-default" style="height:30px;width:30px;background-color:#FF953F" id="color2">
+                                        <input type="button" class="btn-default" style="height:30px;width:30px;background-color:#FFC325" id="color3">
+                                        <input type="button" class="btn-default" style="height:30px;width:30px;background-color:#9ED900" id="color4">
+                                        <input type="button" class="btn-default" style="height:30px;width:30px;background-color:#4B5CC4" id="color5">
+                                        <input type="button" class="btn-default" style="height:30px;width:30px;background-color:#3B2E7E" id="color6">
+                                        <input type="button" class="btn-default" style="height:30px;width:30px;background-color:#8D4BBB" id="color7">
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="edit-start">시작일</label>
+                                </th>
+                                <td>
+                                     <input class="form-control2 tac" type="date" id="edit-start" name="edit-start">
+                                </td>
+                                <th style="text-align: center">
+                                    <label for="edit-start-time">시작시간</label>
+                                </th>
+                                <td>
+                                     <input class="form-control2" type="text" id="edit-start-time" name="edit-start-time"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="edit-end">종료일</label>
+                                </th>
+                                <td>
+                                     <input class="form-control2 tac" type="date" id="edit-end" name="edit-end">
+                                </td>
+                                <th style="text-align: center">
+                                    <label for="edit-end-time">종료시간</label>
+                                </th>
+                                <td>
+                                     <input class="form-control2" type="text" id="edit-end-time" name="edit-end-time"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="edit-desc">설명</label>
+                                </th>
+                                <td colspan="3">
+                                    <textarea class="form-control2" id="edit-desc" name="edit-desc"></textarea>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+
+            <div class="popup-button popup_button_group bottom">
+                <div class="left_align modalBtnContainer-addEvent">
+                      <button type="button" class="btn-popup y_write_auth" id="insertEvent" ><span data-labelCd="저장">저장</span></button>
+                      <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+                </div>
+                <div class="left_align modalBtnContainer-modifyEvent">
+                    <button type="button" class="btn-popup y_write_auth" id="updateEvent"><span data-labelCd="저장">저장</span></button>
+                    <button type="button" class="btn-popup y_write_auth" id="deleteEvent"><span data-labelCd="삭제">삭제</span></button>
+                    <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+                </div>
+            </div>
+
+
+
+            <!--<section class="pt-2">
                 <div class="table_box sub">
                     <form id="modalForm" enctype="multipart/form-data">
                         <input type="hidden" id="edit-id" name="edit-id" value="" />
@@ -131,14 +234,14 @@
                                                         <input class="form-control2" type="text" id="edit-end-time" name="edit-end-time" style="width:30%" />                                        </div>
                                         </div>
 
-                                            <!--
+                                            &lt;!&ndash;
                                             <div class="row">
                                                 <div class="col-xs-12">
                                                     <label class="col-xs-4" for="edit-type" data-labelCd="구분">구분</label>
                                                     <select class="col-xs-8" type="text" name="edit-type" id="edit-type"></select>
                                                 </div>
                                             </div>
-                                             -->
+                                             &ndash;&gt;
 
                                         <div class="col-12">
                                             <div class="input-group">
@@ -154,8 +257,6 @@
                     </form>
                 </div>
             </section>
-
-
         <section class="section">
             <div class="popup_button_group bottom">
                 <div class="left_align modalBtnContainer-addEvent">
@@ -168,7 +269,8 @@
                     <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
                 </div>
             </div>
-        </section>
+        </section>-->
+
         </div>
     </script>
 </th:block>
@@ -429,7 +531,7 @@
                 let modalContainer;
                 modalContainer = new PopupDraggable('일정 등록');
 
-                modalContainer.open({ width: 600, height: 420, $content });
+                modalContainer.open({ width: 1130, height: 420, $content });
 
                 $('#edit-start-time').timepicker({
                     show2400: true,

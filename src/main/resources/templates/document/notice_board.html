@@ -120,10 +120,57 @@
         <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
     </footer>
 
-
+<!--공지사항 등록 스크립트-->
     <script type="text/x-tmpl" id="noticeTmpl">
         <div class="content_wrap popup">
-            <section class="pt-2">
+            <div class="table-wrap">
+                <form id="editorForm">
+                    <table class="write-table">
+                          <input type="hidden" id="id" name="id" value="{%=o.id%}">
+                        <caption>주문등록 테이블</caption>
+                        <tbody>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="title">공지제목</label>
+                                </th>
+                                <td colspan="3">
+                                       <input class="form-control2" id="title" name="title" value="{%=o.title%}" disabled style="width:100%;" />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="notice_yn">공지여부</label>
+                                </th>
+                                <td>
+                                     <select class="form-control2" id="notice_yn" name="notice_yn" disabled >
+                                        <option value="Y">예</option>
+                                        <option value="N" selected>아니오</option>
+                                     </select>
+                                </td>
+                                <th style="text-align: center">
+                                    <label for="notice_end_date">공지종료일</label>
+                                </th>
+                                <td style="text-align: center">
+                                    <input class="form-control2 tac" type="date" id="notice_end_date" name="notice_end_date"  value="{%=o.notice_end_date%}" disabled />
+                                        <!--<span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>-->
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                        <div class="textarea_group" id="divContent">
+                           <textarea id="content" name="content" style="width:100%" >{%=o.content%}</textarea>
+                        </div>
+                </form>
+                <div class="grid_box" id='image_upload1'></div>
+            </div>
+
+            <div class="popup-button">
+              <button type="button" class="btn-popup y_write_auth" id="btn_modal_save" ><span data-labelCd="저장">저장</span></button>
+              <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+            </div>
+
+            <!--<section class="pt-2">
                 <form id="editorForm">
                     <input type="hidden" id="id" name="id" value="{%=o.id%}">
                     <div class="table_box search" id="detail_box">
@@ -179,8 +226,7 @@
                         <button type="button" class="btn-popup" id="modal-close-button"><span>닫기</span></button>
                     </div>
                 </div>
-            </section>
-
+            </section>-->
         </div>
     </script>
 
@@ -354,7 +400,7 @@
             } else {
                 modalContainer = new PopupDraggable('공지 사항 수정');
             }
-            modalContainer.open({width: 785, height: 780, $content});
+            modalContainer.open({width: 1010, height: 670, $content});
             $content.find('#srchDt').ax5DatePicker({direction: 'top'});
             edit();
 
@@ -479,6 +525,9 @@
 
 
         $(document).ready(function () {
+
+
+
             const currentDate = new Date();
             // 오늘 날짜를 'YYYY-MM-DD' 형식으로 변환
             const today = currentDate.toISOString().split('T')[0];
@@ -508,10 +557,20 @@
                 searchMain();
             });
 
+            $('#keyword').on('keypress', function (e) {
+                if (e.keyCode == 13) {  // 'event' 대신 'e' 사용
+                    e.preventDefault(); // 기본 동작(폼 제출) 방지
+                    searchMain();
+                }
+            });
+
+
             //저장버튼
             $('#btn_modal_save').click(function (e) {
                 saveData();
             });
+
+
 
             //신규버튼
             $("#btnNew").click(function (e) {

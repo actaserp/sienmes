@@ -102,7 +102,7 @@
             </div> <!--//section-top end -->
             <div class="container-fluid">
                 <p id="selectedItem"></p>
-                <div id="theGrid" style="height: 600px; max-height: 600px;"></div>
+                <div id="theGrid" style="height: 680px; max-height: 680px;"></div>
             </div>
             <div class="btn-wrap">
             </div>
@@ -113,10 +113,63 @@
         <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
     </footer>
 
+    <!--문서등록 스크립트-->
     <script type="text/x-tmpl" id="docCreateTemplate">
         <div class="content_wrap popup">
+            <div class="table-wrap">
+                 <form id="docForm">
+                    <table class="write-table">
+                        <input type="hidden" id="id" name="id" value="{%=o.id%}">
+                        <caption>주문등록 테이블</caption>
+                        <tbody>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="doc_form_id">문서종류</label>
+                                </th>
+                                <td>
+                                     <select class="form-control2" id="doc_form_id" name="doc_form_id"  value="{%=o.doc_form_id%}"></select>
+                                </td>
 
-            <section class="pt-2">
+                                <th style="text-align: center">
+                                    <label for="popMaterialGroup">작성일</label>
+                                </th>
+                                <td>
+                                      <input class="form-control2 tac" type="date" id="doc_date" name="doc_date" value="{%=o.doc_date%}"/>
+                                      <!--  <span class="input-group-text fs-xl"><i class="fas fa-calendar-alt calendar_color" ></i></span>-->
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="doc_name">문서명</label>
+                                </th>
+                                <td colspan="3" style="text-align: center">
+                                    <input class="form-control2" type="text" id="doc_name" name="doc_name" value="{%=o.doc_name%}" style="width:100%;"  />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="content">내용</label>
+                                </th>
+                                <td colspan="3">
+                                   <textarea class="form-control2" id="content" name="content">{%=o.content%}</textarea>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </form>
+                <div class="grid_box" id='image_upload1'></div>
+            </div>
+
+            <div class="popup-button">
+              <button type="button" class="btn-popup y_write_auth" id="btn_doc_save" ><span data-labelCd="저장">저장</span></button>
+              <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+            </div>
+
+
+            <!--<section class="pt-2">
                 <form id="docForm">
                     <input type="hidden" id="id" name="id" value="{%=o.id%}">
                     <div class="table_box sub" id="detail_box">
@@ -163,10 +216,9 @@
                 </form>
 
                 <div class="grid_box" id='image_upload1'></div>
+            </section>-->
 
-
-            </section>
-            <section class="section">
+           <!-- <section class="section">
                 <div class="popup_button_group bottom">
                     <div class="left_align">
                     <button type="button" class="btn-popup" id="btn_doc_save" ><span>저장</span></button>
@@ -175,7 +227,7 @@
                     </div>
                 </div>
             </section>
-            <img id="imgPhoto" src="" height="600" width="400" />
+            <img id="imgPhoto" src="" height="600" width="400" />-->
         </div>
     </script>
 </th:block>
@@ -343,7 +395,7 @@
             } else {
                 modalContainer = new PopupDraggable('문서 수정');
             }
-            modalContainer.open({width: 800, height: 400, $content});
+            modalContainer.open({width: 1015, height: 580, $content});
 
             AjaxUtil.fillSelectOptions($content.find('#docForm').find('#doc_form_id'), 'doc_form', 'choose', data.doc_form_id, 'file');
             $('#srchDt').ax5DatePicker({direction: 'top'});

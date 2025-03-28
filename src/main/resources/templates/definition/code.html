@@ -2,9 +2,6 @@
 
 <head>
     <style>
-        .wj-cell.wj-group {
-            background-color: #FFFFFF !important; /* 연한 초록 */
-        }
     </style>
 </head>
 
@@ -247,6 +244,16 @@
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            let item = sender.rows[e.row].dataItem; // 현재 행의 데이터 아이템
+                            if (item && item.children && item.children.length > 0) {
+                                // 부모(그룹) 행 배경색
+                                e.cell.style.backgroundColor = '#f0fcf7';
+                            } else {
+                                // 자식(일반) 행 배경색
+                                e.cell.style.backgroundColor = '#ffffff';
+                            }
                         }
                     },
                     columns: [

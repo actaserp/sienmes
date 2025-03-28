@@ -160,7 +160,7 @@
                                 <label for="chkName">작성자</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <input type="text" id="chkName" name="chkName" style="width: 100%;" readonly disabled>
+                                <input type="text" id="chkName" name="chkName" style="width: 100%;" readonly>
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                 <label for="cboType"><span class="eq">*</span>유형</label>
@@ -242,6 +242,7 @@
         var viewdata;
 
         let columns = [
+            {binding: 'id', header: 'id', width: 100, align: 'center', visible:false},
             {binding: 'no', header: 'No', width: 100, align: 'center'},
             {binding: 'chkDt', header: '등록일', width: 160, align: 'center'},
             {binding: 'chkName', header: '작성자', width: 120, align: 'center'},
@@ -271,7 +272,7 @@
                 },
                 async: false,
                 success: function (data) {
-                    console.log('c/s데이터 확인', data.data);
+                    /*console.log('c/s데이터 확인', data.data);*/
                     data2 = data.data;
 
                 },
@@ -292,6 +293,7 @@
 
             theGrid.hostElement.addEventListener('dblclick', function (e) {
                 let selectedItem = theGrid.selectedItems[0];
+                /*console.log(selectedItem);*/
 
                 document.getElementById('id').value = selectedItem.id;
 
@@ -423,6 +425,7 @@
 
 
             let menulogData = data.map(item => ({
+                id: item.id,
                 no: item.no,
                 type: item.type,
                 title: item.title,
@@ -537,6 +540,8 @@
             let url = '/api/support/custom_svc/delete';
             let id = $('#customForm').find('#id').val();
             let data = {id: id};
+
+            /*console.log(data);*/
 
             let fnSuccess = function (result) {
                 if (result.success) {
