@@ -54,7 +54,6 @@
     </section>
 
         <div class="popup-button">
-            <button type="button" class="btn-popup" id="btnMaterialSelect" ><span data-commonCd="선택">선택</span></button>
             <button type="button" class="btn-popup" id="modal-close-button"><span data-commonCd="닫기">닫기</span></button>
             <button type="button" class="btn-popup" id="btnTest"><span data-commonCd="새로고침">새로고침</span></button>
         </div>
@@ -70,7 +69,7 @@
         constructor(val) {
 			this.checkVal = true
 			
-			if (val == 'single') {
+			if (val === 'single') {
 				this.checkVal = false
 			}
             this.grid = null;
@@ -136,13 +135,7 @@
                 ],
                 itemsSource: this.viewData,
             });
-            this.grid.select(-1, -1);
-
-            let selector = new wijmo.grid.selector.Selector(this.grid, {
-                itemChecked: function () {
-
-                }
-            })
+            this.grid.rowHeaders.columns.splice(0, 1);
             new FlexGridContextMenu(this.grid);
             this.grid.downloadFileName = '품목 내역';
 
@@ -173,6 +166,14 @@
                 _this.selectData(items);
             });
 
+            this.grid.hostElement.addEventListener('dblclick', function (e) {
+                let items = _this.grid.selectedItems;
+                if (items.length === 0) {
+                    return false;
+                }
+                _this.selectData(items[0]); // btnMaterialSelect 클릭과 동일한 동작
+            });
+
             this.$keyword.on('keypress', function (e) {
                 if (event.keyCode === 13) {
                     _this.searchDataBind();
@@ -196,7 +197,7 @@
             let $btnTest = $('#btnTest');
 
             $btnTest.click(function (e) {
-                _this.grid.init().repaint();  
+                _this.grid.collectionView.refresh();
             });
         }
 

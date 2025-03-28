@@ -74,7 +74,34 @@
         }
 
     </style>
-
+    <style id="print_css">
+        @media print { .pagebreak { page-break-before: always;}}
+        .bg_gray {background: #dedede;}
+        .table_1 td.tar { text-align: right;}
+        .table_1 td.tal { text-align: left;}
+        .table_1 td.tac { text-align: center; }
+        .table_1 { width: 100%; border-collapse: collapse;}
+        .table_1 td.b2lr { border-left: 2px solid #166614; border-right: 2px solid #166614; }
+        .table_1 td.b2lbr { border-left: 2px solid #166614; border-right: 2px solid #166614; border-bottom: 2px solid #166614; }
+        .table_1 td.b2tr { border-top: 2px solid #166614; border-right: 2px solid #166614;}
+        .table_1 td.b2t { border-top: 2px solid #166614;}
+        .table_1 td.b2tb {border-top: 2px solid #166614; border-bottom: 2px solid #166614; }
+        .table_1 td.b2lt { border-left: 2px solid #166614; border-top: 2px solid #166614; }
+        .table_1 td.b2ltb { border-left: 2px solid #166614; border-top: 2px solid #166614; border-bottom: 2px solid #166614; }
+        .table_1 td.b2rtb { border-right: 2px solid #166614; border-top: 2px solid #166614; border-bottom: 2px solid #166614;}
+        .table_1 td.b2l { border-left: 2px solid #166614; }
+        .table_1 td.b2r {border-right: 2px solid #166614;}
+        .table_1 td.b2lb { border-bottom: 2px solid #166614; border-left: 2px solid #166614;}
+        .table_1 td.b2b { border-bottom: 2px solid #166614; }
+        .table_1 td.b2rb { border-bottom: 2px solid #166614; border-right: 2px solid #166614;}
+        .table_1 th, .table_1 td { border: 1px solid black; text-align: center; padding-left: 3px; padding-right: 3px; }
+        .table_1 .line { border: 1px solid #166614; color: #166614; font-size: 14px; }
+        .table_1 .line.clb { color: black; font-weight: 600; font-size: 12px; font-family: 휴먼고딕; }
+        .table_1 .line.clb.money { font-size: 20px; }
+        .table_1 td > .ts { font-size: 10px; }
+        .table_1 td > .ts2 { font-size: 18px; position: relative; top: 10px; }
+        .table_1 .title { font-size: 24px; font-weight: 600; padding: 5px;}
+    </style>
 
 </head>
 <th:block layout:fragment="content">
@@ -410,7 +437,7 @@
                                                     autocomplete="off" style="height: 36px;"/>
                                     </li>
                                     <li>
-                                        <button type="button" class="btn" id="btnInputLotGridSetting" title="로트투입 저장"><i
+                                        <button type="button" class="btn" id="btnInputLotSave" title="로트투입 저장"><i
                                                 class="fas fa-edit"></i></button>
                                     </li>
                                 </ul>
@@ -703,14 +730,8 @@
                                                     </td>
                                                 </tr>
                                             </table>
-
-
-
                                         </div>
                                     </div>
-
-
-
                                 </div>
                             </div>
                         </form>
@@ -1418,8 +1439,6 @@
                             return false;
                         });
                     }
-
-
                 }
             }
 
@@ -2329,7 +2348,7 @@
             showLotInput(lot_number) {
                 let _this = this;
 
-                if (this.jobres.state == "ordered") {
+                if (this.jobres.state === "ordered") {
                     Alert.alert('LOT 투입오류', '작업이 시작되지 않았습니다.');
                     return;
                 }

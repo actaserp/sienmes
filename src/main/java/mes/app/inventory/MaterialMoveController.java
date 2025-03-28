@@ -69,14 +69,14 @@ public class MaterialMoveController {
 		LocalTime nowTime = LocalTime.now();
 
 		List<Map<String, Object>> moveList = CommonUtil.loadJsonListMap(moveItems);
-		
+
 		for (Map<String, Object> map : moveList) {
 			int mat_id = (int)map.get("mat_id");
 			float moveQty = Float.parseFloat(map.get("move_qty").toString());
 			
 			// 출고
 			MaterialInout mo = new MaterialInout();
-			mo.setStoreHouseId((int)map.get("storehouse_id"));
+			mo.setStoreHouseId(Integer.parseInt(map.get("storehouse_id").toString()));
 			mo.setMaterialId(mat_id);
 			mo.setInOut("out");
 			mo.setOutputType("move_out");
