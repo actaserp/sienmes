@@ -1436,8 +1436,10 @@
                     if (res.success) {
                         Notify.success('저장되었습니다.');
                         _this.searchMainData();
-                        _this.grid.select(previousIndex, 0);
                         _this.showBasicInfo(res.data.jr_pk);
+                        setTimeout(() => {
+                            _this.grid.select(previousIndex, 0);
+                        }, 100);
                     }
                 }
 
@@ -1508,8 +1510,10 @@
                         Notify.success('작업이 시작되었습니다.');
                         _this.saveDefectList(defectGridList, 'workStart', res.data.jr_pk); // 작업시작 시 해당 워크센터에 등록된 공정별 부적합 내역 저장
                         _this.searchMainData();
-                        _this.grid.select(previousIndex, 0);
                         _this.showBasicInfo(res.data.jr_pk);
+                        setTimeout(() => {
+                            _this.grid.select(previousIndex, 0);
+                        }, 100);
                     }
                 }
 
@@ -1548,8 +1552,11 @@
                     } else {
                         Notify.success('작업이 완료되었습니다.');
                         _this.searchMainData();
-                        _this.grid.select(previousIndex, 0);
                         _this.showBasicInfo(res.data.jr_pk);
+                        setTimeout(() => {
+                            _this.grid.select(previousIndex, 0);
+                        }, 100);
+
                     }
                 }
 
@@ -1633,8 +1640,10 @@
                     if (res.success) {
                         Notify.success('취소되었습니다.');
                         _this.searchMainData();
-                        _this.grid.select(previousIndex, 0);
                         _this.showBasicInfo(res.data.jr_pk);
+                        setTimeout(() => {
+                            _this.grid.select(previousIndex, 0);
+                        }, 100);
                     }
                 }
 
@@ -1703,8 +1712,6 @@
                         _this.showBasicInfo(result.data.jr_pk);
 
                     } else {
-                        console.log("서버 응답:", result);
-
                         Alert.alert('차수 추가 오류', result.message);
                     }
                 }
@@ -2070,6 +2077,7 @@
                 }
 
                 let fnSuccess = function (res) {
+                    let previousIndex = _this.selectedIndex;
                     if (res.success) {
                         if (action !== 'workStart') {
                             Notify.success('저장되었습니다');
@@ -2088,6 +2096,11 @@
                             _this.grid.itemsSource.refresh();
                         }
                         _this.showDefectList('total');
+
+                        setTimeout(() => {
+                            _this.grid.select(previousIndex, 0);
+                        }, 150);
+
                     } else {
                         Alert.alert('부적합품 등록', res.message);
                     }

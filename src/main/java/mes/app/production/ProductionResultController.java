@@ -393,8 +393,8 @@ public class ProductionResultController {
 
 	    List<Map<String, Object>> items = CommonUtil.loadJsonListMap(defect_list.getFirst("defect_list").toString());
 
-		System.out.println("🚀 defect_list 원본 데이터: " + defect_list);
-		System.out.println("🚀 defect_list JSON 변환 데이터: " + defect_list.getFirst("defect_list").toString());
+		System.out.println("defect_list 원본 데이터: " + defect_list);
+		System.out.println("defect_list JSON 변환 데이터: " + defect_list.getFirst("defect_list").toString());
 
 	    JobRes jr = this.jobResRepository.getJobResById(jrPk);
 
@@ -418,16 +418,16 @@ public class ProductionResultController {
                 jrd.setLotIndex(0);
                 jrd.set_audit(user);
                 this.jobResDefectRepository.save(jrd);
-                System.out.println("🚀 새 job_res_defect 저장: " + jrd);
+                System.out.println("새 job_res_defect 저장: " + jrd);
             } else {
-                if (defectQty > 0) { // ✅ defectQty가 0 이상인 경우만 업데이트
+                if (defectQty > 0) { // defectQty가 0 이상인 경우만 업데이트
                     jrd.setDefectQty(defectQty);
                     jrd.setDescription(defectRemark);
                     jrd.set_audit(user);
                     this.jobResDefectRepository.save(jrd);
-                    System.out.println("🚀 기존 job_res_defect 업데이트: " + jrd);
+                    System.out.println("기존 job_res_defect 업데이트: " + jrd);
                 } else {
-                    System.out.println("❌ defectQty가 0이므로 저장되지 않음.");
+                    System.out.println("defectQty가 0이므로 저장되지 않음.");
                 }
             }
         }

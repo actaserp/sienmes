@@ -371,7 +371,7 @@
                             button.textContent = '보기';
                             let mp_pk = item.mp_pk;
                             button.addEventListener('click', () => {
-                                s.select(new wijmo.grid.CellRange(e.row, -1));
+                                // s.select(new wijmo.grid.CellRange(e.row, -1));
                                 page.showDetail(mp_pk);
                             });
                             e.cell.appendChild(button);
@@ -411,12 +411,13 @@
             new FlexGridContextMenu(this.grid);
             this.grid.downloadFileName = '생산 실적 조회';
 
+            // 여기
             this.grid.selectionChanged.addHandler((s, e) => {
-                let selectedRow = s.selection.row;
-                let selectedItem = s.rows[selectedRow]?.dataItem;
+                let selectedItem = s.selectedRows[0]?.dataItem;
 
                 if (selectedItem) {
                     _this.selectedJobId = selectedItem.pk;
+                    console.log("selectedJobId changed to:", _this.selectedJobId);
                 }
             });
             this.grid.allowMerging = wijmo.grid.AllowMerging.Cells;
@@ -464,6 +465,7 @@
             }
 
             let defect_result = AjaxUtil.getSyncData(this.baseUrl + '/defect_list', defect_param);
+
             if (_this.defectGrid && defect_result) {
                 this.defectGrid.itemsSource.sourceCollection = defect_result.data;
             }
