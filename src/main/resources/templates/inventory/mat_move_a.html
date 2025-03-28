@@ -366,13 +366,13 @@
             let content = tmpl('LotMovePopupTmpl', item);
             let $content = $(content);
             let modalContainer = new PopupDraggable('Lot이동처리');
-            modalContainer.open({ width: 800, height: 500, $content });
+            modalContainer.open({ width: 800, height: 450, $content });
 
             this.lotSearchGrid = new wijmo.grid.FlexGrid('#lot-search-grid', {
                 autoGenerateColumns: false,
                 allowSorting: false,
-                selectionMode: wijmo.grid.SelectionMode.MultiRange,
-                headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                selectionMode: wijmo.grid.SelectionMode.ListBox,
+                headersVisibility: wijmo.grid.HeadersVisibility.All,
                 columns: [
                     { binding: 'LotNumber', header: 'LOT', width: 220, align: 'center' },
                     { binding: 'storehouse_name', header: '창고위치', width: 220, align: 'left' },
@@ -382,7 +382,11 @@
                 ]
             });
 
+            let selector = new wijmo.grid.selector.Selector(this.lotSearchGrid, {
+                itemChecked: function () {
 
+                }
+            })
             let data = {
                 'material_id': item.mat_id,
                 'storehouse_id': item.storehouse_id
@@ -411,7 +415,7 @@
                 }
 
                 let to_storehouse_id = $cboPopToStoreHouse.val();
-                if(to_storehouse_id==""){
+                if(to_storehouse_id===""){
                 	Alert.alert('LOT이동', 'To창고가 지정되지 않았습니다.');
                 	return;
                 }

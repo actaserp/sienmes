@@ -286,27 +286,27 @@
                             </a>
                         </li>
                         <li>
-                            <a class="btn" title="삭제" id="btnInput">
+                            <a class="btn" title="품목 입고" id="btnInput">
                                 품목 입고
                             </a>
                         </li>
                         <li>
-                            <a class="btn" title="삭제" id="btnOutput">
+                            <a class="btn" title="품목 출고" id="btnOutput">
                                 품목 출고
                             </a>
                         </li>
                         <li>
-                            <a class="btn" title="삭제" id="btnMultiInput">
+                            <a class="btn" title="다중 입고" id="btnMultiInput">
                                 다중 입고
                             </a>
                         </li>
                         <li>
-                            <a class="btn" title="삭제" id="btnInputTest">
+                            <a class="btn" title="입고검사" id="btnInputTest">
                                 입고검사
                             </a>
                         </li>
                         <li>
-                            <a class="btn" title="삭제" id="btnLotInput">
+                            <a class="btn" title="로트 입고 등록" id="btnLotInput">
                                 로트 입고 등록
                             </a>
                         </li>
@@ -985,7 +985,7 @@
                         return false;
                     }
 
-                    if ($('#InoutQty').val() == "" || $('#InoutQty').val() <= 0) {
+                    if ($('#InoutQty').val() === "" || $('#InoutQty').val() <= 0) {
                         Alert.alert('', '수량을 확인해 주세요.');
                         return false;
                     }
@@ -1010,6 +1010,7 @@
             showLotInputPopup() {
                 let _this = this;
                 let items = _this.grid.selectedItems;
+                console.log('items', items);
                 if (items.length === 0) {
                     Alert.alert('로트입고등록', '선택된 입고 데이터가 없습니다. ', function () {
                     });
@@ -1017,6 +1018,12 @@
                 }
                 if (items[0].inout_state === '미확인') {
                     Alert.alert('로트입고등록', '가입고 자재는 로트입고 할 수 없습니다. ', function () {
+                    });
+                    return;
+                }
+
+                if (items[0].lot_use !== 'Y') {
+                    Alert.alert('로트입고등록', '로트관리 안하는 자재는 로트입고 할 수 없습니다. ', function () {
                     });
                     return;
                 }
