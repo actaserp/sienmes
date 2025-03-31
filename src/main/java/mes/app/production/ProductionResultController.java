@@ -5,10 +5,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -1614,17 +1611,24 @@ public class ProductionResultController {
 		}
 
 		Map<String, Object> item = new HashMap<>();
-
-		item.put("testDate", items.get(0).get("testDate"));
-		item.put("CheckName", items.get(0).get("CheckName"));
-		item.put("JudgeCode", items.get(0).get("JudgeCode"));
-		item.put("ctRemark", items.get(0).get("ctRemark"));
-		item.put("ntRemark", items.get(0).get("ntRemark"));
-		item.put("testMasterId", items.get(0).get("testMasterId"));
-		item.put("testResultId", items.get(0).get("testResultId"));
-		item.put("pdList", items);
-
 		AjaxResult result = new AjaxResult();
+
+		if (items != null && !items.isEmpty()) {
+			item.put("testDate", items.get(0).get("testDate"));
+			item.put("CheckName", items.get(0).get("CheckName"));
+			item.put("JudgeCode", items.get(0).get("JudgeCode"));
+			item.put("ctRemark", items.get(0).get("ctRemark"));
+			item.put("ntRemark", items.get(0).get("ntRemark"));
+			item.put("testMasterId", items.get(0).get("testMasterId"));
+			item.put("testResultId", items.get(0).get("testResultId"));
+			item.put("pdList", items);
+		} else {
+			// 안전하게 빈 리스트 전달
+			item.put("pdList", new ArrayList<>());
+			result.message = "검사 항목이 존재하지 않습니다.";
+		}
+
+
 		result.data = item;
 		return result;
 	}

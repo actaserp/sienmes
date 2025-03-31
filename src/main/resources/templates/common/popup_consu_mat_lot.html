@@ -87,8 +87,8 @@
 
 
         <div class="popup-button">
-            <button type="button" class="btn-popup" id="btnLotMultiSelect" ><span data-commonCd="선택">선택</span></button>
-<!--            <button type="button" class="btn-popup" id="btnLotSelect" ><span data-commonCd="단일 선택">단일 선택</span></button>-->
+            <button type="button" class="btn-popup" id="btnLotMultiSelect" ><span data-commonCd="다중 선택(일괄 투입)">다중 선택(일괄 투입)</span></button>
+            <button type="button" class="btn-popup" id="btnLotSelect" ><span data-commonCd="단일 선택">단일 선택</span></button>
             <button type="button" class="btn-popup" id="btnClose"><span data-commonCd="닫기">닫기</span></button>
         </div>
 
@@ -108,7 +108,7 @@
             this.modalContainer = new PopupDraggable('투입할 로트 선택');
             this.$btnMaterialSearch = null;
             this.$cboMaterialGroup = null;
-            // this.$btnLotSelect = null;
+            this.$btnLotSelect = null;
             this.$btnLotMultiSelect = null;
             this.$keyword = null;
             //this.material_type = null;
@@ -174,6 +174,7 @@
                 autoGenerateColumns: false,
                 selectionMode: wijmo.grid.SelectionMode.Row,
                 headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                isReadOnly: true,
                 columns: [
                     { binding: 'id', header: '품목번호', width: 80, align: 'right', isReadOnly: true },
                     { binding: 'mat_type_name', header: '품목구분', width: 120, align: 'left', isReadOnly: true },
@@ -196,9 +197,10 @@
                 autoGenerateColumns: false,
                 selectionMode: wijmo.grid.SelectionMode.ListBox, // 다중 선택 가능
                 headersVisibility: wijmo.grid.HeadersVisibility.All,
+                isReadOnly: true,
                 columns: [
                     { binding: 'lot_use', header: '투입여부', width: 80, align: 'center' },
-                    { binding: 'id', header: '번호', width: 50, align: 'left' },
+                    { binding: 'id', header: '번호', width: 70, align: 'left' },
                     { binding: 'mat_name', header: '품목명', width: 100, align: 'left' },
                     { binding: 'lot_number', header: '로트번호', width: 150, align: 'left' },
                     { binding: 'storehouse_name', header: '창고', width: 150, align: 'left' },
@@ -221,7 +223,7 @@
             this.$cboMaterialGrp = $content.find('#cboMaterialGrp');
             this.$keyword = $content.find('#keyword');
             this.$chkBomComp = $content.find('#chkBomComp');
-            // this.$btnLotSelect = $content.find('#btnLotSelect');
+            this.$btnLotSelect = $content.find('#btnLotSelect');
             this.$btnLotMultiSelect = $content.find('#btnLotMultiSelect');
             
             AjaxUtil.fillSelectOptions(this.$cboMaterialType, 'consu_mat_type', 'all', false);
@@ -247,23 +249,21 @@
                 _this.searchDataBind();
             });
 
-            // this.$btnLotSelect.click(function (e) {
-            //     console.log('하나 선택');
-            //     // 그리드에서 현재 선택된 item을 찾아서 호출한다.
-            //     let selectedItems = _this.lot_grid.selectedItems;
-            //     if (selectedItems.length === 0) {
-            //         return false;
-            //     }
-            //
-            //     if (selectedItems.length > 1) {
-			// 		Alert.alert('로트 투입','하나의 로트만 선택해주세요.')
-			// 		return false;
-			// 	}
-            //     _this.selectData(selectedItems[0]);
-            // });
+            this.$btnLotSelect.click(function (e) {
+                // 그리드에서 현재 선택된 item을 찾아서 호출한다.
+                let selectedItems = _this.lot_grid.selectedItems;
+                if (selectedItems.length === 0) {
+                    return false;
+                }
+
+                if (selectedItems.length > 1) {
+					Alert.alert('로트 투입','하나의 로트만 선택해주세요.')
+					return false;
+				}
+                _this.selectData(selectedItems);
+            });
 
             this.$btnLotMultiSelect.click(function (e) {
-                console.log('다중 선택');
                 // 그리드에서 현재 선택된 item을 찾아서 호출한다.
                 let selectedItems = _this.lot_grid.selectedItems;
                 if (selectedItems.length === 0) {
