@@ -101,7 +101,7 @@ public class ShipmentDoBService {
 		paramMap.addValue("shipment_header_id", shipment_header_id);
 		
 		 String sql = """
-	       select 
+	       select
 	        s."ShipmentHead_id" as sh_id
 	        , s.id as shipment_id
 	        , sh."State"
@@ -231,7 +231,7 @@ public class ShipmentDoBService {
 	    
 		String sql = """
 				with A as(
-	            select 
+	            select
 	            s.id, coalesce(sum(mlc."OutputQty"),0) as qty  
 	            from shipment s  
 	            inner join shipment_head sh on sh.id = s."ShipmentHead_id" 
@@ -245,10 +245,10 @@ public class ShipmentDoBService {
 		}
 		
 		sql += """
-				group by s.id
-	        ), UPC as (
+				group by s.id),
+				UPC as (
 	            select
-	            s.id 
+	            s.id
 	            , s."Material_id"
 	            , sh."Company_id"
 	            , mcu."UnitPrice"

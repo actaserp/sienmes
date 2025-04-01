@@ -22,8 +22,7 @@ public class TagDataController {
 	
 	/**
 	 * @apiNote 품목조회
-	 * 
-	 * @param matType 품목구분
+	 * @param  MatType, 품목구분
 	 * @param matGroupId 품목그룹pk
 	 * @param keyword 키워드
 	 * @return

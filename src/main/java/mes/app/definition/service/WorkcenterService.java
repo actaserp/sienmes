@@ -110,7 +110,7 @@ public class WorkcenterService {
 		paramMap.addValue("equipment_id", equipment_id);
 		
 		String sql = """
-				select * from rela_data 
+				select * from rela_data
                 where "TableName1"='work_center'
                 and "TableName2"='equ'
                 and "DataPk1" = :workcenter_id
