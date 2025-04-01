@@ -417,15 +417,11 @@ public class ProductionResultController {
                 this.jobResDefectRepository.save(jrd);
                 System.out.println("새 job_res_defect 저장: " + jrd);
             } else {
-                if (defectQty > 0) { // defectQty가 0 이상인 경우만 업데이트
-                    jrd.setDefectQty(defectQty);
-                    jrd.setDescription(defectRemark);
-                    jrd.set_audit(user);
-                    this.jobResDefectRepository.save(jrd);
-                    System.out.println("기존 job_res_defect 업데이트: " + jrd);
-                } else {
-                    System.out.println("defectQty가 0이므로 저장되지 않음.");
-                }
+				jrd.setDefectQty(defectQty);
+				jrd.setDescription(defectRemark);
+				jrd.set_audit(user);
+				this.jobResDefectRepository.save(jrd);
+				System.out.println("기존 job_res_defect 업데이트: " + jrd);
             }
         }
 
@@ -969,7 +965,7 @@ public class ProductionResultController {
 				}
 
 				if(totalLotQty < chasuBomQty) {
-					result.message = "가용한 LOT 재고가 없습니다.(" +  matName + ")";
+					result.message = "가용한 LOT 재고가 없습니다.(" +  matName + ")\n 투입 내역에서 가용 재고를 추가해주세요. ";
 					result.success = false;
 					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 					return result;
@@ -1221,12 +1217,35 @@ public class ProductionResultController {
 	@PostMapping("/chasu_save")
 	@Transactional(isolation = Isolation.READ_UNCOMMITTED)
 	public AjaxResult chasuSave(
-			@RequestParam(value="jr_pk" , required=false) Integer jrPk,
-			@RequestParam(value="mp_id" , required=false) Integer mpId,
-			@RequestParam(value="good_qty" , required=false, defaultValue = "0") Float goodQty,
-			@RequestParam(value="defect_qty" , required=false, defaultValue = "0") Float defectQty,
-			HttpServletRequest request,
+			@RequestBody List<Map<String, Object>> chasuList,
 			Authentication auth) {
+
+		AjaxResult result = new AjaxResult();
+		List<Map<String, Object>> resultList = new ArrayList<>();
+
+		for (Map<String, Object> chasu : chasuList) {
+			Integer jrPk = Integer.parseInt(chasu.get("jr_pk").toString());
+			Integer mpId = Integer.parseInt(chasu.get("mp_id").toString());
+			Float goodQty = Float.parseFloat(chasu.get("good_qty").toString());
+			Float defectQty = Float.parseFloat(chasu.get("defect_qty").toString());
+
+			AjaxResult singleResult = saveSingleChasu(jrPk, mpId, goodQty, defectQty, auth);
+
+			if (!singleResult.success) {
+				// 실패 시 롤백 + 에러 메시지 반환
+				TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+				return singleResult;
+			}
+
+			resultList.add((Map<String, Object>) singleResult.data);
+		}
+
+		result.success = true;
+		result.data = resultList;
+		return result;
+	}
+
+	public AjaxResult saveSingleChasu(Integer jrPk, Integer mpId, Float goodQty, Float defectQty, Authentication auth) {
 
 		AjaxResult result = new AjaxResult();
 		User user = (User)auth.getPrincipal();
@@ -1256,11 +1275,11 @@ public class ProductionResultController {
 		float mpGoodQty = mpe.getGoodQty() != null ? mpe.getGoodQty() : 0;
 		float mpDefectQty = mpe.getDefectQty() != null ? mpe.getDefectQty() : 0;
 
-		if (Float.compare(mpGoodQty, goodQty) == 0 && Float.compare(mpDefectQty, defectQty) == 0) {	//if (Float.compare(mpe.getGoodQty(), goodQty) == 0 && Float.compare(mpe.getDefectQty(), defectQty) == 0) {
-			result.message = "수량변경이 없습니다.("+	mpe.getLotNumber()+ ")";
-			result.success = false;
-		    return result;
-		}
+//		if (Float.compare(mpGoodQty, goodQty) == 0 && Float.compare(mpDefectQty, defectQty) == 0) {	//if (Float.compare(mpe.getGoodQty(), goodQty) == 0 && Float.compare(mpe.getDefectQty(), defectQty) == 0) {
+//			result.message = "수량변경이 없습니다.("+	mpe.getLotNumber()+ ")";
+//			result.success = false;
+//		    return result;
+//		}
 
 		MaterialProduce mp = this.matProduceRepository.getMatProduceById(mpId);
 
@@ -1365,7 +1384,7 @@ public class ProductionResultController {
 				}
 
 				if(totalLotQty < chasuBomQty) {
-					result.message = "가용한 LOT 재고가 없습니다.(" +  matName + ")";
+					result.message = "가용한 LOT 재고가 없습니다.(" +  matName + ")\n 투입 내역에서 가용 재고를 추가해주세요. ";
 					result.success = false;
 					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 					return result;

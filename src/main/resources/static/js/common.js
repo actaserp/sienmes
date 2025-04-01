@@ -760,6 +760,34 @@ let AjaxUtil = {
             }
         });
     },
+    postJsonAsyncData: function (url, data, fn_success, fn_failure) {
+        let result = null;
+
+        let csrf = $('[name=_csrf]').val();
+
+        $.ajax({
+            async: true,
+            dataType: 'json',
+            type: 'POST',
+            url: url,
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-CSRF-TOKEN', csrf); // 헤더로 명시적 전달
+            },
+            success: function (res) {
+                fn_success(res);
+            },
+            error: function (req, status, error) {
+                if (typeof fn_failure !== 'undefined') {
+                    fn_failure(req, status, error);
+                } else {
+
+                    AjaxUtil.failureCallback(req, status, error);
+                }
+            }
+        });
+    },
     postFileSyncData: function (url, form_data, fn_failure) {
         let result = null;
 

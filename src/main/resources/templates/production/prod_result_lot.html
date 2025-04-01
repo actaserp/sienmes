@@ -957,6 +957,42 @@
                     _this.updateFooter();
                 });
 
+                this.chasuGrid.beginningEdit.addHandler(function (s, e) {
+                    const col = s.columns[e.col];
+                    const editedRow = s.rows[e.row];
+                    const item = editedRow.dataItem;
+
+                    if (col.binding === 'defect_qty') {
+                        item._prev_defect_qty = parseInt(item.defect_qty) || 0;
+                    }
+                });
+
+                this.chasuGrid.cellEditEnded.addHandler(function (s, e) {
+                    const col = s.columns[e.col];
+                    const editedRow = s.rows[e.row];
+                    const item = editedRow.dataItem;
+
+                    if (col.binding === 'defect_qty') {
+                        // 기존 양품량 저장 안돼있으면 최초값 저장
+                        if (!item.original_good_qty) {
+                            item.original_good_qty = item.good_qty || 0;
+                        }
+
+                        let prevDefectQty = item._prev_defect_qty || 0;
+                        let newDefectQty = parseInt(item.defect_qty) || 0;
+
+                        // 기존과 새 defect_qty 차이만큼 good_qty 보정
+                        let diff = prevDefectQty - newDefectQty;
+                        item.good_qty = Math.max(0, item.good_qty + diff);
+
+                        // 수정된 값 저장
+                        item._prev_defect_qty = newDefectQty;
+
+                        s.collectionView.commitEdit();
+                        s.invalidate();
+                    }
+                });
+
                 // Context Menu 추가
                 new FlexGridContextMenu(this.chasuGrid);
                 this.chasuGrid.downloadFileName = '차수별 생산 내역';
@@ -1621,6 +1657,7 @@
 
                 //작업지시에 불량량과 차수의 불량량 합 맞추기
                 let chassu_grid = _this.chasuGrid.collectionView.items;
+                let defect_grid = _this.defectGrid.collectionView.items;
                 let chasu_def_qty = 0;
 
                 for (let i = 0; i < chassu_grid.length; i++) {
@@ -1634,6 +1671,17 @@
                     return;
                 }
 
+                let defect_detail_qty = 0;
+                for (let i = 0; i < defect_grid.length; i++) {
+                    if (defect_grid[i].defect_qty != null) {
+                        defect_detail_qty += parseFloat(defect_grid[i].defect_qty);
+                    }
+                }
+
+                if (parseFloat(defect_detail_qty) !== parseFloat(defect_qty)) {
+                    Alert.alert('작업완료 오류', '부적합량과 부적합 정보의 부적합량을 확인해주세요.');
+                    return;
+                }
 
                 // 지시량 대비 입력량 check
                 if (orderQty !== inputQty) {
@@ -1660,6 +1708,7 @@
                         Notify.success('취소되었습니다.');
                         _this.searchMainData();
                         _this.showBasicInfo(res.data.jr_pk);
+                        $('#btnFinishCancel').attr('disabled', true);
                         setTimeout(() => {
                             _this.grid.select(previousIndex, 0);
                         }, 100);
@@ -1805,52 +1854,60 @@
                 }
 
                 let jr_pk = _this.$tabBasic.find('#id').val();
-                let item = items[0];
-                let mp_id = item.id;
-                let good_qty = item.good_qty;
-                let defect_qty = item.defect_qty;
 
-                if (good_qty === "0" || good_qty === "") {
-                    Alert.alert('차수 양품량 수정', '잘못된 수량을 입력하셨습니다.');
-                    return;
+                let chasuList = [];
+                for (let item of items) {
+                    let mp_id = item.id;
+                    let good_qty = item.good_qty;
+                    let defect_qty = item.defect_qty;
+
+                    if (good_qty === "0" || good_qty === "") {
+                        Alert.alert('차수 양품량 수정', '잘못된 수량이 포함되어 있습니다.');
+                        return;
+                    }
+
+                    chasuList.push({
+                        jr_pk: jr_pk,
+                        mp_id: mp_id,
+                        good_qty: good_qty,
+                        defect_qty: defect_qty
+                    });
                 }
-
-                let data = {
-                    jr_pk: jr_pk,
-                    mp_id: mp_id,
-                    good_qty: good_qty,
-                    defect_qty: defect_qty
-                };
 
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        // result.good_qty_sum, result.defect_qty_sum, result.lot_number
                         Alert.alert('', '수정 되었습니다');
-                        _this.showChasuList(res.data.jr_pk);
 
-                        // Wijmo Grid에서 해당 행 찾기
-                        let dataSource = _this.grid.itemsSource instanceof wijmo.collections.CollectionView
-                            ? _this.grid.itemsSource.sourceCollection
-                            : _this.grid.itemsSource;
-                        let updatedItem = dataSource[parseInt(_this.selectedIndex)];
+                        let last = null;
 
-                        if (updatedItem) {
-                            // `good_qty` 값 업데이트
-                            updatedItem.good_qty = res.data.good_qty_sum;
-                            updatedItem.defect_qty = res.data.defect_qty_sum;
-
-                            // 3. Wijmo Grid에 변경사항 반영
-                            _this.grid.collectionView.commitEdit(); // 데이터 변경 확정
-                            _this.grid.invalidate(); // 화면 다시 그림 (강제 새로고침 X)
+                        if (res.data && res.data.length > 0) {
+                            last = res.data[res.data.length - 1];
+                            _this.showChasuList(last.jr_pk);
+                            _this.showBasicInfo(last.jr_pk);
                         }
 
-                        _this.showBasicInfo(res.data.jr_pk);
+                        // Wijmo Grid에서 해당 행 찾기
+                        if (last) {
+                            let dataSource = _this.grid.itemsSource instanceof wijmo.collections.CollectionView
+                                ? _this.grid.itemsSource.sourceCollection
+                                : _this.grid.itemsSource;
+                            let updatedItem = dataSource[parseInt(_this.selectedIndex)];
+
+                            if (updatedItem) {
+                                updatedItem.good_qty = last.good_qty_sum;
+                                updatedItem.defect_qty = last.defect_qty_sum;
+
+                                _this.grid.collectionView.commitEdit();
+                                _this.grid.invalidate();
+                            }
+                        }
                     } else {
                         Alert.alert('', res.message);
                     }
+
                 };
                 let url = this.baseUrl + '/chasu_save';
-                AjaxUtil.postAsyncData(url, data, fnSuccess);
+                AjaxUtil.postJsonAsyncData(url, chasuList, fnSuccess);
             }
 
             object_copy(val) {
@@ -2359,6 +2416,10 @@
                 let lot_info = {};
 
                 let callback = function (lot) {
+                    if(!lot.lot_id){
+                        Alert.alert('', 'LOT 검색에 실패했습니다.');
+                        return;
+                    }
                     if (valid) {
                         lot_info['lot_id'] = lot.lot_id;
                         lot_info['lot_number'] = lot.lot_number;
