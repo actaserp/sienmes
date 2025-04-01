@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import mes.domain.entity.SystemCode;
+import mes.domain.repository.SysCodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +32,11 @@ public class UserCodeController {
 
 	@Autowired
 	UserCodeRepository userCodeRepository;
+
+
+	@Autowired
+	SysCodeRepository sysCodeRepository;
+
 	
 	@GetMapping("/read")
 	public AjaxResult getCodeList(
@@ -42,6 +49,19 @@ public class UserCodeController {
 		result.data = items;
 		return result;
 	}
+
+	@GetMapping("/SystemCoderead")
+	public AjaxResult getSystemCodeList(
+			@RequestParam("txtCode") String txtCode,
+			@RequestParam("txtCodeType") String txtCodeType
+	) {
+
+		List<Map<String, Object>> items = this.codeService.getSystemCodeList(txtCode,txtCodeType);
+		AjaxResult result = new AjaxResult();
+
+		result.data = items;
+		return result;
+	}
 	
 	@GetMapping("/detail")
 	public AjaxResult getCode(@RequestParam("id") int id) {
@@ -51,6 +71,16 @@ public class UserCodeController {
 		result.data = item;
 		return result;
 	}
+
+	@GetMapping("/Systemcodedetail")
+	public AjaxResult getSystemCode(@RequestParam("id") int id) {
+		Map<String, Object> item = this.codeService.getSystemcCode(id);
+
+		AjaxResult result = new AjaxResult();
+		result.data = item;
+		return result;
+	}
+
 	
 	@PostMapping("/save")
 	public AjaxResult saveCode(
@@ -83,12 +113,55 @@ public class UserCodeController {
 		
 		return result;
 	}
-	
+
+	@PostMapping("/Systemcodesave")
+	public AjaxResult Systemcodesave(
+			@RequestParam(value="id", required=false) Integer id,
+			@RequestParam("code_type") String code_type,
+			@RequestParam("name") String value,
+			@RequestParam("code") String code,
+			@RequestParam("description") String description,
+			HttpServletRequest request,
+			Authentication auth) {
+		User user = (User)auth.getPrincipal();
+
+		SystemCode s = null;
+
+		if(id == null) {
+			s = new SystemCode();
+		} else {
+			s = this.sysCodeRepository.getSysCodeById(id);
+		}
+
+		s.setCodeType(code_type);
+		s.setValue(value);
+		s.setCode(code);
+		s.setDescription(description);
+		s.set_audit(user);
+
+		s = this.sysCodeRepository.save(s);
+
+		AjaxResult result = new AjaxResult();
+		result.data = s;
+
+		return result;
+	}
+
+
 	@PostMapping("/delete")
 	public AjaxResult deleteCode(@RequestParam("id") Integer id) {
 		this.userCodeRepository.deleteById(id);
 		AjaxResult result = new AjaxResult();
 		
+		return result;
+	}
+
+
+	@PostMapping("/SystemCodedelete")
+	public AjaxResult deleteSystemCode(@RequestParam("id") Integer id) {
+		this.sysCodeRepository.deleteById(id);
+		AjaxResult result = new AjaxResult();
+
 		return result;
 	}
 

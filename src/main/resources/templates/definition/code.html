@@ -2,6 +2,18 @@
 
 <head>
     <style>
+        .btn-wrap ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            gap: 10px; /* 버튼 간 간격 조절 */
+        }
+
+        .btn-wrap ul li {
+            display: inline-block;
+        }
+
     </style>
 </head>
 
@@ -23,113 +35,255 @@
             </ul>
         </div>
 
-        <section class="section">
-            <div class="section-top">
-                <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            <label>코드명</label>
-                        </dt>
-                        <dd>
-                            <input type="text" class="form-control2" id="txtCode" name="txtCode">
-                        </dd>
-                    </dl>
-
-                    <dl>
-                        <dt><span class="eq"></span></dt>
-                        <dd>
-                            <li>
-                                <a class="btn btn-delete" title="검색" id="btnSearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    검색
-                                </a>
-                            </li>
-                        </dd>
-                    </dl>
-                </div>
-
-            </div>
-
-           <!-- <div class="grid_box">
-                <div class="h-460" data-ax5grid="code-grid"></div>
-            </div>-->
-            <div class="container-fluid">
-                <div id="code-grid" style="height: 460px; max-height: 460px;"></div>
-            </div>
-        </section>
-
-
         <div class="tab-wrap">
-            <section class="section">
-                <div class="section-top">
-                    <div class="button-wrap">
-                        <ul>
-                            <li>
-                                <button type="button" class="btn-default " id="btnNew" name="btnNew" style="width: 115px; height: 36px;"><i
-                                        class="fas fa-plus" ></i>신규등록</button>
-                            </li>
-                            <li>
-                                <button type="button" class="btn-default" id="btnNewChild" name="btnNewChild" style="width: 115px; height: 36px;">하위추가
-                                </button>
-                            </li>
+            <ul class="tab-links">
+                <li>
+                    <a href="#tab1" title="사용자코드">사용자코드</a>
+                </li>
+                <li>
+                    <a href="#tab2" title="시스템코드">시스템코드</a>
+                </li>
+            </ul>
+            <div class="tab-contents">
+                <section class="tab-item" id="tab1" style="height: 820px;">
+                    <div class="section-top">
+                        <div class="search-wrap">
+                            <dl>
+                                <dt>
+                                    <label>코드명</label>
+                                </dt>
+                                <dd>
+                                    <input type="text" class="form-control2" id="txtCode" name="txtCode">
+                                </dd>
+                            </dl>
 
-                            <li>
-                                <button type="button" class="btn-default" id="btnNewBro" name="btnNewBro" style="width: 115px; height: 36px;">형제추가</button>
-                            </li>
-                            <li>
-                                <button type="button" class="btn-danger " id="btnDel" style="float:none; width: 115px; height: 36px;"><i
-                                        class="fas fa-trash"></i></button>
-                            </li>
-                            <li>
-                                <button type="button" class="btn-default" id="btnSave" style="float:none; width: 115px; height: 36px;"><i
-                                        class="fas fa-save"></i></button>
-                            </li>
-                        </ul>
+                            <dl>
+                                <dt><span class="eq"></span></dt>
+                                <dd>
+                                    <li>
+                                        <a class="btn btn-delete" title="검색" id="btnSearch">
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            검색
+                                        </a>
+                                    </li>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="btn-wrap" style="height: 67px;">
+                            <ul>
+                                <li>
+                                    <button type="button" class="btn-default " id="btnNew" name="btnNew"
+                                            style="width: 115px; height: 36px;"><i
+                                            class="fas fa-plus"></i>신규등록
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn-default" id="btnNewChild"
+                                            name="btnNewChild" style="width: 115px; height: 36px;">하위추가
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button type="button" class="btn-default" id="btnNewBro"
+                                            name="btnNewBro" style="width: 115px; height: 36px;">형제추가
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn-danger " id="btnDel"
+                                            style=" width: 115px; height: 36px;"><i
+                                            class="fas fa-trash"></i>삭제</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn-default" id="btnSave"
+                                            style="width: 115px; height: 36px;"><i
+                                            class="fas fa-save"></i>저장</button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div> <!--//section-top end -->
+
+                    <div class="row">
+                        <div class="wp70 mg-r20">
+                            <div class="container-fluid col">
+                                <p id="selectedItem"></p>
+                                <div id="code-grid" style="height: 700px; max-height: 700px;"></div>
+                            </div>
+                        </div>
+
+                        <div class="col wp30">
+                            <div class="section">
+                                <form id="codeForm">
+                                    <input type="hidden" id="parent_id" name="parent_id" value=""/>
+                                    <input class="form-control2" type="hidden" id="id" name="id" disabled/>
+                                    <div class="table-wrap">
+                                        <table class="view-table" id="selectedData">
+                                            <caption>코드등록 테이블</caption>
+                                            <colgroup>
+                                                <col class="wp20">
+                                                <col class="wauto">
+                                            </colgroup>
+                                            <tbody>
+                                            <tr>
+                                                <th><label for="parent_name">상위코드</label></th>
+                                                <td>
+                                                    <input type="text" id="parent_name" name="parent_name" class="wp100" readonly>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="code">코드</label></th>
+                                                <td>
+                                                    <input type="text" id="code" name="code" class="wp100" >
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="name">코드명</label></th>
+                                                <td>
+                                                    <input type="text" id="name" name="name" class="wp100">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="description">설명</label></th>
+                                                <td>
+                                                    <input type="text" id="description" name="description"
+                                                           class="wp100">
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="tab-item" id="tab2" style="height: 820px;">
+                    <div class="section-top">
+                        <div class="search-wrap">
+
+                            <dl>
+                                <dt>
+                                    <label>코드타입</label>
+                                </dt>
+                                <dd>
+                                    <input type="text" class="form-control2" id="txtCodeType" name="txtCodeType">
+                                </dd>
+                            </dl>
+
+                            <dl>
+                                <dt>
+                                    <label>코드명</label>
+                                </dt>
+                                <dd>
+                                    <input type="text" class="form-control2" id="txtCode2" name="txtCode">
+                                </dd>
+                            </dl>
+
+
+
+                            <dl>
+                                <dt><span class="eq"></span></dt>
+                                <dd>
+                                    <li>
+                                        <a class="btn btn-delete" title="검색" id="btnSearch2">
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            검색
+                                        </a>
+                                    </li>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="btn-wrap" style="height: 67px;">
+                            <ul>
+                                <li>
+                                    <button type="button" class="btn-default " id="btnNew2" name="btnNew"
+                                            style="width: 115px; height: 36px;"><i
+                                            class="fas fa-plus"></i>신규등록
+                                    </button>
+                                </li>
+                                <!--<li>
+                                    <button type="button" class="btn-default" id="btnNewChild2"
+                                            name="btnNewChild" style="width: 115px; height: 36px;">하위추가
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button type="button" class="btn-default" id="btnNewBro2"
+                                            name="btnNewBro" style="width: 115px; height: 36px;">형제추가
+                                    </button>
+                                </li>-->
+                                <li>
+                                    <button type="button" class="btn-danger " id="btnDel2"
+                                            style=" width: 115px; height: 36px;"><i
+                                            class="fas fa-trash"></i>삭제</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn-default" id="btnSave2"
+                                            style="width: 115px; height: 36px;"><i
+                                            class="fas fa-save"></i>저장</button>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <div class="table-wrap" style=" overflow-x: auto;">
-                        <form id="codeForm">
-                            <table class="write-table"
-                                   style="width: 100%; border-collapse: collapse; table-layout: fixed;">
-                                <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
-                                <input type="hidden" id="parent_id" name="parent_id" value=""/>
-                                <input class="form-control2" type="hidden" id="id" name="id" disabled/>
-                                <tbody>
-                                <tr>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="parent_name">상위코드</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="text" id="parent_name" name="parent_name"
-                                               style="width: 100%;">
-                                    </td>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="code"><span class="eq">*</span>코드</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="text" id="code" name="code" style="width: 100%;">
-                                    </td>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="name"><span class="eq">*</span>코드명</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="text" style="width: 100%;" id="name" name="name">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="description">설명</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;" colspan="5">
-                                        <textarea id="description" name="description"></textarea>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </form>
+
+                    <div class="row">
+                        <div class="wp70 mg-r20">
+                            <div class="container-fluid col">
+                                <p id="selectedItem"></p>
+                                <div id="syscode-grid" style="height: 700px; max-height: 700px;"></div>
+                            </div>
+                        </div>
+
+                        <div class="col wp30">
+                            <div class="section">
+                                <form id="SystemcodeForm">
+                                    <!--<input type="hidden" id="parent_id2" name="parent_id" value=""/>-->
+                                    <input class="form-control2" type="hidden" id="id2" name="id" disabled/>
+                                    <div class="table-wrap">
+                                        <table class="view-table">
+                                            <caption>코드등록 테이블</caption>
+                                            <colgroup>
+                                                <col class="wp20">
+                                                <col class="wauto">
+                                            </colgroup>
+                                            <tbody>
+                                            <tr>
+                                                <th><label for="code_type">코드타입</label></th>
+                                                <td>
+                                                    <input type="text" id="code_type" name="code_type" class="wp100">
+
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="code">코드</label></th>
+                                                <td>
+                                                    <input type="text" id="code2" name="code" class="wp100" >
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="name">코드명</label></th>
+                                                <td>
+                                                    <input type="text" id="name2" name="name" class="wp100">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="description">설명</label></th>
+                                                <td>
+                                                    <input type="text" id="description2" name="description"
+                                                           class="wp100">
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+
+            </div> <!--//tab-contens end-->
         </div>
 
     </div>
@@ -145,7 +299,9 @@
         class CodePage {
             constructor() {
                 this.grid = null;
+                this.grid2 = null;
                 this.viewData = new wijmo.collections.CollectionView();
+                this.viewData2 = new wijmo.collections.CollectionView();
                 this.init();
             }
 
@@ -257,11 +413,11 @@
                         }
                     },
                     columns: [
-                        {binding: 'id', header: '코드번호', width: 70, align: 'center',visible:false},
+                        {binding: 'id', header: '코드번호', width: 70, align: 'center', visible: false},
                         {binding: 'name', header: '코드명', width: 250, align: 'left'},
-                        {binding: 'code', header: '코드', width: 250, align: 'left'},
-                        {binding: 'description', header: '설명', width: 350, align: 'left'},
-                        {binding: '', header: '', width: '*', align: 'left'},
+                        {binding: 'code', header: '코드', width: 300, align: 'left'},
+                        {binding: 'description', header: '설명', width: '*', align: 'left'},
+                        /*{binding: '', header: '', width: '*', align: 'left'},*/
 
                     ],
                     childItemsPath: 'children',
@@ -279,7 +435,54 @@
 
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '코드정보';
+
+
+                this.grid2 = new wijmo.grid.FlexGrid('#syscode-grid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            let row = sender.rows[e.row]; // 현재 행
+                            if (row instanceof wijmo.grid.GroupRow) {
+                                //  그룹(부모) 행 배경색
+                                e.cell.style.backgroundColor = '#f0fcf7';
+                            } else {
+                                //  일반 데이터(자식) 행 배경색
+                                e.cell.style.backgroundColor = '#ffffff';
+                            }
+                        }
+                    },
+                    columns: [
+                        {binding: 'id', header: '코드번호', width: 70, align: 'center', visible: false},
+                        {binding: 'code_type', header: '코드타입', width: 250, align: 'left'},
+                        {binding: 'code', header: '코드', width: 250, align: 'left'},
+                        {binding: 'name', header: '코드명', width: 250, align: 'left'},
+                        {binding: 'description', header: '설명', width: '*', align: 'left'},
+
+                    ],
+
+                    itemsSource: this.viewData2, // 데이터를 설정할 배열
+                });
+
+                this.grid2.hostElement.addEventListener('dblclick', (e) => {
+                    let hitTest = this.grid2.hitTest(e);
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        let row = hitTest.row;
+                        let selectedItem = this.grid2.rows[row].dataItem;
+                        _this.showDetail2(selectedItem.id)
+                    }
+                });
+
+                new FlexGridContextMenu(this.grid2);
+                this.grid2.downloadFileName = '시스템코드정보';
             }
+
 
             //clickContextMenu(action, param) {
             //    let _this = this;
@@ -327,6 +530,7 @@
                     $('#btnNewBro').prop('disabled', true);
                 }
             }
+
             /*'action': 'detail'*/
             showDetail(idx) {
                 let param = {
@@ -343,6 +547,24 @@
                 //page.setButtonDisable(false, false, false);
                 page.setButtonState();
             }
+
+            showDetail2(idx) {
+                let param = {
+                    'id': idx,
+                };
+
+                let url = '/api/definition/code';
+                let result = AjaxUtil.getSyncData(url + '/Systemcodedetail', param);
+                if (result.success) {
+                    FormUtil.BindDataForm(result.data, $('#SystemcodeForm'));
+                    /*console.log(result.data);*/
+                    $('#description2').text(result.description);
+                }
+
+                //page.setButtonDisable(false, false, false);
+                /*page.setButtonState();*/
+            }
+
             /*'action': 'read'*/
             searchMainData() {
                 let _this = this;
@@ -365,8 +587,42 @@
                     _this.viewData.sourceCollection = treeData;
                 }
 
+                this.searchMainData2();
+
                 page.setButtonState();
             }
+
+
+            searchMainData2() {
+                let _this = this;
+                let data = {
+                    'txtCode': $('#txtCode2').val(),
+                    'txtCodeType': $('#txtCodeType').val(),
+
+                };
+
+                $('#SystemcodeForm')[0].reset();
+                $('#id2').val('');
+                $('#description2').text('');
+                let url = '/api/definition/code';
+
+                let result = AjaxUtil.getSyncData(url + '/SystemCoderead', data);
+
+                console.log(JSON.stringify(result, null, 2));
+
+                if (result != null) {
+                    // CollectionView 생성
+                    let cv = new wijmo.collections.CollectionView(result.data);
+
+                    // 그룹화 적용 (code_type 기준)
+                    cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription('code_type'));
+
+                    // FlexGrid에 CollectionView 적용
+                    _this.viewData2 = cv;
+                    _this.grid2.itemsSource = cv; // 여기서 grid2에 직접 설정해야 적용됨
+                }
+            }
+
 
 
             /**
@@ -378,7 +634,7 @@
 
                 // 모든 항목을 id 기준으로 매핑
                 flatData.forEach(item => {
-                    map[item.id] = { ...item, children: [] };
+                    map[item.id] = {...item, children: []};
                 });
 
                 // 부모-자식 관계 설정
@@ -419,7 +675,7 @@
 
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Alert.alert('','저장되었습니다'); // Notification
+                        Alert.alert('', '저장되었습니다'); // Notification
                         _this.searchMainData();
                     } else {
                         Alert.alert('', res.message)
@@ -428,13 +684,52 @@
                 AjaxUtil.postAsyncData(url, data, fnSuccess);
             }
 
+
+            saveCode2() {
+                let _this = this;
+                let url = '/api/definition/code/Systemcodesave';
+
+                //let data = $('#codeForm').serialize();
+                let data = FormUtil.extractForm($('#SystemcodeForm'));
+
+                if (!data.code_type) {
+                    Alert.alert('', '코드타입를 입력해 주세요');
+                    $('#SystemcodeForm #code_type').focus();
+                    return;
+                }
+
+                if (!data.code) {
+                    Alert.alert('', '코드을 입력해 주세요');
+                    $('#SystemcodeForm #code').focus();
+                    return;
+                }
+
+
+                if (!data.name) {
+                    Alert.alert('', '코드명을 입력해 주세요');
+                    $('#SystemcodeForm #name').focus();
+                    return;
+                }
+
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('', '저장되었습니다'); // Notification
+                        _this.searchMainData2();
+                    } else {
+                        Alert.alert('', res.message)
+                    }
+                };
+                AjaxUtil.postAsyncData(url, data, fnSuccess);
+            }
+
+
             deleteCode(id) {
                 let _this = this;
                 let url = '/api/definition/code/delete';
                 let data = {id: id};
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Alert.alert('','삭제되었습니다'); // Notification
+                        Alert.alert('', '삭제되었습니다'); // Notification
                         _this.searchMainData();
                     } else {
                         Alert.alert('', res.message);
@@ -442,6 +737,22 @@
                 };
                 AjaxUtil.postAsyncData(url, data, fnSuccess);
             }
+
+            deleteCode2(id) {
+                let _this = this;
+                let url = '/api/definition/code/SystemCodedelete';
+                let data = {id: id};
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('', '삭제되었습니다'); // Notification
+                        _this.searchMainData2();
+                    } else {
+                        Alert.alert('', res.message);
+                    }
+                };
+                AjaxUtil.postAsyncData(url, data, fnSuccess);
+            }
+
         }
 
         let page = null;
@@ -453,12 +764,23 @@
                 page.searchMainData();
             });
 
+            $('#btnSearch2').click(function (ex) {
+                page.searchMainData2();
+            });
+
 
             $('#txtCode').on('keypress', function (e) {
                 if (event.keyCode == 13) {
                     page.searchMainData();
                 }
             });
+
+            $('#txtCodeType, #txtCode2').on('keydown', function (e) {
+                if (e.keyCode === 13) {
+                    page.searchMainData2();
+                }
+            });
+
 
             $('#btnNew').click(function (e) {
                 $('#codeForm')[0].reset();
@@ -485,6 +807,30 @@
 
             });
 
+            $('#btnNew2').click(function (e) {
+                $('#SystemcodeForm')[0].reset();
+                $('#id2').val('');
+                $('#description2').text('');
+
+                $('#SystemcodeForm #code2').attr('readonly', false);
+                $('#SystemcodeForm input').each(function () {
+                    if ($(this).is(':disabled')) {
+                        $(this).removeAttr('disabled');
+                    }
+                });
+
+                $('#SystemcodeForm textarea').each(function () {
+                    if ($(this).is(':disabled')) {
+                        $(this).removeAttr('disabled');
+                    }
+                });
+                //page.setButtonDisable(true, false, true);
+                /*page.setButtonState();*/
+
+                //$('#codeForm').reset();
+
+            });
+
             $('#btnSave').click(function (e) {
                 Alert.confirm('',
                     '저장하시겠습니까?',
@@ -495,6 +841,18 @@
                     }
                 );
             });
+
+            $('#btnSave2').click(function (e) {
+                Alert.confirm('',
+                    '저장하시겠습니까?',
+                    function () {
+                        page.saveCode2();
+                    },
+                    function () {
+                    }
+                );
+            });
+
 
             $('#btnDel').click(function (e) {
                 let id = $('#codeForm').find('#id').val()
@@ -507,6 +865,23 @@
                     }
                 );
             });
+
+            $('#btnDel2').click(function (e) {
+                let id = $('#SystemcodeForm').find('#id2').val()
+
+                /*console.log("id값 확인"+id);*/
+
+                Alert.confirm('',
+                    '삭제하시겠습니까?',
+                    function () {
+                        page.deleteCode2(id)
+                    },
+                    function () {
+                    }
+                );
+            });
+
+
 
             // 엑셀 다운로드
             $('#btnExcel').click(function (e) {
@@ -545,21 +920,21 @@
             });
 
             //그리드 컬럼 설정
-          /*  page.popColSetting = new popColSetting();
-            let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid', page.grid);
+            /*  page.popColSetting = new popColSetting();
+              let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid', page.grid);
 
-            if (userinfo.group_code == 'admin') {
-                $('#btnGridSetting').css('visibility', 'visible');
-            }
+              if (userinfo.group_code == 'admin') {
+                  $('#btnGridSetting').css('visibility', 'visible');
+              }
 
-            $('#btnGridSetting').click(function (e) {
-                let _this = this;
-                let fix_cols = page.grid_config.frozenColumnIndex;
-                page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, {
-                    'order_fix': false,
-                    'fix_cols': fix_cols
-                });
-            });*/
+              $('#btnGridSetting').click(function (e) {
+                  let _this = this;
+                  let fix_cols = page.grid_config.frozenColumnIndex;
+                  page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, {
+                      'order_fix': false,
+                      'fix_cols': fix_cols
+                  });
+              });*/
 
             page.searchMainData();
 
