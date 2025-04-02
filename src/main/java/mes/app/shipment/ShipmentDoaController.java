@@ -104,8 +104,10 @@ public class ShipmentDoaController {
 					this.shipmentRepository.save(sm);
 					
 					orderSum += orderQty;
-					
-					if (sm.getSourceTableName().equals("suju")) {
+
+					String sourceTableName = sm.getSourceTableName();
+
+					if ( sourceTableName != null && sm.getSourceTableName().equals("suju")) {
 						Suju su = this.sujuRepository.getSujuById(sm.getSourceDataPk());
 						su.setShipmentState("shipped");
 						su.set_audit(user);
@@ -156,8 +158,10 @@ public class ShipmentDoaController {
 			this.shipmentRepository.save(sm);
 			
 			orderSum += orderQty;
-			
-			if(data.get(i).get("src_table_name").toString().equals("suju")) {
+
+			Object srcTableName = data.get(i).get("src_table_name");
+
+			if(srcTableName != null && data.get(i).get("src_table_name").toString().equals("suju")) {
 				Integer srcDataPk = Integer.parseInt(data.get(i).get("src_data_pk").toString());
 				if (srcDataPk > 0) {
 					Suju su = this.sujuRepository.getSujuById(srcDataPk);
