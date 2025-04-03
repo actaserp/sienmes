@@ -168,6 +168,8 @@ public class ProdOrderEditController {
 		
 		if (equipmentId != null) {
 			jr.setEquipment_id(equipmentId);
+		} else {
+			jr.setEquipment_id(m.getEquipment());
 		}
 		
 		jr.setFirstWorkCenter_id(workcenterId);

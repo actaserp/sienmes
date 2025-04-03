@@ -378,15 +378,23 @@ public class ProductionResultService {
         dicParam.addValue("jrPk", jrPk);
 
         String sql = """
-                         select id
-                         , "LotIndex" as chasu, "LotNumber" as lot_no
-                         , "GoodQty" as good_qty, "DefectQty" as defect_qty, "LossQty" as loss_qty, "ScrapQty" as scrap_qty
-                         , to_char("EndTime", 'HH24:MI') as end_time
-                         , case when to_char("_modified", 'HH24:MI') is null then to_char("_created", 'HH24:MI') else  to_char("_modified", 'HH24:MI') end as input_time
-                         from mat_produce
-                         where "JobResponse_id" = :jrPk
-                         order by "LotIndex"
-                """;
+			 select id
+				  , "LotIndex" as chasu
+				  , "LotNumber" as lot_no
+				  , "GoodQty" as good_qty
+				  , "DefectQty" as defect_qty
+				  , "LossQty" as loss_qty
+				  , "ScrapQty" as scrap_qty
+				  , to_char("EndTime", 'YYYY-MM-DD HH24:MI') as end_time
+				  , to_char("StartTime", 'YYYY-MM-DD HH24:MI') as start_time
+				  , case
+					  when "_modified" is null then to_char("_created", 'YYYY-MM-DD HH24:MI')
+					  else to_char("_modified", 'YYYY-MM-DD HH24:MI')
+					end as input_time
+			 from mat_produce
+			 where "JobResponse_id" = :jrPk
+			 order by "LotIndex"
+			""";
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
         return items;

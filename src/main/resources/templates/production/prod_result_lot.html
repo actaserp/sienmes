@@ -918,7 +918,9 @@
                             isReadOnly: false,
                             cssClass: 'background-defect'
                         },
-                        {binding: 'input_time', header: '입력시간', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'start_time', header: '시작시간', width: 150, align: 'center', isReadOnly: true},
+                        {binding: 'end_time', header: '종료시간', width: 150, align: 'center', isReadOnly: true},
+                        {binding: 'input_time', header: '입력시간', width: 150, align: 'center', isReadOnly: true},
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
                     itemFormatter: function (panel, row, col, cell) {
@@ -1152,12 +1154,12 @@
                             isReadOnly: true
                         },
                         {
-                            binding: 'consumed_qty',
+                            binding: 'mc_qty',
                             header: '실생산소모량',
                             width: 120,
                             align: 'right',
                             format: 'n0',
-                            isReadOnly: false
+                            isReadOnly: true
                         },
                         {
                             binding: 'currentStock',
@@ -1338,9 +1340,15 @@
                 };
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/read', param);
-                if (result.data != null) {
-                    _this.grid.itemsSource = result.data;
+                if (result.data && _this.grid.itemsSource) {
+                    // 기존 sourceCollection 업데이트 (선택 유지됨)
+                    let view = _this.grid.itemsSource;
+                    view.sourceCollection.splice(0, view.sourceCollection.length, ...result.data);
+                    view.refresh(); // 필터, 정렬, 페이징 적용
                 }
+                // if (result.data != null) {
+                //     _this.grid.itemsSource = result.data;
+                // }
 
                 $('#selected_order_num').val('');
                 $('#basicForm')[0].reset();
@@ -1367,7 +1375,7 @@
                 let res = AjaxUtil.getSyncData(this.baseUrl + '/detail', param);
                 let result = res.data
                 if (result) {
-
+                    console.log('result', result);
                     $('#selected_order_num').val(result.order_num);
 
                     AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment', 'choose', false, '', '', result.workcenter_id);
@@ -1732,6 +1740,7 @@
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/chasu_list', param);
                 if (result.data) {
+                    console.log('showChasuList', result.data);
                     _this.setDefaultData(result.data); // 기본값 설정
                     _this.chasuGrid.itemsSource = new wijmo.collections.CollectionView(result.data); // 데이터 바인딩
                     _this.updateFooter(); // 하단 합계 업데이트
@@ -2208,6 +2217,7 @@
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/consumed_list', param);
                 if (result.data != null) {
                     _this.consumedGrid.itemsSource = result.data;
+                    console.log('consumedGrid', result.data);
 
 
                     let goodQty = parseFloat($('#tabBasic').find('#good_qty').val());
@@ -2511,6 +2521,7 @@
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/input_lot_list', param);
                 if (result.success) {
+                    console.log('showInputLotList', result.data);
                     _this.inputLotGrid.itemsSource = result.data
                     _this.updateFooter();
                 }

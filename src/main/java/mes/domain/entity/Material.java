@@ -178,6 +178,10 @@ public class Material extends AbstractAuditModel {
 	
 	@Column(name = "\"LotUseYN\"")
 	String lotUseYn;
+
+	@Column(name = "\"Equipment_id\"")
+	Integer equipment;
+
 	//Entity 생성 후 활성화
 	//MaterialGroup materialGroup;
 	//Unit unit;

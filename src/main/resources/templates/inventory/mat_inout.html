@@ -1010,7 +1010,6 @@
             showLotInputPopup() {
                 let _this = this;
                 let items = _this.grid.selectedItems;
-                console.log('items', items);
                 if (items.length === 0) {
                     Alert.alert('로트입고등록', '선택된 입고 데이터가 없습니다. ', function () {
                     });
@@ -1116,7 +1115,7 @@
                 $btnLotCalc.click(function (e) {
                     _this.matLotGrid.itemsSource.sourceCollection = [];
 
-                    if ($EffectiveDate.val() == '' || $EffectiveDate.val() == null) {
+                    if ($EffectiveDate.val() === '' || $EffectiveDate.val() == null) {
                         Alert.alert('로트저장', '유효 일시를 입력해주세요.', function () {
                         });
                         return;
@@ -1126,17 +1125,20 @@
                     let lotSize = $LotSize.val();
                     let effectedDate = $EffectiveDate.val();
 
-                    if (inputQty == '' || inputQty == 0) {
-                        alert(1);
+                    if (inputQty === '' || inputQty === 0) {
+                        // alert(1);
+                        Alert.alert('입고수량', '입고수량이 없습니다.');
                         return;
                     }
-                    if (lotSize == '' || lotSize == 0) {
-                        alert(2);
+                    if (lotSize === '' || lotSize === 0) {
+                        // alert(2);
+                        Alert.alert('로트당수량', '로트당 수량을 입력해주세요.');
                         return;
                     }
                     let lotCount = (inputQty / lotSize);
                     if (lotCount < 1) {
-                        alert(3);
+                        // alert(3);
+                        Alert.alert('', '입고수량과 로트당수량을 확인해주세요.');
                         return;
                     }
                     lotCount = Math.ceil(lotCount);
