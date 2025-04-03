@@ -11,6 +11,6 @@ public interface MaterialRepository extends JpaRepository<Material, Integer>{
 	Material getMaterialById(Integer matPk);
 	
 	Integer countByIdAndStoreHouseIdIsNull(Integer id);
-	Material findByCode(String string);
+
 
 }

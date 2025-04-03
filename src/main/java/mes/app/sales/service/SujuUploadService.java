@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import mes.domain.entity.Company;
+import mes.domain.entity.Material;
+import mes.domain.repository.CompanyRepository;
+import mes.domain.repository.MaterialRepository;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -29,6 +33,8 @@ public class SujuUploadService {
 	
 	@Autowired
 	SujuRepository SujuRepository;
+
+
 	
 	
 	// 수주 업로드 내역 조회 
@@ -115,5 +121,5 @@ public class SujuUploadService {
 		
 		return all_rows;
 	}
-	
+
 }

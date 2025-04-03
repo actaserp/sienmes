@@ -14,6 +14,10 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import mes.domain.entity.Company;
+import mes.domain.entity.Material;
+import mes.domain.repository.CompanyRepository;
+import mes.domain.repository.MaterialRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.core.Authentication;
@@ -43,7 +47,13 @@ public class SujuUploadController {
 	
 	@Autowired
 	private SujuUploadService sujuUploadService;
-	
+
+	@Autowired
+	MaterialRepository materialRepository;
+
+	@Autowired
+	CompanyRepository companyRepository;
+
 	@Autowired
 	Settings settings;
 	
@@ -60,7 +70,6 @@ public class SujuUploadController {
 		
 //		start_date = start_date + " 00:00:00";
 //		end_date = end_date + " 23:59:59";
-		
 //		Timestamp start = Timestamp.valueOf(start_date);
 //		Timestamp end = Timestamp.valueOf(end_date);
 		
@@ -117,7 +126,9 @@ public class SujuUploadController {
 			LocalDateTime now = LocalDateTime.now();
 			String formattedDate = dtf.format(now);
 			String upload_filename = settings.getProperty("file_temp_upload_path") + formattedDate + "_" + upload_file.getOriginalFilename();
-			
+
+
+
 			if (new File(upload_filename).exists()) {
 			    new File(upload_filename).delete();
 			}
@@ -129,8 +140,13 @@ public class SujuUploadController {
 			List<List<String>> suju_file = this.sujuUploadService.excel_read(upload_filename);
 			//List<String> error_items = new ArrayList<>();
 			Map<String, Object> error_items = new HashMap<String, Object>();
-			
-			for (int i=0; i < suju_file.size(); i++) {
+
+		List<Material> materialList = materialRepository.findAll();
+		List<Company> CompanyList = companyRepository.findAll();
+		AjaxResult result = new AjaxResult();
+
+		for (int i=0; i < suju_file.size(); i++) {
+
 			    List<String> row = suju_file.get(i);
 			    
 			    String jumun_number = row.get(jumun_number_col);
@@ -146,7 +162,23 @@ public class SujuUploadController {
 			    LocalDate jumun_date = LocalDate.parse(jumun_date_str, formatter);
 			    LocalDate due_date = LocalDate.parse(due_date_str, formatter);
 
-			    MapSqlParameterSource paramMap = new MapSqlParameterSource();
+
+			boolean exits_material = materialList.stream()
+					.anyMatch(material -> prod_code.equals(material.getCode()));
+			boolean exits_company = CompanyList.stream()
+					.anyMatch(company -> company_code.equals(company.getCode()));
+
+			if(!exits_material){
+				result.message = "엑셀에 기입된 제품코드가 없습니다. 제품코드를 등록하고 이용해주세요.";
+				result.success = false;
+				return result;
+			}else if(!exits_company){
+				result.message = "엑셀에 기입된 업체코드가 없습니다. 업체코드를 등록하고 이용해주세요.";
+				result.success = false;
+				return result;
+			}
+
+			MapSqlParameterSource paramMap = new MapSqlParameterSource();
 				paramMap.addValue("jumun_number", jumun_number);
 				paramMap.addValue("jumun_date", jumun_date);
 				paramMap.addValue("company_code", company_code);
@@ -187,7 +219,7 @@ public class SujuUploadController {
 			    
 			}
 			
-		AjaxResult result = new AjaxResult();
+
 		result.success=true;
 		
 		if( error_items.size() > 0 )
@@ -228,7 +260,9 @@ public class SujuUploadController {
 	    	MapSqlParameterSource paramMap = new MapSqlParameterSource();
 			paramMap.addValue("id", id);
 			paramMap.addValue("user_pk", user.getId());
-			
+
+			//sujuUploadService.BeforeCheck();
+
 			if (state.equals("엑셀")) {
 				sql = """
 					with A as (
