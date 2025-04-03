@@ -331,7 +331,7 @@ public class ShipmentDoBService {
 		        s.id as shipment_id
 		        ,sh.id as sh_id
 		        , rd."DataPk1" as suju_id
-		        , sj."State" 
+		        , sj."State"
 		        , sj."ShipmentState"
 		        from shipment s 
 		        inner join shipment_head sh on sh.id=s."ShipmentHead_id"

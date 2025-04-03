@@ -124,7 +124,7 @@
             <div class="grid_box" id="divList">
                 <div class="title_box">
                     <span class="right_align rpt" data-labelCd="출하 지시 목록">출하 지시 목록</span>
-                    <button class="btn-default y_write_auth" id="btnShipmentComplete" title="출하처리" disabled><i class="fa fa-truck"></i></button>
+                    <button class="btn-default y_write_auth" id="btnShipmentComplete" title="출하처리" disabled>출하처리</button>
                 </div>
                 <div id="theGrid" style="height: 350px;"></div>
             </div>
@@ -145,9 +145,9 @@
                     <div class="grid_box">
                         <div class="title_box buttons">
                             <span class="right_align rpt" data-labelCd="출하 처리 LOT상세">출하 처리 LOT상세</span>
-                            <input style="width: 170px; height: 48px"  class="w-140 tac y_write_auth" type="text" id="LotNumber" placeholder="LOT번호 스캔 or 입력" disabled />
+                            <input style="width: 170px; height: 32px"  class="w-140 tac y_write_auth" type="text" id="LotNumber" placeholder="LOT번호 스캔 or 입력" disabled />
                             <button type="button" class="btn-default" id="btnLOTSelect" title="LOT추가" disabled><i class="fas fa-plus"></i></button>
-                            <button style="width: 124px; height: 48px;" type="button" class="btn-danger" id="btnLOTSelectCancel" title="LOT삭제" disabled><i class="fas fa-trash"></i></button>
+                            <button style="" type="button" class="btn-danger y_write_auth" id="btnLOTSelectCancel" title="LOT삭제" disabled><i class="fas fa-trash"></i></button>
                         </div>
                         <div id="theGrid3" style="height: 350px;"></div>
                     </div>
@@ -239,6 +239,7 @@
         let $content;
         let modalContainer;
         let SelectItem = [];
+        let enterFlag = false;
 
         class ShipmentProcessPage {
             constructor() {
@@ -541,25 +542,32 @@
                             return;
                         }
 
-                        _this.showLotMaterialDetail();
+                        _this.showLotSelectPopup();
                     }
                 });
             }
 
             // 로트입력 엔터키
             showLotMaterialDetail() {
+
+
                 let _this = this;
                 let lot_number = this.$LotNumber.val();
                 let headerItems = this.shipmentHeaderGrid.selectedItems;
                 let sh_id = headerItems[0].id;
 
+
+
                 let fnsuccess = function (result) {
 
                     if (result.data.length > 0) {
+                        console.log('1')
+
                         let content = tmpl('lotDetailTemplate', {});
                         let $content = $(content);
                         let modalContainer = new PopupDraggable('LOT 지정 수량 입력');
                         modalContainer.open({ width: 800, height: 300, $content });
+                        console.log('2')
 
                         let $lotDetailForm = $content.find('#lotDetailForm');
                         let selectedItem = result.data[0];
@@ -568,6 +576,7 @@
 
                         let $btnLotDetailSave = $content.find('#btnLotDetailSave');
                         let $popLotUseQuantity = $content.find('#popLotUseQuantity');
+                        console.log('3')
 
                         //스캔 팝업에서 저장
                         $btnLotDetailSave.click(function (e) {
@@ -576,6 +585,7 @@
                                 Alert.alert('LOT 추가 오류', '출하 수량을 입력하십시요');
                                 return;
                             }
+                            console.log('4')
 
                             let fnOkCallback = function () {
                                 let items = [];
@@ -775,7 +785,8 @@
                     // 헤더와 material 이 있는경우 해당 품목에 해당되는 lot 리스트업
                     let data = {
                         material_id : material_id,
-                        sh_id : sh_id
+                        sh_id : sh_id,
+                        lot_number: $('#LotNumber').val().trim()
                     };
 
                     let result = AjaxUtil.getSyncData(_this.url + '/mat_lot_search', data);

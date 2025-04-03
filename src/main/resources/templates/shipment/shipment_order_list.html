@@ -118,7 +118,7 @@
                 <div class="title_box">
                     <span class="right_align rpt" data-labelCd="출하지시 목록">출하지시 목록</span>
                     <button type="button" class="btn-default y_write_auth" id="btnSaveShipDate" data-labelCd="출하일 변경">출하일 변경</button>
-                    <button type="button" style="width: 124px; height: 48px" class="btn-danger y_write_auth" id="btnCancelOrder" data-labelCd="출하지시 취소">출하지시 취소</button>
+                    <button type="button" class="btn-danger y_write_auth" id="btnCancelOrder" data-labelCd="출하지시 취소">출하지시 취소</button>
                 </div>
                 <div id="theGrid" style="height: 350px;"></div>
             </div>
@@ -272,11 +272,10 @@
 
                 let result = AjaxUtil.getSyncData(this.gUrl + '/shipment_item_list', data);
 
-
+                console.log('data22', result.data);
                 if (result != null) {
                     this.addNewRow(result.data);
                 }
-
             }
 
             addNewRow(data){
@@ -284,16 +283,19 @@
                 console.log('ds', data);
                 console.log('ds4', data.mat_grp_name);
 
-                let newRow = {
-                    mat_grp_name : data[0].mat_grp_name,
-                    mat_code : data[0].mat_code,
-                    mat_name : data[0].mat_name,
-                    unit_name : data[0].unit_name,
-                    order_qty : data[0].order_qty,
-                    ship_qty : data[0].ship_qty,
-                    description : data[0].description
-                };
-                cv.addNew(newRow);
+                for(let i=0; i < data.length; i++){
+                    let newRow = {
+                        mat_grp_name : data[i].mat_grp_name,
+                        mat_code : data[i].mat_code,
+                        mat_name : data[i].mat_name,
+                        unit_name : data[i].unit_name,
+                        order_qty : data[i].order_qty,
+                        ship_qty : data[i].ship_qty,
+                        description : data[i].description
+                    };
+                    cv.addNew(newRow);
+                }
+
             }
 
             searchMain() {

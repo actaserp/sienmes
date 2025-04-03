@@ -114,6 +114,7 @@ public class ShipmentDoaController {
 						this.sujuRepository.save(su);
 					}
 				}
+
 				smh.setState("shipped");
 				smh.setTotalQty((float)orderSum);
 				smh.set_audit(user);

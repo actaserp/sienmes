@@ -96,8 +96,8 @@ public class ShipmentOrderController {
 		
 		AjaxResult result = new AjaxResult();
 		
-		Timestamp today = new Timestamp(System.currentTimeMillis());
-		Timestamp shipDate = CommonUtil.tryTimestamp(Ship_date);
+		Timestamp today = new Timestamp(System.currentTimeMillis());  //shipment_head의 OrderDate 컬럼값 yyyy-MM-dd
+		Timestamp shipDate = CommonUtil.tryTimestamp(Ship_date); //shipment_head의 ShipDate 컬럼값 yyyy-MM-dd
 		
 		List<Map<String, Object>> data = CommonUtil.loadJsonListMap(Q.getFirst("Q").toString());
 		ShipmentHead smh = new ShipmentHead();
