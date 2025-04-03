@@ -118,7 +118,7 @@
                  <div class="h-280" data-ax5grid="bom-grid" ></div>
              </div>-->
             <div class="container-fluid">
-                <div id="bom-grid" style="height: 280px; max-height: 280px;"></div>
+                <div id="bom-grid" style="height: 300px; max-height: 300px;"></div>
             </div>
         </section>
 
@@ -184,20 +184,7 @@
                 </section>
                 <!--section2-->
                 <section class="tab-item" id="tab_tree" style="border-top-left-radius: 0;">
-                    <!--<div class="section-top">
-                        <div class="button-wrap">
-                            <ul>
-                                <li>
-                                    <button type="button" class="btn-default" id="btnBomTreeView"><i
-                                            class="fas fa-search"></i></button>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>-->
                     <div>
-                        <!-- <div class="grid_box">
-                             <div class="h-600" data-ax5grid="bomtree-grid" ></div>
-                         </div>-->
                         <div class="container-fluid">
                             <div id="bomtree-grid" style="height: 240px; max-height: 240px;"></div>
                         </div>
@@ -715,6 +702,16 @@
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            let item = sender.rows[e.row].dataItem; // 현재 행의 데이터 아이템
+                            if (item && item.children && item.children.length > 0) {
+                                // 부모(그룹) 행 배경색
+                                e.cell.style.backgroundColor = '#f0fcf7';
+                            } else {
+                                // 자식(일반) 행 배경색
+                                e.cell.style.backgroundColor = '#ffffff';
+                            }
+                        }
                     },
                     columns: [
                         {binding: 'mat_type', header: '품목구분', width: 120, align: 'center'},
@@ -1155,9 +1152,10 @@
 
                 if (result.success) {
                     try {
-                        _this.grid3.itemsSource = new wijmo.collections.CollectionView(result.data);
+                        let treeData = this.buildTree(result.data);
+                        _this.grid3.itemsSource = new wijmo.collections.CollectionView(treeData);
 
-                        if (!result.data || result.data.length === 0) {
+                        if (!treeData || treeData.length === 0) {
                             Alert.alert('', '조회된 데이터가 없습니다.');
                         }
                     } catch (ex) {
@@ -1168,6 +1166,32 @@
                     Alert.alert('', '데이터를 불러오는 데 실패했습니다.');
                 }
             }
+
+            buildTree(flatData) {
+                let tree = [];
+                let lookup = {};
+
+                // 모든 데이터를 lookup 객체에 저장 (my_key를 키로 사용)
+                flatData.forEach(item => {
+                    lookup[item.my_key] = { ...item, children: [] };
+                });
+
+                // 트리 구조로 변환
+                flatData.forEach(item => {
+                    if (item.parent_key) {
+                        // 부모가 있으면 부모의 children 배열에 추가
+                        if (lookup[item.parent_key]) {
+                            lookup[item.parent_key].children.push(lookup[item.my_key]);
+                        }
+                    } else {
+                        // 부모가 없으면 최상위 노드
+                        tree.push(lookup[item.my_key]);
+                    }
+                });
+
+                return tree;
+            }
+
 
 
 

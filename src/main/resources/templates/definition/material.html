@@ -118,7 +118,7 @@
             <div class="tab-wrap">
                 <ul class="tab-links">
                     <li><a href="#tab_basic" name="tabs_basic">기본정보</a></li>
-                    <li><a href="#tab_production" name="tab_production">생살/출하정보</a></li>
+                    <li><a href="#tab_production" name="tab_production">생산/출하정보</a></li>
                     <li><a href="#tab_inventory" name="tab_inventory">발주/재고정보</a></li>
                     <li><a href="#tab_bom" name="tab_bom">BOM</a></li>
                     <li><a href="#tab_bom_reverse" name="tab_bom_reverse">BOM(역전개)</a></li>
@@ -495,7 +495,7 @@
 
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd; text-align: center; vertical-align: middle;">
                                             <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                                                <input type="checkbox" id="lot_use_yn" name="lot_use_yn" value="Y" checked>
+                                                <input type="checkbox" id="lot_use_yn" name="lot_use_yn" value="Y" >
                                             </div>
                                         </td>
                                     </tr>
@@ -647,9 +647,9 @@
                                 </form>
                             </div>
                             <div class="button-wrap">
-                                <small2>단가정보는 왼쪽 버튼을 통해 별도로 저장됩니다. 기존 이력을 남기려면 단가등록/변경 버튼을 누르시고 이력을 남기지 않으시려면 단가 수정 버튼을
+                                <!--<small2>단가정보는 왼쪽 버튼을 통해 별도로 저장됩니다. 기존 이력을 남기려면 단가등록/변경 버튼을 누르시고 이력을 남기지 않으시려면 단가 수정 버튼을
                                     누르십시오.
-                                </small2>
+                                </small2>-->
                                 <ul class="button-list">
                                     <li>
                                         <button type="button" class="btn-default" id="btnPriceHistory"
@@ -910,6 +910,7 @@
                     if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
                         let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
                         let mat_pk = selectedRowData.id; // 품목 ID 가져오기
+                        /*console.log(selectedRowData);*/
 
                         // 상세 정보 표시
                         _this.showDetail(mat_pk);
@@ -1170,6 +1171,16 @@
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            let item = sender.rows[e.row].dataItem; // 현재 행의 데이터 아이템
+                            if (item && item.children && item.children.length > 0) {
+                                // 부모(그룹) 행 배경색
+                                e.cell.style.backgroundColor = '#f0fcf7';
+                            } else {
+                                // 자식(일반) 행 배경색
+                                e.cell.style.backgroundColor = '#ffffff';
+                            }
+                        }
                     },
                     columns: [
                         {binding: '_level', header: '레벨', width: 100, align: 'left'},
@@ -1252,6 +1263,16 @@
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            let item = sender.rows[e.row].dataItem; // 현재 행의 데이터 아이템
+                            if (item && item.children && item.children.length > 0) {
+                                // 부모(그룹) 행 배경색
+                                e.cell.style.backgroundColor = '#f0fcf7';
+                            } else {
+                                // 자식(일반) 행 배경색
+                                e.cell.style.backgroundColor = '#ffffff';
+                            }
                         }
                     },
                     columns: [
@@ -1479,11 +1500,12 @@
 
             // 탭 내부 dropdown load
             initForm() {
-                AjaxUtil.fillSelectOptions($('#MaterialGroup_id'), 'material_group', 'choose', false); // 품목그룹
-                AjaxUtil.fillSelectOptions($('#Unit_id'), 'unit', 'choose', false); // 단위
-                AjaxUtil.fillSelectOptions($('#StoreHouse_id'), 'store_house', 'choose', false); // 창고
+                AjaxUtil.fillSelectOptions($('#MaterialGroup_id'), 'material_group', '', false); // 품목그룹
+                AjaxUtil.fillSelectOptions($('#Unit_id'), 'unit', '', false); // 단위
+                AjaxUtil.fillSelectOptions($('#StoreHouse_id'), 'store_house', '', false); // 창고
+                AjaxUtil.fillSelectOptions($('#WorkCenter_id'), 'workcenter', '', false); // 워크센터
+
                 AjaxUtil.fillSelectOptions($('#Factory_id'), 'factory', "", false); // 공장
-                AjaxUtil.fillSelectOptions($('#WorkCenter_id'), 'workcenter', "choose", false); // 워크센터
                 AjaxUtil.fillSelectOptions($('#ManagementLevel'), 'user_code', 'choose', false, 'mat_manage_level');
                 AjaxUtil.fillSelectOptions($('#EquipmentGroup_id'), 'equipment_group', 'choose', false); // 설비그룹
                 AjaxUtil.fillSelectOptions($('#Routing_id'), 'routing', 'choose', false); // 라우팅
@@ -1495,6 +1517,7 @@
                 AjaxUtil.fillSelectOptions($('#cboTestMasterGroup'), 'test_master_group', 'choose', false); // 검사마스터
                 AjaxUtil.fillSelectOptions($('#cboTestMaster'), 'test_master', 'choose', false); // 검사마스터
             }
+
 
             setButtonState() {
                 let pk = $('#matBasicForm').find('#id').val();
@@ -1807,7 +1830,7 @@
                 }
 
                 let fnSuccess = function (res) {
-                    console.log("서버 응답:", res);  // 서버 응답을 콘솔에 출력
+                    /*console.log("서버 응답:", res);*/  // 서버 응답을 콘솔에 출력
                     if (!res.success) {
                         console.error("서버 오류 메시지:", res.message);  // 오류 메시지 확인
                         Alert.alert('', '저장실패: ' + res.message);
@@ -2424,7 +2447,7 @@
 
                     // 서버에 데이터 전송
                     AjaxUtil.postAsyncData(url, data, function(result) {
-                        console.log(result);
+                        /*console.log(result);*/
                         if (result.data != null) {
                             Alert.alert('', "삭제되었습니다.");
                             page.showTestList(mat_id); // 갱신된 데이터 반영

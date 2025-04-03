@@ -1,8 +1,10 @@
 package mes.app.definition.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import mes.domain.repository.ProcessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
@@ -12,8 +14,13 @@ import io.micrometer.core.instrument.util.StringUtils;
 import mes.domain.services.CommonUtil;
 import mes.domain.services.SqlRunner;
 
+import javax.transaction.Transactional;
+
 @Service
 public class ProcessService {
+
+	@Autowired
+	ProcessRepository processRepository;
 	
 	@Autowired
 	SqlRunner sqlRunner;
@@ -148,5 +155,18 @@ public class ProcessService {
 		}
 		return this.sqlRunner.execute(sql, dicParam);
 	}
+
+	@Transactional
+	public List<String> getSuggestions(String query, String field) {
+
+		return switch (field) {
+			case "process_type" -> processRepository.findProcessTypeByQuery(query);
+
+			// 다른 필드에 대한 처리
+			default -> new ArrayList<>();
+		};
+	}
+
+
 
 }

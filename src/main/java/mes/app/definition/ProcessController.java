@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -245,6 +246,14 @@ public class ProcessController {
 	    this.sqlRunner.execute(sql2, dicParam);
 		return result;
 	}
+
+
+	@GetMapping("/autocomplete")
+	public ResponseEntity<List<String>> autocomplete(@RequestParam String query, @RequestParam String field) {
+		List<String> suggestions = processService.getSuggestions(query, field);
+		return ResponseEntity.ok(suggestions);
+	}
+
 
 
 }

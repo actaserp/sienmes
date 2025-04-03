@@ -121,6 +121,7 @@
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                             <input type="text" id="process_type" name="process_type"
                                                    style="width: 100%;">
+                                            <ul id="suggestions-process_type" class="suggestions-list"></ul>
                                         </td>
                                         <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                             <label for="process_code"><span class="eq">*</span>공정코드</label>
@@ -741,6 +742,151 @@
             AjaxUtil.postAsyncData(url + "/save_proc_stop_cause", param, fnSuccess);
         }
 
+        // 자동완성
+        let debounceTimeout;
+        let selectedSuggestionIndex = -1;
+        let suggestionsVisible = false;
+
+        function fetchSuggestions(inputId, apiUrl, suggestionId) {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                const inputField = document.getElementById(inputId);
+                let suggestionsList = document.getElementById(suggestionId);
+
+                if (!inputField || !suggestionsList) return;
+
+                const inputClearDiv = inputField.parentElement;
+                inputClearDiv.appendChild(suggestionsList);
+
+                const query = inputField.value;
+                if (query.length > 0) {
+                    fetch(`${apiUrl}?query=${encodeURIComponent(query)}&field=${encodeURIComponent(inputId)}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            const previousSelectedText = (selectedSuggestionIndex >= 0 && selectedSuggestionIndex < data.length) ? data[selectedSuggestionIndex] : null;
+                            suggestionsList.innerHTML = '';
+                            if (data.length > 0) {
+                                suggestionsVisible = true;
+                                suggestionsList.style.display = 'block'; // 결과가 있을 때만 표시
+                                data.forEach((item, index) => {
+                                    let li = document.createElement('li');
+                                    li.textContent = item;
+                                    li.setAttribute('data-index', index);
+                                    li.onclick = function () {
+                                        document.getElementById(inputId).value = this.textContent;
+                                        suggestionsList.innerHTML = '';
+                                        suggestionsList.style.display = 'none';
+                                        suggestionsVisible = false;
+                                    };
+                                    suggestionsList.appendChild(li);
+                                    // 이전에 선택한 항목을 다시 선택 상태로 설정
+                                    if (item === previousSelectedText) {
+                                        selectedSuggestionIndex = index;
+                                        li.classList.add('selected');
+                                    }
+                                });
+                            } else {
+                                suggestionsList.style.display = 'none'; // 결과가 없으면 숨김
+                                suggestionsVisible = false;
+                                selectedSuggestionIndex = -1;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Fetch error:', error);
+                            suggestionsList.style.display = 'none'; // 오류 시 숨김
+                            suggestionsVisible = false;
+                            selectedSuggestionIndex = -1;
+                        });
+                } else {
+                    suggestionsList.innerHTML = '';
+                    suggestionsList.style.display = 'none';
+                    suggestionsVisible = false;
+                    selectedSuggestionIndex = -1;
+                }
+            }, 300);  // 300ms의 디바운스 타임 적용
+        }
+
+        // 자동완성 기능
+        function initializeAutoComplete(inputId, apiUrl, suggestionId) {
+            const inputField = document.getElementById(inputId);
+
+            let preventFetchOnEnter = false;  // Enter 키로 선택했을 때 검색을 방지하기 위한 플래그
+
+            inputField.addEventListener('keyup', (event) => {
+                if (event.key !== 'Enter' && event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && !preventFetchOnEnter) {
+                    fetchSuggestions(inputId, apiUrl, suggestionId);
+                }
+                // Enter 키가 눌렸을 경우에는 검색을 방지
+                preventFetchOnEnter = false;  // 플래그 초기화
+            });
+
+            inputField.addEventListener('keydown', function (event) {
+                const suggestionsList = document.getElementById(suggestionId);
+                const items = suggestionsList.getElementsByTagName('li');
+
+                if (suggestionsVisible) {
+                    if (event.key === 'ArrowDown') {
+                        // 아래 화살표 키를 누르면
+                        event.preventDefault(); // 기본 동작 방지
+                        selectedSuggestionIndex = (selectedSuggestionIndex + 1) % items.length;
+                        updateSuggestionSelection(items);
+                    } else if (event.key === 'ArrowUp') {
+                        // 위 화살표 키를 누르면
+                        event.preventDefault(); // 기본 동작 방지
+                        selectedSuggestionIndex = (selectedSuggestionIndex - 1 + items.length) % items.length;
+                        updateSuggestionSelection(items);
+                    } else if (event.key === 'Enter') {
+                        // Enter 키를 누르면
+                        if (selectedSuggestionIndex >= 0) {
+                            event.preventDefault(); // 기본 동작 방지
+                            items[selectedSuggestionIndex].click();
+                            preventFetchOnEnter = true;  // 엔터로 선택한 후 검색 방지
+                            suggestionsVisible = false; // Enter 키를 누르면 선택을 확정하고 목록을 숨김
+                            // inputField.blur(); // 입력 필드 포커스 해제
+                        }
+                    } else if (event.key === 'Escape') {
+                        // Escape 키를 누르면
+                        suggestionsList.style.display = 'none';
+                        suggestionsVisible = false;
+                    }
+                }
+            });
+
+            // 포커스 해제 시 자동 완성 목록 숨기기
+            inputField.addEventListener('blur', function () {
+                setTimeout(function () {
+                    const suggestionsList = document.getElementById(suggestionId);
+                    suggestionsList.style.display = 'none';
+                    suggestionsVisible = false;
+                }, 300); // 300ms 지연 시간
+            });
+
+            // 마우스 클릭으로 선택 시에도 검색 방지
+            document.getElementById(suggestionId).addEventListener('click', function (event) {
+                if (event.target.tagName === 'LI') {
+                    preventFetchOnEnter = true;
+                }
+            });
+        }
+
+        function updateSuggestionSelection(items) {
+            // 모든 항목의 선택 상태 초기화
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove('selected');
+            }
+
+            // 현재 선택된 항목에 선택 상태 추가
+            if (selectedSuggestionIndex >= 0 && selectedSuggestionIndex < items.length) {
+                items[selectedSuggestionIndex].classList.add('selected');
+                items[selectedSuggestionIndex].scrollIntoView({block: 'nearest'});
+            }
+        }
+
 
         $(document.body).ready(function (e) {
             /*setButtonState();*/
@@ -865,6 +1011,20 @@
                 saveStopCause();
             });
 
+            document.querySelectorAll('input[type="text"]').forEach(function (input) {
+                input.setAttribute('autocomplete', 'off');
+            });
+
+            const autoCompleteFields = [
+                {
+                    inputId: 'process_type',
+                    suggestionId: 'suggestions-process_type',
+                    apiUrl: '/api/definition/process/autocomplete'
+                },
+            ]
+            autoCompleteFields.forEach(field => {
+                initializeAutoComplete(field.inputId, field.apiUrl, field.suggestionId);
+            });
         });
 
     </script>
