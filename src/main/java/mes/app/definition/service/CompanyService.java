@@ -55,6 +55,7 @@ public class CompanyService {
             , "PaymentCondition" as payment_condition
             , "Description" as description
             , "GroupName" as group_name
+            , relyn as relyn
             from company c 
             where 1 = 1
 			""";
@@ -111,6 +112,7 @@ public class CompanyService {
             , "UnpaidAmount" as unpaid_amount
             , "ManageRemark" as manage_remark
             , "GroupName" as group_name
+             , relyn as relyn
             from company c 
             Where id = :company_id
 			""";
@@ -216,6 +218,7 @@ public class CompanyService {
             , mcu."ApplyEndDate"::date as apply_end_date
             , mcu."ChangeDate" as change_date
             , mcu."ChangerName" as changer_name 
+            , mcu."Type" as type
             from mat_comp_uprice mcu 
             inner join material m on m.id = mcu."Material_id"
             left join mat_grp mg on mg.id = m."MaterialGroup_id"

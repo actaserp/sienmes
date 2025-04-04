@@ -279,10 +279,18 @@
                                     </tr>
 
                                    <tr>
-                                        <th>
+                                       <th>
+                                           <label for="relyn">거래중지여부</label>
+                                       </th>
+                                       <td style="text-align: center;">
+                                           <input type="checkbox" id="relyn" name="relyn" value="1" style="display: block; margin: auto; height: 26px; width: 26px;">
+                                       </td>
+
+
+                                       <th>
                                             <label for="description">설명</label>
                                         </th>
-                                        <td colspan="9">
+                                        <td colspan="7">
                                             <input type="text" id="description" name="description"
                                                    style="width: 100%;">
                                           <!--<textarea id="description" name="description"></textarea>-->
@@ -495,6 +503,17 @@
                                             <tbody>
                                             <tr>
                                                 <th>
+                                                    <label for="name">구분</label>
+                                                </th>
+                                                <td>
+                                                    <select id="type" name="type" class="wp100">
+                                                        <option value="01">매입</option>
+                                                        <option value="02">매출</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
                                                     <label for="name">품목그룹</label>
                                                 </th>
                                                 <td>
@@ -503,7 +522,7 @@
                                             </tr>
                                             <tr>
                                                 <th>
-                                                    <label for="company_type">품목명</label>
+                                                    <label for="Material_id">품목명</label>
                                                 </th>
                                                 <td>
                                                     <select id="Material_id" name="Material_id" class="wp100"></select>
@@ -582,6 +601,7 @@
                         {binding: 'email', header: '이메일', width: 150, align: 'left',},
                         {binding: 'zip_code', header: '우편번호', width: 150, align: 'left',},
                         {binding: 'address', header: '주소', width: 300, align: 'left',},
+                        {binding: 'relyn', header: '거래중지여부', width: 150, align: 'center',},
                         {binding: 'our_manager', header: '자사담당자', width: 150, align: 'left',},
                         {binding: 'tranding_bank', header: '거래은행', width: 150, align: 'left',},
                         {binding: 'account_holder', header: '예금주', width: 150, align: 'left',},
@@ -623,6 +643,11 @@
                             let cc2 = item.comp_code2.replace(/(\d{6})(\d{7})/, "$1-$2");
                             e.cell.textContent = cc2;
                         }
+
+                        // 거래중지여부 (1 → 'Y', 0 또는 null → 'N')
+                        if (col.binding === "relyn") {
+                            e.cell.textContent = (item.relyn === 1 || item.relyn === '1') ? 'Y' : 'N';
+                        }
                     }
                 });
 
@@ -653,6 +678,13 @@
                         _this.showDetail(id);
                         $('#priceForm')[0].reset();
                         page.setPriceButtonState();
+
+                        // company_type_name 값에 따라 select 값 변경
+                        if (selectedRowData.company_type_name === "매출처") {
+                            $("#type").val("02").change(); // 매출 선택 후 change 이벤트 트리거
+                        } else if (selectedRowData.company_type_name === "매입처") {
+                            $("#type").val("01").change(); // 매입 선택 후 change 이벤트 트리거
+                        }
                     }
                 });
 
@@ -763,13 +795,14 @@
                         {binding: 'mat_type_name', header: '품목유형', width: 100, align: 'center',},
                         {binding: 'mat_grp_name', header: '품목그룹', width: 100, align: 'center',},
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'center',},
-                        {binding: 'mat_name', header: '품목명', width: 150, align: 'left',},
+                        {binding: 'mat_name', header: '품목명', width: 150, align: 'center',},
                         {binding: 'unit_name', header: '단위', width: 80, align: 'center',},
+                        {binding: 'type', header: '구분', width: 120, align: 'center',},
                         {binding: 'unit_price', header: '단가', width: 120, align: 'right',},
                         {binding: 'former_unit_price', header: '이전단가', width: 120, align: 'right',},
                         {binding: 'apply_start_date', header: '적용시작일', width: 120, align: 'center',},
                         {binding: 'apply_end_date', header: '적용종료일', width: 120, align: 'center',},
-                        {binding: 'changer_name', header: '변경자', width: 120, align: 'left',},
+                        {binding: 'changer_name', header: '변경자', width: 120, align: 'center',},
                         {binding: 'change_date', header: '변경일', width: 200, align: 'center',},
                         {binding: '', header: '', width: "*", align: 'center',},
                     ],
@@ -787,6 +820,19 @@
                         /*_this.showPriceDetail(selectedItem.mcu_id);*/
                         _this.showPriceDetail(selectedItem.id);
 
+                    }
+                });
+
+                this.price_grid.formatItem.addHandler((s, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                        let col = s.columns[e.col];
+                        let item = s.rows[e.row].dataItem;
+
+
+                        // 거래중지여부 (1 → 'Y', 0 또는 null → 'N')
+                        if (col.binding === "type") {
+                            e.cell.textContent = (item.type === '01' || item.type === '02') ? '매입' : '매출';
+                        }
                     }
                 });
 
@@ -878,6 +924,13 @@
                         result.data.comp_code2 = result.data.comp_code2.replace(/(\d{6})(\d{7})/, "$1-$2");
                     }
 
+                    // 거래중지여부 체크박스 상태 설정
+                    if (result.data.relyn === 1 || result.data.relyn === '1') {
+                        $('#relyn').prop('checked', true);
+                    } else {
+                        $('#relyn').prop('checked', false);
+                    }
+
                     // 변환된 데이터 바인딩
                     FormUtil.BindDataForm(result.data, $('#basicForm'));
                     FormUtil.BindDataForm(result.data, $('#manageForm'));
@@ -896,6 +949,7 @@
                 };
                 let result = AjaxUtil.getSyncData(this.url + '/read', data);
                 if (result != null) {
+                    console.log(result.data);
                     _this.viewData.sourceCollection = result.data;
                 }
 
@@ -947,6 +1001,7 @@
 
                 let result = AjaxUtil.getSyncData(this.url + '/read_price_history', data);
                 if (result != null) {
+                    console.log(result.data);
                     _this.viewData2.sourceCollection = result.data;
 
                     $('#priceForm')[0].reset();
@@ -1193,7 +1248,7 @@
             page = new CompanyPage();
 
             AjaxUtil.fillSelectOptions($('#cboCompanyType'), 'system_code', 'choose', false, 'company_type');
-            AjaxUtil.fillSelectOptions($('#cboGroupName'), 'groupName', 'choose', false);
+            /*AjaxUtil.fillSelectOptions($('#cboGroupName'), 'system_code', 'choose', false,'company_group');*/
 
             AjaxUtil.fillSelectOptions($('#company_type'), 'system_code', 'choose', false, 'company_type');
 
@@ -1249,8 +1304,15 @@
                 let company_id = $('#basicForm').find('#id').val();
 
                 //let mat_id = $('#materialBasicForm').find('#id').val();
-                if (company_id)
+                if (company_id) {
+                    // 기존 #type 값 저장
+                    let selectedType = $("#type").val();
+
                     page.showPriceHistoryList(company_id);
+
+                    // reset() 후 다시 기존 값 설정
+                    $("#type").val(selectedType).change();
+                }
             });
 
             // 단가정보 신규버튼

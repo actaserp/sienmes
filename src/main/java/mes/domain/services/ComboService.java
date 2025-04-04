@@ -41,6 +41,7 @@ public class ComboService {
 		this._dicFunc_.put("equipment", this.equipment);
 		this._dicFunc_.put("equipment_ccp", this.equipment_ccp);
 		this._dicFunc_.put("equipment_gongmu", this.equipment_gongmu);
+		this._dicFunc_.put("equipment_code", this.equipment_code);
 		this._dicFunc_.put("equipment_group", this.equipment_group);
 		this._dicFunc_.put("equipment_type", this.equipment_type);
 		this._dicFunc_.put("factory", this.factory);
@@ -272,7 +273,31 @@ public class ComboService {
         dicParam.addValue("cond3", cond3);
         return this.sqlRunner.getRows(sql, dicParam);		
 	};
-	
+
+	ComboDataFunction equipment_code=(String cond1, String cond2, String cond3)-> {
+		String sql = "select " +
+					 "              rd.id as value" +
+					 "              , rd.\"DataPk1\" as \"WorkCenter_id\"" +
+					 "              , rd.\"DataPk2\" as \"value\"" +
+					 "              , e.\"Name\" as \"EquipmentName\"" +
+					 "              , wc.\"Name\" as \"WorkCenterName\"" +
+					 "              , e.\"Code\" as \"text\"" +
+					 "            from rela_data rd " +
+					 "                left join work_center wc on wc.id = rd.\"DataPk1\"" +
+					 "                left join equ e on e.id = rd.\"DataPk2\"" +
+					 "            where rd.\"TableName1\"='work_center' and rd.\"TableName2\"='equ'";
+
+		if (StringUtils.hasText(cond1)) {
+			sql += " and rd.\"DataPk1\" = :cond1"; // 중복 방지
+		}
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("cond1", Integer.parseInt(cond1));
+		dicParam.addValue("cond2", cond2);
+		dicParam.addValue("cond3", cond3);
+		return this.sqlRunner.getRows(sql, dicParam);
+	};
+
 	ComboDataFunction equipment_group=(String cond1, String cond2, String cond3)-> { 
 		String sql = "select id as value,\"Name\" as text from equ_grp order by \"Name\" ";
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();

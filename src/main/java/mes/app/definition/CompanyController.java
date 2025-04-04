@@ -94,6 +94,7 @@ public class CompanyController {
 			@RequestParam("zip_code") String zipCode,
 			@RequestParam("address") String address,
 			@RequestParam("description") String description,
+			@RequestParam("relyn") String relyn,
 			//관리 정보
 			@RequestParam("our_manager") String ourManager,
 			@RequestParam("sales_manager") String salesManager,
@@ -139,6 +140,7 @@ public class CompanyController {
 		company.setZipCode(zipCode);
 		company.setAddress(address);
 		company.setDescription(description);
+		company.setRelyn(relyn);
 		//관리정보
 		company.setOurManager(ourManager);
 		company.setSalesManager(salesManager);

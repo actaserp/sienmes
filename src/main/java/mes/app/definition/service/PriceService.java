@@ -25,6 +25,7 @@ public class PriceService {
 		Timestamp applyEndDate = CommonUtil.tryTimestamp("2100-12-31");
 		Float unitPrice = CommonUtil.tryFloatNull(data.getFirst("UnitPrice"));
 		String changerName = CommonUtil.tryString(data.getFirst("ChangerName"));
+		String type = CommonUtil.tryString(data.getFirst("type"));
 		Integer userId = CommonUtil.tryIntNull(data.getFirst("user_id").toString());
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
@@ -35,6 +36,7 @@ public class PriceService {
 		dicParam.addValue("unitPrice", unitPrice);
 		dicParam.addValue("changerName", changerName);
 		dicParam.addValue("userId", userId);
+		dicParam.addValue("type", type);
 		dicParam.addValue("formerUnitPrice", null);
 		
 		String sql = """
@@ -72,7 +74,8 @@ public class PriceService {
 				, "UnitPrice"
 				, "FormerUnitPrice"
 				, "ChangeDate"
-				, "ChangerName")
+				, "ChangerName"
+				, "Type")
 				VALUES(
 				now()
 				, :userId
@@ -83,7 +86,8 @@ public class PriceService {
 				, :unitPrice
 				, :formerUnitPrice
 				, now()
-				, :changerName )
+				, :changerName
+				, :type)
 				""";
 		return this.sqlRunner.execute(sql, dicParam);
 	}
@@ -94,7 +98,7 @@ public class PriceService {
 		Float unitPrice = CommonUtil.tryFloatNull(data.getFirst("UnitPrice"));
 		String changerName = CommonUtil.tryString(data.getFirst("ChangerName"));
 		Integer userId = CommonUtil.tryIntNull(data.getFirst("user_id").toString());
-		
+
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("priceId", priceId);
 		dicParam.addValue("applyStartDate", applyStartDate, java.sql.Types.TIMESTAMP);
