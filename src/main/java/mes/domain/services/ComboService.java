@@ -276,12 +276,12 @@ public class ComboService {
 
 	ComboDataFunction equipment_code=(String cond1, String cond2, String cond3)-> {
 		String sql = "select " +
-					 "              rd.id as value" +
+					 "              rd.id as id" +
 					 "              , rd.\"DataPk1\" as \"WorkCenter_id\"" +
 					 "              , rd.\"DataPk2\" as \"value\"" +
-					 "              , e.\"Name\" as \"EquipmentName\"" +
+					 "              , e.\"Name\" as \"text\"" +
 					 "              , wc.\"Name\" as \"WorkCenterName\"" +
-					 "              , e.\"Code\" as \"text\"" +
+					 "              , e.\"Code\" as \"Code\"" +
 					 "            from rela_data rd " +
 					 "                left join work_center wc on wc.id = rd.\"DataPk1\"" +
 					 "                left join equ e on e.id = rd.\"DataPk2\"" +
