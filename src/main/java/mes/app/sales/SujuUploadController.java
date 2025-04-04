@@ -217,7 +217,7 @@ public class SujuUploadController {
 			        continue;
 			    }
 			    
-			}
+		}
 			
 
 		result.success=true;
