@@ -22,107 +22,170 @@
     <script src="/js/ui.js"></script> <!-- Common js -->
     <script src="/js/utilscript.js"></script> <!-- 박광열 -->
 
+    <style>
+        .left{
+            cursor: pointer;
+        }
 
+        .hidden {
+            display: none !important;
+        }
+
+        .menu_area {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateX(0); /* 기본 위치 */
+            opacity: 1;
+            width: 250px; /* 메뉴 너비 */
+            position: absolute; /* 왼쪽 고정 */
+            left: 0;
+        }
+
+        /* 메뉴가 사라질 때 */
+        .menu_area.hidden {
+            transform: translateX(-250px); /* 부드럽게 왼쪽으로 사라짐 */
+            opacity: 0;
+            pointer-events: none; /* 클릭 방지 */
+        }
+
+        /* 메뉴가 다시 나타날 때 부드럽게 애니메이션 */
+        .menu_area:not(.hidden) {
+            animation: menuFadeIn 0.3s ease-in-out;
+        }
+
+        /* 컨텐츠 영역 */
+        .con_area {
+            transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
+            width: calc(100% - 250px); /* 기본적으로 메뉴 너비만큼 줄어든 상태 */
+            left: 250px; /* 메뉴가 있을 때 기본 위치 */
+        }
+
+        /* 메뉴가 사라지면 컨텐츠 영역 확장 */
+        .menu_area.hidden + .con_area {
+            width: 100%;
+            left: 0;
+        }
+
+        /* 부드럽게 나오는 애니메이션 */
+        @keyframes menuFadeIn {
+            0% {
+                transform: translateX(-250px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+    </style>
 </head>
 
 <body>
-<div class="wrap">
+<div class="page-wrapper sub-page">
     <div class="dashboard-layout-header">
         <header>
-            <div class="left" style="display: flex; align-items: center; margin-left: 20px;">
-                <div class="logo" style="display: flex; align-items: center;">
-                    <img src="/images/logo/actas_log.png" alt="로고" style="max-width: 40%; height: auto; margin-right: 10px;">
-                    <h4 style="margin: 0;">ERP</h4>
+            <div class="left">
+                <div class="logo">
+                    <img src="/images/logo/actas_log.png" alt="로고" >
+                    <h1>MES</h1>
                 </div>
             </div>
             <div class="right">
-
-                <div class="weather">
-                    <div class="wt-main">
-                        <p id="area"></p>
-                        <div class="wt-graphic">
-                            <img id="weatherIcon" src="" alt="">
-                            <!--                            <p id="temperature"></p> &lt;!&ndash; 기존의 <span> 태그를 제거 -->
-                            <p id="temperature"></p>
+                <div id="navbarBarMenu2">
+                    <div class="open_menu">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+                <div class="header-info">
+                    <div class="weather">
+                        <div class="wt-main">
+                            <p id="area"></p>
+                            <div class="wt-graphic">
+                                <img id="weatherIcon" src="" alt="">
+                                <!--                            <p id="temperature"></p> &lt;!&ndash; 기존의 <span> 태그를 제거 -->
+                                <p id="temperature"></p>
+                            </div>
+                        </div>
+                        <div class="wt-detail">
+                            <ul>
+                                <li>
+                                    <img src="/images/icon/ico-umbrella.svg" alt="강수">
+                                    <p id="precipitationProbability"></p>
+                                </li>
+                                <li>
+                                    <img src="/images/icon/ico-water.svg" alt="습도">
+                                    <p id="humidity"></p>
+                                </li>
+                                <li>
+                                    <img src="/images/icon/ico-wind.svg" alt="풍속">
+                                    <p id="windSpeed"></p>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-                    <div class="wt-detail">
+                    <!-- 알람 -->
+                    <a href="#" class="alarm" title="알람">
+                        <img src="/images/icon/ico-bell.svg" alt="알람 아이콘">
+                        <span>알람</span>
+                        <span class="num">0</span>
+                    </a>
+                    <div class="alarm-box" style="width: 1000px;">
+                        <ul class="alarm-tab-links">
+                            <li class="active">
+                                <a href="#alarm-tab1" title="주문의뢰">주문의뢰(0)</a> <!-- 동적으로 업데이트 -->
+                            </li>
+                        </ul>
+                        <div class="alarm-tab-contents">
+                            <div class="alarm-tab-item" id="alarm-tab1">
+                                <div class="table-wrap">
+                                    <table>
+                                        <caption>알람 테이블</caption>
+                                        <colgroup>
+                                            <col class="wp30"> <!-- 날짜 -->
+                                            <col class="wp45"> <!-- 업체 이름 -->
+                                            <col class="wp25"> <!-- 주문 상태 -->
+                                        </colgroup>
+                                        <thead>
+                                        <tr>
+                                            <th>날    짜</th>
+                                            <th>업체 이름</th>
+                                            <th>주문 상태</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <!-- 알림 데이터가 여기 동적으로 추가됨 -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <a href="#" title="확인" class="btn-gray" id="AlarmOk" onclick="AlarmOk()">확인</a>
+                        </div>
+                    </div>
+                    <!-- 알람 -->
+                    <!-- 사용자 로그인 상태-->
+                    <a class="user" title="사용자">
+    <!--                    <span id="spplannm-display"></span>-->
+    <!--                    <span style="padding:0 5px">·</span>-->
+                        <span>관리자</span>
+                        <span style="padding:0 5px">·</span>
+                        <span id="userName2" th:text="${ username }"></span>
+                        <span>(</span>
+                        <span id="userName3" th:text="${ userid }"></span>
+                        <span>)</span>
+                        <span style="padding-right: 8px">님</span>
+                    </a>
+                    <div class="user-box">
                         <ul>
-                            <li>
-                                <img src="/images/icon/ico-umbrella.svg" alt="강수">
-                                <p id="precipitationProbability"></p>
+                            <li id="myinfo">
+                                <a href="#" title="내 정보" data-popup="popup1" onclick="UserInfo()">내 정보</a>
                             </li>
-                            <li>
-                                <img src="/images/icon/ico-water.svg" alt="습도">
-                                <p id="humidity"></p>
-                            </li>
-                            <li>
-                                <img src="/images/icon/ico-wind.svg" alt="풍속">
-                                <p id="windSpeed"></p>
+                            <li id="logout">
+                                <a href="#" title="로그아웃">로그아웃</a>
                             </li>
                         </ul>
                     </div>
-                </div>
-                <!-- 알람 -->
-                <a href="#" class="alarm" title="알람">
-                    <img src="/images/icon/ico-bell.svg" alt="알람 아이콘">
-                    <span>알람</span>
-                    <span class="num">0</span>
-                </a>
-                <div class="alarm-box" style="width: 1000px;">
-                    <ul class="alarm-tab-links">
-                        <li class="active">
-                            <a href="#alarm-tab1" title="주문의뢰">주문의뢰(0)</a> <!-- 동적으로 업데이트 -->
-                        </li>
-                    </ul>
-                    <div class="alarm-tab-contents">
-                        <div class="alarm-tab-item" id="alarm-tab1">
-                            <div class="table-wrap">
-                                <table>
-                                    <caption>알람 테이블</caption>
-                                    <colgroup>
-                                        <col class="wp30"> <!-- 날짜 -->
-                                        <col class="wp45"> <!-- 업체 이름 -->
-                                        <col class="wp25"> <!-- 주문 상태 -->
-                                    </colgroup>
-                                    <thead>
-                                    <tr>
-                                        <th>날    짜</th>
-                                        <th>업체 이름</th>
-                                        <th>주문 상태</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <!-- 알림 데이터가 여기 동적으로 추가됨 -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <a href="#" title="확인" class="btn-gray" id="AlarmOk" onclick="AlarmOk()">확인</a>
-                    </div>
-                </div>
-                <!-- 알람 -->
-                <!-- 사용자 로그인 상태-->
-                <a class="user" title="사용자">
-<!--                    <span id="spplannm-display"></span>-->
-<!--                    <span style="padding:0 5px">·</span>-->
-                    <span>관리자</span>
-                    <span style="padding:0 5px">·</span>
-                    <span id="userName2" th:text="${ username }"></span>
-                    <span>(</span>
-                    <span id="userName3" th:text="${ userid }"></span>
-                    <span>)</span>
-                    <span style="padding-right: 8px">님</span>
-                </a>
-                <div class="user-box">
-                    <ul>
-                        <li id="myinfo">
-                            <a href="#" title="내 정보" data-popup="popup1" onclick="UserInfo()">내 정보</a>
-                        </li>
-                        <li id="logout">
-                            <a href="#" title="로그아웃">로그아웃</a>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </header>
@@ -148,34 +211,42 @@
                         <nav class="layout-nav sidebar-tabcont" id="menu">
                             <ul class="dep1">
                                 <li class="dep1-1">
-                                    <a href="#a" title="대시보드" class="ico-lnb01">
-                                        대시보드
+                                    <a href="#a" title="모니터링" class="ico-lnb01">
+                                        모니터링
                                     </a>
-                                    <ul class="dep2" id="dep2-dashboard">
-
-                                    </ul>
-                                </li>
-<!--                                <li class="dep1-1">-->
-<!--                                    <a href="#a" title="일지 및 데이터" class="ico-lnb02">-->
-<!--                                        일지 및 데이터-->
-<!--                                    </a>-->
-<!--                                    <ul class="dep2" id="dep2-order-request">-->
-
-<!--                                    </ul>-->
-<!--                                </li>-->
-                                <li class="dep1-1">
-                                    <a href="#a" title="관리 메뉴" class="ico-lnb03">
-                                        관리 메뉴
-                                    </a>
-                                    <ul class="dep2" id="dep2-order-status">
+                                    <ul class="dep2" id="dep2-monitoring">
 
                                     </ul>
                                 </li>
                                 <li class="dep1-1">
-                                    <a href="#a" title="조치 및 통계" class="ico-lnb04">
-                                        조치 및 통계
+                                    <a href="#a" title="영업 관리" class="ico-lnb02">
+                                        영업 관리
                                     </a>
-                                    <ul class="dep2" id="dep2-inspection-management">
+                                    <ul class="dep2" id="dep2-sales-management">
+
+                                    </ul>
+                                </li>
+                                <li class="dep1-1">
+                                    <a href="#a" title="구매 자재 관리" class="ico-lnb03">
+                                        구매 자재 관리
+                                    </a>
+                                    <ul class="dep2" id="dep2-purchase-materials">
+
+                                    </ul>
+                                </li>
+                                <li class="dep1-1">
+                                    <a href="#a" title="생산 관리" class="ico-lnb03">
+                                        생산 관리
+                                    </a>
+                                    <ul class="dep2" id="dep2-production-management">
+
+                                    </ul>
+                                </li>
+                                <li class="dep1-1">
+                                    <a href="#a" title="품질 / 보고서 관리" class="ico-lnb04">
+                                        품질 / 보고서 관리
+                                    </a>
+                                    <ul class="dep2" id="dep2-quality-report">
 
                                     </ul>
                                 </li>
@@ -246,17 +317,23 @@
 
     $(document).ready(function () {
 
+        $(".left").click(function () {
+            nthTabs.delAllTab();
+            // window.location.reload();
+        });
+
         // let lang_cd = i18n.getLanguageCode();
         //i18n.initializeCommonData(lang_cd);
         // i18n.initializeMenuData(lang_cd);
 
         // 메뉴 매핑(FrontFolder_id)
         const dep2Mappings = {
-            1: '#dep2-dashboard',  //대시보드
-            2: '#dep2-order-request',  //주문의뢰
-            3: '#dep2-order-status',    // 주문현황
-            4: '#dep2-inspection-management',
-            5: '#dep2-system-settings'
+            1: '#dep2-monitoring',
+            2: '#dep2-sales-management',
+            3: '#dep2-purchase-materials',
+            4: '#dep2-production-management',
+            5: '#dep2-quality-report',
+            6: '#dep2-system-settings'
         };
         nthTabs = $('#main-tabs').nthTabs();
 
@@ -375,6 +452,17 @@
             loadMenu(FrontFolderId, $(dep2Mappings[FrontFolderId]));
         });
 
+        $('#navbarBarMenu2 .open_menu').click(function () {
+            $('.menu_area').toggleClass('hidden'); // 메뉴 숨김 토글
+
+            const isMenuHidden = $('.menu_area').hasClass('hidden');
+
+            $('.con_area, .tab-content').css({
+                'width': isMenuHidden ? '100%' : 'calc(100% - 250px)', // 메뉴가 닫히면 전체 확장
+                'left': isMenuHidden ? '0' : '250px' // 왼쪽으로 확장
+            });
+        });
+
         // 북마크 및 default_menu를 한 번에 처리
         $.getJSON('/api/system/bookmark', function (result) {
             let _data = result.data;
@@ -445,78 +533,79 @@
 
 
         $('.scrollbar-inner').scrollbar();
-        var parentClass = $(this).parent('li');
-        if (!$(this).hasClass('on')) {
-            $('.documents a').removeClass('on');
-            $(this).addClass('on');
-        }
-        if (parentClass.attr('class') == 'documents') {
-            $('.gnb li').removeClass('open');
-            $('.gnb li > ul').slideUp(100);
-        }
-        if (localStorage.getItem('theme-top') === null && localStorage.getItem('theme-left') === null) {
-            dynamicLinkCss('/css/theme-top-mes', '/css/theme-left-mes');
-        } else {
-            dynamicLinkCss(localStorage.getItem('theme-top'), localStorage.getItem('theme-left'));
-        }
+        //
+        // var parentClass = $(this).parent('li');
+        // if (!$(this).hasClass('on')) {
+        //     $('.documents a').removeClass('on');
+        //     $(this).addClass('on');
+        // }
+        // if (parentClass.attr('class') == 'documents') {
+        //     $('.gnb li').removeClass('open');
+        //     $('.gnb li > ul').slideUp(100);
+        // }
+        // if (localStorage.getItem('theme-top') === null && localStorage.getItem('theme-left') === null) {
+        //     dynamicLinkCss('/css/theme-top-mes', '/css/theme-left-mes');
+        // } else {
+        //     dynamicLinkCss(localStorage.getItem('theme-top'), localStorage.getItem('theme-left'));
+        // }
 
         //let _mainUrl = 'wm_dashboard_summary';
-        let _mainUrl = default_menu;
-        // 모바일 구분
-        if ('B' == 'F') {
-            _mainUrl = '#OBJ0000000199';
-            $('#navbarBarMenu1').show();
-            $('#navbarBarMenu2').hide();
-            $('.menu_wrap').addClass('mobile_menu_wrap');
-            $('.menu_area').addClass('mobile_menu_area');
-            $('.con_area').addClass('mobile_con_area');
-        } else {
-            $('#navbarBarMenu1').hide();
-            $('#navbarBarMenu2').show();
-        }
-
-        // 메뉴 자동으로 닫히게
-        if ($(window).innerWidth() < 800) {
-            $('body').addClass('open');
-            $('.wrap').addClass('menu_close');
-            $('.con_area').addClass('open');
-        }
-
-        var jsmedia = window.matchMedia("screen and (max-width:799px)");
-        jsmedia.addListener(function (e) {
-            if (e.matches) {
-                $('body').addClass('open');
-                $('.wrap').addClass('menu_close');
-                $('.con_area').addClass('open');
-                $('.menu_wrap').addClass('mobile_menu_wrap');
-                $('.menu_area').addClass('mobile_menu_area');
-                $('.con_area').addClass('mobile_con_area');
-            } else {
-                $('body').removeClass('open');
-                $('.wrap').removeClass('menu_close');
-                $('.con_area').removeClass('open');
-                $('.menu_wrap').removeClass('mobile_menu_wrap');
-                $('.menu_area').removeClass('mobile_menu_area');
-                $('.con_area').removeClass('mobile_con_area');
-            }
-        });
-
-        //$('#mainlogotitle').text("");
-        $('#mainlogotitle').on('click', function () {
-            nthTabs.toggleTab(_mainUrl);
-        });
-
-        //menu slide(left open)
-        $('.open_menu').click(function () {
-            $(this).toggleClass('menu_close');
-            $('.wrap').toggleClass('menu_close');
-        });
-        //menu slide(left open)
-        $('.open_menu').click(function () {
-            $('.con_area').toggleClass('open');
-            $('.left_area').toggleClass('open');
-            $('body').toggleClass('open');
-        });
+        // let _mainUrl = default_menu;
+        // // 모바일 구분
+        // if ('B' == 'F') {
+        //     _mainUrl = '#OBJ0000000199';
+        //     $('#navbarBarMenu1').show();
+        //     $('#navbarBarMenu2').hide();
+        //     $('.menu_wrap').addClass('mobile_menu_wrap');
+        //     $('.menu_area').addClass('mobile_menu_area');
+        //     $('.con_area').addClass('mobile_con_area');
+        // } else {
+        //     $('#navbarBarMenu1').hide();
+        //     $('#navbarBarMenu2').show();
+        // }
+        //
+        // // 메뉴 자동으로 닫히게
+        // if ($(window).innerWidth() < 800) {
+        //     $('body').addClass('open');
+        //     $('.wrap').addClass('menu_close');
+        //     $('.con_area').addClass('open');
+        // }
+        //
+        // var jsmedia = window.matchMedia("screen and (max-width:799px)");
+        // jsmedia.addListener(function (e) {
+        //     if (e.matches) {
+        //         $('body').addClass('open');
+        //         $('.wrap').addClass('menu_close');
+        //         $('.con_area').addClass('open');
+        //         $('.menu_wrap').addClass('mobile_menu_wrap');
+        //         $('.menu_area').addClass('mobile_menu_area');
+        //         $('.con_area').addClass('mobile_con_area');
+        //     } else {
+        //         $('body').removeClass('open');
+        //         $('.wrap').removeClass('menu_close');
+        //         $('.con_area').removeClass('open');
+        //         $('.menu_wrap').removeClass('mobile_menu_wrap');
+        //         $('.menu_area').removeClass('mobile_menu_area');
+        //         $('.con_area').removeClass('mobile_con_area');
+        //     }
+        // });
+        //
+        // //$('#mainlogotitle').text("");
+        // $('#mainlogotitle').on('click', function () {
+        //     nthTabs.toggleTab(_mainUrl);
+        // });
+        //
+        // //menu slide(left open)
+        // $('.open_menu').click(function () {
+        //     $(this).toggleClass('menu_close');
+        //     $('.wrap').toggleClass('menu_close');
+        // });
+        // //menu slide(left open)
+        // $('.open_menu').click(function () {
+        //     $('.con_area').toggleClass('open');
+        //     $('.left_area').toggleClass('open');
+        //     $('body').toggleClass('open');
+        // });
 
         // TAB메뉴 Context Menu
         $('#tabdragdrop').on('contextmenu', 'li', function (e) {
@@ -562,72 +651,50 @@
             });
         });
 
-        let notify_text = `Yesterday was a history, Tomorrow is a mystery, but today is a gift.
-That's why we called a present
-Divide and Conquer!
-깨진 유리창은 주변에 전파된다
-정품, 정량, 정위치, 청결, 습관화(3정 5S).
-모든 문제를 눈에 보이게 하라.
-Don't Repeat Yourself(DRY).
-Define the problem before solving it.
-No pain, No gain.
-No Input, No Output.
-Gabege In, Gabage Out(GIGO).
-1대 29대 300. 하인리히 법칙.
-갈까 말까 할 때는 가라.
-살까 말까 할 때는 사지 마라.
-말할까 말까 할 때는 말하지 마라.
-줄까 말까 할 때는 줘라.
-성공은 두 번 이루어진다. 한 번은 마음. 그 다음은 리얼.
-배우고 때로 익히면, 또한 즐겁지 아니한가? (공자)
-배워서 남 주자.
-一日不讀書 口中生荊棘 하루라도 책을 읽지 않으면 입안에 가시가 돋힌다.
-측정할 수 없는 것은 개선할 수 없다.
-Quality is planned, designed, and built in-not inspected in.`;
 
-        CR = String.fromCharCode(10);
-        let notify_list = notify_text.split(CR);
-
-        let notify_index = 0;
-
-        let timer = setInterval(function () {
-            return;
-
-            if (notify_index >= notify_list.length)
-                notify_index = 0;
-            let notify_text = notify_list[notify_index];
-            $('#notify_text').text(notify_text);
-            notify_index++;
-        }, 5000);
-
-        // 내정보 클릭
-        $('#myinfo').on('click', function (e) {
-            e.preventDefault();
-            Ax5Modal.open({url: '/page/account/myinfo', width: 400, height: 300});
-            $(".profile_contbox").hide();
-        });
-
-        // 언어설정
-        $('#myLanguage').on('click', function (e) {
-            e.preventDefault();
-            Ax5Modal.open({url: '/page/account/language', width: 400, height: 200});
-            $(".profile_contbox").hide();
-        });
-
-        // 테마변경
-        $('.setting-color > label').on('click', function (e) {
-            dynamicLinkCss($(this).data('load-top-css'), $(this).data('load-left-css'));
-        });
-
-        // 개인정보 처리방침 클릭
-        $('#link_privatepolicy').on('click', function (e) {
-            Ax5Modal.open({url: '/page/popup/privacy_policy', width: 800, height: 200});
-        });
-
-        // 이메일 무단수집 거부 클릭
-        $('#link_emailreject').on('click', function (e) {
-            Ax5Modal.open({url: '/page/popup/email_unauthorized_collection_policy', width: 800, height: 400});
-        });
+        // CR = String.fromCharCode(10);
+        // let notify_list = notify_text.split(CR);
+        //
+        // let notify_index = 0;
+        //
+        // let timer = setInterval(function () {
+        //     return;
+        //
+        //     if (notify_index >= notify_list.length)
+        //         notify_index = 0;
+        //     let notify_text = notify_list[notify_index];
+        //     $('#notify_text').text(notify_text);
+        //     notify_index++;
+        // }, 5000);
+        //
+        // // 내정보 클릭
+        // $('#myinfo').on('click', function (e) {
+        //     e.preventDefault();
+        //     Ax5Modal.open({url: '/page/account/myinfo', width: 400, height: 300});
+        //     $(".profile_contbox").hide();
+        // });
+        //
+        // // 언어설정
+        // $('#myLanguage').on('click', function (e) {
+        //     e.preventDefault();
+        //     Ax5Modal.open({url: '/page/account/language', width: 400, height: 200});
+        //     $(".profile_contbox").hide();
+        // });
+        //
+        // // 테마변경
+        // $('.setting-color > label').on('click', function (e) {
+        //     dynamicLinkCss($(this).data('load-top-css'), $(this).data('load-left-css'));
+        // });
+        //
+        // // 개인정보 처리방침 클릭
+        // $('#link_privatepolicy').on('click', function (e) {
+        //     Ax5Modal.open({url: '/page/popup/privacy_policy', width: 800, height: 200});
+        // });
+        //
+        // // 이메일 무단수집 거부 클릭
+        // $('#link_emailreject').on('click', function (e) {
+        //     Ax5Modal.open({url: '/page/popup/email_unauthorized_collection_policy', width: 800, height: 400});
+        // });
 
         // 오픈소스 사용공지 필요
     });
