@@ -229,6 +229,12 @@ var CommonUtil = {
             d.getSeconds();
         return s;
     },
+    getHourMin: function () {
+        var d = new Date();
+        var hours = String(d.getHours()).padStart(2, '0');
+        var minutes = String(d.getMinutes()).padStart(2, '0');
+        return hours + ':' + minutes;
+    },
     addDays: function (date, days) {
         var result = new Date(date);
         result.setDate(result.getDate() + days);

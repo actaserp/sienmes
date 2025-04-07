@@ -20,7 +20,7 @@ public class WebMvcConfig implements WebMvcConfigurer{
     public void addCorsMappings(CorsRegistry registry){
         registry.addMapping("/**")
                 .allowedOrigins(
-                        "http://localhost:8030") // 모든 오리진 허용
+                        "http://localhost:8030", "http://actascld.co.kr:8030/") // 모든 오리진 허용
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD")
                 .allowedHeaders("*")
                 .allowCredentials(true);
