@@ -201,4 +201,46 @@ public class EquipmentService {
 		return items;
 	}
 
+	// 작지번호로 설비 상태 찾기
+	public List<Map<String, Object>> getEquipmentOrderNum(String orderNum) {
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+
+		dicParam.addValue("WorkOrderNumber", orderNum);
+
+		String sql = """
+        		select er.id
+                , to_char(er."StartDate", 'yyyy-mm-dd') as start_date
+                , to_char(er."EndDate", 'yyyy-mm-dd') as end_date
+	            , e."Name"
+	            , e."Code"
+	            , er."StartDate"
+	            , to_char(er."StartDate",'HH24:MI') as "StartTime"
+	            , er."EndDate"
+	            , to_char(er."EndDate",'HH24:MI') as "EndTime"
+	            , EXTRACT(day from (er."EndDate" - er."StartDate")) * 60 * 24
+	                + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60 
+	                + EXTRACT(min from ("EndDate" - "StartDate")) as "GapTime"
+                , er."WorkOrderNumber" 
+	            , er."Equipment_id" 
+	            , er."RunState" 
+                , sc."StopCauseName" 
+                , er."Description" 
+                , er."StopCause_id"
+                from equ_grp eg
+                inner join equ e on eg.id = e."EquipmentGroup_id"
+                left join equ_run er on e.id = er."Equipment_id"
+                left join stop_cause sc on sc.id = er."StopCause_id"
+                where 1=1
+                and er."WorkOrderNumber" = :WorkOrderNumber
+	            --and er."RunState" = :runType
+        		""";
+
+		sql += " order by e.\"Name\", er.\"StartDate\", er.\"EndDate\"";
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+
+		return items;
+	}
+
 }

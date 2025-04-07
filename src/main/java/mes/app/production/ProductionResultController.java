@@ -9,6 +9,10 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import mes.app.definition.service.EquipmentService;
+import mes.app.production.service.EquipmentRunChartService;
+import mes.domain.entity.*;
+import mes.domain.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Isolation;
@@ -26,41 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import mes.app.inventory.service.LotService;
 import mes.app.production.service.ProductionResultService;
-import mes.domain.entity.JobRes;
-import mes.domain.entity.JobResDefect;
-import mes.domain.entity.MaterialConsume;
-import mes.domain.entity.MaterialLot;
-import mes.domain.entity.MatLotCons;
-import mes.domain.entity.MatProcInput;
-import mes.domain.entity.MatProcInputReq;
-import mes.domain.entity.Material;
-import mes.domain.entity.MaterialGroup;
-import mes.domain.entity.MaterialInout;
-import mes.domain.entity.MaterialProduce;
-import mes.domain.entity.StoreHouse;
-import mes.domain.entity.SystemOption;
-import mes.domain.entity.TestItemResult;
-import mes.domain.entity.TestResult;
-import mes.domain.entity.User;
-import mes.domain.entity.Workcenter;
 import mes.domain.model.AjaxResult;
-import mes.domain.repository.JobResDefectRepository;
-import mes.domain.repository.JobResRepository;
-import mes.domain.repository.MatConsuRepository;
-import mes.domain.repository.MatInoutRepository;
-import mes.domain.repository.MatLotConsRepository;
-import mes.domain.repository.MatLotRepository;
-import mes.domain.repository.MatProcInputRepository;
-import mes.domain.repository.MatProcInputReqRepository;
-import mes.domain.repository.MatProduceRepository;
-import mes.domain.repository.MaterialGroupRepository;
-import mes.domain.repository.MaterialRepository;
-import mes.domain.repository.StorehouseRepository;
-import mes.domain.repository.SujuRepository;
-import mes.domain.repository.SystemOptionRepository;
-import mes.domain.repository.TestItemResultRepository;
-import mes.domain.repository.TestResultRepository;
-import mes.domain.repository.WorkcenterRepository;
 import mes.domain.services.CommonUtil;
 import mes.domain.services.DateUtil;
 import mes.domain.services.SqlRunner;
@@ -131,7 +101,13 @@ public class ProductionResultController {
 	TestItemResultRepository testItemResultRepository;
 
 	@Autowired
+	EquipmentService equipmentService;
+
+	@Autowired
 	SqlRunner sqlRunner;
+
+	@Autowired
+	EquRunRepository equRunRepository;
 
 	@GetMapping("/read")
 	public AjaxResult getProdResult(
@@ -1604,6 +1580,54 @@ public class ProductionResultController {
 
 		this.matProcInputRepository.deleteById(mpi_pk);
  		return result;
+	}
+
+	@GetMapping("/readOrder")
+	public AjaxResult getEquipmentdRunChart(
+			@RequestParam(value="WorkOrderNumber", required=false) String orderNum,
+			HttpServletRequest request) {
+
+		List<Map<String, Object>> items = this.equipmentService.getEquipmentOrderNum(orderNum);
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+		return result;
+	}
+
+	// 중지 시작
+	@PostMapping("/stop_save")
+	@Transactional
+	public AjaxResult stopSave(
+			@RequestParam(value="stop_pk" , required=false) Integer id,
+			@RequestParam(value="stop_date" , required=false) String stop_date,
+			@RequestParam(value="stopTime" , required=false) String stopTime,
+			@RequestParam(value="WorkOrderNumber" , required=false) String WorkOrderNumber,
+			@RequestParam(value="Description" , required=false) String Description,
+			@RequestParam(value="Equipment_id" , required=false) Integer Equipment_id,
+			@RequestParam(value="StopCause_id" , required=false) Integer StopCause_id,
+			HttpServletRequest request,
+			Authentication auth) {
+
+		AjaxResult result = new AjaxResult();
+
+		User user = (User)auth.getPrincipal();
+
+		Timestamp stop_time = Timestamp.valueOf(stop_date + ' ' + stopTime + ":00");
+
+
+		EquRun er = new EquRun();
+		er.setEquipmentId(Equipment_id);
+		er.setStopCauseId(StopCause_id);
+		er.setStartDate(stop_time);
+		er.setWorkOrderNumber(WorkOrderNumber);
+		er.setRunState("stop");
+		er.setDescription(Description);
+		er.set_audit(user);
+
+		this.equRunRepository.save(er);
+
+		result.success = true;
+//		result.data = item;
+		return result;
 	}
 
 	@GetMapping("/prod_test_list")
