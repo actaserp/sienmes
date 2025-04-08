@@ -118,7 +118,7 @@
                  <div class="h-280" data-ax5grid="bom-grid" ></div>
              </div>-->
             <div class="container-fluid">
-                <div id="bom-grid" style="height: 300px; max-height: 300px;"></div>
+                <div id="bom-grid" style="height: 360px; max-height: 360px;"></div>
             </div>
         </section>
 
@@ -887,7 +887,6 @@
                 let $matSearchGrid = null;
                 let selectedItem = null;
                 let target = $content.find('#material-search-grid');
-                // 🔍 데이터가 배열인지 확인하고 기본값 설정
                 this.viewData4 = Array.isArray(this.viewData4) ? this.viewData4 : [];
 
                 this.grid4 = new wijmo.grid.FlexGrid('#material-search-grid', {
@@ -1145,19 +1144,17 @@
                 console.log("bom_id:", bom_id); // 디버깅용
                 console.log("API Response:", result); // 디버깅용
 
-                if (!result) {
-                    Alert.alert('', '서버 응답이 없습니다.');
-                    return;
-                }
-
                 if (result.success) {
                     try {
+                        if (!Array.isArray(result.data) || result.data.length === 0) {
+                            Alert.alert('', '조회된 전체레벨 데이터가 없습니다.');
+                            _this.grid3.itemsSource = new wijmo.collections.CollectionView([]); // 빈 배열 설정
+                            return;
+                        }
+
                         let treeData = this.buildTree(result.data);
                         _this.grid3.itemsSource = new wijmo.collections.CollectionView(treeData);
 
-                        if (!treeData || treeData.length === 0) {
-                            Alert.alert('', '조회된 데이터가 없습니다.');
-                        }
                     } catch (ex) {
                         Alert.alert('에러가 발생했습니다: ' + ex.message);
                         console.error(ex);
@@ -1165,6 +1162,7 @@
                 } else {
                     Alert.alert('', '데이터를 불러오는 데 실패했습니다.');
                 }
+
             }
 
             buildTree(flatData) {

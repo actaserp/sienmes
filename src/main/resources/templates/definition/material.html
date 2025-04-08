@@ -192,7 +192,7 @@
                                         </td>
 
 
-                                        <th>
+                                        <th style="font-size: 14px;">
                                             <label for="LotSize">(생산/발주)로트사이즈</label>
                                         </th>
                                         <td>
@@ -651,7 +651,7 @@
                     <section class="tab-item" id="tab_unitcost" style="border-top-left-radius: 0;">
                         <div class="section-top">
                             <div class="search-wrap">
-                                <form id="priceForm">
+                                <!--<form id="priceForm">
                                     <dl>
                                         <dt>
                                             <label>평균단가</label>
@@ -660,7 +660,7 @@
                                             <input type="number" id="UnitPrice" name="UnitPrice" disabled>
                                         </dd>
                                     </dl>
-                                </form>
+                                </form>-->
                             </div>
                             <div class="button-wrap">
                                 <!--<small2>단가정보는 왼쪽 버튼을 통해 별도로 저장됩니다. 기존 이력을 남기려면 단가등록/변경 버튼을 누르시고 이력을 남기지 않으시려면 단가 수정 버튼을
@@ -723,7 +723,7 @@
                                                     <label for="name">구분</label>
                                                 </th>
                                                 <td>
-                                                    <select id="uamt_type" name="uamt_type" class="wp100">
+                                                    <select id="type" name="type" class="wp100">
                                                         <option value="01">매입</option>
                                                         <option value="02">매출</option>
                                                     </select>
@@ -740,7 +740,7 @@
                                             </tr>
                                             <tr>
                                                 <th>
-                                                    <label for="UnitPrice">변경 단가</label>
+                                                    <label for="UnitPrices">변경 단가</label>
                                                 </th>
                                                 <td>
                                                     <input type="text" id="UnitPrices" name="UnitPrice"
@@ -886,6 +886,8 @@
                         {binding: 'mat_name', header: '품목명', width: 200, align: 'left'},
                         {binding: 'unit_name', header: '단위', width: 100, align: 'center'},
                         {binding: 'factory_name', header: '공장', width: 100, align: 'center'},
+                        {binding: 'mtyn', header: '재고관리유무', width: 100, align: 'center'},
+                        {binding: 'useyn', header: '사용중지여부', width: 100, align: 'center'},
                         {binding: 'lotUseYn', header: 'LOT관리 유무', width: 150, align: 'center'},
                         {binding: 'lot_size', header: '로트사이즈', width: 100, align: 'right',},
                         {binding: 'customer_barcode', header: '고객바코드', width: 100, align: 'left'},
@@ -909,6 +911,7 @@
                         {binding: 'purchase_order_standard', header: '발주기준', width: 100, align: 'center'},
                         {binding: 'leadtime', header: '리드타임(일)', width: 150, align: 'right'},
                         {binding: 'min_order', header: '최소발주량', width: 100, align: 'right',},
+                        {binding: 'avrqty', header: '적정재고수량', width: 100, align: 'center'},
                         {binding: 'max_order', header: '최대발주량', width: 100, align: 'right',},
                         {binding: 'storehouse_name', header: '기본재고창고', width: 150, align: 'left'},
                         {binding: 'storehouse_loc', header: '창고내위치', width: 120, align: 'left'},
@@ -949,7 +952,7 @@
                     if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
                         let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
                         let mat_pk = selectedRowData.id; // 품목 ID 가져오기
-                        /*console.log(selectedRowData);*/
+                        console.log(selectedRowData);
 
                         // 상세 정보 표시
                         _this.showDetail(mat_pk);
@@ -989,6 +992,23 @@
                         _this.showTestList(selectedItem.id)
                         _this.showRoutingProcessList(selectedItem.id)
                         /* _this.showBomCompTreeList(selectedItem.id)*/
+                    }
+                });
+
+                this.grid.formatItem.addHandler((s, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                        let col = s.columns[e.col];
+                        let item = s.rows[e.row].dataItem;
+
+                        // 재고관리여부 (1 → 'Y', 0 또는 null → 'N')
+                        if (col.binding === "mtyn") {
+                            e.cell.textContent = (item.mtyn === 1 || item.mtyn === '1') ? 'Y' : 'N';
+                        }
+
+                        // 사용중지여부
+                        if (col.binding === "useyn") {
+                            e.cell.textContent = (item.useyn === 1 || item.useyn === '1') ? 'Y' : 'N';
+                        }
                     }
                 });
 
@@ -1138,7 +1158,8 @@
                         }
                     },
                     columns: [
-                        {binding: 'CompanyName', header: '업체명', width: 200, align: 'left',},
+                        {binding: 'CompanyName', header: '업체명', width: 220, align: 'left',},
+                        {binding: 'type', header: '구분', width: 120, align: 'center',},
                         {binding: 'UnitPrice', header: '단가', width: 120, align: 'right',},
                         {binding: 'FormerUnitPrice', header: '이전단가', width: 120, align: 'right',},
                         {binding: 'ApplyStartDate', header: '적용시작일', width: 120, align: 'center',},
@@ -1157,6 +1178,17 @@
                         let row = hitTest.row;
                         let selectedItem = this.price_grid.rows[row].dataItem;
                         _this.showPriceDetail(selectedItem.id);
+                    }
+                });
+
+                this.price_grid.formatItem.addHandler((s, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                        let col = s.columns[e.col];
+                        let item = s.rows[e.row].dataItem;
+
+                        if (col.binding === "type") {
+                            e.cell.textContent = (item.type === '01' || item.type === '02') ? '매입' : '매출';
+                        }
                     }
                 });
 
@@ -1547,7 +1579,7 @@
 
                 $('#WorkCenter_id').change(function (e) {
                     let group_pk = $('#WorkCenter_id').val();
-                    AjaxUtil.fillSelectOptions($('#Equipment_id'), 'equipment_code', 'choose', '', group_pk);
+                    AjaxUtil.fillSelectOptions($('#Equipment_id'), 'equipment_code', 'choose', '',group_pk);
                 });
 
                 AjaxUtil.fillSelectOptions($('#Factory_id'), 'factory', "", false); // 공장
@@ -1632,7 +1664,7 @@
                     });
 
                     // 단가정보 리셋
-                    $('#priceForm')[0].reset();
+                    /*$('#priceForm')[0].reset();*/
 
                     /*_this.price_grid.setData([]);*/
                     $('#companyPriceForm')[0].reset();
@@ -1672,6 +1704,20 @@
                     } else {
                         $('#matStockForm').find('#lot_use_yn').prop('checked', false);
                     }
+
+                    if (detailData.mtyn === 1 || detailData.mtyn === '1') {
+                        $('#mtyn').prop('checked', true);
+                    } else {
+                        $('#mtyn').prop('checked', false);
+                    }
+
+                    if (detailData.useyn === 1 || detailData.useyn === '1') {
+                        $('#useyn').prop('checked', true);
+                    } else {
+                        $('#useyn').prop('checked', false);
+                    }
+
+
                     //$('#Routing_id').trigger('change');
                     //FormUtil.BindDataForm(result, $('#matRoutingForm'));
                 }

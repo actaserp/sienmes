@@ -188,9 +188,6 @@ public class Material extends AbstractAuditModel {
 	@Column(name = "\"Useyn\"")
 	String useyn;
 
-	@Column(name = "\"Uamt_type\"")
-	String uamttype;
-
 	@Column(name = "\"Avrqty\"")
 	String avrqty;
 

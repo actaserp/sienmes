@@ -82,14 +82,14 @@
 
             <div class="container-fluid">
                 <p id="selectedItem"></p>
-                <div id="theGrid" style="height: 520px; max-height: 520px;"></div>
+                <div id="equipment-grid" style="height: 520px; max-height: 520px;"></div>
             </div>
         </section>
 
         <div class="tab-wrap">
             <ul class="tab-links">
                 <li><a href="#tab_basic">설비정보</a></li>
-                <li><a href="#tab_photo" name="tab_photo" class="tab">설비구성품추가</a></li>
+                <li><a href="#tab_add" name="tab_photo" class="tab">설비구성품추가</a></li>
             </ul>
             <div>
                 <section class="tab-item" id="tab_basic" style="border-top-left-radius: 0;">
@@ -330,47 +330,155 @@
                     </div>
                 </section>
 
-                <section class="tab-item" id="tab_photo" style="border-top-left-radius: 0;">
+                <section class="tab-item" id="tab_add" style="border-top-left-radius: 0;">
                     <div class="section-top">
+                        <div class="search-wrap">
+                        </div>
                         <div class="button-wrap">
-                            <ul>
-                                <!--<li>
-                                    <button type="button" class="btn-default" id="" name="btnBasicNew" style="width: 115px; height: 36px;"><i
-                                            class="fas fa-plus"></i>신규등록</button>
-                                </li>-->
+                            <ul class="button-list">
+
                                 <li>
-                                    <button type="button" class="btn-cancel y_write_auth btn-danger" id="" style="width: 115px; height: 36px;"><i
-                                            class="fas fa-trash"></i>삭제</button>
+                                    <button type="button" class="btn-default" id="btnPriceNew"
+                                            style="width: 115px; height: 36px;"><span
+                                            data-labelCd="신규">신규</span></button>
                                 </li>
+
                                 <li>
-                                    <button disabled type="button" class="btn-default y_write_auth" id="" style="width: 115px; height: 36px;"><i
-                                            class="fas fa-save"></i>저장</button>
+                                    <button type="button" class="btn-default" id="btnPriceSave"
+                                            style="width: 115px; height: 36px;"><span
+                                            data-labelCd="등록">등록</span></button>
                                 </li>
+
+                                <li>
+                                    <button type="button" class="btn-danger" id="btnPriceDelete"
+                                            style="width: 115px; height: 36px;"><span
+                                            data-labelCd="삭제">삭제</span>
+                                    </button>
+                                </li>
+
                             </ul>
                         </div>
                     </div>
-                    <!--<div class="table_box">
-                        <div class="grid_box col-lg-7">
-                            <div data-ax5uploader="fileuploadAx" class="fileuploaddiv" id="fileUploadDiv">
-                                <span class="fileuploadTitle"></span>
-                                <button class="new y_write_auth" data-ax5uploader-button="selector" id="addFile"
-                                        style="width: 100px;height:30px;" data-labelCd="파일선택">파일선택
-                                </button>
-                                <div data-uploaded-box="fileuploadAx" data-ax5uploader-uploaded-box="inline"
-                                     id="fileUploadBox"></div>
-                                <input type="hidden" id="srchFileId" name="srchFileId"/>
-                                <input type="hidden" id="DataPk" name="DataPk"/>
+
+
+                    <div class="row">
+                        <div class="wp60">
+                            <div class="container-fluid col">
+                                <p id="selectedItem"></p>
+                                <!--<div id="price-grid" style="height: 180px; max-height: 180px;"></div>-->
+                                <div id="add-grid" style="height: 180px; max-height: 180px;"></div>
                             </div>
                         </div>
-                        &lt;!&ndash;<div class="row" style="height:300px">
-                            <div class="col-2">
-                                <div class="col-4" id="thumbnail"></div>
+
+                        <div class="col wp40">
+                            <div class="section">
+                                <form id="companyPriceForm">
+                                    <table class="write-table" style="width: 100%;">
+                                        <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
+                                        <colgroup>
+                                            <col class="wp20">
+                                            <col class="wp10">
+                                            <col class="wp20">
+                                            <col class="wp10">
+                                        </colgroup>
+                                        <input type="text" id="price_id" name="price_id" hidden/>
+                                        <tbody>
+                                        <tr>
+                                            <th>
+                                                <label for="name">설비명</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="" name=""  style="width: 180px;">
+                                            </td>
+                                            <th>
+                                                <label for="name">구성품명</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="" name=""  style="width: 180px;">
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>
+                                                <label for="name">부품유형</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="" name=""  style="width: 180px;">
+                                            </td>
+                                            <th>
+                                                <label for="name">모델명/사양</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="" name=""  style="width: 180px;">
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>
+                                                <label for="">제조사</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="" name=""  style="width: 180px;">
+                                            </td>
+                                            <th>
+                                                <label for="">수량</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="" name=""  style="width: 180px;">
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>
+                                                <label for="">단가</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="" name=""  style="width: 180px;">
+                                            </td>
+                                            <th>
+                                                <label for="">설비일자</label>
+                                            </th>
+                                            <td>
+                                                <input type="date" id="" name=""  style="width: 180px;">
+                                            </td>
+                                        </tr>
+
+
+                                        <tr>
+                                            <th>
+                                                <label for="">교체주기</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="" name=""  style="width: 180px;">
+                                            </td>
+                                            <th>
+                                                <label for="">상태</label>
+                                            </th>
+                                            <td>
+                                                <select class="s-150" id="cbo" name="cbo" style="width: 180px;">
+                                                    <option value="">정상</option>
+                                                    <option value="">이상</option>
+                                                    <option value="">교체필요</option>
+                                                    <option value="">수리중</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>
+                                                <label for="">비고</label>
+                                            </th>
+                                            <td colspan="3">
+                                                <input type="text" id="" name=""  style="width: 100%;">
+                                            </td>
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                </form>
                             </div>
-                            <div class="col-6">
-                                <img id="image_expand" src="" height="300"/>
-                            </div>
-                        </div>&ndash;&gt;
-                    </div>-->
+                        </div>
+                    </div>
                 </section>
             </div>
         </div>
@@ -380,408 +488,409 @@
 </th:block>
 
 <th:block layout:fragment="scripts">
-    <th:block th:replace="/common/approve_box :: approve_box"></th:block>
-    <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
-    <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
-    <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
-    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
     <script type="text/javascript" src="/js/fileupload.js?v=100000006"></script>
     <script type="text/javascript">
-        /*'/api/definition/equipment*/
+
+        class EquipmentPage {
+            constructor() {
+                this.grid = null;
+                this.viewData = new wijmo.collections.CollectionView();
+                this.viewData2 = new wijmo.collections.CollectionView();
+                this.init();
+                this.url = '/api/definition/equipment';
+            }
+
+            init() {
+                let _this = this;
+
+                /*let config = {
+                    target: $('[data-ax5grid="equipment-grid"]'),
+                    sortable: true,
+                    frozenColumnIndex: 0, // 열 고정
+                    frozenRowIndex: 0,    // 행 고정
+                    showLineNumber: false, // 열의 번호 보이기 여부
+                    showRowSelector: false,  // checkbox(선택) 보이기 여부
+                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
+                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
+                    multiSort: true, // 다중 정렬 여부
+                    header: {
+                        align: 'center',  // 헤더의 기본 정렬
+                        columnHeight: 38  // 헤더 높이
+                    },
+                    body: {
+                        columnHeight: 25, // body의 기본 높이
+                        onClick: function (e) {
+                            //e.colIndex
+                            //e.dindex
+                            //c.value
+                            //e.column
+                            //e.item
+                            //e.list
+                            let eq_pk = e.item.id;
+
+                            _this.grid.select(this.dindex);
+                            _this.showDetail(e.item.id);
+
+                            if (_this.current_tab == 'tab_photo') {
+                                _this.showPhotoFiles(eq_pk)
+                                _this.showThumbnail(eq_pk);
+
+                                $('#image_expand').attr('src', '');
+
+                            }
+                        },
+                    },
+                    page: {
+                        display: true,  // 페이징 보이기 여부
+                        statusDisplay: true,
+                    },
+                    columns: [
+                        //{ key: 'id', label: '번호', width: 80, align: 'right' },
+                        { key: 'group_name', label: '설비그룹', width: 120, align: 'left' },
+                        { key: 'Usage', label: '용도', width: 120, align: 'left' },
+                        { key: 'Code', label: '설비코드', width: 150, align: 'left' },
+                        { key: 'Name', label: '설비명', width: 200, align: 'left' },
+                        { key: 'workcenter_name', label: '워크센터', width: 150, align: 'left' },
+                        { key: 'ManageNumber', label: '관리번호', width: 250, align: 'left' },
+                        { key: 'Model', label: '모델명', width: 150, align: 'left' },
+                        { key: 'Maker', label: '제조사', width: 150, align: 'left' },
+                        { key: 'Voltage', label: '사용전압', width: 150, align: 'left' },
+                        { key: 'PowerWatt', label: '용량', width: 150, align: 'left' },
+                        { key: 'InputDate', label: '입고일', width: 150, align: 'left' },
+                        { key: 'DepartName', label: '사용부서', width: 150, align: 'left' },
+                        { key: 'ASTelNumber', label: 'AS전화번호', width: 150, align: 'left' },
+                        { key: 'SerialNumber', label: '시리얼번호', width: 150, align: 'left' },
+                        { key: 'ProductionYear', label: '제작년도', width: 150, align: 'center' },
+                        { key: 'PurchaseDate', label: '구매일', width: 150, align: 'center' },
+                        { key: 'InstallDate', label: '설치일', width: 150, align: 'center' },
+                        { key: 'SupplierName', label: '공급업체', width: 150, align: 'left' },
+                        { key: 'PurchaseCost', label: '구매금액', width: 150, align: 'right', formatter:'money' },
+                        { key: 'OperationRateYN', label: '가동률표시', width: 100, align: 'center' },
+                        { key: 'Manager', label: '관리책임자', width: 150, align: 'center' },
+                        { key: 'SupplierName', label: '공급업체', width: 150, align: 'left' },
+                        { key: 'DisposalDate', label: '폐기일', width: 150, align: 'left' },
+                        { key: 'Description', label: '설명', width: 150, align: 'left' },
+                        { key: 'AttentionRemark', label: '점검 및 사용상 주의점', width: 150, align: 'left' },
+                    ]
+                };
+
+                this.grid = new ax5.ui.grid(config);
+                this.grid_config = config;*/
 
 
-        var theGrid;
-        var viewdata;
-
-        let columns = [
-            {binding: 'id', header: '번호', width: 80, align: 'right', visible: false},
-            {binding: 'group_name', header: '설비그룹', width: 120, align: 'center'},
-            {binding: 'Code', header: '설비코드', width: 150, align: 'center'},
-            {binding: 'Name', header: '설비명', width: 200, align: 'center'},
-            {binding: 'Usage', header: '용도', width: 120, align: 'center'},
-            {binding: 'workcenter_name', header: '워크센터', width: 150, align: 'center'},
-            {binding: 'ManageNumber', header: '관리번호', width: 120, align: 'center'},
-            {binding: 'Model', header: '모델명', width: 150, align: 'center'},
-            {binding: 'Maker', header: '제조사', width: 150, align: 'center'},
-            {binding: 'Voltage', header: '사용전압', width: 150, align: 'center'},
-            {binding: 'PowerWatt', header: '용량', width: 150, align: 'center'},
-            {binding: 'InputDate', header: '입고일', width: 150, align: 'center'},
-            {binding: 'DepartName', header: '사용부서', width: 150, align: 'center'},
-            {binding: 'ASTelNumber', header: 'AS전화번호', width: 150, align: 'center'},
-            {binding: 'SerialNumber', header: '시리얼번호', width: 150, align: 'center'},
-            {binding: 'ProductionYear', header: '제작년도', width: 150, align: 'center'},
-            {binding: 'PurchaseDate', header: '구매일', width: 150, align: 'center'},
-            {binding: 'InstallDate', header: '설치일', width: 150, align: 'center'},
-            {binding: 'SupplierName', header: '공급업체', width: 150, align: 'center'},
-            {binding: 'PurchaseCost', header: '구매금액', width: 150, align: 'right'},
-            {binding: 'OperationRateYN', header: '가동률표시', width: 100, align: 'center'},
-            {binding: 'Manager', header: '관리책임자', width: 150, align: 'center'},
-            {binding: 'DisposalDate', header: '폐기일', width: 150, align: 'center'},
-            {binding: 'Description', header: '설명', width: 200, align: 'center'},
-            {binding: 'AttentionRemark', header: '점검 및 사용상 주의점', width: 200, align: 'center'}
-        ]
-
-        document.readyState === 'complete' ? init() : window.onload = init;
-
-        function init() {
-            let _this = this;
-            let data2 = [];
-
-            let group = $('#cboEquipmentGroup').val();
-            let workcenter = $('#cboWorkcenter').val();
-            let equipment = $('#txtEquipment').val();
-
-            $.ajax({
-                url: '/api/definition/equipment/read',
-                type: 'GET',
-                data: {
-                    'group': group,
-                    'workcenter': workcenter,
-                    'equipment': equipment,
-                },
-                async: false,
-                success: function (data) {
-                    data2 = data.data;
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    console.error('Error fetching log_count data:', textStatus, errorThrown);
-                }
-            })
-
-            viewdata = new wijmo.collections.CollectionView(data2);
-
-            theGrid = new wijmo.grid.FlexGrid('#theGrid', {
-                autoGenerateColumns: false,
-                showMarquee: true,
-                columns: columns,
-                isReadOnly: true,
-                itemsSource: viewdata,
-                frozenColumns: 4
-            });
-
-
-            theGrid.hostElement.addEventListener('dblclick', function (e) {
-                let selectedItem = theGrid.selectedItems[0];
-                document.getElementById('id').value = selectedItem.id,
-
-                    document.getElementById('Usage').value = selectedItem.Usage, //용도
-                    document.getElementById('Code').value = selectedItem.Code, // 설비코드
-                    document.getElementById('Name').value = selectedItem.Name, // 설비명
-
-                    document.getElementById('ManageNumber').value = selectedItem.ManageNumber, // 관리번호
-                    document.getElementById('Model').value = selectedItem.Model, // 모델명
-                    document.getElementById('Maker').value = selectedItem.Maker, // 제조사
-                    document.getElementById('Voltage').value = selectedItem.Voltage, // 사용전압
-                    document.getElementById('PowerWatt').value = selectedItem.PowerWatt, // 용량
-                    document.getElementById('InputDate').value = selectedItem.InputDate, // 입고일
-
-                    document.getElementById('ASTelNumber').value = selectedItem.ASTelNumber, //as번호
-                    document.getElementById('SerialNumber').value = selectedItem.SerialNumber, // 시리얼넘버
-                    document.getElementById('ProductionYear').value = selectedItem.ProductionYear, // 제작년도
-                    document.getElementById('PurchaseDate').value = selectedItem.PurchaseDate, //구매일
-                    document.getElementById('InstallDate').value = selectedItem.InstallDate, // 설치일
-                    document.getElementById('SupplierName').value = selectedItem.SupplierName, //공급업체
-                    document.getElementById('PurchaseCost').value = selectedItem.PurchaseCost, // 구매금액
-
-                    document.getElementById('Manager').value = selectedItem.Manager, //  관리책임자
-                    document.getElementById('DisposalDate').value = selectedItem.DisposalDate, // 폐기일
-                    document.getElementById('Description').value = selectedItem.Description  // 설명
-                    document.getElementById('AttentionRemark').value = selectedItem.AttentionRemark // 점검 및 사용상 주의점
-
-                function setSelectValue(selectId, valueToMatch) {
-                    let selectElement = document.getElementById(selectId);
-                    if (selectElement) {
-                        for (let option of selectElement.options) {
-                            option.selected = option.text === valueToMatch;
+                this.grid = new wijmo.grid.FlexGrid('#equipment-grid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    frozenColumns: 3,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
                         }
-                    }
+                    },
+                    columns: [
+                        //{ key: 'id', label: '번호', width: 80, align: 'right' },
+                        { binding: 'group_name', header: '설비그룹', width: 120, align: 'left' },
+                        { binding: 'Code', header: '설비코드', width: 150, align: 'left' },
+                        { binding: 'Usage', header: '용도', width: 120, align: 'left' },
+                        { binding: 'Name', header: '설비명', width: 200, align: 'left' },
+                        { binding: 'workcenter_name', header: '워크센터', width: 150, align: 'left' },
+                        { binding: 'ManageNumber', header: '관리번호', width: 180, align: 'left' },
+                        { binding: 'Model', header: '모델명', width: 150, align: 'left' },
+                        { binding: 'Maker', header: '제조사', width: 150, align: 'left' },
+                        { binding: 'Voltage', header: '사용전압', width: 150, align: 'left' },
+                        { binding: 'PowerWatt', header: '용량', width: 150, align: 'left' },
+                        { binding: 'InputDate', header: '입고일', width: 150, align: 'center' },
+                        { binding: 'DepartName', header: '사용부서', width: 150, align: 'left' },
+                        { binding: 'ASTelNumber', header: 'AS전화번호', width: 150, align: 'left' },
+                        { binding: 'SerialNumber', header: '시리얼번호', width: 150, align: 'left' },
+                        { binding: 'ProductionYear', header: '제작년도', width: 150, align: 'center' },
+                        { binding: 'PurchaseDate', header: '구매일', width: 150, align: 'center' },
+                        { binding: 'InstallDate', header: '설치일', width: 150, align: 'center' },
+                        { binding: 'SupplierName', header: '공급업체', width: 150, align: 'left' },
+                        { binding: 'PurchaseCost', header: '구매금액', width: 150, align: 'right' },
+                        { binding: 'OperationRateYN', header: '가동률표시', width: 100, align: 'center' },
+                        { binding: 'Manager', header: '관리책임자', width: 150, align: 'center' },
+                        { binding: 'SupplierName', header: '공급업체', width: 150, align: 'left' },
+                        { binding: 'DisposalDate', header: '폐기일', width: 150, align: 'left' },
+                        { binding: 'Description', header: '설명', width: 200, align: 'left' },
+                        { binding: 'AttentionRemark', header: '점검 및 사용상 주의점', width: 200, align: 'left' },
+                    ],
+                    itemsSource: this.viewData, // 데이터를 설정할 배열
+
+                });
+
+                this.grid2 = new wijmo.grid.FlexGrid('#add-grid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                    },
+                    columns: [
+                        //{ key: 'id', label: '번호', width: 80, align: 'right' },
+                        { binding: '', header: '설비명', width: 120, align: 'left' },
+                        { binding: '', header: '구성품명', width: 150, align: 'left' },
+                        { binding: '', header: '부품유형', width: 120, align: 'left' },
+                        { binding: '', header: '모델명/사양', width: 200, align: 'left' },
+                        { binding: '', header: '제조사', width: 150, align: 'left' },
+                        { binding: '', header: '수량', width: 180, align: 'left' },
+                        { binding: '', header: '단가', width: 150, align: 'left' },
+                        { binding: '', header: '설비일자', width: 150, align: 'left' },
+                        { binding: '', header: '교체주기', width: 150, align: 'left' },
+                        { binding: '', header: '상태', width: 150, align: 'left' },
+                        { binding: '', header: '비고', width: 150, align: 'center' },
+                    ],
+                    itemsSource: this.viewData2, // 데이터를 설정할 배열
+
+                });
+
+
+
+
+                AjaxUtil.fillSelectOptions($('#cboEquipmentGroup'), 'equipment_group', 'all', false);
+                AjaxUtil.fillSelectOptions($('#cboWorkcenter'), 'workcenter', 'all', false);
+                AjaxUtil.fillSelectOptions($('#Depart_id'), 'depart', 'choose', false);
+                this.initForm();
+            }
+
+            initForm() {
+                AjaxUtil.fillSelectOptions($('#EquipmentGroup_id'), 'equipment_group', 'choose', false);
+                AjaxUtil.fillSelectOptions($('#WorkCenter_id'), 'workcenter', 'choose', false);
+                this.setUploader();
+            }
+
+            setButtonState() {
+                let pk = $('#equipmentForm').find('#id').val();
+                $('#btnBasicNew').prop('disabled', false);
+                $('#btnBasicSave').prop('disabled', false);
+                if (pk) {
+                    $('#btnBasicDel').prop('disabled', false);
+                    $('#btnPhotoSave').prop('disabled', false);
+                }
+                else {
+                    $('#btnBasicDel').prop('disabled', true);
+                    $('#btnPhotoSave').prop('disabled', true);
+                }
+            }
+
+
+            showDetail(idx) {
+                let _this = this;
+                let param = { 'id': idx };
+                let result = AjaxUtil.getSyncData(_this.url+"/detail", param);
+                if (result != null) {
+                    FormUtil.BindDataForm(result.data, $('#equipmentForm'));
+
+                    $('#description').text(result.data.description);
                 }
 
-                setSelectValue('EquipmentGroup_id', selectedItem.group_name);
-                setSelectValue('WorkCenter_id', selectedItem.workcenter_name);
-                setSelectValue('Depart_id', selectedItem.DepartName);
-                setSelectValue('OperationRateYN', selectedItem.OperationRateYN);
+                //page.setButtonDisable(false, false, false);
+                page.setButtonState();
 
-                setButtonState();
-
-            });
-
-
-            theGrid.rowHeaders.columns.splice(0, 1);
-        }
-
-        function setButtonState() {
-            let pk = $('#equipmentForm').find('#id').val();
-            $('#btnBasicNew').prop('disabled', false);
-            $('#btnBasicSave').prop('disabled', false);
-
-            if (pk) {
-                $('#btnBasicDel').prop('disabled', false);
-                $('#btnPhotoSave').prop('disabled', false);
-            } else {
-                $('#btnBasicDel').prop('disabled', true);
-                $('#btnPhotoSave').prop('disabled', true);
+                this.uploader.mode = 'active';
             }
-        }
 
+            searchMainData() {
+                let _this = this;
 
-        function searchMainData() {
-            let group = $('#cboEquipmentGroup').val();
-            let workcenter = $('#cboWorkcenter').val();
-            let equipment = $('#txtEquipment').val();
+                let data = {
+                    'group': $('#cboEquipmentGroup').val(),
+                    'workcenter' : $('#cboWorkcenter').val(),
+                    'equipment': $('#txtEquipment').val()
+                };
+                let result = AjaxUtil.getSyncData(_this.url+"/read", data);
 
-            $.ajax({
-                url: '/api/definition/equipment/read',
-                type: 'GET',
-                data: {
-                    'group': group,
-                    'workcenter': workcenter,
-                    'equipment': equipment,
-                },
-                async: false,
-                success: function (result) {
-                    if (result.success) {
-                        grid_binding(result.data);
-                    } else {
-                        console.log("Error occurred");
-                    }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    console.error('Error fetching log_list data:', textStatus, errorThrown);
-
+                if (result != null) {
+                    _this.viewData.sourceCollection = result.data;
+                    _this.viewData2.sourceCollection = result.data;
                 }
-            });
 
-            $('#equipmentForm')[0].reset();
-            setButtonState();
-            /* uploader.mode = 'disable';*/
-        }
+                $('#equipmentForm')[0].reset();
 
-        function grid_binding(data) {
-            if (!Array.isArray(data)) {
-                console.error('데이터가 배열 형식이 아닙니다:', data);
-                return;
-            }
+                //page.setButtonDisable(false, false, false);
+                page.setButtonState();
+                this.uploader.mode = 'disable';
+            }//searchMainData
 
-            let menulogData = data.map(item => ({
-                id: item.id,
-                group_name: item.group_name,
-                Usage: item.Usage,
-                Code: item.Code,
-                Name: item.Name,
-                workcenter_name: item.workcenter_name,
-                ManageNumber: item.ManageNumber,
-                Model: item.Model,
-                Maker: item.Maker,
-                Voltage: item.Voltage,
-                PowerWatt: item.PowerWatt,
-                InputDate: item.InputDate,
-                DepartName: item.DepartName,
-                ASTelNumber: item.ASTelNumber,
-                SerialNumber: item.SerialNumber,
-                ProductionYear: item.ProductionYear,
-                PurchaseDate: item.PurchaseDate,
-                InstallDate: item.InstallDate,
-                SupplierName: item.SupplierName,
-                PurchaseCost: item.PurchaseCost,
-                OperationRateYN: item.OperationRateYN,
-                Manager: item.Manager,
-                DisposalDate: item.DisposalDate,
-                Description: item.Description,
-                AttentionRemark: item.AttentionRemark,
-            }));
+            saveData() {
+                let _this = this;
+                //데이터입력체크루틴 누락
 
-            if (typeof theGrid === 'undefined' || typeof viewdata === 'undefined') {
-                console.error('theGrid 또는 viewdata가 정의되지 않았습니다.');
-                return;
-            }
+                //let data = $('#equipmentForm').serialize();
 
-            theGrid.columns.clear();
-            theGrid.autoGenerateColumns = false;
+                let WorkCenter_id = $('#WorkCenter_id').val();
+                let Code = $('#Code').val();
+                let Name = $('#Name').val();
 
-            // columns 배열이 정의되어 있는지 확인
-            if (typeof columns === 'undefined' || !Array.isArray(columns)) {
-                console.error('columns 배열이 정의되지 않았습니다.');
-                return;
-            }
-
-            columns.forEach(columnDef => {
-                var col = new wijmo.grid.Column(columnDef);
-                theGrid.columns.push(col);
-            });
-
-            viewdata = new wijmo.collections.CollectionView(menulogData);
-
-            theGrid.itemsSource = viewdata;
-            theGrid.refresh();
-        }
-
-
-        function saveData() {
-            let url = '/api/definition/equipment/save';
-            let data = FormUtil.extractForm($('#equipmentForm'));
-
-            if (!data.Code) {
-                Alert.alert('', '설비코드를 입력해주세요.');
-                $('#equipmentForm #Code').focus();
-                return false;
-            }else if (!data.Name) {
-                Alert.alert('', '설비명을 입력해주세요.');
-                $('#equipmentForm #Name').focus();
-                return false;
-            } else if (!data.WorkCenter_id) {
-                Alert.alert('', '워크센터를 선택해주세요.');
-                $('#equipmentForm #WorkCenter_id').focus();
-                return false;
-            }
-
-            if ($('#PurchaseCost').val() < 0) {
-                Alert.alert('', '구매금액을 확인해 주세요.');
-                return;
-            }
-
-            let fnSuccess = function (res) {
-                if (res.success) {
-                    Alert.alert('', '저장되었습니다.'); // Notification
-                    searchMainData();
-                } else {
-                    Alert.alert('', res.message);
+                if (!WorkCenter_id) {
+                    Alert.alert('', '워크센터를 선택해주세요.', function () { });
+                    return;
+                } else if (!Code) {
+                    Alert.alert('', '설비코드를 입력해주세요.', function () { });
+                    return;
+                } else if (!Name) {
+                    Alert.alert('', '설비명을 입력해주세요.', function () { });
                     return;
                 }
-            };
 
-            AjaxUtil.postAsyncData(url, data, fnSuccess);
-        }
-
-        function deleteData() {
-            let url = '/api/definition/equipment';
-            let id = $('#equipmentForm').find('#id').val()
-            let data = {id: id};
-            let fnsuccess = function (res) {
-                if (res.success) {
-                    Alert.alert('','삭제했습니다.');
-
-                    $('#equipmentForm')[0].reset();
-                    $('#equipmentForm').find('#id').val('');
-                    $('#equipmentForm #Code').attr('readonly', false);
-                    $('#equipmentForm input').each(function () {
-                        if ($(this).is(':disabled')) {
-                            $(this).removeAttr('disabled');
-                        }
-                    });
-
-                    $('#equipmentForm textarea').each(function () {
-                        let $obj = $(this);
-                        if ($obj.is(':disabled')) {
-                            $obj.removeAttr('disabled');
-                        }
-                        $obj.text('');
-                    });
-
-                    searchMainData();
-                } else {
-                    Alert.alert('', res.message);
+                if ($('#PurchaseCost').val() < 0) {
+                    Alert.alert('', '구매금액을 확인해 주세요.');
+                    return;
                 }
-            };
 
-            AjaxUtil.postAsyncData(url + "/delete", data, fnsuccess);
-        }
+                let data = FormUtil.extractForm($('#equipmentForm'));
 
-        function showPhotoFiles(eq_pk) {
-            let _this = this;
 
-            let child = document.getElementById("thumbnail");
-            while (child.hasChildNodes()) {
-                child.removeChild(child.firstChild);
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Notify.success('저장되었습니다.'); // Notification
+                        _this.searchMainData();
+                    } else {
+                        Alert.alert('', res.message);
+                        return;
+                    }
+                };
+                AjaxUtil.postAsyncData(_this.url+"/save", data, fnSuccess);
             }
 
-            //$('#addFile').prop('disabled', false);
-            $('#DataPk').val(eq_pk);
+            deleteData() {
+                let _this = this;
+                let id = $('#equipmentForm').find('#id').val()
+                let data = { id: id };
+                let fnsuccess = function (res) {
+                    if (res.success) {
+                        Notify.success('삭제했습니다.');
 
-            //$('#fileUploadBox').show();
+                        $('#equipmentForm')[0].reset();
+                        $('#equipmentForm').find('#id').val('');
+                        $('#equipmentForm #Code').attr('readonly', false);
+                        $('#equipmentForm input').each(function () {
+                            if ($(this).is(':disabled')) {
+                                $(this).removeAttr('disabled');
+                            }
+                        });
 
-            //파일조회
-            let attparam = { "action": 'detailFiles', "TableName": "equ", 'DataPk': eq_pk, "attachName": 'photo' };
-            YuFileUploader.getAttachFiles(attparam);
-        }
+                        $('#equipmentForm textarea').each(function () {
+                            let $obj = $(this);
+                            if ($obj.is(':disabled')) {
+                                $obj.removeAttr('disabled');
+                            }
+                            $obj.text('');
+                        });
 
-        function showThumbnail(eq_pk) {
-            let _this = this;
+                        _this.searchMainData();
+                    } else {
+                        Alert.alert('', res.message);
+                    }
+                };
 
-            let data = {
-                "action": 'detailFiles',
-                "TableName": "equ",
-                'DataPk': eq_pk,
-                "attachName": 'thumbnail'
-            };
-
-            let result = AjaxUtil.getSyncData('/api/common/attach_file/detailFiles', data);
-            if (result != null) {
-                for (let i = 0; i < result.length; i++) {
-                    let url = '/api/files/image?id=' + result[i].id;
-                    $("#thumbnail").append('<div align="center" width="50px"><img id="thumbnail_show' + i +'" src="' + url + '" width="50" height="50" onclick="javascript:expand(' + result[i].id + ')"/></div>');
-                }
+                AjaxUtil.postAsyncData(_this.url+"/delete", data, fnsuccess);
             }
-            result = [];
-        }
 
-        // 사진파일 저장
-        function savePhotoFiles() {
-            let url= '/api/definition/equipment';
-            let param = {
-                'eq_id': $('#equipmentForm').find('#id').val(),
-                'file_id': $("#srchFileId").val(),
-            };
+            showPhotoFiles(eq_pk) {
+                let _this = this;
 
-            let fnSuccess = function (res) {
-                if (!res.success) {
-                    Alert.alert('', res.message);
-                } else {
-                    Notify.success("저장되었습니다.");
-                    //_this.searchDataBind();
+                let child = document.getElementById("thumbnail");
+                while (child.hasChildNodes()) {
+                    child.removeChild(child.firstChild);
                 }
-            };
 
-            AjaxUtil.postAsyncData(url+"/save_photo", param, fnSuccess);
-        }
+                //$('#addFile').prop('disabled', false);
+                $('#DataPk').val(eq_pk);
 
-        //파일 업로더
-       function setUploader() {
-            let _this = this;
-            //$('#addFile').prop('disabled', false);
+                //$('#fileUploadBox').show();
 
-            let accept_files = 'jpg,jpeg,gif,png,xlsx,xls';
-            let accept = '.' + accept_files.split(',').join(',.');
+                //파일조회
+                let attparam = { "action": 'detailFiles', "TableName": "equ", 'DataPk': eq_pk, "attachName": 'photo' };
+                YuFileUploader.getAttachFiles(attparam);
+            }
 
-            /*if (_this.uploader)
-                return;*/
+            showThumbnail(eq_pk) {
+                let _this = this;
 
-            _this.uploader = $('#fileUploadDiv').yuFileUploader(
-                {
-                    fileIdsCtl: '#srchFileId',
-                    dropZone: 'fileuploadAx',
-                    boxZone: 'fileuploadAx',
-                    others: '', // 파일저장 상위경로
-                    filepath: 'equ', // 파일저장 하위경로
-                    addfileext: 'Y', // 저장시 파일확장자 포함 파일이름저장
-                    icons: {
-                        'download': '<i class="fa fa-download" aria-hidden="true"></i>',
-                        'delete': '<i class="fa fa-minus-circle" aria-hidden="true"></i>'
-                    },
-                    emptymsg: '파일을 Drag&amp;Drop하거나 클릭하여 업로드를 진행하세요' + '(업로드 후 저장버튼을 클릭하세요.)',
+                let data = {
+                    "action": 'detailFiles',
+                    "TableName": "equ",
+                    'DataPk': eq_pk,
+                    "attachName": 'thumbnail'
+                };
 
-                    multiple: true,  // 멑티업로드 허용여부
-                    maxcnt: 5, // 업로드 최대갯수
-                    accept: accept, // 허용 확장자 image/* .gif,.jpg,.png
-                    accepts: accept_files,    // 드래그로 업로드할 때 체크할 용도
-                    fileSize: 50,   // Mega, 업로드 파일사이즈제한
-                    tableName: 'equ',
-                    attachName: 'photo',
-                    thumbnailYN: 'Y'
+                let result = AjaxUtil.getSyncData('/api/common/attach_file/detailFiles', data);
+                if (result != null) {
+                    for (let i = 0; i < result.length; i++) {
+                        let url = '/api/files/image?id=' + result[i].id;
+                        $("#thumbnail").append('<div align="center" width="50px"><img id="thumbnail_show' + i +'" src="' + url + '" width="50" height="50" onclick="javascript:expand(' + result[i].id + ')"/></div>');
+                    }
                 }
-            );
-            _this.uploader.can_write = userinfo.can_write();
-            _this.uploader.mode = 'disable';
+                result = [];
+            }
+
+            // 사진파일 저장
+            savePhotoFiles() {
+                let param = {
+                    'eq_id': $('#equipmentForm').find('#id').val(),
+                    'file_id': $("#srchFileId").val(),
+                };
+
+                let fnSuccess = function (res) {
+                    if (!res.success) {
+                        Alert.alert('', res.message);
+                    } else {
+                        Notify.success("저장되었습니다.");
+                        //_this.searchDataBind();
+                    }
+                };
+
+                AjaxUtil.postAsyncData(_this.url+"/save_photo", param, fnSuccess);
+            }
+
+            //파일 업로더
+            setUploader() {
+                let _this = this;
+                //$('#addFile').prop('disabled', false);
+
+                let accept_files = 'jpg,jpeg,gif,png,xlsx,xls';
+                let accept = '.' + accept_files.split(',').join(',.');
+
+                if (_this.uploader)
+                    return;
+
+                _this.uploader = $('#fileUploadDiv').yuFileUploader(
+                    {
+                        fileIdsCtl: '#srchFileId',
+                        dropZone: 'fileuploadAx',
+                        boxZone: 'fileuploadAx',
+                        others: '', // 파일저장 상위경로
+                        filepath: 'equ', // 파일저장 하위경로
+                        addfileext: 'Y', // 저장시 파일확장자 포함 파일이름저장
+                        icons: {
+                            'download': '<i class="fa fa-download" aria-hidden="true"></i>',
+                            'delete': '<i class="fa fa-minus-circle" aria-hidden="true"></i>'
+                        },
+                        emptymsg: '파일을 Drag&amp;Drop하거나 클릭하여 업로드를 진행하세요' + '(업로드 후 저장버튼을 클릭하세요.)',
+
+                        multiple: true,  // 멑티업로드 허용여부
+                        maxcnt: 5, // 업로드 최대갯수
+                        accept: accept, // 허용 확장자 image/* .gif,.jpg,.png
+                        accepts: accept_files,    // 드래그로 업로드할 때 체크할 용도
+                        fileSize: 50,   // Mega, 업로드 파일사이즈제한
+                        tableName: 'equ',
+                        attachName: 'photo',
+                        thumbnailYN: 'Y'
+                    }
+                );
+                _this.uploader.can_write = userinfo.can_write();
+                _this.uploader.mode = 'disable';
+            }
+
         }
 
 
@@ -791,32 +900,19 @@
             $('#image_expand').attr('src', url);
         }
 
-        $(document.body).ready(function (e) {
+        let page = null;
 
-
-            $('#txtEquipment').on('keypress', function (e) {
-                if (event.keyCode == 13) {
-                    searchMainData();
-                }
-            });
-
-            $('#btnSearch').click(function (e) {
-                searchMainData();
-            });
-
+        $(document).ready(function (e) {
+            page = new EquipmentPage();
 
             $('#PurchaseDate').ax5DatePicker({ direction: 'bottom' });
             $('#InstallDate').ax5DatePicker({ direction: 'bottom' });
             $('#DisposalDate').ax5DatePicker({ direction: 'bottom' });
             $('#InputDate').ax5DatePicker({ direction: 'bottom' });
 
-            AjaxUtil.fillSelectOptions($('#cboEquipmentGroup'), 'equipment_group', 'all', false);
-            AjaxUtil.fillSelectOptions($('#cboWorkcenter'), 'workcenter', 'all', false);
-            AjaxUtil.fillSelectOptions($('#Depart_id'), 'depart', 'choose', false);
-            AjaxUtil.fillSelectOptions($('#EquipmentGroup_id'), 'equipment_group', 'choose', false);
-            AjaxUtil.fillSelectOptions($('#WorkCenter_id'), 'workcenter', 'choose', false);
-            setUploader();
-
+            $('#btnSearch').click(function (ex) {
+                page.searchMainData();
+            });
 
             $('.tab_links .tab').click(function (e) {
                 let target = e.currentTarget.name;
@@ -827,7 +923,7 @@
                     $('#tab_photo').removeClass("hidden");
 
                     if (eq_pk) {
-                        showPhotoFiles(eq_pk);
+                        page.showPhotoFiles(eq_pk);
                     }
                 }
             });
@@ -856,45 +952,57 @@
                     $obj.text('');
                 });
                 //page.setButtonDisable(true, false, true);
-                setButtonState();
+                page.setButtonState();
 
             });
 
             $('#btnBasicSave').click(function (e) {
                 Alert.confirm('',
                     '저장하시겠습니까?',
-                    function () {
-                        saveData()
-                    },
-                    function () {
-                    }
+                    function () { page.saveData() },
+                    function () { }
                 );
             });
 
             $('#btnBasicDel').click(function (e) {
                 Alert.confirm('',
                     '삭제하시겠습니까?',
-                    function () {
-                        deleteData()
-                    },
-                    function () {
-                    }
+                    function () { page.deleteData() },
+                    function () { }
                 );
             });
 
             // 사진파일 저장버튼
             $('#btnPhotoSave').click(function (e) {
-                let eq_pk = $('#equipmentForm').find('#id').val();
-
-                if(!eq_pk){
-                    Alert.alert('', '정보를 선택해 주세요.');
-                    return false;
-                }
-                savePhotoFiles();
-              /*savePhotoFiles();*/
+                Alert.confirm('',
+                    '사진을 저장하시겠습니까?',
+                    function () { page.savePhotoFiles() },
+                    function () { }
+                );
             });
-        });
 
+            // 엑셀 다운로드
+            $('#btnExcel').click(function (e) {
+                page.grid.exportExcel('설비정보.xls');
+            });
+
+           /* //그리드 컬럼 설정
+            page.popColSetting = new popColSetting();
+            let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
+
+            if (userinfo.group_code == 'admin') {
+                $('#btnGridSetting').css('visibility','visible');
+            }
+
+            $('#btnGridSetting').click(function (e) {
+                let _this = this;
+                let fix_cols = page.grid_config.frozenColumnIndex;
+                page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
+            });*/
+
+            page.searchMainData();
+
+        });
     </script>
 </th:block>
 </html>

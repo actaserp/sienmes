@@ -75,6 +75,9 @@ public class MaterialService {
                 , m."UnitPrice" as unit_price
                 , coalesce(m."LotUseYN",'N') as "lotUseYn"
                 , to_char(m._created, 'yyyy-mm-dd') as _created
+                , m."Mtyn" as mtyn
+                , m."Useyn" as useyn
+                , m."Avrqty" as avrqty
             from material m
             left join mat_grp mg on mg.id = m."MaterialGroup_id"
             left join unit u on u.id = m."Unit_id"
@@ -142,6 +145,9 @@ public class MaterialService {
             , m."ProcessSafetyStock" 
             , m."ValidDays" 
             , m."LotUseYN" as "lotUseYn"
+            , m."Mtyn" as mtyn
+            , m."Useyn" as useyn
+            , m."Avrqty" as avrqty
             from material m
             inner join mat_grp mg on m."MaterialGroup_id" = mg.id
             left join unit u on u.id = m."Unit_id"
@@ -180,6 +186,20 @@ public class MaterialService {
 		} else {
 			dicParam.addValue("lotUseYN", null);
 		}
+
+		if(data.containsKey("mtyn")) {
+			dicParam.addValue("mtyn", data.getFirst("mtyn").toString());
+		} else {
+			dicParam.addValue("mtyn", null);
+		}
+
+		if(data.containsKey("useyn")) {
+			dicParam.addValue("useyn", data.getFirst("useyn").toString());
+		} else {
+			dicParam.addValue("useyn", null);
+		}
+		dicParam.addValue("avrqty", CommonUtil.tryString(data.getFirst("avrqty")));
+
 		dicParam.addValue("packingUnitQty", CommonUtil.tryFloatNull(data.getFirst("PackingUnitQty")));
 		dicParam.addValue("packingUnitName", CommonUtil.tryString(data.getFirst("PackingUnitName")));
 		dicParam.addValue("minOrder", CommonUtil.tryFloatNull(data.getFirst("MinOrder")));
@@ -262,7 +282,11 @@ public class MaterialService {
 						, "PurchaseOrderStandard" 
 						, "VatExemptionYN" 
 						, "Routing_id" 
-						, "UnitPrice" )
+						, "UnitPrice"
+						 , "Mtyn"
+						 , "Useyn"
+						 ,"Avrqty"
+						 )
 						VALUES
 						(now()
 						, :user_id
@@ -308,7 +332,10 @@ public class MaterialService {
 						, :purchaseOrderStandard
 						, :vatExemptionYN
 						, :routingId
-						, :unitPrice )
+						, :unitPrice
+						, :mtyn
+						, :useyn
+						, :avrqty)
 					""";
 		}else {
 			sql = """
@@ -358,6 +385,9 @@ public class MaterialService {
 					, "VatExemptionYN" = :vatExemptionYN 
 					, "Routing_id" = :routingId
 					, "UnitPrice" = :unitPrice
+					, "Mtyn" = :mtyn
+					, "Useyn" = :useyn
+					,"Avrqty" = :avrqty
 					WHERE id = :id
 					""";
 		}
