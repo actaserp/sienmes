@@ -27,10 +27,6 @@
             cursor: pointer;
         }
 
-        .hidden {
-            display: none !important;
-        }
-
         .menu_area {
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
             transform: translateX(0); /* 기본 위치 */
@@ -38,18 +34,16 @@
             width: 250px; /* 메뉴 너비 */
             position: absolute; /* 왼쪽 고정 */
             left: 0;
+            visibility: visible;
+            pointer-events: auto;
         }
 
         /* 메뉴가 사라질 때 */
         .menu_area.hidden {
             transform: translateX(-250px); /* 부드럽게 왼쪽으로 사라짐 */
             opacity: 0;
+            visibility: hidden;
             pointer-events: none; /* 클릭 방지 */
-        }
-
-        /* 메뉴가 다시 나타날 때 부드럽게 애니메이션 */
-        .menu_area:not(.hidden) {
-            animation: menuFadeIn 0.3s ease-in-out;
         }
 
         /* 컨텐츠 영역 */
@@ -117,7 +111,7 @@
                 </div>
             </div>
             <div class="right">
-                <div id="navbarBarMenu2">
+                <div id="navbarBarMenu2" style="margin-left: 10px;">
                     <div class="open_menu">
                         <span class="bar"></span>
                         <span class="bar"></span>
@@ -204,8 +198,8 @@
                     </a>
                     <div class="user-box">
                         <ul>
-                            <li id="myinfo">
-                                <a href="#" title="내 정보" data-popup="popup1" onclick="UserInfo()">내 정보</a>
+                            <li>
+                                <a id="myinfo" href="#" title="내 정보" data-popup="popup1">내 정보</a>
                             </li>
                             <li id="logout">
                                 <a href="#" title="로그아웃">로그아웃</a>
@@ -224,7 +218,7 @@
             <!-- [대시보드] 왼쪽 컨텐츠 영역 -->
             <div class="dashboard-layout-left menu_wrap">
                 <!-- (레이아웃) 사이드바  -->
-                <div class="dashboard-layout-sidebar tabs scrollbar-rail" data-tab="tabWrap">
+                <div class="dashboard-layout-sidebar tabs" data-tab="tabWrap">
                     <ul class="layout-sidebar-tab">
                         <li class="active">
                             <a href="#menu" title="전체메뉴">전체 메뉴</a>
@@ -391,16 +385,11 @@
                 url: '/api/system/menus', // menus API를 통해 전체 메뉴 데이터를 가져옴
                 type: 'GET',
                 success: function (response) {
-                    //console.log('response', response);
+                    console.log('response', response);
                     // FrontFolder_id를 기반으로 폴더 필터링
                     const data = response.data;
 
                     //const folders = data.filter(folder => folder.frontfolder_id === parseInt(FrontFolderId));
-
-                    let folders = [];
-                    Object.entries(dep2Mappings).forEach(([frontId, selector]) => {
-                        folders = data.filter(folder  => folder.frontfolder_id === parseInt(frontId));
-                    })
 
                     //메뉴 이름과 url 추출
                     const flattenedNodes  = data.flatMap(item => item.nodes || []);
@@ -418,109 +407,114 @@
                     console.log('menuNames', menuNameList);
                     console.log('menuLinks', menuLinkList);
 
-                    if (folders.length > 0) {
-                        // 해당 FrontFolderId에 해당하는 폴더가 있으면 대 메뉴를 다시 보여줌
 
-                        Object.entries(dep2Mappings).forEach(([frontId, selector]) => {
-                            console.log('selecotr', selector);
-                            $(selector).closest('.dep1-1').css('display', 'block');
+                    Object.entries(dep2Mappings).forEach(([frontId, selector]) => {
+                        const folders = data.filter(folder => folder.frontfolder_id === parseInt(frontId));
 
-                            folders.forEach(function (folder) {
-                                let $li = $('<li class="dep2-1"></li>');
-                                let $a = $('<a href="#"></a>').text(folder.folder_name);
-                                $li.append($a);
+                        if (folders.length > 0) {
+                            // 해당 FrontFolderId에 해당하는 폴더가 있으면 대 메뉴를 다시 보여줌
 
-                                let $subUl = $('<ul class="dep3 documents" style="display: none;"></ul>');
-                                $li.append($subUl);
+                            if (folders.length > 0) {
+                                console.log('selecotr', selector);
+                                $(selector).closest('.dep1-1').css('display', 'block');
 
-                                // 해당 폴더의 하위 메뉴 항목 추가
-                                folder.nodes.forEach(function (item) {
-                                    let $itemLi = $('<li class="dep3-custom-list-style"></li>');
-                                    let $itemA = $('<a href="#" menuurl="' + item.url + '" data-bookmark="' + item.isbookmark + '" data-objid="' + item.objId + '" title="' + item.objNm + '"></a>').text(item.objNm);
+                                folders.forEach(function (folder) {
+                                    let $li = $('<li class="dep2-1"></li>');
+                                    let $a = $('<a href="#"></a>').text(folder.folder_name);
+                                    $li.append($a);
 
-                                    $itemLi.append($itemA);
-                                    $subUl.append($itemLi);
+                                    let $subUl = $('<ul class="dep3 documents" style="display: none;"></ul>');
+                                    $li.append($subUl);
+
+                                    // 해당 폴더의 하위 메뉴 항목 추가
+                                    folder.nodes.forEach(function (item) {
+                                        let $itemLi = $('<li class="dep3-custom-list-style"></li>');
+                                        let $itemA = $('<a href="#" menuurl="' + item.url + '" data-bookmark="' + item.isbookmark + '" data-objid="' + item.objId + '" title="' + item.objNm + '"></a>').text(item.objNm);
+
+                                        $itemLi.append($itemA);
+                                        $subUl.append($itemLi);
+                                    });
+
+                                    $(selector).append($li);
+
+                                    // dep2 클릭 시 dep3 항목이 1개면 바로 탭 추가하고 dep3 숨김
+                                    $a.on('click', function (e) {
+                                        e.preventDefault();
+
+                                        // dep3 항목 찾기
+                                        var $dep3 = $li.find('.dep3 li');
+
+                                        if ($dep3.length > 1) {
+
+                                        } else if ($dep3.length === 1) {
+                                            $('.dep2-1').removeClass('on');
+                                            $('.dep3 li').removeClass('on');
+                                            $li.addClass('on');
+
+                                            var $a = $dep3.find('a');
+                                            var val = $a.text();
+                                            var menuurl = $a.attr('menuurl');
+                                            var objid = $a.attr('data-objid');
+                                            // var _bookmark = $a.attr('data-bookmark');
+
+                                            if (nthTabs.isExistsTab('#' + objid)) {
+                                                nthTabs.toggleTab('#' + objid);
+                                            } else {
+                                                nthTabs.addTab({
+                                                    id: objid,
+                                                    title: val,
+                                                    url: '/gui/' + objid + '/default',
+                                                    active: true,
+                                                    allowClose: true,
+                                                    // isbookmark: _bookmark
+                                                });
+                                                // nthTabs.bindBookmarkEvent(objid, _bookmark);
+                                            }
+
+                                            // dep3 리스트 숨김
+                                            $subUl.hide(); // dep3 항목이 1개일 때 숨김
+                                            return false;
+                                        }
+                                    });
                                 });
 
-                                $(selector).append($li);
-
-                                // dep2 클릭 시 dep3 항목이 1개면 바로 탭 추가하고 dep3 숨김
-                                $a.on('click', function (e) {
+                                $(selector).find('.dep3').on('click', 'a', function (e) {
                                     e.preventDefault();
 
-                                    // dep3 항목 찾기
-                                    var $dep3 = $li.find('.dep3 li');
+                                    // 모든 dep3의 li에서 on 클래스 제거
+                                    $('.dep3 li').removeClass('on');
 
-                                    if ($dep3.length > 1) {
+                                    // 현재 클릭한 li에 on 클래스 추가
+                                    var $clickedDep3 = $(this).parent('li');
+                                    $clickedDep3.addClass('on');
 
-                                    } else if ($dep3.length === 1) {
-                                        $('.dep2-1').removeClass('on');
-                                        $('.dep3 li').removeClass('on');
-                                        $li.addClass('on');
+                                    // dep3가 1개인 dep2에서 on 클래스 제거
+                                    $('.dep2-1.on').removeClass('on');
 
-                                        var $a = $dep3.find('a');
-                                        var val = $a.text();
-                                        var menuurl = $a.attr('menuurl');
-                                        var objid = $a.attr('data-objid');
-                                        // var _bookmark = $a.attr('data-bookmark');
+                                    var val = $(this).text();
+                                    var menuurl = $(this).attr('menuurl');
+                                    var objid = $(this).attr('data-objid');
+                                    var _bookmark = $(this).attr('data-bookmark');
 
-                                        if (nthTabs.isExistsTab('#' + objid)) {
-                                            nthTabs.toggleTab('#' + objid);
-                                        } else {
-                                            nthTabs.addTab({
-                                                id: objid,
-                                                title: val,
-                                                url: '/gui/' + objid + '/default',
-                                                active: true,
-                                                allowClose: true,
-                                                // isbookmark: _bookmark
-                                            });
-                                            // nthTabs.bindBookmarkEvent(objid, _bookmark);
-                                        }
-
-                                        // dep3 리스트 숨김
-                                        $subUl.hide(); // dep3 항목이 1개일 때 숨김
-                                        return false;
+                                    if (nthTabs.isExistsTab('#' + objid)) {
+                                        nthTabs.toggleTab('#' + objid);
+                                    } else {
+                                        nthTabs.addTab({
+                                            id: objid,
+                                            title: val,
+                                            url: '/gui/' + objid + '/default',
+                                            active: true,
+                                            allowClose: true,
+                                            isbookmark: _bookmark
+                                        });
+                                        nthTabs.bindBookmarkEvent(objid, _bookmark);
                                     }
                                 });
-                            });
-
-                            $(selector).find('.dep3').on('click', 'a', function (e) {
-                                e.preventDefault();
-
-                                // 모든 dep3의 li에서 on 클래스 제거
-                                $('.dep3 li').removeClass('on');
-
-                                // 현재 클릭한 li에 on 클래스 추가
-                                var $clickedDep3 = $(this).parent('li');
-                                $clickedDep3.addClass('on');
-
-                                // dep3가 1개인 dep2에서 on 클래스 제거
-                                $('.dep2-1.on').removeClass('on');
-
-                                var val = $(this).text();
-                                var menuurl = $(this).attr('menuurl');
-                                var objid = $(this).attr('data-objid');
-                                var _bookmark = $(this).attr('data-bookmark');
-
-                                if (nthTabs.isExistsTab('#' + objid)) {
-                                    nthTabs.toggleTab('#' + objid);
-                                } else {
-                                    nthTabs.addTab({
-                                        id: objid,
-                                        title: val,
-                                        url: '/gui/' + objid + '/default',
-                                        active: true,
-                                        allowClose: true,
-                                        isbookmark: _bookmark
-                                    });
-                                    nthTabs.bindBookmarkEvent(objid, _bookmark);
-                                }
-                            });
-                        })
+                            }
 
 
-                    }
+                        }
+                    })
                 }
             });
         }
@@ -536,8 +530,9 @@
 
 
         $('#navbarBarMenu2 .open_menu').click(function () {
-            $('.menu_area').toggleClass('hidden'); // 메뉴 숨김 토글
+            $(this).toggleClass('menu_open'); // 메뉴 숨김 토글
 
+            $('.menu_area').toggleClass('hidden');
             const isMenuHidden = $('.menu_area').hasClass('hidden');
 
             $('.con_area, .tab-content').css({
@@ -751,11 +746,11 @@
         // }, 5000);
         //
         // // 내정보 클릭
-        // $('#myinfo').on('click', function (e) {
-        //     e.preventDefault();
-        //     Ax5Modal.open({url: '/page/account/myinfo', width: 400, height: 300});
-        //     $(".profile_contbox").hide();
-        // });
+        $('#myinfo').on('click', function (e) {
+            e.preventDefault();
+            Ax5Modal.open({url: '/page/account/myinfo', width: 400, height: 380});
+            $(".profile_contbox").hide();
+        });
         //
         // // 언어설정
         // $('#myLanguage').on('click', function (e) {
