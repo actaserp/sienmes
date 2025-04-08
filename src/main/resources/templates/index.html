@@ -59,32 +59,6 @@
             left: 0;
         }
 
-        #menusearch {
-            margin-top: 10px;
-            padding: 10px 16px;
-            width: 100%;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 15px;
-            font-family: 'Segoe UI', 'Pretendard', sans-serif;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            background-color: #fefefe;
-            color: #333;
-        }
-
-        #menusearch::placeholder {
-            color: #aaa;
-
-        }
-
-        #menusearch:focus {
-            border-color: #031B4B;
-            outline: none;
-            box-shadow: 0 0 8px rgba(123, 97, 255, 0.3);
-            background-color: #ffffff;
-        }
-
         /* 부드럽게 나오는 애니메이션 */
         @keyframes menuFadeIn {
             0% {
@@ -229,9 +203,6 @@
                     </ul>
                     <div class="layout-sidebar-tabcont">
                         <nav class="layout-nav sidebar-tabcont" id="menu">
-                            <div class="srch-box" id="menusearch-box">
-                                <input type="text" placeholder="메뉴명입력후 엔터" style="margin-top: 10px;" autocomplete="off" id="menusearch">
-                            </div>
                             <ul class="dep1">
                                 <li class="dep1-1">
                                     <a href="#a" title="모니터링" class="ico-lnb01">
@@ -337,8 +308,6 @@
 <script type="text/javascript">
     let nthTabs = null;
     let default_menu = null;
-    let menuNameList = [];
-    let menuLinkList = [];
 
     $(document).ready(function () {
 
@@ -347,20 +316,6 @@
             // window.location.reload();
         });
 
-        document.getElementById('menusearch').addEventListener('keydown', function(e){
-            if(e.key === 'Enter'){
-                setTimeout(function(){
-                    let menuName = e.target.value.trim();
-                    let menuUrl = menuLinkList.find(item => item.name === menuName)?.link;
-                    if(menuUrl === undefined || menuUrl === null){
-                        Alert.alert('', '해당 메뉴는 없습니다.');
-                        return;
-                    }
-                    window.open(menuUrl + '/default', 'popupWindow',
-                        'width=1300,height=850,resizable=no,toolbar=no,location=no,menubar=no,status=no,scrollbars=yes');
-                }, 200);
-            }
-        })
 
         // let lang_cd = i18n.getLanguageCode();
         //i18n.initializeCommonData(lang_cd);
@@ -388,25 +343,6 @@
                     console.log('response', response);
                     // FrontFolder_id를 기반으로 폴더 필터링
                     const data = response.data;
-
-                    //const folders = data.filter(folder => folder.frontfolder_id === parseInt(FrontFolderId));
-
-                    //메뉴 이름과 url 추출
-                    const flattenedNodes  = data.flatMap(item => item.nodes || []);
-                    flattenedNodes.forEach(node => {
-                        menuNameList.push(node.objNm);
-                        menuLinkList.push({
-                            name : node.objNm,
-                            link : node.objUrl
-                        });
-                    });
-
-
-                    //메뉴명들 추출
-                    console.log('data', response.data);
-                    console.log('menuNames', menuNameList);
-                    console.log('menuLinks', menuLinkList);
-
 
                     Object.entries(dep2Mappings).forEach(([frontId, selector]) => {
                         const folders = data.filter(folder => folder.frontfolder_id === parseInt(frontId));
@@ -519,11 +455,6 @@
             });
         }
 
-        document.addEventListener('input', function(event){
-            if(event.target){
-                initializeAutocomplete('menusearch', 'menusearch-box', menuNameList);
-            }
-        })
 
         loadMenu();
         // 폴더
