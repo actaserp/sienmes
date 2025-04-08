@@ -209,6 +209,9 @@
                     </ul>
                     <div class="layout-sidebar-tabcont">
                         <nav class="layout-nav sidebar-tabcont" id="menu">
+                            <div class="srch-box" id="menusearch-box">
+                                <input type="text" placeholder="메뉴명입력후 엔터" style="margin-top: 10px;" autocomplete="off" id="menusearch">
+                            </div>
                             <ul class="dep1">
                                 <li class="dep1-1">
                                     <a href="#a" title="모니터링" class="ico-lnb01">
@@ -314,6 +317,8 @@
 <script type="text/javascript">
     let nthTabs = null;
     let default_menu = null;
+    let menuNameList = [];
+    let menuLinkList = [];
 
     $(document).ready(function () {
 
@@ -322,22 +327,39 @@
             // window.location.reload();
         });
 
+        document.getElementById('menusearch').addEventListener('keydown', function(e){
+            if(e.key === 'Enter'){
+                setTimeout(function(){
+                    let menuName = e.target.value.trim();
+                    let menuUrl = menuLinkList.find(item => item.name === menuName)?.link;
+                    if(menuUrl === undefined || menuUrl === null){
+                        Alert.alert('', '해당 메뉴는 없습니다.');
+                        return;
+                    }
+                    window.open(menuUrl + '/default', 'popupWindow',
+                        'width=1300,height=850,resizable=no,toolbar=no,location=no,menubar=no,status=no,scrollbars=yes');
+                }, 200);
+            }
+        })
+
         // let lang_cd = i18n.getLanguageCode();
         //i18n.initializeCommonData(lang_cd);
         // i18n.initializeMenuData(lang_cd);
 
         // 메뉴 매핑(FrontFolder_id)
-        const dep2Mappings = {
-            1: '#dep2-monitoring',
-            2: '#dep2-sales-management',
-            3: '#dep2-purchase-materials',
-            4: '#dep2-production-management',
-            5: '#dep2-quality-report',
-            6: '#dep2-system-settings'
-        };
+
         nthTabs = $('#main-tabs').nthTabs();
 
-        function loadMenu(FrontFolderId, $FrontFolderElement) {
+        function loadMenu() {
+
+            const dep2Mappings = {
+                1: '#dep2-monitoring',
+                2: '#dep2-sales-management',
+                3: '#dep2-purchase-materials',
+                4: '#dep2-production-management',
+                5: '#dep2-quality-report',
+                6: '#dep2-system-settings'
+            };
 
             $.ajax({
                 url: '/api/system/menus', // menus API를 통해 전체 메뉴 데이터를 가져옴
@@ -345,112 +367,147 @@
                 success: function (response) {
                     //console.log('response', response);
                     // FrontFolder_id를 기반으로 폴더 필터링
-                    const folders = response.data.filter(folder => folder.frontfolder_id === parseInt(FrontFolderId));
+                    const data = response.data;
+
+                    //const folders = data.filter(folder => folder.frontfolder_id === parseInt(FrontFolderId));
+
+                    let folders = [];
+                    Object.entries(dep2Mappings).forEach(([frontId, selector]) => {
+                        folders = data.filter(folder  => folder.frontfolder_id === parseInt(frontId));
+                    })
+
+                    //메뉴 이름과 url 추출
+                    const flattenedNodes  = data.flatMap(item => item.nodes || []);
+                    flattenedNodes.forEach(node => {
+                        menuNameList.push(node.objNm);
+                        menuLinkList.push({
+                            name : node.objNm,
+                            link : node.objUrl
+                        });
+                    });
+
+
+                    //메뉴명들 추출
+                    console.log('data', response.data);
+                    console.log('menuNames', menuNameList);
+                    console.log('menuLinks', menuLinkList);
+
                     if (folders.length > 0) {
                         // 해당 FrontFolderId에 해당하는 폴더가 있으면 대 메뉴를 다시 보여줌
-                        $FrontFolderElement.closest('.dep1-1').css('display', 'block');
 
-                        folders.forEach(function (folder) {
-                            let $li = $('<li class="dep2-1"></li>');
-                            let $a = $('<a href="#"></a>').text(folder.folder_name);
-                            $li.append($a);
+                        Object.entries(dep2Mappings).forEach(([frontId, selector]) => {
+                            console.log('selecotr', selector);
+                            $(selector).closest('.dep1-1').css('display', 'block');
 
-                            let $subUl = $('<ul class="dep3 documents" style="display: none;"></ul>');
-                            $li.append($subUl);
+                            folders.forEach(function (folder) {
+                                let $li = $('<li class="dep2-1"></li>');
+                                let $a = $('<a href="#"></a>').text(folder.folder_name);
+                                $li.append($a);
 
-                            // 해당 폴더의 하위 메뉴 항목 추가
-                            folder.nodes.forEach(function (item) {
-                                let $itemLi = $('<li class="dep3-custom-list-style"></li>');
-                                let $itemA = $('<a href="#" menuurl="' + item.url + '" data-bookmark="' + item.isbookmark + '" data-objid="' + item.objId + '" title="' + item.objNm + '"></a>').text(item.objNm);
+                                let $subUl = $('<ul class="dep3 documents" style="display: none;"></ul>');
+                                $li.append($subUl);
 
-                                $itemLi.append($itemA);
-                                $subUl.append($itemLi);
+                                // 해당 폴더의 하위 메뉴 항목 추가
+                                folder.nodes.forEach(function (item) {
+                                    let $itemLi = $('<li class="dep3-custom-list-style"></li>');
+                                    let $itemA = $('<a href="#" menuurl="' + item.url + '" data-bookmark="' + item.isbookmark + '" data-objid="' + item.objId + '" title="' + item.objNm + '"></a>').text(item.objNm);
+
+                                    $itemLi.append($itemA);
+                                    $subUl.append($itemLi);
+                                });
+
+                                $(selector).append($li);
+
+                                // dep2 클릭 시 dep3 항목이 1개면 바로 탭 추가하고 dep3 숨김
+                                $a.on('click', function (e) {
+                                    e.preventDefault();
+
+                                    // dep3 항목 찾기
+                                    var $dep3 = $li.find('.dep3 li');
+
+                                    if ($dep3.length > 1) {
+
+                                    } else if ($dep3.length === 1) {
+                                        $('.dep2-1').removeClass('on');
+                                        $('.dep3 li').removeClass('on');
+                                        $li.addClass('on');
+
+                                        var $a = $dep3.find('a');
+                                        var val = $a.text();
+                                        var menuurl = $a.attr('menuurl');
+                                        var objid = $a.attr('data-objid');
+                                        // var _bookmark = $a.attr('data-bookmark');
+
+                                        if (nthTabs.isExistsTab('#' + objid)) {
+                                            nthTabs.toggleTab('#' + objid);
+                                        } else {
+                                            nthTabs.addTab({
+                                                id: objid,
+                                                title: val,
+                                                url: '/gui/' + objid + '/default',
+                                                active: true,
+                                                allowClose: true,
+                                                // isbookmark: _bookmark
+                                            });
+                                            // nthTabs.bindBookmarkEvent(objid, _bookmark);
+                                        }
+
+                                        // dep3 리스트 숨김
+                                        $subUl.hide(); // dep3 항목이 1개일 때 숨김
+                                        return false;
+                                    }
+                                });
                             });
 
-                            $FrontFolderElement.append($li);
-
-                            // dep2 클릭 시 dep3 항목이 1개면 바로 탭 추가하고 dep3 숨김
-                            $a.on('click', function (e) {
+                            $(selector).find('.dep3').on('click', 'a', function (e) {
                                 e.preventDefault();
 
-                                // dep3 항목 찾기
-                                var $dep3 = $li.find('.dep3 li');
+                                // 모든 dep3의 li에서 on 클래스 제거
+                                $('.dep3 li').removeClass('on');
 
-                                if ($dep3.length > 1) {
+                                // 현재 클릭한 li에 on 클래스 추가
+                                var $clickedDep3 = $(this).parent('li');
+                                $clickedDep3.addClass('on');
 
-                                } else if ($dep3.length === 1) {
-                                    $('.dep2-1').removeClass('on');
-                                    $('.dep3 li').removeClass('on');
-                                    $li.addClass('on');
+                                // dep3가 1개인 dep2에서 on 클래스 제거
+                                $('.dep2-1.on').removeClass('on');
 
-                                    var $a = $dep3.find('a');
-                                    var val = $a.text();
-                                    var menuurl = $a.attr('menuurl');
-                                    var objid = $a.attr('data-objid');
-                                    // var _bookmark = $a.attr('data-bookmark');
+                                var val = $(this).text();
+                                var menuurl = $(this).attr('menuurl');
+                                var objid = $(this).attr('data-objid');
+                                var _bookmark = $(this).attr('data-bookmark');
 
-                                    if (nthTabs.isExistsTab('#' + objid)) {
-                                        nthTabs.toggleTab('#' + objid);
-                                    } else {
-                                        nthTabs.addTab({
-                                            id: objid,
-                                            title: val,
-                                            url: '/gui/' + objid + '/default',
-                                            active: true,
-                                            allowClose: true,
-                                            // isbookmark: _bookmark
-                                        });
-                                        // nthTabs.bindBookmarkEvent(objid, _bookmark);
-                                    }
-
-                                    // dep3 리스트 숨김
-                                    $subUl.hide(); // dep3 항목이 1개일 때 숨김
-                                    return false;
+                                if (nthTabs.isExistsTab('#' + objid)) {
+                                    nthTabs.toggleTab('#' + objid);
+                                } else {
+                                    nthTabs.addTab({
+                                        id: objid,
+                                        title: val,
+                                        url: '/gui/' + objid + '/default',
+                                        active: true,
+                                        allowClose: true,
+                                        isbookmark: _bookmark
+                                    });
+                                    nthTabs.bindBookmarkEvent(objid, _bookmark);
                                 }
                             });
-                        });
+                        })
 
-                        $FrontFolderElement.find('.dep3').on('click', 'a', function (e) {
-                            e.preventDefault();
 
-                            // 모든 dep3의 li에서 on 클래스 제거
-                            $('.dep3 li').removeClass('on');
-
-                            // 현재 클릭한 li에 on 클래스 추가
-                            var $clickedDep3 = $(this).parent('li');
-                            $clickedDep3.addClass('on');
-
-                            // dep3가 1개인 dep2에서 on 클래스 제거
-                            $('.dep2-1.on').removeClass('on');
-
-                            var val = $(this).text();
-                            var menuurl = $(this).attr('menuurl');
-                            var objid = $(this).attr('data-objid');
-                            var _bookmark = $(this).attr('data-bookmark');
-
-                            if (nthTabs.isExistsTab('#' + objid)) {
-                                nthTabs.toggleTab('#' + objid);
-                            } else {
-                                nthTabs.addTab({
-                                    id: objid,
-                                    title: val,
-                                    url: '/gui/' + objid + '/default',
-                                    active: true,
-                                    allowClose: true,
-                                    isbookmark: _bookmark
-                                });
-                                nthTabs.bindBookmarkEvent(objid, _bookmark);
-                            }
-                        });
                     }
                 }
             });
         }
 
+        document.addEventListener('input', function(event){
+            if(event.target){
+                initializeAutocomplete('menusearch', 'menusearch-box', menuNameList);
+            }
+        })
+
+        loadMenu();
         // 폴더
-        Object.keys(dep2Mappings).forEach(FrontFolderId => {
-            loadMenu(FrontFolderId, $(dep2Mappings[FrontFolderId]));
-        });
+
 
         $('#navbarBarMenu2 .open_menu').click(function () {
             $('.menu_area').toggleClass('hidden'); // 메뉴 숨김 토글
