@@ -482,6 +482,12 @@ $(document).ready(function () {
                 if ($depthTarget.css('display') == 'none') {
                     _self.activeOn($this);
                     $depthTarget.slideDown(_self.speed);
+
+                    var $onlyDep2 = $depthTarget.children('li');
+                    if ($onlyDep2.length === 1) {
+                        // dep2 클릭 시 dep3가 1개면 바로 탭 열기
+                        $onlyDep2.find('a').trigger('click');
+                    }
                 } else {
                     $depthTarget.slideUp(_self.speed);
                     _self.activeOff($this);

@@ -1557,7 +1557,6 @@
                 };
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/read', param);
-                console.log('result', result);
                 if (result.data && _this.grid.itemsSource) {
                     // 기존 sourceCollection 업데이트 (선택 유지됨)
                     let view = _this.grid.itemsSource;
@@ -1593,7 +1592,6 @@
                 let res = AjaxUtil.getSyncData(this.baseUrl + '/detail', param);
                 let result = res.data
                 if (result) {
-                    console.log('result', result);
                     $('#selected_order_num').val(result.order_num);
 
                     let workcenter_id = result.workcenter_id;
@@ -1962,7 +1960,6 @@
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/chasu_list', param);
                 if (result.data) {
-                    console.log('showChasuList', result.data);
                     _this.setDefaultData(result.data); // 기본값 설정
                     _this.chasuGrid.itemsSource = new wijmo.collections.CollectionView(result.data); // 데이터 바인딩
                     _this.updateFooter(); // 하단 합계 업데이트
@@ -2439,8 +2436,6 @@
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/consumed_list', param);
                 if (result.data != null) {
                     _this.consumedGrid.itemsSource = result.data;
-                    console.log('consumedGrid', result.data);
-
 
                     let goodQty = parseFloat($('#tabBasic').find('#good_qty').val());
                     let defectQty = parseFloat($('#tabBasic').find('#defect_qty').val());
@@ -2743,7 +2738,6 @@
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/input_lot_list', param);
                 if (result.success) {
-                    console.log('showInputLotList', result.data);
                     _this.inputLotGrid.itemsSource = result.data
                     _this.updateFooter();
                 }
@@ -3098,7 +3092,6 @@
                     let previousIndex = _this.selectedIndex;
                     let stopSaveCallback = function (result) {
                         if (result.success) {
-                            console.log('result11', result);
                             Notify.success(stop_pk ? '재가동되었습니다.' : '중지되었습니다.');
                             $content.find('#modal-close-button').click();
                             _this.searchMainData();
