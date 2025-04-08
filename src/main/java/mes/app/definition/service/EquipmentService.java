@@ -210,8 +210,10 @@ public class EquipmentService {
 
 		String sql = """
         		select er.id
-                , to_char(er."StartDate", 'yyyy-mm-dd') as start_date
-                , to_char(er."EndDate", 'yyyy-mm-dd') as end_date
+        		, to_char(er."StartDate", 'yyyy-mm-dd') as start_date_only
+                , to_char(er."EndDate", 'yyyy-mm-dd') as end_date_only
+                , to_char(er."StartDate", 'yyyy-mm-dd hh24:mi') as start_date
+			    , to_char(er."EndDate", 'yyyy-mm-dd hh24:mi') as end_date
 	            , e."Name"
 	            , e."Code"
 	            , er."StartDate"
@@ -221,6 +223,29 @@ public class EquipmentService {
 	            , EXTRACT(day from (er."EndDate" - er."StartDate")) * 60 * 24
 	                + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60 
 	                + EXTRACT(min from ("EndDate" - "StartDate")) as "GapTime"
+				, CASE\s
+					 WHEN FLOOR((
+					   EXTRACT(day from (er."EndDate" - er."StartDate")) * 60 * 24
+					   + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60\s
+					   + EXTRACT(min from ("EndDate" - "StartDate"))
+					 ) / 60)::int = 0
+					 THEN MOD((
+					   EXTRACT(day from (er."EndDate" - er."StartDate")) * 60 * 24
+					   + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60\s
+					   + EXTRACT(min from ("EndDate" - "StartDate"))
+					 )::int, 60) || 'm'
+					 ELSE\s
+					   FLOOR((
+						 EXTRACT(day from (er."EndDate" - er."StartDate")) * 60 * 24
+						 + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60\s
+						 + EXTRACT(min from ("EndDate" - "StartDate"))
+					   ) / 60)::int || 'h ' ||\s
+					   MOD((
+						 EXTRACT(day from (er."EndDate" - er."StartDate")) * 60 * 24
+						 + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60\s
+						 + EXTRACT(min from ("EndDate" - "StartDate"))
+					   )::int, 60) || 'm'
+				 END as gap_time_text
                 , er."WorkOrderNumber" 
 	            , er."Equipment_id" 
 	            , er."RunState" 
@@ -236,7 +261,7 @@ public class EquipmentService {
 	            --and er."RunState" = :runType
         		""";
 
-		sql += " order by e.\"Name\", er.\"StartDate\", er.\"EndDate\"";
+		sql += " order by start_date desc";
 
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 
