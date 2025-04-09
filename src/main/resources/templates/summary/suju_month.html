@@ -22,28 +22,33 @@
                     <dl>
                         <dt>
                             <label for="cboYear">
-                                연도<span class="eq"></span>
+                                연도<span class="eq">*</span>
                             </label>
                         </dt>
                         <dd>
                             <div class="srch-box">
                                 <select id="cboYear">
-                                    <option value="">선택</option>
                                 </select>
                             </div>
                         </dd>
                     </dl>
                     <dl>
                         <dt>
-                            업체<span class="eq">*</span>
+                            업체
                         </dt>
                         <dd>
-                            <select class="form-control2" id="cboCompany" name="cboCompany" ></select>
+                            <input type="text" id="cboCompany" name="cboCompany">
+                            <input type="hidden" id="cboCompanyHidden">
+                            &nbsp;
+                            <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                업체 검색
+                            </a>
                         </dd>
                     </dl>
                     <dl>
                         <dt>
-                            제품그룹<span class="eq">*</span>
+                            제품그룹
                         </dt>
                         <dd>
                             <select class="form-control2" id="cboMatGrp" name="cboMatGrp" ></select>
@@ -110,14 +115,8 @@
 </th:block>
 <th:block layout:fragment="scripts">
 <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+    <th:block th:replace="/common/popup_company :: popup_company"></th:block>
 <script type="text/javascript">
-    const currentYear = new Date().getFullYear();
-    const yearSelect = $('#cboYear');
-    for (let y = currentYear; y >= 2010; y--) {
-        yearSelect.append(new Option(y, y));
-    }
-
-
     class SujuMonthWijmoPage {
         constructor() {
             this.url = '/api/summary/suju_month_summary';
@@ -136,6 +135,7 @@
                 autoGenerateColumns: false,
                 showMarquee: true,
                 isReadOnly: true,
+                frozenColumns: 7,
                 formatItem: (sender, e) => {
                     if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                         e.cell.style.textAlign = 'center';
@@ -193,17 +193,51 @@
     let page = null;
 
     $(document.body).ready(function (e) {
+        const currentYear = new Date().getFullYear();
+        const yearSelect = $('#cboYear');
+        // 옵션 추가
+        for (let y = currentYear; y >= 2010; y--) {
+            yearSelect.append(new Option(y, y));
+        }
+        // 기본값 설정
+        yearSelect.val(currentYear);
+
         page = new SujuMonthWijmoPage();
-        let content = tmpl('searchWrap', data);
-        let $content = $(content);
-        AjaxUtil.fillSelectOptions($('#searchForm').find('#cboMatGrp'), 'material_group', 'all', false, 'product');
-        AjaxUtil.fillSelectOptions($('#searchForm').find('#cboYear'), 'data_year', '', false);
-        AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '');
 
-        $('#btnSearch').click(() => page.searchMainData());
-        $('#btnExcel').click(() => page.exportExcel());
+        AjaxUtil.fillSelectOptions($('#cboMatGrp'), 'material_group', 'all', '', 'product,semi');
+
+        $('#btnSearch').click(() => {
+            if ($('#cboCompanyHidden').val() === '' && $('#cboCompany').val() !== '') {
+                Alert.alert('', '업체명은 업체검색 버튼을 통해서 \n 검색해주세요');
+                return;
+            }
+
+            page.searchMainData();
+        });
+
+        $('#btnCompanySearch').click(function () {
+
+            let poppage = new PopCompComponent();
+            let $poppage = $(poppage);
+            let searchcallback = function (items) {
+                // $content.find('#cboCompany').val(items.id);
+                // $content.find('#CompanyName').val(items.compname);
+                console.log('items : ',items);
+                document.getElementById('cboCompany').value = items.compname;
+                document.getElementById('cboCompanyHidden').value = items.id;
+            };
+
+            poppage.show(searchcallback);
+        });
+
+        page.searchMainData();
     });
-
+    $('#cboCompany').on('input', function () {
+        const val = $(this).val();
+        if (val === '') {
+            $('#cboCompanyHidden').val('');
+        }
+    });
 
 </script>
 </th:block>

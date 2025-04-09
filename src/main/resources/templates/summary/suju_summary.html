@@ -37,7 +37,7 @@
                                 업체
                             </dt>
                             <dd>
-                                <input type="text" id="cboCompany" name="cboCompany" readonly>
+                                <input type="text" id="cboCompany" name="cboCompany">
                                 <input type="hidden" id="cboCompanyHidden">
                                 &nbsp;
                                 <a class="btn btn-delete" title="검색" id="btnCompanySearch">
@@ -64,18 +64,6 @@
                                         <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
                                         <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                         검색
-                                    </a>
-                                </li>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>&nbsp;</dt>
-                            <dd>
-                                <li>
-                                    <a class="btn btn-delete" title="초기화" id="btnClear">
-                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                                        <img src="/images/icon/ico-edit.svg" alt="아이콘">
-                                        초기화
                                     </a>
                                 </li>
                             </dd>
@@ -119,6 +107,8 @@
 <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
     <th:block th:replace="/common/popup_company :: popup_company"></th:block>
 <script type="text/javascript">
+
+
     class SujuSummaryPage {
         constructor() {
             this.url = '/api/summary/suju_summary';
@@ -209,17 +199,32 @@
     let page = null;
 
     $(document.body).ready(function (e) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작
+        const dd = String(today.getDate()).padStart(2, '0');
+
+        const firstDay = `${yyyy}-${mm}-01`;
+        const currentDay = `${yyyy}-${mm}-${dd}`;
         page = new SujuSummaryPage();
-        let content = document.getElementById('searchComArea');
+
+
+        $('#srchStartDt').val(firstDay);
+        $('#srchEndDt').val(currentDay);
 
         AjaxUtil.fillSelectOptions($('#cboMatGrp'), 'material_group', 'all', '', 'product,semi');
-        AjaxUtil.fillSelectOptions($('#searchForm').find('#cboYear'), 'data_year', '', false);
-        AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '');
 
-        $('#btnSearch').click(() => page.searchMainData());
-        $('#btnExcel').click(() => page.exportExcel());
+        $('#btnSearch').click(() => {
+            if ($('#cboCompanyHidden').val() === '' && $('#cboCompany').val() !== '') {
+                Alert.alert('', '업체명은 업체검색 버튼을 통해서 \n 검색해주세요');
+                return;
+            }
+
+            page.searchMainData();
+        });
 
         $('#btnCompanySearch').click(function () {
+
             let poppage = new PopCompComponent();
             let $poppage = $(poppage);
             let searchcallback = function (items) {
@@ -232,14 +237,16 @@
 
             poppage.show(searchcallback);
         });
-        // 초기화 버튼 클릭 이벤트
-        $('#btnClear').click(function () {
 
-                document.getElementById('cboCompany').value = '';
-                document.getElementById('cboCompanyHidden').value = '';
-        });
+        page.searchMainData();
     });
 
+    $('#cboCompany').on('input', function () {
+        const val = $(this).val();
+        if (val === '') {
+            $('#cboCompanyHidden').val('');
+        }
+    });
 
 
 
