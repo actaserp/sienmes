@@ -1,254 +1,247 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-<div class="content_wrap">
-    <section class="section ">
-
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="수주량 집계">수주량 집계</h3>
-            </div>
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderRefresh" title="새로고침"><i class="fas fa-undo-alt"></i></button>
-        </div>
-        
-        <div class="table_box search" >
-            <form id="searchForm" autocomplete="off">
-
-                <div class="row" >
-
-                    <div class="col-12 col-lg-5 col-xl-4" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_sm" data-labelCd="기간">기간</span>
-                            </div> 
-                            <div data-ax5picker="multi" id="srchDt">
-                                <div class="input-group-append">
-                                <input class="tac " type="text" id="srchStartDt" name="srchStartDt" />
-                                    <span class="input-group-text fs-xl">
-                                        <i class="fas fa-calendar-alt calendar_color" ></i>
-                                    </span>
-                                <span class="slow_sign">~</span>
-                                <input class="tac " type="text" id="srchEndDt" name="srchEndDt" />
-                                    <span class="input-group-text fs-xl">
-                                        <i class="fas fa-calendar-alt calendar_color"></i>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-6 col-md-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_sm" data-labelCd="업체">업체</span>
-                            </div>
-                            <select class="form-control2" id="cboCompany" name="cboCompany" ></select>
-                        </div>
-                    </div>
-
-                    <div class="col-5 col-md-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_sm" data-labelCd="제품그룹">제품그룹</span>
-                            </div>
-                            <select class="form-control2" id="cboMatGrp" name="cboMatGrp" ></select>
-                        </div>
-                    </div>
-
-                    <div class="col-1" >
-                            <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                    </div> 
-
+    <div class="content_wrap">
+        <div class="layout-contents">
+            <div class="page-title-wrap">
+                <div class="left">
+                    <h2>수주량 집계</h2>
+                    <a title="북마크" class="bookmark toggle">
+                        내 메뉴
+                    </a>
                 </div>
-            </form>
-
-        </div>
-    </section>
-
-    <section class="section ">
-        <div class="grid_box">
-            <div class="title_box">
-                <span class="right_align rpt" data-labelCd="업체별 수주량">업체별 수주량</span>
-                <button type="button" class="btn-default" id="btnExcel"><i class="fas fa-file-excel"></i></button>
-                <button type="button" class="btn-default" id="btnGridSetting" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
+                <ul class="page-navi">
+                    <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                    <li>영업 관리</li>
+                    <li>수주량집계</li>
+                </ul>
             </div>
 
-            <div class=" h-600" data-ax5grid="suju-summary-grid">
-            </div>
-        </div>
-    </section>
+            <section class="section">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label for="srchStartDt">
+                                    기간<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="date" id="srchStartDt">&nbsp; ~&nbsp;
+                                    <input type="date" id="srchEndDt">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl id="searchComArea">
+                            <dt>
+                                업체
+                            </dt>
+                            <dd>
+                                <input type="text" id="cboCompany" name="cboCompany" readonly>
+                                <input type="hidden" id="cboCompanyHidden">
+                                &nbsp;
+                                <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    업체 검색
+                                </a>
+                            </dd>
 
-</div>
+                        </dl>
+                        <dl>
+                            <dt>
+                                제품그룹
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboMatGrp" name="cboMatGrp" ></select>
+                            </dd>
+                        </dl>
+
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="초기화" id="btnClear">
+                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                        <img src="/images/icon/ico-edit.svg" alt="아이콘">
+                                        초기화
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+                    </div>
+                    <!--                <div class="button-wrap">-->
+                    <!--                    <ul>-->
+                    <!--                        <li>-->
+                    <!--                            <a class="btn btn-excell" title="등록" id="btnAddNew">-->
+                    <!--                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">-->
+                    <!--                                등록-->
+                    <!--                            </a>-->
+                    <!--                        </li>-->
+                    <!--                        <li>-->
+                    <!--                            <a class="btn btn-delete" title="삭제" id="btnDelete">-->
+                    <!--                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">-->
+                    <!--                                삭제-->
+                    <!--                            </a>-->
+                    <!--                        </li>-->
+                    <!--                        <li>-->
+                    <!--                            <a class="btn btn-edit" title="수정" id="btnEdit">-->
+                    <!--                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">-->
+                    <!--                                수정-->
+                    <!--                            </a>-->
+                    <!--                        </li>-->
+                    <!--                    </ul>-->
+                    <!--                </div>-->
+                </div>
+                <div class="container-fluid">
+                    <div id="theGrid" style="height: 730px;"></div>
+                </div>
+                <!--        <div class="grid_box">-->
+
+                <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
+                <!--        </div>-->
+            </section>
+        </div>
+    </div>
 </th:block>
 <th:block layout:fragment="scripts">
 <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <th:block th:replace="/common/popup_company :: popup_company"></th:block>
 <script type="text/javascript">
     class SujuSummaryPage {
         constructor() {
+            this.url = '/api/summary/suju_summary';
             this.grid = null;
+            this.$btnEdit = $('#btnEdit');
+            this.$btnAddNew = $('#btnAddNew');
+            this.viewData = new wijmo.collections.CollectionView();
             this.init();
         }
 
         init() {
-            let _this = this;
-            let config = {
-                target: $('[data-ax5grid="suju-summary-grid"]'),
-                sortable: true,
-                frozenColumnIndex: 0, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: true, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
+            this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+                selectionMode: wijmo.grid.SelectionMode.Row,
+                headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                autoGenerateColumns: false,
+                showMarquee: true,
+                isReadOnly: true,
+                formatItem: (sender, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                        e.cell.style.textAlign = 'center';
+                    }
                 },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        _this.grid.select(this.dindex);
-                    },
-                    mergeCells: ['mat_grp_name','mat_code','mat_name','unit_name', 'tot_price_sum', 'tot_suju_sum']
-                },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-               columns: [
-                    { key: 'mat_grp_name', label: '제품그룹', width: 100, align: 'center'},
-                    { key: 'mat_code', label: '제품코드', width: 100, align: 'center'},
-                    { key: 'mat_name', label: '제품명', width: 250, align: 'left' },
-                    { key: 'unit_name', label: '단위', width: 70, align: 'center' },
-                    { key: 'tot_price_sum', label: '총수주액', width: 100, align: 'right', formatter: 'money' },
-                    { key: 'tot_suju_sum', label: '총 수주량', width: 100, align: 'right', formatter: 'money' },
-                    { key: 'company_name', label: '업체', width: 250, align: 'left' },
-                    { key: 'suju_sum', label: '수주량', width: 100, align: 'right', formatter: 'money' },
-                    { key: 'price_sum', label: '수주액', width: 100, align: 'right', formatter: 'money' },
+                columns: [
+                    { binding: 'mat_grp_name', header: '제품그룹', width: 100 },
+                    { binding: 'mat_code', header: '제품코드', width: 100 },
+                    { binding: 'mat_name', header: '제품명', width: 250 },
+                    { binding: 'unit_name', header: '단위', width: 70 },
+                    { binding: 'tot_price_sum', header: '총수주액', width: 100, align: 'right', format: 'n0' },
+                    { binding: 'tot_suju_sum', header: '총 수주량', width: 100, align: 'right', format: 'n0' },
+                    { binding: 'company_name', header: '업체', width: 250 },
+                    { binding: 'suju_sum', header: '수주량', width: 100, align: 'right', format: 'n0' },
+                    { binding: 'price_sum', header: '수주액', width: 100, align: 'right', format: 'n0' },
                 ],
-               footSum: [
-                    [
-                        { label: '총합', colspan: 4, align: 'center' },
-                        { key: 'tot_price_sum', collector: 'sum', formatter: function () { return ''; }, align: 'right' },
-                        { key: 'tot_suju_sum', collector: 'sum', formatter: function () { return ''; }, align: 'right' },
-                        { key: 'company_name', collector: 'sum', formatter: function () { return ''; }, align: 'right' },
-                        { key: 'suju_sum', collector: 'sum', formatter: 'money', align: 'right' },
-                        { key: 'price_sum', collector: 'sum', formatter: 'money', align: 'right' },
-                    ]
-                ]
-            };
+                itemsSource: this.viewData,
+            });
 
-            this.grid = new ax5.ui.grid(config);
-            this.grid_config = config;
+            // ✅ Footer 패널 사용 설정
+            this.grid.columnFooters.rows.push(new wijmo.grid.Row());
+            this.grid.bottomLeftCells.setCellData(0, 0, '총합');
+
+            // ✅ Footer 합계 값 설정 (수동)
+            this.grid.loadedRows.addHandler(() => {
+                const rows = this.grid.rows;
+                const footer = this.grid.columnFooters.rows[0];
+
+                const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+
+                footer.dataItem = {
+                    tot_price_sum: getSum('tot_price_sum'),
+                    tot_suju_sum: getSum('tot_suju_sum'),
+                    suju_sum: getSum('suju_sum'),
+                    price_sum: getSum('price_sum'),
+                };
+            });
+
+            new FlexGridContextMenu(this.grid);
+            this.grid.downloadFileName = '수주량집계';
         }
 
-        searchMainData() {
-            let url = '/api/summary/suju_summary/read'
-            let data = {
-				'srchStartDt' : $("#srchStartDt").val(),
-				'srchEndDt' : $("#srchEndDt").val(),
-				'cboCompany' : $("#cboCompany").val(),
-				'cboMatGrp' : $("#cboMatGrp").val()
-			}
-            
-            let result = AjaxUtil.getSyncData(url, data);
 
-            if (result != null) {
-                this.grid.setData({
-                    list: result.data,
-                    page: {
-                        display: true,
-                        totalElements: result.data.length,
-                    },
-                });
+
+
+        searchMainData() {
+            const url = this.url + '/read';
+            const data = {
+                'srchStartDt' : $("#srchStartDt").val(),
+                'srchEndDt' : $("#srchEndDt").val(),
+                'cboCompany' : $("#cboCompanyHidden").val(),
+                'cboMatGrp' : $("#cboMatGrp").val()
+            };
+            const result = AjaxUtil.getSyncData(url, data);
+            console.log("result data : ", result.data);
+            if (result) {
+                this.grid.itemsSource = result.data;
             }
         }
 
-        //엑셀다운로드
         exportExcel() {
-            var targetview = this.grid;
-            // 현재 html코드로 데이터 만들어 확장자만 xls로 변경해주고 있음
-            targetview.exportExcel('업체별 수주량.xls');
+            const book = wijmo.grid.xlsx.FlexGridXlsxConverter.saveAsync(this.grid, {
+                includeColumnHeaders: true,
+                includeCellStyles: false,
+            }, (blob) => {
+                wijmo.saveFile(blob, '수주량.xlsx');
+            });
         }
-
     }
 
     let page = null;
 
     $(document.body).ready(function (e) {
         page = new SujuSummaryPage();
+        let content = document.getElementById('searchComArea');
 
-        picker.bind({
-            target: $('[data-ax5picker="multi"]'),  
-            direction: "top",
-   			locale: {
-				format: 'YYYY-MM-DD'
-			},
-            content: {
-                width:  214,  // 130, //270,
-                margin: 10,
-                type: 'date',
-                
-                config: {
-                    control: {
-                        left: '<i class="fa fa-arrow-left"></i>',   //fa-chevron-left
-                        yearTmpl: '%s',
-                        monthTmpl: '%s',
-                        right: '<i class="fa fa-arrow-right"></i>'
-                    },
-                    lang: {
-                        yearTmpl: "%s년",
-                        months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-                        dayTmpl: "%s"
-                    }
-                }
-            },
-            btns: {
+        AjaxUtil.fillSelectOptions($('#cboMatGrp'), 'material_group', 'all', '', 'product,semi');
+        AjaxUtil.fillSelectOptions($('#searchForm').find('#cboYear'), 'data_year', '', false);
+        AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '');
 
-            },
-            onStateChanged: function () {
- 
-            }
-        });		
+        $('#btnSearch').click(() => page.searchMainData());
+        $('#btnExcel').click(() => page.exportExcel());
 
-		//그리드 컬럼 설정
-        page.popColSetting = new popColSetting();
-        let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-		
-        if (userinfo.group_code == 'admin') {
-            $('#btnGridSetting').css('visibility','visible');  
-        }		
+        $('#btnCompanySearch').click(function () {
+            let poppage = new PopCompComponent();
+            let $poppage = $(poppage);
+            let searchcallback = function (items) {
+                // $content.find('#cboCompany').val(items.id);
+                // $content.find('#CompanyName').val(items.compname);
+                console.log('items : ',items);
+                document.getElementById('cboCompany').value = items.compname;
+                document.getElementById('cboCompanyHidden').value = items.id;
+            };
 
-        let date_from = CommonUtil.getYYYYMMDD(-7);
-        let today = CommonUtil.getYYYYMMDD();
-        $('#srchDt').ax5DatePicker({ direction: 'top' });
-        $('#srchStartDt').val(date_from);
-        $('#srchEndDt').val(today);
-
-        AjaxUtil.fillSelectOptions($('#searchForm').find('#cboMatGrp'), 'material_group', 'all', false, 'product');
-        AjaxUtil.fillSelectOptions($('#searchForm').find('#cboCompany'), 'company', 'all', false, '');
-
-        page.searchMainData();
-
-        // 검색
-        $('#btnSearch').click(function (e) {
-            page.searchMainData();
+            poppage.show(searchcallback);
         });
+        // 초기화 버튼 클릭 이벤트
+        $('#btnClear').click(function () {
 
-        //엑셀
-        $('#btnExcel').click(function (e) {
-            page.exportExcel();
-        });
-
-		//그리드 컬럼 설정	
-        $('#btnGridSetting').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
+                document.getElementById('cboCompany').value = '';
+                document.getElementById('cboCompanyHidden').value = '';
         });
     });
+
+
+
 
 </script>
 </th:block>
