@@ -1,6 +1,5 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-    <div class="content_wrap">
         <div class="layout-contents">
             <div class="page-title-wrap">
                 <div class="left">
@@ -101,7 +100,6 @@
                 <!--        </div>-->
             </section>
         </div>
-    </div>
 </th:block>
 <th:block layout:fragment="scripts">
 <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
@@ -123,6 +121,8 @@
             this.grid = new wijmo.grid.FlexGrid('#theGrid', {
                 selectionMode: wijmo.grid.SelectionMode.Row,
                 headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                allowSorting: wijmo.grid.AllowSorting.MultiColumn,
+                allowMerging: wijmo.grid.AllowMerging.Cells,  //셀 병합
                 autoGenerateColumns: false,
                 showMarquee: true,
                 isReadOnly: true,
@@ -132,19 +132,30 @@
                     }
                 },
                 columns: [
-                    { binding: 'mat_grp_name', header: '제품그룹', width: 100 },
-                    { binding: 'mat_code', header: '제품코드', width: 100 },
-                    { binding: 'mat_name', header: '제품명', width: 250 },
+                    { binding: 'mat_grp_name', header: '제품그룹', width: 150 ,allowMerging: true },
+                    { binding: 'mat_code', header: '제품코드', width: 200 ,allowMerging: true },
+                    { binding: 'mat_name', header: '제품명', width: 250 ,allowMerging: true },
                     { binding: 'unit_name', header: '단위', width: 70 },
-                    { binding: 'tot_price_sum', header: '총수주액', width: 100, align: 'right', format: 'n0' },
+                    { binding: 'tot_price_sum', header: '총수주액', width: '*', minWidth: 150,align: 'right', format: 'n0' },
                     { binding: 'tot_suju_sum', header: '총 수주량', width: 100, align: 'right', format: 'n0' },
                     { binding: 'company_name', header: '업체', width: 250 },
                     { binding: 'suju_sum', header: '수주량', width: 100, align: 'right', format: 'n0' },
-                    { binding: 'price_sum', header: '수주액', width: 100, align: 'right', format: 'n0' },
+                    { binding: 'price_sum', header: '수주액', width: 200, align: 'right', format: 'n0' },
                 ],
                 itemsSource: this.viewData,
             });
-
+            this.grid.itemFormatter = function (panel, row, col, cell) {
+                if (panel.cellType === wijmo.grid.CellType.Cell) {
+                    let colName = panel.columns[col].binding;
+                    if (['mat_grp_name', 'mat_code', 'mat_name', 'unit_name'].includes(colName)) {
+                        cell.style.textAlign = 'center';          // 수평 가운데
+                        cell.style.verticalAlign = 'middle';      // 수직 가운데
+                        cell.style.display = 'flex';              // flex로 정렬
+                        cell.style.alignItems = 'center';         // 수직 정렬
+                        cell.style.justifyContent = 'center';     // 수평 정렬
+                    }
+                }
+            };
             // ✅ Footer 패널 사용 설정
             this.grid.columnFooters.rows.push(new wijmo.grid.Row());
             this.grid.bottomLeftCells.setCellData(0, 0, '총합');
