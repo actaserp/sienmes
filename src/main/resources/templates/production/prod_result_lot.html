@@ -1329,6 +1329,7 @@
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'left', isReadOnly: true},
                         {binding: 'mat_name', header: '품목', width: 250, align: 'left', isReadOnly: true},
                         {binding: 'unit', header: '단위', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'useyn', header: '사용중지여부', width: 100, align: 'center', isReadOnly: true},
                         {binding: 'lotUseYn', header: 'LOT관리 유무', width: 120, align: 'center', isReadOnly: true},
                         {
                             binding: 'lot_size',
@@ -1373,8 +1374,17 @@
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]), // 빈 데이터로 초기화
                     itemFormatter: (panel, row, col, cell) => {
+                        const CellType = wijmo.grid.CellType;
+                        cell.style.backgroundColor = '';
                         if (panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             cell.style.textAlign = 'center';
+                        }
+                        if (panel.cellType === CellType.Cell) {
+                            const item = panel.rows[row].dataItem;
+
+                            if (item && item.useyn === 'Y') {
+                                cell.style.backgroundColor = '#f8d2cb';
+                            }
                         }
                     }
                 });
@@ -1809,6 +1819,9 @@
                     return;
                 } else if (!data.workcenter_id) {
                     Alert.alert('', '워크센터를 선택해주세요.');
+                    return;
+                } else if (!data.equipment_id) {
+                    Alert.alert('', '설비를 선택해주세요.');
                     return;
                 }
 
@@ -2436,6 +2449,7 @@
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/consumed_list', param);
                 if (result.data != null) {
                     _this.consumedGrid.itemsSource = result.data;
+                    console.log('result.data', result.data);
 
                     let goodQty = parseFloat($('#tabBasic').find('#good_qty').val());
                     let defectQty = parseFloat($('#tabBasic').find('#defect_qty').val());

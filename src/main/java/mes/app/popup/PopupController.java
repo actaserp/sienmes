@@ -43,13 +43,15 @@ public class PopupController {
 	            , sc."Code" as "MaterialTypeCode"
 	            , u."Name" as unit_name
 	            , m."Mtyn" as mtyn
+	            , m."WorkCenter_id"
+				, m."Equipment_id"
 	            from material m
 	            left join unit u on m."Unit_id" = u.id
 	            left join mat_grp mg on m."MaterialGroup_id" = mg.id
 	            left join sys_code sc on mg."MaterialType" = sc."Code" 
 	            and sc."CodeType" ='mat_type'
 	            where 1=1 
-	            AND "Mtyn" ='1' 
+	            AND "Useyn" ='0' 
 	    """;
 
 		if (StringUtils.hasText(material_type)){

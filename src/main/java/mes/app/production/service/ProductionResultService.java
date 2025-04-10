@@ -537,6 +537,10 @@ public class ProductionResultService {
                             , MCC.mc_qty
                             , COALESCE(MMP.current_qty_sum,0) as current_qty_sum
                             , coalesce(m."LotUseYN",'N') as "lotUseYn"
+                            , CASE WHEN m."Useyn" = '1' THEN 'Y'
+				                   WHEN m."Useyn" = '0' THEN 'N'
+				                   ELSE NULL
+				              END as useyn
                             from BT
                             inner join material m on m.id=BT.mat_pk
                             left join MCC on MCC.mat_pk=BT.mat_pk

@@ -108,7 +108,7 @@ public class ProdResultListService {
 	          left join unit u on u.id = m."Unit_id"
 	          left join work_center wc on wc.id = jr."WorkCenter_id"
               left join process p on p.id = wc."Process_id" 
-	          left join equ e on e.id = jr."Equipment_id"
+	          left join equ e on e.id = mp."Equipment_id"
               left join shift sh on sh."Code" = jr."ShiftCode"
              where mp.id = :mp_pk
 			""";
@@ -155,10 +155,11 @@ public class ProdResultListService {
                 , coalesce(mc."AddQty", 0) as add_consumed
                 , to_char(mc."StartTime", 'hh24:mi') as consumed_start
                 , to_char(mc."EndTime", 'hh24:mi') as consumed_end 
-                from mat_consu mc
-                inner join material m on m.id = mc."Material_id"
-                left join unit u on u.id = m."Unit_id"
-                where mc."JobResponse_id" = :mp_pk
+                FROM mat_produce mp
+				JOIN mat_consu mc ON mc."JobResponse_id" = mp."JobResponse_id" AND mc."LotIndex" = mp."LotIndex"
+					inner join material m on m.id = mc."Material_id"
+					left join unit u on u.id = m."Unit_id"
+				WHERE mp.id = :mp_pk
 			""";
 		
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);

@@ -78,6 +78,7 @@ public class MaterialInoutService {
                     left join test_result tr on tr."SourceDataPk"  = mi.id and tr."SourceTableName" = 'mat_inout'
                     left join test_item_result tir on tr.id = tir."TestResult_id"
                     where 1 = 1
+                    and m."Useyn" = '0'
                     --and sh."HouseType" = 'material'
                     and mi."InoutDate" between cast(:srchStartDt as date) and cast(:srchEndDt as date)
 				""";

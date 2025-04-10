@@ -47,6 +47,7 @@ public class MaterialCurrentStockService {
             left join store_house sh on sh.id = mh."StoreHouse_id"
             left join mat_lot ml on ml."StoreHouse_id"  = sh.id and m.id = ml."Material_id" and ml."CurrentStock" > 0
             where 1 = 1
+            and m."Useyn" = '0'
 			""";
 		if (StringUtils.isEmpty(mat_type)==false) sql +=" and mg.\"MaterialType\" = :mat_type ";
 		if (mat_grp_pk != null) sql +=" and mg.\"id\" = :mat_grp_pk ";

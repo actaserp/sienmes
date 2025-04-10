@@ -387,17 +387,21 @@
 
                     let $btnMaterialSearch = $content.find('#btnMaterialSearch');
 
-                    $('#srchDt').ax5DatePicker({direction: 'top'});
+                    // $('#srchDt').ax5DatePicker({direction: 'top'});
                     $('production_date').val(today);
 
                     AjaxUtil.fillSelectOptions($content.find('#cboShiftCode'), 'shift', 'choose', false);
                     AjaxUtil.fillSelectOptions($content.find('#cboMaterialGrp'), 'material_group', 'choose', false, 'product,semi');
                     AjaxUtil.fillSelectOptions($content.find('#cboWorcenter'), 'workcenter', 'choose', false);
-                    AjaxUtil.fillSelectOptions($content.find('#cboEquipment'), 'equipment', 'choose', false);
+
+                    $content.find('#cboWorcenter').off('change').on('change', function () {
+                        const workcenterId = $content.find('#cboWorcenter').val();
+                        if (!workcenterId) return;
+                        AjaxUtil.fillSelectOptions($content.find('#cboEquipment'), 'equipment_code', 'choose', '', $content.find('#cboWorcenter').val());
+                    });
                     AjaxUtil.fillSelectOptions($content.find('#cboMaterial'), 'material', 'choose', false);
 
                     if (action === 'update') {
-                        console.log('data', data);
                         AjaxUtil.fillSelectOptions($content.find('#cboMaterial'), 'material', 'choose', false, data.mat_grp_id);
                         $content.find('#cboShiftCode').val(data.shift_code);
                         $content.find('#cboMaterialGrp').val(data.mat_grp_id);
@@ -418,16 +422,39 @@
                                 $content.find('#cboMaterialName').val(item.Name);
                                 $content.find('#cboMaterialGrpName').val(item.group_name);
                                 $content.find('#mat_code').val(item.Code);
-                                //$txtProductName.val(item.Name);
-                                //$Material_id.val(item.id);
-                                //$product_code.val(item.Code);
-                                //$MaterialGroupName.val(item.group_name);
+                                $content.find('#cboWorcenter').val(item.WorkCenter_id);
+                                $content.find('#cboEquipment').val(item.Equipment_id);
+
+                                const $cboEquipment = $content.find('#cboEquipment');
+                                const $cboWorcenter = $content.find('#cboWorcenter');
+
+                                if (item.WorkCenter_id) {
+                                    // 워크센터 선택 → 그에 맞는 설비 옵션 채우기
+                                    AjaxUtil.fillSelectOptions($cboEquipment, 'equipment_code', 'choose', item.Equipment_id, item.WorkCenter_id, function () {
+                                        // 설비 옵션이 로드된 뒤, 일치하는 Equipment_id가 있으면 선택
+                                        if (item.Equipment_id) {
+                                            $cboEquipment.val(item.Equipment_id);
+                                        }
+                                    });
+                                } else {
+                                    $cboEquipment.empty(); // 워크센터 없으면 설비 초기화
+                                }
+
+                                // 워크센터 변경 시 설비 옵션 다시 채우기
+                                $cboWorcenter.off('change').on('change', function () {
+                                    const workcenterId = $(this).val();
+                                    if (!workcenterId) return;
+
+                                    AjaxUtil.fillSelectOptions($cboEquipment, 'equipment_code', 'choose', '', workcenterId);
+                                });
                             });
                             pop.searchDataBind();
 
                         });
 
                     }
+
+
 
                     $('#cboMaterialGrp').change(function (e) {
                         AjaxUtil.fillSelectOptions($content.find('#cboMaterial'), 'material', 'choose', false, $content.find('#cboMaterialGrp').val());

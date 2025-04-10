@@ -990,19 +990,29 @@ public class ProductionResultController {
                     return result;
                 }
             } else {
-
-                Float currentStock = consMat.getCurrentStock();
-                if (currentStock == null || currentStock == 0f) {
-                    result.message = "가용한 품목 재고가 없습니다.(" + matName + ")";
+                if ("1".equals(consMat.getUseyn())) {
+                    result.message = "사용 불가능한 품목이 BOM에 등록되어 있습니다.(" + matName + ")";
                     result.success = false;
                     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                     return result;
-                } else if (currentStock < goodQty) {
-                    result.message = "가용한 품목 재고가 부족합니다. \n(" +
-                            matName + ", 필요 수량: " + goodQty + ", 가용 수량: " + currentStock + ")";
-                    result.success = false;
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    return result;
+                }
+                // mtyn이 0일 때는 재고 체크하지 않음
+                if ("0".equals(consMat.getMtyn())) {
+                    // 아무 조건 없이 통과
+                } else {
+                    Float currentStock = consMat.getCurrentStock();
+                    if (currentStock == null || currentStock == 0f) {
+                        result.message = "가용한 품목 재고가 없습니다.(" + matName + ")";
+                        result.success = false;
+                        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                        return result;
+                    } else if (currentStock < goodQty) {
+                        result.message = "가용한 품목 재고가 부족합니다. \n(" +
+                                matName + ", 필요 수량: " + goodQty + ", 가용 수량: " + currentStock + ")";
+                        result.success = false;
+                        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                        return result;
+                    }
                 }
             }
 
@@ -1409,16 +1419,26 @@ public class ProductionResultController {
                     return result;
                 }
             } else {
-                Float availableStock = consMat.getCurrentStock();
-                if (diffTotal > 0) {
-                    if (availableStock == null || availableStock == 0f) {
+                if ("1".equals(consMat.getUseyn())) {
+                    result.message = "사용 불가능한 품목이 BOM에 등록되어 있습니다.(" + matName + ")";
+                    result.success = false;
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                    return result;
+                }
+
+                // mtyn이 0일 때는 재고 체크하지 않음
+                if ("0".equals(consMat.getMtyn())) {
+                    // 아무 조건 없이 통과
+                } else {
+                    Float currentStock = consMat.getCurrentStock();
+                    if (currentStock == null || currentStock == 0f) {
                         result.message = "가용한 품목 재고가 없습니다.(" + matName + ")";
                         result.success = false;
                         TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                         return result;
-
-                    } else if (availableStock < diffTotal) {
-                        result.message = "가용한 품목 재고가 부족합니다. \n(" + matName + ", 가용 수량: " + availableStock + ")";
+                    } else if (currentStock < goodQty) {
+                        result.message = "가용한 품목 재고가 부족합니다. \n(" +
+                                matName + ", 필요 수량: " + goodQty + ", 가용 수량: " + currentStock + ")";
                         result.success = false;
                         TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                         return result;

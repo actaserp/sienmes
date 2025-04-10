@@ -73,9 +73,9 @@ public class ProdResultListController {
 	// 투입목록조회
 	@GetMapping("/consumed_list")
 	public AjaxResult getProdResultConsumedList(
-			@RequestParam("jr_pk") int jr_pk,
+			@RequestParam("mp_pk") int mp_pk,
 			HttpServletRequest request) {
-		List<Map<String, Object>> items = this.prodResultListService.getProdResultConsumedList(jr_pk);
+		List<Map<String, Object>> items = this.prodResultListService.getProdResultConsumedList(mp_pk);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;

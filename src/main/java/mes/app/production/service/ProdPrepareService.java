@@ -49,7 +49,7 @@ public class ProdPrepareService {
                 left join work_center wc on wc.id = jr."WorkCenter_id"
                 left join equ e on e.id = jr."Equipment_id"
                 left join shift sh on sh."Code" = jr."ShiftCode"
-                where jr."ProductionDate" = :data_date and jr."State" <>'finished'
+                where jr."ProductionDate" = :data_date and jr."State" = 'ordered'
         		""";
   		
 	    if (StringUtils.isEmpty(shift_code) == false) {

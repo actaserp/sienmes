@@ -50,6 +50,7 @@ public class MaterialMoveService {
         left join store_house sh on sh.id = mh."StoreHouse_id"
         left join unit un on un.id = m."Unit_id"
         where 1 = 1
+        and m."Useyn" = '0'
 		""";
 		if(storehouse_id!=null) {
 			sql+="""
