@@ -42,6 +42,7 @@ public class MatStockTakeService {
                     where 1 = 1
                     and mih."StoreHouse_id" = :house_pk
                     and (m."LotUseYN" = 'N' or m."LotUseYN" is null)
+                    and "Useyn" = '0'
 	            """;
         
         if (StringUtils.isEmpty(mat_type) == false) {

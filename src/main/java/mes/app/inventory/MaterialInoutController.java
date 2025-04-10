@@ -487,7 +487,7 @@ public class MaterialInoutController {
 			@RequestParam(value="start", required=false) String start_date,
 			@RequestParam(value="end", required=false) String end_date,
 			HttpServletRequest request) {
-		//log.info("발주 read--- date_kind:{}, start_date:{},end_date:{} ",date_kind,start_date , end_date);
+
 		start_date = start_date + " 00:00:00";
 		end_date = end_date + " 23:59:59";
 

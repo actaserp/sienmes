@@ -80,6 +80,7 @@ public class LotStockTakeService {
         inner join unit u on u.id = m."Unit_id"
         left join mat_lot ml on ml."Material_id" = m.id
         where 1=1 and m."LotUseYN"='Y'
+        and "Useyn" = '0'
 		""";
 
 		if(StringUtils.hasText(mat_type)) {

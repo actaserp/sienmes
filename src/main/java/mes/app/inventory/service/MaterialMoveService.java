@@ -130,6 +130,7 @@ public class MaterialMoveService {
         left join mat_in_house mh on mh."Material_id" = m.id
         left join store_house sh on sh.id = mh."StoreHouse_id"
         where 1 = 1
+        and "Useyn" = '0'
 		""";
 		if(storehouse_id!=null) {
 			sql+="""
