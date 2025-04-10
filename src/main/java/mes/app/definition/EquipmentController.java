@@ -7,14 +7,13 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
+import mes.domain.repository.EquComponentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import mes.app.common.service.FileService;
 import mes.app.definition.service.EquipmentService;
@@ -47,6 +46,9 @@ public class EquipmentController {
 	
 	@Autowired
 	EquipmentHistoryRepository equipmentHistoryRepository;
+
+	@Autowired
+	EquComponentRepository equComponentRepository;
 	
 	// 설비 목록 조회
 	@GetMapping("/read")
@@ -254,6 +256,65 @@ public class EquipmentController {
 				this.fileService.updateDataPk(id_int, eq_id);
 			}
 		}
+		return result;
+	}
+
+	/**
+	 *
+	 * @param data 추가설비정보
+	 * @return
+	 */
+	@PostMapping("/save_add")
+	public AjaxResult saveAdd(@RequestBody MultiValueMap<String,Object> data) {
+		SecurityContext sc = SecurityContextHolder.getContext();
+		Authentication auth = sc.getAuthentication();
+		User user = (User)auth.getPrincipal();
+		data.set("user_id", user.getId());
+
+		AjaxResult result = new AjaxResult();
+		try {
+
+			if (this.equipmentService.saveComponent(data) > 0) {
+
+			} else {
+				result.success = false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.success = false;
+			result.message = "서버 오류: " + e.getMessage();
+		}
+		return result;
+	}
+
+	@GetMapping("/Componentdetail")
+	public AjaxResult getComponent(@RequestParam("id") int equPk) {
+		Map<String, Object> item = this.equipmentService.getComponent(equPk);
+
+		AjaxResult result = new AjaxResult();
+		result.data = item;
+
+		return result;
+	}
+
+
+	@GetMapping("/readComponent")
+	public AjaxResult getComponentList(@RequestParam("equ_pk") int equPk) {
+
+		List<Map<String, Object>> items = this.equipmentService.getComponentListByEqu(equPk);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
+		return result;
+	}
+
+
+	@PostMapping("/componentdelete")
+	public AjaxResult deletePriceByMat(@RequestParam("id") int id) {
+
+		AjaxResult result = new AjaxResult();
+		this.equComponentRepository.deleteById(id);
 		return result;
 	}
 

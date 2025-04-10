@@ -3,9 +3,11 @@ package mes.app.definition.service;
 import java.util.List;
 import java.util.Map;
 
+import mes.domain.services.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 import mes.domain.services.SqlRunner;
@@ -265,6 +267,134 @@ public class EquipmentService {
 
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 
+		return items;
+	}
+	public int saveComponent(MultiValueMap<String, Object> data) {
+		Integer id = CommonUtil.tryIntNull(data.getFirst("id"));
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("id", id);
+		dicParam.addValue("cname", CommonUtil.tryString(data.getFirst("cname")));
+		dicParam.addValue("component", CommonUtil.tryString(data.getFirst("component")));
+		dicParam.addValue("ctype", CommonUtil.tryString(data.getFirst("ctype")));
+		dicParam.addValue("cmodel", CommonUtil.tryString(data.getFirst("cmodel")));
+		dicParam.addValue("cmake", CommonUtil.tryString(data.getFirst("cmake")));
+
+		dicParam.addValue("camaunt", CommonUtil.tryString(data.getFirst("camaunt")));
+		dicParam.addValue("cunit", CommonUtil.tryString(data.getFirst("cunit")));
+		dicParam.addValue("cdate", CommonUtil.tryString(data.getFirst("cdate")));
+		dicParam.addValue("cycle", CommonUtil.tryString(data.getFirst("cycle")));
+		dicParam.addValue("state", CommonUtil.tryString(data.getFirst("state")));
+		dicParam.addValue("description", CommonUtil.tryString(data.getFirst("description")));
+		dicParam.addValue("equ_id", CommonUtil.tryIntNull(data.getFirst("equipmentId")));
+		dicParam.addValue("user_id", CommonUtil.tryIntNull(data.getFirst("user_id").toString()));
+
+		String sql = "";
+
+		if(id == null) {
+			sql = """
+    		INSERT INTO public.equ_component
+    		("_created", "_creater_id", "cname", "component", "ctype",
+     			"cmodel", "cmake", "camaunt", "cunit", "cdate",
+    		 "cycle", "state", "description", "equ_id")
+    		VALUES
+    		(now(), :user_id, :cname, :component, :ctype,
+     			:cmodel, :cmake, :camaunt, :cunit, :cdate,
+     				:cycle, :state, :description, :equ_id)
+			""";
+		}else {
+			sql = """
+					UPDATE public.equ_component
+					SET "_modified" = now()
+					, "_modifier_id" = :user_id
+					, "cname" = :cname
+					, "component"  = :component
+					, "ctype"  = :ctype
+					, "cmodel" = :cmodel
+					, "cmake" = :cmake
+					, "camaunt" = :camaunt
+					, "cunit" = :cunit
+					, "cdate" = :cdate
+					, "cycle" = :cycle
+					, "state" = :state
+					, "description" = :description
+					, "equ_id" = :equ_id
+					WHERE id = :id
+					""";
+		}
+		return this.sqlRunner.execute(sql, dicParam);
+	}
+
+
+	public Map<String, Object> getComponent(int equPk){
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("equ_pk", equPk);
+		String sql = """
+		select ec.id
+		, ec.cname
+		, ec.component
+		, ec.ctype
+		, ec.cmodel
+		, ec.cmake
+		, ec.camaunt
+		, ec.cunit
+		, ec.cdate
+		, ec.cycle
+		, ec.state
+		, ec.description
+		, ec.equ_id
+		from equ_component ec
+		inner join equ e on e.id = ec.equ_id
+		 where ec.id = :equ_pk
+		""";
+
+
+		Map<String, Object> item = this.sqlRunner.getRow(sql, paramMap);
+		return item;
+
+	}
+
+
+	public List<Map<String, Object>> getComponentListByEqu(int equPk) {
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("equ_pk", equPk);
+
+		String sql = """
+		with A as
+		(
+		select ec.id
+		, ec.cname
+		, ec.component
+		, ec.ctype
+		, ec.cmodel
+		, ec.cmake
+		, ec.camaunt
+		, ec.cunit
+		, ec.cdate
+		, ec.cycle
+		, ec.state
+		, ec.description
+		, ec.equ_id
+		from equ_component ec
+		where ec.equ_id = :equ_pk
+		)
+		select A.id,
+		A.cname,
+		A.component,
+		A.ctype,
+		A.cmodel,
+		A.cmake,
+		A.camaunt,
+		A.cunit,
+		A.cdate,
+		A.cycle,
+		A.state,
+		A.description,
+		A.equ_id
+		from A
+		inner join equ e on e.id = A.equ_id
+		""";
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		return items;
 	}
 

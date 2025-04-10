@@ -97,10 +97,6 @@
                         <div class="button-wrap">
                             <ul>
                                 <li>
-                                    <!-- <a class="btn btn-edit" title="작업 지시 상세" id="btnJobResDetail">
-                                         <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
-                                         작업 지시 상세
-                                     </a>-->
                                     <button type="button" class="btn-default" id="btnBasicNew" name="btnBasicNew" style="width: 115px; height: 36px;"><i
                                             class="fas fa-plus"></i>신규등록</button>
                                 </li>
@@ -338,19 +334,19 @@
                             <ul class="button-list">
 
                                 <li>
-                                    <button type="button" class="btn-default" id="btnPriceNew"
+                                    <button type="button" class="btn-default" id="btnComponentNew"
                                             style="width: 115px; height: 36px;"><span
                                             data-labelCd="신규">신규</span></button>
                                 </li>
 
                                 <li>
-                                    <button type="button" class="btn-default" id="btnPriceSave"
+                                    <button type="button" class="btn-default" id="btnComponentSave"
                                             style="width: 115px; height: 36px;"><span
                                             data-labelCd="등록">등록</span></button>
                                 </li>
 
                                 <li>
-                                    <button type="button" class="btn-danger" id="btnPriceDelete"
+                                    <button type="button" class="btn-danger" id="btnComponentDelete"
                                             style="width: 115px; height: 36px;"><span
                                             data-labelCd="삭제">삭제</span>
                                     </button>
@@ -366,13 +362,13 @@
                             <div class="container-fluid col">
                                 <p id="selectedItem"></p>
                                 <!--<div id="price-grid" style="height: 180px; max-height: 180px;"></div>-->
-                                <div id="add-grid" style="height: 180px; max-height: 180px;"></div>
+                                <div id="add-grid" style="height: 200px; max-height: 200px;"></div>
                             </div>
                         </div>
 
                         <div class="col wp40">
                             <div class="section">
-                                <form id="companyPriceForm">
+                                <form id="componentForm">
                                     <table class="write-table" style="width: 100%;">
                                         <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
                                         <colgroup>
@@ -381,98 +377,97 @@
                                             <col class="wp20">
                                             <col class="wp10">
                                         </colgroup>
-                                        <input type="text" id="price_id" name="price_id" hidden/>
+                                        <input type="text" id="id2" name="id" hidden/>
                                         <tbody>
                                         <tr>
                                             <th>
-                                                <label for="name">설비명</label>
+                                                <label for="cname">설비명</label>
                                             </th>
                                             <td>
-                                                <input type="text" id="" name=""  style="width: 180px;">
+                                                <input type="text" id="cname" name="cname"  style="width: 180px;" readonly>
                                             </td>
                                             <th>
-                                                <label for="name">구성품명</label>
+                                                <label for="component">구성품명</label>
                                             </th>
                                             <td>
-                                                <input type="text" id="" name=""  style="width: 180px;">
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <th>
-                                                <label for="name">부품유형</label>
-                                            </th>
-                                            <td>
-                                                <input type="text" id="" name=""  style="width: 180px;">
-                                            </td>
-                                            <th>
-                                                <label for="name">모델명/사양</label>
-                                            </th>
-                                            <td>
-                                                <input type="text" id="" name=""  style="width: 180px;">
+                                                <input type="text" id="component" name="component"  style="width: 180px;">
                                             </td>
                                         </tr>
 
                                         <tr>
                                             <th>
-                                                <label for="">제조사</label>
+                                                <label for="ctype">부품유형</label>
                                             </th>
                                             <td>
-                                                <input type="text" id="" name=""  style="width: 180px;">
+                                                <input type="text" id="ctype" name="ctype"  style="width: 180px;">
                                             </td>
                                             <th>
-                                                <label for="">수량</label>
+                                                <label for="cmodel">모델명/사양</label>
                                             </th>
                                             <td>
-                                                <input type="text" id="" name=""  style="width: 180px;">
+                                                <input type="text" id="cmodel" name="cmodel"  style="width: 180px;">
                                             </td>
                                         </tr>
 
                                         <tr>
                                             <th>
-                                                <label for="">단가</label>
+                                                <label for="cmake">제조사</label>
                                             </th>
                                             <td>
-                                                <input type="text" id="" name=""  style="width: 180px;">
+                                                <input type="text" id="cmake" name="cmake"  style="width: 180px;">
                                             </td>
                                             <th>
-                                                <label for="">설비일자</label>
+                                                <label for="camaunt">수량</label>
                                             </th>
                                             <td>
-                                                <input type="date" id="" name=""  style="width: 180px;">
+                                                <input type="text" id="camaunt" name="camaunt"  style="width: 180px;">
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>
+                                                <label for="cunit">단가</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="cunit" name="cunit"  style="width: 180px;">
+                                            </td>
+                                            <th>
+                                                <label for="cdate">설비일자</label>
+                                            </th>
+                                            <td>
+                                                <input type="date" id="cdate" name="cdate"  style="width: 180px;">
                                             </td>
                                         </tr>
 
 
                                         <tr>
                                             <th>
-                                                <label for="">교체주기</label>
+                                                <label for="cycle">교체주기</label>
                                             </th>
                                             <td>
-                                                <input type="text" id="" name=""  style="width: 180px;">
+                                                <input type="text" id="cycle" name="cycle"  style="width: 180px;">
                                             </td>
                                             <th>
-                                                <label for="">상태</label>
+                                                <label for="state">상태</label>
                                             </th>
                                             <td>
-                                                <select class="s-150" id="cbo" name="cbo" style="width: 180px;">
-                                                    <option value="">정상</option>
-                                                    <option value="">이상</option>
-                                                    <option value="">교체필요</option>
-                                                    <option value="">수리중</option>
+                                                <select class="s-150" id="state" name="state" style="width: 180px;">
+                                                    <option value="정상">정상</option>
+                                                    <option value="이상">이상</option>
+                                                    <option value="교체필요">교체필요</option>
+                                                    <option value="수리중">수리중</option>
                                                 </select>
                                             </td>
                                         </tr>
 
                                         <tr>
                                             <th>
-                                                <label for="">비고</label>
+                                                <label for="description">비고</label>
                                             </th>
                                             <td colspan="3">
-                                                <input type="text" id="" name=""  style="width: 100%;">
+                                                <input type="text" id="description2" name="description"  style="width: 100%;">
                                             </td>
                                         </tr>
-
                                         </tbody>
                                     </table>
                                 </form>
@@ -623,6 +618,34 @@
 
                 });
 
+
+                this.grid.loadedRows.addHandler(() => {
+                    setTimeout(() => {
+                        this.grid.select(-1, -1); // 선택 상태 초기화
+                    }, 0); // 비동기로 처리하여 초기 선택 해제
+                });
+                let isInitialLoad = true; // 초기 상태 플래그
+
+                this.grid.selectionChanged.addHandler((s, e) => {
+                    if (isInitialLoad) {
+                        isInitialLoad = false; // 초기 로드 이후 플래그 해제
+                        return;
+                    }
+
+                    let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
+                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
+                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
+                        let id = selectedRowData.id; // 품목 ID 가져오기
+                        /*console.log(selectedRowData);*/
+
+                        _this.showDetail(id);
+                        _this.showComponentList(id);
+
+                    }
+                });
+
+
+
                 this.grid2 = new wijmo.grid.FlexGrid('#add-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
@@ -635,24 +658,34 @@
                         }
                     },
                     columns: [
-                        //{ key: 'id', label: '번호', width: 80, align: 'right' },
-                        { binding: '', header: '설비명', width: 120, align: 'left' },
-                        { binding: '', header: '구성품명', width: 150, align: 'left' },
-                        { binding: '', header: '부품유형', width: 120, align: 'left' },
-                        { binding: '', header: '모델명/사양', width: 200, align: 'left' },
-                        { binding: '', header: '제조사', width: 150, align: 'left' },
-                        { binding: '', header: '수량', width: 180, align: 'left' },
-                        { binding: '', header: '단가', width: 150, align: 'left' },
-                        { binding: '', header: '설비일자', width: 150, align: 'left' },
-                        { binding: '', header: '교체주기', width: 150, align: 'left' },
-                        { binding: '', header: '상태', width: 150, align: 'left' },
-                        { binding: '', header: '비고', width: 150, align: 'center' },
+                        { binding: 'cname', header: '설비명', width: 200, align: 'left' },
+                        { binding: 'component', header: '구성품명', width: 150, align: 'left' },
+                        { binding: 'ctype', header: '부품유형', width: 120, align: 'left' },
+                        { binding: 'cmodel', header: '모델명/사양', width: 200, align: 'left' },
+                        { binding: 'cmake', header: '제조사', width: 150, align: 'left' },
+                        { binding: 'camaunt', header: '수량', width: 120, align: 'left' },
+                        { binding: 'cunit', header: '단가', width: 150, align: 'left' },
+                        { binding: 'cdate', header: '설비일자', width: 150, align: 'left' },
+                        { binding: 'cycle', header: '교체주기', width: 150, align: 'left' },
+                        { binding: 'state', header: '상태', width: 150, align: 'left' },
+                        { binding: 'description', header: '비고', width: 150, align: 'center' },
                     ],
                     itemsSource: this.viewData2, // 데이터를 설정할 배열
 
                 });
 
+                this.grid2.hostElement.addEventListener('dblclick', (e) => {
+                    let hitTest = this.grid2.hitTest(e);
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        let row = hitTest.row;
+                        let selectedItem = this.grid2.rows[row].dataItem;
+                        /*console.log(selectedItem);*/
 
+                        /*_this.showPriceDetail(selectedItem.mcu_id);*/
+                        _this.showComponentDetail(selectedItem.id);
+
+                    }
+                });
 
 
                 AjaxUtil.fillSelectOptions($('#cboEquipmentGroup'), 'equipment_group', 'all', false);
@@ -690,6 +723,8 @@
                     FormUtil.BindDataForm(result.data, $('#equipmentForm'));
 
                     $('#description').text(result.data.description);
+
+                    $('#cname').val(result.data.Name);
                 }
 
                 //page.setButtonDisable(false, false, false);
@@ -710,7 +745,8 @@
 
                 if (result != null) {
                     _this.viewData.sourceCollection = result.data;
-                    _this.viewData2.sourceCollection = result.data;
+                    /*_this.viewData2.sourceCollection = result.data;*/
+                    /*_this.showComponentList(result.data.id);*/
                 }
 
                 $('#equipmentForm')[0].reset();
@@ -891,9 +927,93 @@
                 _this.uploader.mode = 'disable';
             }
 
+            /*let Code = $('#Code').val();
+               let Name = $('#Name').val();
+
+               if (!WorkCenter_id) {
+                   Alert.alert('', '워크센터를 선택해주세요.', function () { });
+                   return;
+               } else if (!Code) {
+                   Alert.alert('', '설비코드를 입력해주세요.', function () { });
+                   return;
+               } else if (!Name) {
+                   Alert.alert('', '설비명을 입력해주세요.', function () { });
+                   return;
+               }
+
+               if ($('#PurchaseCost').val() < 0) {
+                   Alert.alert('', '구매금액을 확인해 주세요.');
+                   return;
+               }*/
+
+            showComponentList(equ_pk) {
+                let _this = this;
+                let data = {'equ_pk': equ_pk};
+
+                let result = AjaxUtil.getSyncData(_this.url + '/readComponent', data);
+                if (result != null) {
+                    _this.viewData2.sourceCollection = result.data;
+                }
+            }
+
+
+            ComponentSave() {
+                let _this = this;
+
+                let equipmentId = $('#equipmentForm').find('#id').val();
+
+                let data = FormUtil.extractForm($('#componentForm'));
+                data.equipmentId = equipmentId;
+
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('','저장되었습니다.'); // Notification
+                        $('#componentForm')[0].reset();
+                        $('#componentForm').find('#id2').val('');
+                        _this.searchMainData();
+                    } else {
+                        Alert.alert('', res.message);
+                        return;
+                    }
+                };
+                AjaxUtil.postAsyncData(_this.url+"/save_add", data, fnSuccess);
+            }
+
+            showComponentDetail(idx) {
+                let _this = this;
+                let param = { 'id': idx };
+                let result = AjaxUtil.getSyncData(_this.url+"/Componentdetail", param);
+                if (result != null) {
+                    console.log(result.data);
+                    FormUtil.BindDataForm(result.data, $('#componentForm'));
+                }
+            }
+
+            deleteComponentData() {
+                let _this = this;
+                let id = $('#componentForm').find('#id2').val()
+                let id2 = $('#equipmentForm').find('#id').val()
+                let data = { id: id };
+                let fnsuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('','삭제했습니다.');
+
+                        $('#componentForm')[0].reset();
+                        $('#componentForm').find('#id2').val('');
+
+                        _this.searchMainData();
+                        _this.showComponentList(id2);
+                    } else {
+                        Alert.alert('', res.message);
+                    }
+                };
+
+                AjaxUtil.postAsyncData(_this.url+"/componentdelete", data, fnsuccess);
+            }
+
+
+
         }
-
-
 
         expand = function(id) {
             let url = '/api/files/image?id=' + id;
@@ -904,6 +1024,8 @@
 
         $(document).ready(function (e) {
             page = new EquipmentPage();
+
+            $('#cdate').val(CommonUtil.getYYYYMMDD());
 
             $('#PurchaseDate').ax5DatePicker({ direction: 'bottom' });
             $('#InstallDate').ax5DatePicker({ direction: 'bottom' });
@@ -956,6 +1078,14 @@
 
             });
 
+
+
+            $('#btnComponentNew').click(function (e) {
+                $('#componentForm')[0].reset();
+                $('#componentForm').find('#id2').val('');
+
+            });
+
             $('#btnBasicSave').click(function (e) {
                 Alert.confirm('',
                     '저장하시겠습니까?',
@@ -972,6 +1102,16 @@
                 );
             });
 
+            $('#btnComponentDelete').click(function (e) {
+                Alert.confirm('',
+                    '삭제하시겠습니까?',
+                    function () { page.deleteComponentData() },
+                    function () { }
+                );
+            });
+
+
+
             // 사진파일 저장버튼
             $('#btnPhotoSave').click(function (e) {
                 Alert.confirm('',
@@ -980,6 +1120,16 @@
                     function () { }
                 );
             });
+
+            $('#btnComponentSave').click(function (e) {
+                Alert.confirm('',
+                    '저장하시겠습니까?',
+                    function () { page.ComponentSave() },
+                    function () { }
+                );
+            });
+
+
 
             // 엑셀 다운로드
             $('#btnExcel').click(function (e) {
