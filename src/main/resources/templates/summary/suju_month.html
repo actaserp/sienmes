@@ -171,6 +171,13 @@
                         cell.style.alignItems = 'center';         // 수직 정렬
                         cell.style.justifyContent = 'center';     // 수평 정렬
                     }
+                    else if (colName.startsWith('mon_') || ['year_qty_sum', 'year_money_sum'].includes(colName)) {
+                        // 숫자 오른쪽 정렬
+                        cell.style.textAlign = 'right';
+                    } else if (['company_name'].includes(colName)) {
+                        // 그 외 기본값 정렬 (선택)
+                        cell.style.textAlign = 'left';
+                    }
                 }
             };
             new FlexGridContextMenu(this.grid);
