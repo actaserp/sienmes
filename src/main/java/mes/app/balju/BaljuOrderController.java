@@ -65,8 +65,8 @@ public class BaljuOrderController {
       @RequestParam(value="SujuType") String sujuType,
       HttpServletRequest request,
       Authentication auth	) {
-   /* log.info("발주 등록 요청: id={}, sujuQty={}, companyId={}, companyName={}, description={}, dueDate={}, jumunDate={}, materialId={}, availableStock={}, sujuType={}",
-        id, sujuQty, companyId, companyName, description, dueDate, jumunDate, materialId, availableStock, sujuType);*/
+    log.info("발주 등록 요청: id={}, sujuQty={}, companyId={}, companyName={}, description={}, dueDate={}, jumunDate={}, materialId={}, availableStock={}, sujuType={}",
+        id, sujuQty, companyId, companyName, description, dueDate, jumunDate, materialId, availableStock, sujuType);
 
     User user = (User)auth.getPrincipal();
 
@@ -84,9 +84,9 @@ public class BaljuOrderController {
     availableStock = availableStock==null?0:availableStock;
     Date due_Date = CommonUtil.trySqlDate(dueDate);
     Date jumun_Date = CommonUtil.trySqlDate(jumunDate);
+    String jumunNumber = baljuOrderService.makeJumunNumber(jumun_Date);
 
     balju.setSujuQty(Double.valueOf(sujuQty));
-    balju.setSujuQty2(Double.valueOf(sujuQty));
     balju.setCompanyId(companyId);
     balju.setCompanyName(companyName);
     balju.setDescription(description);
@@ -96,6 +96,7 @@ public class BaljuOrderController {
     balju.setAvailableStock(availableStock); // 없으면 0으로 보내기 추가
     balju.setSujuType(sujuType);
     balju.set_status("manual");
+    balju.setJumunNumber(jumunNumber);
     balju.set_audit(user);
 
     balju = this.bujuRepository.save(balju);

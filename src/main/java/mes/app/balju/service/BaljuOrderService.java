@@ -5,8 +5,11 @@ import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +52,7 @@ public class BaljuOrderService {
           , b."ReservationStock" as "ReservationStock"
           , b."SujuQty2" as "SujuQty2"
           , fn_code_name('balju_state', b."State") as "StateName"
-          , fn_code_name('shipment_state', b."ShipmentState") as "ShipmentStateName"
+           ,sh."Name" as "ShipmentStateName"
           , b."State"
           , to_char(b."_created", 'yyyy-mm-dd') as create_date
           , case b."PlanTableName" when 'prod_week_term' then '주간계획' when 'bundle_head' then '임의계획' else b."PlanTableName" end as plan_state
@@ -58,6 +61,7 @@ public class BaljuOrderService {
           inner join mat_grp mg on mg.id = m."MaterialGroup_id"
           left join unit u on m."Unit_id" = u.id
           left join company c on c.id= b."Company_id"
+          left join store_house sh ON sh.id::varchar = b."ShipmentState"
           where 1 = 1
 			""";
 
@@ -122,4 +126,55 @@ public class BaljuOrderService {
 
     return item;
   }
+
+  //주문 번호 생성
+  @Transactional
+  public String makeJumunNumber(Date dataDate) {
+    String baseDate = new SimpleDateFormat("yyyyMMdd").format(dataDate);
+
+    MapSqlParameterSource paramMap = new MapSqlParameterSource();
+    paramMap.addValue("data_date", baseDate);
+    paramMap.addValue("code", "BaljuNumber");
+
+    int currVal = 1;
+
+    // 1. 현재 값 조회
+    String checkSql = """
+        SELECT "CurrVal" 
+        FROM seq_maker 
+        WHERE "Code" = :code AND "BaseDate" = :data_date
+        FOR UPDATE
+    """;
+    Map<String, Object> mapRow = sqlRunner.getRow(checkSql, paramMap);
+
+    if (mapRow != null && mapRow.containsKey("CurrVal")) {
+      currVal = (int) mapRow.get("CurrVal") + 1;
+
+      // 2. 시퀀스 업데이트
+      String updateSql = """
+            UPDATE seq_maker 
+            SET "CurrVal" = :currVal, "_modified" = now()
+            WHERE "Code" = :code AND "BaseDate" = :data_date
+        """;
+      paramMap.addValue("currVal", currVal);
+      sqlRunner.execute(updateSql, paramMap);
+
+    } else {
+      // 3. 신규 row 생성
+      currVal = 1;
+
+      String insertSql = """
+            INSERT INTO seq_maker("Code", "BaseDate", "Code2", "CurrVal", "_modified") 
+            VALUES (:code, :data_date, NULL, :currVal, now())
+        """;
+      paramMap.addValue("currVal", currVal);
+      sqlRunner.execute(insertSql, paramMap);
+    }
+
+    // 4. 주문번호 조립
+    String jumunNumber = baseDate + "-" + String.format("%04d", currVal);
+    //log.info("✅ 최종 생성된 주문번호: {}", jumunNumber);
+    return jumunNumber;
+  }
+
 }
