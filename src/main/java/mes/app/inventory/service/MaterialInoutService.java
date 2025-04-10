@@ -1,5 +1,6 @@
 package mes.app.inventory.service;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -220,6 +221,59 @@ public class MaterialInoutService {
 		Map<String,Object> items = this.sqlRunner.getRow(sql, param);
 		
 		return items;
+	}
+
+	public List<Map<String, Object>> getBaljuList(Timestamp start, Timestamp end) {
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("start", start);
+		dicParam.addValue("end", end);
+
+		String sql = """
+        select b.id
+          , b."JumunNumber"
+          , b."Material_id" as "Material_id"
+          , mg."Name" as "MaterialGroupName"
+          , mg.id as "MaterialGroup_id"
+          , fn_code_name('mat_type', mg."MaterialType") as "MaterialTypeName"
+          , m.id as "Material_id"
+          , m."Code" as product_code
+          , m."Name" as product_name
+          , u."Name" as unit
+          , b."SujuQty" as "SujuQty"
+          , to_char(b."JumunDate", 'yyyy-mm-dd') as "JumunDate"
+          , to_char(b."DueDate", 'yyyy-mm-dd') as "DueDate"
+          , b."CompanyName"
+          , b."Company_id"
+          , b."SujuType"
+          , fn_code_name('Balju_type', b."SujuType") as "BaljuTypeName"
+          , to_char(b."ProductionPlanDate", 'yyyy-mm-dd') as production_plan_date
+          , to_char(b."ShipmentPlanDate", 'yyyy-mm-dd') as shiment_plan_date
+          , b."Description"
+          , b."AvailableStock" as "AvailableStock"
+          , b."ReservationStock" as "ReservationStock"
+          , b."SujuQty2" as "SujuQty2"
+          , fn_code_name('balju_state', b."State") as "StateName"
+          , fn_code_name('shipment_state', b."ShipmentState") as "ShipmentStateName"
+          , b."State"
+          , to_char(b."_created", 'yyyy-mm-dd') as create_date
+          , case b."PlanTableName" when 'prod_week_term' then '주간계획' when 'bundle_head' then '임의계획' else b."PlanTableName" end as plan_state
+          from balju b
+          inner join material m on m.id = b."Material_id"
+          inner join mat_grp mg on mg.id = m."MaterialGroup_id"
+          left join unit u on m."Unit_id" = u.id
+          left join company c on c.id= b."Company_id"
+          where 1 = 1
+          and b."JumunDate" between :start and :end 
+          and b."State" = 'draft'
+			order by b."JumunDate" desc,  m."Name"
+			""";
+
+//    log.info("발주 read SQL: {}", sql);
+//    log.info("SQL Parameters: {}", dicParam.getValues());
+		List<Map<String, Object>> itmes = this.sqlRunner.getRows(sql, dicParam);
+
+		return itmes;
 	}
 
 }

@@ -34,6 +34,7 @@
             .pagebreak {
                 page-break-before: always;
             }
+
             /* page-break-after works, as well */
         }
 
@@ -291,6 +292,11 @@
                             </a>
                         </li>
                         <li>
+                            <a class="btn" title="품목 입고" id="btnBaljuInput">
+                                발주 입고
+                            </a>
+                        </li>
+                        <li>
                             <a class="btn" title="품목 출고" id="btnOutput">
                                 품목 출고
                             </a>
@@ -462,6 +468,53 @@
             <div class="popup-button">
                 <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
             </div>
+        </div>
+    </script>
+
+    <script type="text/x-tmpl" id="addBaljuInputPopup">
+        <div class="content_wrap popup">
+            <div class="section-top">
+                <div class="search-wrap" style="justify-content: flex-start;">
+                  <dl>
+                    <dt style="display:flex;">
+                      조회기간
+                    </dt>
+                    <dd>
+                      <ul class="date-box">
+                        <li>
+                          <input type="date" id="srchStartDt" name="srchStartDt">
+                          <label for="srchStartDt" class="hide">시작일</label>
+                        </li>
+                        <li>
+                          <input type="date" id="srchEndDt" name="srchEndDt">
+                          <label for="srchEndDt" class="hide">종료일</label>
+                        </li>
+                      </ul>
+                    </dd>
+                  </dl>
+
+                  <dl>
+                    <dt>&nbsp;</dt>
+                    <dd>
+                      <li>
+                        <a class="btn btn-delete" title="검색" id="btnSearch">
+                          <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                          <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                          검색
+                        </a>
+                      </li>
+                    </dd>
+                  </dl>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div id="balju-input-grid" style="height: 400px;"></div>
+            </div>
+            <div class="popup-button">
+                <button type="button" class="btn-popup y_write_auth" id="btnBaljuAction"><span data-labelCd="입고처리">입고처리</span></button>
+                <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
+            </div>
+
         </div>
     </script>
 
@@ -994,6 +1047,146 @@
 
                     modalContainer.modal.close();
                 });
+            }
+
+            // 발주 입고
+            showBaljuInputPopup() {
+                let _this = this;
+
+                let content = tmpl('addBaljuInputPopup', {});
+                let $content = $(content);
+                let modalContainer = new PopupDraggable('발주 입고');
+                modalContainer.open({width: 1300, height: 670, $content});
+
+                this.storeHouseOptions = AjaxUtil.getSelectDataWithNull('store_house', 'choose');
+
+                let dicStoreHouse = {};
+                $.each(this.storeHouseOptions, function (idx, item) {
+                    dicStoreHouse[item.value] = item.text;
+                });
+
+                let storeHouseMap = new wijmo.grid.DataMap(this.storeHouseOptions, 'value', 'text');
+
+                this.baljuInputGrid = new wijmo.grid.FlexGrid('#balju-input-grid', {
+                    autoGenerateColumns: false,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    frozenColumns: 0,
+                    frozenRows: 0,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
+                    formatItem: (s, e) => {
+                        e.cell.style.color = '';
+                        e.cell.style.textAlign = '';
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+
+                            const binding = s.columns[e.col].binding;
+
+                            if (binding === 'StoreHouse_id' || binding === 'SujuQty2' || binding === 'Description2') {
+                                e.cell.style.color = '#5567ff'; // 글자 색 적용
+                            }
+                        }
+                    },
+                    columns: [
+                        {binding: 'CompanyName', header: '구매처', width: 120, align: 'center', isReadOnly: true},
+                        {binding: 'JumunDate', header: '발주일', width: 120, align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '발주번호', width: 140, align: 'center', isReadOnly: true},
+                        {binding: 'product_code', header: '제품코드', width: 100, isReadOnly: true},
+                        {binding: 'product_name', header: '제품명', width: 200, align: 'left',isReadOnly: true},
+                        {binding: 'unit', header: '단위', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'SujuQty', header: '발주 수량', width: 80, align: 'right', format: 'n0', isReadOnly: true},
+                        {binding: 'DueDate', header: '납기예정일', width: 120, align: 'center', isReadOnly: true},
+                        {binding: 'StoreHouse_id', header: '납품 창고', width: 100, align: 'center',dataMap: storeHouseMap, isReadOnly: false},
+                        {binding: 'SujuQty2', header: '입고 수량', width: 100, align: 'right', isReadOnly: false},
+                        {binding: 'Description2', header: '사유', width: 150, isReadOnly: false},
+                        {binding: 'Description', header: '발주 메모', width: 150, isReadOnly: true}
+                    ],
+                    itemsSource: new wijmo.collections.CollectionView([]),
+                });
+
+                // let selector = new wijmo.grid.selector.Selector(this.baljuInputGrid);
+                new FlexGridContextMenu(this.baljuInputGrid);
+                this.baljuInputGrid.downloadFileName = '발주 입고';
+
+                $content.find('#btnSearch').on('click', function () {
+                    fnLoadBaljuList();
+                });
+
+                let start = $content.find('#srchStartDt');
+                let end = $content.find('#srchEndDt');
+
+                start.val(CommonUtil.getYYYYMMDD(-7));
+                end.val(CommonUtil.getYYYYMMDD());
+
+                let fnLoadBaljuList = function () {
+                    let fnsuccess = function (result) {
+                        if (result.data !== null) {
+                            console.log('balju', result.data);
+                            result.data.forEach(item => {
+                                if (!item.StoreHouse_id) {
+                                    item.StoreHouse_id = _this.storeHouseOptions[0].value; // 첫 번째 옵션의 value
+                                }
+                            });
+                            _this.baljuInputGrid.itemsSource = new wijmo.collections.CollectionView(result.data);
+                            new wijmo.grid.selector.Selector(_this.baljuInputGrid);
+                        }
+                    };
+                    let baljuParam = {
+                        'start': start.val(),
+                        'end': end.val(),
+                        'action': 'read'
+                    };
+                    AjaxUtil.getAsyncData(_this.url + '/read_balju', baljuParam, fnsuccess);
+
+                };
+
+                fnLoadBaljuList();
+
+                $content.find('#btnBaljuAction').on('click', function () {
+
+                    let url = _this.url + '/save_balju';
+                    let items = _this.baljuInputGrid.rows
+                        .filter(row => row.isSelected)
+                        .map(row => row.dataItem);
+
+
+                    if (!items || items.length === 0) {
+                        Alert.alert('', '저장할 항목을 선택하세요.');
+                        return;
+                    }
+
+                    for (let i = 0; i < items.length; i++) {
+                        const row = items[i];
+
+                        if (!row.StoreHouse_id) {
+                            Alert.alert('', '납품 창고를 선택하세요.');
+                            return;
+                        }
+
+                        if (row.SujuQty2 === null || row.SujuQty2 === undefined || row.SujuQty2 === '') {
+                            Alert.alert('', '입고 수량을 입력하세요.');
+                            return;
+                        }
+
+                        // 추가: 음수 또는 0 체크도 필요할 경우
+                        if (isNaN(row.SujuQty2) || Number(row.SujuQty2) <= 0) {
+                            Alert.alert('', '입고 수량은 0보다 큰 숫자여야 합니다.');
+                            return;
+                        }
+                    }
+
+                    let fnSuccess = function (res) {
+                        if (!res.success) {
+                            Alert.alert('', res.message);
+                        } else {
+                            Notify.success('저장되었습니다');
+                            page.searchDataBind();
+                            modalContainer.modal.close();
+                        }
+                    };
+
+                    AjaxUtil.postJsonAsyncData(url, items, fnSuccess);
+                });
+
             }
 
             addMultiDataPopup(type) {
@@ -1911,6 +2104,10 @@
             });
             $('#btnMultiInput').on('click', function () {
                 page.addMultiDataPopup('in');
+            });
+            // 발주입고
+            $('#btnBaljuInput').on('click', function () {
+                page.showBaljuInputPopup();
             });
 
             // 품목 창고이동 팝업 생성

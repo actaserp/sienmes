@@ -12,6 +12,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
+import mes.domain.entity.*;
+import mes.domain.repository.*;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,18 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import mes.app.inventory.service.LotService;
 import mes.app.inventory.service.MaterialInoutService;
-import mes.domain.entity.MaterialLot;
-import mes.domain.entity.Material;
-import mes.domain.entity.MaterialInout;
-import mes.domain.entity.TestItemResult;
-import mes.domain.entity.TestResult;
-import mes.domain.entity.User;
 import mes.domain.model.AjaxResult;
-import mes.domain.repository.MatInoutRepository;
-import mes.domain.repository.MatLotRepository;
-import mes.domain.repository.MaterialRepository;
-import mes.domain.repository.TestItemResultRepository;
-import mes.domain.repository.TestResultRepository;
 import mes.domain.services.CommonUtil;
 
 @RestController
@@ -69,6 +60,9 @@ public class MaterialInoutController {
 	
 	@Autowired
 	TestItemResultRepository testItemResultRepository;
+
+	@Autowired
+	BujuRepository bujuRepository;
 	
 	@GetMapping("/read")
 	public AjaxResult getMaterialInout(
@@ -485,6 +479,92 @@ public class MaterialInoutController {
 			this.matInoutRepository.save(mi);
 		}
 		
+		return result;
+	}
+
+	@GetMapping("/read_balju")
+	public AjaxResult getbaljuList(
+			@RequestParam(value="start", required=false) String start_date,
+			@RequestParam(value="end", required=false) String end_date,
+			HttpServletRequest request) {
+		//log.info("발주 read--- date_kind:{}, start_date:{},end_date:{} ",date_kind,start_date , end_date);
+		start_date = start_date + " 00:00:00";
+		end_date = end_date + " 23:59:59";
+
+		Timestamp start = Timestamp.valueOf(start_date);
+		Timestamp end = Timestamp.valueOf(end_date);
+
+		List<Map<String, Object>> items = this.materialInoutService.getBaljuList(start, end);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
+		return result;
+	}
+
+	@PostMapping("/save_balju")
+	@Transactional
+	public AjaxResult saveBaljuInout(
+			@RequestBody List<Map<String, Object>> baljuList,
+			HttpServletRequest request,
+			Authentication auth) {
+
+		User user = (User)auth.getPrincipal();
+		AjaxResult result = new AjaxResult();
+
+		for (Map<String, Object> item : baljuList) {
+			try {
+				Integer bal_pk = (Integer) item.get("id");
+				String description = (String) item.get("Description2");
+				if (description == null || description.trim().isEmpty()) {
+					description = "발주 입고";
+				}
+				String inoutQtyStr = String.valueOf(item.get("SujuQty2")); // '입고 수량'
+				String materialIdStr = String.valueOf(item.get("Material_id"));
+				String storeHouseIdStr = String.valueOf(item.get("StoreHouse_id"));
+
+				Integer matPk = Integer.parseInt(materialIdStr);
+				Integer qty = Integer.parseInt(inoutQtyStr);
+
+				MaterialInout mi = new MaterialInout();
+				mi.setInoutDate(LocalDate.now());
+				mi.setInoutTime(LocalTime.now());
+				mi.setMaterialId(matPk);
+				mi.setStoreHouseId(Integer.parseInt(storeHouseIdStr));
+
+				Material m = materialRepository.getMaterialById(matPk);
+				String testYn = m.getInTestYN() != null ? m.getInTestYN() : "";
+
+				if ("Y".equals(testYn)) {
+					mi.setPotentialInputQty((float) qty);
+					mi.setState("waiting");
+					mi.set_status("t");
+				} else {
+					mi.setInputQty((float) qty);
+					mi.setState("confirmed");
+					mi.set_status("a");
+				}
+
+				mi.setDescription(description);
+				mi.setInOut("in");
+				mi.setInputType("발주 입고");
+				mi.set_audit(user);
+				matInoutRepository.save(mi);
+
+				Balju balju = this.bujuRepository.getBujuById(bal_pk);
+				balju.setSujuQty2((double) qty);
+				balju.setShipmentState(storeHouseIdStr);
+				balju.setState("received");
+				bujuRepository.save(balju);
+
+			} catch (Exception e) {
+				result.success = false;
+				result.message = "처리 중 오류 발생: " + e.getMessage();
+				return result;
+			}
+		}
+		result.success = true;
+
 		return result;
 	}
 	
