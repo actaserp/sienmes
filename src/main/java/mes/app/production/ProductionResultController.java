@@ -297,6 +297,7 @@ public class ProductionResultController {
             @RequestParam(value = "equipment_id", required = false) Integer equipmentId,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "mat_pk", required = false) Integer matPk,
+            @RequestParam(value = "order_num", required = false) String order_num,
             HttpServletRequest request,
             Authentication auth) {
 
@@ -326,6 +327,7 @@ public class ProductionResultController {
             mir = this.matProcInputReqRepository.save(mir);
 
             jr.setMaterialProcessInputRequestId(mir.getId());
+
         } else {
 
         }
@@ -346,6 +348,17 @@ public class ProductionResultController {
         jr.setDescription(description);
         jr.set_audit(user);
         jr = this.jobResRepository.save(jr);
+
+        // 설비 시작 추가
+        EquRun er = new EquRun();
+        er.setEquipmentId(equipmentId);
+        er.setStartDate(start_time);
+        er.setWorkOrderNumber(order_num);
+        er.setRunState("run");
+        er.set_audit(user);
+
+        this.equRunRepository.save(er);
+
 
         result.data = jr;
 
@@ -453,6 +466,7 @@ public class ProductionResultController {
             @RequestParam(value = "end_date", required = false) String endDate,
             @RequestParam(value = "end_time", required = false) String endTime,
             @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "order_num", required = false) String order_num,
             HttpServletRequest request,
             Authentication auth) {
 
@@ -502,6 +516,16 @@ public class ProductionResultController {
 
         jr = this.jobResRepository.save(jr);
         System.out.println("jr data" + jr);
+
+        Optional<EquRun> runningRunOpt = equRunRepository.findLatestRunningByEquipmentAndOrder(equipmentId, order_num);
+        if (runningRunOpt.isPresent()) {
+            EquRun equ = runningRunOpt.get();
+            equ.setEndDate(end_time); // 중지 시각
+            equ.setRunState("complete");
+            equ.set_audit(user);
+
+            equRunRepository.save(equ);
+        }
 
         Map<String, Object> item = new HashMap<String, Object>();
         item.put("jr_pk", jrPk);
@@ -1617,11 +1641,8 @@ public class ProductionResultController {
     @PostMapping("/stop_save")
     @Transactional
     public AjaxResult stopSave(
-            @RequestParam(value = "stop_pk", required = false) Integer stop_id,
             @RequestParam(value = "stop_date", required = false) String stop_date,
             @RequestParam(value = "stopTime", required = false) String stopTime,
-            @RequestParam(value = "restart_date", required = false) String restart_date,
-            @RequestParam(value = "restartTime", required = false) String restartTime,
             @RequestParam(value = "WorkOrderNumber", required = false) String WorkOrderNumber,
             @RequestParam(value = "Description", required = false) String Description,
             @RequestParam(value = "Equipment_id", required = false) Integer Equipment_id,
@@ -1635,48 +1656,37 @@ public class ProductionResultController {
         User user = (User) auth.getPrincipal();
 
         Timestamp stop_time = Timestamp.valueOf(stop_date + ' ' + stopTime + ":00");
-        Timestamp restart_time = null;
-        if (restart_date != null && !restart_date.trim().isEmpty()
-                && restartTime != null && !restartTime.trim().isEmpty()) {
-            restart_time = Timestamp.valueOf(restart_date + ' ' + restartTime + ":00");
-        }
+        Timestamp now = DateUtil.getNowTimeStamp();
+        Optional<EquRun> runningRunOpt = equRunRepository.findLatestRunningByEquipmentAndOrder(Equipment_id, WorkOrderNumber);
+        if (runningRunOpt.isPresent()) {
+            EquRun equ = runningRunOpt.get();
+            equ.setEndDate(stop_time); // 중지 시각
+            equ.setRunState("stop");
+            equ.setStopCauseId(StopCause_id);
+            equ.setDescription(Description);
+            equ.set_audit(user);
 
-        if (stop_id == null) {
+            equRunRepository.save(equ);
+
+            jobResRepository.updateStateById(jr_pk, "stopped");
+            return result;
+        } else {
             EquRun er = new EquRun();
             er.setEquipmentId(Equipment_id);
-            er.setStopCauseId(StopCause_id);
-            er.setStartDate(stop_time);
+            er.setStartDate(now);
             er.setWorkOrderNumber(WorkOrderNumber);
-            er.setRunState("stop");
-            er.setDescription(Description);
+            er.setRunState("run");
             er.set_audit(user);
 
             this.equRunRepository.save(er);
 
-            jobResRepository.updateStateById(jr_pk, "stopped");
-        } else {
-            Optional<EquRun> runOpt = equRunRepository.findById(stop_id);
-            if (runOpt.isPresent()) {
-                EquRun run = runOpt.get();
-                run.setEndDate(restart_time);
-                run.set_audit(user);
-                run.setDescription(Description);
-                equRunRepository.save(run);
+            jobResRepository.updateStateById(jr_pk, "working");
 
-                // job_res 상태를 working으로 변경
-                jobResRepository.updateStateById(jr_pk, "working");
-            } else {
-                result.success = false;
-                result.message = "중지된 이력이 존재하지 않습니다.";
-                return result;
-            }
+            result.message = "재개 되었습니다..";
+            return result;
         }
-
-
-        result.success = true;
-		result.data = jr_pk;
-        return result;
     }
+
 
     @GetMapping("/prod_test_list")
     public AjaxResult prodTestList(

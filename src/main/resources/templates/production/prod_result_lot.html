@@ -873,15 +873,14 @@
                 <table class="work-table">
                     <caption>일지중지 테이블</caption>
                     <input type="hidden" id="jr_pk" name="jr_pk" value="">
-                    <input type="hidden" id="stop_pk" name="stop_pk" value="">
                     <tbody>
                         <tr>
-                            <th style="text-align: center">
-                                <label for="start_date">작업 시작시간</label>
+                             <th style="text-align: center">
+                                <label for="stop_date">중지 시간</label>
                             </th>
                             <td>
-                                <input type="date" id="start_date" name="start_date" readonly disabled>
-                                <input type="time" id="startTime" name="startTime" readonly disabled>
+                                <input type="date" id="stop_date" name="stop_date" readonly disabled>
+                                <input type="time" id="stopTime" name="stopTime" readonly disabled>
                             </td>
                             <th style="text-align: center">
                                 <label for="equipment_id">설비</label>
@@ -893,27 +892,10 @@
                         </tr>
                         <tr>
                             <th style="text-align: center">
-                                <label for="stop_date">중지 시간*</label>
-                            </th>
-                            <td>
-                                <input type="date" id="stop_date" name="stop_date">
-                                <input type="time" id="stopTime" name="stopTime">
-                            </td>
-                            <th style="text-align: center">
                                 <label for="StopCause_id">비가동유형*</label>
                             </th>
                             <td>
                                <select id="StopCause_id" name="StopCause_id" ></select>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th style="text-align: center">
-                                <label for="restart_date">재가동 시간*</label>
-                            </th>
-                            <td>
-                                <input type="date" id="restart_date" name="restart_date" disabled>
-                                <input type="time" id="restartTime" name="restartTime" disabled>
                             </td>
                             <th style="text-align: center">
                                 <label for="OrderNum">작업지시번호</label>
@@ -922,7 +904,6 @@
                                 <input class="form-control2" id="OrderNum" name="OrderNum" readonly />
                             </td>
                         </tr>
-
                         <tr>
                             <th style="text-align: center">
                                 <label for="description">비고</label>
@@ -940,7 +921,7 @@
             </div>
 
             <div class="popup-button">
-                <button type="button" class="btn-popup y_write_auth" id="btnStopSave">저장</button>
+                <button type="button" class="btn-popup y_write_auth" id="btnStopSave">중지하기</button>
                 <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
             </div>
             </form>
@@ -2958,17 +2939,40 @@
                     return;
                 }
 
+                const state = item.state;
+
+                if (state === 'stopped') {
+                    Alert.confirm('재가동', '재가동 하시겠습니까?', function () {
+                        let sendData = {
+                            stop_date: CommonUtil.getYYYYMMDD(),
+                            stopTime: CommonUtil.getHourMin(),
+                            WorkOrderNumber: item.order_num,
+                            jr_pk: item.id,
+                            Description: '',
+                            Equipment_id: item.equipment_id,
+                            StopCause_id: null
+                        };
+
+                        let previousIndex = _this.selectedIndex;
+                        AjaxUtil.postAsyncData(_this.baseUrl + '/stop_save', sendData, function (result) {
+                            if (result.success) {
+                                Notify.success('재가동 처리되었습니다.');
+                                _this.searchMainData();
+                                _this.showBasicInfo(item.id);
+                                setTimeout(() => {
+                                    _this.grid.select(previousIndex, 0);
+                                }, 100);
+                            } else {
+                                Notify.error('재가동 처리 중 오류가 발생했습니다.');
+                            }
+                        });
+
+                    });
+                    return;
+                }
+
                 let content = tmpl('stopPopup', {});
                 let $content = $(content);
-
-                const state = item.state;
-                if (state === 'working') {
-                    $content.find('#btnStopSave').text('중지');
-                } else if (state === 'stopped') {
-                    $content.find('#btnStopSave').text('재가동');
-                } else {
-                    $content.find('#btnStopSave').text('중지'); // 기본 fallback
-                }
 
                 let modalContainer = new PopupDraggable('일시중지');
                 modalContainer.open({width: 1000, height: 670, $content});
@@ -2982,15 +2986,8 @@
                         {binding: 'WorkOrderNumber', header: '작지번호', width: 140, align: 'center', isReadOnly: true},
                         {binding: 'Name', header: '설비', width: 120, align: 'center', isReadOnly: true},
                         {binding: 'StopCauseName', header: '비가동 유형', width: 100, align: 'center', isReadOnly: true},
-                        {binding: 'start_date', header: '중지 시간', width: 140, align: 'center', isReadOnly: true},
-                        {binding: 'end_date', header: '재가동 시간', width: 140, align: 'center', isReadOnly: true},
-                        {
-                            binding: 'gap_time_text',
-                            header: '중지된 시간',
-                            width: 100,
-                            align: 'right',
-                            isReadOnly: true
-                        },
+                        {binding: 'start_date', header: '시작 시간', width: 140, align: 'center', isReadOnly: true},
+                        {binding: 'end_date', header: '중지 시간', width: 140, align: 'center', isReadOnly: true},
                         {
                             binding: 'Description',
                             header: '비고',
@@ -3010,24 +3007,16 @@
                 new FlexGridContextMenu(this.stopGrid);
                 this.stopGrid.downloadFileName = '중지 내역';
 
-                let $stop_pk = $content.find('#stop_pk');
                 let $OrderNum = $content.find('#OrderNum');
-                let $startDate = $content.find('#start_date');
-                let $startTime = $content.find('#startTime');
                 let $EquipmentId = $content.find('#equipment_id');
                 let $EquipmentName = $content.find('#equipment_name');
                 let $stopDate = $content.find('#stop_date');
                 let $stopTime = $content.find('#stopTime');
-                let $restartDate = $content.find('#restart_date');
-                let $restartTime = $content.find('#restartTime');
                 let $StopCauseId = $content.find('#StopCause_id');
                 let $Description = $content.find('#Description');
                 let $btnStopSave = $content.find('#btnStopSave');
 
-                $stop_pk.val($('#equipmentStopForm').find('#stop_pk').val());
                 $OrderNum.val(item.order_num);
-                $startDate.val(item.prod_date);
-                $startTime.val(item.start_time);
                 $EquipmentId.val(item.equipment_id);
                 $EquipmentName.val(item.equipment);
                 $stopDate.val(CommonUtil.getYYYYMMDD());
@@ -3039,19 +3028,6 @@
                 let fnLoadStopList = function (order_num) {
                     let fnsuccess = function (result) {
                         if (result.data !== null) {
-                            let stopData = result.data.find(row => !row.end_date); // 중지중인 데이터
-                            if (stopData) {
-                                $content.find('#stop_pk').val(stopData.id); // 중지중이라면 stop_pk 지정
-                                $StopCauseId.val(stopData.StopCause_id);
-                                $Description.val(stopData.Description);
-                                $stopDate.val(stopData.start_date_only);
-                                $stopTime.val(stopData.StartTime);
-                                $StopCauseId.attr('disabled', 'disabled');
-                                $restartDate.removeAttr('disabled');
-                                $restartTime.removeAttr('disabled');
-                                $restartDate.val(CommonUtil.getYYYYMMDD());
-                                $restartTime.val(CommonUtil.getHourMin());
-                            }
                             _this.stopGrid.itemsSource = new wijmo.collections.CollectionView(result.data);
                         }
                     };
@@ -3067,14 +3043,6 @@
 
                 // 일시중지 저장
                 $btnStopSave.click(function (e) {
-                    let stopDateTime = new Date($stopDate.val() + 'T' + $stopTime.val());
-                    let restartDateVal = $restartDate.val();
-                    let restartTimeVal = $restartTime.val();
-
-                    let restartDateTime = null;
-                    if (restartDateVal && restartTimeVal) {
-                        restartDateTime = new Date(restartDateVal + 'T' + restartTimeVal);
-                    }
 
                     if (!$StopCauseId.val()) {
                         Alert.alert('비가동유형', '비가동유형을 선택하세요.', function () {
@@ -3082,16 +3050,9 @@
                         return;
                     }
 
-                    if (restartDateTime && !isNaN(restartDateTime.getTime()) && stopDateTime >= restartDateTime) {
-                        Alert.alert('중지시간 오류', '재가동 시간은 중지 시간 이후여야 합니다.', function () {});
-                        return;
-                    }
-
-                    let stop_pk = $content.find('#stop_pk').val(); // stop_pk 가져오기
 
                     let url = _this.baseUrl + '/stop_save';
                     let sendData = {
-                        stop_pk: $stop_pk.val(),
                         stop_date: $stopDate.val(),
                         stopTime: $stopTime.val(),
                         WorkOrderNumber: item.order_num,
@@ -3099,13 +3060,10 @@
                         Description: $Description.val(),
                         Equipment_id: $EquipmentId.val(),
                         StopCause_id: $StopCauseId.val(),
-                        restart_date: $restartDate.val(),
-                        restartTime: $restartTime.val()
                     };
                     let previousIndex = _this.selectedIndex;
                     let stopSaveCallback = function (result) {
                         if (result.success) {
-                            Notify.success(stop_pk ? '재가동되었습니다.' : '중지되었습니다.');
                             $content.find('#modal-close-button').click();
                             _this.searchMainData();
                             _this.showBasicInfo(result.data);
