@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="/css/animate.css">
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/theme-top-mes.css">
-<!--    <link rel="stylesheet" href="/css/theme-left-mes.css">-->
+    <!--    <link rel="stylesheet" href="/css/theme-left-mes.css">-->
     <link rel="stylesheet" type="text/css" href="/css/import.css">
     <script src="/js/vendor/jquery-3.6.0.js"></script>
     <script src="/js/vendor/jquery-ui.min.js"></script>
@@ -23,7 +23,7 @@
     <script src="/js/utilscript.js"></script> <!-- 박광열 -->
 
     <style>
-        .left{
+        .left {
             cursor: pointer;
         }
 
@@ -80,7 +80,7 @@
         <header>
             <div class="left">
                 <div class="logo">
-                    <img src="/images/logo/actas_log.png" alt="로고" >
+                    <img src="/images/logo/actas_log.png" alt="로고">
                     <h1>MES</h1>
                 </div>
             </div>
@@ -143,7 +143,7 @@
                                         </colgroup>
                                         <thead>
                                         <tr>
-                                            <th>날    짜</th>
+                                            <th>날 짜</th>
                                             <th>업체 이름</th>
                                             <th>주문 상태</th>
                                         </tr>
@@ -160,8 +160,8 @@
                     <!-- 알람 -->
                     <!-- 사용자 로그인 상태-->
                     <a class="user" title="사용자">
-    <!--                    <span id="spplannm-display"></span>-->
-    <!--                    <span style="padding:0 5px">·</span>-->
+                        <!--                    <span id="spplannm-display"></span>-->
+                        <!--                    <span style="padding:0 5px">·</span>-->
                         <span>관리자</span>
                         <span style="padding:0 5px">·</span>
                         <span id="userName2" th:text="${ username }"></span>
@@ -213,6 +213,14 @@
                                     </ul>
                                 </li>
                                 <li class="dep1-1">
+                                    <a href="#a" title="기준정보" class="ico-lnb01">
+                                        기준정보
+                                    </a>
+                                    <ul class="dep2" id="dep2-information">
+
+                                    </ul>
+                                </li>
+                                <li class="dep1-1">
                                     <a href="#a" title="영업 관리" class="ico-lnb02">
                                         영업 관리
                                     </a>
@@ -221,8 +229,8 @@
                                     </ul>
                                 </li>
                                 <li class="dep1-1">
-                                    <a href="#a" title="구매 자재 관리" class="ico-lnb03">
-                                        구매 자재 관리
+                                    <a href="#a" title="자재 관리" class="ico-lnb03">
+                                        자재 관리
                                     </a>
                                     <ul class="dep2" id="dep2-purchase-materials">
 
@@ -237,10 +245,18 @@
                                     </ul>
                                 </li>
                                 <li class="dep1-1">
-                                    <a href="#a" title="품질 / 보고서 관리" class="ico-lnb04">
-                                        품질 / 보고서 관리
+                                    <a href="#a" title="품질 관리" class="ico-lnb04">
+                                        품질 관리
                                     </a>
-                                    <ul class="dep2" id="dep2-quality-report">
+                                    <ul class="dep2" id="dep2-quality">
+
+                                    </ul>
+                                </li>
+                                <li class="dep1-1">
+                                    <a href="#a" title="보고서 관리" class="ico-lnb04">
+                                        보고서 관리
+                                    </a>
+                                    <ul class="dep2" id="dep2-report">
 
                                     </ul>
                                 </li>
@@ -325,112 +341,67 @@
 
         nthTabs = $('#main-tabs').nthTabs();
 
-        function loadMenu() {
+        const dep2Mappings = {
+            1: '#dep2-monitoring',
+            2: '#dep2-information',
+            3: '#dep2-sales-management',
+            4: '#dep2-purchase-materials',
+            5: '#dep2-production-management',
+            6: '#dep2-quality',
+            7: '#dep2-report',
+            8: '#dep2-system-settings'
+        };
 
-            const dep2Mappings = {
-                1: '#dep2-monitoring',
-                2: '#dep2-sales-management',
-                3: '#dep2-purchase-materials',
-                4: '#dep2-production-management',
-                5: '#dep2-quality-report',
-                6: '#dep2-system-settings'
-            };
-
+        function loadMenu(FrontFolderId, $FrontFolderElement) {
             $.ajax({
                 url: '/api/system/menus', // menus API를 통해 전체 메뉴 데이터를 가져옴
                 type: 'GET',
                 success: function (response) {
-                    console.log('response', response);
                     // FrontFolder_id를 기반으로 폴더 필터링
-                    const data = response.data;
+                    const folders = response.data.filter(folder => folder.frontfolder_id === parseInt(FrontFolderId));
 
-                    Object.entries(dep2Mappings).forEach(([frontId, selector]) => {
-                        const folders = data.filter(folder => folder.frontfolder_id === parseInt(frontId));
+                    if (folders.length > 0) {
+                        // 해당 FrontFolderId에 해당하는 폴더가 있으면 대 메뉴를 다시 보여줌
+                        $FrontFolderElement.closest('.dep1-1').css('display', 'block');
 
-                        if (folders.length > 0) {
-                            // 해당 FrontFolderId에 해당하는 폴더가 있으면 대 메뉴를 다시 보여줌
+                        folders.forEach(function (folder) {
+                            let $li = $('<li class="dep2-1"></li>');
+                            let $a = $('<a href="#"></a>').text(folder.folder_name);
+                            $li.append($a);
 
-                            if (folders.length > 0) {
-                                console.log('selecotr', selector);
-                                $(selector).closest('.dep1-1').css('display', 'block');
+                            let $subUl = $('<ul class="dep3 documents" style="display: none;"></ul>');
+                            $li.append($subUl);
 
-                                folders.forEach(function (folder) {
-                                    let $li = $('<li class="dep2-1"></li>');
-                                    let $a = $('<a href="#"></a>').text(folder.folder_name);
-                                    $li.append($a);
+                            // 해당 폴더의 하위 메뉴 항목 추가
+                            folder.nodes.forEach(function (item) {
+                                let $itemLi = $('<li class="dep3-custom-list-style"></li>');
+                                let $itemA = $('<a href="#" menuurl="' + item.url + '" data-bookmark="' + item.isbookmark + '" data-objid="' + item.objId + '" title="' + item.objNm + '"></a>').text(item.objNm);
 
-                                    let $subUl = $('<ul class="dep3 documents" style="display: none;"></ul>');
-                                    $li.append($subUl);
+                                $itemLi.append($itemA);
+                                $subUl.append($itemLi);
+                            });
 
-                                    // 해당 폴더의 하위 메뉴 항목 추가
-                                    folder.nodes.forEach(function (item) {
-                                        let $itemLi = $('<li class="dep3-custom-list-style"></li>');
-                                        let $itemA = $('<a href="#" menuurl="' + item.url + '" data-bookmark="' + item.isbookmark + '" data-objid="' + item.objId + '" title="' + item.objNm + '"></a>').text(item.objNm);
+                            $FrontFolderElement.append($li);
 
-                                        $itemLi.append($itemA);
-                                        $subUl.append($itemLi);
-                                    });
+                            // dep2 클릭 시 dep3 항목이 1개면 바로 탭 추가하고 dep3 숨김
+                            $a.on('click', function (e) {
+                                e.preventDefault();
 
-                                    $(selector).append($li);
+                                // dep3 항목 찾기
+                                var $dep3 = $li.find('.dep3 li');
 
-                                    // dep2 클릭 시 dep3 항목이 1개면 바로 탭 추가하고 dep3 숨김
-                                    $a.on('click', function (e) {
-                                        e.preventDefault();
+                                if ($dep3.length > 1) {
 
-                                        // dep3 항목 찾기
-                                        var $dep3 = $li.find('.dep3 li');
-
-                                        if ($dep3.length > 1) {
-
-                                        } else if ($dep3.length === 1) {
-                                            $('.dep2-1').removeClass('on');
-                                            $('.dep3 li').removeClass('on');
-                                            $li.addClass('on');
-
-                                            var $a = $dep3.find('a');
-                                            var val = $a.text();
-                                            var menuurl = $a.attr('menuurl');
-                                            var objid = $a.attr('data-objid');
-                                            // var _bookmark = $a.attr('data-bookmark');
-
-                                            if (nthTabs.isExistsTab('#' + objid)) {
-                                                nthTabs.toggleTab('#' + objid);
-                                            } else {
-                                                nthTabs.addTab({
-                                                    id: objid,
-                                                    title: val,
-                                                    url: '/gui/' + objid + '/default',
-                                                    active: true,
-                                                    allowClose: true,
-                                                    // isbookmark: _bookmark
-                                                });
-                                                // nthTabs.bindBookmarkEvent(objid, _bookmark);
-                                            }
-
-                                            // dep3 리스트 숨김
-                                            $subUl.hide(); // dep3 항목이 1개일 때 숨김
-                                            return false;
-                                        }
-                                    });
-                                });
-
-                                $(selector).find('.dep3').on('click', 'a', function (e) {
-                                    e.preventDefault();
-
-                                    // 모든 dep3의 li에서 on 클래스 제거
+                                } else if ($dep3.length === 1) {
+                                    $('.dep2-1').removeClass('on');
                                     $('.dep3 li').removeClass('on');
+                                    $li.addClass('on');
 
-                                    // 현재 클릭한 li에 on 클래스 추가
-                                    var $clickedDep3 = $(this).parent('li');
-                                    $clickedDep3.addClass('on');
-
-                                    // dep3가 1개인 dep2에서 on 클래스 제거
-                                    $('.dep2-1.on').removeClass('on');
-
-                                    var val = $(this).text();
-                                    var menuurl = $(this).attr('menuurl');
-                                    var objid = $(this).attr('data-objid');
-                                    var _bookmark = $(this).attr('data-bookmark');
+                                    var $a = $dep3.find('a');
+                                    var val = $a.text();
+                                    var menuurl = $a.attr('menuurl');
+                                    var objid = $a.attr('data-objid');
+                                    // var _bookmark = $a.attr('data-bookmark');
 
                                     if (nthTabs.isExistsTab('#' + objid)) {
                                         nthTabs.toggleTab('#' + objid);
@@ -441,23 +412,59 @@
                                             url: '/gui/' + objid + '/default',
                                             active: true,
                                             allowClose: true,
-                                            isbookmark: _bookmark
+                                            // isbookmark: _bookmark
                                         });
-                                        nthTabs.bindBookmarkEvent(objid, _bookmark);
+                                        // nthTabs.bindBookmarkEvent(objid, _bookmark);
                                     }
+
+                                    // dep3 리스트 숨김
+                                    $subUl.hide(); // dep3 항목이 1개일 때 숨김
+                                    return false;
+                                }
+                            });
+                        });
+
+                        $FrontFolderElement.find('.dep3').on('click', 'a', function (e) {
+                            e.preventDefault();
+
+                            // 모든 dep3의 li에서 on 클래스 제거
+                            $('.dep3 li').removeClass('on');
+
+                            // 현재 클릭한 li에 on 클래스 추가
+                            var $clickedDep3 = $(this).parent('li');
+                            $clickedDep3.addClass('on');
+
+                            // dep3가 1개인 dep2에서 on 클래스 제거
+                            $('.dep2-1.on').removeClass('on');
+
+                            var val = $(this).text();
+                            var menuurl = $(this).attr('menuurl');
+                            var objid = $(this).attr('data-objid');
+                            var _bookmark = $(this).attr('data-bookmark');
+
+                            if (nthTabs.isExistsTab('#' + objid)) {
+                                nthTabs.toggleTab('#' + objid);
+                            } else {
+                                nthTabs.addTab({
+                                    id: objid,
+                                    title: val,
+                                    url: '/gui/' + objid + '/default',
+                                    active: true,
+                                    allowClose: true,
+                                    isbookmark: _bookmark
                                 });
+                                nthTabs.bindBookmarkEvent(objid, _bookmark);
                             }
-
-
-                        }
-                    })
+                        });
+                    }
                 }
             });
         }
 
 
-        loadMenu();
-        // 폴더
+        Object.keys(dep2Mappings).forEach(FrontFolderId => {
+            loadMenu(FrontFolderId, $(dep2Mappings[FrontFolderId]));
+        });
 
 
         $('#navbarBarMenu2 .open_menu').click(function () {
@@ -538,7 +545,6 @@
         }).fail(function (e) {
             Notify.error('Failed to retrieve bookmark data.');
         });
-
 
 
         $('.scrollbar-inner').scrollbar();
@@ -713,6 +719,7 @@
 <script type="text/javascript">
     // 날씨 정보
     fetchWeatherData();
+
     // 날씨 정보를 서버에서 가져오는 함수
     function fetchWeatherData() {
         $.ajax({
@@ -738,6 +745,7 @@
             }
         });
     }
+
     // 날씨 아이콘 업데이트 함수
     function updateWeatherIcon(skyValue, ptyValue) {
         // console.log("PTY Value:", ptyValue);
