@@ -127,56 +127,56 @@
             {binding: 'mat_code', header: '제품코드', width: 170, align: 'center' ,allowMerging: true},
             {binding: 'mat_name', header: '제품명', width: 150, align: 'left' ,allowMerging: true,},
             {binding: 'unit_name', header: '단위', width: 70, align: 'center', allowSorting: false },
-            { binding: 'year_qty_sum', header: '연발주량', width: 100, align: 'right', format: 'money' },
-            { binding: 'year_money_sum', header: '연발주액', width: 100, align: 'right', format: 'money' },
+            { binding: 'year_qty_sum', header: '연발주량', width: 100, align: 'right', format: 'n0', },
+            { binding: 'year_money_sum', header: '연발주액', width: 100, align: 'right', format: 'n0', },
             {binding: 'company_name', header: '업체', width: 200, align: 'left', allowSorting: false },
             {
              binding: 'mon_1', header: '1월', width: 80, align: 'right', allowSorting: false,
-              format: 'money'
+              format: 'n0',
             },
             {
              binding: 'mon_2', header: '2월', width: 80, align: 'right', allowSorting: false,
-              format: 'money'
+              format: 'n0',
             },
             {
              binding: 'mon_3', header: '3월', width: 80, align: 'right', allowSorting: false,
-              format: 'money'
+              format: 'n0',
             },
             {
              binding: 'mon_4', header: '4월', width: 80, align: 'right', allowSorting: false,
-              format: 'money'
+              format: 'n0',
             },
             {
              binding: 'mon_5', header: '5월', width: 80, align: 'right', allowSorting: false,
-              format: 'money'
+              format: 'n0',
             },
             {
              binding: 'mon_6', header: '6월', width: 80, align: 'right', allowSorting: false,
-              format: 'money'
+              format: 'n0',
             },
             {
              binding: 'mon_7', header: '7월', width: 80, align: 'right', allowSorting: false,
-              format: 'money'
+              format: 'n0',
             },
             {
              binding: 'mon_8', header: '8월', width: 80, align: 'right', allowSorting: false,
-              format: 'money'
+              format: 'n0',
             },
             {
              binding: 'mon_9', header: '9월', width: 80, align: 'right', allowSorting: false,
-              format: 'money'
+              format: 'n0',
             },
             {
              binding: 'mon_10', header: '10월', width: 80, align: 'right', allowSorting: false,
-              format: 'money'
+              format: 'n0',
             },
             {
              binding: 'mon_11', header: '11월', width: 80, align: 'right', allowSorting: false,
-              format: 'money'
+              format: 'n0',
             },
             {
              binding: 'mon_12', header: '12월', width: 80, align: 'right', allowSorting: false,
-              format: 'money'
+              format: 'n0',
             },
           ],
           itemsSource: this.viewData,
@@ -265,6 +265,12 @@
         if (val === '') {
           $('#cboCompanyHidden').val('');
         }
+      });
+      // .btn-clear 클릭 후 input 이벤트 강제 발생
+      $(document).on('click', '.btn-clear', function () {
+        const $input = $(this).siblings('input[type="text"]');
+        $input.val('');
+        $input.trigger('input'); // 🔥 input 이벤트 강제 발생
       });
       // 초기화 버튼 클릭 이벤트
       $('#btnClear').click(function () {
