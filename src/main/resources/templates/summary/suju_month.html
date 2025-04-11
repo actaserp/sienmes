@@ -258,6 +258,14 @@
             $('#cboCompanyHidden').val('');
         }
     });
+    // .btn-clear 클릭 후 input 이벤트 강제 발생
+    $(document).on('click', '.btn-clear', function () {
+        const $input = $(this).siblings('input[type="text"]');
+        $input.val('');
+        $input.trigger('input'); // 🔥 input 이벤트 강제 발생
+    });
+
+
 
 </script>
 </th:block>
