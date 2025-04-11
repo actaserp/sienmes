@@ -263,7 +263,7 @@ public class EquipmentService {
 	            --and er."RunState" = :runType
         		""";
 
-		sql += " order by start_date desc";
+		sql += " order by start_date desc, end_date DESC";
 
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 

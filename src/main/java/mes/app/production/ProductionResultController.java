@@ -557,6 +557,27 @@ public class ProductionResultController {
 
         this.productionResultService.delete_jobres_defectqty_inout(jrPk);
 
+        Optional<EquRun> latestComplete = equRunRepository.findLatestCompleteByEquipmentAndOrder(
+                jr.getEquipment_id(), jr.getWorkOrderNumber());
+
+        if (latestComplete.isPresent()) {
+            EquRun equ = latestComplete.get();
+            equ.setRunState("complete_cancel");
+            equ.set_audit(user);
+            equ.setDescription("완료 취소");
+            equRunRepository.save(equ);
+
+            // 그리고 새로운 run 상태로 재시작
+            EquRun newRun = new EquRun();
+            newRun.setEquipmentId(jr.getEquipment_id());
+            newRun.setWorkOrderNumber(jr.getWorkOrderNumber());
+            newRun.setStartDate(DateUtil.getNowTimeStamp()); // 지금 시각
+            newRun.setRunState("run");
+            newRun.set_audit(user);
+
+            equRunRepository.save(newRun);
+        }
+
         Map<String, Object> item = new HashMap<String, Object>();
         item.put("jr_pk", jrPk);
 

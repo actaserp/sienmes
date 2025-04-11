@@ -917,6 +917,7 @@
                 </table>
             </div>
             <div class="container-fluid" style="margin-top:5px;">
+                <div style="text-align: left; margin: 15px 0 5px 10px;">설비 가동 정보</div>
                 <div id="stop_grid" style="height: 200px;"></div>
             </div>
 
@@ -1505,6 +1506,7 @@
                         $('#btnAddChasu').attr('disabled', 'disabled');
                         $('#btnSaveChasu').attr('disabled', 'disabled');
                         $('#btnDeleteChasu').attr('disabled', 'disabled');
+                        $('#btnWorkFinish').attr('disabled', 'disabled');
                         $('#btnWorkStop').removeAttr('disabled');
                         $('#btnWorkStop').text('재가동');
                     } else if (state === 'working') {
@@ -2975,7 +2977,7 @@
                 let $content = $(content);
 
                 let modalContainer = new PopupDraggable('일시중지');
-                modalContainer.open({width: 1000, height: 670, $content});
+                modalContainer.open({width: 1000, height: 600, $content});
 
                 this.stopGrid = new wijmo.grid.FlexGrid('#stop_grid', {
                     autoGenerateColumns: false,
@@ -2998,6 +3000,15 @@
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]), // 빈 데이터로 초기화
                     itemFormatter: (panel, row, col, cell) => {
+                        if (panel.cellType === wijmo.grid.CellType.Cell) {
+                            let binding = panel.columns[col].binding;
+
+                            // 강제로 left 정렬
+                            if (binding === 'Description') {
+                                cell.style.textAlign = 'left';
+                            }
+                        }
+
                         if (panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             cell.style.textAlign = 'center';
                         }
