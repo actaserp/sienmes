@@ -165,9 +165,15 @@
                         </tr>
                         <tr>
                             <th style="text-align: center">
+                                <label for="unitPrice">단가</label>
+                            </th>
+                            <td>
+                                <input id="unitPrice" name="unitPrice" style="text-align:right;" readonly>
+                            </td>
+                            <th style="text-align: center">
                                 <label for="cboSujuType">수주구분</label>
                             </th>
-                            <td colspan="3">
+                            <td>
                                 <select id="cboSujuType" name="SujuType"></select>
                             </td>
                         </tr>
@@ -402,10 +408,15 @@
                     let pop = new PopMatComponent();
                     pop.material_type = 'product,sangpum';
                     pop.show(function (item) {
+                        console.log('$btnProductSearch', item);
                         $txtProductName.val(item.Name);
                         $Material_id.val(item.id);
                         $product_code.val(item.Code);
                         $MaterialGroupName.val(item.group_name);
+
+                        if ($Material_id.val() && $cboCompany.val()) {
+                            tryShowPriceHistory();
+                        }
                     });
                     pop.searchDataBind();
                 });
@@ -414,8 +425,13 @@
                     let poppage = new PopCompComponent();
                     let $poppage = $(poppage);
                     let searchcallback = function (items) {
+                        console.log('btnCompanySearch', items);
                         $content.find('#cboCompany').val(items.id);
                         $content.find('#CompanyName').val(items.compname);
+
+                        if ($Material_id.val() && $cboCompany.val()) {
+                            tryShowPriceHistory();
+                        }
                     };
 
                     poppage.show(searchcallback);
@@ -470,20 +486,88 @@
                         return;
                     }
 
+                    let currentUnitPrice = $content.find('#unitPrice').val();
+                    let unitPriceChanged = originalUnitPrice != null && currentUnitPrice !== originalUnitPrice;
+
                     Alert.confirm('', '저장하시겠습니까?', function () {
-                        let url = _this.url + '/manual_save';
+                        let doSave = function () {
+                            let url = _this.url + '/manual_save';
+                            data.SujuQty = data.SujuQty.replace(/,/g, '');
 
+                            let fnSaveSuccess = function (result) {
+                                Notify.success("저장되었습니다.");
+                                _this.searchMainData();
+                                modalContainer.close();
+                            };
 
-                        data.SujuQty = data.SujuQty.replace(/,/g, '');
-
-                        let fnSaveSuccess = function (result) {
-                            Notify.success("저장되었습니다.");
-                            _this.searchMainData();
-                            modalContainer.close();
+                            AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
                         };
-                        AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
+
+                        if (unitPriceChanged) {
+                            // 단가 저장 먼저 수행
+                            let priceData = {
+                                Material_id: data.Material_id,
+                                Company_id: data.Company_id,
+                                UnitPrice: currentUnitPrice,
+                                ApplyStartDate: data.JumunDate,
+                                type: '02',
+                                ChangerName: userinfo.username
+                            };
+
+                            AjaxUtil.postAsyncData('/api/definition/material/savePrice', priceData, function (res) {
+                                if (res.success) {
+                                    console.log('단가 저장 성공');
+                                    doSave(); // 수주 저장 진행
+                                } else {
+                                    Alert.alert('단가 저장 실패', res.message || '알 수 없는 오류');
+                                }
+                            });
+                        } else {
+                            doSave(); // 단가 변경 없으면 수주만 저장
+                        }
                     });
+
                 });
+
+                let originalUnitPrice = null;
+                // 단가 정보 가져오기
+                function tryShowPriceHistory() {
+                    const mat_pk = $content.find('#Material_id').val();
+                    const company_id = $content.find('#cboCompany').val();
+                    const JumunDate = $content.find('#JumunDate').val();
+                    let url = _this.url + '/readPriceSuju';
+                    let data = {
+                        'mat_pk': mat_pk,
+                        'company_id': company_id,
+                        'JumunDate': JumunDate
+                    };
+
+                    if (mat_pk && company_id && JumunDate) {
+
+                        let fnsuccess = function (result) {
+                            $content.find('#unitPrice').prop('readonly', false);
+
+                            if (result != null && result.data && result.data.length > 0) {
+                                let unitPrice = result.data[0].UnitPrice;
+                                $content.find('#unitPrice').val(unitPrice);
+                                originalUnitPrice = unitPrice;
+
+                            } else {
+                                $content.find('#unitPrice').val('0'); // 값이 없을 경우 비움
+                                originalUnitPrice = '0';
+                            }
+                        };
+                        AjaxUtil.getAsyncData(url, data, fnsuccess);
+
+                    }
+
+
+                }
+
+                // 값이 바뀔 때마다 검사
+                $content.find('#Material_id').on('change', tryShowPriceHistory);
+                $content.find('#cboCompany').on('change', tryShowPriceHistory);
+                $content.find('#JumunDate').on('change', tryShowPriceHistory);
             }
 
             deleteSujuData(id, state) {
@@ -528,75 +612,26 @@
                 };
                 AjaxUtil.getAsyncData(url, data, fnsuccess);
             }
+
         }
 
         let page = null;
-        var picker = new ax5.ui.picker();
 
         $(document).ready(function (e) {
 
             page = new SujuUploadPage();
 
-            picker.bind({
-                target: $('[data-ax5picker="multi"]'),
-                direction: "top",
-                content: {
-                    width: 214,  //130 270
-                    margin: 10,
-                    type: 'date',
-                    config: {
-                        control: {
-                            left: '<i class="fa fa-chevron-left"></i>',
-                            yearTmpl: '%s',
-                            monthTmpl: '%s',
-                            right: '<i class="fa fa-chevron-right"></i>'
-                        },
-                        lang: {
-                            yearTmpl: "%s년",
-                            months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-                            dayTmpl: "%s"
-                        }
-                    }
-                },
-                btns: {
-                    /*ok: {
-                        label: "닫기", theme: "default", onClick: function () {
-                            this.self.close();
-                        }
-                    }*/
-                }
-            });
 
-//        $('#divDate').ax5DatePicker({ direction: 'top' });
             $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
             $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
 
             page.searchMainData();
 
-            // page.popColSetting = new popColSetting();
-            // let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-
-            // if (userinfo.group_code == 'admin') {
-            //     $('#btnGridSetting').css('visibility', 'visible');
-            // }
 
             // 검색
             $('#btnSearch').click(function (e) {
                 page.searchMainData();
             });
-
-            // 엑셀 다운로드
-            // $('#btnExc/el').on('click', function () {
-            //     page.exportExcel();
-            // });
-
-            //그리드 컬럼 설정 버튼
-            // $('#btnGridSetting').click(function (e) {
-            //     let _this = this;
-            //
-            //     let fix_cols = page.grid_config.frozenColumnIndex;
-            //     page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-            // });
 
         })
     </script>

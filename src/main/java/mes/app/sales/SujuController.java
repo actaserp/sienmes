@@ -149,6 +149,20 @@ public class SujuController {
 		
 		return result;
 	}
+
+	// 단가 정보 가져오기
+	@GetMapping("/readPriceSuju")
+	public AjaxResult getPriceHistory(@RequestParam("mat_pk") int matPk,
+									  @RequestParam("company_id") int company_id,
+									  @RequestParam("JumunDate") String ApplyStartDate) {
+
+		List<Map<String, Object>> items = this.sujuService.getPriceByMatAndComp(matPk, company_id, ApplyStartDate);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
+		return result;
+	}
 	
 	
 }

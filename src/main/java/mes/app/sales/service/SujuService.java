@@ -199,4 +199,36 @@ public class SujuService {
 		}
 		return jumunNumber;
 	}
+
+	public List<Map<String, Object>> getPriceByMatAndComp(int matPk, int company_id, String ApplyStartDate){
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("mat_pk", matPk);
+		dicParam.addValue("company_id", company_id);
+		dicParam.addValue("ApplyStartDate", ApplyStartDate);
+
+		String sql = """
+			select mcu.id 
+            , mcu."Company_id"
+            , c."Name" as "CompanyName"
+            , mcu."UnitPrice" 
+            , mcu."FormerUnitPrice" 
+            , mcu."ApplyStartDate"::date 
+            , mcu."ApplyEndDate"::date 
+            , mcu."ChangeDate"::date 
+            , mcu."ChangerName" 
+            from mat_comp_uprice mcu 
+            inner join company c on c.id = mcu."Company_id"
+            where 1=1
+            and mcu."Material_id" = :mat_pk
+            and mcu."Company_id" = :company_id
+            and to_date(:ApplyStartDate, 'YYYY-MM-DD') between mcu."ApplyStartDate"::date and mcu."ApplyEndDate"::date
+            and mcu."Type" = '02'
+            order by c."Name", mcu."ApplyStartDate" desc
+        """;
+
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+		return items;
+	}
+
 }

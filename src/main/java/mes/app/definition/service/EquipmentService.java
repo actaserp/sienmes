@@ -222,32 +222,6 @@ public class EquipmentService {
 	            , to_char(er."StartDate",'HH24:MI') as "StartTime"
 	            , er."EndDate"
 	            , to_char(er."EndDate",'HH24:MI') as "EndTime"
-	            , EXTRACT(day from (er."EndDate" - er."StartDate")) * 60 * 24
-	                + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60 
-	                + EXTRACT(min from ("EndDate" - "StartDate")) as "GapTime"
-				, CASE\s
-					 WHEN FLOOR((
-					   EXTRACT(day from (er."EndDate" - er."StartDate")) * 60 * 24
-					   + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60\s
-					   + EXTRACT(min from ("EndDate" - "StartDate"))
-					 ) / 60)::int = 0
-					 THEN MOD((
-					   EXTRACT(day from (er."EndDate" - er."StartDate")) * 60 * 24
-					   + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60\s
-					   + EXTRACT(min from ("EndDate" - "StartDate"))
-					 )::int, 60) || 'm'
-					 ELSE\s
-					   FLOOR((
-						 EXTRACT(day from (er."EndDate" - er."StartDate")) * 60 * 24
-						 + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60\s
-						 + EXTRACT(min from ("EndDate" - "StartDate"))
-					   ) / 60)::int || 'h ' ||\s
-					   MOD((
-						 EXTRACT(day from (er."EndDate" - er."StartDate")) * 60 * 24
-						 + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60\s
-						 + EXTRACT(min from ("EndDate" - "StartDate"))
-					   )::int, 60) || 'm'
-				 END as gap_time_text
                 , er."WorkOrderNumber" 
 	            , er."Equipment_id" 
 	            , er."RunState" 
