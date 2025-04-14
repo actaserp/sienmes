@@ -676,6 +676,7 @@
                         /*console.log(selectedRowData);*/
 
                         _this.showDetail(id);
+
                         $('#priceForm')[0].reset();
                         page.setPriceButtonState();
 
@@ -688,14 +689,15 @@
                     }
                 });
 
-                /*this.grid.hostElement.addEventListener('dblclick', (e) => {
+                this.grid.hostElement.addEventListener('dblclick', (e) => {
                     let hitTest = this.grid.hitTest(e);
                     if (hitTest.cellType === wijmo.grid.CellType.Cell) {
                         let row = hitTest.row;
                         let selectedItem = this.grid.rows[row].dataItem;
-                        _this.showPriceList(selectedItem.id)
+                        /*_this.showPriceList(selectedItem.id)*/
+                        _this.showPriceHistoryList(selectedItem.id)
                     }
-                });*/
+                });
 
 
                 /*let config1 = {
@@ -1059,6 +1061,7 @@
                     } else {
                         Alert.alert('', '저장되었습니다');
                         _this.showPriceList(comp_id);
+                        _this.showPriceHistoryList(comp_id)
                     }
                 };
 
@@ -1120,6 +1123,7 @@
                     } else {
                         Alert.alert('','저장되었습니다');
                         _this.showPriceList(comp_id);
+                        _this.showPriceHistoryList(comp_id)
                     }
                 };
 
