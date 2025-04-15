@@ -1081,7 +1081,7 @@
 
                             const binding = s.columns[e.col].binding;
 
-                            if (binding === 'StoreHouse_id' || binding === 'SujuQty2' || binding === 'Description2') {
+                            if (binding === 'StoreHouse_id' || binding === 'inputQty' || binding === 'Description2') {
                                 e.cell.style.color = '#5567ff'; // 글자 색 적용
                             }
                         }
@@ -1094,9 +1094,17 @@
                         {binding: 'product_name', header: '제품명', width: 200, align: 'left',isReadOnly: true},
                         {binding: 'unit', header: '단위', width: 80, align: 'center', isReadOnly: true},
                         {binding: 'SujuQty', header: '발주 수량', width: 80, align: 'right', format: 'n0', isReadOnly: true},
+                        {binding: 'SujuQty2', header: '기입고 수량', width: 100, align: 'right', isReadOnly: true},
                         {binding: 'DueDate', header: '납기예정일', width: 120, align: 'center', isReadOnly: true},
                         {binding: 'StoreHouse_id', header: '납품 창고', width: 100, align: 'center',dataMap: storeHouseMap, isReadOnly: false},
-                        {binding: 'SujuQty2', header: '입고 수량', width: 100, align: 'right', isReadOnly: false},
+                        {binding: 'inputQty', header: '입고 수량', width: 100, align: 'right', isReadOnly: false,
+                            editor: new wijmo.input.InputNumber(document.createElement('div'), {
+                                format: 'n0', // 정수 형식
+                                min: 0,       // 최소값 설정
+                                max: 99999,   // 최대값 설정
+                                step: 1       // 증가/감소 단위
+                            })
+                        },
                         {binding: 'Description2', header: '사유', width: 150, isReadOnly: false},
                         {binding: 'Description', header: '발주 메모', width: 150, isReadOnly: true}
                     ],
@@ -1162,13 +1170,13 @@
                             return;
                         }
 
-                        if (row.SujuQty2 === null || row.SujuQty2 === undefined || row.SujuQty2 === '') {
+                        if (row.inputQty === null || row.inputQty === undefined || row.inputQty === '') {
                             Alert.alert('', '입고 수량을 입력하세요.');
                             return;
                         }
 
                         // 추가: 음수 또는 0 체크도 필요할 경우
-                        if (isNaN(row.SujuQty2) || Number(row.SujuQty2) <= 0) {
+                        if (isNaN(row.inputQty) || Number(row.inputQty) <= 0) {
                             Alert.alert('', '입고 수량은 0보다 큰 숫자여야 합니다.');
                             return;
                         }

@@ -265,7 +265,7 @@ public class MaterialInoutService {
           left join company c on c.id= b."Company_id"
           where 1 = 1
           and b."JumunDate" between :start and :end 
-          and b."State" = 'draft'
+          and b."State" IN ('draft', 'partial')
 			order by b."JumunDate" desc,  m."Name"
 			""";
 

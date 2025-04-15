@@ -190,7 +190,7 @@
                             </th>
                             <td>
 
-                                <input class="form-control2 tar" type="text" id="unitPrice" name="unitPrice" onkeyup="numberUnitPrice(this.value)">
+                                <input class="form-control2 tar" type="text" id="unitPrice" name="unitPrice" readonly onkeyup="numberUnitPrice(this.value)">
                             </td>
                             <th style="text-align: center">
                                 <label for="price">공급가액</label>
@@ -308,7 +308,7 @@
                         {binding: 'DueDate', header: '납기일', width: 120, align: 'center'},
                         {binding: 'StateName', header: '상태', width: 100, align: 'center'},
                         {binding: 'ShipmentStateName', header: '출하상태', width: 100, align: 'center'},
-                        {binding: 'SujuQty2', header: '출하수량', width: 100, align: 'center'},
+                        {binding: 'ShippedQty', header: '출하수량', width: 100, align: 'center'},
                         {binding: 'Description', header: '비고', width: 200}
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
@@ -541,8 +541,6 @@
                         };
 
                         if (unitPriceChanged) {
-                            console.log('unitPriceChanged', unitPriceChanged);
-
                             let now = new Date();
                             let hh = String(now.getHours()).padStart(2, '0');
                             let mm = String(now.getMinutes()).padStart(2, '0');

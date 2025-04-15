@@ -519,7 +519,7 @@ public class MaterialInoutController {
 				if (description == null || description.trim().isEmpty()) {
 					description = "발주 입고";
 				}
-				String inoutQtyStr = String.valueOf(item.get("SujuQty2")); // '입고 수량'
+				String inoutQtyStr = String.valueOf(item.get("inputQty")); // '입고 수량'
 				String materialIdStr = String.valueOf(item.get("Material_id"));
 				String storeHouseIdStr = String.valueOf(item.get("StoreHouse_id"));
 
@@ -547,14 +547,23 @@ public class MaterialInoutController {
 
 				mi.setDescription(description);
 				mi.setInOut("in");
-				mi.setInputType("발주 입고");
 				mi.set_audit(user);
-				matInoutRepository.save(mi);
+				mi.setSourceDataPk(bal_pk);
+				mi.setSourceTableName("balju");
 
 				Balju balju = this.bujuRepository.getBujuById(bal_pk);
-				balju.setSujuQty2((double) qty);
+				double prevSujuQty2 = balju.getSujuQty2() != null ? balju.getSujuQty2() : 0.0;
+				balju.setSujuQty2(prevSujuQty2 + qty);
 				balju.setShipmentState(storeHouseIdStr);
-				balju.setState("received");
+
+				if (balju.getSujuQty() > balju.getSujuQty2()) {
+					balju.setState("partial");
+					mi.setInputType("발주 부분 입고");
+				} else {
+					balju.setState("received");
+					mi.setInputType("발주 입고");
+				}
+				matInoutRepository.save(mi);
 				bujuRepository.save(balju);
 
 			} catch (Exception e) {

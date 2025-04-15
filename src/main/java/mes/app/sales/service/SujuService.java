@@ -59,9 +59,12 @@ public class SujuService {
             , s."Description"
             , s."AvailableStock" as "AvailableStock"
             , s."ReservationStock" as "ReservationStock"
-            , s."SujuQty2" as "SujuQty2"
+            , COALESCE(sh.shippedQty, 0) as "ShippedQty"
             , fn_code_name('suju_state', s."State") as "StateName"
-            , fn_code_name('shipment_state', s."ShipmentState") as "ShipmentStateName"
+            , case
+				when sh.shippedQty is not null and sh.shippedQty = s."SujuQty" then '출하'
+				when sh.shippedQty is not null and sh.shippedQty < s."SujuQty" then '부분출하'
+				end as "ShipmentStateName"
             , s."State"
             , to_char(s."_created", 'yyyy-mm-dd') as create_date
             , case s."PlanTableName" when 'prod_week_term' then '주간계획' when 'bundle_head' then '임의계획' else s."PlanTableName" end as plan_state
@@ -70,6 +73,11 @@ public class SujuService {
             inner join mat_grp mg on mg.id = m."MaterialGroup_id"
             left join unit u on m."Unit_id" = u.id
             left join company c on c.id= s."Company_id"
+            LEFT JOIN (
+				 SELECT "SourceDataPk", SUM("Qty") as shippedQty
+				 FROM shipment
+				 GROUP BY "SourceDataPk"
+			 ) sh ON sh."SourceDataPk" = s.id
             where 1 = 1
 			""";
 		
