@@ -22,7 +22,7 @@ public class ProductionMonthController {
 	@GetMapping("/read")
 	public AjaxResult getProductionMonthList(
 			@RequestParam(value="cboYear",required=false) String cboYear,
-			@RequestParam(value="cbomatType",required=false) Integer cbomatType,
+			@RequestParam(value="cbomatType",required=false) String cbomatType,
 			@RequestParam(value="matGrpPk",required=false) Integer matGrpPk,
 			@RequestParam(value="cboDataDiv",required=false) String cboDataDiv) {
 		

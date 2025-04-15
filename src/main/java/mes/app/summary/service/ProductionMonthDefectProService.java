@@ -16,7 +16,7 @@ public class ProductionMonthDefectProService {
 	SqlRunner sqlRunner;
 	
 	
-	public List<Map<String, Object>> getList(String cboYear, Integer cboMatType, Integer cboMatGrpPk,String cboDataDiv,String chkOnlyDefect) {
+	public List<Map<String, Object>> getList(String cboYear, String cboMatType, Integer cboMatGrpPk,String cboDataDiv,String chkOnlyDefect) {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("cboYear", cboYear);
 		paramMap.addValue("cboMatType", cboMatType);
@@ -59,7 +59,7 @@ public class ProductionMonthDefectProService {
                 and jr."State" = 'finished'
 				""";
 		
-		if(cboMatType != null) {
+		if(cboMatType != null && !cboMatType.trim().isEmpty()) {
 			sql += """
 					and mg."MaterialType" = :cboMatType
 					""";

@@ -157,7 +157,7 @@
             let url = '/api/summary/production_month_summary/read'
             let data = {
 				'cboYear' : $("#cboYear").val(),
-				'cbomatType' : $("#cbomatType").val(),
+				'cbomatType' : $("#cboMatType").val(),
 				'matGrpPk' : $("#matGrpPk").val(),
 				'cboDataDiv' :$("#cboDataDiv").val()
 			}
@@ -182,11 +182,11 @@
         page = new ProductionMonthPage();
 
         const $cbomatType = $('#cboMatType');
-        AjaxUtil.fillSelectOptions($cbomatType, 'system_code', 'all', false, 'mat_type');
+        AjaxUtil.fillSelectOptions($cbomatType, 'system_code', 'all', false,  'mat_type', 'product,semi');
         AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);
         AjaxUtil.fillSelectOptions($('#matGrpPk'), 'material_group', 'all', false, 'product,semi');
         $cbomatType.on('change', function (e) {
-            let mat_grp_pk = $('#cbomatType').val();
+            let mat_grp_pk = $('#cboMatType').val();
             AjaxUtil.fillSelectOptions($('#matGrpPk'), 'material_group', 'all', false, mat_grp_pk);
         });
 

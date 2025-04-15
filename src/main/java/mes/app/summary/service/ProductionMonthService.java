@@ -16,7 +16,7 @@ public class ProductionMonthService {
 	@Autowired
 	SqlRunner sqlRunner;
 
-	public List<Map<String, Object>> getList(String cboYear, Integer cbomatType, Integer matGrpPk, String cboDataDiv) {
+	public List<Map<String, Object>> getList(String cboYear, String cbomatType, Integer matGrpPk, String cboDataDiv) {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("cboYear", cboYear);
 		paramMap.addValue("cbomatType", cbomatType);
@@ -59,15 +59,15 @@ public class ProductionMonthService {
             and jr."State" = 'finished'
 				""";
 		
-		if(matGrpPk != null) {
+		if(cbomatType != null && !cbomatType.trim().isEmpty()) {
 			sql +="""
-					and mg."MaterialType" = :matGrpPk
+					and mg."MaterialType" = :cbomatType
 					""";
 		}
 		
-		if(cbomatType != null) {
+		if(matGrpPk != null) {
 			sql +="""
-					and mg.id = :cbomatType
+					and mg.id = :matGrpPk
 					""";
 		}
 		

@@ -23,7 +23,7 @@ public class ProductionMonthDefectProController {
 	@GetMapping("/read")
 	public AjaxResult getProductionMonthProList(
 			@RequestParam(value="cboYear",required=false) String cboYear,
-			@RequestParam(value="cboMatType",required=false) Integer cboMatType,
+			@RequestParam(value="cboMatType",required=false) String cboMatType,
 			@RequestParam(value="cboMatGrpPk",required=false) Integer cboMatGrpPk,
 			@RequestParam(value="cboDataDiv",required=false) String cboDataDiv,
 			@RequestParam(value="chkOnlyDefect",required=false) String chkOnlyDefect
