@@ -367,13 +367,14 @@
                 // 삭제 버튼
                 $('#btnDelete').click(function (e) {
                     let items = _this.grid.selectedItems;
+                    console.log('items', items);
                     if (items.length > 0) {
                         Alert.confirm('', '삭제하시겠습니까?',
                             function () {
                                 let id = items[0].id;
                                 let state = items[0].State;
-
-                                _this.deleteSujuData(id, state);
+                                let ShipmentStateName = items[0].ShipmentStateName;
+                                _this.deleteSujuData(id, state, ShipmentStateName);
                             },
                             function () {
                             }
@@ -492,6 +493,9 @@
                 }
                 FormUtil.BindDataForm(data, $sujuForm);
 
+                if (data.State !== 'received' || data.ShipmentStateName) {
+                    $('#btnPopSujuSave').hide();
+                }
 
                 if (data.SujuQty > 0) {
                     $SujuQty.val(data.SujuQty.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
@@ -643,10 +647,10 @@
                 $content.find('#unitPrice').on('input', calculateAmounts);
             }
 
-            deleteSujuData(id, state) {
+            deleteSujuData(id, state, ShipmentStateName) {
                 let _this = this;
                 let url = _this.url + '/delete';
-                let data = {'id':id, 'State': state}
+                let data = {'id':id, 'State': state, 'ShipmentStateName': ShipmentStateName}
                 let fnsuccess = function (res) {
                     if (res.success) {
                         Notify.success('삭제되었습니다.');

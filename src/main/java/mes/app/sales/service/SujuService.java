@@ -135,11 +135,20 @@ public class SujuService {
             , s."State"
             , fn_code_name('suju_state', s."State") as "StateName"
             , to_char(s."_created", 'yyyy-mm-dd') as create_date
+            , case
+				when sh.shippedQty is not null and sh.shippedQty = s."SujuQty" then '출하'
+				when sh.shippedQty is not null and sh.shippedQty < s."SujuQty" then '부분출하'
+				end as "ShipmentStateName"
             from suju s
             inner join material m on m.id = s."Material_id"
             inner join mat_grp mg on mg.id = m."MaterialGroup_id"
             left join unit u on m."Unit_id" = u.id
             left join company c on c.id= s."Company_id"
+            LEFT JOIN (
+				 SELECT "SourceDataPk", SUM("Qty") as shippedQty
+				 FROM shipment
+				 GROUP BY "SourceDataPk"
+			 ) sh ON sh."SourceDataPk" = s.id
             where s.id = :id
 			""";
 		

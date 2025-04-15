@@ -143,7 +143,8 @@ public class SujuController {
 	@PostMapping("/delete")
 	public AjaxResult deleteSuju(
 			@RequestParam("id") Integer id,
-			@RequestParam("State") String State) {
+			@RequestParam("State") String State,
+			@RequestParam("ShipmentStateName") String ShipmentStateName) {
 		
 		AjaxResult result = new AjaxResult();
 		
@@ -151,6 +152,11 @@ public class SujuController {
 			//received 아닌것만
 			result.success = false;
 			result.message = "수주상태만 삭제할 수 있습니다";
+			return result;
+		}
+		if (ShipmentStateName != null && !ShipmentStateName.isEmpty()) {
+			result.success = false;
+			result.message = "출하된 수주는 삭제할 수 없습니다";
 			return result;
 		}
 		
