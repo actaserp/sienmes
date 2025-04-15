@@ -90,7 +90,7 @@
         </div>
       </div>
       <div class="container-fluid">
-        <div id="theGrid" style="height: 730px;"></div>
+        <div id="theGrid" style="height: 730px;" ></div>
       </div>
       <!--        <div class="grid_box">-->
 
@@ -106,6 +106,34 @@
                 <caption>주문등록 테이블</caption>
                 <input type="hidden" id="id" name="id">
                 <tbody>
+                    <tr>
+                        <th style="text-align: center">
+                            <label for="JumunDate">발주일</label>
+                        </th>
+                        <td>
+                            <input type="date" id="JumunDate" name="JumunDate">
+                        </td>
+                        <th style="text-align: center">
+                            <label for="DueDate">납기예정일</label>
+                        </th>
+                        <td>
+                            <input type="date" id="DueDate" name="DueDate">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: center">
+                            <label for="cboCompany">구매처*</label>
+                        </th>
+                        <td colspan="3">
+                            <input id="cboCompany" name="Company_id" type="hidden">
+                            <input class="form-control2" type="text" id="CompanyName" name="CompanyName" readonly/>
+                            &nbsp;
+                            <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                구매처 검색
+                            </a>
+                        </td>
+                    </tr>
                     <tr>
                         <th style="text-align: center">
                             <label for="MaterialGroupName">제품그룹</label>
@@ -151,38 +179,30 @@
                     </tr>
                     <tr>
                         <th style="text-align: center">
-                            <label for="cboCompany">구매처*</label>
+                            <label for="BaljuUnitPrice">단가 *</label>
                         </th>
-                        <td colspan="3">
-                            <input id="cboCompany" name="Company_id" type="hidden">
-                            <input class="form-control2" type="text" id="CompanyName" name="CompanyName" readonly/>
-                            &nbsp;
-                            <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                구매처 검색
-                            </a>
+                        <td>
+                            <input class="form-control2 tar" type="text" id="BaljuUnitPrice" name="BaljuUnitPrice" onkeyup="numberBaljuQty(this.value)">
                         </td>
-                    </tr>
-                    <tr>
                         <th style="text-align: center">
                             <label for="cboBaljuType">발주구분</label>
                         </th>
-                        <td colspan="3">
+                        <td>
                             <select id="cboBaljuType" name="SujuType"></select>
                         </td>
                     </tr>
                     <tr>
                         <th style="text-align: center">
-                            <label for="JumunDate">발주일</label>
+                            <label for="BaljuPrice"> 공급가</label>
                         </th>
                         <td>
-                            <input type="date" id="JumunDate" name="JumunDate">
+                            <input class="form-control2 tar" type="text" id="BaljuPrice" name="BaljuPrice" onkeyup="numberBaljuQty(this.value)" readonly>
                         </td>
                         <th style="text-align: center">
-                            <label for="DueDate">납기예정일</label>
+                            <label for="BaljuVat">부가세</label>
                         </th>
                         <td>
-                            <input type="date" id="DueDate" name="DueDate">
+                            <input class="form-control2 tar" type="text" id="BaljuVat" name="BaljuVat" onkeyup="numberBaljuQty(this.value)" readonly>
                         </td>
                     </tr>
                     <tr>
@@ -213,10 +233,9 @@
         </div>
 
         <div class="popup-button">
-
+                <button type="button" class="btn-popup y_write_auth" id="btnPopBaljuStop">중지</button>
                 <button type="button" class="btn-popup y_write_auth" id="btnPopBaljuSave">저장</button>
                 <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
-
         </div>
     </div>
   </script>
@@ -229,13 +248,33 @@
   <th:block th:replace="/common/popup_company :: popup_company"></th:block>
 
   <script type="text/javascript">
+    function formatNumberInput(inputValue, targetSelector) {
+      let cleaned = inputValue.replace(/[^0-9]/g, '').replace(/,/g, '');// 숫자만 남기기
+      let formatted = cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ',');// 쉼표 넣기
+      $(targetSelector).val(formatted);// 값 넣기
+    }
+    function updateBaljuPrice() {
+      const qtyStr = $('#SujuQty').val().replace(/,/g, '');
+      const unitStr = $('#BaljuUnitPrice').val().replace(/,/g, '');
 
+      const qty = parseFloat(qtyStr || 0);
+      const unitPrice = parseFloat(unitStr || 0);
+
+      const supplyPrice = qty * unitPrice;
+      const vat = supplyPrice * 0.1;
+
+      $('#BaljuPrice').val(supplyPrice.toLocaleString());
+      $('#BaljuVat').val(vat.toLocaleString());
+    }
     function numberSujuQty(x) {
-      x = x.replace(/[^0-9]/g, '');   // 입력값이 숫자가 아니면 공백
-      x = x.replace(/,/g, '');          // ,값 공백처리
-      $("#SujuQty").val(x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")); // 정규식을 이용해서 3자리 마다 , 추가
+      formatNumberInput(x, "#SujuQty");
+      updateBaljuPrice();
     }
 
+    function numberBaljuQty(x) {
+      formatNumberInput(x, "#BaljuUnitPrice");
+      updateBaljuPrice();
+    }
     class SujuUploadPage {
       constructor() {
         this.url = '/api/balju/balju_order';
@@ -272,6 +311,10 @@
             {binding: 'StateName', header: '상태', width: 100, align: 'center'},
             {binding: 'ShipmentStateName', header: '납품장소', width: 100, align: 'center'},
             /*{binding: 'plan_state', header: '입고수량', width: 100, align: 'center'},*/
+            {binding: 'BaljuUnitPrice', header: '단가', width: 100, align: 'right'},
+            {binding: 'BaljuPrice', header: '공급가', width: 100, align: 'right'},
+            {binding: 'SujuQty2', header: '기입고수량', width: 100, align: 'right'},
+            {binding: 'SujuQty2', header: '미입고수량', width: 100, align: 'right'},
             {binding: 'SujuQty2', header: '입고수량', width: 100, align: 'right'},
             {binding: 'Description', header: '비고', width: 200}
           ],
@@ -364,10 +407,11 @@
 
         let modalContainer = null;
         if (data.mode === 'new') {
-          modalContainer = new PopupDraggable('등록');
+          modalContainer = new PopupDraggable('발주 등록');
         } else {
-          modalContainer = new PopupDraggable('수정');
+          modalContainer = new PopupDraggable('발주 수정');
         }
+
         modalContainer.open({width: 1050, height: 580, $content});
         $('#popSrchDt1').ax5DatePicker({direction: 'top'});
         $('#popSrchDt2').ax5DatePicker({direction: 'top'});
@@ -393,6 +437,12 @@
         let $CompanyName = $('#CompanyName');
         let $quantity = $('#quantity');
         let $SujuQty = $('#SujuQty');
+       /* let $BaljuUnitPrice = $('#BaljuUnitPrice');
+        let $BaljuPrice = $('#BaljuPrice');
+        let $BaljuVat = $('#BaljuVat');*/
+        let $BaljuUnitPrice = $content.find('#BaljuUnitPrice');
+        let $BaljuPrice = $content.find('#BaljuPrice');
+        let $BaljuVat = $content.find('#BaljuVat');
 
         if (data.mode === 'new') {
           $btnProductSearch.removeAttr('disabled');
@@ -403,10 +453,15 @@
           let pop = new PopMatComponent();
           pop.material_type = 'product,sangpum';
           pop.show(function (item) {
+            console.log('$btnProductSearch', item);
             $txtProductName.val(item.Name);
             $Material_id.val(item.id);
             $product_code.val(item.Code);
             $MaterialGroupName.val(item.group_name);
+
+            if ($Material_id.val() && $cboCompany.val()) {
+              tryShowBaljuPrice();
+            }
           });
           pop.searchDataBind();
         });
@@ -415,16 +470,75 @@
           let poppage = new PopCompComponent();
           let $poppage = $(poppage);
           let searchcallback = function (items) {
+            console.log('btnCompanySearch', items);
             $content.find('#cboCompany').val(items.id);
             $content.find('#CompanyName').val(items.compname);
+
+            if ($Material_id.val() && $cboCompany.val()) {
+              tryShowBaljuPrice();
+            }
           };
 
           poppage.show(searchcallback);
         });
 
+        let originalUnitPrice = null;
+
+        function tryShowBaljuPrice() {
+          const mat_pk = $content.find('#Material_id').val();
+          const company_id = $content.find('#cboCompany').val();
+          const JumunDate = $content.find('#JumunDate').val();
+          let url = _this.url + '/price';
+
+          if (!mat_pk || !company_id || !JumunDate) return;
+
+          let data = {
+            'mat_pk': mat_pk,
+            'company_id': company_id,
+            'JumunDate': JumunDate
+          };
+
+          AjaxUtil.getAsyncData(url, data, function (result) {
+            console.log('[Ajax 응답 데이터]', result);
+            if (result && result.data && result.data.length > 0) {
+              const item = result.data[0];
+              const unitPrice = item.UnitPrice || 0;
+              const vat = item.vat || 0;
+              const supplyPrice = unitPrice * 1;
+
+              $content.find('#unitPrice').prop('readonly', false).val(unitPrice);
+              originalUnitPrice = unitPrice;
+
+              $BaljuUnitPrice.val(unitPrice);
+              $BaljuPrice.val(supplyPrice);
+              $BaljuVat.val(vat);
+            } else {
+              $content.find('#unitPrice').val('0');
+              originalUnitPrice = '0';
+
+              $BaljuUnitPrice.val('');
+              $BaljuPrice.val('');
+              $BaljuVat.val('');
+            }
+          });
+        }
+
         // 저장버튼
         let $btnPopBaljuSave = $('#btnPopBaljuSave');
+        let $btnPopBaljuStop = $('#btnPopBaljuStop');
+        if (data.mode === 'new') {
+          $btnProductSearch.removeAttr('disabled');
+          $btnPopBaljuStop.hide();  // 등록 모드 → 중지 버튼 숨김
+        } else {
+          $btnPopBaljuStop.show();  // 수정 모드 → 중지 버튼 보이기
+        }
 
+        // 상태가 '중지'면 버튼 텍스트를 '중지취소'로 변경
+        if (data.State === 'canceled') {
+          $btnPopBaljuStop.text('중지취소');
+        } else {
+          $btnPopBaljuStop.text('중지');
+        }
 
         //발주구분
         AjaxUtil.fillSelectOptions($cboBaljuType, 'system_code', 'choose', null, 'Balju_type');
@@ -449,6 +563,27 @@
           $SujuQty.val(data.SujuQty.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
         }
 
+        // 팝업 중지버튼 클릭
+        $btnPopBaljuStop.click(function (e) {
+          // 현재 버튼 텍스트로 상태 판단 (중지 / 중지취소)
+          const isCanceled = $btnPopBaljuStop.text() === '중지취소';
+          const confirmMsg = isCanceled ? '중지취소 하시겠습니까?' : '중지 하시겠습니까?';
+          const notifyMsg = isCanceled ? '발주가 중지취소 되었습니다.' : '발주가 중지 되었습니다.';
+
+          Alert.confirm('', confirmMsg, function () {
+            let url = _this.url + '/balju_stop';
+
+            console.log("📤 전송될 발주정지 데이터:", data);
+
+            let fnSaveSuccess = function (result) {
+              Notify.success(notifyMsg);
+              _this.searchMainData();
+              modalContainer.close();
+            };
+
+            AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
+          });
+        });
 
         // 발주등록 팝업 저장버튼 클릭
         $btnPopBaljuSave.click(function (e) {
@@ -476,6 +611,9 @@
 
 
             data.SujuQty = data.SujuQty.replace(/,/g, '');
+            data.BaljuPrice = data.BaljuPrice.replace(/,/g, '');
+            data.BaljuUnitPrice = data.BaljuUnitPrice.replace(/,/g, '');
+            data.BaljuVat = data.BaljuVat.replace(/,/g, '');
             console.log("📤 전송될 발주 데이터:", data);
             let fnSaveSuccess = function (result) {
               Notify.success("저장되었습니다.");
@@ -485,6 +623,7 @@
             AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
           });
         });
+
       }
 
       deleteSujuData(id, state) {
@@ -529,6 +668,7 @@
         };
         AjaxUtil.getAsyncData(url, data, fnsuccess);
       }
+
     }
 
     let page = null;

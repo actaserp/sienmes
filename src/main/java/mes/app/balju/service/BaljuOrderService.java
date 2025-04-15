@@ -52,8 +52,10 @@ public class BaljuOrderService {
           , b."ReservationStock" as "ReservationStock"
           , b."SujuQty2" as "SujuQty2"
           , fn_code_name('balju_state', b."State") as "StateName"
-           ,sh."Name" as "ShipmentStateName"
+          , sh."Name" as "ShipmentStateName"
           , b."State"
+          , b."UnitPrice" as "BaljuUnitPrice"
+          , b."Price" as "BaljuPrice"
           , to_char(b."_created", 'yyyy-mm-dd') as create_date
           , case b."PlanTableName" when 'prod_week_term' then '주간계획' when 'bundle_head' then '임의계획' else b."PlanTableName" end as plan_state
           from balju b
@@ -104,7 +106,7 @@ public class BaljuOrderService {
             , b."CompanyName"
             , b."Company_id"
             , b."SujuType"
-            , fn_code_name('suju_type', b."SujuType") as "SujuTypeName"
+            , fn_code_name('Balju_type', b."SujuType") as "SujuTypeName"
             , to_char(b."ProductionPlanDate", 'yyyy-mm-dd') as production_plan_date
             , to_char(b."ShipmentPlanDate", 'yyyy-mm-dd') as shiment_plan_date
             , b."Description"
@@ -112,7 +114,10 @@ public class BaljuOrderService {
             , b."ReservationStock" as "ReservationStock"
             , b."SujuQty2" as "SujuQty2"
             , b."State"
-            , fn_code_name('suju_state', b."State") as "StateName"
+            ,b."UnitPrice" as "BaljuUnitPrice"
+            ,b."Price" as "BaljuPrice"
+            ,b."Vat"as "BaljuVat"
+            , fn_code_name('balju_state', b."State") as "StateName"
             , to_char(b."_created", 'yyyy-mm-dd') as create_date
             from balju b
             inner join material m on m.id = b."Material_id"
@@ -121,7 +126,8 @@ public class BaljuOrderService {
             left join company c on c.id= b."Company_id"
             where b.id = :id
 			""";
-
+//    log.info("발주상세 데이터 SQL: {}", sql);
+//    log.info("SQL Parameters: {}", paramMap.getValues());
     Map<String,Object> item = this.sqlRunner.getRow(sql, paramMap);
 
     return item;
@@ -175,6 +181,98 @@ public class BaljuOrderService {
     String jumunNumber = baseDate + "-" + String.format("%04d", currVal);
     //log.info("✅ 최종 생성된 주문번호: {}", jumunNumber);
     return jumunNumber;
+  }
+
+  public List<Map<String, Object>> getBaljuPrice(int materialId, String jumunDate, int companyId) {
+    MapSqlParameterSource dicParam = new MapSqlParameterSource();
+    dicParam.addValue("mat_pk", materialId);
+    dicParam.addValue("company_id", companyId);
+    dicParam.addValue("ApplyStartDate", jumunDate);
+
+    String sql = """
+			select mcu.id 
+            , mcu."Company_id"
+            , c."Name" as "CompanyName"
+            , mcu."UnitPrice" 
+            , mcu."FormerUnitPrice" 
+            , mcu."ApplyStartDate"::date 
+            , mcu."ApplyEndDate"::date 
+            , mcu."ChangeDate"::date 
+            , mcu."ChangerName" 
+            from mat_comp_uprice mcu 
+            inner join company c on c.id = mcu."Company_id"
+            where 1=1
+            and mcu."Material_id" = :mat_pk
+            and mcu."Company_id" = :company_id
+            and to_date(:ApplyStartDate, 'YYYY-MM-DD') between mcu."ApplyStartDate"::date and mcu."ApplyEndDate"::date
+            and mcu."Type" = '01'
+            order by c."Name", mcu."ApplyStartDate" desc
+        """;
+
+//    log.info("발주 단가 데이터 SQL: {}", sql);
+//    log.info("SQL Parameters: {}", dicParam.getValues());
+    List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+    return items;
+  }
+
+  public void updateMatCompUnitPrice(int materialId, int companyId, String jumunDate, double newUnitPrice, String changerName) {
+    String sql = """
+        UPDATE mat_comp_uprice
+        SET "FormerUnitPrice" = "UnitPrice",
+            "UnitPrice" = :unitPrice,
+            "ChangeDate" = now(),
+            "ChangerName" = :changerName
+        WHERE "Material_id" = :materialId
+          AND "Company_id" = :companyId
+          AND TO_DATE(:jumunDate, 'YYYY-MM-DD') BETWEEN "ApplyStartDate" AND "ApplyEndDate"
+          AND "Type" = '01'
+    """;
+
+    MapSqlParameterSource params = new MapSqlParameterSource()
+        .addValue("unitPrice", newUnitPrice)
+        .addValue("changerName", changerName)
+        .addValue("materialId", materialId)
+        .addValue("companyId", companyId)
+        .addValue("jumunDate", jumunDate);
+
+    int affected = sqlRunner.execute(sql, params);
+    //log.info("🔁 단가 업데이트 완료 (이전 단가 백업 포함): {}건", affected);
+  }
+
+  public List<Map<String, Object>> balju_stop(Integer id) {
+    // 1. 현재 상태 조회
+    String selectSql = "SELECT \"State\" FROM balju WHERE id = :id;";
+    MapSqlParameterSource selectParams = new MapSqlParameterSource()
+        .addValue("id", id);
+
+    String currentState = sqlRunner.queryForObject(
+        selectSql,
+        selectParams,
+        (rs, rowNum) -> rs.getString("State")
+    );
+    // 2.새 상태값 결정
+    String newState = "canceled";
+    if ("canceled".equalsIgnoreCase(currentState)) {
+      newState = "draft"; // 다시 입고 가능한 상태로
+    }
+
+    // 3. 상태 업데이트
+    String updateSql = """
+        UPDATE balju
+        SET "State" = :state
+        WHERE id = :id
+    """;
+    MapSqlParameterSource updateParams = new MapSqlParameterSource()
+        .addValue("state", newState)
+        .addValue("id", id);
+
+    int affected = sqlRunner.execute(updateSql, updateParams);
+//    log.info("상태 변경 완료: {} → {}, affected = {}", currentState, newState, affected);
+
+    return List.of(Map.of(
+        "updatedRows", affected,
+        "newState", newState
+    ));
   }
 
 }
