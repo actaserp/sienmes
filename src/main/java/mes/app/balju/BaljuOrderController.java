@@ -68,35 +68,22 @@ public class BaljuOrderController {
       @RequestParam(value = "BaljuVat")Double BaljuVat,     //부과세
       HttpServletRequest request,
       Authentication auth	) {
-    log.info("발주 등록 요청: id={}, sujuQty={}, companyId={}, companyName={}, description={}, dueDate={}, jumunDate={}, materialId={}, availableStock={}, sujuType={}, BaljuUnitPrice={} , BaljuPrice={}, BaljuVat={}",
-        id, sujuQty, companyId, companyName, description, dueDate, jumunDate, materialId, availableStock, sujuType, BaljuUnitPrice, BaljuPrice, BaljuVat);
-
+    /*log.info("발주 등록 요청: id={}, sujuQty={}, companyId={}, companyName={}, description={}, dueDate={}, jumunDate={}, materialId={}, availableStock={}, sujuType={}, BaljuUnitPrice={} , BaljuPrice={}, BaljuVat={}",
+        id, sujuQty, companyId, companyName, description, dueDate, jumunDate, materialId, availableStock, sujuType, BaljuUnitPrice, BaljuPrice, BaljuVat);*/
     User user = (User)auth.getPrincipal();
 
     Balju balju = null;
 
     if (id != null) {
       balju = this.bujuRepository.getBujuById(id);
-      log.info("🔄 기존 발주 수정: id={}", id);
+//      log.info("🔄 기존 발주 수정: id={}", id);
     } else {
       balju = new Balju();
       balju.setState("draft");
-      log.info("🆕 신규 발주 생성");
+//      log.info("🆕 신규 발주 생성");
     }
     List<Map<String, Object>> upriceList = baljuOrderService.getBaljuPrice(materialId, jumunDate, companyId);
-
-    /*if (!upriceList.isEmpty()) {
-      Map<String, Object> row = upriceList.get(0); // 가장 최근 단가
-      Double currentUnitPrice = row.get("UnitPrice") == null ? null : Double.valueOf(row.get("UnitPrice").toString());
-
-      if (currentUnitPrice == null || !currentUnitPrice.equals(BaljuUnitPrice)) {
-        // 단가가 다르면 업데이트
-        log.info("🛠 단가 변경 감지 → 기존:{}, 새로운:{}", currentUnitPrice, BaljuUnitPrice);
-        baljuOrderService.updateMatCompUnitPrice(materialId, companyId, jumunDate, BaljuUnitPrice, user.getUserProfile().getName());
-
-      }
-    }*/
-
+    
     availableStock = availableStock==null?0:availableStock;
     Date due_Date = CommonUtil.trySqlDate(dueDate);
     Date jumun_Date = CommonUtil.trySqlDate(jumunDate);
@@ -120,7 +107,7 @@ public class BaljuOrderController {
     balju.set_audit(user);
 
     balju = this.bujuRepository.save(balju);
-    log.info("✅ 발주 저장 완료: balju={}", balju);
+//    log.info("✅ 발주 저장 완료: balju={}", balju);
 
     AjaxResult result = new AjaxResult();
     result.data=balju;
@@ -175,7 +162,7 @@ public class BaljuOrderController {
   public AjaxResult BaljuPrice(@RequestParam("mat_pk") int materialId,
                                @RequestParam("JumunDate") String jumunDate,
                                @RequestParam("company_id") int companyId){
-    log.info("발주단가 찾기 --- matPk:{}, ApplyStartDate:{},company_id:{} ",materialId,jumunDate , companyId);
+    //log.info("발주단가 찾기 --- matPk:{}, ApplyStartDate:{},company_id:{} ",materialId,jumunDate , companyId);
     List<Map<String, Object>> items = this.baljuOrderService.getBaljuPrice(materialId, jumunDate, companyId);
     AjaxResult result = new AjaxResult();
     result.data = items;

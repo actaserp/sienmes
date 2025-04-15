@@ -531,6 +531,9 @@
           $btnPopBaljuStop.hide();  // 등록 모드 → 중지 버튼 숨김
         } else {
           $btnPopBaljuStop.show();  // 수정 모드 → 중지 버튼 보이기
+          if (data.State && data.State !== 'draft') {
+            $BaljuUnitPrice.prop('readonly', true);
+          }
         }
 
         // 상태가 '중지'면 버튼 텍스트를 '중지취소'로 변경
@@ -555,6 +558,7 @@
           if (data.Company_id) {
             $CompanyName.attr('readonly', true);
           }
+          originalUnitPrice = parseFloat(data.BaljuUnitPrice || '0');
         }
         FormUtil.BindDataForm(data, $baljuForm);
 
