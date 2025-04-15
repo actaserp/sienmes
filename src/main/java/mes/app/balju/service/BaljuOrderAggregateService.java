@@ -15,12 +15,13 @@ public class BaljuOrderAggregateService {
   @Autowired
   SqlRunner sqlRunner;
 
-  public List<Map<String, Object>> getList(String srchStartDt, String srchEndDt, Integer cboCompany, Integer cboMatGrp) {
+  public List<Map<String, Object>> getList(String srchStartDt, String srchEndDt, Integer cboCompany, Integer cboMatGrp, String cBaljuState) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
     paramMap.addValue("srchStartDt", srchStartDt);
     paramMap.addValue("srchEndDt", srchEndDt);
     paramMap.addValue("cboCompany", cboCompany);
     paramMap.addValue("cboMatGrp", cboMatGrp);
+    paramMap.addValue("cBaljuState", cBaljuState);
 
 
     String sql = """
@@ -45,6 +46,11 @@ public class BaljuOrderAggregateService {
           and m."MaterialGroup_id" = :cboMatGrp
           """;
     }
+    if (cBaljuState != null && !cBaljuState.isBlank()) {
+      sql += """
+      and b."State" = :cBaljuState
+  """;
+    }
 
     sql += """
         group by b."Material_id", b."CompanyName" 
@@ -61,8 +67,8 @@ public class BaljuOrderAggregateService {
         """;
 
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-    log.info("발주량집계 read SQL: {}", sql);
-    log.info("SQL Parameters: {}", paramMap.getValues());
+//    log.info("발주량집계 read SQL: {}", sql);
+//    log.info("SQL Parameters: {}", paramMap.getValues());
     return items;
   }
 }

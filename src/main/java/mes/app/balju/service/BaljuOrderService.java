@@ -39,6 +39,7 @@ public class BaljuOrderService {
           , m."Name" as product_name
           , u."Name" as unit
           , b."SujuQty" as "SujuQty"
+          , (b."SujuQty" - b."SujuQty2") as "SujuQty3"
           , to_char(b."JumunDate", 'yyyy-mm-dd') as "JumunDate"
           , to_char(b."DueDate", 'yyyy-mm-dd') as "DueDate"
           , b."CompanyName"
@@ -195,9 +196,9 @@ public class BaljuOrderService {
             , c."Name" as "CompanyName"
             , mcu."UnitPrice" 
             , mcu."FormerUnitPrice" 
-            , mcu."ApplyStartDate"::date 
-            , mcu."ApplyEndDate"::date 
-            , mcu."ChangeDate"::date 
+            , mcu."ApplyStartDate"
+            , mcu."ApplyEndDate"
+            , mcu."ChangeDate"
             , mcu."ChangerName" 
             from mat_comp_uprice mcu 
             inner join company c on c.id = mcu."Company_id"

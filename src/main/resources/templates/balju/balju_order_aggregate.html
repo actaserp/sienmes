@@ -55,6 +55,14 @@
             </dd>
           </dl>
           <dl>
+            <dt>
+              발주상태
+            </dt>
+            <dd>
+              <select class="form-control2" id="cBaljuState" name="cBaljuState" ></select>
+            </dd>
+          </dl>
+          <dl>
             <dt>&nbsp;</dt>
             <dd>
               <li>
@@ -161,7 +169,8 @@
           'srchStartDt' : $("#srchStartDt").val(),
           'srchEndDt' : $("#srchEndDt").val(),
           'cboCompany' : $("#cboCompanyHidden").val(),
-          'cboMatGrp' : $("#cboMatGrp").val()
+          'cboMatGrp' : $("#cboMatGrp").val(),
+          'cBaljuState' : $("#cBaljuState").val()
         };
         const result = AjaxUtil.getSyncData(url, data);
         console.log("result data : ", result.data);
@@ -196,6 +205,7 @@
       $('#srchEndDt').val(currentDay);
 
       AjaxUtil.fillSelectOptions($('#cboMatGrp'), 'material_group', 'all', '', 'product,semi');
+      AjaxUtil.fillSelectOptions($('#cBaljuState'), 'system_code', 'all', null, 'balju_state');
 
       $('#btnSearch').click(() => {
         if ($('#cboCompanyHidden').val() === '' && $('#cboCompany').val() !== '') {

@@ -77,15 +77,15 @@ public class BaljuOrderController {
 
     if (id != null) {
       balju = this.bujuRepository.getBujuById(id);
-      //log.info("🔄 기존 발주 수정: id={}", id);
+      log.info("🔄 기존 발주 수정: id={}", id);
     } else {
       balju = new Balju();
       balju.setState("draft");
-      //log.info("🆕 신규 발주 생성");
+      log.info("🆕 신규 발주 생성");
     }
     List<Map<String, Object>> upriceList = baljuOrderService.getBaljuPrice(materialId, jumunDate, companyId);
 
-    if (!upriceList.isEmpty()) {
+    /*if (!upriceList.isEmpty()) {
       Map<String, Object> row = upriceList.get(0); // 가장 최근 단가
       Double currentUnitPrice = row.get("UnitPrice") == null ? null : Double.valueOf(row.get("UnitPrice").toString());
 
@@ -95,14 +95,12 @@ public class BaljuOrderController {
         baljuOrderService.updateMatCompUnitPrice(materialId, companyId, jumunDate, BaljuUnitPrice, user.getUserProfile().getName());
 
       }
-    }
+    }*/
 
     availableStock = availableStock==null?0:availableStock;
     Date due_Date = CommonUtil.trySqlDate(dueDate);
     Date jumun_Date = CommonUtil.trySqlDate(jumunDate);
     String jumunNumber = baljuOrderService.makeJumunNumber(jumun_Date);
-
-
 
     balju.setSujuQty(Double.valueOf(sujuQty));
     balju.setSujuQty2(Double.valueOf(0));
@@ -122,7 +120,7 @@ public class BaljuOrderController {
     balju.set_audit(user);
 
     balju = this.bujuRepository.save(balju);
-    //log.info("✅ 발주 저장 완료: balju={}", balju);
+    log.info("✅ 발주 저장 완료: balju={}", balju);
 
     AjaxResult result = new AjaxResult();
     result.data=balju;

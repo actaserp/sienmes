@@ -314,8 +314,8 @@
             {binding: 'BaljuUnitPrice', header: '단가', width: 100, align: 'right'},
             {binding: 'BaljuPrice', header: '공급가', width: 100, align: 'right'},
             {binding: 'SujuQty2', header: '기입고수량', width: 100, align: 'right'},
-            {binding: 'SujuQty2', header: '미입고수량', width: 100, align: 'right'},
-            {binding: 'SujuQty2', header: '입고수량', width: 100, align: 'right'},
+            {binding: 'SujuQty3', header: '미입고수량', width: 100, align: 'right'},
+            // {binding: 'SujuQty2', header: '입고수량', width: 100, align: 'right'},
             {binding: 'Description', header: '비고', width: 200}
           ],
           itemsSource: this.viewData, // 데이터를 설정할 배열
@@ -412,7 +412,7 @@
           modalContainer = new PopupDraggable('발주 수정');
         }
 
-        modalContainer.open({width: 1050, height: 580, $content});
+        modalContainer.open({width: 1050, height: 610, $content});
         $('#popSrchDt1').ax5DatePicker({direction: 'top'});
         $('#popSrchDt2').ax5DatePicker({direction: 'top'});
 
@@ -563,6 +563,7 @@
           $SujuQty.val(data.SujuQty.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
         }
 
+
         // 팝업 중지버튼 클릭
         $btnPopBaljuStop.click(function (e) {
           // 현재 버튼 텍스트로 상태 판단 (중지 / 중지취소)
@@ -605,22 +606,61 @@
             Alert.alert('', '발주량을 입력하세요.');
             return;
           }
+          let currentUnitPrice = $content.find('#BaljuUnitPrice').val();  // 발주 단가 필드 ID 확인 필수
+          let unitPriceChanged = originalUnitPrice != null &&
+            parseFloat($content.find('#BaljuUnitPrice').val().replace(/,/g, '')) !== originalUnitPrice;
 
           Alert.confirm('', '저장하시겠습니까?', function () {
-            let url = _this.url + '/manual_save';
 
+            // 발주 저장 함수 정의
+            let doSave = function () {
+              let url = _this.url + '/manual_save';
 
-            data.SujuQty = data.SujuQty.replace(/,/g, '');
-            data.BaljuPrice = data.BaljuPrice.replace(/,/g, '');
-            data.BaljuUnitPrice = data.BaljuUnitPrice.replace(/,/g, '');
-            data.BaljuVat = data.BaljuVat.replace(/,/g, '');
-            console.log("📤 전송될 발주 데이터:", data);
-            let fnSaveSuccess = function (result) {
-              Notify.success("저장되었습니다.");
-              _this.searchMainData();
-              modalContainer.close();
+              // 숫자 포맷 제거
+              data.SujuQty = data.SujuQty.replace(/,/g, '');
+              data.BaljuPrice = data.BaljuPrice.replace(/,/g, '');
+              data.BaljuUnitPrice = data.BaljuUnitPrice.replace(/,/g, '');
+              data.BaljuVat = data.BaljuVat.replace(/,/g, '');
+
+              console.log("📤 전송될 발주 데이터:", data);
+
+              AjaxUtil.postAsyncData(url, data, function (result) {
+                Notify.success("저장되었습니다.");
+                _this.searchMainData();
+                modalContainer.close();
+              });
             };
-            AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
+
+            // 단가 변경이 있는 경우 → 단가 먼저 저장
+            if (unitPriceChanged) {
+              let now = new Date();
+              let hh = String(now.getHours()).padStart(2, '0');
+              let mm = String(now.getMinutes()).padStart(2, '0');
+              let ss = String(now.getSeconds()).padStart(2, '0');
+
+              let applyStartDate = `${data.JumunDate}T${hh}:${mm}:${ss}`;
+
+              let priceData = {
+                Material_id: data.Material_id,
+                Company_id: data.Company_id,
+                UnitPrice: currentUnitPrice,
+                ApplyStartDate: applyStartDate,  // ✅ 수정된 값 사용!
+                type: '01',
+                ChangerName: userinfo.username
+              };
+
+              AjaxUtil.postAsyncData('/api/definition/material/savePrice', priceData, function (res) {
+                if (res.success) {
+                  console.log('✅ 단가 저장 성공');
+                  doSave();
+                } else {
+                  Alert.alert('단가 저장 실패', res.message || '알 수 없는 오류');
+                }
+              });
+            } else {
+              // 단가 변경 없으면 발주 저장 바로 실행
+              doSave();
+            }
           });
         });
 
