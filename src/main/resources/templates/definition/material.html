@@ -31,7 +31,6 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>시스템설정</li>
                 <li>기준정보</li>
                 <li>품목정보</li>
             </ul>
@@ -707,14 +706,15 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th>
+                                                <th style="font-size: 13px;">
                                                     <label for="ApplyStartDate">적용시작일</label>
                                                 </th>
                                                 <td>
-                                                    <input type="date" style="width: 100%;" id="ApplyStartDate"
+                                                    <input type="datetime-local" style="width: 100%;" id="ApplyStartDate"
                                                            name="ApplyStartDate">
                                                 </td>
                                             </tr>
+
                                             </tbody>
                                         </table>
                                     </form>
@@ -911,7 +911,7 @@
                     if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
                         let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
                         let mat_pk = selectedRowData.id; // 품목 ID 가져오기
-                        console.log(selectedRowData);
+                        /*console.log(selectedRowData);*/
 
                         // 상세 정보 표시
                         _this.showDetail(mat_pk);
@@ -1146,7 +1146,7 @@
                         let item = s.rows[e.row].dataItem;
 
                         if (col.binding === "type") {
-                            e.cell.textContent = (item.type === '01' || item.type === '02') ? '매입' : '매출';
+                            e.cell.textContent = (item.type === '01') ? '매입' : '매출';
                         }
                     }
                 });
@@ -1793,14 +1793,6 @@
 
                 let result = AjaxUtil.getSyncData(this.url + '/readPrice', data);
                 if (result != null) {
-                    /*   let count = result.data.length;
-                       _this.price_grid.setData({
-                           list: result.data,
-                           page: {
-                               display: true,
-                               totalElements: count,
-                           }
-                       });*/
                     _this.viewData2.sourceCollection = result.data;
 
                     $('#companyPriceForm')[0].reset();
@@ -1823,6 +1815,7 @@
 
                 let result = AjaxUtil.getSyncData(this.url + '/readPriceHistory', data);
                 if (result != null) {
+                    /*console.log(result);*/
                     _this.viewData2.sourceCollection = result.data;
 
                     $('#companyPriceForm')[0].reset();
@@ -1843,13 +1836,41 @@
                 let param = {'price_id': idx};
                 let result = AjaxUtil.getSyncData(this.url + '/detailPrice', param);
                 if (result != null) {
+                    console.log(result.data);
                     FormUtil.BindDataForm(result.data, $('#companyPriceForm'));
+
+                    // ApplyStartDate를 UTC에서 한국시간(KST)으로 변환하여 datetime-local 포맷으로 설정
+                    let applyStartDate = result.data.ApplyStartDate;
+                    if (applyStartDate) {
+                        // UTC 시간 문자열을 Date 객체로 변환
+                        let date = new Date(applyStartDate);
+
+                        // 한국 시간으로 변환 (UTC + 9시간)
+                        date.setHours(date.getHours() + 9);
+
+                        // 'YYYY-MM-DDTHH:MM' 형식으로 변환
+                        let formattedDate = date.toISOString().substring(0, 16);
+
+                        // input 필드에 설정
+                        $('#ApplyStartDate').val(formattedDate);
+                    }
                 }
 
-                //this.setPriceButtonDisabled(false, false, false);
-                //this.setPriceButtonDisabled(false, true, false);
                 this.setPriceButtonState();
             }
+
+
+
+            /*let price_grid = this.price_grid.itemsSource; // itemsSource로 변경
+                for (let i = 0; i < price_grid.length; i++) {
+                    if (price_grid[i].Company_id == data.Company_id) {
+                        if (price_grid[i].ApplyStartDate == data.ApplyStartDate) {
+                            Alert.alert('', '적용 시작일을 확인해주세요.')
+                            $('#ApplyStartDate').focus();
+                            return;
+                        }
+                    }
+                }*/
 
             // 단가 정보 등록/변경
             savePriceData() {
@@ -1860,19 +1881,8 @@
                 let url = this.url + '/savePrice';
                 let data = FormUtil.extractForm($('#companyPriceForm'));
 
-                let price_grid = this.price_grid.itemsSource; // itemsSource로 변경
-                for (let i = 0; i < price_grid.length; i++) {
-                    if (price_grid[i].Company_id == data.Company_id) {
-                        if (price_grid[i].ApplyStartDate == data.ApplyStartDate) {
-                            Alert.alert('', '적용 시작일을 확인해주세요.')
-                            $('#ApplyStartDate').focus();
-                            return;
-                        }
-                    }
-                }
-
                 let fnSuccess = function (res) {
-                    /*console.log("서버 응답:", res);*/  // 서버 응답을 콘솔에 출력
+                    console.log("서버 응답:", res);  // 서버 응답을 콘솔에 출력
                     if (!res.success) {
                         console.error("서버 오류 메시지:", res.message);  // 오류 메시지 확인
                         Alert.alert('', '저장실패: ' + res.message);
@@ -1979,7 +1989,7 @@
                 let result = AjaxUtil.getSyncData(this.url + '/bom', data);
 
                 if (result.data && Array.isArray(result.data)) {
-                    console.log(result.data);
+                    /*console.log(result.data);*/
                     // 데이터를 계층 구조로 변환
                     let treeData = _this.buildTree(result.data);
 

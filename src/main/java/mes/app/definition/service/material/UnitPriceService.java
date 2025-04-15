@@ -1,6 +1,8 @@
 package mes.app.definition.service.material;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +74,8 @@ public class UnitPriceService {
             , mcu."ApplyStartDate"::date 
             , mcu."ApplyEndDate"::date 
             , mcu."ChangeDate"::date 
-            , mcu."ChangerName" 
+            , mcu."ChangerName"
+            , mcu."Type" as type
             from mat_comp_uprice mcu 
             inner join company c on c.id = mcu."Company_id"
             where 1=1
@@ -96,8 +99,9 @@ public class UnitPriceService {
             , mcu."Company_id" 
             , mcu."UnitPrice"
             , "FormerUnitPrice"
-            , to_char(mcu."ApplyStartDate", 'yyyy-mm-dd') as "ApplyStartDate"
-            , to_char(mcu."ApplyEndDate", 'yyyy-mm-dd') as "ApplyEndDate"
+            , mcu."ApplyStartDate" as "ApplyStartDate"
+            , mcu."ApplyEndDate" as "ApplyEndDate"
+            , mcu."Type" as type
             from mat_comp_uprice mcu 
             inner join material m on m.id = mcu."Material_id" 
             where 1 = 1
@@ -108,17 +112,24 @@ public class UnitPriceService {
         Map<String, Object> item = this.sqlRunner.getRow(sql, dicParam);
         return item;
 	}
-	
+
 	public int saveCompanyUnitPrice(MultiValueMap<String, Object> data) {
 		Integer materialId = CommonUtil.tryIntNull(data.getFirst("Material_id"));
 		Integer companyId = CommonUtil.tryIntNull(data.getFirst("Company_id"));
-		Timestamp applyStartDate = CommonUtil.tryTimestamp(data.getFirst("ApplyStartDate"));
+
+		// applyStartDate가 '2025-04-15T13:34'와 같은 형식으로 들어올 때 처리
+		String applyStartDateStr = CommonUtil.tryString(data.getFirst("ApplyStartDate"));
+		LocalDateTime applyStartDateLocal = LocalDateTime.parse(applyStartDateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		Timestamp applyStartDate = Timestamp.valueOf(applyStartDateLocal);
+
+		// applyEndDate는 기존대로 설정
 		Timestamp applyEndDate = CommonUtil.tryTimestamp("2100-12-31");
+
 		Float unitPrice = CommonUtil.tryFloatNull(data.getFirst("UnitPrice"));
 		String changerName = CommonUtil.tryString(data.getFirst("ChangerName"));
 		String type = CommonUtil.tryString(data.getFirst("type"));
 		Integer userId = CommonUtil.tryIntNull(data.getFirst("user_id").toString());
-		
+
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("materialId", materialId);
 		dicParam.addValue("companyId", companyId);
@@ -129,57 +140,57 @@ public class UnitPriceService {
 		dicParam.addValue("userId", userId);
 		dicParam.addValue("type", type);
 		dicParam.addValue("formerUnitPrice", null);
-		
+
 		String sql = """
-				select id, "UnitPrice"
-	            from mat_comp_uprice
-	            where "Material_id" = :materialId
-	            and "Company_id" = :companyId
-	            and :applyStartDate between "ApplyStartDate" and "ApplyEndDate"
-				""";
-		
+            select id, "UnitPrice"
+            from mat_comp_uprice
+            where "Material_id" = :materialId
+            and "Company_id" = :companyId
+            and :applyStartDate between "ApplyStartDate" and "ApplyEndDate"
+            """;
+
 		Map<String, Object> item = this.sqlRunner.getRow(sql, dicParam);
 
 		if(!MapUtils.isEmpty(item)) {
 			dicParam.addValue("formerUnitPrice", CommonUtil.tryFloatNull(item.get("UnitPrice")));
 		}
-		
+
 		sql = """
-				update mat_comp_uprice
-                set "ApplyEndDate" = (:applyStartDate)::timestamp - interval '1 days'
-                where "Material_id" = :materialId
-                and "Company_id" = :companyId
-                and :applyStartDate between "ApplyStartDate" and "ApplyEndDate"
-				""";
-		
+            update mat_comp_uprice
+            set "ApplyEndDate" = (:applyStartDate)::timestamp
+            where "Material_id" = :materialId
+            and "Company_id" = :companyId
+            and :applyStartDate between "ApplyStartDate" and "ApplyEndDate"
+            """;
+
 		this.sqlRunner.execute(sql, dicParam);
-		
+
 		sql = """
-				INSERT INTO public.mat_comp_uprice
-				("_created"
-				, "_creater_id"
-				, "Material_id"
-				, "Company_id"
-				, "ApplyStartDate"
-				, "ApplyEndDate" 
-				, "UnitPrice"
-				, "FormerUnitPrice"
-				, "ChangeDate"
-				, "ChangerName"
-				, "Type")
-				VALUES(
-				now()
-				, :userId
-				, :materialId 
-				, :companyId
-				, :applyStartDate
-				, :applyEndDate
-				, :unitPrice
-				, :formerUnitPrice
-				, now()
-				, :changerName 
-				, :type)
-				""";
+            INSERT INTO public.mat_comp_uprice
+            ("_created"
+            , "_creater_id"
+            , "Material_id"
+            , "Company_id"
+            , "ApplyStartDate"
+            , "ApplyEndDate" 
+            , "UnitPrice"
+            , "FormerUnitPrice"
+            , "ChangeDate"
+            , "ChangerName"
+            , "Type")
+            VALUES(
+            now()
+            , :userId
+            , :materialId 
+            , :companyId
+            , :applyStartDate
+            , :applyEndDate
+            , :unitPrice
+            , :formerUnitPrice
+            , now()
+            , :changerName 
+            , :type)
+            """;
 		return this.sqlRunner.execute(sql, dicParam);
 	}
 	
