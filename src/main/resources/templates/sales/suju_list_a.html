@@ -108,6 +108,35 @@
                     <tbody>
                         <tr>
                             <th style="text-align: center">
+                                <label for="JumunDate">수주일*</label>
+                            </th>
+                            <td>
+                                <input type="date" id="JumunDate" name="JumunDate">
+                            </td>
+                            <th style="text-align: center">
+                                <label for="DueDate">납기일*</label>
+                            </th>
+                            <td>
+                                <input type="date" id="DueDate" name="DueDate">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="cboCompany">판매처*</label>
+                            </th>
+                            <td colspan="3">
+                                <input id="cboCompany" name="Company_id" type="hidden">
+                                <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
+                                placeholder="판매처 검색 버튼을 클릭하여 판매처를 검색하세요" readonly/>
+                                &nbsp;
+                                <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    판매처 검색
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
                                 <label for="MaterialGroupName">제품그룹</label>
                             </th>
                             <td>
@@ -122,11 +151,11 @@
                         </tr>
                         <tr>
                             <th style="text-align: center">
-                                <label for="txtProductName">품목명</label>
+                                <label for="txtProductName">품목명*</label>
                             </th>
                             <td colspan="3">
                                 <input type="text" id="txtProductName" name="product_name"
-                                       placeholder="검색버튼을 클릭하여 제품을 검색하세요" readonly>
+                                       placeholder="검색 버튼을 클릭하여 제품을 검색하세요" readonly>
                                 <input type="hidden" id="Material_id" name="Material_id">
                                 &nbsp;
                                 <a class="btn btn-delete" title="검색" id="btnProductSearch">
@@ -142,34 +171,12 @@
                             <td>
                                 <input class="form-control2 tar" type="text" id="SujuQty" name="SujuQty" onkeyup="numberSujuQty(this.value)">
                             </td>
-                            <th style="text-align: center">
-                                <label for="AvailableStock">당시 가용재고</label>
-                            </th>
-                            <td>
-                                <input class="form-control2 tar" type="text" id="AvailableStock" name="AvailableStock" readonly>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th style="text-align: center">
-                                <label for="cboCompany">판매처*</label>
-                            </th>
-                            <td colspan="3">
-                                <input id="cboCompany" name="Company_id" type="hidden">
-                                <input class="form-control2" type="text" id="CompanyName" name="CompanyName" readonly/>
-                                &nbsp;
-                                <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    판매처 검색
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th style="text-align: center">
-                                <label for="unitPrice">단가</label>
-                            </th>
-                            <td>
-                                <input id="unitPrice" name="unitPrice" style="text-align:right;" readonly>
-                            </td>
+<!--                            <th style="text-align: center">-->
+<!--                                <label for="AvailableStock">당시 가용재고</label>-->
+<!--                            </th>-->
+<!--                            <td>-->
+<!--                                <input class="form-control2 tar" type="text" id="AvailableStock" name="AvailableStock" readonly>-->
+<!--                            </td>-->
                             <th style="text-align: center">
                                 <label for="cboSujuType">수주구분</label>
                             </th>
@@ -179,16 +186,31 @@
                         </tr>
                         <tr>
                             <th style="text-align: center">
-                                <label for="JumunDate">수주일</label>
+                                <label for="unitPrice">단가</label>
                             </th>
                             <td>
-                                <input type="date" id="JumunDate" name="JumunDate">
+
+                                <input class="form-control2 tar" type="text" id="unitPrice" name="unitPrice" onkeyup="numberUnitPrice(this.value)">
                             </td>
                             <th style="text-align: center">
-                                <label for="DueDate">납기일</label>
+                                <label for="price">공급가액</label>
                             </th>
                             <td>
-                                <input type="date" id="DueDate" name="DueDate">
+                                <input id="price" name="price" style="text-align:right;" readonly>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="vat">부가세</label>
+                            </th>
+                            <td>
+                                <input id="vat" name="vat" style="text-align:right;" readonly>
+                            </td>
+                            <th style="text-align: center">
+                                <label for="totalAmount">총계</label>
+                            </th>
+                            <td>
+                                <input id="totalAmount" name="totalAmount" style="text-align:right;" readonly>
                             </td>
                         </tr>
                         <tr>
@@ -242,6 +264,12 @@
             $("#SujuQty").val(x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")); // 정규식을 이용해서 3자리 마다 , 추가
         }
 
+        function numberUnitPrice(x) {
+            x = x.replace(/[^0-9]/g, '');   // 입력값이 숫자가 아니면 공백
+            x = x.replace(/,/g, '');          // ,값 공백처리
+            $("#unitPrice").val(x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")); // 정규식을 이용해서 3자리 마다 , 추가
+        }
+
         class SujuUploadPage {
             constructor() {
                 this.url = '/api/sales/suju';
@@ -251,6 +279,7 @@
                 this.viewData = new wijmo.collections.CollectionView();
                 this.init();
             }
+
 
             init() {
                 let _this = this;
@@ -274,10 +303,12 @@
                         {binding: 'product_name', header: '제품명', width: 200},
                         {binding: 'unit', header: '단위', width: 80, align: 'center'},
                         {binding: 'SujuQty', header: '수량', width: 80, align: 'right', format: 'n0'},
+                        {binding: 'unitPrice', header: '단가', width: 80, align: 'right', format: 'n0'},
+                        {binding: 'Price', header: '공급가액', width: 80, align: 'right', format: 'n0'},
                         {binding: 'DueDate', header: '납기일', width: 120, align: 'center'},
                         {binding: 'StateName', header: '상태', width: 100, align: 'center'},
                         {binding: 'ShipmentStateName', header: '출하상태', width: 100, align: 'center'},
-                        {binding: 'plan_state', header: '생산계획', width: 100, align: 'center'},
+                        {binding: 'SujuQty2', header: '출하수량', width: 100, align: 'center'},
                         {binding: 'Description', header: '비고', width: 200}
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
@@ -320,6 +351,7 @@
                             action: 'detail'
                         };
                         let fnsuccess = function (result) {
+                            console.log('edit', result.data);
                             result.data['mode'] = 'edit';
                             _this.showSujuForm(result.data);
                         };
@@ -373,9 +405,7 @@
                 } else {
                     modalContainer = new PopupDraggable('수정');
                 }
-                modalContainer.open({width: 1050, height: 580, $content});
-                $('#popSrchDt1').ax5DatePicker({direction: 'top'});
-                $('#popSrchDt2').ax5DatePicker({direction: 'top'});
+                modalContainer.open({width: 1050, height: 620, $content});
 
                 // 제품검색
                 let $btnProductSearch = $content.find('#btnProductSearch');
@@ -398,6 +428,7 @@
                 let $CompanyName = $('#CompanyName');
                 let $quantity = $('#quantity');
                 let $SujuQty = $('#SujuQty');
+                let isVatExempt = false;
 
                 if (data.mode === 'new') {
                     $btnProductSearch.removeAttr('disabled');
@@ -413,9 +444,11 @@
                         $Material_id.val(item.id);
                         $product_code.val(item.Code);
                         $MaterialGroupName.val(item.group_name);
+                        $unit.val(item.unit_name);
+                        isVatExempt = item.VatExemptionYN === 'Y';
 
                         if ($Material_id.val() && $cboCompany.val()) {
-                            tryShowPriceHistory();
+                            tryShowPrice();
                         }
                     });
                     pop.searchDataBind();
@@ -430,7 +463,7 @@
                         $content.find('#CompanyName').val(items.compname);
 
                         if ($Material_id.val() && $cboCompany.val()) {
-                            tryShowPriceHistory();
+                            tryShowPrice();
                         }
                     };
 
@@ -471,6 +504,7 @@
                     //수주일, 납기일 체크?
                     let data = FormUtil.extractForm($sujuForm);
 
+
                     if ((data.Material_id == null) || (data.Material_id === '')) {
                         Alert.alert('', '제품을 선택하세요.');
                         return;
@@ -487,12 +521,15 @@
                     }
 
                     let currentUnitPrice = $content.find('#unitPrice').val();
-                    let unitPriceChanged = originalUnitPrice != null && currentUnitPrice !== originalUnitPrice;
+                    let unitPriceChanged = originalUnitPrice != null &&
+                        parseFloat($content.find('#unitPrice').val().replace(/,/g, '')) !== originalUnitPrice;
+
 
                     Alert.confirm('', '저장하시겠습니까?', function () {
                         let doSave = function () {
                             let url = _this.url + '/manual_save';
                             data.SujuQty = data.SujuQty.replace(/,/g, '');
+                            data.unitPrice.replace(/,/g, '');
 
                             let fnSaveSuccess = function (result) {
                                 Notify.success("저장되었습니다.");
@@ -504,19 +541,27 @@
                         };
 
                         if (unitPriceChanged) {
+                            console.log('unitPriceChanged', unitPriceChanged);
+
+                            let now = new Date();
+                            let hh = String(now.getHours()).padStart(2, '0');
+                            let mm = String(now.getMinutes()).padStart(2, '0');
+                            let ss = String(now.getSeconds()).padStart(2, '0');
+
+                            let applyStartDate = `${data.JumunDate}T${hh}:${mm}:${ss}`;
+
                             // 단가 저장 먼저 수행
                             let priceData = {
                                 Material_id: data.Material_id,
                                 Company_id: data.Company_id,
-                                UnitPrice: currentUnitPrice,
-                                ApplyStartDate: data.JumunDate,
+                                UnitPrice: data.unitPrice.replace(/,/g, ''),
+                                ApplyStartDate: applyStartDate,
                                 type: '02',
                                 ChangerName: userinfo.username
                             };
 
                             AjaxUtil.postAsyncData('/api/definition/material/savePrice', priceData, function (res) {
                                 if (res.success) {
-                                    console.log('단가 저장 성공');
                                     doSave(); // 수주 저장 진행
                                 } else {
                                     Alert.alert('단가 저장 실패', res.message || '알 수 없는 오류');
@@ -531,10 +576,12 @@
 
                 let originalUnitPrice = null;
                 // 단가 정보 가져오기
-                function tryShowPriceHistory() {
+                function tryShowPrice() {
                     const mat_pk = $content.find('#Material_id').val();
                     const company_id = $content.find('#cboCompany').val();
                     const JumunDate = $content.find('#JumunDate').val();
+                    const SujuQty = parseFloat($content.find('#SujuQty').val().replace(/,/g, '') || '0');
+
                     let url = _this.url + '/readPriceSuju';
                     let data = {
                         'mat_pk': mat_pk,
@@ -543,31 +590,59 @@
                     };
 
                     if (mat_pk && company_id && JumunDate) {
-
                         let fnsuccess = function (result) {
-                            $content.find('#unitPrice').prop('readonly', false);
 
+                            let unitPrice = 0;
                             if (result != null && result.data && result.data.length > 0) {
-                                let unitPrice = result.data[0].UnitPrice;
-                                $content.find('#unitPrice').val(unitPrice);
+                                unitPrice = parseFloat(result.data[0].UnitPrice);
+                                $content.find('#unitPrice').val(unitPrice.toLocaleString());
                                 originalUnitPrice = unitPrice;
-
                             } else {
-                                $content.find('#unitPrice').val('0'); // 값이 없을 경우 비움
+                                $content.find('#unitPrice').val('0');
                                 originalUnitPrice = '0';
                             }
+                            calculateAmounts();
                         };
+
                         AjaxUtil.getAsyncData(url, data, fnsuccess);
-
                     }
-
-
                 }
 
+                function calculateAmounts() {
+                    const SujuQty = parseFloat($content.find('#SujuQty').val().replace(/,/g, '') || '0');
+                    const unitPrice = parseFloat($content.find('#unitPrice').val().replace(/,/g, '') || '0');
+
+                    if (SujuQty > 0) {
+                        let supplyAmount = unitPrice * SujuQty;
+                        let vat = 0;
+                        let vatLabel = '';
+
+                        if (isVatExempt) {
+                            vatLabel = '면세';
+                        } else {
+                            vat = Math.floor(supplyAmount * 0.1);
+                            vatLabel = vat.toLocaleString();
+                        }
+
+                        let total = supplyAmount + vat;
+
+                        $content.find('#price').val(supplyAmount.toLocaleString());
+                        $content.find('#vat').val(vatLabel);
+                        $content.find('#totalAmount').val(total.toLocaleString());
+                    } else {
+                        $content.find('#price').val('');
+                        $content.find('#vat').val('');
+                        $content.find('#totalAmount').val('');
+                    }
+                }
+
+
                 // 값이 바뀔 때마다 검사
-                $content.find('#Material_id').on('change', tryShowPriceHistory);
-                $content.find('#cboCompany').on('change', tryShowPriceHistory);
-                $content.find('#JumunDate').on('change', tryShowPriceHistory);
+                $content.find('#Material_id').on('change', tryShowPrice);
+                $content.find('#cboCompany').on('change', tryShowPrice);
+                $content.find('#JumunDate').on('change', tryShowPrice);
+                $content.find('#SujuQty').on('input', calculateAmounts);
+                $content.find('#unitPrice').on('input', calculateAmounts);
             }
 
             deleteSujuData(id, state) {

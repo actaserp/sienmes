@@ -93,6 +93,9 @@ public class SujuController {
 			@RequestParam(value="Material_id") Integer materialId,
 			@RequestParam(value="AvailableStock", required=false) Float availableStock,
 			@RequestParam(value="SujuType") String sujuType,
+			@RequestParam(value="unitPrice") String unitPriceStr,
+			@RequestParam(value="price") String priceStr,
+			@RequestParam(value="vat") String vatStr,
 			HttpServletRequest request,
 			Authentication auth	) {
 		User user = (User)auth.getPrincipal();
@@ -109,6 +112,9 @@ public class SujuController {
 		availableStock = availableStock==null?0:availableStock;
 		Date due_Date = CommonUtil.trySqlDate(dueDate);
 		Date jumun_Date = CommonUtil.trySqlDate(jumunDate);
+		int unitPrice = Integer.parseInt(unitPriceStr.replace(",", ""));
+		int price = Integer.parseInt(priceStr.replace(",", ""));
+		int vat = "면세".equals(vatStr) ? 0 : Integer.parseInt(vatStr.replace(",", ""));
 		
 		suju.setSujuQty(sujuQty);
 		suju.setSujuQty2(sujuQty);
@@ -122,6 +128,9 @@ public class SujuController {
 		suju.setSujuType(sujuType);
 		suju.set_status("manual");
 		suju.set_audit(user);
+		suju.setUnitPrice(unitPrice);
+		suju.setPrice(price);
+		suju.setVat(vat);
 		
 		suju = this.SujuRepository.save(suju);
 		

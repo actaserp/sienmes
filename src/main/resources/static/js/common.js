@@ -623,7 +623,12 @@ let FormUtil = {
                     $radioCtl.attr('checked', true);
                 } else {
                     if ($.isNumeric(value) || value === null) {
-                        $frmCtl.val(value);
+                        let numberFields = ['unitPrice', 'vat', 'price', 'totalAmount']; // 포맷 대상 필드 목록
+                        if (numberFields.includes(key)) {
+                            $frmCtl.val(Number(value).toLocaleString()); // 천단위 콤마 추가
+                        } else {
+                            $frmCtl.val(value);
+                        }
                     } else {
                         $frmCtl.val(value.replace('&amp;', '&'));
                     }

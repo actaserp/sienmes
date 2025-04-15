@@ -51,6 +51,8 @@ public class SujuService {
             , s."CompanyName"
             , s."Company_id"
             , s."SujuType"
+            , s."Price"
+            , s."UnitPrice" as "unitPrice"
             , fn_code_name('suju_type', s."SujuType") as "SujuTypeName"
             , to_char(s."ProductionPlanDate", 'yyyy-mm-dd') as production_plan_date
             , to_char(s."ShipmentPlanDate", 'yyyy-mm-dd') as shiment_plan_date
@@ -111,6 +113,10 @@ public class SujuService {
             , s."CompanyName"
             , s."Company_id"
             , s."SujuType"
+            , s."UnitPrice" as "unitPrice"
+            , s."Vat" as "vat"
+            , s."Price" as "price"
+            , (s."Vat" + s."Price") as "totalAmount"
             , fn_code_name('suju_type', s."SujuType") as "SujuTypeName"
             , to_char(s."ProductionPlanDate", 'yyyy-mm-dd') as production_plan_date
             , to_char(s."ShipmentPlanDate", 'yyyy-mm-dd') as shiment_plan_date
