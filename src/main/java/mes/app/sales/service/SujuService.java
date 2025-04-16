@@ -62,7 +62,7 @@ public class SujuService {
             , COALESCE(sh.shippedQty, 0) as "ShippedQty"
             , fn_code_name('suju_state', s."State") as "StateName"
             , case
-				when sh.shippedQty is not null and sh.shippedQty = s."SujuQty" then '출하'
+				when sh.shippedQty is not null and sh.shippedQty >= s."SujuQty" then '출하'
 				when sh.shippedQty is not null and sh.shippedQty < s."SujuQty" then '부분출하'
 				end as "ShipmentStateName"
             , s."State"
