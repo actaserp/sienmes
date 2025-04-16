@@ -26,13 +26,14 @@ public class BaljuOrderAggregateService {
 
     String sql = """
          with A as (
-             select b."Material_id" as mat_pk, b."CompanyName" as company_name
-             , sum(b."SujuQty") as suju_sum
-             , sum(mcu."UnitPrice" + coalesce(b."Vat", 0)) as price_sum
+             select b."Material_id" as mat_pk,
+             b."CompanyName" as company_name,
+             sum(b."SujuQty") as suju_sum,
+             sum(b."Price" + coalesce(b."Vat", 0)) as price_sum
              from balju b
                 inner join material m on m.id = b."Material_id"
-                left join mat_comp_uprice mcu on mcu."Company_id" = b."Company_id"
-             where b."JumunDate" between cast(:srchStartDt as date) and cast(:srchEndDt as date)
+             where b."JumunDate" between cast(:srchStartDt as date) 
+             and cast(:srchEndDt as date) 
         """;
 
     if (cboCompany != null) {
@@ -57,9 +58,11 @@ public class BaljuOrderAggregateService {
                 )
              select mg."Name" as mat_grp_name, m."Code" as mat_code, m."Name" as mat_name, A.mat_pk
                 , u."Name" as unit_name
-             , sum(A.suju_sum) over(partition by A.mat_pk, A.company_name) as tot_suju_sum
-             , sum(A.price_sum) over(partition by A.mat_pk,  A.company_name) as tot_price_sum
-             , A.company_name, A.suju_sum, A.price_sum
+             , sum(A.suju_sum) over(partition by A.mat_pk, A.company_name) as tot_suju_sum,
+             sum(A.price_sum) over(partition by A.mat_pk,  A.company_name) as tot_price_sum,
+             A.company_name, 
+             A.suju_sum, 
+             A.price_sum
              from A 
              inner join material m on m.id = A.mat_pk
                 left join mat_grp mg on mg.id = m."MaterialGroup_id"

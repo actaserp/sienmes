@@ -32,7 +32,7 @@ public class BaljuOrderListService {
     if(cboDataDiv.equals("qty")) {
       data_column = " b.\"SujuQty\" ";
     }else {
-      data_column = " mcu.\"UnitPrice\" + coalesce(b.\"Vat\",0) ";
+      data_column = " b.\"Price\" + coalesce(b.\"Vat\",0) ";
     }
 
     String sql ="""
@@ -40,7 +40,7 @@ public class BaljuOrderListService {
 	            select b."Material_id" as mat_pk, b."CompanyName" as company_name
 	            , extract (month from b."JumunDate") as data_month
 	            , sum(b."SujuQty") as qty_sum
-	            , sum(mcu."UnitPrice" + coalesce(b."Vat", 0)) as money_sum
+	            , sum(b."Price"+ coalesce(b."Vat", 0)) as money_sum
 	            """;
 
     sql += " ,sum( " + data_column + " ) as balju_sum ";
@@ -48,7 +48,6 @@ public class BaljuOrderListService {
     sql +="""
 	            from balju b
                 inner join material m on m.id = b."Material_id"
-                left join mat_comp_uprice mcu on mcu."Company_id" = b."Company_id"
 	            where b."JumunDate" between cast(:date_form as date) and cast(:date_to as date)
 				""";
     if(cboCompany != null) {

@@ -39,7 +39,7 @@ public class BaljuOrderService {
           , m."Name" as product_name
           , u."Name" as unit
           , b."SujuQty" as "SujuQty"
-          , (b."SujuQty" - b."SujuQty2") as "SujuQty3"
+          , GREATEST((b."SujuQty" - b."SujuQty2"), 0) as "SujuQty3"
           , to_char(b."JumunDate", 'yyyy-mm-dd') as "JumunDate"
           , to_char(b."DueDate", 'yyyy-mm-dd') as "DueDate"
           , b."CompanyName"

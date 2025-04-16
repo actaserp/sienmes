@@ -82,8 +82,8 @@ public class BaljuOrderController {
       balju.setState("draft");
 //      log.info("🆕 신규 발주 생성");
     }
-    List<Map<String, Object>> upriceList = baljuOrderService.getBaljuPrice(materialId, jumunDate, companyId);
-    
+    //List<Map<String, Object>> upriceList = baljuOrderService.getBaljuPrice(materialId, jumunDate, companyId);
+
     availableStock = availableStock==null?0:availableStock;
     Date due_Date = CommonUtil.trySqlDate(dueDate);
     Date jumun_Date = CommonUtil.trySqlDate(jumunDate);
@@ -138,7 +138,7 @@ public class BaljuOrderController {
     if (State.equals("draft")==false) {
       // draft 아닌것만
       result.success = false;
-      result.message = "등록상태만 삭제할 수 있습니다";
+      result.message = "미입고 상태일 때만 삭제할 수 있습니다.";
       return result;
     }
 
