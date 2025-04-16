@@ -23,11 +23,12 @@ public class ProductionDefectTypeMonthController {
 	@GetMapping("/read")
 	public AjaxResult getProductionDefectTypeMonthList(
 			@RequestParam(value="cboYear",required=false) String cboYear,
-			@RequestParam(value="cboMatType",required=false) String cboMatType,
-			@RequestParam(value="cboMatGrpPk",required=false) Integer cboMatGrpPk
+			@RequestParam(value="cboMatType",required=false) Integer cboMatType,
+			@RequestParam(value="cboMatGrpPk",required=false) Integer cboMatGrpPk,
+			@RequestParam(value="txtProductId",required=false) Integer txtProductId
 			) {
 		
-		List<Map<String,Object>> items = this.productionDefectTypeMonthService.getList(cboYear,cboMatType,cboMatGrpPk);
+		List<Map<String,Object>> items = this.productionDefectTypeMonthService.getList(cboYear,cboMatType,cboMatGrpPk,txtProductId);
 		
 		
 		AjaxResult result = new AjaxResult();

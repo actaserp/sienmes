@@ -16,11 +16,13 @@ public class ProductionDefectTypeMonthService {
 	SqlRunner sqlRunner;
 	
 
-	public List<Map<String, Object>> getList(String cboYear, String cboMatType, Integer cboMatGrpPk) {
+	public List<Map<String, Object>> getList(String cboYear, Integer cboMatType, Integer cboMatGrpPk,
+											 Integer txtProductId) {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("cboYear", cboYear);
 		paramMap.addValue("cboMatType", cboMatType);
 		paramMap.addValue("cboMatGrpPk", cboMatGrpPk);
+		paramMap.addValue("txtProductId", txtProductId);
 		
 		//String data_column = "";
 		
@@ -49,7 +51,7 @@ public class ProductionDefectTypeMonthService {
                     and jr."State" = 'finished'
 				""";
 		
-		if(cboMatType != null && !cboMatType.trim().isEmpty()) {
+		if(cboMatType != null) {
 			sql += """
 					and dt."id" = :cboMatType
 					""";
@@ -60,8 +62,13 @@ public class ProductionDefectTypeMonthService {
 					and mg.id = :cboMatGrpPk
 					""";
 		}
-		
-		
+
+		if(txtProductId != null) {
+			sql += """
+					and m.id = :txtProductId
+					""";
+		}
+
 		sql += """
 				 group by dt.id, dt."Name", extract (month from jr."ProductionDate") 
 		        ), B as (
