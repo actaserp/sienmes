@@ -16,12 +16,13 @@ public class SujuSummaryService {
 	SqlRunner sqlRunner;
 
 	public List<Map<String, Object>> getList(String srchStartDt, String srchEndDt, Integer cboCompany,
-			Integer cboMatGrp) {
+			Integer cboMatGrp, String sujuState) {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("srchStartDt", srchStartDt);
 		paramMap.addValue("srchEndDt", srchEndDt);
 		paramMap.addValue("cboCompany", cboCompany);
 		paramMap.addValue("cboMatGrp", cboMatGrp);
+		paramMap.addValue("sujuState", sujuState);
 		
 		
 		String sql ="""
@@ -43,6 +44,12 @@ public class SujuSummaryService {
 		if(cboMatGrp != null) {
 			sql += """
 					and m."MaterialGroup_id" = :cboMatGrp
+					""";
+		}
+
+		if(sujuState != null && !sujuState.trim().isEmpty()) {
+			sql += """
+					and s."State" = :sujuState
 					""";
 		}
 		

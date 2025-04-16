@@ -1,386 +1,371 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-<div class="content_wrap">
+<div class="layout-contents">
 
-    <section class="section">
-
-        <div class="title_box ">
-            <div class="left_align">
-                <h3 data-labelCd="부적합 유형별 부적합률">부적합 유형별 부적합률</h3>
-            </div>
-
-            <button type="button" class="btn-default pull-right " id="btnHedaerFilter" title="필터 보이기/감추기"><i class="fas fa-filter"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderCompress" title="화면 확대/축소"><i class="fas fa-compress" id="iCompress"></i></button>
-            <button type="button" class="btn-default pull-right mr-1" id="btnHeaderRefresh" title="새로고침"><i class="fas fa-undo-alt"></i></button>
+    <div class="page-title-wrap">
+        <div class="left">
+            <h2>부적합 유형별 부적합률</h2>
+            <a title="북마크" class="bookmark toggle">
+                내 메뉴
+            </a>
         </div>
-
-        <div class="table_box search">
-            <form id="searchForm" autocomplete="off">
-                <div class="row">
-
-                    <div class="col-6 col-md-3 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="연도">연도</span>
-                            </div>
-                            <select class="form-control2" id="cboYear" name="cboYear" ></select>
-
+        <ul class="page-navi">
+            <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+            <li>생산공정관리</li>
+            <li>유형별월부적합률</li>
+        </ul>
+    </div>
+    <section class="section">
+        <div class="section-top">
+            <div class="search-wrap">
+                <dl>
+                    <dt>
+                        <label for="cboYear">
+                            연도<span class="eq"></span>
+                        </label>
+                    </dt>
+                    <dd>
+                        <div class="srch-box">
+                            <select id="cboYear">
+                            </select>
                         </div>
+                    </dd>
+                </dl>
+                <dl id="searchComArea">
+                    <dt>
+                        품목유형
+                    </dt>
+                    <dd>
+                        <select class="form-control2" id="cboMatType" name="cboMatType"></select>
+                    </dd>
+
+                </dl>
+                <dl>
+                    <dt>
+                        품목그룹
+                    </dt>
+                    <dd>
+                        <select class="form-control2" id="cboMatGrpPk" name="cboMatGrpPk" ></select>
+                    </dd>
+                </dl>
+                <dl id="searchProductNameArea">
+                    <dt>
+                        품목
+                    </dt>
+                    <dd>
+                        <input type="text" id="txtProductName" name="txtProductName">
+                        <input type="hidden" id="txtProductNameHidden">
+                        &nbsp;
+                        <a class="btn btn-delete" title="검색" id="btnProductNameSearch">
+                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                            품목 검색
+                        </a>
+                    </dd>
+
+                </dl>
+                <dl>
+                    <dt>&nbsp;</dt>
+                    <dd>
+                        <li>
+                            <a class="btn btn-search" title="검색" id="btnMainSearch">
+                                <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                검색
+                            </a>
+                        </li>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        <div class="tab-wrap">
+
+            <ul class="tab-links">
+                <li><a href="#tabs_count" style="border-radius: 6px 0 0 0;">부적합량</a></li>
+                <li><a href="#tabs_portion" style="border-radius: 0 6px 0 0;">부적합률</a></li>
+            </ul>
+            <div>
+                <section class="tab-item" id="tabs_count" style="border-top-left-radius: 0;">
+                    <div class="container-fluid">
+                        <div id="theGrid1" style="height: 730px;"></div>
                     </div>
-
-                    <div class="col-6 col-md-3 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="품목유형">품목유형</span>
-                            </div>
-                            <select class="form-control2" id="cboMatType" name="cboMatType"></select>
-
+                </section>
+                <section class="tab-item" id="tabs_portion" style="border-top-left-radius: 0; display: flex;">
+                    <div class="container-fluid" style="width: 72%">
+                        <div id="theGrid3" style="height: 730px;"></div>
+                    </div>
+                    <div class="grid_box col-3">
+                        <div class="title_box">
+                            <span class="right_align rpt" data-labelCd="부적합률 그래프"></span>
                         </div>
+                        <canvas id="chart" width="420" height="420"></canvas>
+                        <!-- <div id="chart" class="chart-canvas"></div>-->
                     </div>
-
-                    <div class="col-6 col-md-3 col-lg-3 col-xl-2" >
-                        <div class="input-group" >
-                            <div class="input-group-prepend">
-                                <span class="input-group-text fit_box_md" data-labelCd="품목그룹">품목그룹</span>
-                            </div>
-                            <select class="form-control2" id="cboMatGrpPk" name="cboMatGrpPk"></select>
-
-                        </div>
-                    </div>
-
-                    <div class="col-1" >
-                            <button type="button" class="btn-default" id="btnSearch" title="조회"><i class="fas fa-search"></i></button>
-                    </div> 
-
-                </div>
-            </form>
+                </section>
+            </div>
         </div>
     </section>
-
-
-    <section class="h-700">
-        <div class="tabs" data-tab="tabWrap">
-            <div class="title_box">
-                <div class="left_align">
-                    <ul class="tab_links">
-                        <li><a href="#" data-tablink="#tabs_count_tab" id="tabs_count" class="tab_link" data-labelCd="부적합량">부적합량</a></li>
-                        <li><a href="#" data-tablink="#tabs_portion_tab" id="tabs_portion" class="tab_link" data-labelCd="부적합률">부적합률</a></li>
-                    </ul>
-                </div>
-            </div>
-                <div class="tab-content" >
-                    <div class="tab "id="tabs_count_tab">
-                        <div class="grid_box" >
-                            <div class="title_box">
-                                <span class="right_align rpt" data-labelCd="부적합 량">부적합 량</span>
-                                <button type="button" class="btn-default" id="btnExcel1"><i class="fas fa-file-excel"></i></button>
-                                <button type="button" class="btn-default" id="btnGridSetting1" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>       
-                            </div>
-                            <div class="h-580"data-ax5grid="defect-count-grid"></div>  
-                        </div>
-                    </div>
-                    <div class="tab "id="tabs_portion_tab">
-                        <div class="row">
-                            <div class="grid_box col-9" >
-                                <div class="title_box">
-                                    <span class="right_align rpt" data-labelCd="부적합 률">부적합 률</span>
-                                    <button type="button" class="btn-default" id="btnExcel2"><i class="fas fa-file-excel"></i></button>
-                                    <button type="button" class="btn-default" id="btnGridSetting2" style="visibility:hidden"><i class="fas fa-cog"></i> Setting</button>
-                                </div>
-                                <div class="h-580"data-ax5grid="defect-portion-grid"></div>  
-                            </div>
-                            <div class="grid_box col-3">
-                                <div class="title_box">
-                                    <span class="right_align rpt" data-labelCd="부적합률 그래프">부적합률 그래프</span>
-                                </div>
-                                            <div id="chart" class="chart-canvas"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        </div>
-    </section>            
 </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
 <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
-<script src="/resource/apexcharts/apexcharts.3.26.min.js"></script>
+<th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
+<th:block th:replace="/common/popup_company :: popup_company"></th:block>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="text/javascript">
     class DefectTypePage {
         constructor() {
             this.grid = null;
+            this.grid2 = null;
             this.chart = null;
             this.init();
         }
 
         init() {
-            let _this = this;
-            let config1 = {
-                target: $('[data-ax5grid="defect-count-grid"]'), //부적합량 
-                sortable: true,
-                frozenColumnIndex: 2, // 열 고정
-                frozenRowIndex: 0,    // 행 고정
-                showLineNumber: true, // 열의 번호 보이기 여부
-                showRowSelector: false,  // checkbox(선택) 보이기 여부
-                multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                multiSort: true, // 다중 정렬 여부
-                header: {
-                    align: 'center',  // 헤더의 기본 정렬
-                    columnHeight: 38  // 헤더 높이
-                },
-                body: {
-                    columnHeight: 25, // body의 기본 높이
-                    onClick: function (e) {
-                        _this.grid.select(this.dindex);
+            this.grid = new wijmo.grid.FlexGrid('#theGrid1', {
+                selectionMode: wijmo.grid.SelectionMode.Row,
+                headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                allowSorting: wijmo.grid.AllowSorting.MultiColumn,
+                allowMerging: wijmo.grid.AllowMerging.Cells,  //셀 병합
+                autoGenerateColumns: false,
+                showMarquee: true,
+                isReadOnly: true,
+                frozenColumns: 2,
+                formatItem: (sender, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                        e.cell.style.textAlign = 'center';
                     }
                 },
-                page: {
-                    display: true,  // 페이징 보이기 여부
-                    statusDisplay: true,
-                },
-               columns: [
-                    { key: 'defect_type', label: '부적합유형', width: 200, align: 'left'},
-                   {
-                       key: 'year_count', label: '부적합량', width: 150, align: 'right',
-                       formatter: 'money'
-                   },
-                   {
-                       key: 'count_1', label: '1월', width: 100, align: 'right', sortable: false,
-                       formatter: 'money'
-                   },
-                   {
-                       key: 'count_2', label: '2월', width: 100, align: 'right', sortable: false,
-                       formatter: 'money'
-                   },
-                   {
-                       key: 'count_3', label: '3월', width: 100, align: 'right', sortable: false,
-                       formatter: 'money'
-                   },
-                   {
-                       key: 'count_4', label: '4월', width: 100, align: 'right', sortable: false,
-                       formatter: 'money'
-                   },
-                   {
-                       key: 'count_5', label: '5월', width: 100, align: 'right', sortable: false,
-                       formatter: 'money'
-                   },
-                   {
-                       key: 'count_6', label: '6월', width: 100, align: 'right', sortable: false,
-                       formatter: 'money'
-                   },
-                   {
-                       key: 'count_7', label: '7월', width: 100, align: 'right', sortable: false,
-                       formatter: 'money'
-                   },
-                   {
-                       key: 'count_8', label: '8월', width: 100, align: 'right', sortable: false,
-                       formatter: 'money'
-                   },
-                   {
-                       key: 'count_9', label: '9월', width: 100, align: 'right', sortable: false,
-                       formatter: 'money'
-                   },
-                   {
-                       key: 'count_10', label: '10월', width: 100, align: 'right', sortable: false,
-                       formatter: 'money'
-                   },
-                   {
-                       key: 'count_11', label: '11월', width: 100, align: 'right', sortable: false,
-                       formatter: 'money'
-                   },
-                   {
-                       key: 'count_12', label: '12월', width: 100, align: 'right', sortable: false,
-                       formatter: 'money'
-                   },
-                ]
-            };
-            let config2 = {
-            target: $('[data-ax5grid="defect-portion-grid"]'), //부적합률
-            sortable: true,
-            frozenColumnIndex: 2, // 열 고정
-            frozenRowIndex: 0,    // 행 고정
-            showLineNumber: true, // 열의 번호 보이기 여부
-            showRowSelector: false,  // checkbox(선택) 보이기 여부
-            multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-            sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-            multiSort: true, // 다중 정렬 여부
-            header: {
-                align: 'center',  // 헤더의 기본 정렬
-                columnHeight: 38  // 헤더 높이
-            },
-            body: {
-                columnHeight: 25, // body의 기본 높이
-                onClick: function (e) {
-                    _this.portion_grid.select(this.dindex);
-                    _this.showDetail(e);
-                }
-            },
-            page: {
-                display: true,  // 페이징 보이기 여부
-                statusDisplay: true,
-            },
-            columns: [
-                { key: 'defect_type', label: '부적합유형', width: 200, align: 'left'},
-                { key: 'year_portion', label: '분율(%)', width: 150, align: 'right' },
-                { key: 'portion_1', label: '1월', width: 100, align: 'right', sortable: false },
-                { key: 'portion_2', label: '2월', width: 100, align: 'right', sortable: false },
-                { key: 'portion_3', label: '3월', width: 100, align: 'right', sortable: false },
-                { key: 'portion_4', label: '4월', width: 100, align: 'right', sortable: false },
-                { key: 'portion_5', label: '5월', width: 100, align: 'right', sortable: false },
-                { key: 'portion_6', label: '6월', width: 100, align: 'right', sortable: false },
-                { key: 'portion_7', label: '7월', width: 100, align: 'right', sortable: false },
-                { key: 'portion_8', label: '8월', width: 100, align: 'right', sortable: false },
-                { key: 'portion_9', label: '9월', width: 100, align: 'right', sortable: false },
-                { key: 'portion_10', label: '10월', width: 100, align: 'right', sortable: false },
-                { key: 'portion_11', label: '11월', width: 100, align: 'right', sortable: false },
-                { key: 'portion_12', label: '12월', width: 100, align: 'right', sortable: false },
-            ]
-        };
 
-            let options = {
-                series: [44, 55, 13, 43, 22],
-                chart: {
-                width: 380,
-                type: 'pie',
+                columns: [
+                    { binding: 'defect_type', header: '부적합유형', width: 200},
+                    { binding: 'year_count', header: '부적합량', width: '*', format: 'n0', align: 'right' },
+                    ...Array.from({ length: 12 }, (_, i) => ({
+                        binding: `count_${i + 1}`,
+                        header: `${i + 1}월`,
+                        width: 100,
+                        format: 'n0',
+                        align: 'right',
+                        allowSorting: false
+                    }))
+                ],
+                itemsSource: this.viewData, // 데이터를 설정할 배열
+            });
+            this.grid.itemFormatter = function (panel, row, col, cell) {
+                if (panel.cellType === wijmo.grid.CellType.Cell) {
+                    let colName = panel.columns[col].binding;
+                    if (['mon'].includes(colName)) {
+                        cell.style.textAlign = 'center';          // 수평 가운데
+                        cell.style.verticalAlign = 'middle';      // 수직 가운데
+                        cell.style.display = 'flex';              // flex로 정렬
+                        cell.style.alignItems = 'center';         // 수직 정렬
+                        cell.style.justifyContent = 'center';     // 수평 정렬
+                    }
+                    else if (colName.startsWith('count_') || ['year_count'].includes(colName)) {
+                        // 숫자 오른쪽 정렬
+                        cell.style.textAlign = 'right';
+                    } else if (['defect_type'].includes(colName)) {
+                        // 그 외 기본값 정렬 (선택)
+                        cell.style.textAlign = 'left';
+                    }
+                }
+            };
+            new FlexGridContextMenu(this.grid);
+            this.grid.downloadFileName = '부적합량';
+
+
+            this.grid2 = new wijmo.grid.FlexGrid('#theGrid3', {
+                selectionMode: wijmo.grid.SelectionMode.Row,
+                headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                allowSorting: wijmo.grid.AllowSorting.MultiColumn,
+                allowMerging: wijmo.grid.AllowMerging.Cells,  //셀 병합
+                autoGenerateColumns: false,
+                showMarquee: true,
+                isReadOnly: true,
+                frozenColumns: 2,
+                formatItem: (sender, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                        e.cell.style.textAlign = 'center';
+                    }
                 },
-                labels: [],
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        chart: {
-                        width: 200
-                        },
+
+                columns: [
+                    { binding: 'defect_type', header: '부적합유형', width: 200 ,allowMerging: true },
+                    { binding: 'year_portion', header: '분율(%)', width: 100 ,allowMerging: true },
+                    ...Array.from({ length: 12 }, (_, i) => ({
+                        binding: `portion_${i + 1}`,
+                        header: `${i + 1}월`,
+                        width: 80,
+                        format: 'n0',
+                        align: 'right',
+                        allowSorting: false
+                    }))
+                ],
+                itemsSource: this.viewData, // 데이터를 설정할 배열
+            });
+            this.grid2.itemFormatter = function (panel, row, col, cell) {
+                if (panel.cellType === wijmo.grid.CellType.Cell) {
+                    let colName = panel.columns[col].binding;
+                    if (['mat_type_name', 'mat_grp_name', 'mat_code', 'mat_name', 'unit_name'].includes(colName)) {
+                        cell.style.textAlign = 'center';          // 수평 가운데
+                        cell.style.verticalAlign = 'middle';      // 수직 가운데
+                        cell.style.display = 'flex';              // flex로 정렬
+                        cell.style.alignItems = 'center';         // 수직 정렬
+                        cell.style.justifyContent = 'center';     // 수평 정렬
+                    }
+                    else if (colName.startsWith('portion_') || ['year_portion'].includes(colName)) {
+                        // 숫자 오른쪽 정렬
+                        cell.style.textAlign = 'right';
+                    } else if (['defect_type'].includes(colName)) {
+                        // 그 외 기본값 정렬 (선택)
+                        cell.style.textAlign = 'left';
+                    }
+                }
+            };
+            new FlexGridContextMenu(this.grid2);
+            this.grid2.downloadFileName = '부적합률';
+            // let options = {
+            //     series: [44, 55, 13, 43, 22],
+            //     chart: {
+            //     width: 380,
+            //     type: 'pie',
+            //     },
+            //     labels: [],
+            //     responsive: [{
+            //         breakpoint: 480,
+            //         options: {
+            //             chart: {
+            //             width: 200
+            //             },
+            //             legend: {
+            //                 position: 'bottom'
+            //             }
+            //         }
+            //     }]
+            // };
+            //
+            // this.chart = new ApexCharts(document.querySelector("#chart"), options);
+            // this.chart.render();
+
+            // Chart.js 차트 생성
+            const ctx = document.getElementById('chart').getContext('2d');
+            this.portion_chart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '부적합률',
+                        data: [],
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56',
+                            '#4BC0C0', '#9966FF', '#FF9F40',
+                            '#E7E9ED', '#36A2EB', '#FF6384',
+                            '#FFCE56', '#4BC0C0', '#9966FF'
+                        ],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
                         legend: {
-                            position: 'bottom'
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: '부적합률 그래프'
                         }
                     }
-                }]
-            };
+                }
+            });
 
-            this.count_grid = new ax5.ui.grid(config1);
-            this.portion_grid = new ax5.ui.grid(config2);
-            this.grid_config1 = config1;
-            this.grid_config2 = config2;
-
-            this.chart = new ApexCharts(document.querySelector("#chart"), options);
-            this.chart.render();
-
-            AjaxUtil.fillSelectOptions($('#searchForm').find('#cboYear'), 'data_year', '', false);
-            //AjaxUtil.fillSelectOptions($('#searchForm').find('#cboMatType'), 'system_code', 'all', false, 'mat_type', 'semi','product');
-            AjaxUtil.fillSelectOptions($('#searchForm').find('#cboMatType'), 'system_code', 'all', false, 'mat_type', 'semi,product');
-            //AjaxUtil.fillSelectOptions($('#searchForm').find('#cboMatGrpPk'), 'material_group', 'all', false, 'product', 'semi');
-            AjaxUtil.fillSelectOptions($('#searchForm').find('#cboMatGrpPk'), 'material_group', 'all', false, 'product,semi');
 
         }
 
         searchMainData(target) {
-            let url = '/api/summary/production_defect_type_month_portion/read'
+            let url = '/api/summary/production_defect_type_month_portion/read';
             let data = {
-				'cboYear' : $("#cboYear").val(),
-				'cboMatType' : $("#cboMatType").val(),
-				'cboMatGrpPk' : $("#cboMatGrpPk").val()
-			}
-            let result = AjaxUtil.getSyncData(url, data);
-            if (result.data != null) {
-                if (target == 'tabs_count' || !target) {
-                    this.count_grid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: result.data.length,
-                        },
-                    });
+                'cboYear': $("#cboYear").val(),
+                'cboMatType': $("#cboMatType").val(),
+                'cboMatGrpPk': $("#cboMatGrpPk").val()
+            };
 
-                }
-                else if (target == 'tabs_portion') {
-                    this.portion_grid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: result.data.length,
-                        },
-                    });
+            const result = AjaxUtil.getSyncData(url, data);
+            console.log("result data : ", result.data);
 
-                }
-
-                let updateSeries = {
-                    series : [],
-                    labels : []
-                };
-
-                for (let i = 0; i < result.data.length; i++) {
-                    let defect_type = result.data[i]['defect_type'];
-                    let defect_year_portion = Number(result.data[i]['year_portion']);
-                    updateSeries.series.push(defect_year_portion);
-                    updateSeries.labels.push(defect_type);
-                }
-
-            this.portion_options = {
-                series: updateSeries.series ,
-                chart: {
-                    width: 420,
-                type: 'pie',
-                },
-                title: {
-                    //text: '부적합률 그래프',
-                    align: "left"
-                  },
-                labels: updateSeries.labels,
-                legend: {
-                    position: 'top',
-                    //show: false,
-                    horizontalAlign: 'left',
-                },
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        chart: {
-                        width: 380
-                        },
-
-                    }
-                }]
-                };
-
-                this.portion_chart = new ApexCharts(document.querySelector("#chart"), this.portion_options);
-                if (!target|| target == 'tabs_portion') {
-                    $('#chart').empty();
-                    this.portion_chart.render();
-                    this.portion_chart.updateSeries(this.portion_options.series);
-                }
-
-
+            if (result) {
+                this.grid.itemsSource = result.data;
+                this.grid2.itemsSource = result.data;
             }
-        }
-        showDetail(data) {
 
             let updateSeries = {
-                series : [],
-                labels : []
+                series: [],
+                labels: []
             };
+
+            for (let i = 0; i < result.data.length; i++) {
+                let defect_type = result.data[i]['defect_type'];
+                let defect_year_portion = Number(result.data[i]['year_portion']);
+                updateSeries.series.push(defect_year_portion);
+                updateSeries.labels.push(defect_type);
+            }
+
+            // 차트 데이터 갱신
+            if (!target || target === 'tabs_portion') {
+                if (this.portion_chart) {
+                    this.portion_chart.destroy(); // 차트 인스턴스 제거
+                }
+                const ctx = document.getElementById('chart').getContext('2d');
+                this.portion_chart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: updateSeries.labels,
+                        datasets: [{
+                            data: updateSeries.series,
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56',
+                                '#4BC0C0', '#9966FF', '#FF9F40',
+                                '#E7E9ED', '#36A2EB', '#FF6384',
+                                '#FFCE56', '#4BC0C0', '#9966FF'
+                            ],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: '부적합률 그래프' }
+                        }
+                    }
+                });
+            }
+        }
+
+
+        showDetail(data) {
+            let updateSeries = {
+                series: [],
+                labels: []
+            };
+
             let portionNum = data.colIndex - 1;
             for (let i = 0; i < data.list.length; i++) {
                 let defect_type = data.list[i].defect_type;
-                let defect_type_portion=[];
-                if (!data || data.colIndex < 2) {
-                    defect_type_portion = Number(data.list[i].year_portion);
-                } else {
-                    defect_type_portion = Number(data.list[i]['portion_' + portionNum]);
-                }
-                if (!defect_type_portion) {
-                    defect_type_portion = 0;
-                }
+                let defect_type_portion = (data.colIndex < 2) ?
+                    Number(data.list[i].year_portion) :
+                    Number(data.list[i]['portion_' + portionNum]);
+
+                if (!defect_type_portion) defect_type_portion = 0;
+
                 updateSeries.series.push(defect_type_portion);
                 updateSeries.labels.push(defect_type);
             }
 
-            this.portion_chart.opts.labels = updateSeries.labels;
-            //this.portion_chart.w.globals.labels = ["불량1", "불량2"];
-            this.portion_chart.updateSeries(updateSeries.series);
-            //this.portion_chart.updateSeries(["50","50"]);
+            // 차트 갱신
+            this.portion_chart.data.labels = updateSeries.labels;
+            this.portion_chart.data.datasets[0].data = updateSeries.series;
+            this.portion_chart.update();
         }
+
         // 엑셀 다운로드
         exportExcel(target) {
 
@@ -401,10 +386,20 @@
 
     $(document.body).ready(function (e) {
 
+        AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);
+        //AjaxUtil.fillSelectOptions($('#searchForm').find('#cboMatType'), 'system_code', 'all', false, 'mat_type', 'semi','product');
+        AjaxUtil.fillSelectOptions($('#cboMatType'), 'defect_type', 'all', false, 'mat_type', 'semi,product');
+        //AjaxUtil.fillSelectOptions($('#searchForm').find('#cboMatGrpPk'), 'material_group', 'all', false, 'product', 'semi');
+        AjaxUtil.fillSelectOptions($('#cboMatGrpPk'), 'material_group', 'all', false, 'product,semi');
+
         page = new DefectTypePage();
 
         // 검색버튼
-        $('#btnSearch').click(function (e) {
+        $('#btnMainSearch').click(function (e) {
+            if ($('#txtProductNameHidden').val() === '' && $('#txtProductName').val() !== '') {
+                Alert.alert('', '품목명은 품목검색 버튼을 통해서 \n 검색해주세요');
+                return;
+            }
             page.searchMainData();
             $('#tabs_count').click();
         });
@@ -428,38 +423,39 @@
             AjaxUtil.fillSelectOptions($('#cboMatGrpPk'), 'material_group', 'all', false, mat_grp_pk);
         });
 
-        // 엑셀 다운로드
-        $('#btnExcel1').on('click', function () {
-            page.exportExcel(target);
-        });
-        $('#btnExcel2').on('click', function () {
-            page.exportExcel(target);
-        });
 
-		//그리드 컬럼 설정
-        page.popColSetting = new popColSetting();
-        let columns1 = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid1',  page.count_grid);
-        let columns2 = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid2',  page.portion_grid);
 		
         if (userinfo.group_code == 'admin') {
             $('#btnGridSetting1').css('visibility','visible');  
             $('#btnGridSetting2').css('visibility','visible');  
-        }		
-	
-        $('#btnGridSetting1').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config1.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid1', page.grid_config1.columns, page.count_grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });	
+        }
 
-        $('#btnGridSetting2').click(function (e) {
-            let _this = this;
-            let fix_cols = page.grid_config2.frozenColumnIndex;
-            page.popColSetting.show(gui.gui_code, gui.template_key, 'grid2', page.grid_config2.columns, page.portion_grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-        });	
+
+        $('#btnProductNameSearch').click(function () {
+
+            let pop = new PopMatComponent();
+            pop.material_type = 'product,sangpum';
+            pop.show(function (item) {
+                console.log('$btnProductSearch', item);
+                document.getElementById('txtProductName').value = item.Name;
+                document.getElementById('txtProductNameHidden').value = item.id;
+            });
+            pop.searchDataBind();
+        });
         page.searchMainData();
+    });
 
-
+    $('#txtProductName').on('input', function () {
+        const val = $(this).val();
+        if (val === '') {
+            $('#txtProductNameHidden').val('');
+        }
+    });
+    // .btn-clear 클릭 후 input 이벤트 강제 발생
+    $(document).on('click', '.btn-clear', function () {
+        const $input = $(this).siblings('input[type="text"]');
+        $input.val('');
+        $input.trigger('input'); // 🔥 input 이벤트 강제 발생
     });
 
 </script>

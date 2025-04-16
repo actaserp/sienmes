@@ -25,10 +25,11 @@ public class SujuSummaryController {
 			@RequestParam(value="srchStartDt",required=false) String srchStartDt,
 			@RequestParam(value="srchEndDt",required=false) String srchEndDt,
 			@RequestParam(value="cboCompany",required=false) Integer cboCompany,
-			@RequestParam(value="cboMatGrp",required=false) Integer cboMatGrp
+			@RequestParam(value="cboMatGrp",required=false) Integer cboMatGrp,
+			@RequestParam(value="sujuState",required=false) String sujuState
 			) {
 		
-		List<Map<String,Object>> items = this.sujuSummaryService.getList(srchStartDt,srchEndDt,cboCompany,cboMatGrp);
+		List<Map<String,Object>> items = this.sujuSummaryService.getList(srchStartDt,srchEndDt,cboCompany,cboMatGrp,sujuState);
 		
 		
 		AjaxResult result = new AjaxResult();

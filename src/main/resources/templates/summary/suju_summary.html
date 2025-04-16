@@ -54,7 +54,14 @@
                                 <select class="form-control2" id="cboMatGrp" name="cboMatGrp" ></select>
                             </dd>
                         </dl>
-
+                        <dl>
+                            <dt>
+                                수주상태
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="sujuState" name="sujuState" ></select>
+                            </dd>
+                        </dl>
                         <dl>
                             <dt>&nbsp;</dt>
                             <dd>
@@ -139,7 +146,7 @@
                     { binding: 'tot_price_sum', header: '총수주액', width: '*', minWidth: 150,align: 'right', format: 'n0' },
                     { binding: 'tot_suju_sum', header: '총 수주량', width: 100, align: 'right', format: 'n0' },
                     { binding: 'company_name', header: '업체', width: 250, allowSorting: false },
-                    { binding: 'suju_zsum', header: '수주량', width: 100, align: 'right', format: 'n0' },
+                    { binding: 'suju_sum', header: '수주량', width: 100, align: 'right', format: 'n0' },
                     { binding: 'price_sum', header: '수주액', width: 200, align: 'right', format: 'n0' },
                 ],
                 itemsSource: this.viewData,
@@ -188,7 +195,8 @@
                 'srchStartDt' : $("#srchStartDt").val(),
                 'srchEndDt' : $("#srchEndDt").val(),
                 'cboCompany' : $("#cboCompanyHidden").val(),
-                'cboMatGrp' : $("#cboMatGrp").val()
+                'cboMatGrp' : $("#cboMatGrp").val(),
+                'sujuState' : $("#sujuState").val()
             };
             const result = AjaxUtil.getSyncData(url, data);
             console.log("result data : ", result.data);
@@ -224,6 +232,7 @@
         $('#srchEndDt').val(currentDay);
 
         AjaxUtil.fillSelectOptions($('#cboMatGrp'), 'material_group', 'all', '', 'product,semi');
+        AjaxUtil.fillSelectOptions($('#sujuState'), 'system_code', 'all', null, 'suju_state');
 
         $('#btnSearch').click(() => {
             if ($('#cboCompanyHidden').val() === '' && $('#cboCompany').val() !== '') {
