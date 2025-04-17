@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
+import mes.app.shipment.enums.ShipmentStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -91,12 +92,13 @@ public class ShipmentDoaController {
 			ShipmentHead smh = this.shipmentHeadRepository.getShipmentHeadById(head_id);
 			
 			if(!smh.getState().equals("shipped")) {
-				List<Shipment> smList = this.shipmentRepository.findByShipmentHeadId(head_id);
+				List<Shipment> smList = shipmentRepository.findByShipmentHeadId(head_id);
 				int orderSum = 0;
 				
 				for(int j = 0; j < smList.size(); j++) {
-					Shipment sm = new Shipment();
-					sm = this.shipmentRepository.getShipmentById(smList.get(j).getId());
+					//Shipment sm = new Shipment();
+					//sm = this.shipmentRepository.getShipmentById(smList.get(j).getId());
+					Shipment sm = smList.get(j);
 					Float orderQty = smList.get(j).getOrderQty();
 					sm.setQty(orderQty);
 					sm.set_status("a");
@@ -105,17 +107,9 @@ public class ShipmentDoaController {
 					
 					orderSum += orderQty;
 
-					String sourceTableName = sm.getSourceTableName();
-
-					if ( sourceTableName != null && sm.getSourceTableName().equals("suju")) {
-						Suju su = this.sujuRepository.getSujuById(sm.getSourceDataPk());
-						su.setShipmentState("shipped");
-						su.set_audit(user);
-						this.sujuRepository.save(su);
-					}
 				}
-
-				smh.setState("shipped");
+				ShipmentStatus status = ShipmentStatus.SHIPPED;
+				smh.setState(status.getLabel());
 				smh.setTotalQty((float)orderSum);
 				smh.set_audit(user);
 				smh = this.shipmentHeadRepository.save(smh);

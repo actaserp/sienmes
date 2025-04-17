@@ -5,6 +5,10 @@ import org.springframework.stereotype.Repository;
 
 import mes.domain.entity.Material;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
 @Repository
 public interface MaterialRepository extends JpaRepository<Material, Integer>{
 
@@ -14,5 +18,7 @@ public interface MaterialRepository extends JpaRepository<Material, Integer>{
 
 
 	Material findByCode(String matCode);
+
+    List<Material> findByIdIn(Collection<Integer> matIds);
 
 }

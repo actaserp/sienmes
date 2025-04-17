@@ -164,7 +164,7 @@
                             </label>
                         </dt>
                         <dd>
-                            <select class="" id="company_id" name="company_id"></select>
+                            <select class="" id="company_id" name="company_id" disabled></select>
                         </dd>
                     </dl>
                     <dl>
@@ -266,6 +266,7 @@
                     selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
                     isReadOnly: false,
                     columns: [
+                        {binding: 'suju_pk', header: '수주번호', width: '*', align: 'center', isReadOnly: true, visible: false},
                         {binding: 'JumunNumber', header: '수주번호', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'JumunDate', header: '수주일', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'DueDate', header: '납기일', width: '*', align: 'center', isReadOnly: true},
@@ -330,13 +331,19 @@
 
                 this.grid_shipment = new wijmo.grid.FlexGrid('#theGrid2', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
                     autoGenerateColumns: false,
                     showMarquee: true,
                     allowDelete: true,
                     isReadOnly: false,
+                    formatItem: (sender, e) => {
+                      if(e.panel.cellType === wijmo.grid.CellType.RowHeader){
+                          e.cell.textContent = (e.row + 1).toString();
+                      }
+                    },
                     columns: [
-                        {binding: 'index', header: '순번', width: 70, align: 'right', isReadOnly: true},
+                        {binding: 'suju_pk', header: '순번(지워야됨)', width: 70, align: 'right', isReadOnly: true, visible : false},
+                        {binding: 'mat_id', header: '순번(지워야됨)', width: 70, align: 'right', isReadOnly: true, visible : false},
                         {binding: 'mat_grp', header: '제품그룹', width: '*', align: 'left', isReadOnly: true},
                         {binding: 'mat_code', header: '제품코드', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'mat_name', header: '제품명', width: '*', align: 'left', isReadOnly: true},
@@ -380,7 +387,7 @@
                 });
 
                 // 행 헤더 크기 조정
-                this.grid_shipment.rowHeaders.columns[0].width = 100;
+                this.grid_shipment.rowHeaders.columns[0].width = 50;
                 new FlexGridContextMenu(this.grid_shipment);
                 this.grid_shipment.downloadFileName = '출하지시';
 
@@ -442,6 +449,7 @@
 
             grid_shipment_clear() {
                 this.grid_shipment.itemsSource = new wijmo.collections.CollectionView([]);
+                document.getElementById('company_id').selectedIndex  = 0;
 
             }
 
@@ -450,18 +458,24 @@
                 if ($("#cboSource").val() == 'suju') {
                     let comp_pk = null;
                     let comp_name = null;
+
+                    let hasError = false;
+
                     $.each(SelectItem, function (index, item) {
                         comp_pk = item._data.Company_id;
                         comp_name = item._data.CompanyName;
-                        let row_idx = _this.getShipMatRow(item._data.mat_id);
+                        //let row_idx = _this.getShipMatRow(item._data.mat_id);
+
                         let order_input_qty = Number(item._data.order_input_qty);
 
                         if (!order_input_qty) {
                             Alert.alert('', '추가지시량을 입력해주세요.');
+                            hasError = true;
                             return false;
                         }
                         if (order_input_qty < 0) {
                             Alert.alert('', '추가지시량을 확인해주세요.');
+                            hasError = true;
                             return false;
                         }
 
@@ -473,20 +487,23 @@
                             //return true;    // continue
                         }
 
-                        if (row_idx == -1) {    // 품목중복 없음.
-                            let new_data = {};
-                            new_data['mat_id'] = item._data.mat_id;
-                            new_data['suju_pk'] = 'S' + String(item._data.suju_pk) + ':' + String(order_input_qty);
-                            new_data['mat_grp'] = item._data.mat_grp;
-                            new_data['mat_code'] = item._data.mat_code;
-                            new_data['mat_name'] = item._data.mat_name;
-                            new_data['unit_name'] = item._data.unit_name;
-                            //let qty = item.suju_qty;
-                            //if (item.order_qty > 0)
-                            //    qty -= item.order_qty;
-                            new_data['order_qty'] = order_input_qty;
 
-                            _this.addNewRow(new_data);
+                        let new_data = {};
+                        //new_data['item_pk'] = item._data.mat_id;
+                        new_data['mat_id'] = item._data.mat_id;
+                        new_data['suju_pk'] = item._data.suju_pk;
+                        new_data['mat_grp'] = item._data.mat_grp;
+                        new_data['mat_code'] = item._data.mat_code;
+                        new_data['mat_name'] = item._data.mat_name;
+                        new_data['unit_name'] = item._data.unit_name;
+                        //let qty = item.suju_qty;
+                        //if (item.order_qty > 0)
+                        //    qty -= item.order_qty;
+                        new_data['order_qty'] = order_input_qty;
+
+                        _this.addNewRow(new_data);
+                        /*if (row_idx == -1) {    // 품목중복 없음.
+
                             //page.grid_shipment.addRow($.extend({}, new_data), 'last');
                             //result.push(new_data);
                         } else {
@@ -494,7 +511,7 @@
                                 console.log('row', row['mat_id'])
                                 if (row['mat_id'] == item._data.mat_id) {
                                     let suju_pk = 'S' + String(item._data.suju_pk);
-                                    console.log('suju_pk', suju_pk)
+                                    console.log('row1', row);
                                     if (row['suju_pk'].indexOf(suju_pk) == -1) {
                                         console.log('여기는 수주pk가 없다는 의미');
 
@@ -525,10 +542,11 @@
                                     }
                                 }
                             });
-                        }
+                        }*/
+
                     });
 
-                    _this.grid_shipment.collectionView.items.forEach(function (row, index) {
+                    /*_this.grid_shipment.collectionView.items.forEach(function (row, index) {
                         let myArray = row['suju_pk'].split(',');
                         let order_sum = 0;
                         myArray.forEach(function (suju_data, index, thisArray) {
@@ -536,8 +554,8 @@
                             order_sum += Number(qty);
                         });
                         row['order_qty'] = order_sum;
-                    });
-
+                    });*/
+                    if(hasError) return;
                     $("#company_id").val(comp_pk);
                     $("#company_id_text").val(comp_name);
                 } else if ($("#cboSource").val() == 'product') {
@@ -571,6 +589,11 @@
                 let selectedIndex = this.grid_shipment.selection.row;
                 let selectedItem = cv.items[selectedIndex]; // 선택된 행의 데이터
                 cv.remove(selectedItem);
+                cv.refresh();
+
+                if(cv.items.length === 0){
+                   document.getElementById('company_id').selectedIndex = 0;
+                }
 
             }
 
@@ -600,6 +623,8 @@
             saveShipOrder() {
                 let data = {}; // = FormUtil.extractForm($('#shipmentForm'));
                 let bucket = [];
+                console.log('list_data', this.grid_shipment.collectionView.items);
+
                 let list_data = this.grid_shipment.collectionView.items;
                 for (let i = 0; i < list_data.length; i++) {
                     bucket.push(list_data[i])
@@ -615,6 +640,7 @@
                     data['TableName'] = 'suju'
 
                 data['Q'] = JSON.stringify(bucket);
+                console.log('data', data);
 
                 let fnSuccess = function (res) {
                     if (res.success) {
@@ -631,8 +657,8 @@
 
                         page.searchMain();
                     } else {
-                        Alert.alert('', '출하 지시 실패.');
-                        return;
+                        const message = res.message ?? '출하지시실패';
+                        Alert.alert('', message);
                     }
                 }
 
@@ -663,18 +689,15 @@
 
             addNewRow(new_data) {
                 let cv = this.grid_shipment.collectionView;
-                let item = this.grid_shipment.collectionView.items[this.grid_shipment.collectionView.items.length - 1];
-                let num
 
-                if (item === undefined || item === null) {
-                    num = 1;
-                } else {
-                    num = item.index + 1;
+                let existingItem = cv.items.find(item =>
+                    item.suju_pk && item.suju_pk === new_data['suju_pk']);
+                if(existingItem){
+                    cv.remove(existingItem);
+                    cv.commitEdit();
                 }
 
-                console.log('chk', item);
                 let newRow = {
-                    index: num,
                     suju_pk: new_data['suju_pk'],
                     mat_id: new_data['mat_id'],
                     mat_grp: new_data['mat_grp'],        // 제품그룹 초기값
@@ -724,9 +747,18 @@
             function initAll() {
                 $('#btnListCollapse').prop("checked", true);
                 $('#divList').show();
-                $("#company_id").attr("disabled", false);
 
-                $("#company_id option:eq(0)").prop("selected", true);
+                if($("#cboSource").val() === 'product'){
+                    $("#company_id").attr("disabled", false);
+
+                    $("#company_id option:eq(0)").prop("selected", true);
+                }else{
+                    $("#company_id").attr("disabled", true);
+
+                    $("#company_id option:eq(0)").prop("selected", true);
+                }
+
+
 
                 if ($("#cboSource").val() != 'product') {
                     page.grid_shipment_clear();
@@ -741,6 +773,7 @@
             $('#cboSource').change(function (e) {
                 initAll();
 
+                page.grid_shipment_clear();
                 if ($("#cboSource").val() == 'suju') {
                     $('#div_suju').show();
                     $('#div_product').hide();
@@ -760,24 +793,37 @@
 
                 if (($("#cboSource").val() == 'suju') && (SelectItem.length === 0 || SelectItem === undefined)) {
                     Alert.alert('', '제품을 선택해 주세요.');
-                    console.log('item', SelectItem);
                     return;
                 } else if (($("#cboSource").val() == 'product') && (SelectItem2.length === 0 || SelectItem2 === undefined)) {
                     Alert.alert('', '제품을 선택해 주세요.');
-                    console.log('item', SelectItem2);
                     return;
                 }
-                console.log('item', SelectItem);
                 let comp_a = "";
+                let comp_a2 = "";
+
                 let return_a = 0;
 
                 if ($("#cboSource").val() == 'suju') {
-                    $.each(SelectItem, function (index, item) {
-                        if (comp_a && (comp_a != item._data.Company_id)) {
-                            return_a = 1;
-                        } else
-                            comp_a = item._data.Company_id;
-                    });
+
+                    let bottomCompanySelectBox = $('#company_id').val();
+                    if(bottomCompanySelectBox != '' && bottomCompanySelectBox !== null){
+                        $.each(SelectItem, function (index, item){
+                            if(item._data.Company_id !=  bottomCompanySelectBox){
+                                console.log('bottom', bottomCompanySelectBox);
+                                console.log('item', item._data.Company_id);
+
+                                return_a = 1;
+                            }
+                        })
+                    }else{
+                        $.each(SelectItem, function (index, item) {
+                            if (comp_a && (comp_a !== item._data.Company_id)) {
+                                return_a = 1;
+                            } else
+                                comp_a = item._data.Company_id;
+                        });
+                    }
+
                 }
                 if (return_a == 1) {
                     Alert.alert('', '하나 이상의 판매처가 있습니다.');

@@ -156,7 +156,6 @@ public class ProcessService {
 		return this.sqlRunner.execute(sql, dicParam);
 	}
 
-	@Transactional
 	public List<String> getSuggestions(String query, String field) {
 
 		return switch (field) {

@@ -1,12 +1,15 @@
 package mes.app.shipment;
 
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
+import mes.domain.entity.*;
+import mes.domain.repository.MaterialRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -20,10 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import mes.app.shipment.service.ShipmentOrderService;
-import mes.domain.entity.RelationData;
-import mes.domain.entity.Shipment;
-import mes.domain.entity.ShipmentHead;
-import mes.domain.entity.User;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.RelationDataRepository;
 import mes.domain.repository.ShipmentHeadRepository;
@@ -48,6 +47,9 @@ public class ShipmentOrderController {
 
 	@Autowired
 	TransactionTemplate transactionTemplate;
+
+	@Autowired
+	MaterialRepository materialRepository;
 	
 	@GetMapping("/suju_list")
 	public AjaxResult getSujuList(
@@ -95,7 +97,7 @@ public class ShipmentOrderController {
 		User user = (User)auth.getPrincipal();
 		
 		AjaxResult result = new AjaxResult();
-		
+
 		Timestamp today = new Timestamp(System.currentTimeMillis());  //shipment_head의 OrderDate 컬럼값 yyyy-MM-dd
 		Timestamp shipDate = CommonUtil.tryTimestamp(Ship_date); //shipment_head의 ShipDate 컬럼값 yyyy-MM-dd
 		
@@ -112,12 +114,84 @@ public class ShipmentOrderController {
 		smh = this.shipmentHeadRepository.save(smh);
 		
 		int orderSum = 0;
+
+		// 1. 출하에 포함된 mat_id 추출
+		Set<Integer> matIds = data.stream()
+				.map(d -> (Integer) d.get("mat_id"))
+				.collect(Collectors.toSet());
+
+		// 2. 해당 품목의 현재고 조회
+		List<Material> materialList = materialRepository.findByIdIn(matIds);
+
+		Map<Integer, Material> materialMap = materialList.stream()
+				.collect(Collectors.toMap(Material::getId, Function.identity()));
+
+
+		//출하하려는 항목의 누적 클래스, 여기서만 사용하는 클래스라서 이너클래스로 생성함
+		class MatSummary {
+			String name;
+			int totalQty;
+
+			public MatSummary(String name, int totalQty){
+				this.name = name;
+				this.totalQty = totalQty;
+			}
+			public void addQty(int qty){
+				this.totalQty += qty;
+			}
+		}
+
+		//출하하려는 목록
+		Map<Integer, MatSummary> GroupedMaterial = new HashMap<>();
+
+		for(Map<String, Object> item : data){
+			Integer matId = (Integer) item.get("mat_id");
+			String matName = item.get("mat_name").toString();
+			int orderQty = (Integer) item.get("order_qty");
+
+			GroupedMaterial.compute(matId, (id, summary) -> {
+				if(summary == null){
+					return new MatSummary(matName, orderQty);
+				}else{
+					summary.addQty(orderQty);
+					return summary;
+				}
+			});
+		}
+
+
+
+		//현재고보다 많은 출하를 하려하면 빠꾸
+		for(Map.Entry<Integer, Material> entry : materialMap.entrySet()){
+			Integer matid = entry.getKey();
+			Material material = entry.getValue();
+
+			MatSummary summary = GroupedMaterial.get(matid);
+
+			if(summary != null){
+				int totalQty = summary.totalQty; // 출하하려는 재고
+				float currentStock = material.getCurrentStock();
+
+				if(totalQty > currentStock){
+					result.success = false;
+					result.message = "품목 [" + material.getName() + "]의 출하 수량이 현재고를 초과합니다.";
+					return result;
+				}
+			}
+		}
+
+
 		for(int i = 0; i < data.size(); i++) {
-			Shipment sm = new Shipment();
-			int orderQty =  Integer.parseInt(data.get(i).get("order_qty").toString());
+
+			int orderQty = Integer.parseInt(data.get(i).get("order_qty").toString());
+
 			if (orderQty <=  0) {
 				continue;
 			}
+
+
+			Shipment sm = new Shipment();
+
 			sm.setShipmentHeadId(smh.getId());
 			sm.setMaterialId((int)data.get(i).get("mat_id"));
 			sm.setOrderQty((float)orderQty);
@@ -125,34 +199,35 @@ public class ShipmentOrderController {
 			if (data.get(i).get("description") != null) {
 			sm.setDescription((String)data.get(i).get("description"));
 			}
-			
+
+			sm.setSourceDataPk((int)data.get(i).get("suju_pk"));
+
 			if(TableName.equals("product")) {
-				sm.setSourceDataPk((int)data.get(i).get("suju_pk"));
 				sm.setSourceTableName(TableName);
 			} else if (TableName.equals("suju")) {
+
 				sm.setSourceTableName("rela_data");
 			}
 			sm.set_audit(user);
 			sm = this.shipmentRepository.save(sm);
-			if(TableName.equals("suju")) {
-				String[] sujuData = data.get(i).get("suju_pk").toString().split(",");
-				for(String sujuItem: sujuData) {
-					RelationData rd = new RelationData();
-					String[] foo = sujuItem.split(":");
-					String sujuPk = foo[0].substring(1);
-					String sujuOrderQty = foo[1];
-					rd.setTableName1("suju");
-					rd.setDataPk1(Integer.parseInt(sujuPk));
-					rd.setTableName2("shipment");
-					rd.setDataPk2(sm.getId());
-					rd.set_audit(user);
-					rd.setRelationName("");
-					rd.setNumber1(Integer.parseInt(sujuOrderQty));
-					rd = this.relationDataRepository.save(rd);
-				}
+
+			if(TableName.equals("suju")){
+
+				RelationData rd = new RelationData();
+				Integer sujuPk = (Integer)data.get(i).get("suju_pk");
+				rd.setTableName1("suju");
+				rd.setDataPk1(sujuPk);
+				rd.setTableName2("shipment");
+				rd.setDataPk2(sm.getId());
+				rd.set_audit(user);
+				rd.setRelationName("");
+				rd.setNumber1(orderQty);
+				rd = this.relationDataRepository.save(rd);
+
 			}
-			orderSum += orderQty; 
+			orderSum += orderQty;
 		}
+
 		smh.setTotalQty((float)orderSum);
 		
 		smh = this.shipmentHeadRepository.save(smh);
