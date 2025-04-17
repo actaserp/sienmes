@@ -53,19 +53,20 @@ public class ShipmentListService {
 		if (StringUtils.isEmpty(matPk)==false || StringUtils.isEmpty(matGrpPk)==false || StringUtils.isEmpty(keyword)==false) {
 			sql += """
 					and exists ( select 1
-        		    from shipment s 
-                    inner join material m on m.id = s."Material_id" 
+        		    from shipment s
+                    inner join material m on m.id = s."Material_id"
                     left join mat_grp mg on mg.id = m."MaterialGroup_id"
-                    where s."ShipmentHead_id" = sh.id 
+                    where s."ShipmentHead_id" = sh.id
 					""";
 			if (StringUtils.isEmpty(matPk)==false)  sql += " and s.\"Material_id\"  = cast(:matPk as Integer) ";
 			if (StringUtils.isEmpty(matGrpPk)==false)  sql += " and mg.id  = cast(:matGrpPk as Integer) ";
 			if (StringUtils.isEmpty(keyword)==false)  sql += " and ( m.\"Name\" ilike concat('%%',:keyword,'%%') or m.\"Code\" ilike concat('%%',:keyword,'%%')) ";
-			sql += """ 
-		 		) order by sh."ShipDate", c."Name", sh.id
-		 		""";
-			
+
+
 		}
+		sql += """ 
+		 		order by sh."ShipDate" desc
+		 		""";
         List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
 		
 		return items;

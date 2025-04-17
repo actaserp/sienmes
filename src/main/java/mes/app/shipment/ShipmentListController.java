@@ -26,7 +26,8 @@ public class ShipmentListController {
 			@RequestParam("cboCompany") String compPk,
 			@RequestParam("cboMatGroup") String matGrpPk,
 			@RequestParam("cboMaterial") String matPk,
-			@RequestParam("keyword") String keyword) {
+			@RequestParam("keyword") String keyword
+	) {
 		
 		List<Map<String, Object>> items = this.shipmentListService.getShipmentHeadList(dateFrom,dateTo,compPk,matGrpPk,matPk,keyword, "shipped");
 		

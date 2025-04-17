@@ -200,7 +200,8 @@ public class ShipmentOrderController {
 			sm.setDescription((String)data.get(i).get("description"));
 			}
 
-			sm.setSourceDataPk((int)data.get(i).get("suju_pk"));
+			Object sujuPkObj = data.get(i).get("suju_pk");
+			sm.setSourceDataPk(sujuPkObj == "" ? null : (int) sujuPkObj);
 
 			if(TableName.equals("product")) {
 				sm.setSourceTableName(TableName);
