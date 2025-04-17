@@ -35,5 +35,20 @@ public class ProductionDefectTypeMonthController {
 		result.data = items;
 		return result; 
 	}
+	@GetMapping("/readProduct")
+	public AjaxResult getProductionDetailDefectTypeMonthList(
+			@RequestParam(value="cboYear",required=false) String cboYear,
+			@RequestParam(value="cboMatType",required=false) Integer cboMatType,
+			@RequestParam(value="cboMatGrpPk",required=false) Integer cboMatGrpPk,
+			@RequestParam(value="txtProductId",required=false) Integer txtProductId
+	) {
+
+		List<Map<String,Object>> items = this.productionDefectTypeMonthService.getProductList(cboYear,cboMatType,cboMatGrpPk,txtProductId);
+
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+		return result;
+	}
 
 }

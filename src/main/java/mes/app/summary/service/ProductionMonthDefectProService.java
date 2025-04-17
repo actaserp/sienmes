@@ -81,6 +81,7 @@ public class ProductionMonthDefectProService {
                 , round((100 * sum(defect_qty) / nullif(sum(prod_sum),0))::decimal,3) as year_defect_pro 
                 , sum(defect_qty) as year_defect_qty 
                 , sum(defect_money) as year_defect_money
+                , sum(prod_sum) as prod_Sum
 				""";
 		
 		for(int i=1; i<13; i++) {
