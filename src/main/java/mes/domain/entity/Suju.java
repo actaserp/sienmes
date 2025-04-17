@@ -93,5 +93,8 @@ public class Suju extends AbstractAuditModel {
 	
 	@Column(name="\"_status\"")
 	String _status;
+
+	@Column(name="\"InVatYN\"")
+	String inVatYN;
 	
 }

@@ -53,6 +53,8 @@ public class SujuService {
             , s."SujuType"
             , s."Price"
             , s."UnitPrice" as "unitPrice"
+            , s."Vat"
+            , (s."Price" + s."Vat") as "totalAmount"
             , fn_code_name('suju_type', s."SujuType") as "SujuTypeName"
             , to_char(s."ProductionPlanDate", 'yyyy-mm-dd') as production_plan_date
             , to_char(s."ShipmentPlanDate", 'yyyy-mm-dd') as shiment_plan_date
@@ -62,9 +64,10 @@ public class SujuService {
             , COALESCE(sh.shippedQty, 0) as "ShippedQty"
             , fn_code_name('suju_state', s."State") as "StateName"
             , case
+            	WHEN sh.shippedQty = 0 THEN '출하지시'
 				when sh.shippedQty is not null and sh.shippedQty >= s."SujuQty" then '출하'
 				when sh.shippedQty is not null and sh.shippedQty < s."SujuQty" then '부분출하'
-				end as "ShipmentStateName"
+			end as "ShipmentStateName"
             , s."State"
             , to_char(s."_created", 'yyyy-mm-dd') as create_date
             , case s."PlanTableName" when 'prod_week_term' then '주간계획' when 'bundle_head' then '임의계획' else s."PlanTableName" end as plan_state
@@ -133,6 +136,7 @@ public class SujuService {
             , s."ReservationStock" as "ReservationStock"
             , s."SujuQty2" as "SujuQty2"
             , s."State"
+            , s."InVatYN" as "invatyn"
             , fn_code_name('suju_state', s."State") as "StateName"
             , to_char(s."_created", 'yyyy-mm-dd') as create_date
             , case

@@ -96,6 +96,7 @@ public class SujuController {
 			@RequestParam(value="unitPrice") String unitPriceStr,
 			@RequestParam(value="price") String priceStr,
 			@RequestParam(value="vat") String vatStr,
+			@RequestParam(value="invatyn") String invatyn,
 			HttpServletRequest request,
 			Authentication auth	) {
 		User user = (User)auth.getPrincipal();
@@ -131,6 +132,8 @@ public class SujuController {
 		suju.setUnitPrice(unitPrice);
 		suju.setPrice(price);
 		suju.setVat(vat);
+		suju.setInVatYN(invatyn);
+
 		
 		suju = this.SujuRepository.save(suju);
 		

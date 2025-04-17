@@ -568,6 +568,8 @@ let FormUtil = {
             values[val] = $form.find('#' + val).val();
         });
 
+        values['invatyn'] = $form.find('#invatyn').is(':checked') ? 'Y' : 'N';
+
         return values;
     },
     // serialize시에 disabled값도 포함하여 serialize 리턴
