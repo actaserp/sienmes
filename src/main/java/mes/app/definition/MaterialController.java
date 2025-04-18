@@ -164,9 +164,10 @@ public class MaterialController {
 	 * @return
 	 */
 	@GetMapping("/readPriceHistory")
-	public AjaxResult getPriceHistory(@RequestParam("mat_pk") int matPk) {
-       
-        List<Map<String, Object>> items = this.unitPriceService.getPriceHistoryByMat(matPk);      
+	public AjaxResult getPriceHistory(@RequestParam("mat_pk") int matPk,
+									  @RequestParam("com_pk") int comPk) {
+
+        List<Map<String, Object>> items = this.unitPriceService.getPriceHistoryByMat(matPk,comPk);
                		
         AjaxResult result = new AjaxResult();
         result.data = items;        				

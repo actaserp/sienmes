@@ -1,6 +1,7 @@
 package mes.app.definition.service.material;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -35,7 +36,8 @@ public class UnitPriceService {
             , mcu."ApplyStartDate"
             , mcu."ApplyEndDate"
             , mcu."ChangeDate"
-            , mcu."ChangerName" 
+            , mcu."ChangerName"
+            , mcu."Material_id"
             , row_number() over (partition by mcu."Company_id" order by mcu."ApplyStartDate" desc) as g_idx
             , now() between mcu."ApplyStartDate" and mcu."ApplyEndDate" as current_check
             , now() < mcu."ApplyStartDate" as future_check
@@ -49,6 +51,7 @@ public class UnitPriceService {
             , A."ApplyStartDate"::date 
             , A."ApplyEndDate"::date 
             , A."ChangeDate"::date 
+            , A."Material_id"
             , A."ChangerName" 
             from A 
             inner join company c on c.id = A."Company_id"
@@ -61,9 +64,10 @@ public class UnitPriceService {
         return items;
 	}
 	
-	public List<Map<String, Object>> getPriceHistoryByMat(int matPk){
+	public List<Map<String, Object>> getPriceHistoryByMat(int matPk, int comPk){
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();        
         dicParam.addValue("mat_pk", matPk);
+		dicParam.addValue("com_pk", comPk);
         
         String sql = """
 			select mcu.id 
@@ -80,6 +84,7 @@ public class UnitPriceService {
             inner join company c on c.id = mcu."Company_id"
             where 1=1
             and mcu."Material_id" = :mat_pk
+            and mcu."Company_id" = :com_pk
             order by c."Name", mcu."ApplyStartDate" desc
         """;
         	
@@ -117,13 +122,31 @@ public class UnitPriceService {
 		Integer materialId = CommonUtil.tryIntNull(data.getFirst("Material_id"));
 		Integer companyId = CommonUtil.tryIntNull(data.getFirst("Company_id"));
 
-		// applyStartDate가 '2025-04-15T13:34'와 같은 형식으로 들어올 때 처리
+		/*// applyStartDate가 '2025-04-15T13:34'와 같은 형식으로 들어올 때 처리
+		String applyStartDateStr = CommonUtil.tryString(data.getFirst("ApplyStartDate"));
+		LocalDateTime applyStartDateLocal = LocalDateTime.parse(applyStartDateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		Timestamp applyStartDate = Timestamp.valueOf(applyStartDateLocal);*/
+		// ApplyStartDate 처리
 		String applyStartDateStr = CommonUtil.tryString(data.getFirst("ApplyStartDate"));
 		LocalDateTime applyStartDateLocal = LocalDateTime.parse(applyStartDateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 		Timestamp applyStartDate = Timestamp.valueOf(applyStartDateLocal);
 
+		// 현재 날짜와 비교하여 ApplyEndDate 설정
+		LocalDate applyStartDateDate = applyStartDateLocal.toLocalDate();
+		LocalDate today = LocalDate.now();
+
+		Timestamp applyEndDate;
+		if (!applyStartDateDate.equals(today)) {
+			// 날짜가 다르면 하루 전 날짜로 설정 (시간은 00:00:00)
+			applyEndDate = Timestamp.valueOf(applyStartDateDate.minusDays(1).atStartOfDay());
+		} else {
+			// 날짜가 같으면 ApplyStartDate 그대로 사용
+			applyEndDate = applyStartDate;
+		}
+
 		// applyEndDate는 기존대로 설정
-		Timestamp applyEndDate = CommonUtil.tryTimestamp("2100-12-31");
+		Timestamp applyEndDate2 = CommonUtil.tryTimestamp("2100-12-31");
+
 
 		Float unitPrice = CommonUtil.tryFloatNull(data.getFirst("UnitPrice"));
 		String changerName = CommonUtil.tryString(data.getFirst("ChangerName"));
@@ -135,6 +158,9 @@ public class UnitPriceService {
 		dicParam.addValue("companyId", companyId);
 		dicParam.addValue("applyStartDate", applyStartDate, java.sql.Types.TIMESTAMP);
 		dicParam.addValue("applyEndDate", applyEndDate, java.sql.Types.TIMESTAMP);
+
+		dicParam.addValue("applyEndDate2", applyEndDate2, java.sql.Types.TIMESTAMP);
+
 		dicParam.addValue("unitPrice", unitPrice);
 		dicParam.addValue("changerName", changerName);
 		dicParam.addValue("userId", userId);
@@ -156,12 +182,12 @@ public class UnitPriceService {
 		}
 
 		sql = """
-            update mat_comp_uprice
-            set "ApplyEndDate" = (:applyStartDate)::timestamp
-            where "Material_id" = :materialId
-            and "Company_id" = :companyId
-            and :applyStartDate between "ApplyStartDate" and "ApplyEndDate"
-            """;
+        update mat_comp_uprice
+        set "ApplyEndDate" = :applyEndDate
+        where "Material_id" = :materialId
+        and "Company_id" = :companyId
+        and :applyStartDate between "ApplyStartDate" and "ApplyEndDate"
+        """;
 
 		this.sqlRunner.execute(sql, dicParam);
 
@@ -172,7 +198,7 @@ public class UnitPriceService {
             , "Material_id"
             , "Company_id"
             , "ApplyStartDate"
-            , "ApplyEndDate" 
+            , "ApplyEndDate"
             , "UnitPrice"
             , "FormerUnitPrice"
             , "ChangeDate"
@@ -184,7 +210,7 @@ public class UnitPriceService {
             , :materialId 
             , :companyId
             , :applyStartDate
-            , :applyEndDate
+            , :applyEndDate2
             , :unitPrice
             , :formerUnitPrice
             , now()

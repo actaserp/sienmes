@@ -15,6 +15,23 @@
             margin: 0;
             padding: 0;
         }
+
+        .button-wrap {
+            margin-left: auto; /* 버튼들을 오른쪽 끝으로 */
+        }
+
+        .button-wrap ul {
+            display: flex;
+            gap: 10px; /* 버튼 간격 */
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .unitcost-save-btn {
+            margin-top: 10px;
+        }
+
     </style>
 </head>
 
@@ -87,7 +104,7 @@
         </section>
         <!--border-radius: 6px 0 0 0;-->
         <section>
-            <div class="section-top">
+            <!--<div class="section-top">
                 <div class="button-wrap">
                     <ul>
                         <li>
@@ -112,18 +129,43 @@
                         </li>
                     </ul>
                 </div>
-            </div>
+            </div>-->
 
             <div class="tab-wrap">
                 <ul class="tab-links">
-                    <li><a href="#tab_basic" name="tabs_basic">기본정보</a></li>
-                    <li><a href="#tab_production" name="tab_production">생산/출하정보</a></li>
-                    <li><a href="#tab_inventory" name="tab_inventory">발주/재고정보</a></li>
+                    <li><a href="#tab_basic" name="tabs_basic" id="tabs_basic">기본정보</a></li>
+                    <li><a href="#tab_production" name="tab_production" id="tabs_production" >생산/출하정보</a></li>
+                    <li><a href="#tab_inventory" name="tab_inventory" id="tabs_inventory">발주/재고정보</a></li>
                     <li><a href="#tab_bom" name="tab_bom">BOM</a></li>
                     <li><a href="#tab_bom_reverse" name="tab_bom_reverse">BOM(역전개)</a></li>
-                    <li><a href="#tab_unitcost" name="tab_unitcost">단가정보</a></li>
+                    <li><a href="#tab_unitcost" name="tab_unitcost" id="tabs_unitcost">단가정보</a></li>
                     <li><a href="#tab_test_master" name="tab_test_master">검사정보</a></li>
                     <li><a href="#tab_routing" name="tab_routing">라우팅</a></li>
+
+                    <div class="button-wrap button-list">
+                        <ul>
+                            <li>
+                                <button type="button" class="btn-default" id="btnNew" name="btnNew"
+                                        style="width: 115px; height: 36px;">
+                                    <i class="fas fa-plus"></i>신규등록
+                                </button>
+                            </li>
+
+                            <li>
+                                <button type="button" class="btn-danger" id="btnDelete"
+                                        style="width: 115px; height: 36px;">
+                                    <i class="fas fa-trash"></i>삭제
+                                </button>
+                            </li>
+
+                            <li>
+                                <button disabled type="button" class="btn-default" id="btnSave"
+                                        style="width: 115px; height: 36px;">
+                                    <i class="fas fa-save"></i>저장
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                 </ul>
 
                 <div>
@@ -609,16 +651,18 @@
                     <section class="tab-item" id="tab_unitcost" style="border-top-left-radius: 0;">
                         <div class="section-top">
                             <div class="search-wrap">
-                                <!--<form id="priceForm">
+                                <form id="priceForm">
                                     <dl>
                                         <dt>
                                             <label>평균단가</label>
                                         </dt>
                                         <dd>
-                                            <input type="number" id="UnitPrice" name="UnitPrice" disabled>
+                                            <input type="number" id="UnitPrice" name="UnitPrice">
                                         </dd>
                                     </dl>
-                                </form>-->
+                                </form>
+                                <div id="unitcostSaveButtonContainer" style="display: none; margin-top: 10px;">
+                                </div>
                             </div>
                             <div class="button-wrap">
                                 <!--<small2>단가정보는 왼쪽 버튼을 통해 별도로 저장됩니다. 기존 이력을 남기려면 단가등록/변경 버튼을 누르시고 이력을 남기지 않으시려면 단가 수정 버튼을
@@ -706,11 +750,11 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th style="font-size: 13px;">
+                                                <th>
                                                     <label for="ApplyStartDate">적용시작일</label>
                                                 </th>
                                                 <td>
-                                                    <input type="datetime-local" style="width: 100%;" id="ApplyStartDate"
+                                                    <input type="date" style="width: 100%;" id="ApplyStartDate"
                                                            name="ApplyStartDate">
                                                 </td>
                                             </tr>
@@ -801,6 +845,30 @@
         </section>
     </div>
 
+
+    <script type="text/x-tmpl" id="MaterialTemplate">
+        <div class="content_wrap popup">
+            <!--<header>
+                <h4 id="popTitle">
+                {% if (o.id!='') { %}
+                  BOM 수정({%=o.Name%})
+                  {% } else { %}
+                  BOM 등록
+                  {% } %}
+                </h4>
+                <div class="popup_close_box"><button class="btn_popup_close" id="modal-close-x"><i class="fas fa-times"></i></button></div>
+            </header>-->
+
+            <div class="grid_box" style="margin-top: 10px;">
+                <div id="price-history-grid" style="height: 400px; max-height: 400px;"></div>
+           </div>
+
+        <div class="popup-button">
+          <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+        </div>
+    </div>
+    </script>
+
 </th:block>
 
 <th:block layout:fragment="scripts">
@@ -818,6 +886,7 @@
                 this.viewData4 = new wijmo.collections.CollectionView();
                 this.viewData5 = new wijmo.collections.CollectionView();
                 this.viewData6 = new wijmo.collections.CollectionView();
+                this.viewData8 = new wijmo.collections.CollectionView();
 
                 this.init();
             }
@@ -859,8 +928,8 @@
                         {binding: 'class1', header: '분류1', width: 100, align: 'left'},
                         {binding: 'class2', header: '분류2', width: 100, align: 'left'},
                         {binding: 'class3', header: '분류3', width: 100, align: 'left'},
-                        {binding: 'starndard1', header: '규격1', width: 100, align: 'right'},
-                        {binding: 'standard2', header: '규격2', width: 100, align: 'right'},
+                        {binding: 'starndard1', header: '규격1', width: 150, align: 'right'},
+                        {binding: 'standard2', header: '규격2', width: 150, align: 'right'},
                         {binding: 'description', header: '설명', width: 200, align: 'left'},
                         {binding: 'workcenter_name', header: '기본워크센터', width: 150, align: 'left'},
                         {binding: 'standard_time', header: '표준생산시간', width: 150, align: 'right'},
@@ -950,7 +1019,8 @@
                         _this.showBomReverseList(selectedItem.id)
                         _this.showTestList(selectedItem.id)
                         _this.showRoutingProcessList(selectedItem.id)
-                        _this.showPriceHistoryList(selectedItem.id)
+                        /*_this.showPriceHistoryList(selectedItem.id)*/
+                        _this.showPriceList(selectedItem.id)
                         /* _this.showBomCompTreeList(selectedItem.id)*/
                     }
                 });
@@ -1793,7 +1863,21 @@
 
                 let result = AjaxUtil.getSyncData(this.url + '/readPrice', data);
                 if (result != null) {
+                    result.data.forEach(item => {
+                        // Date 객체 추가 (문자열 기반 정렬은 정확하지 않아서)
+                        item.ApplyEndDateObj = new Date(item.ApplyEndDate);
+
+                        // ApplyEndDate가 2100-12-31이면 sortFlag로 지정
+                        item.sortFlag = item.ApplyEndDate === "2100-12-31" ? 0 : 1;
+                    });
+
                     _this.viewData2.sourceCollection = result.data;
+
+                    // 정렬 순서: 1. 업체명(오름차순), 2. sortFlag(오름차순), 3. 날짜(내림차순)
+                    _this.viewData2.sortDescriptions.clear();
+                    _this.viewData2.sortDescriptions.push(new wijmo.collections.SortDescription('CompanyName', true));      // 업체명 A → Z
+                    _this.viewData2.sortDescriptions.push(new wijmo.collections.SortDescription('sortFlag', true));         // 2100-12-31 우선
+                    _this.viewData2.sortDescriptions.push(new wijmo.collections.SortDescription('ApplyEndDateObj', false)); // 최신 날짜 우선
 
                     $('#companyPriceForm')[0].reset();
                     $('#companyPriceForm').find('#price_id').val('');
@@ -1803,9 +1887,10 @@
                         }
                     });
 
-                    //_this.setPriceButtonDisabled(false, true, true);
                     _this.setPriceButtonState();
                 }
+
+
             }
 
             // 업체별 단가히스토리 리스트 조회
@@ -1842,35 +1927,19 @@
                     // ApplyStartDate를 UTC에서 한국시간(KST)으로 변환하여 datetime-local 포맷으로 설정
                     let applyStartDate = result.data.ApplyStartDate;
                     if (applyStartDate) {
-                        // UTC 시간 문자열을 Date 객체로 변환
                         let date = new Date(applyStartDate);
-
-                        // 한국 시간으로 변환 (UTC + 9시간)
                         date.setHours(date.getHours() + 9);
 
-                        // 'YYYY-MM-DDTHH:MM' 형식으로 변환
-                        let formattedDate = date.toISOString().substring(0, 16);
+                        // YYYY-MM-DD 형식으로 변환
+                        let formattedDate = date.toISOString().substring(0, 10);
 
-                        // input 필드에 설정
                         $('#ApplyStartDate').val(formattedDate);
                     }
+
                 }
 
                 this.setPriceButtonState();
             }
-
-
-
-            /*let price_grid = this.price_grid.itemsSource; // itemsSource로 변경
-                for (let i = 0; i < price_grid.length; i++) {
-                    if (price_grid[i].Company_id == data.Company_id) {
-                        if (price_grid[i].ApplyStartDate == data.ApplyStartDate) {
-                            Alert.alert('', '적용 시작일을 확인해주세요.')
-                            $('#ApplyStartDate').focus();
-                            return;
-                        }
-                    }
-                }*/
 
             // 단가 정보 등록/변경
             savePriceData() {
@@ -1881,6 +1950,19 @@
                 let url = this.url + '/savePrice';
                 let data = FormUtil.extractForm($('#companyPriceForm'));
 
+                // ApplyStartDate 가공해서 다시 설정
+                let applyDate = data.ApplyStartDate; // YYYY-MM-DD
+                if (applyDate) {
+                    let now = new Date();
+                    let hh = String(now.getHours()).padStart(2, '0');
+                    let mm = String(now.getMinutes()).padStart(2, '0');
+                    let ss = String(now.getSeconds()).padStart(2, '0');
+                    data.ApplyStartDate = `${applyDate}T${hh}:${mm}:${ss}`;
+                }
+
+                data['Material_id'] = mat_id;
+                data['ChangerName'] = userinfo.username;
+
                 let fnSuccess = function (res) {
                     console.log("서버 응답:", res);  // 서버 응답을 콘솔에 출력
                     if (!res.success) {
@@ -1889,7 +1971,6 @@
                     } else {
                         Alert.alert('', '저장되었습니다');
                         _this.showPriceList(mat_id);
-                        _this.showPriceHistoryList(mat_id);
                     }
                 };
 
@@ -1902,9 +1983,6 @@
                         }
                     }
                 });
-
-                data['Material_id'] = mat_id;
-                data['ChangerName'] = userinfo.username;
 
                 if (validate) {
                     AjaxUtil.postAsyncData(url, data, fnSuccess);
@@ -1929,7 +2007,6 @@
                     } else {
                         Alert.alert('', '저장되었습니다');
                         _this.showPriceList(mat_id);
-                        _this.showPriceHistoryList(mat_id);
                     }
                 };
 
@@ -2099,13 +2176,7 @@
 
                 if (result != null) {
                     let count = result.data.length;
-                    /*_this.routing_grid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: count,
-                        }
-                    });*/
+
                     _this.viewData5.sourceCollection = result.data;
                 }
             }
@@ -2166,6 +2237,63 @@
                     _this.viewData6.sourceCollection = result.data;
                 }
             }
+
+            showpriceEdit(data) {
+                let _this = this;
+                let content = tmpl('MaterialTemplate', data);
+                let $content = $(content);
+
+                let modalContainer = new PopupDraggable('히스토리 조회');
+                modalContainer.open({ width: 1025, height: 500, $content });
+
+                let target = $content.find('#price-history-grid');
+                _this.viewData8 = data || [];
+
+                setTimeout(() => {
+                    _this.grid8 = new wijmo.grid.FlexGrid('#price-history-grid', {
+                        selectionMode: wijmo.grid.SelectionMode.Row,
+                        headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                        autoGenerateColumns: false,
+                        showMarquee: true,
+                        isReadOnly: false,
+                            formatItem: (sender, e) => {
+                                if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                                    e.cell.style.textAlign = 'center';
+                                }
+                            },
+                        columns: [
+                            {binding: 'CompanyName', header: '업체명', width: '*', align: 'left',},
+                            {binding: 'type', header: '구분', width: 120, align: 'center',},
+                            {binding: 'UnitPrice', header: '단가', width: 120, align: 'right',},
+                            {binding: 'FormerUnitPrice', header: '이전단가', width: 120, align: 'right',},
+                            {binding: 'ApplyStartDate', header: '적용시작일', width: 120, align: 'center',},
+                            {binding: 'ApplyEndDate', header: '적용종료일', width: 120, align: 'center',},
+                            {binding: 'ChangerName', header: '변경자', width: 120, align: 'left',},
+                            {binding: 'ChangeDate', header: '변경일', width: 120, align: 'center',},
+                        ],
+                        itemsSource: _this.viewData8
+                    });
+
+                    this.grid8.formatItem.addHandler((s, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            let col = s.columns[e.col];
+                            let item = s.rows[e.row].dataItem;
+
+                            if (col.binding === "type") {
+                                e.cell.textContent = (item.type === '01') ? '매입' : '매출';
+                            }
+                        }
+                    });
+
+                    let $btnTest = $content.find('#btnTest');
+                    $btnTest.click(function () {
+                        _this.grid8.collectionView.refresh();
+                    });
+                }, 0);
+            }
+
+
+
         }
 
         let page = null;
@@ -2283,10 +2411,11 @@
             });
 
             // 기본정보 저장버튼
-            $('#btnSave').click(function (e) {
+            $(document).on('click', '#btnSave', function (e) {
                 let basicData = FormUtil.extractForm($('#matBasicForm'));
                 let stockData = FormUtil.extractForm($('#matStockForm'));
                 let data = $.extend({}, basicData, stockData);
+                console.log("버튼눌림");
 
                 if (!data.MaterialGroup_id) {
                     Alert.alert('', '품목 그룹을 선택해 주세요');
@@ -2364,7 +2493,6 @@
             });
 
 
-
             // 기본정보 삭제버튼
             $('#btnDelete').click(function (e) {
                 Alert.confirm('',
@@ -2379,10 +2507,28 @@
 
             // 단가 히스토리버튼
             $('#btnPriceHistory').click(function (e) {
-                let mat_id = $('#matBasicForm').find('#id').val();
-                if (mat_id)
-                    page.showPriceHistoryList(mat_id);
+                let price_grid = wijmo.Control.getControl('#price-grid');
+                let selectedRow = price_grid.selection.row;
+
+                // 선택한 행의 데이터 가져오기 (단일 객체)
+                let selectedItem = price_grid.rows[selectedRow].dataItem;
+                /*console.log(selectedItem);*/
+                let id = selectedItem.Material_id; // ID 값 가져오기
+                let id2 = selectedItem.Company_id;
+                let data = {
+                    'mat_pk': id,
+                    'com_pk': id2
+                }
+
+                let url = '/api/definition/material/readPriceHistory';
+                let result = AjaxUtil.getSyncData(url, data);
+                if (result.success) {
+                    page.showpriceEdit(result.data);
+                } else {
+                    Alert.alert('', "오류가 발생했습니다.");
+                }
             });
+
 
             $('#cboTestMasterGroup').change(function (e) {
                 let group_pk = $('#cboTestMasterGroup').val();
@@ -2454,7 +2600,7 @@
                 let result = AjaxUtil.postSyncData(url, data);
                 /*console.log(result);*/
                 if (result.data != null) {
-                    Alert.alert('',"저장되었습니다.");
+                    Alert.alert('', "저장되었습니다.");
                     page.showTestList(mat_id);
                 }
 
@@ -2501,7 +2647,7 @@
                     };
 
                     // 서버에 데이터 전송
-                    AjaxUtil.postAsyncData(url, data, function(result) {
+                    AjaxUtil.postAsyncData(url, data, function (result) {
                         /*console.log(result);*/
                         if (result.data != null) {
                             Alert.alert('', "삭제되었습니다.");
@@ -2515,14 +2661,10 @@
                 }
             });
 
-
-
-
-
             // 단가정보 신규버튼
             $('#btnPriceNew').click(function (e) {
                 // 단가 상세정보 리셋
-                //$('#companyPriceForm')[0].reset();
+                $('#companyPriceForm')[0].reset();
                 $('#companyPriceForm').find('#price_id').val('');
 
                 $('#companyPriceForm').find('input, select').each(function () {
@@ -2531,13 +2673,9 @@
                     }
                 });
 
-                /*page.price_grid.clearSelect();*/
-
-                //page.setPriceButtonDisabled(true, false, true);
                 page.setPriceButtonState();
 
-                let today_string = CommonUtil.getYYYYMMDD();
-                $('#companyPriceForm').find('#ApplyStartDate').val(today_string); //오늘날짜
+                $('#ApplyStartDate').val(CommonUtil.getYYYYMMDD());
             });
 
             // 단가등록/변경 버튼
@@ -2599,13 +2737,6 @@
                 page.grid.exportExcel('품목정보.xls');
             });
 
-            //page.popColSetting = new popColSetting();
-
-            //let lang_code = i18n.getLanguageCode();
-            //let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid',  page.grid);
-            //let config = page.grid.config;
-            //config.columns = columns;
-            //page.grid.setConfig(config);
 
             if (userinfo.group_code == 'admin') {
                 //$('#btnGridSetting').show();
@@ -2613,11 +2744,44 @@
                 $('#btnGridSetting').css('visibility', 'visible');
             }
 
-            //$('#btnGridSetting').click(function (e) {
-            //    let _this = this;
-            //    let fix_cols = page.grid_config.frozenColumnIndex;
-            //    page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
-            //});
+            $(".tab-links a").on("click", function () {
+                const id = $(this).attr("id");
+                const showButtons = ["tabs_basic", "tabs_production", "tabs_inventory", "tabs_unitcost"];
+
+                if (showButtons.includes(id)) {
+                    $(".button-wrap.button-list").show();
+
+                    if (id === "tabs_unitcost") {
+                        // 저장 버튼만 이동해서 보여주기
+                        $("#btnNew").parent().hide();
+                        $("#btnDelete").parent().hide();
+
+                        // 저장 버튼을 따로 복사해서 옮겨 붙이기
+                        const $saveBtn = $("#btnSave").closest("li").clone();
+                        // 버튼 안의 <button>에 다시 id 부여
+                        $saveBtn.find("button").attr("id", "btnSave");
+
+                        $saveBtn.find("#btnSave").addClass("unitcost-save-btn");
+                        $("#unitcostSaveButtonContainer").html($saveBtn).show();
+
+
+                        // 기존 버튼 영역 숨기기
+                        $(".button-wrap.button-list").hide();
+                    } else {
+                        // 버튼들 원래대로 복원
+                        $(".button-wrap.button-list li").show();
+                        $(".button-wrap.button-list").show();
+                        $("#unitcostSaveButtonContainer").hide();
+                    }
+
+                } else {
+                    $(".button-wrap.button-list").hide();
+                    $("#unitcostSaveButtonContainer").hide();
+                }
+            });
+
+
+
 
             page.searchDataBind();
         });
