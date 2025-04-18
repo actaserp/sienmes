@@ -86,4 +86,10 @@ public class Balju extends AbstractAuditModel{
 
   @Column(name="\"_status\"")
   String _status;
+
+  @Column(name = "\"InVatYN\"")
+  String inVatYN;
+
+  @Column(name = "\"TotalAmount\"")
+  Double TotalAmount;
 }

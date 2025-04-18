@@ -56,6 +56,8 @@ public class BaljuOrderService {
           , sh."Name" as "ShipmentStateName"
           , b."State"
           , b."UnitPrice" as "BaljuUnitPrice"
+          , b."Vat" as "BaljuVat"
+          , sum(b."Price"+ coalesce(b."Vat", 0)) as "BaljuTotalPrice"
           , b."Price" as "BaljuPrice"
           , to_char(b."_created", 'yyyy-mm-dd') as create_date
           , case b."PlanTableName" when 'prod_week_term' then '주간계획' when 'bundle_head' then '임의계획' else b."PlanTableName" end as plan_state
@@ -71,14 +73,27 @@ public class BaljuOrderService {
     if (date_kind.equals("sales")) {
       sql += """
 				and b."JumunDate" between :start and :end 
-		        order by b."JumunDate" desc,  m."Name"
 				""";
     } else {
       sql +="""
 				and b."DueDate" between :start and :end
-		        order by b."DueDate" desc,  m."Name"
 				""";
     }
+
+    sql += """
+        group by
+          b.id, b."JumunNumber", b."Material_id", mg."Name", mg.id,
+          mg."MaterialType", m.id, m."Code", m."Name", u."Name",
+          b."SujuQty", b."SujuQty2", b."JumunDate", b."DueDate", b."CompanyName",\s
+          b."Company_id", b."SujuType", b."ProductionPlanDate", b."ShipmentPlanDate",
+          b."Description", b."AvailableStock", b."ReservationStock",\s
+          b."State", sh."Name", b."UnitPrice", b."Vat", b."Price",\s
+          b."_created", b."PlanTableName"
+        """;
+    sql += """
+         order by b."DueDate" desc,  m."Name"
+        """;
+
 //    log.info("발주 read SQL: {}", sql);
 //    log.info("SQL Parameters: {}", dicParam.getValues());
     List<Map<String, Object>> itmes = this.sqlRunner.getRows(sql, dicParam);
@@ -115,9 +130,11 @@ public class BaljuOrderService {
             , b."ReservationStock" as "ReservationStock"
             , b."SujuQty2" as "SujuQty2"
             , b."State"
-            ,b."UnitPrice" as "BaljuUnitPrice"
-            ,b."Price" as "BaljuPrice"
-            ,b."Vat"as "BaljuVat"
+            , b."UnitPrice" as "BaljuUnitPrice"
+            , b."Price" as "BaljuPrice"
+            , b."Vat"as "BaljuVat"
+            , b."InVatYN"
+            , sum(b."Price"+ coalesce(b."Vat", 0)) as "BaljuTotalPrice"
             , fn_code_name('balju_state', b."State") as "StateName"
             , to_char(b."_created", 'yyyy-mm-dd') as create_date
             from balju b
@@ -126,6 +143,14 @@ public class BaljuOrderService {
             left join unit u on m."Unit_id" = u.id
             left join company c on c.id= b."Company_id"
             where b.id = :id
+            group by
+             b.id, b."JumunNumber", b."Material_id", mg."Name", mg.id,
+             mg."MaterialType", m.id, m."Code", m."Name", u."Name",
+             b."SujuQty", b."SujuQty2", b."JumunDate", b."DueDate", b."CompanyName",
+             b."Company_id", b."SujuType", b."ProductionPlanDate", b."ShipmentPlanDate",
+             b."Description", b."AvailableStock", b."ReservationStock",
+             b."State", b."UnitPrice", b."Vat", b."Price",
+             b."_created", b."PlanTableName"
 			""";
 //    log.info("발주상세 데이터 SQL: {}", sql);
 //    log.info("SQL Parameters: {}", paramMap.getValues());
@@ -191,23 +216,23 @@ public class BaljuOrderService {
     dicParam.addValue("ApplyStartDate", jumunDate);
 
     String sql = """
-			select mcu.id 
-            , mcu."Company_id"
-            , c."Name" as "CompanyName"
-            , mcu."UnitPrice" 
-            , mcu."FormerUnitPrice" 
-            , mcu."ApplyStartDate"
-            , mcu."ApplyEndDate"
-            , mcu."ChangeDate"
-            , mcu."ChangerName" 
-            from mat_comp_uprice mcu 
-            inner join company c on c.id = mcu."Company_id"
-            where 1=1
-            and mcu."Material_id" = :mat_pk
-            and mcu."Company_id" = :company_id
-            and to_date(:ApplyStartDate, 'YYYY-MM-DD') between mcu."ApplyStartDate"::date and mcu."ApplyEndDate"::date
-            and mcu."Type" = '01'
-            order by c."Name", mcu."ApplyStartDate" desc
+        select mcu.id 
+                 , mcu."Company_id"
+                 , c."Name" as "CompanyName"
+                 , mcu."UnitPrice" 
+                 , mcu."FormerUnitPrice" 
+                 , mcu."ApplyStartDate"
+                 , mcu."ApplyEndDate"
+                 , mcu."ChangeDate"
+                 , mcu."ChangerName" 
+                 from mat_comp_uprice mcu 
+                 inner join company c on c.id = mcu."Company_id"
+                 where 1=1
+                 and mcu."Material_id" = :mat_pk
+                 and mcu."Company_id" = :company_id
+                 and to_date(:ApplyStartDate, 'YYYY-MM-DD') between mcu."ApplyStartDate"::date and mcu."ApplyEndDate"::date
+                 and mcu."Type" = '01'
+                 order by c."Name", mcu."ApplyStartDate" desc
         """;
 
 //    log.info("발주 단가 데이터 SQL: {}", sql);

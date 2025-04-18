@@ -105,8 +105,8 @@ public class BaljuOrderListService {
         order by mat_code, mat_name, grp_idx, company_name
 				""";
 
-    log.info("월별 발주량 read SQL: {}", sql);
-    log.info("SQL Parameters: {}", paramMap.getValues());
+//    log.info("월별 발주량 read SQL: {}", sql);
+//    log.info("SQL Parameters: {}", paramMap.getValues());
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
 
     return items;

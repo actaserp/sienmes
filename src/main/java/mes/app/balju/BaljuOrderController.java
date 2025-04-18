@@ -66,10 +66,12 @@ public class BaljuOrderController {
       @RequestParam(value = "BaljuUnitPrice")Double BaljuUnitPrice, //단가
       @RequestParam(value = "BaljuPrice")Double BaljuPrice,   //공급가
       @RequestParam(value = "BaljuVat")Double BaljuVat,     //부과세
+      @RequestParam(value = "invatyn") String isVat,
       HttpServletRequest request,
       Authentication auth	) {
-    /*log.info("발주 등록 요청: id={}, sujuQty={}, companyId={}, companyName={}, description={}, dueDate={}, jumunDate={}, materialId={}, availableStock={}, sujuType={}, BaljuUnitPrice={} , BaljuPrice={}, BaljuVat={}",
-        id, sujuQty, companyId, companyName, description, dueDate, jumunDate, materialId, availableStock, sujuType, BaljuUnitPrice, BaljuPrice, BaljuVat);*/
+    log.info("발주 등록 요청: id={}, sujuQty={}, companyId={}, companyName={}, description={}, dueDate={}, jumunDate={}, materialId={}, 3" +
+            "availableStock={}, sujuType={}, BaljuUnitPrice={} , BaljuPrice={}, BaljuVat={} , isVat={}",
+        id, sujuQty, companyId, companyName, description, dueDate, jumunDate, materialId, availableStock, sujuType, BaljuUnitPrice, BaljuPrice, BaljuVat,isVat);
     User user = (User)auth.getPrincipal();
 
     Balju balju = null;
@@ -82,12 +84,12 @@ public class BaljuOrderController {
       balju.setState("draft");
 //      log.info("🆕 신규 발주 생성");
     }
-    //List<Map<String, Object>> upriceList = baljuOrderService.getBaljuPrice(materialId, jumunDate, companyId);
 
     availableStock = availableStock==null?0:availableStock;
     Date due_Date = CommonUtil.trySqlDate(dueDate);
     Date jumun_Date = CommonUtil.trySqlDate(jumunDate);
     String jumunNumber = baljuOrderService.makeJumunNumber(jumun_Date);
+    String isVatYn = "Y".equalsIgnoreCase(isVat) || "true".equalsIgnoreCase(isVat) ? "Y" : "N";
 
     balju.setSujuQty(Double.valueOf(sujuQty));
     balju.setSujuQty2(Double.valueOf(0));
@@ -105,6 +107,7 @@ public class BaljuOrderController {
     balju.setPrice(BaljuPrice);
     balju.setVat(BaljuVat);
     balju.set_audit(user);
+    balju.setInVatYN(isVatYn);
 
     balju = this.bujuRepository.save(balju);
 //    log.info("✅ 발주 저장 완료: balju={}", balju);
