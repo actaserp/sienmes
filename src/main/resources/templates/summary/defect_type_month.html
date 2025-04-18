@@ -295,6 +295,18 @@
                     }
                 }
             };
+            this.grid3.hostElement.addEventListener('dblclick', (e) => {
+                const ht = this.grid3.hitTest(e);
+                if (ht && ht.row > -1 && ht.cellType === wijmo.grid.CellType.Cell) {
+                    const clickedRow = this.grid3.rows[ht.row].dataItem;
+                    const matName = clickedRow.mat_name;
+
+                    // 병합된 품목명 그룹의 모든 행 수집
+                    const mergedGroup = this.grid3.itemsSource.filter(row => row.mat_name === matName);
+
+                    this.ProductDBClick(matName, mergedGroup);
+                }
+            });
             new FlexGridContextMenu(this.grid3);
             this.grid3.downloadFileName = '부적합품목';
 
@@ -483,8 +495,54 @@
             }
         }
 
-        ProductDBClick(){
+        ProductDBClick(title, dataGroup){
+            const defectMap = {};
 
+            // 1. defect_type별로 year_defect_pro 누적
+            dataGroup.forEach(row => {
+                const type = row.defect_type || '기타';
+                const value = parseFloat(row.year_defect_pro || 0);
+
+                if (!defectMap[type]) defectMap[type] = 0;
+                defectMap[type] += value;
+            });
+
+            const labels = Object.keys(defectMap);
+            const values = Object.values(defectMap);
+
+            const total = values.reduce((sum, val) => sum + val, 0);
+
+            // 퍼센트 비율 계산
+            const percentages = values.map(val => ((val / total) * 100).toFixed(1));
+
+            // 기존 차트 제거
+            if (this.portion_detail_chart) {
+                this.portion_detail_chart.destroy();
+            }
+
+            const ctx = document.getElementById('chart2').getContext('2d');
+            this.portion_detail_chart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels.map((lbl, i) => `${lbl} (${percentages[i]}%)`),
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56',
+                            '#4BC0C0', '#9966FF', '#FF9F40',
+                            '#E7E9ED', '#36A2EB', '#FF6384',
+                            '#FFCE56', '#4BC0C0', '#9966FF'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: `${title} - 부적합 유형별 비율` }
+                    }
+                }
+            });
         }
 
 
