@@ -50,21 +50,4 @@ public class ProductionDefectTypeMonthController {
 		result.data = items;
 		return result;
 	}
-	// 그리드 더블클릭시 차트 업데이트
-	@GetMapping("/readProduct2")
-	public AjaxResult getProductionDetailDefectTypeMonthList2(
-			@RequestParam(value="cboYear",required=false) String cboYear,
-			@RequestParam(value="cboMatType",required=false) String cboMatType,
-			@RequestParam(value="cboMatGrpPk",required=false) Integer cboMatGrpPk,
-			@RequestParam(value="txtProductId",required=false) Integer txtProductId
-	) {
-
-		List<Map<String,Object>> items = this.productionDefectTypeMonthService.getProductList(cboYear,cboMatType,cboMatGrpPk,txtProductId);
-
-
-		AjaxResult result = new AjaxResult();
-		result.data = items;
-		return result;
-	}
-
 }
