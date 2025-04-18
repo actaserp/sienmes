@@ -29,7 +29,9 @@ public class BaljuOrderAggregateService {
              select b."Material_id" as mat_pk,
              b."CompanyName" as company_name,
              sum(b."SujuQty") as suju_sum,
-             sum(b."Price" + coalesce(b."Vat", 0)) as price_sum
+             sum(b."Price") as price_sum, -- 공급가 합계
+             sum(b."Price" + coalesce(b."Vat", 0)) as amount_sum,
+             sum(b."Vat") as vat_sum
              from balju b
                 inner join material m on m.id = b."Material_id"
              where b."JumunDate" between cast(:srchStartDt as date) 
@@ -57,12 +59,14 @@ public class BaljuOrderAggregateService {
         group by b."Material_id", b."CompanyName" 
                 )
              select mg."Name" as mat_grp_name, m."Code" as mat_code, m."Name" as mat_name, A.mat_pk
-                , u."Name" as unit_name
-             , sum(A.suju_sum) over(partition by A.mat_pk, A.company_name) as tot_suju_sum,
-             sum(A.price_sum) over(partition by A.mat_pk,  A.company_name) as tot_price_sum,
-             A.company_name, 
-             A.suju_sum, 
-             A.price_sum
+                , u."Name" as unit_name,
+                 sum(A.suju_sum) over(partition by A.mat_pk, A.company_name) as tot_suju_sum,
+                 sum(A.price_sum) over(partition by A.mat_pk,  A.company_name) as tot_price_sum,
+                 sum(A.vat_sum)over(partition by A.mat_pk,  A.company_name) as tot_vat_sum,
+                 sum(A.amount_sum)over(partition by A.mat_pk,  A.company_name) as amount_sum,
+                 A.company_name,
+                 A.suju_sum,
+                 A.price_sum
              from A 
              inner join material m on m.id = A.mat_pk
                 left join mat_grp mg on mg.id = m."MaterialGroup_id"

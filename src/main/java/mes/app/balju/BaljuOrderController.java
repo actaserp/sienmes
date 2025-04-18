@@ -67,6 +67,7 @@ public class BaljuOrderController {
       @RequestParam(value = "BaljuPrice")Double BaljuPrice,   //공급가
       @RequestParam(value = "BaljuVat")Double BaljuVat,     //부과세
       @RequestParam(value = "invatyn") String isVat,
+      @RequestParam(value = "BaljuTotalPrice") Double totalAmount,
       HttpServletRequest request,
       Authentication auth	) {
     log.info("발주 등록 요청: id={}, sujuQty={}, companyId={}, companyName={}, description={}, dueDate={}, jumunDate={}, materialId={}, 3" +
@@ -108,6 +109,7 @@ public class BaljuOrderController {
     balju.setVat(BaljuVat);
     balju.set_audit(user);
     balju.setInVatYN(isVatYn);
+    balju.setTotalAmount(totalAmount);
 
     balju = this.bujuRepository.save(balju);
 //    log.info("✅ 발주 저장 완료: balju={}", balju);

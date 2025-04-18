@@ -359,17 +359,17 @@
             {binding: 'MaterialGroupName', header: '제품그룹', width: 100},
             {binding: 'product_code', header: '제품코드', width: 100},
             {binding: 'product_name', header: '제품명', width: 100},
-            {binding: 'unit', header: '단위', width: 80, align: 'center'},
-            {binding: 'SujuQty', header: '수량', width: 80, align: 'right', format: 'n0'},
+            {binding: 'unit', header: '단위', width: 60, align: 'center'},
+            {binding: 'SujuQty', header: '수량', width: 60, align: 'right', format: 'n0'},
             {binding: 'BaljuUnitPrice', header: '단가', width: 100, align: 'right'},
             {binding: 'BaljuPrice', header: '공급가', width: 100, align: 'right'},
             {binding: 'BaljuVat', header: '부과세', width: 100, align: 'right'},
             {binding: 'BaljuTotalPrice', header: '발주액', width: 100, align: 'right'},
-            {binding: 'DueDate', header: '납기예정일', width: 120, align: 'center'},
             {binding: 'StateName', header: '상태', width: 80, align: 'center'},
-            {binding: 'ShipmentStateName', header: '납품장소', width: 100, align: 'center'},
             {binding: 'SujuQty2', header: '기입고수량', width: 100, align: 'right'},
             {binding: 'SujuQty3', header: '미입고수량', width: 100, align: 'right'},
+            {binding: 'ShipmentStateName', header: '납품장소', width: 100, align: 'center'},
+            {binding: 'DueDate', header: '납기예정일', width: 120, align: 'center'},
             {binding: 'Description', header: '비고', width: 200}
           ],
           itemsSource: this.viewData, // 데이터를 설정할 배열
@@ -691,6 +691,7 @@
               data.BaljuPrice = data.BaljuPrice.replace(/,/g, '');
               data.BaljuUnitPrice = data.BaljuUnitPrice.replace(/,/g, '');
               data.BaljuVat = data.BaljuVat.replace(/,/g, '');
+              data.BaljuTotalPrice = data.BaljuTotalPrice.replace(/,/g, '');
 
               console.log("📤 전송될 발주 데이터:", data);
 

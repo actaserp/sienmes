@@ -184,13 +184,26 @@
         this.grid.rowHeaders.columns.splice(0, 1);
         this.grid.itemFormatter = function (panel, row, col, cell) {
           if (panel.cellType === wijmo.grid.CellType.Cell) {
-            let colName = panel.columns[col].binding;
+            const colName = panel.columns[col].binding;
+            const item = panel.rows[row].dataItem;
+
+            // 💡 병합 셀 여부 확인
+            const isMergedCell = !item || !item[colName];
+
+            // 👉 병합 셀이 아니면서, 업체명이 정확히 '전체'인 경우에만 스타일 적용
+            if (colName === 'company_name' && !isMergedCell && item[colName].trim() === '전체') {
+              cell.style.backgroundColor = '#f0f9ff';
+              cell.style.color = '#007acc';
+              cell.style.fontWeight = 'bold';
+            }
+
+            // 기존 중앙 정렬
             if (['mat_grp_name', 'mat_code', 'mat_name', 'unit_name'].includes(colName)) {
-              cell.style.textAlign = 'center';          // 수평 가운데
-              cell.style.verticalAlign = 'middle';      // 수직 가운데
-              cell.style.display = 'flex';              // flex로 정렬
-              cell.style.alignItems = 'center';         // 수직 정렬
-              cell.style.justifyContent = 'center';     // 수평 정렬
+              cell.style.textAlign = 'center';
+              cell.style.verticalAlign = 'middle';
+              cell.style.display = 'flex';
+              cell.style.alignItems = 'center';
+              cell.style.justifyContent = 'center';
             }
           }
         };

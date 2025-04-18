@@ -117,11 +117,11 @@
             { binding: 'mat_code', header: '제품코드', width: 200 ,allowMerging: true },
             { binding: 'mat_name', header: '제품명', width: 250 ,allowMerging: true },
             { binding: 'unit_name', header: '단위', width: 70, allowSorting: false },
-            { binding: 'tot_price_sum', header: '총발주액', width: '*', minWidth: 150,align: 'right', format: 'n0' },
+            { binding: 'tot_vat_sum', header: '총 부과세액', width: 100, align: 'right', format: 'n0' },
+            { binding: 'tot_price_sum', header: '총 공급가액', width: 100, align: 'right', format: 'n0' },
+            { binding: 'amount_sum', header: '총발주액', width: 100, align: 'right', format: 'n0' },
             { binding: 'tot_suju_sum', header: '총 발주량', width: 100, align: 'right', format: 'n0' },
             { binding: 'company_name', header: '업체', width: 250, allowSorting: false },
-            { binding: 'suju_sum', header: '발주량', width: 100, align: 'right', format: 'n0' },
-            { binding: 'price_sum', header: '발주액', width: 200, align: 'right', format: 'n0' },
           ],
           itemsSource: this.viewData,
         });
@@ -151,7 +151,8 @@
           footer.dataItem = {
             tot_price_sum: getSum('tot_price_sum'),
             tot_suju_sum: getSum('tot_suju_sum'),
-            suju_sum: getSum('suju_sum'),
+            amount_sum: getSum('amount_sum'),
+            tot_vat_sum: getSum('tot_vat_sum'),
             price_sum: getSum('price_sum'),
           };
         });
