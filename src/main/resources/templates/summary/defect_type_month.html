@@ -4,7 +4,7 @@
 
     <div class="page-title-wrap">
         <div class="left">
-            <h2>부적합 유형별 부적합률</h2>
+            <h2>부적합 집계 현황</h2>
             <a title="북마크" class="bookmark toggle">
                 내 메뉴
             </a>
@@ -12,7 +12,7 @@
         <ul class="page-navi">
             <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
             <li>생산공정관리</li>
-            <li>유형별월부적합률</li>
+            <li>부적합 집계 현황</li>
         </ul>
     </div>
     <section class="section">
@@ -248,7 +248,7 @@
                 autoGenerateColumns: false,
                 showMarquee: true,
                 isReadOnly: true,
-                frozenColumns: 8,
+                frozenColumns: 6,
                 formatItem: (sender, e) => {
                     if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                         e.cell.style.textAlign = 'center';
@@ -256,14 +256,15 @@
                 },
 
                 columns: [
-                    { binding: 'mat_type_name', header: '품목유형', width: 100 ,allowMerging: true },
-                    { binding: 'mat_grp_name', header: '품목그룹', width: 150 ,allowMerging: true },
+                    { binding: 'mat_type_name', header: '품목유형', width: 80 ,allowMerging: true },
+                    { binding: 'mat_grp_name', header: '품목그룹', width: 130 ,allowMerging: true },
                     { binding: 'mat_code', header: '품목코드', width: 150 ,allowMerging: true },
-                    { binding: 'mat_name', header: '품목명', width: 150 , allowSorting: false },
-                    { binding: 'unit_name', header: '부적합유형', width: 100, format: 'n0', align: 'right' },
-                    { binding: 'year_defect_pro', header: '연 부적합률(%)', width: 110, format: 'n0', align: 'right' },
-                    { binding: 'year_defect_qty', header: '연 부적합량', width: 100, allowSorting: false  },
-                    { binding: 'year_defect_money', header: '연 부적합금액', width: 100, allowSorting: false  },
+                    { binding: 'mat_name', header: '품목명', width: 150 , allowSorting: false, allowMerging: true },
+                    { binding: 'defect_type', header: '부적합유형', width: 100, align: 'right', allowMerging: true },
+                    { binding: 'year_defect_pro', header: '연 부적합률(%)', width: 110, format: 'n0', align: 'right'},
+                    // { binding: 'year_defect_pro', header: '연 부적합률(%)', width: 110, format: 'n0', align: 'right' },
+                    // { binding: 'year_defect_qty', header: '연 부적합량', width: 100, allowSorting: false  },
+                    // { binding: 'year_defect_money', header: '연 부적합금액', width: 100, allowSorting: false  },
                     ...Array.from({ length: 12 }, (_, i) => ({
                         binding: `mon_${i + 1}`,
                         header: `${i + 1}월`,
@@ -445,7 +446,7 @@
 
             for (let i = 0; i < result.data.length; i++) {
                 let defect_type = result.data[i]['defect_type'];
-                let defect_year_portion = Number(result.data[i]['year_portion']);
+                let defect_year_portion = Number(result.data[i]['year_defect_pro']);
                 updateSeries.series.push(defect_year_portion);
                 updateSeries.labels.push(defect_type);
             }
@@ -480,6 +481,10 @@
                     }
                 });
             }
+        }
+
+        ProductDBClick(){
+
         }
 
 

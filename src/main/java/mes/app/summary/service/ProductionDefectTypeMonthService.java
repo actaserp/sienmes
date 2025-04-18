@@ -105,11 +105,12 @@ public class ProductionDefectTypeMonthService {
 		return items;
 	}
 
-	public List<Map<String, Object>> getProductList(String cboYear, Integer cboMatType, Integer cboMatGrpPk,Integer txtProductId) {
+	public List<Map<String, Object>> getProductList(String cboYear, String cboMatType, Integer cboMatGrpPk, Integer txtProductId) {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("cboYear", cboYear);
 		paramMap.addValue("cboMatType", cboMatType);
 		paramMap.addValue("cboMatGrpPk", cboMatGrpPk);
+		paramMap.addValue("txtProductId", txtProductId);
 
 		String data_column = "";
 
@@ -118,7 +119,7 @@ public class ProductionDefectTypeMonthService {
 		paramMap.addValue("date_form",data_year+"-01-01" );
 		paramMap.addValue("date_to",data_year+"-12-31" );
 
-		data_column = "A.defect_qty";
+		data_column = "A.defect_pro";
 
 
 		String sql = """
@@ -143,7 +144,7 @@ public class ProductionDefectTypeMonthService {
                 and jr."State" = 'finished'
 				""";
 
-		if(cboMatType != null) {
+		if(cboMatType != null && !cboMatType.trim().isEmpty()) {
 			sql += """
 					and mg."MaterialType" = :cboMatType
 					""";
@@ -155,9 +156,15 @@ public class ProductionDefectTypeMonthService {
 					""";
 		}
 
+		if(txtProductId != null) {
+			sql += """
+					and m.id = :txtProductId
+					""";
+		}
+
 		sql += """
 				group by jr."Material_id", mg."MaterialType", mg."Name" , m."Name" , m."Code", m."UnitPrice"
-                , u."Name"
+                , u."Name", dt.id, dt."Name"
                 , extract (month from jr."ProductionDate") 
 	            )
 	            select A.mat_pk, A.mat_type_name, A.mat_grp_name, A.mat_code, A.mat_name, A.defect_type
@@ -175,7 +182,7 @@ public class ProductionDefectTypeMonthService {
 
 		sql += """ 
 				from A 
-				group by A.mat_pk, A.mat_type_name, A.mat_grp_name, A.mat_code, A.mat_name, A.unit_name
+				group by A.mat_pk, A.mat_type_name, A.mat_grp_name, A.mat_code, A.mat_name, A.unit_name, A.defect_type
 				""";
 
 		sql += """

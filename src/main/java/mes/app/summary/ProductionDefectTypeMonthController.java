@@ -38,7 +38,7 @@ public class ProductionDefectTypeMonthController {
 	@GetMapping("/readProduct")
 	public AjaxResult getProductionDetailDefectTypeMonthList(
 			@RequestParam(value="cboYear",required=false) String cboYear,
-			@RequestParam(value="cboMatType",required=false) Integer cboMatType,
+			@RequestParam(value="cboMatType",required=false) String cboMatType,
 			@RequestParam(value="cboMatGrpPk",required=false) Integer cboMatGrpPk,
 			@RequestParam(value="txtProductId",required=false) Integer txtProductId
 	) {
