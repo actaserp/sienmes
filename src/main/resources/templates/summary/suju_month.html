@@ -148,7 +148,7 @@
                     { binding: 'mat_name', header: '제품명', width: 150 ,allowMerging: true },
                     { binding: 'unit_name', header: '단위', width: 70 , allowSorting: false },
                     { binding: 'year_qty_sum', header: '연수주량', width: 100, format: 'n0', align: 'right' },
-                    { binding: 'year_money_sum', header: '연수주액', width: 100, format: 'n0', align: 'right' },
+                    { binding: 'year_money_sum', header: '연수주액', width: 150, format: 'n0', align: 'right' },
                     { binding: 'company_name', header: '업체', width: 200, allowSorting: false  },
                     ...Array.from({ length: 12 }, (_, i) => ({
                         binding: `mon_${i + 1}`,
@@ -180,6 +180,60 @@
                     }
                 }
             };
+            this.grid.itemFormatter = function (panel, row, col, cell) {
+                if (panel.cellType === wijmo.grid.CellType.Cell) {
+                    const colName = panel.columns[col].binding;
+                    const item = panel.rows[row].dataItem;
+
+                    //모든 셀 공통 초기화 (기존 스타일 제거)
+                    cell.style.backgroundColor = '';
+                    cell.style.color = '';
+                    cell.style.fontWeight = '';
+                    cell.style.textAlign = '';
+                    cell.style.verticalAlign = '';
+                    cell.style.display = '';
+                    cell.style.alignItems = '';
+                    cell.style.justifyContent = '';
+
+                    //'전체' 업체명인 셀만 스타일 적용
+                    if (
+                        colName === 'company_name' &&
+                        typeof item?.[colName] === 'string' &&
+                        item[colName].trim() === '소계'
+                    ) {
+                        cell.style.backgroundColor = '#f0f9ff';
+                        cell.style.color = '#007acc';
+                        cell.style.fontWeight = 'bold';
+                    }
+
+                    //중앙 정렬 컬럼
+                    if (['mat_grp_name', 'mat_code', 'mat_name', 'unit_name'].includes(colName)) {
+                        cell.style.textAlign = 'center';
+                        cell.style.verticalAlign = 'middle';
+                        cell.style.display = 'flex';
+                        cell.style.alignItems = 'center';
+                        cell.style.justifyContent = 'center';
+                    }
+                }
+            };
+
+            // ✅ Footer 패널 사용 설정
+            this.grid.columnFooters.rows.push(new wijmo.grid.Row());
+            this.grid.bottomLeftCells.setCellData(0, 0, '총합');
+
+            // ✅ Footer 합계 값 설정 (수동)
+            this.grid.loadedRows.addHandler(() => {
+                const rows = this.grid.rows;
+                const footer = this.grid.columnFooters.rows[0];
+
+                const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+
+                footer.dataItem = {
+                    year_qty_sum: getSum('year_qty_sum'),
+                    year_money_sum: getSum('year_money_sum'),
+                };
+            });
+
             new FlexGridContextMenu(this.grid);
             this.grid.downloadFileName = '월별수주량';
         }

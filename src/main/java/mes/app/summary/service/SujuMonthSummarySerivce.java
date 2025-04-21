@@ -89,7 +89,7 @@ public class SujuMonthSummarySerivce {
         union all 
         select 2 as grp_idx, mg."Name" as mat_grp_name, m."Code" as mat_code, m."Name" as mat_name, A.mat_pk
         , u."Name" as unit_name
-        , '전체' as company_name
+        , '소계' as company_name
 		, sum(A.qty_sum) as year_qty_sum	 
 		, sum(A.money_sum) as year_money_sum
 				""";
