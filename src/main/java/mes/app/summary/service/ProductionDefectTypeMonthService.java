@@ -130,10 +130,10 @@ public class ProductionDefectTypeMonthService {
 	            , fn_code_name('mat_type', mg."MaterialType") as mat_type_name, mg."Name" as mat_grp_name, m."Code" as mat_code, m."Name" as mat_name
                 , u."Name" as unit_name
 	            , extract (month from jr."ProductionDate") as data_month
-	            , coalesce(sum(jr."DefectQty"),0) as defect_qty
+	            , coalesce(sum(jrd."DefectQty"),0) as defect_qty
                 , sum(jr."DefectQty") * m."UnitPrice" as defect_money
 	            ,(coalesce(sum(jr."GoodQty"),0) + coalesce(sum(jr."DefectQty"),0)) as prod_sum
-	            , 100 * coalesce(sum(jr."DefectQty"),0) / nullif(coalesce(sum(jr."GoodQty"),0) + coalesce(sum(jr."DefectQty"),0),0 ) as defect_pro
+	            , 100 * coalesce(sum(jrd."DefectQty"),0) / nullif(coalesce(sum(jr."GoodQty"),0) + coalesce(sum(jr."DefectQty"),0),0 ) as defect_pro
 	            from job_res jr
 	            inner join material m on m.id = jr."Material_id"
 	            left join mat_grp mg on mg.id = m."MaterialGroup_id"
