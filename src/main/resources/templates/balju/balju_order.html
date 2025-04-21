@@ -202,7 +202,7 @@
                             <label for="BaljuVat">부가세액</label>
                         </th>
                         <td>
-                            <input class="form-control2 tar" type="text" id="BaljuVat" name="BaljuVat" onkeyup="numberBaljuQty(this.value)">
+                            <input class="form-control2 tar" type="text" id="BaljuVat" name="BaljuVat" onkeyup="numberBaljuQty(this.value)" readonly>
                             <input type="hidden" id="VatExempt" name="VatExempt" value="false">
                        </td>
                         <th style="text-align: center">
@@ -260,23 +260,40 @@
       let formatted = cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ',');// 쉼표 넣기
       $(targetSelector).val(formatted);// 값 넣기
     }
-
     function updateBaljuPrice() {
       const qtyStr = $('#SujuQty').val().replace(/,/g, '');
       const unitStr = $('#BaljuUnitPrice').val().replace(/,/g, '');
+      const isVatIncluded = $('#VatIncluded').is(':checked');
+      const isVatExempt = $('#VatExempt').val() === 'Y';
 
       const qty = parseFloat(qtyStr || 0);
       const unitPrice = parseFloat(unitStr || 0);
-      const isVatIncluded = $('#VatIncluded').is(':checked');
-
       const supplyPrice = qty * unitPrice;
-      const vat = isVatIncluded ? Math.round(supplyPrice * 0.1) : 0;
-      const totalPrice = supplyPrice + vat;
+
+      let vat = 0;
+      let totalPrice = supplyPrice;
+
+      if (isVatExempt) {
+        // 면세일 경우
+        $('#BaljuVat')
+          .val('면세')
+          .prop('readonly', true)
+          .css({ 'background-color': '', 'color': ''});
+      } else {
+        // 과세일 경우
+        vat = isVatIncluded ? Math.round(supplyPrice * 0.1) : 0;
+        totalPrice = supplyPrice + vat;
+
+        $('#BaljuVat')
+          .val(vat.toLocaleString())
+          .prop('readonly', false)
+          .css({ 'background-color': '', 'color': '', 'text-align': '' });
+      }
 
       $('#BaljuPrice').val(supplyPrice.toLocaleString());
-      $('#BaljuVat').val(vat.toLocaleString());
       $('#BaljuTotalPrice').val(totalPrice.toLocaleString());
     }
+
     function calculateFromTotalPrice() {
       const totalStr = $('#BaljuTotalPrice').val().replace(/,/g, '');
       const total = parseFloat(totalStr || 0);
@@ -288,31 +305,28 @@
       let vat = 0;
 
       if (isVatExempt) {
-        // 면세 → 부가세 없음
-        vat = 0;
+        vat = '면세';
         supply = total;
       } else {
         if (isVatIncluded) {
-          // 부가세 포함 → 총액에서 공급가 역산
+          // 총액이 부가세 포함된 금액일 경우 → 공급가 역산
           supply = Math.round(total / 1.1);
           vat = total - supply;
         } else {
-          // 부가세 별도 → 총액은 공급가로 간주, 부가세 추가
-          supply = total;
-          vat = Math.round(supply * 0.1);
+          // 총액 = 공급가 + 부가세 (부가세 별도이므로 역산 필요)
+          supply = Math.round(total / 1.1);
+          vat = total - supply;
         }
       }
 
       $('#BaljuPrice').val(supply.toLocaleString());
-      $('#BaljuVat').val(vat.toLocaleString());
+      $('#BaljuVat').val(
+        isVatExempt ? '면세' : vat.toLocaleString()
+      );
 
-      // 총액 필드도 다시 계산된 총합으로 보정 (선택사항)
-      if (!isVatExempt && !isVatIncluded) {
-        $('#BaljuTotalPrice').val((supply + vat).toLocaleString());
-      }
+      // 선택사항: 총액 필드 보정
+      // $('#BaljuTotalPrice').val((supply + vat).toLocaleString());
     }
-
-
 
     function numberSujuQty(x) {
       formatNumberInput(x, "#SujuQty");
@@ -519,6 +533,15 @@
             $product_code.val(item.Code);
             $MaterialGroupName.val(item.group_name);
             $isVatExempt = item.VatExemptionYN === 'Y';
+            // 부가세 UI 처리
+            if (item.VatExemptionYN === 'Y') {
+              $BaljuVat.prop('readonly', true).val('면세').css({ 'background-color': '', 'color': ''});
+              $('#VatExempt').val('Y');
+            } else {
+              $BaljuVat.prop('readonly', false).val('')
+                .css({ 'background-color': '', 'color': '', 'text-align': '' });
+              $('#VatExempt').val('N');
+            }
 
             if ($Material_id.val() && $cboCompany.val()) {
               tryShowBaljuPrice();
@@ -534,6 +557,15 @@
             console.log('btnCompanySearch', items);
             $content.find('#cboCompany').val(items.id);
             $content.find('#CompanyName').val(items.compname);
+            $isVatExempt = items.VatExemptionYN === 'Y';
+            if (items.VatExemptionYN === 'Y') {
+              $BaljuVat.prop('readonly', true).val('면세').css({ 'background-color': '', 'color': ''});
+              $('#VatExempt').val('Y');
+            } else {
+              $BaljuVat.prop('readonly', false).val('')
+                .css({ 'background-color': '', 'color': '', 'text-align': '' });
+              $('#VatExempt').val('N');
+            }
 
             if ($Material_id.val() && $cboCompany.val()) {
               tryShowBaljuPrice();
@@ -561,7 +593,7 @@
           };
 
           AjaxUtil.getAsyncData(url, data, function (result) {
-            console.log('[Ajax 응답 데이터]', result);
+            //console.log('[Ajax 응답 데이터]', result);
             if (result && result.data && result.data.length > 0) {
               const item = result.data[0];
               const unitPrice = item.UnitPrice || 0;
@@ -690,7 +722,8 @@
               data.SujuQty = data.SujuQty.replace(/,/g, '');
               data.BaljuPrice = data.BaljuPrice.replace(/,/g, '');
               data.BaljuUnitPrice = data.BaljuUnitPrice.replace(/,/g, '');
-              data.BaljuVat = data.BaljuVat.replace(/,/g, '');
+              data.BaljuVat = (data.BaljuVat === '면세') ? '0' : data.BaljuVat.replace(/,/g, '');
+              // data.BaljuVat = data.BaljuVat.replace(/,/g, '');
               data.BaljuTotalPrice = data.BaljuTotalPrice.replace(/,/g, '');
 
               console.log("📤 전송될 발주 데이터:", data);
@@ -778,8 +811,6 @@
         };
         AjaxUtil.getAsyncData(url, data, fnsuccess);
       }
-
-
     }
 
     let page = null;

@@ -70,9 +70,9 @@ public class BaljuOrderController {
       @RequestParam(value = "BaljuTotalPrice") Double totalAmount,
       HttpServletRequest request,
       Authentication auth	) {
-    log.info("발주 등록 요청: id={}, sujuQty={}, companyId={}, companyName={}, description={}, dueDate={}, jumunDate={}, materialId={}, 3" +
+    /*log.info("발주 등록 요청: id={}, sujuQty={}, companyId={}, companyName={}, description={}, dueDate={}, jumunDate={}, materialId={}, 3" +
             "availableStock={}, sujuType={}, BaljuUnitPrice={} , BaljuPrice={}, BaljuVat={} , isVat={}",
-        id, sujuQty, companyId, companyName, description, dueDate, jumunDate, materialId, availableStock, sujuType, BaljuUnitPrice, BaljuPrice, BaljuVat,isVat);
+        id, sujuQty, companyId, companyName, description, dueDate, jumunDate, materialId, availableStock, sujuType, BaljuUnitPrice, BaljuPrice, BaljuVat,isVat);*/
     User user = (User)auth.getPrincipal();
 
     Balju balju = null;
