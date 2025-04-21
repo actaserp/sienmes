@@ -36,13 +36,13 @@ public class EquipmentRunChartService {
 	            , er."EndDate"
 	            , to_char(er."EndDate",'HH24:MI') as "EndTime"
 	            , EXTRACT(day from (er."EndDate" - er."StartDate")) * 60 * 24
-	                + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60 
-	                + EXTRACT(min from ("EndDate" - "StartDate")) as "GapTime"
-                , er."WorkOrderNumber" 
-	            , er."Equipment_id" 
-	            , er."RunState" 
-                , sc."StopCauseName" 
-                , er."Description" 
+	                + EXTRACT(hour from (er."EndDate" - er."StartDate")) * 60
+	                + EXTRACT(min from ("EndDate" - "StartDate")) as "Runtime"
+                , er."WorkOrderNumber"
+	            , er."Equipment_id"
+	            , er."RunState"
+                , sc."StopCauseName"
+                , er."Description"
                 , er."StopCause_id"
                 from equ_grp eg
                 inner join equ e on eg.id = e."EquipmentGroup_id"
@@ -59,9 +59,11 @@ public class EquipmentRunChartService {
 	        dicParam.addValue("date_to", Timestamp.valueOf(date_to + " 23:59:59"));
 			
 			sql += """
-	        		and er."StartDate" <= :date_to
-					and er."EndDate" >= :date_from
-        		""";
+	        		AND (
+	        			(er."StartDate" <= :date_to) AND
+	        			(er."EndDate" IS NULL OR er."EndDate" >= :date_from)
+	        		)
+     """;
 		}
 		
 		sql += " order by e.\"Name\", er.\"StartDate\", er.\"EndDate\"";

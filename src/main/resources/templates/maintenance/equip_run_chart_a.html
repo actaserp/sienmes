@@ -8,6 +8,14 @@
             width: 150px !important;
         }
 
+        /*.wj-cell.wj-group {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            padding: 0 !important;
+        }*/
+
     </style>
 </head>
 <th:block layout:fragment="content">
@@ -88,7 +96,7 @@
                     </div>
                 </div>
                 <div class="container-fluid">
-                    <div id="theGrid" style="height: 300px;"></div>
+                    <div id="theGrid" style="height: 330px;"></div>
 
                 </div>
 
@@ -102,7 +110,7 @@
 
         <section class="">
             <div class="card card-default  mb-2">
-                <div class="card-wrapper" style="max-height: 450px; transition: max-height 0.5s ease 0s; position:relative; ">
+                <div class="card-wrapper" style="max-height: 420px; transition: max-height 0.5s ease 0s; position:relative; ">
                     <div class="card-body">
                         <div class="flot-chart" style="padding: 0px; position: relative;">
                             <div id="chart" class="chart-canvas"></div>
@@ -160,24 +168,20 @@
                             <td>
                                <select id="Equipment_id" name="Equipment_id" ></select>
                             </td>
-                            <th style="text-align: center">
-                                <label for="RunState">상태</label>
-                            </th>
-                            <td>
-                                <select id="RunState" name="RunState"></select>
-                            </td>
-                        </tr>
 
-                        <tr>
                             <th style="text-align: center">
                                 <label for="end_date">비가동유형</label>
                             </th>
                             <td>
                                <select id="StopCause_id" name="StopCause_id" ></select>
                             </td>
-
+                            <!--<th style="text-align: center">
+                                <label for="RunState">상태</label>
+                            </th>
+                            <td>
+                                <select id="RunState" name="RunState"></select>
+                            </td>-->
                         </tr>
-
                         <tr>
                             <th style="text-align: center">
                                 <label for="description">비고</label>
@@ -289,19 +293,21 @@
 
 
                 this.grid = new wijmo.grid.FlexGrid('#theGrid', {
-                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    selectionMode: wijmo.grid.SelectionMode.Cell,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    allowMerging: wijmo.grid.AllowMerging.All,
                     autoGenerateColumns: false,
                     showMarquee: true,
                     isReadOnly: true,
                     columns: [
-                        {binding: 'Name', header: '설비', width: '*', align : 'left'},
+                        {binding: 'Name', header: '설비', width: '*', align : 'center', allowMerging: true},
                         {binding: 'RunState', header: '상태', width: '*', align: 'center'},
                         {binding: 'start_date', header: '시작일자', width: '*', align: 'left'},
                         {binding: 'StartTime', header: '시작시간', width: '*', align: 'center'},
                         {binding: 'end_date', header: '종료일자', width: '*', align: 'center'},
                         {binding: 'EndTime', header: '종료시간', width: '*', align: 'center'},
-                        {binding: 'GapTime', header: '소요시간(분)', width: '*', align: 'center'},
+                        {binding: 'Runtime', header: '가동시간(분)', width: '*', align: 'center'},
+                        {binding: 'GapTime', header: '비가동시간(분)', width: '*', align: 'center'},
                         {binding: 'StopCauseName', header: '비가동유형', width: '*', align: 'left'},
                         {binding: 'Description', header: '비고', width: '*', align: 'center'},
 
@@ -311,6 +317,37 @@
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '가동/비가동차트';
 
+                this.grid.formatItem.addHandler(function (s, e) {
+                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                        const item = s.rows[e.row].dataItem;
+
+                        //  1. 항상 스타일 초기화
+                        e.cell.style.backgroundColor = '';
+                        e.cell.innerHTML = e.cell.textContent; // merge 셀도 초기화 필요
+
+                        //  2. stop 상태일 때만 회색 배경
+                        if (item && item.RunState === 'stop') {
+                            e.cell.style.backgroundColor = '#e0e0e0';
+                        }
+
+                        // 3. 병합된 셀은 중앙 정렬
+                        const rng = s.getMergedRange(e.panel, e.row, e.col);
+                        const isMergedCell = rng && (rng.rowSpan > 1 || rng.colSpan > 1);
+
+                        if (isMergedCell) {
+                            const text = e.cell.textContent;
+                            e.cell.innerHTML = ''; // 기존 내용 지움
+                            const inner = document.createElement('div');
+                            inner.style.display = 'flex';
+                            inner.style.alignItems = 'center';
+                            inner.style.justifyContent = 'center';
+                            inner.style.height = '100%';
+                            inner.style.width = '100%';
+                            inner.textContent = text;
+                            e.cell.appendChild(inner);
+                        }
+                    }
+                });
 
 
 
@@ -332,7 +369,7 @@
 
                 if (result.data) {
                     _this.viewData.sourceCollection = result.data;
-
+                    _this.grid.invalidate();
                     // xaxis 변경
                     this.chart.updateOptions({
                         xaxis: {
@@ -560,10 +597,10 @@
                 } else if (!data.Equipment_id) {
                     Alert.alert('', '설비를 선택해주세요.');
                     return;
-                } else if (!data.RunState) {
+                } /*else if (!data.RunState) {
                     Alert.alert('', '상태를 선택해주세요.');
                     return;
-                }
+                }*/
 
                 // 비가동 유형 필수 선택?
                 //if (data.RunState == 'X') {

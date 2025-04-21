@@ -1,13 +1,18 @@
 package mes.app.production;
 
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,11 +47,78 @@ public class EquipmentRunChartController {
     		@RequestParam(value="id", required=false) Integer id,
     		@RequestParam(value="runType", required=false) String runType,
 			HttpServletRequest request) {
-		
+
+
+
 		List<Map<String, Object>> items = this.equipmentRunChartService.getEquipmentRunChart(date_from, date_to, id, runType);      
-        AjaxResult result = new AjaxResult();
-        result.data = items;        
-		return result;
+
+		Map<String, List<Map<String, Object>>> groupedItems = items.stream()
+				.collect(Collectors.groupingBy(item -> item.get("Name").toString(), LinkedHashMap::new, Collectors.toList()));
+
+		List<Map<String, Object>> result = new ArrayList<>();
+
+		for(Map.Entry<String, List<Map<String, Object>>> entry : groupedItems.entrySet()){
+
+			String name = entry.getKey();
+
+			List<Map<String, Object>> itemList = entry.getValue();
+
+
+			for(int i=0; i < itemList.size(); i++){
+				Map<String, Object> current = itemList.get(i);
+				String StopCause = current.get("StopCauseName") == null ? "" : current.get("StopCauseName").toString();
+
+				current.put("StopCauseName", "");
+				current.put("RunState", "run");
+
+				result.add(current);
+
+				Timestamp endDate = (Timestamp) current.get("EndDate");
+
+				if(endDate == null){
+					continue;
+				}
+				Map<String, Object> idleRow = new LinkedCaseInsensitiveMap<>();
+
+				if(i < itemList.size() - 1){
+
+					Map<String, Object> next = itemList.get(i + 1);
+
+					if(!current.get("Name").equals(next.get("Name"))) continue;
+
+
+					Timestamp nextStart = (Timestamp) next.get("StartDate");
+
+					long idleMinutes = Duration.between(endDate.toInstant(), nextStart.toInstant()).toMinutes();
+
+
+					idleRow.put("Name", current.get("Name"));
+					idleRow.put("GapTime", idleMinutes);
+					idleRow.put("RunState", "stop");
+					idleRow.put("start_date", current.get("end_date"));
+					idleRow.put("StartTime", current.get("EndTime"));
+					idleRow.put("end_date", next.get("start_date"));
+					idleRow.put("EndTime", next.get("StartTime"));
+					idleRow.put("StopCauseName", StopCause);
+
+					result.add(idleRow);
+
+				}else if(i == itemList.size() - 1){
+
+					idleRow.put("Name", current.get("Name"));
+					idleRow.put("RunState", "stop");
+					idleRow.put("start_date", current.get("end_date"));
+					idleRow.put("StartTime", current.get("EndTime"));
+					idleRow.put("StopCauseName", StopCause);
+
+					result.add(idleRow);
+				}
+			}
+		}
+
+		AjaxResult result2 = new AjaxResult();
+        result2.data = result;
+		return result2;
 	}
 	
 	// 차트 fillData
@@ -95,7 +167,7 @@ public class EquipmentRunChartController {
 		er.setEquipmentId(Equipment_id);
 		er.setStartDate(startDate);
 		er.setEndDate(endDate);
-		er.setRunState(RunState);
+		er.setRunState("run");
 		er.setDescription(Description);
 		er.setStopCauseId(StopCause_id);
 		er.set_audit(user);
