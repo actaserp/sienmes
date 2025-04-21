@@ -207,8 +207,9 @@ public class CompanyController {
 	@GetMapping("/read_price_history")
 	public AjaxResult getPriceHistoryByComp(
 			@RequestParam("comp_id") int companyId,
+			@RequestParam("code") String Code,
 			HttpServletRequest request) {
-		List<Map<String, Object>> items = this.companyService.getPriceHistoryByComp(companyId);
+		List<Map<String, Object>> items = this.companyService.getPriceHistoryByComp(companyId,Code);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;

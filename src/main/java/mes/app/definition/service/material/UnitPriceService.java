@@ -44,7 +44,8 @@ public class UnitPriceService {
             from mat_comp_uprice mcu 
             where mcu."Material_id" = :mat_pk
             )
-            select A.id, A."Company_id"
+            select A.id
+            , A."Company_id"
             , c."Name" as "CompanyName"
             , A."UnitPrice" 
             , A."FormerUnitPrice" 

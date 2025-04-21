@@ -1,6 +1,9 @@
 package mes.app.definition.service;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +24,28 @@ public class PriceService {
 	public int saveCompanyUnitPrice(MultiValueMap<String, Object> data) {
 		Integer materialId = CommonUtil.tryIntNull(data.getFirst("Material_id"));
 		Integer companyId = CommonUtil.tryIntNull(data.getFirst("Company_id"));
-		Timestamp applyStartDate = CommonUtil.tryTimestamp(data.getFirst("ApplyStartDate"));
-		Timestamp applyEndDate = CommonUtil.tryTimestamp("2100-12-31");
+
+		String applyStartDateStr = CommonUtil.tryString(data.getFirst("ApplyStartDate"));
+		LocalDateTime applyStartDateLocal = LocalDateTime.parse(applyStartDateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		Timestamp applyStartDate = Timestamp.valueOf(applyStartDateLocal);
+
+		// 현재 날짜와 비교하여 ApplyEndDate 설정
+		LocalDate applyStartDateDate = applyStartDateLocal.toLocalDate();
+		LocalDate today = LocalDate.now();
+
+		Timestamp applyEndDate;
+		if (!applyStartDateDate.equals(today)) {
+			// 날짜가 다르면 하루 전 날짜로 설정 (시간은 00:00:00)
+			applyEndDate = Timestamp.valueOf(applyStartDateDate.minusDays(1).atStartOfDay());
+		} else {
+			// 날짜가 같으면 ApplyStartDate 그대로 사용
+			applyEndDate = applyStartDate;
+		}
+
+
+
+		/*Timestamp applyStartDate = CommonUtil.tryTimestamp(data.getFirst("ApplyStartDate"));*/
+		Timestamp applyEndDate2 = CommonUtil.tryTimestamp("2100-12-31");
 		Float unitPrice = CommonUtil.tryFloatNull(data.getFirst("UnitPrice"));
 		String changerName = CommonUtil.tryString(data.getFirst("ChangerName"));
 		String type = CommonUtil.tryString(data.getFirst("type"));
@@ -33,6 +56,7 @@ public class PriceService {
 		dicParam.addValue("companyId", companyId);
 		dicParam.addValue("applyStartDate", applyStartDate, java.sql.Types.TIMESTAMP);
 		dicParam.addValue("applyEndDate", applyEndDate, java.sql.Types.TIMESTAMP);
+		dicParam.addValue("applyEndDate2", applyEndDate2, java.sql.Types.TIMESTAMP);
 		dicParam.addValue("unitPrice", unitPrice);
 		dicParam.addValue("changerName", changerName);
 		dicParam.addValue("userId", userId);
@@ -54,12 +78,12 @@ public class PriceService {
 		}
 		
 		sql = """
-				update mat_comp_uprice
-                set "ApplyEndDate" = (:applyStartDate)::timestamp - interval '1 days'
-                where "Material_id" = :materialId
-                and "Company_id" = :companyId
-                and :applyStartDate between "ApplyStartDate" and "ApplyEndDate"
-				""";
+			update mat_comp_uprice
+			set "ApplyEndDate" = :applyEndDate
+			where "Material_id" = :materialId
+			and "Company_id" = :companyId
+			and :applyStartDate between "ApplyStartDate" and "ApplyEndDate"
+        """;
 		
 		this.sqlRunner.execute(sql, dicParam);
 		
@@ -82,7 +106,7 @@ public class PriceService {
 				, :materialId 
 				, :companyId
 				, :applyStartDate
-				, :applyEndDate
+				, :applyEndDate2
 				, :unitPrice
 				, :formerUnitPrice
 				, now()

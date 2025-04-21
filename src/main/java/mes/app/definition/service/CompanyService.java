@@ -133,12 +133,14 @@ public class CompanyService {
             (
                 select mcu.id 
                 , mcu."Material_id" 
+                , mcu."Company_id"
                 , mcu."UnitPrice" 
                 , mcu."FormerUnitPrice" 
                 , mcu."ApplyStartDate"
                 , mcu."ApplyEndDate"
                 , mcu."ChangeDate"
                 , mcu."ChangerName" 
+                , mcu."Type"
                 , row_number() over (partition by mcu."Company_id" order by mcu."ApplyStartDate" desc) as g_idx
                 , now() between mcu."ApplyStartDate" and mcu."ApplyEndDate" as current_check
                 , now() < mcu."ApplyStartDate" as future_check
@@ -157,7 +159,9 @@ public class CompanyService {
             , A."ApplyStartDate"::date as apply_start_date
             , A."ApplyEndDate"::date as apply_end_date
             , A."ChangeDate" as change_date
-            , A."ChangerName" as changer_name 
+            , A."ChangerName" as changer_name
+            , A."Company_id"
+            , A."Type" as type
             from A 
             inner join material m on m.id = A."Material_id"
             left join mat_grp mg on mg.id = m."MaterialGroup_id"
@@ -184,8 +188,10 @@ public class CompanyService {
             , mcu."Company_id" 
             , mcu."UnitPrice"
             , "FormerUnitPrice"
-            , to_char(mcu."ApplyStartDate", 'yyyy-mm-dd') as "ApplyStartDate"
-            , to_char(mcu."ApplyEndDate", 'yyyy-mm-dd') as "ApplyEndDate"
+            , mcu."ApplyStartDate" as "ApplyStartDate"
+            , mcu."ApplyEndDate" as "ApplyEndDate"
+            , mcu."Type" as type
+            , m."Name" as mat_name
             from mat_comp_uprice mcu 
             inner join material m on m.id = mcu."Material_id" 
             where 1 = 1
@@ -199,10 +205,11 @@ public class CompanyService {
 	
 	
 	// 품목별 단가 히스토리 리스트 조회
-	public List<Map<String, Object>> getPriceHistoryByComp(int companyId) {
+	public List<Map<String, Object>> getPriceHistoryByComp(int companyId, String Code) {
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("comp_id", companyId);
+		dicParam.addValue("code", Code);
 		
 		String sql = """
 			select mcu.id 
@@ -225,6 +232,8 @@ public class CompanyService {
             left join unit u on u.id = m."Unit_id"
             where 1=1
             and mcu."Company_id" = :comp_id
+            and m."Code" = :code
+            
             order by m."Name", mcu."ApplyStartDate" desc 
 			""";
 		

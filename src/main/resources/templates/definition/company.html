@@ -37,16 +37,15 @@
 
         <div class="page-title-wrap">
             <div class="left">
-                <h2>업체 정보</h2>
+                <h2>거래처 정보</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>시스템설정</li>
                 <li>기준정보</li>
-                <li>업체정보</li>
+                <li>거래처정보</li>
             </ul>
         </div>
 
@@ -383,7 +382,7 @@
                                         </th>
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                             <input type="number" style="width: 100%;" id="receivable_amount"
-                                                   name="receivable_amount">
+                                                   name="receivable_amount" disabled>
                                         </td>
 
                                         <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
@@ -391,7 +390,7 @@
                                         </th>
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                             <input type="number" style="width: 100%;" id="unpaid_amount"
-                                                   name="unpaid_amount">
+                                                   name="unpaid_amount" disabled>
                                         </td>
                                     </tr>
 
@@ -556,6 +555,29 @@
             </div>
         </section>
     </div>
+
+    <script type="text/x-tmpl" id="CompanyTemplate">
+        <div class="content_wrap popup">
+            <!--<header>
+                <h4 id="popTitle">
+                {% if (o.id!='') { %}
+                  BOM 수정({%=o.Name%})
+                  {% } else { %}
+                  BOM 등록
+                  {% } %}
+                </h4>
+                <div class="popup_close_box"><button class="btn_popup_close" id="modal-close-x"><i class="fas fa-times"></i></button></div>
+            </header>-->
+
+            <div class="grid_box" style="margin-top: 10px;">
+                <div id="price-history-grid" style="height: 400px; max-height: 400px;"></div>
+           </div>
+
+        <div class="popup-button">
+          <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+        </div>
+    </div>
+    </script>
 </th:block>
 
 <th:block layout:fragment="scripts">
@@ -571,6 +593,7 @@
                 this.url = '/api/definition/company'
                 this.viewData = new wijmo.collections.CollectionView();
                 this.viewData2 = new wijmo.collections.CollectionView();
+                this.viewData4 = new wijmo.collections.CollectionView();
                 //this.setCboItem();
                 this.init();
             }
@@ -694,8 +717,7 @@
                     if (hitTest.cellType === wijmo.grid.CellType.Cell) {
                         let row = hitTest.row;
                         let selectedItem = this.grid.rows[row].dataItem;
-                        /*_this.showPriceList(selectedItem.id)*/
-                        _this.showPriceHistoryList(selectedItem.id)
+                        _this.showPriceList(selectedItem.id)
                     }
                 });
 
@@ -805,8 +827,7 @@
                         {binding: 'apply_start_date', header: '적용시작일', width: 120, align: 'center',},
                         {binding: 'apply_end_date', header: '적용종료일', width: 120, align: 'center',},
                         {binding: 'changer_name', header: '변경자', width: 120, align: 'center',},
-                        {binding: 'change_date', header: '변경일', width: 200, align: 'center',},
-                        {binding: '', header: '', width: "*", align: 'center',},
+                        {binding: 'change_date', header: '변경일', width: '*', align: 'center',},
                     ],
                     itemsSource: this.viewData2, // 데이터를 설정할 배열
                 });
@@ -818,9 +839,8 @@
                         let row = hitTest.row;
                         let selectedItem = this.price_grid.rows[row].dataItem;
                         /*console.log(selectedItem);*/
-
                         /*_this.showPriceDetail(selectedItem.mcu_id);*/
-                        _this.showPriceDetail(selectedItem.id);
+                        _this.showPriceDetail(selectedItem.mcu_id);
 
                     }
                 });
@@ -830,10 +850,8 @@
                         let col = s.columns[e.col];
                         let item = s.rows[e.row].dataItem;
 
-
-                        // 거래중지여부 (1 → 'Y', 0 또는 null → 'N')
                         if (col.binding === "type") {
-                            e.cell.textContent = (item.type === '01' || item.type === '02') ? '매입' : '매출';
+                            e.cell.textContent = (item.type === '01') ? '매입' : '매출';
                         }
                     }
                 });
@@ -951,7 +969,7 @@
                 };
                 let result = AjaxUtil.getSyncData(this.url + '/read', data);
                 if (result != null) {
-                    console.log(result.data);
+                    /*console.log(result.data);*/
                     _this.viewData.sourceCollection = result.data;
                 }
 
@@ -979,17 +997,37 @@
                     'company_id': company_id
                 };
                 let result = AjaxUtil.getSyncData(this.url + '/mat_price_list', data);
-                /*if (result != null) {
-                    _this.price_grid.setData({
-                        list: result.data,
-                        page: {
-                            display: true,
-                            totalElements: result.data.length,
+console.log(result.data);
+                if (result != null) {
+                    result.data.forEach(item => {
+                        // Date 객체 추가 (문자열 기반 정렬은 정확하지 않아서)
+                        item.ApplyEndDateObj = new Date(item.apply_end_date);
+
+                        // ApplyEndDate가 2100-12-31이면 sortFlag로 지정
+                        item.sortFlag = item.apply_end_date === "2100-12-31" ? 0 : 1;
+                    });
+
+                    _this.viewData2.sourceCollection = result.data;
+
+                    // 정렬 순서: 1. 업체명(오름차순), 2. sortFlag(오름차순), 3. 날짜(내림차순)
+                    _this.viewData2.sortDescriptions.clear();
+                    _this.viewData2.sortDescriptions.push(new wijmo.collections.SortDescription('mat_name', true));      // 업체명 A → Z
+                    _this.viewData2.sortDescriptions.push(new wijmo.collections.SortDescription('sortFlag', true));         // 2100-12-31 우선
+                    _this.viewData2.sortDescriptions.push(new wijmo.collections.SortDescription('ApplyEndDateObj', false)); // 최신 날짜 우선
+
+                    $('#priceForm')[0].reset();
+                    $('#priceForm').find('#price_id').val('');
+                    $('#priceForm').find('input, select').each(function () {
+                        if (!$(this).is(':disabled')) {
+                            $(this).attr('disabled', 'disabled');
                         }
                     });
-                }*/
-                _this.viewData2.sourceCollection = result.data;
-                page.setPriceButtonState();
+
+                    _this.setPriceButtonState();
+                }
+
+               /* _this.viewData2.sourceCollection = result.data;
+                page.setPriceButtonState();*/
             }
 
             // 품목별 단가히스토리 리스트 조회
@@ -1003,7 +1041,7 @@
 
                 let result = AjaxUtil.getSyncData(this.url + '/read_price_history', data);
                 if (result != null) {
-                    console.log(result.data);
+                    /*console.log(result.data);*/
                     _this.viewData2.sourceCollection = result.data;
 
                     $('#priceForm')[0].reset();
@@ -1021,19 +1059,26 @@
             // 단가 상세 조회
             showPriceDetail(mcu_id) {
                 let param = { 'id': mcu_id };
-                console.log("Ajax 요청 파라미터:", param);
-
                 let result = AjaxUtil.getSyncData(this.url + '/detail_price', param);
                 if (result != null) {
+                    console.log(result.data);
                     //FormUtil.BindDataForm(result, $('#priceForm'));
-
-                    $('#priceForm').find('#price_id').val(result.data.price_id);
-                    $('#priceForm').find('#MaterialGroup_id').val(result.data.MaterialGroup_id);
+                    FormUtil.BindDataForm(result.data, $('#priceForm'));
                     $('#priceForm').find('#MaterialGroup_id').trigger('change');
-                    $('#priceForm').find('#Material_id').val(result.data.Material_id);
-                    $('#priceForm').find('#UnitPrice').val(result.data.UnitPrice);
-                    $('#priceForm').find('#ApplyStartDate').val(result.data.ApplyStartDate);
 
+                    // ApplyStartDate를 UTC에서 한국시간(KST)으로 변환하여 datetime-local 포맷으로 설정
+                    let applyStartDate = result.data.ApplyStartDate;
+                    if (applyStartDate) {
+                        let date = new Date(applyStartDate);
+                        date.setHours(date.getHours() + 9);
+
+                        // YYYY-MM-DD 형식으로 변환
+                        let formattedDate = date.toISOString().substring(0, 10);
+
+                        $('#ApplyStartDate').val(formattedDate);
+                    }
+
+                    $('#priceForm').find('#Material_id').val(result.data.Material_id).trigger('change');
 
                     $('#priceForm').find('input, select').each(function () {
                         $(this).removeAttr('disabled'); // disabled 속성 제거
@@ -1052,16 +1097,24 @@
                 let url = this.url + '/save_price';
                 let data = FormUtil.extractForm($('#priceForm'));
 
+                // ApplyStartDate 가공해서 다시 설정
+                let applyDate = data.ApplyStartDate; // YYYY-MM-DD
+                if (applyDate) {
+                    let now = new Date();
+                    let hh = String(now.getHours()).padStart(2, '0');
+                    let mm = String(now.getMinutes()).padStart(2, '0');
+                    let ss = String(now.getSeconds()).padStart(2, '0');
+                    data.ApplyStartDate = `${applyDate}T${hh}:${mm}:${ss}`;
+                }
 
 
                 let fnSuccess = function (res) {
-                    console.log(res); // 서버 응답 확인
+                    /*console.log(res);*/ // 서버 응답 확인
                     if (!res.success) {
                         Alert.alert('', '저장실패하였습니다.');
                     } else {
                         Alert.alert('', '저장되었습니다');
-                        _this.showPriceList(comp_id);
-                        _this.showPriceHistoryList(comp_id)
+                        _this.showPriceList(comp_id)
                     }
                 };
 
@@ -1075,9 +1128,8 @@
                     }
                 });
 
-                let mat_id = $('#Material_id').val();
+                /*let mat_id = $('#Material_id').val();
                 let price_grid = this.price_grid.itemsSource;
-
 
                 // price_grid가 undefined이면 빈 배열로 초기화
                 if (!price_grid || !Array.isArray(price_grid)) {
@@ -1093,7 +1145,7 @@
                     Alert.alert('', '적용 시작일을 확인해주세요.');
                     $('#ApplyStartDate').focus();
                     return;
-                }
+                }*/
 
 
                 data['Company_id'] = comp_id;
@@ -1244,6 +1296,65 @@
                 }
                 return false;
             }
+
+
+            showpriceEdit(data) {
+                let _this = this;
+                let content = tmpl('CompanyTemplate', data);
+                let $content = $(content);
+
+                let modalContainer = new PopupDraggable('히스토리 조회');
+                modalContainer.open({ width: 1025, height: 500, $content });
+
+                let target = $content.find('#price-history-grid');
+                _this.viewData4 = data || [];
+
+                setTimeout(() => {
+                    _this.grid4 = new wijmo.grid.FlexGrid('#price-history-grid', {
+                        selectionMode: wijmo.grid.SelectionMode.Row,
+                        headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                        autoGenerateColumns: false,
+                        showMarquee: true,
+                        isReadOnly: false,
+                        formatItem: (sender, e) => {
+                            if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                                e.cell.style.textAlign = 'center';
+                            }
+                        },
+                        columns: [
+                            {binding: 'mat_type_name', header: '품목유형', width: 100, align: 'center',},
+                            {binding: 'mat_grp_name', header: '품목그룹', width: 100, align: 'center',},
+                            {binding: 'mat_code', header: '품목코드', width: 100, align: 'center',},
+                            {binding: 'mat_name', header: '품목명', width: 150, align: 'center',},
+                            {binding: 'unit_name', header: '단위', width: 80, align: 'center',},
+                            {binding: 'type', header: '구분', width: 120, align: 'center',},
+                            {binding: 'unit_price', header: '단가', width: 120, align: 'right',},
+                            {binding: 'former_unit_price', header: '이전단가', width: 120, align: 'right',},
+                            {binding: 'apply_start_date', header: '적용시작일', width: 120, align: 'center',},
+                            {binding: 'apply_end_date', header: '적용종료일', width: 120, align: 'center',},
+                            {binding: 'changer_name', header: '변경자', width: 120, align: 'center',},
+                            {binding: 'change_date', header: '변경일', width: '*', align: 'center',},
+                        ],
+                        itemsSource: _this.viewData4
+                    });
+
+                    this.grid4.formatItem.addHandler((s, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            let col = s.columns[e.col];
+                            let item = s.rows[e.row].dataItem;
+
+                            if (col.binding === "type") {
+                                e.cell.textContent = (item.type === '01') ? '매입' : '매출';
+                            }
+                        }
+                    });
+
+                    let $btnTest = $content.find('#btnTest');
+                    $btnTest.click(function () {
+                        _this.grid4.collectionView.refresh();
+                    });
+                }, 0);
+            }
         }
 
         let page = null;
@@ -1305,9 +1416,30 @@
 
             // 단가 히스토리버튼
             $('#btnPriceHistory').click(function (e) {
-                let company_id = $('#basicForm').find('#id').val();
+                let price_grid= wijmo.Control.getControl('#price_grid');
+                let selectedRow = price_grid.selection.row;
 
-                //let mat_id = $('#materialBasicForm').find('#id').val();
+                let selectedItem = price_grid.rows[selectedRow].dataItem;
+                /*console.log(selectedItem);*/
+                let id = selectedItem.Company_id;
+                let id2 = selectedItem.mat_code;
+                let data = {
+                    'comp_id': id,
+                    'code': id2
+                }
+
+                let url = '/api/definition/company/read_price_history';
+                let result = AjaxUtil.getSyncData(url, data);
+
+                if (result.success) {
+                    page.showpriceEdit(result.data);
+                } else {
+                    Alert.alert('', "오류가 발생했습니다.");
+                }
+
+
+               /* let company_id = $('#basicForm').find('#id').val();
+
                 if (company_id) {
                     // 기존 #type 값 저장
                     let selectedType = $("#type").val();
@@ -1316,13 +1448,13 @@
 
                     // reset() 후 다시 기존 값 설정
                     $("#type").val(selectedType).change();
-                }
+                }*/
             });
 
             // 단가정보 신규버튼
             $('#btnNewPrice').click(function (e) {
                 // 단가 상세정보 리셋
-                //$('#priceForm')[0].reset();
+                $('#priceForm')[0].reset();
                 $('#priceForm').find('#price_id').val('');
 
                 $('#priceForm').find('input, select').each(function () {
@@ -1336,8 +1468,8 @@
                 //page.setPriceButtonDisabled(true, false, true);
                 page.setPriceButtonState();
 
-                let today_string = CommonUtil.getYYYYMMDD();
-                $('#priceForm').find('#ApplyStartDate').val(today_string); //오늘날짜
+                $('#ApplyStartDate').val(CommonUtil.getYYYYMMDD());
+
             });
 
             // 단가등록/변경 버튼
@@ -1430,41 +1562,6 @@
                     $(".button-wrap.button-list").show();
                 }
             });
-
-            /*   // 엑셀 다운로드
-               $('#btnExcel1').click(function (e) {
-                   page.grid1.exportExcel('업체정보.xls');
-               });
-               $('#btnExcel2').click(function (e) {
-                   page.price_grid.exportExcel('품목단가.xls');
-               });
-
-               //그리드 컬럼 설정
-               page.popColSetting = new popColSetting();
-               let columns1 = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid1', page.grid1);
-               let columns2 = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid2', page.price_grid);
-
-               if (userinfo.group_code == 'admin') {
-                   $('#btnGridSetting1').css('visibility', 'visible');
-                   $('#btnGridSetting2').css('visibility', 'visible');
-               }
-
-               $('#btnGridSetting1').click(function (e) {
-                   let _this = this;
-                   let fix_cols = page.grid_config1.frozenColumnIndex;
-                   page.popColSetting.show(gui.gui_code, gui.template_key, 'grid1', page.grid_config1.columns, page.grid1, {
-                       'order_fix': false,
-                       'fix_cols': fix_cols
-                   });
-               });
-               $('#btnGridSetting2').click(function (e) {
-                   let _this = this;
-                   let fix_cols = page.grid_config2.frozenColumnIndex;
-                   page.popColSetting.show(gui.gui_code, gui.template_key, 'grid2', page.grid_config2.columns, page.price_grid, {
-                       'order_fix': false,
-                       'fix_cols': fix_cols
-                   });
-               });*/
 
             page.searchMainData1();
 

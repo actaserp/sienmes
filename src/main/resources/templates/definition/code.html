@@ -29,7 +29,6 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>시스템설정</li>
                 <li>기준정보</li>
                 <li>코드정보</li>
             </ul>
@@ -37,15 +36,15 @@
 
         <div class="tab-wrap">
             <ul class="tab-links">
-                <li>
-                    <a href="#tab1" title="사용자코드">사용자코드</a>
-                </li>
+                <!--<li>
+                    <a href="#tab1" title="사용자코드" >사용자코드</a>
+                </li>-->
                 <li>
                     <a href="#tab2" title="시스템코드">시스템코드</a>
                 </li>
             </ul>
             <div class="tab-contents">
-                <section class="tab-item" id="tab1" style="height: 820px;">
+                <!--<section class="tab-item" id="tab1" style="height: 820px;" >
                     <div class="section-top">
                         <div class="search-wrap">
                             <dl>
@@ -100,7 +99,7 @@
                                 </li>
                             </ul>
                         </div>
-                    </div> <!--//section-top end -->
+                    </div> &lt;!&ndash;//section-top end &ndash;&gt;
 
                     <div class="row">
                         <div class="wp70 mg-r20">
@@ -155,7 +154,7 @@
                             </div>
                         </div>
                     </div>
-                </section>
+                </section>-->
 
                 <section class="tab-item" id="tab2" style="height: 820px;">
                     <div class="section-top">
@@ -256,19 +255,19 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th><label for="code"><span class="eq">*</span>코드</label></th>
+                                                <th><label for="code2"><span class="eq">*</span>코드</label></th>
                                                 <td>
                                                     <input type="text" id="code2" name="code" class="wp100" >
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th><label for="name"><span class="eq">*</span>코드명</label></th>
+                                                <th><label for="name2"><span class="eq">*</span>코드명</label></th>
                                                 <td>
                                                     <input type="text" id="name2" name="name" class="wp100">
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th><label for="description">설명</label></th>
+                                                <th><label for="description2">설명</label></th>
                                                 <td>
                                                     <input type="text" id="description2" name="description"
                                                            class="wp100">
@@ -307,91 +306,8 @@
 
             init() {
                 let _this = this;
-                /*let config = {
-                    target: $('[data-ax5grid="code-grid"]'),
-                    //sortable: false,
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: true, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 38  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onClick: function (e) {
-                            //e.colIndex
-                            //e.dindex
-                            //c.value
-                            //e.column
-                            //e.item
-                            //e.list
-                            //_this.grid.select(this.dindex, { __selected__: true });
-                            _this.showDetail(e.item.id);
-                        },
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
-                    columns: [
-                        {key: 'id', label: '코드번호', width: 70, align: 'center', sortable: false, hidden: true},
-                        {key: 'name', label: '코드명', width: 250, align: 'left', treeControl: true},
-                        {key: 'code', label: '코드', width: 100, align: 'left', sortable: false},
-                        {key: 'description', label: '설명', width: 350, align: 'left', sortable: false},
 
-                    ],
-                    tree: {
-                        use: true,
-                        indentWidth: 15,
-                        arrowWidth: 15,
-                        iconWidth: 18,
-                        icons: {
-                            openedArrow: '<i class="fa fa-caret-down" aria-hidden="true"></i>',
-                            collapsedArrow: '<i class="fa fa-caret-right" aria-hidden="true"></i>',
-                            groupIcon: '<i class="fa fa-minus-square" aria-hidden="true"></i>',
-                            collapsedGroupIcon: '<i class="fa fa-plus-square" aria-hidden="true"></i>',
-                            itemIcon: '-'
-                        },
-                        columnKeys: {
-                            parentKey: 'parent_id',
-                            selfKey: 'id'
-                        }
-                    },
-                    //contextMenu: {
-                    //    iconWidth: 20,
-                    //    acceleratorWidth: 100,
-                    //    itemClickAndClose: true,
-                    //    icons: {
-                    //        'arrow': '<i class="fa fa-caret-right"></i>'
-                    //    },
-                    //    items: [
-                    //        { action: 'create', label: "하위추가" },
-                    //        { divide: true },
-                    //        { action: 'delete', label: "삭제" },
-                    //    ],
-                    //    popupFilter: function (item, param) {
-                    //        if(param.element) {
-                    //            return true;
-                    //        }else{
-                    //            return item.type == 1;
-                    //        }
-                    //    },
-                    //    onClick: function (item, param) {
-                    //        _this.clickContextMenu(item.action, param);
-                    //        //close();
-                    //        //또는 return true;
-                    //    }
-                    //}
-                };
-                this.grid = new ax5.ui.grid(config);
-                this.grid_config = config;*/
-
-                this.grid = new wijmo.grid.FlexGrid('#code-grid', {
+                /*this.grid = new wijmo.grid.FlexGrid('#code-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
@@ -417,7 +333,7 @@
                         {binding: 'name', header: '코드명', width: 250, align: 'left'},
                         {binding: 'code', header: '코드', width: 300, align: 'left'},
                         {binding: 'description', header: '설명', width: '*', align: 'left'},
-                        /*{binding: '', header: '', width: '*', align: 'left'},*/
+                        /!*{binding: '', header: '', width: '*', align: 'left'},*!/
 
                     ],
                     childItemsPath: 'children',
@@ -434,7 +350,7 @@
                 });
 
                 new FlexGridContextMenu(this.grid);
-                this.grid.downloadFileName = '코드정보';
+                this.grid.downloadFileName = '코드정보';*/
 
 
                 this.grid2 = new wijmo.grid.FlexGrid('#syscode-grid', {
@@ -483,38 +399,6 @@
                 this.grid2.downloadFileName = '시스템코드정보';
             }
 
-
-            //clickContextMenu(action, param) {
-            //    let _this = this;
-            //    let pk = param.item.id;
-            //    let parent_name = param.item.code;
-            //    let $codeForm = $('#codeForm');
-            //    if (action == 'create') {
-            //        let newItem = {
-            //            'parent_id': pk,
-            //            'parent_name': parent_name,
-            //            'id': '',
-            //            'code': '',
-            //            'name': '',
-            //        }
-            //        FormUtil.BindDataForm(newItem, $codeForm);
-            //        $('#description').text('');
-            //    }  else if (action == 'delete') {
-            //        Alert.confirm('',
-            //            '삭제하시겠습니까?',
-            //            function () { _this.deleteCode(pk) },
-            //            function () { }
-            //        );
-            //    }
-            //}
-
-            //setButtonDisable(_boolnew, _boolsave, _booldel) {
-            //    $('#btnNew').prop('disabled', _boolnew);
-            //    $('#btnSave').prop('disabled', _boolsave);
-            //    $('#btnDel').prop('disabled', _booldel);
-
-            //}
-
             //버튼 활성화
             setButtonState() {
                 let pk = $('#id').val();
@@ -531,7 +415,7 @@
                 }
             }
 
-            /*'action': 'detail'*/
+
             showDetail(idx) {
                 let param = {
                     'id': idx,
@@ -565,7 +449,6 @@
                 /*page.setButtonState();*/
             }
 
-            /*'action': 'read'*/
             searchMainData() {
                 let _this = this;
                 let data = {
@@ -587,8 +470,6 @@
                     _this.viewData.sourceCollection = treeData;
                 }
 
-                this.searchMainData2();
-
                 page.setButtonState();
             }
 
@@ -607,8 +488,6 @@
                 let url = '/api/definition/code';
 
                 let result = AjaxUtil.getSyncData(url + '/SystemCoderead', data);
-
-                console.log(JSON.stringify(result, null, 2));
 
                 if (result != null) {
                     // CollectionView 생성
@@ -919,24 +798,7 @@
                 $('#btnNewBro').prop('disabled', true);
             });
 
-            //그리드 컬럼 설정
-            /*  page.popColSetting = new popColSetting();
-              let columns = page.popColSetting.loadColumnData(gui.gui_code, gui.template_key, 'grid', page.grid);
-
-              if (userinfo.group_code == 'admin') {
-                  $('#btnGridSetting').css('visibility', 'visible');
-              }
-
-              $('#btnGridSetting').click(function (e) {
-                  let _this = this;
-                  let fix_cols = page.grid_config.frozenColumnIndex;
-                  page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, {
-                      'order_fix': false,
-                      'fix_cols': fix_cols
-                  });
-              });*/
-
-            page.searchMainData();
+            page.searchMainData2();
 
         });
     </script>
