@@ -187,17 +187,28 @@
             const colName = panel.columns[col].binding;
             const item = panel.rows[row].dataItem;
 
-            // 💡 병합 셀 여부 확인
-            const isMergedCell = !item || !item[colName];
+            //모든 셀 공통 초기화 (기존 스타일 제거)
+            cell.style.backgroundColor = '';
+            cell.style.color = '';
+            cell.style.fontWeight = '';
+            cell.style.textAlign = '';
+            cell.style.verticalAlign = '';
+            cell.style.display = '';
+            cell.style.alignItems = '';
+            cell.style.justifyContent = '';
 
-            // 👉 병합 셀이 아니면서, 업체명이 정확히 '전체'인 경우에만 스타일 적용
-            if (colName === 'company_name' && !isMergedCell && item[colName].trim() === '전체') {
+            //'전체' 업체명인 셀만 스타일 적용
+            if (
+              colName === 'company_name' &&
+              typeof item?.[colName] === 'string' &&
+              item[colName].trim() === '전체'
+            ) {
               cell.style.backgroundColor = '#f0f9ff';
               cell.style.color = '#007acc';
               cell.style.fontWeight = 'bold';
             }
 
-            // 기존 중앙 정렬
+            //중앙 정렬 컬럼
             if (['mat_grp_name', 'mat_code', 'mat_name', 'unit_name'].includes(colName)) {
               cell.style.textAlign = 'center';
               cell.style.verticalAlign = 'middle';
@@ -207,7 +218,6 @@
             }
           }
         };
-
         new FlexGridContextMenu(this.grid);
         this.grid.downloadFileName = '발주 내역';
       }
@@ -228,7 +238,6 @@
         };
         AjaxUtil.getAsyncData(url, data, fnsuccess);
       }
-
     }
     let page = null;
 
