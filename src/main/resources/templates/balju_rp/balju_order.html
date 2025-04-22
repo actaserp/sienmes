@@ -184,7 +184,7 @@
                         </th>
                         <td style="display: flex; align-items: center; gap: 10px;">
                             <input class="form-control2 tar" type="text" id="BaljuUnitPrice" name="BaljuUnitPrice"
-                                   onkeyup="numberBaljuQty(this.value)" style="width:50%;">
+                                   onkeyup="numberUnitPrice(this.value)" style="width:50%;">
                             <label style="margin: 0; display: flex; align-items: center;">
                               <input type="checkbox" id="VatIncluded" name="VatIncluded" checked>
                               <span style="margin-left: 5px;">부가세 포함</span>
@@ -260,6 +260,7 @@
       let formatted = cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ',');// 쉼표 넣기
       $(targetSelector).val(formatted);// 값 넣기
     }
+    // 수량 또는 단가가 입력되었을 때 → 공급가/부가세/총액 계산
     function updateBaljuPrice() {
       const qtyStr = $('#SujuQty').val().replace(/,/g, '');
       const unitStr = $('#BaljuUnitPrice').val().replace(/,/g, '');
@@ -274,26 +275,30 @@
       let totalPrice = supplyPrice;
 
       if (isVatExempt) {
-        // 면세일 경우
         $('#BaljuVat')
           .val('면세')
           .prop('readonly', true)
-          .css({ 'background-color': '', 'color': ''});
+          .css({ 'background-color': '', 'color': '' });
+        totalPrice = supplyPrice;
       } else {
-        // 과세일 경우
-        vat = isVatIncluded ? Math.round(supplyPrice * 0.1) : 0;
-        totalPrice = supplyPrice + vat;
+        if (isVatIncluded) {
+          vat = Math.round(supplyPrice * 10 / 110);
+          totalPrice = supplyPrice;
+        } else {
+          vat = Math.round(supplyPrice * 0.1);
+          totalPrice = supplyPrice + vat;
+        }
 
         $('#BaljuVat')
           .val(vat.toLocaleString())
-          .prop('readonly', false)
+          .prop('readonly', true)
           .css({ 'background-color': '', 'color': '', 'text-align': '' });
       }
 
       $('#BaljuPrice').val(supplyPrice.toLocaleString());
       $('#BaljuTotalPrice').val(totalPrice.toLocaleString());
     }
-
+    // 총액이 입력된 경우 → 공급가/부가세를 역산
     function calculateFromTotalPrice() {
       const totalStr = $('#BaljuTotalPrice').val().replace(/,/g, '');
       const total = parseFloat(totalStr || 0);
@@ -327,17 +332,63 @@
       // 선택사항: 총액 필드 보정
       // $('#BaljuTotalPrice').val((supply + vat).toLocaleString());
     }
+    // 공급가 입력 시 → 총액 및 부가세 계산
+    function calculateFromSupplyPrice() {
+      const supplyStr = $('#BaljuPrice').val().replace(/,/g, '');
+      const isVatExempt = $('#VatExempt').val() === 'Y';
+      const isVatIncluded = $('#VatIncluded').is(':checked');
 
+      const supplyPrice = parseFloat(supplyStr || 0);
+
+      let vat = 0;
+      let totalPrice = supplyPrice;
+
+      if (isVatExempt) {
+        // 면세일 경우
+        $('#BaljuVat')
+          .val('면세')
+          .prop('readonly', true)
+          .css({ 'background-color': '', 'color': '' });
+
+        totalPrice = supplyPrice; // 총액은 공급가 그대로
+      } else {
+        if (isVatIncluded) {
+          // 부가세 포함 → 공급가 = 총액, 부가세를 역산
+          vat = Math.round(supplyPrice * 10 / 110); // 공급가의 10/110 계산
+          totalPrice = supplyPrice; // 총액은 입력한 공급가 그대로
+        } else {
+          // 부가세 별도 → 공급가에 부가세 추가
+          vat = Math.round(supplyPrice * 0.1);
+          totalPrice = supplyPrice + vat;
+        }
+
+        $('#BaljuVat')
+          .val(vat.toLocaleString())
+          .prop('readonly', true)
+          .css({ 'background-color': '', 'color': '', 'text-align': '' });
+      }
+
+      // $('#BaljuTotalPrice').val(totalPrice.toLocaleString());
+    }
+    // 수량 변경 시 → 단가 × 수량 → 공급가 계산
     function numberSujuQty(x) {
       formatNumberInput(x, "#SujuQty");
       updateBaljuPrice();
     }
 
-    function numberBaljuQty(x) {
+    // 단가 변경 시 → 단가 × 수량 → 공급가 계산
+    function numberUnitPrice(x) {
       formatNumberInput(x, "#BaljuUnitPrice");
       updateBaljuPrice();
     }
 
+    // 공급가 변경 시 → 부가세/총액 계산
+    function numberBaljuQty(x) {
+      formatNumberInput(x, "#BaljuPrice");
+      calculateFromSupplyPrice();
+    }
+
+    // 총액 변경 시 → 공급가/부가세 역산
     function tTotalBaljuPrice(x) {
       formatNumberInput(x, "#BaljuTotalPrice");
       calculateFromTotalPrice();
@@ -519,7 +570,9 @@
 
         }
         $vatCheck.change(function () {
+          updateBaljuPrice();
           calculateFromTotalPrice();
+          calculateFromSupplyPrice();
         });
 
 
@@ -538,7 +591,7 @@
               $BaljuVat.prop('readonly', true).val('면세').css({ 'background-color': '', 'color': ''});
               $('#VatExempt').val('Y');
             } else {
-              $BaljuVat.prop('readonly', false).val('')
+              $BaljuVat.prop('readonly', true).val('')
                 .css({ 'background-color': '', 'color': '', 'text-align': '' });
               $('#VatExempt').val('N');
             }
@@ -562,7 +615,7 @@
               $BaljuVat.prop('readonly', true).val('면세').css({ 'background-color': '', 'color': ''});
               $('#VatExempt').val('Y');
             } else {
-              $BaljuVat.prop('readonly', false).val('')
+              $BaljuVat.prop('readonly', true).val('')
                 .css({ 'background-color': '', 'color': '', 'text-align': '' });
               $('#VatExempt').val('N');
             }
@@ -600,7 +653,7 @@
               const vat = item.vat || 0;
               const supplyPrice = unitPrice * 1;
 
-              $content.find('#unitPrice').prop('readonly', false).val(unitPrice);
+              $content.find('#unitPrice').prop('readonly', true).val(unitPrice);
               originalUnitPrice = unitPrice;
 
               // 나머지 값 세팅
@@ -613,7 +666,7 @@
 
               $BaljuUnitPrice.val('');
               $BaljuPrice.val('');
-              $BaljuVat.val('').prop('readonly', false); // 상태 원복
+              $BaljuVat.val('').prop('readonly', true); // 상태 원복
             }
           });
         }
@@ -831,8 +884,7 @@
         page.searchMainData();
       });
 
-
-    })
+    });
   </script>
 
 </th:block>
