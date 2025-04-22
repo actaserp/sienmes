@@ -240,7 +240,7 @@
                 </table>
                 </form>
             </div>
-
+            <div id="notUpdate" style="display:none;">*출하가 진행된 품목은 수정이 불가합니다.</div>
             <div class="popup-button">
 
                     <button type="button" class="btn-popup y_write_auth" id="btnPopSujuSave">저장</button>
@@ -500,8 +500,12 @@
                     $invatyn.val('N');
                 }
 
-                if (data.State !== 'received' || data.ShipmentStateName) {
+                if (data.State !== 'received' || !!data.ShipmentStateName) {
                     $('#btnPopSujuSave').hide();
+                    $('#notUpdate')
+                        .css('margin-top', '10px') // 조건 만족 시 margin-top 적용
+                        .show();
+                    $('.popup-button').css('margin-top', '10px');
                 }
 
                 if (data.SujuQty > 0) {

@@ -171,6 +171,14 @@
             font-weight: 600;
             padding: 5px;
         }
+
+        .wj-align-left {
+            text-align: left !important;
+        }
+
+        .wj-colheaders .wj-cell {
+            text-align: center !important;
+        }
     </style>
 
 </head>
@@ -1074,12 +1082,12 @@
                 this.baljuInputGrid = new wijmo.grid.FlexGrid('#balju-input-grid', {
                     autoGenerateColumns: false,
                     selectionMode: wijmo.grid.SelectionMode.Row,
-                    frozenColumns: 0,
-                    frozenRows: 0,
                     headersVisibility: wijmo.grid.HeadersVisibility.All,
                     formatItem: (s, e) => {
-                        e.cell.style.color = '';
-                        e.cell.style.textAlign = '';
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            e.cell.style.color = '';
+                            e.cell.style.textAlign = '';
+                        }
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
 
@@ -1091,16 +1099,16 @@
                         }
                     },
                     columns: [
-                        {binding: 'CompanyName', header: '구매처', width: 120, align: 'center', isReadOnly: true},
+                        {binding: 'CompanyName', header: '구매처', width: 100, align: 'left', isReadOnly: true},
                         {binding: 'JumunDate', header: '발주일', width: 120, align: 'center', isReadOnly: true},
                         {binding: 'JumunNumber', header: '발주번호', width: 140, align: 'center', isReadOnly: true},
-                        {binding: 'product_code', header: '제품코드', width: 100, isReadOnly: true},
-                        {binding: 'product_name', header: '제품명', width: 200, align: 'left',isReadOnly: true},
-                        {binding: 'unit', header: '단위', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'product_code', header: '제품코드', width: 100, align: 'left', isReadOnly: true},
+                        {binding: 'product_name', header: '제품명', width: 150, align: 'left', isReadOnly: true},
+                        {binding: 'unit', header: '단위', width: 60, align: 'center', isReadOnly: true},
                         {binding: 'SujuQty', header: '발주 수량', width: 80, align: 'right', format: 'n0', isReadOnly: true},
-                        {binding: 'SujuQty2', header: '기입고 수량', width: 100, align: 'right', isReadOnly: true},
-                        {binding: 'DueDate', header: '납기예정일', width: 120, align: 'center', isReadOnly: true},
-                        {binding: 'StoreHouse_id', header: '납품 창고', width: 100, align: 'center',dataMap: storeHouseMap, isReadOnly: false},
+                        {binding: 'SujuQty2', header: '기입고 수량', width: 90, align: 'right', isReadOnly: true},
+                        {binding: 'DueDate', header: '납기예정일', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'StoreHouse_id', header: '납품 창고', width: 90, align: 'center',dataMap: storeHouseMap, isReadOnly: false},
                         {binding: 'inputQty', header: '입고 수량', width: 100, align: 'right', isReadOnly: false,
                             editor: new wijmo.input.InputNumber(document.createElement('div'), {
                                 format: 'n0', // 정수 형식
@@ -1109,8 +1117,8 @@
                                 step: 1       // 증가/감소 단위
                             })
                         },
-                        {binding: 'Description2', header: '사유', width: 150, isReadOnly: false},
-                        {binding: 'Description', header: '발주 메모', width: 150, isReadOnly: true}
+                        {binding: 'Description2', header: '사유', align: 'left', width: 120, isReadOnly: false},
+                        {binding: 'Description', header: '발주 메모', align: 'left', width: 120, isReadOnly: true}
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
                 });

@@ -401,13 +401,13 @@ public class ProductionResultController {
                 jrd.setLotIndex(0);
                 jrd.set_audit(user);
                 this.jobResDefectRepository.save(jrd);
-                System.out.println("새 job_res_defect 저장: " + jrd);
+
             } else {
                 jrd.setDefectQty(defectQty);
                 jrd.setDescription(defectRemark);
                 jrd.set_audit(user);
                 this.jobResDefectRepository.save(jrd);
-                System.out.println("기존 job_res_defect 업데이트: " + jrd);
+
             }
         }
 
@@ -1520,6 +1520,8 @@ public class ProductionResultController {
     @Transactional
     public AjaxResult prodResultDel(
             @RequestParam(value = "id", required = false) Integer jobresId,
+            @RequestParam(value = "order_num", required = false) String order_num,
+            @RequestParam(value = "equipment_id", required = false) Integer equipmentId,
             HttpServletRequest request,
             Authentication auth) {
 
@@ -1527,12 +1529,34 @@ public class ProductionResultController {
 
         List<MaterialConsume> mcList = this.matConsuRepository.findByJobResponseId(jobresId);
 
+        User user = (User) auth.getPrincipal();
+
+        Timestamp now = DateUtil.getNowTimeStamp();
+
+
+        Optional<EquRun> runningRunOpt = equRunRepository.findLatestRunningByEquipmentAndOrder(equipmentId, order_num);
+        if (runningRunOpt.isPresent()) {
+            EquRun equ = runningRunOpt.get();
+            if (equ.getEndDate() == null) {
+                equ.setEndDate(now); // 중지 시각
+                equ.setRunState("stop");
+            }
+            equ.setType("작지 취소");
+            equ.set_audit(user);
+
+            equRunRepository.save(equ);
+        }
+
         if (mcList.size() > 0) {
             result.success = false;
             result.message = "등록된 차수가 있어 삭제 할 수 없습니다.";
             return result;
         } else {
-            this.jobResRepository.deleteById(jobresId);
+            JobRes jr = this.jobResRepository.getJobResById(jobresId);
+            if (jr != null) {
+                jr.setState("canceled");
+                jobResRepository.save(jr);
+            }
         }
 
         return result;
