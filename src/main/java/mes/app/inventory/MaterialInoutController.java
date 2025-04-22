@@ -443,7 +443,17 @@ public class MaterialInoutController {
 			Timestamp effDt = Timestamp.valueOf(effectiveDate+ " 00:00:00");
 			mi.setEffectiveDate(effDt);
 		}
-		mi.set_audit(user);
+
+		mi.setState("confirmed");
+		if (!"부적합".equals(judgGrp)) {
+			// 적합한 경우에만 입고 처리
+			mi.setInputQty(mi.getPotentialInputQty());
+			mi.setPotentialInputQty((float)0);
+
+			// 트리거 작동용 상태 변경
+			mi.set_status("a");
+		}
+
 		this.matInoutRepository.save(mi);
 		
 		Map<String, Object> item = new HashMap<>();

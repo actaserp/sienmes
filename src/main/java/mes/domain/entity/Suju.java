@@ -96,5 +96,8 @@ public class Suju extends AbstractAuditModel {
 
 	@Column(name="\"InVatYN\"")
 	String inVatYN;
+
+	@Column(name="\"TotalAmount\"")
+	Integer totalAmount;
 	
 }

@@ -1,4 +1,5 @@
 ﻿<html layout:decorate="~{layout_page}">
+
 <th:block layout:fragment="content">
 
     <div class="layout-contents">
@@ -68,24 +69,24 @@
                         </dd>
                     </dl>
                 </div>
-                <div class="button-wrap">
-                    <ul>
-                        <li>
-                            <span data-labelCd="To창고">To창고</span>
-                            <select id="cboToStoreHouse" name="to_storehouse_id"></select>
-                        </li>
-                        <li>
-                            <button class="btn" title="이동 처리" id="btnMove">
-                                이동 처리
-                            </button>
-                        </li>
-                        <li>
-                            <button class="btn" title="수정" id="btnLotMove">
-                                Lot이동 처리
-                            </button>
-                        </li>
-                    </ul>
-                </div>
+<!--                <div class="button-wrap">-->
+<!--                    <ul>-->
+<!--                        <li>-->
+<!--                            <span data-labelCd="받을 창고">받을 창고</span>-->
+<!--                            <select id="cboToStoreHouse" name="to_storehouse_id"></select>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <button class="btn" title="이동 처리" id="btnMove">-->
+<!--                                이동 처리-->
+<!--                            </button>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <button class="btn" title="수정" id="btnLotMove">-->
+<!--                                Lot이동 처리-->
+<!--                            </button>-->
+<!--                        </li>-->
+<!--                    </ul>-->
+<!--                </div>-->
             </div>
             <div class="container-fluid">
                 <div id="storehouse-mat-grid" style="height: 730px;"></div>
@@ -130,7 +131,7 @@
                 <tbody>
                     <tr>
                         <th style="text-align: center">
-                            <label for="mat_code">To창고</label>
+                            <label for="mat_code">받을 창고</label>
                         </th>
                         <td colspan="3">
                             <select class="form-control2" id="cboPopToStoreHouse" name="to_storehouse_id"></select>
@@ -152,11 +153,22 @@
         constructor() {
             this.baseUrl = '/api/inventory/material_move';
             this.grid = null;
-            this.init(); 
+            this.init();
+            this.selectedIndex = null;
         }
 
         init() {
             let _this = this;
+
+            this.storeHouseOptions = AjaxUtil.getSelectDataWithNull('store_house', 'choose');
+
+            let dicStoreHouse = {};
+            $.each(this.storeHouseOptions, function (idx, item) {
+                dicStoreHouse[item.value] = item.text;
+            });
+
+            let storeHouseMap = new wijmo.grid.DataMap(this.storeHouseOptions, 'value', 'text');
+
             this.grid = new wijmo.grid.FlexGrid('#storehouse-mat-grid', {
                 autoGenerateColumns: false,
                 selectionMode: wijmo.grid.SelectionMode.Row,
@@ -168,30 +180,22 @@
                 allowMerging: wijmo.grid.AllowMerging.All,
                 itemsSource: new wijmo.collections.CollectionView([]),
                 mergeManager: new wijmo.grid.MergeManager(), // 병합 관리자를 정의
-                formatItem: (sender, e) => {
+                formatItem: (s, e) => {
                     if (e.panel.cellType === wijmo.grid.CellType.Cell) {
 
-                        const item = sender.rows[e.row].dataItem;
-
-                        // Disable editing for move_qty if mat_lot_check is 'Y'
-                        if (sender.columns[e.col].binding === 'move_qty') {
-                            if (item.mat_lot_check === 'Y') {
-                                e.cell.style.backgroundColor = '#f0f0f0'; // Disabled cell style
-                                e.cell.style.cursor = 'not-allowed';
-                            }
-                        }
+                        const item = s.rows[e.row].dataItem;
 
                         // 병합된 셀 확인
-                        const range = sender.getMergedRange(e.panel, e.row, e.col);
+                        const range = s.getMergedRange(e.panel, e.row, e.col);
                         if (range && range.row !== range.row2) {
                             e.cell.style.display = 'flex';
                             e.cell.style.alignItems = 'center'; // 세로 가운데 정렬
                         }
                         // 로트발행여부 컬럼 병합 시 센터 정렬
-                        if (sender.columns[e.col].binding === 'mat_lot_check') {
+                        if (s.columns[e.col].binding === 'mat_lot_check') {
                             e.cell.style.justifyContent = 'center';
                         }
-                        if (sender.columns[e.col].binding === 'total_stock') {
+                        if (s.columns[e.col].binding === 'total_stock') {
                             e.cell.style.justifyContent = 'right';
                         }
                     }
@@ -201,49 +205,42 @@
                     }
 
                     // 이동량 열 헤더 스타일 적용
-                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader && sender.columns[e.col].binding === 'move_qty') {
+                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader &&
+                        (
+                            s.columns[e.col].binding === 'move_qty' ||
+                            s.columns[e.col].binding === 'cho_storehouse'
+                        )
+                    ){
                         e.cell.style.color = '#5567ff'; // 글자 색깔 변경
                     }
                 },
                 columns: [
                     { binding: 'mat_type', header: '품목유형', width: 80, align: 'left', isReadOnly: true },
                     { binding: 'mat_group', header: '품목그룹', width: 120, align: 'left', isReadOnly: true },
-                    { binding: 'class1', header: '소분류', width: 100, align: 'left', isReadOnly: true },
+                    // { binding: 'class1', header: '소분류', width: 100, align: 'left', isReadOnly: true },
                     { binding: 'mat_code', header: '품목코드', width: 100, align: 'left', isReadOnly: true }, // 병합 안함
-                    { binding: 'material', header: '품목', width: 350, align: 'left', isReadOnly: true }, // 병합 안함
+                    { binding: 'material', header: '품목', width: 200, align: 'left', isReadOnly: true }, // 병합 안함
                     { binding: 'total_stock', header: '총재고량', width: 100, align: 'right', isReadOnly: true },
-                    { binding: 'storehouse', header: '창고', width: 200, align: 'left', isReadOnly: true },
+                    { binding: 'storehouse', header: '창고', width: 150, align: 'left', isReadOnly: true },
                     { binding: 'current_stock', header: '현재고량', width: 100, align: 'right', isReadOnly: true},
                     { binding: 'mat_lot_check', header: '로트발행여부', width: 120, align: 'center', isReadOnly: true },
-                    { binding: 'move_qty', header: '이동량', width: 100, align: 'right', isReadOnly: false }
+                    { binding: 'move_qty', header: '이동할 수량', width: 100, align: 'right', isReadOnly: false },
+                    {
+                        binding: 'cho_storehouse', header: '이동할 창고', width: 120, align: 'center',
+                        dataMap: storeHouseMap, isReadOnly: false
+                    },
+                    { binding: 'move_action', header: '이동', width: 80, align: 'center', isReadOnly: true },
                 ],
             });
-            this.grid.selectionChanged.addHandler((s, e) => {
-                const selectedItems = s.selectedItems; // 선택된 행 데이터
-
-                if (selectedItems.length > 0) {
-                    const item = selectedItems[0]; // 첫 번째 선택된 항목
-
-                    if (item.mat_lot_check === 'N') {
-                        $('#btnMove').prop('disabled', false);
-                        $('#btnLotMove').prop('disabled', true);
-                    } else {
-                        $('#btnMove').prop('disabled', true);
-                        $('#btnLotMove').prop('disabled', false);
-                    }
-                } else {
-                    // 선택된 항목이 없을 경우 버튼 비활성화
-                    $('#btnMove').prop('disabled', true);
-                    $('#btnLotMove').prop('disabled', true);
-                }
-            });
-            this.grid.beginningEdit.addHandler((s, e) => {
+            this.grid.beginningEdit.addHandler(function (s, e) {
                 const col = s.columns[e.col];
                 const item = s.rows[e.row].dataItem;
 
-                // Prevent editing move_qty if mat_lot_check is 'Y'
-                if (col.binding === 'move_qty' && item.mat_lot_check === 'Y') {
-                    e.cancel = true; // Cancel editing
+                if (item.mat_lot_check === 'Y') {
+                    // 로트 발행인 경우: 수량 및 창고 비활성화
+                    if (col.binding === 'move_qty' || col.binding === 'cho_storehouse') {
+                        e.cancel = true; // 편집 취소
+                    }
                 }
             });
             this.grid.mergeManager.getMergedRange = function (panel, r, c, clip) {
@@ -289,6 +286,38 @@
                 return range.isValid ? range : null;
             };
 
+            _this.grid.formatItem.addHandler(function (s, e) {
+                if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                    let col = s.columns[e.col];
+
+                    if (col.binding === 'move_action' && userinfo.can_write()) {
+                        let btn = document.createElement("button");
+                        btn.className = "btn-default";
+                        btn.style.width = "100%";
+                        btn.style.height = "25px";
+
+                        let row = s.rows[e.row];
+
+                        if (row.dataItem.mat_lot_check === 'Y') {
+                            btn.innerText = "이동";
+                            btn.onclick = function () {
+                                _this.selectedIndex = s.rows.findIndex(r => r.dataItem === row.dataItem);
+                                _this.moveMaterialLot(row.dataItem);
+                            };
+                        } else {
+                            btn.innerText = "이동";
+                            btn.onclick = function () {
+                                _this.selectedIndex = s.rows.findIndex(r => r.dataItem === row.dataItem);
+                                _this.moveMaterial(row.dataItem);
+                            };
+                        }
+
+                        e.cell.innerHTML = "";
+                        e.cell.appendChild(btn);
+                    }
+                }
+            });
+
             new FlexGridContextMenu(this.grid);
             this.grid.downloadFileName = '창고 이동 내역';
 
@@ -306,37 +335,39 @@
                 'mat_grp_pk': $('#cboMatGrp').val(),
                 'keyword': $('#keyword').val(),
             }
-            console.log('param',param);
             let url = this.baseUrl + "/read_house"
             AjaxUtil.getAsyncData(url, param, function(result){
                 if (result.success) {
                     _this.grid.itemsSource.sourceCollection = result.data;
+                    console.log('selectedIndex', _this.selectedIndex);
+                    let restoreIndex = _this.selectedIndex || 0;
+                    _this.grid.selectedIndex = -1;
+                    setTimeout(() => {
+                        _this.grid.select(restoreIndex, 0);
+                    }, 10);
+                    _this.selectedIndex = 0; // 초기화
                 }
             });
         }
 
         // 이동처리
-        moveMaterial() {
+        moveMaterial(selectedItem) {
             let _this = this;
-            let toStoreHouse = $('#cboToStoreHouse').val();
-            let moveList = [];
 
-            if (!toStoreHouse) {
-                Alert.alert('', 'To창고를 선택해주세요.');
+            if (!selectedItem.cho_storehouse) {
+                Alert.alert('', '이동할 창고를 선택해주세요.');
                 return;
             }
 
-            const modifiedItems = _this.grid.itemsSource.items.filter(item => item.move_qty > 0 && item.mat_lot_check !== 'Y');
-            if (modifiedItems.length === 0) {
-                Alert.alert('', '이동량이 입력되지 않았거나 로트발행된 제품입니다.');
+            if (!selectedItem.move_qty) {
+                Alert.alert('', '이동할 수량을 넣어주세요.');
                 return;
             }
 
-            modifiedItems.forEach(item => moveList.push(item));
 
             let data = {
-                'to_storehouse_id': toStoreHouse,
-                'move_list': JSON.stringify(moveList),
+                'to_storehouse_id': selectedItem.cho_storehouse,
+                'move_list': JSON.stringify([selectedItem]),
             }
 
             let fnSuccess = function (res) {
@@ -352,16 +383,12 @@
         }
 
         // Lot이동처리
-        moveMaterialLot() {
+        moveMaterialLot(selectedItem) {
             let _this = this;
-            let selectedItems = _this.grid.selectedItems;
 
             let toStoreHouse = $('#cboToStoreHouse').val();
-            if (selectedItems.length === 0) {
-                Alert.alert('Lot이동처리오류', '품목이 선택되지 않았습니다.');
-                return;
-            }
-            let item = selectedItems[0];
+
+            let item = selectedItem;
             let content = tmpl('LotMovePopupTmpl', item);
             let $content = $(content);
             let modalContainer = new PopupDraggable('Lot이동처리');
@@ -416,7 +443,7 @@
 
                 let to_storehouse_id = $cboPopToStoreHouse.val();
                 if(to_storehouse_id===""){
-                	Alert.alert('LOT이동', 'To창고가 지정되지 않았습니다.');
+                	Alert.alert('LOT이동', '받을 창고가 지정되지 않았습니다.');
                 	return;
                 }
 

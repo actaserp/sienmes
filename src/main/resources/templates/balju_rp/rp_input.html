@@ -179,15 +179,15 @@
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
-                <h2>재고 입출고</h2>
+                <h2>수불 전표 등록</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>재고관리</li>
-                <li>재고 입출고</li>
+                <li>발주/수불관리</li>
+                <li>수불 전표 등록</li>
             </ul>
         </div>
         <section class="section">
@@ -1114,39 +1114,8 @@
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
                 });
-                let selector = null;
-                this.baljuInputGrid.beginningEdit.addHandler((s, e) => {
-                    let col = s.columns[e.col]; // 현재 편집 중인 컬럼
-                    let row = e.row;            // 현재 편집 중인 행
 
-                    // 편집 중인 컬럼이 'order_input_qty'인 경우
-                    if (col.binding === 'inputQty') {
-
-                        let baljuQtyValue = s.getCellData(row, s.columns.getColumn('SujuQty').index, false);
-
-                        // 현재 편집 중인 셀에 SujuQty 값을 설정
-                        s.setCellData(row, col.index, baljuQtyValue);
-                    }
-                });
-                _this.baljuInputGrid.hostElement.addEventListener('click', function (e) {
-                    if (e.target?.type === 'checkbox') {
-                        setTimeout(() => {
-                            let items = _this.baljuInputGrid.rows
-                                .filter(row => row.isSelected)
-                                .map(row => row.dataItem);
-
-                            items.forEach(item => {
-                                if (!item.inputQty && item.SujuQty) {
-                                    item.inputQty = item.SujuQty;
-                                }
-                            });
-
-                            _this.baljuInputGrid.refresh();
-                        }, 0);
-                    }
-                });
-
-
+                // let selector = new wijmo.grid.selector.Selector(this.baljuInputGrid);
                 new FlexGridContextMenu(this.baljuInputGrid);
                 this.baljuInputGrid.downloadFileName = '발주 입고';
 
@@ -1169,8 +1138,7 @@
                                 }
                             });
                             _this.baljuInputGrid.itemsSource = new wijmo.collections.CollectionView(result.data);
-                            selector = new wijmo.grid.selector.Selector(_this.baljuInputGrid);
-
+                            new wijmo.grid.selector.Selector(_this.baljuInputGrid);
                         }
                     };
                     let baljuParam = {
@@ -1191,7 +1159,6 @@
                         .filter(row => row.isSelected)
                         .map(row => row.dataItem);
 
-                    console.log(items);
 
                     if (!items || items.length === 0) {
                         Alert.alert('', '저장할 항목을 선택하세요.');

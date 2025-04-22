@@ -96,6 +96,7 @@ public class SujuController {
 			@RequestParam(value="unitPrice") String unitPriceStr,
 			@RequestParam(value="price") String priceStr,
 			@RequestParam(value="vat") String vatStr,
+			@RequestParam(value="totalAmount") String totalAmountStr,
 			@RequestParam(value="invatyn") String invatyn,
 			HttpServletRequest request,
 			Authentication auth	) {
@@ -115,6 +116,7 @@ public class SujuController {
 		Date jumun_Date = CommonUtil.trySqlDate(jumunDate);
 		int unitPrice = Integer.parseInt(unitPriceStr.replace(",", ""));
 		int price = Integer.parseInt(priceStr.replace(",", ""));
+		int totalAmount = Integer.parseInt(totalAmountStr.replace(",", ""));
 		int vat = "면세".equals(vatStr) ? 0 : Integer.parseInt(vatStr.replace(",", ""));
 		
 		suju.setSujuQty(sujuQty);
@@ -133,8 +135,8 @@ public class SujuController {
 		suju.setPrice(price);
 		suju.setVat(vat);
 		suju.setInVatYN(invatyn);
+		suju.setTotalAmount(totalAmount);
 
-		
 		suju = this.SujuRepository.save(suju);
 		
 		AjaxResult result = new AjaxResult();

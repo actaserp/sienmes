@@ -124,6 +124,7 @@ public class MaterialMoveService {
         , count(*) over (partition by m.id) as house_count
         , AA.mat_lot_check as mat_lot_count
         , case when AA.mat_lot_check = 0 then 'N' else 'Y' end as mat_lot_check
+        , '' as cho_storehouse
         from material m 
         inner join mat_grp mg on mg.id = m."MaterialGroup_id"
         inner join AA on AA.mat_id = m.id

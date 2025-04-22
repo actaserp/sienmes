@@ -54,14 +54,17 @@ public class SujuService {
             , s."Price"
             , s."UnitPrice" as "unitPrice"
             , s."Vat"
-            , (s."Price" + s."Vat") as "totalAmount"
+            , s."TotalAmount" as "totalAmount"
             , fn_code_name('suju_type', s."SujuType") as "SujuTypeName"
             , to_char(s."ProductionPlanDate", 'yyyy-mm-dd') as production_plan_date
             , to_char(s."ShipmentPlanDate", 'yyyy-mm-dd') as shiment_plan_date
             , s."Description"
             , s."AvailableStock" as "AvailableStock"
             , s."ReservationStock" as "ReservationStock"
-            , COALESCE(sh.shippedQty, 0) as "ShippedQty"
+            , case
+				 when sh.shippedQty = 0 then ''
+				 else sh.shippedQty::text
+			 end as "ShippedQty"
             , fn_code_name('suju_state', s."State") as "StateName"
             , case
             	WHEN sh.shippedQty = 0 THEN '출하지시'
@@ -127,7 +130,7 @@ public class SujuService {
             , s."UnitPrice" as "unitPrice"
             , s."Vat" as "vat"
             , s."Price" as "price"
-            , (s."Vat" + s."Price") as "totalAmount"
+            , s."TotalAmount" as "totalAmount"
             , fn_code_name('suju_type', s."SujuType") as "SujuTypeName"
             , to_char(s."ProductionPlanDate", 'yyyy-mm-dd') as production_plan_date
             , to_char(s."ShipmentPlanDate", 'yyyy-mm-dd') as shiment_plan_date

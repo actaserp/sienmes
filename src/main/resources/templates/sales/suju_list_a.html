@@ -169,7 +169,7 @@
                                 <label for="SujuQty">수주량*</label>
                             </th>
                             <td>
-                                <input class="form-control2 tar" type="text" id="SujuQty" name="SujuQty" onkeyup="numberSujuQty(this.value)">
+                                <input class="form-control2 tar" type="text" id="SujuQty" name="SujuQty" onkeyup="formatNumberInput(this)">
                             </td>
 <!--                            <th style="text-align: center">-->
 <!--                                <label for="AvailableStock">당시 가용재고</label>-->
@@ -189,7 +189,7 @@
                                 <label for="unitPrice">단가</label>
                             </th>
                             <td style="display: flex; align-items: center;">
-                                <input style="text-align:right; width:200px;" type="text" id="unitPrice" name="unitPrice" onkeyup="numberUnitPrice(this.value)">
+                                <input style="text-align:right; width:200px;" type="text" id="unitPrice" name="unitPrice" onkeyup="formatNumberInput(this)">
                                 <input type="checkbox" id="invatyn" name="invatyn" value="N" style="margin-left: 10px;">
                                 <span style="margin-left: 4px;">부가세 포함</span>
                             </td>
@@ -197,7 +197,7 @@
                                 <label for="price">공급가액</label>
                             </th>
                             <td>
-                                <input id="price" name="price" style="text-align:right;" readonly>
+                                <input id="price" name="price" style="text-align:right;" onkeyup="formatNumberInput(this)">
                             </td>
                         </tr>
                         <tr>
@@ -205,13 +205,13 @@
                                 <label for="vat">부가세</label>
                             </th>
                             <td>
-                                <input id="vat" name="vat" style="text-align:right;" readonly>
+                                <input id="vat" name="vat" style="text-align:right;" onkeyup="formatNumberInput(this)">
                             </td>
                             <th style="text-align: center">
-                                <label for="totalAmount">총계</label>
+                                <label for="totalAmount">총액</label>
                             </th>
                             <td>
-                                <input id="totalAmount" name="totalAmount" style="text-align:right;" readonly>
+                                <input id="totalAmount" name="totalAmount" style="text-align:right;" onkeyup="formatNumberInput(this)">
                             </td>
                         </tr>
                         <tr>
@@ -259,16 +259,13 @@
 
     <script type="text/javascript">
 
-        function numberSujuQty(x) {
-            x = x.replace(/[^0-9]/g, '');   // 입력값이 숫자가 아니면 공백
-            x = x.replace(/,/g, '');          // ,값 공백처리
-            $("#SujuQty").val(x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")); // 정규식을 이용해서 3자리 마다 , 추가
+        function formatNumberInput(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
 
-        function numberUnitPrice(x) {
-            x = x.replace(/[^0-9]/g, '');   // 입력값이 숫자가 아니면 공백
-            x = x.replace(/,/g, '');          // ,값 공백처리
-            $("#unitPrice").val(x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")); // 정규식을 이용해서 3자리 마다 , 추가
+        function getCleanValue(id) {
+            return document.getElementById(id).value.replace(/,/g, '');
         }
 
         class SujuUploadPage {
@@ -306,7 +303,7 @@
                         {binding: 'SujuQty', header: '수량', width: 80, align: 'right', format: 'n0'},
                         {binding: 'unitPrice', header: '단가', width: 90, align: 'right', format: 'n0'},
                         {binding: 'Vat', header: '부가세', width: 100, align: 'right', format: 'n0'},
-                        {binding: 'totalAmount', header: '총계', width: 100, align: 'right', format: 'n0'},
+                        {binding: 'totalAmount', header: '총액', width: 100, align: 'right', format: 'n0'},
                         {binding: 'DueDate', header: '납기일', width: 100, align: 'center'},
                         {binding: 'StateName', header: '상태', width: 80, align: 'center'},
                         {binding: 'ShipmentStateName', header: '출하상태', width: 80, align: 'center'},
@@ -713,6 +710,7 @@
 
                 let fnsuccess = function (result) {
                     if (result != null) {
+                        console.log('result.data',result.data);
                         _this.viewData.sourceCollection = result.data;
                     }
                 };

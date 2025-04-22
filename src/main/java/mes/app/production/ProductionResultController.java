@@ -379,9 +379,6 @@ public class ProductionResultController {
 
         List<Map<String, Object>> items = CommonUtil.loadJsonListMap(defect_list.getFirst("defect_list").toString());
 
-        System.out.println("defect_list 원본 데이터: " + defect_list);
-        System.out.println("defect_list JSON 변환 데이터: " + defect_list.getFirst("defect_list").toString());
-
         JobRes jr = this.jobResRepository.getJobResById(jrPk);
 
         JobResDefect jrd = null;
