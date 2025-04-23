@@ -19,37 +19,37 @@
     <section class="section">
       <div class="section-top">
         <div class="search-wrap">
-          <dl>
-            <dt>
-              <label>
-                연도
-              </label>
-            </dt>
-            <dd>
-              <select class="" id="cboYear" name="cboYear" >
-              </select>
-            </dd>
-          </dl>
           <dl id="searchComArea">
             <dt>
-              업체
+              거래처
             </dt>
             <dd>
-              <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
+              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="업체검색버튼으로 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
-              &nbsp;
-              <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                업체 검색
-              </a>
+            </dd>
+          </dl>
+          <dl>
+            <dt>
+              조회기간<span class="eq">*</span>
+            </dt>
+            <dd>
+              <ul class="date-box">
+                <li>
+                  <input type="date" id="srchStartDt" name="srchStartDt">
+                  <label for="srchStartDt" class="hide">시작일</label>
+                </li>
+                <li>
+                  <input type="date" id="srchEndDt" name="srchEndDt">
+                  <label for="srchEndDt" class="hide">종료일</label>
+                </li>
+              </ul>
             </dd>
           </dl>
           <dl>
             <dt>&nbsp;</dt>
             <dd>
               <li>
-                <a class="btn btn-delete" title="검색" id="btnSearch">
-                  <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                <a class="btn btn-search" title="검색" id="btnMainSearch">
                   <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                   검색
                 </a>
@@ -60,29 +60,18 @@
       </div>
       <div class="tab-wrap">
         <ul class="tab-links">
-          <li><a href="#tabs_sales" style="border-radius: 6px 0 0 0;">매출</a></li>
-          <li><a href="#tabs_deposit">입금</a></li>
-          <li><a href="#tabs_accounts_receivable" style="border-radius: 0 6px 0 0;">미수금</a></li>
+          <li><a href="#tabs_total" style="border-radius: 6px 0 0 0;">집계</a></li>
+          <li><a href="#tabs_sales_details" style="border-radius: 0 6px 0 0;">상세</a></li>
         </ul>
         <div>
-          <section class="tab-item" id="tabs_sales" style="border-top-left-radius: 0;">
+          <section class="tab-item" id="tabs_total" style="border-top-left-radius: 0;">
             <div class="container-fluid">
               <div id="theGrid" style="height: 730px;"></div>
             </div>
           </section>
-          <section class="tab-item" id="tabs_deposit" style="border-top-left-radius: 0; display: flex;">
-            <div class="container-fluid" style="width: 72%">
-              <div id="theGrid2" style="height: 730px;"></div>
-            </div>
-          </section>
-          <section class="tab-item" id="tabs_accounts_receivable" style="border-top-left-radius: 0; display: flex;">
-            <div class="container-fluid" style="width: 72%">
-              <div id="theGrid3" style="height: 730px;"></div>
-            </div>
-            <div class="grid_box col-3">
-              <div class="title_box">
-                <span class="right_align rpt" data-labelCd=""></span>
-              </div>
+          <section class="tab-item" id="tabs_sales_details" style="border-top-left-radius: 0;">
+            <div class="container-fluid">
+              <div id="sales-details" style="height: 730px;"></div>
             </div>
           </section>
         </div>
@@ -99,7 +88,6 @@
     class AccountsReceivableListPage {
       constructor() {
         this.grid = null;
-        this.grid2 = null;
         this.grid3 = null;
         this.$btnEdit = $('#btnEdit');
         this.$btnAddNew = $('#btnAddNew');
@@ -109,12 +97,9 @@
 
       init() {
         let _this = this;
-        this.grid =  new wijmo.grid.FlexGrid('#theGrid', {
-          frozenColumns: 7,
-          frozenRows: 0,
-          allowSorting: wijmo.grid.AllowSorting.MultiColumn,
-          selectionMode: wijmo.grid.SelectionMode.Row, // 단일행 선택
-          allowMerging: wijmo.grid.AllowMerging.Cells,  //셀 병합
+        this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+          selectionMode: wijmo.grid.SelectionMode.Row,
+          headersVisibility: wijmo.grid.HeadersVisibility.Column,
           autoGenerateColumns: false,
           showMarquee: true,
           isReadOnly: true,
@@ -124,108 +109,97 @@
             }
           },
           columns: [
-            {binding: 'mat_grp_name', header: '제품그룹', width: 150, align: 'center' ,allowMerging: true},
-            {binding: 'mat_code', header: '제품코드', width: 170, align: 'center' ,allowMerging: true},
-            {binding: 'mat_name', header: '제품명', width: 150, align: 'left' ,allowMerging: true,},
-            {binding: 'unit_name', header: '단위', width: 70, align: 'center', allowSorting: false },
-            { binding: 'year_qty_sum', header: '연발주량', width: 100, align: 'right', format: 'n0', },
-            { binding: 'year_money_sum', header: '연발주액', width: 100, align: 'right', format: 'n0', },
-            {binding: 'company_name', header: '업체', width: 200, align: 'left', allowSorting: false },
-            {
-              binding: 'mon_1', header: '1월', width: 80, align: 'right', allowSorting: false,
-              format: 'n0',
-            },
-            {
-              binding: 'mon_2', header: '2월', width: 80, align: 'right', allowSorting: false,
-              format: 'n0',
-            },
-            {
-              binding: 'mon_3', header: '3월', width: 80, align: 'right', allowSorting: false,
-              format: 'n0',
-            },
-            {
-              binding: 'mon_4', header: '4월', width: 80, align: 'right', allowSorting: false,
-              format: 'n0',
-            },
-            {
-              binding: 'mon_5', header: '5월', width: 80, align: 'right', allowSorting: false,
-              format: 'n0',
-            },
-            {
-              binding: 'mon_6', header: '6월', width: 80, align: 'right', allowSorting: false,
-              format: 'n0',
-            },
-            {
-              binding: 'mon_7', header: '7월', width: 80, align: 'right', allowSorting: false,
-              format: 'n0',
-            },
-            {
-              binding: 'mon_8', header: '8월', width: 80, align: 'right', allowSorting: false,
-              format: 'n0',
-            },
-            {
-              binding: 'mon_9', header: '9월', width: 80, align: 'right', allowSorting: false,
-              format: 'n0',
-            },
-            {
-              binding: 'mon_10', header: '10월', width: 80, align: 'right', allowSorting: false,
-              format: 'n0',
-            },
-            {
-              binding: 'mon_11', header: '11월', width: 80, align: 'right', allowSorting: false,
-              format: 'n0',
-            },
-            {
-              binding: 'mon_12', header: '12월', width: 80, align: 'right', allowSorting: false,
-              format: 'n0',
-            },
+            {binding: 'BaljuVat', header: '코드', width: 100, align: 'center'},
+            {binding: 'BaljuTotalPrice', header: '거래처명', width: 130, align: 'right'},
+            {binding: 'StateName', header: '전잔액', width: 200, align: 'right'},
+            {binding: 'SujuQty2', header: '매출액', width: 200, align: 'right'},
+            {binding: 'SujuQty3', header: '입금액', width: 200, align: 'right'},
+            {binding: 'ShipmentStateName', header: '잔액', width: 200, align: 'right'}
           ],
-          itemsSource: this.viewData,
+          itemsSource: this.viewData, // 데이터를 설정할 배열
         });
-        this.grid.rowHeaders.columns.splice(0, 1);
-        this.grid.itemFormatter = function (panel, row, col, cell) {
-          if (panel.cellType === wijmo.grid.CellType.Cell) {
-            const colName = panel.columns[col].binding;
-            const item = panel.rows[row].dataItem;
 
-            //모든 셀 공통 초기화 (기존 스타일 제거)
-            cell.style.backgroundColor = '';
-            cell.style.color = '';
-            cell.style.fontWeight = '';
-            cell.style.textAlign = '';
-            cell.style.verticalAlign = '';
-            cell.style.display = '';
-            cell.style.alignItems = '';
-            cell.style.justifyContent = '';
-
-            //'전체' 업체명인 셀만 스타일 적용
-            if (
-              colName === 'company_name' &&
-              typeof item?.[colName] === 'string' &&
-              item[colName].trim() === '전체'
-            ) {
-              cell.style.backgroundColor = '#f0f9ff';
-              cell.style.color = '#007acc';
-              cell.style.fontWeight = 'bold';
-            }
-
-            //중앙 정렬 컬럼
-            if (['mat_grp_name', 'mat_code', 'mat_name', 'unit_name'].includes(colName)) {
-              cell.style.textAlign = 'center';
-              cell.style.verticalAlign = 'middle';
-              cell.style.display = 'flex';
-              cell.style.alignItems = 'center';
-              cell.style.justifyContent = 'center';
-            }
-          }
-        };
         new FlexGridContextMenu(this.grid);
-        this.grid.downloadFileName = '발주 내역';
+        this.grid.downloadFileName = '미수금 집계 현황';
+        this.grid.hostElement.addEventListener('dblclick', function (e) {
+          let items = _this.grid.selectedItems;
+          if (items.length === 0) {
+            return false;
+          }
+          _this.$btnEdit.trigger('click');
+        });
+        // ✅ Footer 패널 사용 설정
+        this.grid.columnFooters.rows.push(new wijmo.grid.Row());
+        this.grid.bottomLeftCells.setCellData(0, 0, '합 계');
+
+        // ✅ Footer 합계 값 설정 (수동)
+        this.grid.loadedRows.addHandler(() => {
+          const rows = this.grid.rows;
+          const footerTotal = this.grid.columnFooters.rows[0];
+
+          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+          footerTotal.dataItem = {
+            mat_grp_name: '합 계'
+          };
+        });
+
+        this.grid3 = new wijmo.grid.FlexGrid('#sales-details', {
+          selectionMode: wijmo.grid.SelectionMode.Row,
+          headersVisibility: wijmo.grid.HeadersVisibility.Column,
+          autoGenerateColumns: false,
+          showMarquee: true,
+          isReadOnly: true,
+          formatItem: (sender, e) => {
+            if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+              e.cell.style.textAlign = 'center';
+            }
+          },
+          columns: [
+            {binding: 'BaljuPrice', header: '일자', width: 100, align: 'center'},
+            {binding: 'BaljuVat', header: '코드', width: 100, align: 'center'},
+            {binding: 'BaljuTotalPrice', header: '거래처명', width: 150, align: 'center'},
+            {binding: 'StateName', header: '금액', width: 200, align: 'right'},
+            {binding: 'SujuQty2', header: '입급형태', width: 100, align: 'right'},
+            {binding: 'SujuQty3', header: '은행', width: 120, align: 'center'},
+            {binding: 'ShipmentStateName', header: '계좌', width: 200, align: 'right'},
+            {binding: 'DueDate', header: '거래구분', width: 120, align: 'center'},
+            {binding: 'Description', header: '적요', width: 200, align: 'right'}
+          ],
+          itemsSource: this.viewData, // 데이터를 설정할 배열
+        });
+
+        new FlexGridContextMenu(this.grid3);
+        this.grid3.downloadFileName = '미수금 상세현황';
+        this.grid3.hostElement.addEventListener('dblclick', function (e) {
+          let items = _this.grid.selectedItems;
+          if (items.length === 0) {
+            return false;
+          }
+          _this.$btnEdit.trigger('click');
+        });
+        // ✅ Footer 패널 사용 설정
+        this.grid3.columnFooters.rows.push(new wijmo.grid.Row());
+        this.grid3.bottomLeftCells.setCellData(0, 0, '합 계');
+
+        // ✅ Footer 합계 값 설정 (수동)
+        this.grid3.loadedRows.addHandler(() => {
+          const rows = this.grid3.rows;
+          const footerTotal = this.grid3.columnFooters.rows[0];
+
+          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+
+          footerTotal.dataItem = {
+            mat_grp_name: '합 계'
+            // year_qty_sum: getSum('year_qty_sum'),
+            // year_money_sum: getSum('year_money_sum'),
+          };
+        });
+
       }
 
       searchMainData() {
         let _this = this;
-        let url = '/api/balju/balju_order_list/read'
+        let url = ''
         let data = {
           'cboYear': $("#cboYear").val(),
           'cboCompany': $("#cboCompanyHidden").val()
@@ -274,12 +248,13 @@
           // $content.find('#cboCompany').val(items.id);
           // $content.find('#CompanyName').val(items.compname);
           console.log('items : ',items);
-          document.getElementById('cboCompany').value = items.compname;
+          document.getElementById('btnCompanySearch').value = items.compname;
           document.getElementById('cboCompanyHidden').value = items.id;
         };
 
         poppage.show(searchcallback);
       });
+
       $('#cboCompany').on('input', function () {
         const val = $(this).val();
         if (val === '') {

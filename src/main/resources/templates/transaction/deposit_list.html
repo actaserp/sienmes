@@ -24,29 +24,19 @@
               거래처
             </dt>
             <dd>
-              <!--<input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">-->
               <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="업체검색버튼으로 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
-              &nbsp;
-              <!--<a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                업체 검색
-              </a>-->
             </dd>
           </dl>
           <dl>
             <dt>
-              <label for="cboAccountName">
+              <label for="btnAccountName">
                 계좌명
               </label>
             </dt>
             <dd>
               <div class="srch-box">
-                <select id="cboAccountName" name="cboAccountName">
-                  <option value="all">전체</option>
-                  <option value="deposits">예금</option>
-                  <option value="bill">어음</option>
-                </select>
+                <input type="text" id="btnAccountName" name="btnAccountName" placeholder="클릭해서 검색하세요.">
               </div>
             </dd>
           </dl>
@@ -59,9 +49,6 @@
             <dd>
               <div class="srch-box">
                 <select id="cboDepositType" name="cboDepositType">
-                  <option value="all">전체</option>
-                  <option value="deposits">예금</option>
-                  <option value="bill">어음</option>
                 </select>
               </div>
             </dd>
@@ -69,7 +56,7 @@
           <dl>
             <dt>
               <label for="txtMatName">
-                적용
+                적요
               </label>
             </dt>
             <dd>
@@ -121,6 +108,8 @@
   <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
   <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
   <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+  <th:block th:replace="/common/popup_account :: popup_account" />
+
   <script type="text/javascript">
     class DepositListPage {
       constructor() {
@@ -147,13 +136,13 @@
           columns: [
             {binding: 'BaljuPrice', header: '일자', width: 100, align: 'right'},
             {binding: 'BaljuVat', header: '코드', width: 100, align: 'right'},
-            {binding: 'BaljuTotalPrice', header: '거래처명', width: 100, align: 'right'},
+            {binding: 'BaljuTotalPrice', header: '거래처명', width: 200, align: 'right'},
             {binding: 'StateName', header: '금액', width: 80, align: 'center'},
             {binding: 'SujuQty2', header: '입급형태', width: 100, align: 'right'},
             {binding: 'SujuQty3', header: '은행', width: 100, align: 'right'},
-            {binding: 'ShipmentStateName', header: '계좌', width: 100, align: 'center'},
+            {binding: 'ShipmentStateName', header: '계좌', width: 200, align: 'center'},
             {binding: 'DueDate', header: '거래구분', width: 120, align: 'center'},
-            {binding: 'Description', header: '적요', width: 200}
+            {binding: 'Description', header: '적요', width: 250}
           ],
           itemsSource: this.viewData, // 데이터를 설정할 배열
         });
@@ -166,6 +155,31 @@
             return false;
           }
           _this.$btnEdit.trigger('click');
+        });
+        // ✅ Footer 패널 사용 설정
+        this.grid.columnFooters.rows.push(new wijmo.grid.Row());
+        this.grid.bottomLeftCells.setCellData(0, 0, '월 계');
+        this.grid.columnFooters.rows.push(new wijmo.grid.Row());
+        this.grid.bottomLeftCells.setCellData(0, 0, '합 계');
+
+        // ✅ Footer 합계 값 설정 (수동)
+        this.grid.loadedRows.addHandler(() => {
+          const rows = this.grid.rows;
+          const footerMonth = this.grid.columnFooters.rows[0];
+          const footerTotal = this.grid.columnFooters.rows[1];
+
+          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+
+          footerMonth.dataItem = {
+            BaljuTotalPrice: '월 계'
+            // year_qty_sum: getSum('year_qty_sum'),
+            // year_money_sum: getSum('year_money_sum'),
+          };
+          footerTotal.dataItem = {
+            BaljuTotalPrice: '합 계'
+            // year_qty_sum: getSum('year_qty_sum'),
+            // year_money_sum: getSum('year_money_sum'),
+          };
         });
 
         // 엔터키 검색
@@ -205,6 +219,7 @@
 
       AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '', 'sale');
       AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);
+      AjaxUtil.fillSelectOptions($('#cboDepositType'), 'system_code', 'all', false, 'deposit_type', '');
 
       $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
       $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
@@ -233,12 +248,22 @@
           // $content.find('#cboCompany').val(items.id);
           // $content.find('#CompanyName').val(items.compname);
           console.log('items : ',items);
-          document.getElementById('cboCompany').value = items.compname;
+          document.getElementById('btnCompanySearch').value = items.compname;
           document.getElementById('cboCompanyHidden').value = items.id;
         };
 
         poppage.show(searchcallback);
       });
+      //계좌 팝업
+      $('#btnAccountName').click(function () {
+        let poppage = new PopAccountComponent();
+        let searchcallback = function (items) {
+          console.log('btnAccountName items : ', items);
+          // document.getElementById('btnAccountName').value = items.compname;
+        };
+        poppage.show(searchcallback);
+      });
+
       $('#cboCompany').on('input', function () {
         const val = $(this).val();
         if (val === '') {
