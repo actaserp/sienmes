@@ -2,36 +2,6 @@
 
 <head>
     <style>
-        .button-list {
-            display: flex;
-            justify-content: flex-end; /* 버튼들을 오른쪽으로 정렬 */
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            gap: 10px; /* 버튼 간 간격 조정 */
-        }
-
-        .button-list li {
-            margin: 0;
-            padding: 0;
-        }
-
-        .button-wrap {
-            margin-left: auto; /* 버튼들을 오른쪽 끝으로 */
-        }
-
-        .button-wrap ul {
-            display: flex;
-            gap: 10px; /* 버튼 간격 */
-            padding: 0;
-            margin: 0;
-            list-style: none;
-        }
-
-        .unitcost-save-btn {
-            margin-top: 10px;
-        }
-
     </style>
 </head>
 
@@ -57,41 +27,17 @@
         <section class="section">
             <div class="section-top">
                 <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            <label>품목구분</label>
-                        </dt>
-                        <dd>
-                            <select class="form-control2" id="cboMaterialType" name="cboMaterialType"></select>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>
-                            <label>품목그룹</label>
-                        </dt>
-                        <dd>
-                            <select class="form-control2" id="cboMaterialGroup" name="cboMaterialGroup"></select>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>
-                            <label>품목명</label>
-                        </dt>
-                        <dd>
-                            <input type="text" class="form-control2" id="keyword" name="keyword">
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt><span class="eq"></span></dt>
-                        <dd>
-                            <li>
-                                <a class="btn btn-delete" title="검색" id="btnSearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    검색
-                                </a>
-                            </li>
-                        </dd>
-                    </dl>
+                </div>
+                <div class="button-wrap">
+                    <button type="button" class="btn-default" id="asd"
+                            style=" width: 115px; height: 36px;">수정
+                    </button>
+                    <button type="button" class="btn-danger " id="btnDel"
+                            style=" width: 115px; height: 36px;"><i class="fas fa-trash"></i>삭제
+                    </button>
+                    <button type="button" class="btn-default" id="btnBomNew"
+                            style="width: 115px; height: 36px;">등록
+                    </button>
                 </div>
             </div>
 
@@ -99,95 +45,58 @@
                  <div class="h-280" data-ax5grid="material-grid" ></div>
             </div>-->
             <div class="container-fluid">
-                <div id="theGrid" style="height: 280px; max-height: 280px;"></div>
+                <div id="theGrid" style="height: 400px; max-height: 400px;"></div>
             </div>
         </section>
         <!--border-radius: 6px 0 0 0;-->
-        <section>
-            <div class="tab-wrap">
-                <ul class="tab-links">
-                    <li><a href="#tab_test_master" name="tab_test_master">검사정보</a></li>
-                    <li><a href="#tab_routing" name="tab_routing">라우팅</a></li>
-                </ul>
 
-                <div>
-                    <section class="tab-item" id="tab_test_master" style="border-top-left-radius: 0;">
-                        <div class="section-top">
-                            <form id="matTestForm">
-                                <div class="search-wrap">
-                                    <dl>
-                                        <dt>
-                                            <label>수입 검사 필수</label>
-                                        </dt>
-                                        <dd>
-                                            <input type="checkbox" id="InTestYN" name="InTestYN" value="Y"/>
-                                        </dd>
-                                    </dl>
-                                    <dl>
-                                        <dt>
-                                            <label>출하 검사 필수</label>
-                                        </dt>
-                                        <dd>
-                                            <input type="checkbox" id="OutTestYN" name="OutTestYN" value="Y"/>
-                                        </dd>
-                                    </dl>
-                                    <dl>
-                                        <dt></dt>
-                                        <dd>
-                                            <select class="s-150" id="cboTestMasterGroup"
-                                                    name="cboTestMasterGroup"></select>
-                                        </dd>
-                                    </dl>
-                                    <dl>
-                                        <dt></dt>
-                                        <dd>
-                                            <select class="s-150" id="cboTestMaster" name="cboTestMaster"></select>
-                                        </dd>
-                                    </dl>
-                                </div>
-                            </form>
-                            <div class="button-wrap">
-                                <ul>
-                                    <li>
-                                        <button type="button" class="btn-default" id="btnAddTestMaster"
-                                                style="width: 115px; height: 36px;"><i
-                                                class="fas fa-plus"></i>추가
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn-danger y_write_auth" id="btnDelTestMaster"
-                                                style="float:none; width: 115px; height: 36px;"><i
-                                                class="fas fa-trash"></i>삭제
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn-default y_write_auth"
-                                                id="btnSaveTest" style="width: 115px; height: 36px;"><span
-                                                data-labelCd="저장">저장</span></button>
-                                    </li>
-                                </ul>
-                            </div>
+        <div class="tab-wrap">
+            <ul class="tab-links">
+                <li><a href="#tab_basic" name="tab_test_master">계정별관리항목</a></li>
+            </ul>
+
+            <div>
+                <section class="tab-item" id="tab_basic" style="border-top-left-radius: 0;">
+                    <div class="section-top">
+                        <div class="search-wrap">
+                            <dl>
+                                <dt></dt>
+                                <dd>
+                                    <select class="s-150" id="cboAccountGroup" name="cboAccountGroup"></select>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt></dt>
+                                <dd>
+                                    <button type="button" class="btn-default" id="btnAddTestMaster"
+                                            style="width: 115px; height: 36px;"><i
+                                            class="fas fa-plus"></i>추가
+                                    </button>
+                                </dd>
+                            </dl>
+
                         </div>
+                        <div class="button-wrap">
+                            <button type="button" class="btn-default"
+                                    id="" style="width: 115px; height: 36px;">저장</span>
+                            </button>
 
-                        <div class="container-fluid">
-                            <div id="test-master-grid" style="height: 200px; max-height: 200px;"></div>
+                            <button type="button" class="btn-danger" id=""
+                                    style="width: 115px; height: 36px;">삭제
+                            </button>
                         </div>
+                    </div>
 
-                    </section>
-
-                    <!--section8-->
-                    <section class="tab-item" id="tab_routing" style="border-top-left-radius: 0;">
-                        <div class="container-fluid">
-                            <div id="routing-grid" style="height: 200px; max-height: 200px;"></div>
-                        </div>
-                    </section>
-                </div>
+                    <div class="container-fluid">
+                        <div id="subject-grid" style="height: 200px; max-height: 200px;"></div>
+                    </div>
+                </section>
             </div>
-        </section>
+        </div>
     </div>
 
 
-    <script type="text/x-tmpl" id="MaterialTemplate">
+    <script type="text/x-tmpl" id="AccountTemplate">
         <div class="content_wrap popup">
             <!--<header>
                 <h4 id="popTitle">
@@ -200,34 +109,114 @@
                 <div class="popup_close_box"><button class="btn_popup_close" id="modal-close-x"><i class="fas fa-times"></i></button></div>
             </header>-->
 
-            <div class="grid_box" style="margin-top: 10px;">
-                <div id="price-history-grid" style="height: 400px; max-height: 400px;"></div>
-           </div>
+    <div class="table-wrap">
+           <form id="AccountForm">
+                <table class="write-table">
+                    <input type="hidden" id="id" name="id" value="{%=o.id%}">
+                    <caption>주문등록 테이블</caption>
+                    <tbody>
+                        <tr>
+                            <th style="text-align: center">
+                               <label for="Material_id">상위계정</label>
+                            </th>
+                            <td>
+                                <select class="form-control2" id="" name="">
+                                    <option value="">1</option>
+                                    <option value="">2</option>
+                                </select>
+                            </td>
+
+                            <th style="text-align: center">
+                                <label for="Name">차/대</label>
+                            </th>
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                    <label>차변</label>
+                                    <input class="form-control2" type="checkbox" name="debit">
+                                    <label>대변</label>
+                                    <input class="form-control2" type="checkbox" name="credit">
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="OutputAmount">계정코드</label>
+                            </th>
+                            <td>
+                                <input class="form-control2 tar" type="text" id="" name=""/>
+                            </td>
+
+                            <th style="text-align: center">
+                                <label for="BOMType">계정명</label>
+                            </th>
+                            <td>
+                                  <input class="form-control2 tar" type="text" id="" name=""/>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="Version">대 손</label>
+                            </th>
+                            <td>
+                                <select class="form-control2" id="" name="">
+                                    <option value="">1</option>
+                                    <option value="">2</option>
+                                </select>
+                            </td>
+                            <th style="text-align: center">전표발행</th>
+                            <td>
+                                <input class="form-control2 tar" id="Version" name="Version" type="checkbox" style="display: block; margin: auto;  height: 26px; width: 26px;"/>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="">양식 명칭</label>
+                            </th>
+                            <td colspan="3">
+                                 <input class="form-control2 tar" id="" name="" type="text" style="width:100%"/>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th style="text-align: center">
+                                 <label for="">차감계정</label>
+                            </th>
+                            <td>
+                              <input class="form-control2 tar" id="Version" name="Version" type="checkbox"  style="display: block; margin: auto;  height: 26px; width: 26px;"/>
+                            </td>
+                            <th></th>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+        </form>
+    </div>
 
         <div class="popup-button">
+          <button type="button" class="btn-popup" id="btnAccountSave"><span data-labelCd="저장">저장</span></button>
           <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
         </div>
-    </div>
+</div>
     </script>
 
 </th:block>
 
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+    <script type="text/javascript" src="/js/grid.js"></script>
 
     <script type="text/javascript">
-        class MaterialPage {
+        class AccountsubjectPage {
             constructor() {
-                this.url = '/api/definition/material';
+                this.url = '';
                 this.grid = null;
+                this.subject_grid = null;
                 this.delMoldClassIds = [];
                 this.viewData = new wijmo.collections.CollectionView();
                 this.viewData2 = new wijmo.collections.CollectionView();
-                this.viewData3 = new wijmo.collections.CollectionView();
-                this.viewData4 = new wijmo.collections.CollectionView();
-                this.viewData5 = new wijmo.collections.CollectionView();
-                this.viewData6 = new wijmo.collections.CollectionView();
-                this.viewData8 = new wijmo.collections.CollectionView();
 
                 this.init();
             }
@@ -248,24 +237,24 @@
                         }
                     },
                     columns: [
-                        {binding: 'id', header: '품목번호', width: 100, align: 'center'},
-                        {binding: 'mat_type_name', header: '품목구분', width: 100, align: 'center'},
-                        {binding: 'mat_grp_name', header: '품목그룹', width: 150, align: 'left'},
-                        {binding: 'mat_code', header: '품목코드', width: 150, align: 'left'},
-                        {binding: 'mat_name', header: '품목명', width: 200, align: 'left'},
-                        {binding: 'unit_name', header: '단위', width: 100, align: 'center'},
-                        {binding: 'factory_name', header: '공장', width: 100, align: 'center'},
-                        {binding: 'mtyn', header: '재고관리유무', width: 100, align: 'center'},
-                        {binding: 'useyn', header: '사용중지여부', width: 100, align: 'center'},
-                        {binding: 'lotUseYn', header: 'LOT관리 유무', width: 150, align: 'center'},
-                        {binding: 'lot_size', header: '로트사이즈', width: 100, align: 'right',},
+                        {binding: '', header: '계정코드', width: 100, align: 'center'},
+                        {binding: '', header: '계정명칭', width: 250, align: 'right'},
+                        {binding: '', header: '상위계정', width: 150, align: 'left'},
+                        {binding: '', header: '상위계정명칭', width: 150, align: 'left'},
+                        {binding: '', header: '레벨', width: 100, align: 'left'},
+                        {binding: '', header: '차대', width: 100, align: 'center'},
+                        {binding: '', header: '대손', width: 100, align: 'center'},
+                        {binding: '', header: '전표', width: 100, align: 'center'},
+                        {binding: '', header: '사용', width: 100, align: 'center'},
+                        {binding: '', header: '차감계정', width: 150, align: 'center'},
+                        {binding: '', header: '차감계정명칭', width: '*', align: 'right',},
 
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
 
                 new FlexGridContextMenu(this.grid);
-                this.grid.downloadFileName = '품목 정보';
+                this.grid.downloadFileName = '계정과목';
 
                 // 데이터 로드 후 초기 선택 상태 해제
                 this.grid.loadedRows.addHandler(() => {
@@ -290,28 +279,6 @@
                         // 상세 정보 표시
                         _this.showDetail(mat_pk);
 
-                        /* // 기존 데이터 초기화
-                         _this.price_grid.setData([]);
-                         $('#companyPriceForm')[0].reset();
-                         _this.test_grid.setData([]);
-                         _this.setPriceButtonState();*/
-
-                        // 현재 활성화된 탭에 따라 추가 기능 실행
-                        if (_this.current_tab == 'tab_unitcost') {
-                            _this.showPriceList(mat_pk);
-                        } else if (_this.current_tab == 'tab_bom') {
-                            if (mat_pk) page.showBomList(mat_pk);
-                        } else if (_this.current_tab == 'tab_bom_reverse') {
-                            if (mat_pk) page.showBomReverseList(mat_pk);
-                        } else if (_this.current_tab == 'tab_routing') {
-                            let routing_pk = $('#Routing_id').val();
-                            if (routing_pk) page.showRoutingProcessList(routing_pk);
-                        } else if (_this.current_tab == 'tab_test_master') {
-                            if (mat_pk) page.showTestList(mat_pk);
-                        }
-
-                        /*console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
-                        console.log('선택된 행 데이터:', selectedRowData);*/
                     }
                 });
 
@@ -320,13 +287,8 @@
                     if (hitTest.cellType === wijmo.grid.CellType.Cell) {
                         let row = hitTest.row;
                         let selectedItem = this.grid.rows[row].dataItem;
-                        _this.showBomList(selectedItem.id)
-                        _this.showBomReverseList(selectedItem.id)
-                        _this.showTestList(selectedItem.id)
-                        _this.showRoutingProcessList(selectedItem.id)
-                        /*_this.showPriceHistoryList(selectedItem.id)*/
-                        _this.showPriceList(selectedItem.id)
-                        /* _this.showBomCompTreeList(selectedItem.id)*/
+                        /*_this.showBomList(selectedItem.id)*/
+
                     }
                 });
 
@@ -335,478 +297,11 @@
                         let col = s.columns[e.col];
                         let item = s.rows[e.row].dataItem;
 
-                        // 재고관리여부 (1 → 'Y', 0 또는 null → 'N')
-                        if (col.binding === "mtyn") {
-                            e.cell.textContent = (item.mtyn === 1 || item.mtyn === '1') ? 'Y' : 'N';
-                        }
-
-                        // 사용중지여부
-                        if (col.binding === "useyn") {
-                            e.cell.textContent = (item.useyn === 1 || item.useyn === '1') ? 'Y' : 'N';
-                        }
                     }
                 });
 
 
-                /*let config = {
-                    target: $('[data-ax5grid="material-grid"]'),
-                    frozenColumnIndex: 5, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: true, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: true, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onClick: function (e) {
-                            let mat_pk = e.item.id;
-                            _this.grid.select(this.dindex);
-
-                            _this.showDetail(mat_pk);
-                            //_this.showPriceList(e.item.id);
-                            _this.price_grid.setData([]);
-                            $('#companyPriceForm')[0].reset();
-                            _this.test_grid.setData([]);
-                            //_this.setPriceButtonDisabled(false, true, true);
-                            //_this.setPriceButtonDisabled(false, false, true);
-                            _this.setPriceButtonState();
-
-                            //let tab = $('.tab_links li:visible');
-                            if (_this.current_tab == 'tab_unitcost') {
-                                _this.showPriceList(mat_pk);
-                            }
-                            else if (_this.current_tab == 'tab_bom') {
-                                if (mat_pk)
-                                    page.showBomList(mat_pk);
-                            }
-                            else if (_this.current_tab == 'tab_bom_reverse') {
-                                if (mat_pk)
-                                    page.showBomReverseList(mat_pk);
-                            }
-                            else if (_this.current_tab == 'tab_routing') {
-                                let routing_pk = $('#Routing_id').val();
-                                //if (routing_pk)
-                                page.showRoutingProcessList(routing_pk);
-                            }
-                            else if (_this.current_tab == 'tab_test_master') {
-                                //if (mat_pk)
-                                page.showTestList(mat_pk);
-                            }
-                        },
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
-                    columns: [
-                        { key: 'id', label: '품목번호', width: 50, align: 'right', hidden: false },
-                        { key: 'mat_type_name', label: '품목구분', width: 50, align: 'center' },
-                        { key: 'mat_grp_name', label: '품목그룹', width: 120, align: 'left' },
-                        { key: 'mat_code', label: '품목코드', width: 150, align: 'center' },
-                        { key: 'mat_name', label: '품목명', width: 200, align: 'left' },
-                        { key: 'unit_name', label: '단위', width: 50, align: 'center' },
-                        { key: 'factory_name', label: '공장', width: 100, align: 'left' },
-                        { key: 'lotUseYn', label: 'LOT관리 유무', width: 100, align: 'center' },
-                        { key: 'lot_size', label: '로트사이즈', width: 100, align: 'right', formatter:'money' },
-                        { key: 'customer_barcode', label: '고객바코드', width: 100, align: 'left' },
-                        { key: 'thickness', label: '두께', width: 100, align: 'right' },
-                        { key: 'width', label: '폭', width: 100, align: 'right', formatter:'money' },
-                        { key: 'length', label: '길이', width: 100, align: 'right', formatter:'money' },
-                        { key: 'height', label: '높이', width: 100, align: 'right', formatter:'money' },
-                        { key: 'color', label: 'Color', width: 100, align: 'left' },
-                        { key: 'usage', label: '용도', width: 100, align: 'left' },
-                        { key: 'class1', label: '분류1', width: 100, align: 'left' },
-                        { key: 'class2', label: '분류2', width: 100, align: 'left' },
-                        { key: 'class3', label: '분류3', width: 100, align: 'left' },
-                        { key: 'starndard1', label: '규격1', width: 100, align: 'right' },
-                        { key: 'standard2', label: '규격2', width: 100, align: 'right' },
-                        { key: 'description', label: '설명', width: 100, align: 'right' },
-                        { key: 'workcenter_name', label: '기본워크센터', width: 150, align: 'left' },
-                        { key: 'standard_time', label: '표준생산시간', width: 50, align: 'right' },
-                        { key: 'input_man_count', label: '기본작업자수', width: 50, align: 'right' },
-                        { key: 'input_man_hour', label: '기본ManHour', width: 100, align: 'right' },
-                        { key: 'vat_exempt_yn', label: '부가세면제', width: 100, align: 'center' },
-                        { key: 'purchase_order_standard', label: '발주기준', width: 100, align: 'center' },
-                        { key: 'leadtime', label: '리드타임(일)', width: 150, align: 'right' },
-                        { key: 'min_order', label: '최소발주량', width: 100, align: 'right', formatter:'money' },
-                        { key: 'max_order', label: '최대발주량', width: 100, align: 'right', formatter:'money' },
-                        { key: 'storehouse_name', label: '기본재고창고', width: 100, align: 'left' },
-                        { key: 'storehouse_loc', label: '창고내위치', width: 100, align: 'left' },
-                        { key: 'manage_level', label: '자재관리등급', width: 100, align: 'left' },
-                        { key: 'packing_unit_qty', label: '포장수량', width: 100, align: 'right', formatter:'money' },
-                        { key: 'packing_unit_name', label: '포장단위', width: 100, align: 'center' },
-                        { key: 'safety_stock', label: '안전재고', width: 100, align: 'right', formatter:'money' },
-                        { key: 'max_stock', label: '최대재고', width: 100, align: 'right', formatter:'money' },
-                        { key: 'process_safety_stock', label: '공정안전재고', width: 100, align: 'right', formatter:'money' },
-                        { key: 'unit_price', label: '평균단가', width: 100, align: 'right', formatter:'money' },
-                        { key: 'valid_days', label: '사용기한(일)', width: 100, align: 'right', formatter:'money' },
-                        { key: 'intest_yn', label: '수입검사필수', width: 50, align: 'center' },
-                        { key: 'outtest_yn', label: '출하검사필수', width: 50, align: 'center' },
-                        { key: 'routing_name', label: '라우팅', width: 100, align: 'left' },
-                        { key: '_created', label: '등록일', width: 100, align: 'center' },
-                    ],
-                    contextMenu: {
-                        iconWidth: 20,
-                        acceleratorWidth: 100,
-                        itemClickAndClose: true,
-                        icons: {
-                            'arrow': '<i class="fa fa-caret-right"></i>'
-                        },
-                        items: [
-                            { action: 'settings', label: "컬럼설정" },
-                        ],
-                        popupFilter: function (item, param) {
-                            return false;
-
-                            //if(param.element) {
-                            //    return true;
-                            //}
-                            //else {
-                            //    return param.item.Material_Type == "부재료";
-                            //}
-                        },
-                        onClick: function (item, param) {
-                            //if (item.action == 'settings')
-                            //    return;
-                        }
-                    }
-                };*/
-
-                /*  this.grid_config = config;  // 컬럼설정 팝업에 넘기기 위한 용도로 저장해 놓음.
-                  this.grid = new ax5.ui.grid(config);
-                  this.grid.setData([]);*/
-
-                this.price_grid = new wijmo.grid.FlexGrid('#price-grid', {
-                    selectionMode: wijmo.grid.SelectionMode.Row,
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
-                    autoGenerateColumns: false,
-                    showMarquee: true,
-                    isReadOnly: true,
-                    formatItem: (sender, e) => {
-                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
-                            e.cell.style.textAlign = 'center';
-                        }
-                    },
-                    columns: [
-                        {binding: 'CompanyName', header: '업체명', width: '*', align: 'left',},
-                        {binding: 'type', header: '구분', width: 120, align: 'center',},
-                        {binding: 'UnitPrice', header: '단가', width: 120, align: 'right',},
-                        {binding: 'FormerUnitPrice', header: '이전단가', width: 120, align: 'right',},
-                        {binding: 'ApplyStartDate', header: '적용시작일', width: 120, align: 'center',},
-                        {binding: 'ApplyEndDate', header: '적용종료일', width: 120, align: 'center',},
-                        {binding: 'ChangerName', header: '변경자', width: 120, align: 'left',},
-                        {binding: 'ChangeDate', header: '변경일', width: 120, align: 'center',},
-                    ],
-                    itemsSource: this.viewData2, // 데이터를 설정할 배열
-
-                });
-
-                this.price_grid.hostElement.addEventListener('dblclick', (e) => {
-                    let hitTest = this.price_grid.hitTest(e);
-                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
-                        let row = hitTest.row;
-                        let selectedItem = this.price_grid.rows[row].dataItem;
-                        _this.showPriceDetail(selectedItem.id);
-                    }
-                });
-
-                this.price_grid.formatItem.addHandler((s, e) => {
-                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
-                        let col = s.columns[e.col];
-                        let item = s.rows[e.row].dataItem;
-
-                        if (col.binding === "type") {
-                            e.cell.textContent = (item.type === '01') ? '매입' : '매출';
-                        }
-                    }
-                });
-
-                new FlexGridContextMenu(this.price_grid);
-                this.grid.downloadFileName = '단가 정보';
-
-                /*let priceConfig = {
-                    target: $('[data-ax5grid="price-grid"]'),
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    , // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: true, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onClick: function (e) {
-                            _this.showPriceDetail(e.item.id);
-                        },
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
-                    columns: [
-                        { binding: 'CompanyName', header: '업체명', width: 200, align: 'left',   },
-                        { binding: 'UnitPrice', header: '단가', width: 120, align: 'right',  },
-                        { binding: 'FormerUnitPrice', header: '이전단가', width: 120, align: 'right',  },
-                        { binding: 'ApplyStartDate', header: '적용시작일', width: 120, align: 'center',  },
-                        { binding: 'ApplyEndDate', header: '적용종료일', width: 120, align: 'center',  },
-                        { binding: 'ChangerName', header: '변경자', width: 120, align: 'left',  },
-                        { binding: 'ChangeDate', header: '변경일', width: 120, align: 'center',  },
-                    ]
-                };*/
-
-                /*this.price_grid = new ax5.ui.grid(priceConfig);
-                this.price_grid.setData([]);*/
-
-                this.bom_grid = new wijmo.grid.FlexGrid('#bom-grid', {
-                    selectionMode: wijmo.grid.SelectionMode.Row,
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
-                    autoGenerateColumns: false,
-                    showMarquee: true,
-                    isReadOnly: true,
-                    formatItem: (sender, e) => {
-                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
-                            e.cell.style.textAlign = 'center';
-                        }
-                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
-                            let item = sender.rows[e.row].dataItem; // 현재 행의 데이터 아이템
-                            if (item && item.children && item.children.length > 0) {
-                                // 부모(그룹) 행 배경색
-                                e.cell.style.backgroundColor = '#f0fcf7';
-                            } else {
-                                // 자식(일반) 행 배경색
-                                e.cell.style.backgroundColor = '#ffffff';
-                            }
-                        }
-                    },
-                    columns: [
-                        {binding: '_level', header: '레벨', width: 100, align: 'left'},
-                        {binding: 'my_key', header: 'my_key', width: 100, align: 'left'},
-                        {binding: 'mat_type', header: '구분', width: 100, align: 'center'},
-                        {binding: 'mat_name', header: '품목', width: 250, align: 'left'},
-                        {binding: 'unit', header: '단위', width: 100, align: 'center'},
-                        {binding: 'mat_code', header: '품목코드', width: 100, align: 'center'},
-                        {binding: 'bom_ratio', header: '소요량', width: 120, align: 'right'},
-                        {binding: '', header: '', width: '*', align: 'right'},
-                    ],
-                    childItemsPath: 'children', // 계층 구조를 위한 속성 설정
-                    itemsSource: this.viewData3, // 데이터를 설정할 배열
-                });
-
-                new FlexGridContextMenu(this.bom_grid);
-                this.grid.downloadFileName = 'BOM 정보';
-
-
-                /*let bomConfig = {
-                    target: $('[data-ax5grid="bom-grid"]'),
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: false, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onClick: function (e) {
-                        },
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
-                    columns: [
-                        { binding: '_level', header: '레벨', width: 100, align: 'left' },
-                        { binding: 'my_key', header: 'my_key', width: 100, align: 'left' },
-                        { binding: 'mat_type', header: '구분', width: 100, align: 'center' },
-                        { binding: 'mat_name', header: '품목', width: 200, align: 'left', treeControl: true },
-                        { binding: 'unit', header: '단위', width: 100, align: 'center' },
-                        { binding: 'mat_code', header: '품목코드', width: 100, align: 'center' },
-                        { binding: 'bom_ratio', header: '소요량', width: 120, align: 'right' },
-                    ],
-                    tree: {
-                        use: true,
-                        indentWidth: 15,
-                        arrowWidth: 15,
-                        iconWidth: 18,
-                        icons: {
-                          openedArrow: '<i class="fa fa-caret-down" aria-hidden="true"></i>',
-                          collapsedArrow: '<i class="fa fa-caret-right" aria-hidden="true"></i>',
-                          groupIcon: '<i class="fa fa-minus-square" aria-hidden="true"></i>',
-                          collapsedGroupIcon: '<i class="fa fa-plus-square" aria-hidden="true"></i>',
-                          //itemIcon: '-'
-                        },
-                        columnKeys: {
-                          parentbinding: 'parent_key',
-                          selfbinding: 'my_key'
-                        }
-                    },
-                };*/
-
-                /*  this.bom_grid = new ax5.ui.grid(bomConfig);
-                  this.bom_grid.setData([]);*/
-
-
-                this.bom_reverse_grid = new wijmo.grid.FlexGrid('#bom-reverse-grid', {
-                    selectionMode: wijmo.grid.SelectionMode.Row,
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
-                    autoGenerateColumns: false,
-                    showMarquee: true,
-                    isReadOnly: true,
-                    formatItem: (sender, e) => {
-                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
-                            e.cell.style.textAlign = 'center';
-                        }
-                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
-                            let item = sender.rows[e.row].dataItem; // 현재 행의 데이터 아이템
-                            if (item && item.children && item.children.length > 0) {
-                                // 부모(그룹) 행 배경색
-                                e.cell.style.backgroundColor = '#f0fcf7';
-                            } else {
-                                // 자식(일반) 행 배경색
-                                e.cell.style.backgroundColor = '#ffffff';
-                            }
-                        }
-                    },
-                    columns: [
-                        {binding: '_level', header: '레벨', width: 100, align: 'left'},
-                        {binding: 'mat_type', header: '구분', width: 100, align: 'center'},
-                        {binding: 'mat_name', header: '모품목', width: 200, align: 'left'},
-                        {binding: 'unit', header: '단위', width: 100, align: 'center'},
-                        {binding: 'mat_code', header: '모품목코드', width: 100, align: 'center'},
-                        {binding: 'bom_ratio', header: '투입량', width: 120, align: 'right'},
-                        {binding: '', header: '', width: "*", align: 'right'},
-                    ],
-                    childItemsPath: 'children', // 계층 구조를 위한 속성 설정
-                    itemsSource: this.viewData4, // 데이터를 설정할 배열
-                });
-
-                new FlexGridContextMenu(this.bom_reverse_grid);
-                this.grid.downloadFileName = 'BOM역전개 정보';
-
-                /*let bomReverseConfig = {
-                    target: $('[data-ax5grid="bom-reverse-grid"]'),
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: false, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onClick: function (e) {
-                        },
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
-                    columns: [
-                        { binding: '_level', header: '레벨', width: 100, align: 'left' },
-                        { binding: 'mat_type', header: '구분', width: 100, align: 'center' },
-                        { binding: 'mat_name', header: '모품목', width: 200, align: 'left', treeControl: true },
-                        { binding: 'unit', header: '단위', width: 100, align: 'center' },
-                        { binding: 'mat_code', header: '모품목코드', width: 100, align: 'center' },
-                        { binding: 'bom_ratio', header: '투입량', width: 120, align: 'right' },
-                    ],
-                    tree: {
-                        use: true,
-                        indentWidth: 15,
-                        arrowWidth: 15,
-                        iconWidth: 18,
-                        icons: {
-                          openedArrow: '<i class="fa fa-caret-down" aria-hidden="true"></i>',
-                          collapsedArrow: '<i class="fa fa-caret-right" aria-hidden="true"></i>',
-                          groupIcon: '<i class="fa fa-minus-square" aria-hidden="true"></i>',
-                          collapsedGroupIcon: '<i class="fa fa-plus-square" aria-hidden="true"></i>',
-                          //itemIcon: '-'
-                        },
-                        columnKeys: {
-                          parentbinding: 'parent_key',
-                          selfbinding: 'my_key'
-                        }
-                    },
-                };*/
-
-                /*   this.bom_reverse_grid = new ax5.ui.grid(bomReverseConfig);
-                   this.bom_reverse_grid.setData([]);*/
-
-                this.routing_grid = new wijmo.grid.FlexGrid('#routing-grid', {
-                    selectionMode: wijmo.grid.SelectionMode.Row,
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
-                    autoGenerateColumns: false,
-                    showMarquee: true,
-                    isReadOnly: true,
-                    formatItem: (sender, e) => {
-                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
-                            e.cell.style.textAlign = 'center';
-                        }
-                    },
-                    columns: [
-                        {binding: 'proc_order', header: '공정순서', width: 100, align: 'left'},
-                        {binding: 'proc_code', header: '공정코드', width: 100, align: 'left'},
-                        {binding: 'proc_name', header: '공정명', width: 200, align: 'left'},
-                        {binding: 'proc_type', header: '공정유형', width: 120, align: 'left'},
-                        {binding: '', header: '', width: "*", align: 'left'},
-                    ],
-                    itemsSource: this.viewData5, // 데이터를 설정할 배열
-
-                });
-
-                new FlexGridContextMenu(this.routing_grid);
-                this.grid.downloadFileName = '라우팅 정보';
-
-                /*let RoutingConfig = {
-                    target: $('[data-ax5grid="routing-grid"]'),
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: false, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onClick: function (e) {
-                        },
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
-                    columns: [
-                        { binding: 'proc_order', header: '공정순서', width: 100, align: 'left' },
-                        { binding: 'proc_code', header: '공정코드', width: 100, align: 'left' },
-                        { binding: 'proc_name', header: '공정명', width: 200, align: 'left' },
-                        { binding: 'proc_type', header: '공정유형', width: 100, align: 'left' },
-                    ],
-                };*/
-
-                /*this.routing_grid = new ax5.ui.grid(RoutingConfig);
-                this.routing_grid.setData([]);*/
-
-                this.test_master_grid = new wijmo.grid.FlexGrid('#test-master-grid', {
+                this.subject_grid = new wijmo.grid.FlexGrid('#subject-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
@@ -818,204 +313,32 @@
                         }
                     },
                     columns: [
-                        { binding: 'id', header: '번호', width: 100, align: 'center' },
-                        /*{
-                            binding: 'delete',
-                            header: '삭제',
-                            width: 100,
-                            align: 'center',
-                            dataMap: new wijmo.grid.DataMap([
-                                { key: true, value: 'Y' },   // 체크 표시
-                                { key: false, value: 'N' }   // 빈 값
-                            ], 'key', 'value'),
-                            isReadOnly: false,  // 체크박스 활성화
-                        },*/
-                        { binding: 'test_master_id', header: '검사마스터번호', visible: false, width: 200, align: 'left' },
-                        { binding: 'test_class_name', header: '검사종류', width: 120, align: 'left' },
-                        { binding: 'test_master_group_name', header: '검사마스터그룹', width: 120, align: 'left' },
-                        { binding: 'test_master_name', header: '검사마스터', width: 150, align: 'left' },
-                        { binding: '', header: '', width: "*", align: 'left' },
+                        {binding: 'code', header: '번호', width: 100, align: 'center'},
+                        {binding: 'name', header: '관리 항목 목록', width: 180, align: 'center'},
+                        {binding: 'required', header: '필수', width: 150, align: 'center'},
+                        {binding: 'used', header: '사용', width: 150, align: 'center'},
+                        {binding: '', header: '', width: '*', align: 'center'}
                     ],
-                    itemsSource: this.viewData6, // 데이터를 설정할 배열
+                    itemsSource: this.viewData2, // 데이터를 설정할 배열
                 });
 
-                new FlexGridContextMenu(this.test_master_grid);
-                this.grid.downloadFileName = '검사정보 정보';
-
-
-                /*let testConfig = {
-                    target: $('[data-ax5grid="test-master-grid"]'),
-                    frozenColumnIndex: 0, // 열 고정
-                    frozenRowIndex: 0,    // 행 고정
-                    showLineNumber: false, // 열의 번호 보이기 여부
-                    showRowSelector: false,  // checkbox(선택) 보이기 여부
-                    multipleSelect: false, // 여러행 선택 가능 여부 (false시 단독 선택)
-                    sortable: false, // 모든 컬럼에 정렬 아이콘 표시 (columns에서 컬럼별 소팅여부 재설정 가능)
-                    multiSort: false, // 다중 정렬 여부
-                    header: {
-                        align: 'center',  // 헤더의 기본 정렬
-                        columnHeight: 30  // 헤더 높이
-                    },
-                    body: {
-                        columnHeight: 25, // body의 기본 높이
-                        onClick: function (e) {
-                            _this.selected_test_master_pk = e.item.test_master_id;
-                        },
-                    },
-                    page: {
-                        display: true,  // 페이징 보이기 여부
-                        statusDisplay: true,
-                    },
-                    columns: [
-                        { binding: 'id', header: '번호', width: 100, align: 'center' },
-                        {
-                            binding: 'delete', header: '삭제', width: 100, align: 'center',
-                            editor: { type: 'checkbox', config: { height: 17, trueValue: 'Y', falseValue: 'N' } },
-                        },
-                        { binding: 'test_master_id', header: '검사마스터번호', hidden:'false', width: 200, align: 'left' },
-                        { binding: 'test_class_name', header: '검사종류', width: 100, align: 'left' },
-                        { binding: 'test_master_group_name', header: '검사마스터그룹', width: 100, align: 'left' },
-                        { binding: 'test_master_name', header: '검사마스터', width: 100, align: 'left' },
-
-                    ],
-                };
-
-                this.test_grid = new ax5.ui.grid(testConfig);
-                this.test_grid.setData([]);*/
+                new FlexGridContextMenu(this.subject_grid);
+                this.grid.downloadFileName = '관리항목';
 
                 // filter dropdown load
-                AjaxUtil.fillSelectOptions($('#cboMaterialType'), 'system_code', 'all', false, 'mat_type');
-                AjaxUtil.fillSelectOptions($('#cboMaterialGroup'), 'material_group', 'all', false);
-
-                $('#cboMaterialType').on('change', function (e) {
-                    let mat_type = $('#cboMaterialType').val();
-                    AjaxUtil.fillSelectOptions($('#cboMaterialGroup'), 'material_group', 'all', false, mat_type);
-                });
-
-                $('#keyword').on('keypress', function (e) {
-                    if (event.keyCode == 13) {
-                        _this.searchDataBind();
-                    }
-                });
-
-                this.initForm();
-
-                this.setUploader();
-            }
-
-            // 탭 내부 dropdown load
-            initForm() {
-                AjaxUtil.fillSelectOptions($('#MaterialGroup_id'), 'material_group', '', false); // 품목그룹
-                AjaxUtil.fillSelectOptions($('#Unit_id'), 'unit', '', false); // 단위
-                AjaxUtil.fillSelectOptions($('#StoreHouse_id'), 'store_house', '', false); // 창고
-                AjaxUtil.fillSelectOptions($('#WorkCenter_id'), 'workcenter', '', false); // 워크센터
-
-
-                $('#WorkCenter_id').change(function (e) {
-                    let group_pk = $('#WorkCenter_id').val();
-                    AjaxUtil.fillSelectOptions($('#Equipment_id'), 'equipment_code', 'choose', '',group_pk);
-                });
-
-                AjaxUtil.fillSelectOptions($('#Factory_id'), 'factory', "", false); // 공장
-                AjaxUtil.fillSelectOptions($('#ManagementLevel'), 'user_code', 'choose', false, 'mat_manage_level');
-                AjaxUtil.fillSelectOptions($('#EquipmentGroup_id'), 'equipment_group', 'choose', false); // 설비그룹
-                AjaxUtil.fillSelectOptions($('#Routing_id'), 'routing', 'choose', false); // 라우팅
-                AjaxUtil.fillSelectOptions($('#Company_id'), 'company', 'choose', false); // 업체
-
-                /*AjaxUtil.fillSelectOptions($('#Equipment_id'), 'equipment', 'choose', false); // 생산설비*/
-                AjaxUtil.fillSelectOptions($('#MaterialStoreHouse_id'), 'store_house', 'choose', false); // 생산자재창고
-
-                AjaxUtil.fillSelectOptions($('#cboTestMasterGroup'), 'test_master_group', 'choose', false); // 검사마스터
-                AjaxUtil.fillSelectOptions($('#cboTestMaster'), 'test_master', 'choose', false); // 검사마스터
-            }
-
-
-            setButtonState() {
-                let pk = $('#matBasicForm').find('#id').val();
-                $('#btnNew').prop('disabled', false);
-                $('#btnSave').prop('disabled', false);
-                if (pk) {
-                    $('#btnDelete').prop('disabled', false);
-                    $('#btnProductionSave').prop('disabled', false);
-                    $('#btnInventorySave').prop('disabled', false);
-                    $('#btnRoutingSave').prop('disabled', false);
-                } else {
-                    $('#btnDelete').prop('disabled', true);
-                    $('#btnProductionSave').prop('disabled', true);
-                    $('#btnInventorySave').prop('disabled', true);
-                    $('#btnRoutingSave').prop('disabled', true);
-                }
-            }
-
-            setPriceButtonState() {
-                let pk = $('#matBasicForm').find('#id').val();
-                let price_pk = $('#companyPriceForm').find('#price_id').val();
-                $('#btnPriceNew').prop('disabled', false);
-                $('#btnPriceSave').prop('disabled', false);
-                if (pk && price_pk) {
-                    $('#btnPriceUpdate').prop('disabled', false);
-                    $('#btnPriceDelete').prop('disabled', false);
-                } else {
-                    $('#btnPriceUpdate').prop('disabled', true);
-                    $('#btnPriceDelete').prop('disabled', true);
-                }
+                AjaxUtil.fillSelectOptions($('#cboAccountGroup'), 'system_code', 'choose', false, 'account_item');
 
             }
+
 
             // 품목 리스트 조회
             searchDataBind() {
                 let _this = this;
-                let data = {
-                    'mat_type': $('#cboMaterialType').val(),
-                    'mat_group': $('#cboMaterialGroup').val(),
-                    'keyword': $('#keyword').val(),
-                    'action': 'read'
-                };
 
-                let result = AjaxUtil.getSyncData(this.url + '/read', data);
-                if (result.success) {
-                    _this.viewData.sourceCollection = result.data;
-
-                    // 기본정보 리셋
-                    $('#matBasicForm')[0].reset();
-                    $('#matBasicForm').find('#id').val('');
-                    // 재고정보 리셋
-                    $('#matProductionForm')[0].reset();
-                    // 재고정보 리셋
-                    $('#matStockForm')[0].reset();
-                    // 검사정보 리셋
-                    $('#matTestForm')[0].reset();
-                    // 라우팅정보 리셋
-                    //$('#matRoutingForm')[0].reset();
-                    // 도면 파일 리셋
-                    //_this.setUploader();
-
-                    //$('#mat_detail').find('input, select').each(function () {
-                    $('.mat_detail').find('input, select').each(function () {
-                        if (!$(this).is(':disabled')) {
-                            $(this).attr('disabled', 'disabled');
-                        }
-                    });
-
-                    // 단가정보 리셋
-                    /*$('#priceForm')[0].reset();*/
-
-                    /*_this.price_grid.setData([]);*/
-                    $('#companyPriceForm')[0].reset();
-                    $('#companyPriceForm').find('#price_id').val('');
-                    $('#companyPriceForm').find('input, select').each(function () {
-                        if (!$(this).is(':disabled')) {
-                            $(this).attr('disabled', 'disabled');
-                        }
-                    });
-                }
-
-                //this.setButtonDisable(false, true, true);
-                this.setButtonState();
-                //this.setPriceButtonDisabled(true, true, true);
-                this.setPriceButtonState();
-
-                this.uploader.mode = 'disabled';
+                /*let result = AjaxUtil.getSyncData(this.url + '/read');
+                if (result) {
+                       _this.viewData.sourceCollection = result.data;
+                }*/
             }
 
             // 품목 상세 조회
@@ -1024,45 +347,10 @@
                 let result = AjaxUtil.getSyncData(this.url + '/detail', param);
                 if (result.success != null) {
                     let detailData = result.data;
-                    FormUtil.BindDataForm(detailData, $('#matBasicForm'));
-                    FormUtil.BindDataForm(detailData, $('#matProductionForm'));
-                    FormUtil.BindDataForm(detailData, $('#matStockForm'));
-                    FormUtil.BindDataForm(detailData, $('#matTestForm'));
-                    FormUtil.BindDataForm(detailData, $('#priceForm'));
-                    $('#Routing_id').val(detailData.Routing_id);
-                    // lot 체크
-                    $('#matStockForm').find('#lot_use_yn').removeAttr('disabled');
 
-                    if (detailData.lotUseYn == 'Y') {
-                        $('#matStockForm').find('#lot_use_yn').prop('checked', true);
-                    } else {
-                        $('#matStockForm').find('#lot_use_yn').prop('checked', false);
-                    }
-
-                    if (detailData.mtyn === 1 || detailData.mtyn === '1') {
-                        $('#mtyn').prop('checked', true);
-                    } else {
-                        $('#mtyn').prop('checked', false);
-                    }
-
-                    if (detailData.useyn === 1 || detailData.useyn === '1') {
-                        $('#useyn').prop('checked', true);
-                    } else {
-                        $('#useyn').prop('checked', false);
-                    }
-
-
-                    //$('#Routing_id').trigger('change');
-                    //FormUtil.BindDataForm(result, $('#matRoutingForm'));
                 }
 
-                //this.setButtonDisable(false, false, false);
-                this.setButtonState();
-                this.uploader.mode = 'active';
             }
-            //let testData = FormUtil.extractForm($('#matTestForm'));
-            //let data = $.extend({}, basicData, productionData, stockData, testData, routingData);
-            /*matBasicForm matProductionForm matStockForm*/
 
             // 품목 기본정보 저장
             saveData() {
@@ -1071,26 +359,7 @@
                 let $target = null;
 
 
-
-                $('.mat_detail').find('input, select').each(function () {
-                    if ($(this).is(':required')) {
-                        if (!$(this).val()) {
-                            validate = false;
-                            $target = $(this);
-                            return false;
-                        }
-                    }
-                });
-
-                if (!validate) {
-                    Alert.alert('', '필수 항목을 입력해주세요.', function () {
-                        $target.focus();
-                    });
-                    return;
-                }
-
-
-                let url = this.url+'/save';
+                let url = this.url + '/save';
                 let basicData = FormUtil.extractForm($('#matBasicForm'));
                 let productionData = FormUtil.extractForm($('#matProductionForm'));
                 let stockData = FormUtil.extractForm($('#matStockForm'));
@@ -1114,35 +383,6 @@
 
             }
 
-
-
-            // 라우팅정보 저장
-            saveRoutingData() {
-                let _this = this;
-                let validate = true;
-                let $target = null;
-
-                let url = this.url + '/saveRouting';
-                let mat_id = $('#id').val();
-                let routing_pk = $('#Routing_id').val();
-                let param = {
-                    'mat_id': mat_id,
-                    'routing_pk': routing_pk,
-                };
-
-                let fnSuccess = function (res) {
-                    if (!res.success) {
-                        Alert.alert('', res.message);
-                    } else {
-                        Alert.alert('', "저장되었습니다.");
-                        //_this.searchDataBind();
-                    }
-                };
-
-                AjaxUtil.postAsyncData(url, param, fnSuccess);
-
-            }
-
             // 품목 정보 삭제
             deleteData() {
                 let _this = this;
@@ -1161,90 +401,6 @@
                 AjaxUtil.postAsyncData(url, data, fnSuccess);
             }
 
-            // 업체별 단가 리스트 조회
-            showPriceList(mat_pk) {
-                let _this = this;
-                let data = {'mat_pk': mat_pk};
-
-                let result = AjaxUtil.getSyncData(this.url + '/readPrice', data);
-                if (result != null) {
-                    result.data.forEach(item => {
-                        // Date 객체 추가 (문자열 기반 정렬은 정확하지 않아서)
-                        item.ApplyEndDateObj = new Date(item.ApplyEndDate);
-
-                        // ApplyEndDate가 2100-12-31이면 sortFlag로 지정
-                        item.sortFlag = item.ApplyEndDate === "2100-12-31" ? 0 : 1;
-                    });
-
-                    _this.viewData2.sourceCollection = result.data;
-
-                    // 정렬 순서: 1. 업체명(오름차순), 2. sortFlag(오름차순), 3. 날짜(내림차순)
-                    _this.viewData2.sortDescriptions.clear();
-                    _this.viewData2.sortDescriptions.push(new wijmo.collections.SortDescription('CompanyName', true));      // 업체명 A → Z
-                    _this.viewData2.sortDescriptions.push(new wijmo.collections.SortDescription('sortFlag', true));         // 2100-12-31 우선
-                    _this.viewData2.sortDescriptions.push(new wijmo.collections.SortDescription('ApplyEndDateObj', false)); // 최신 날짜 우선
-
-                    $('#companyPriceForm')[0].reset();
-                    $('#companyPriceForm').find('#price_id').val('');
-                    $('#companyPriceForm').find('input, select').each(function () {
-                        if (!$(this).is(':disabled')) {
-                            $(this).attr('disabled', 'disabled');
-                        }
-                    });
-
-                    _this.setPriceButtonState();
-                }
-
-
-            }
-
-            // 업체별 단가히스토리 리스트 조회
-            showPriceHistoryList(mat_pk) {
-                let _this = this;
-                let data = {'mat_pk': mat_pk};
-
-                let result = AjaxUtil.getSyncData(this.url + '/readPriceHistory', data);
-                if (result != null) {
-                    /*console.log(result);*/
-                    _this.viewData2.sourceCollection = result.data;
-
-                    $('#companyPriceForm')[0].reset();
-                    $('#companyPriceForm').find('#price_id').val('');
-                    $('#companyPriceForm').find('input, select').each(function () {
-                        if (!$(this).is(':disabled')) {
-                            $(this).attr('disabled', 'disabled');
-                        }
-                    });
-
-                    //_this.setPriceButtonDisabled(false, true, true);
-                    _this.setPriceButtonState();
-                }
-            }
-
-            // 단가 상세 조회
-            showPriceDetail(idx) {
-                let param = {'price_id': idx};
-                let result = AjaxUtil.getSyncData(this.url + '/detailPrice', param);
-                if (result != null) {
-                    console.log(result.data);
-                    FormUtil.BindDataForm(result.data, $('#companyPriceForm'));
-
-                    // ApplyStartDate를 UTC에서 한국시간(KST)으로 변환하여 datetime-local 포맷으로 설정
-                    let applyStartDate = result.data.ApplyStartDate;
-                    if (applyStartDate) {
-                        let date = new Date(applyStartDate);
-                        date.setHours(date.getHours() + 9);
-
-                        // YYYY-MM-DD 형식으로 변환
-                        let formattedDate = date.toISOString().substring(0, 10);
-
-                        $('#ApplyStartDate').val(formattedDate);
-                    }
-
-                }
-
-                this.setPriceButtonState();
-            }
 
             // 단가 정보 등록/변경
             savePriceData() {
@@ -1275,7 +431,7 @@
                         Alert.alert('', '저장실패: ' + res.message);
                     } else {
                         Alert.alert('', '저장되었습니다');
-                        _this.showPriceList(mat_id);
+                        /*_this.showPriceList(mat_id);*/
                     }
                 };
 
@@ -1353,178 +509,12 @@
                 let data = {id: id};
                 let fnSuccess = function () {
                     Alert.alert('', '삭제되었습니다'); // Notification
-                    _this.showPriceList(mat_id);
+                    /*_this.showPriceList(mat_id);*/
                 };
 
                 AjaxUtil.postAsyncData(url, data, fnSuccess);
             }
 
-
-            // BOM 조회
-            showBomList(mat_id) {
-                let _this = this;
-
-                let data = {
-                    'mat_id': mat_id
-                };
-
-                let result = AjaxUtil.getSyncData(this.url + '/bom', data);
-
-                if (result.data && Array.isArray(result.data)) {
-                    /*console.log(result.data);*/
-                    // 데이터를 계층 구조로 변환
-                    let treeData = _this.buildTree(result.data);
-
-                    // FlexGrid의 데이터 갱신
-                    _this.bom_grid.itemsSource = treeData;
-                } else {
-                    // 데이터가 없을 경우 빈 배열 설정
-                    _this.bom_grid.itemsSource = [];
-                }
-
-                // 데이터 바인딩을 다시 렌더링
-                _this.bom_grid.collectionView.refresh();
-            }
-
-            /**
-             * 부모-자식 관계를 반영하여 계층 구조로 변환하는 함수
-             */
-            buildTree(flatData) {
-                let tree = [];
-                let map = {};
-
-                // 모든 항목을 매핑 (my_key를 키로)
-                flatData.forEach(item => {
-                    map[item.my_key] = {...item, children: []};
-                });
-
-                // 부모-자식 관계를 설정
-                flatData.forEach(item => {
-                    if (item.parent_mat_pk !== null) {
-                        if (map[item.parent_mat_pk]) {
-                            map[item.parent_mat_pk].children.push(map[item.my_key]);
-                        }
-                    } else {
-                        tree.push(map[item.my_key]); // 최상위 레벨
-                    }
-                });
-
-                return tree;
-            }
-
-
-            // BOM역전개 조회
-            showBomReverseList(mat_id) {
-                let _this = this;
-                let data = {
-                    'mat_id': mat_id
-                };
-
-                let result = AjaxUtil.getSyncData(this.url + '/bomReverse', data);
-
-                /* console.log("result: ", result);
-                 console.log(JSON.stringify(result, null, 2));*/
-
-                if (result.data && Array.isArray(result.data)) {
-                    // 데이터를 계층 구조로 변환
-                    let treeData = _this.buildTree2(result.data);
-
-                    // FlexGrid의 데이터 갱신
-                    _this.bom_reverse_grid.itemsSource = treeData;
-                } else {
-                    // 데이터가 없을 경우 빈 배열 설정
-                    _this.bom_reverse_grid.itemsSource = [];
-                }
-
-                // 데이터 바인딩을 다시 렌더링
-                _this.bom_reverse_grid.collectionView.refresh();
-            }
-
-            /**
-             * 부모-자식 관계를 반영하여 계층 구조로 변환하는 함수
-             */
-            buildTree2(flatData) {
-                let tree = [];
-                let map = {};
-
-                // 모든 항목을 매핑 (my_key를 키로)
-                flatData.forEach(item => {
-                    map[item.my_key] = {...item, children: []};
-                });
-
-                // 부모-자식 관계를 설정
-                flatData.forEach(item => {
-                    if (item.parent_key !== null) {
-                        if (map[item.parent_key]) {
-                            map[item.parent_key].children.push(map[item.my_key]);
-                        }
-                    } else {
-                        tree.push(map[item.my_key]); // 최상위 레벨
-                    }
-                });
-
-                return tree;
-            }
-
-
-            // ROUTING 공정정보 조회
-            showRoutingProcessList(routing_pk) {
-                let _this = this;
-                let data = {
-                    'routing_pk': routing_pk
-                };
-
-                let result = AjaxUtil.getSyncData(this.url + '/routingProcess', data);
-
-                /*console.log("result: ", result);
-                console.log(JSON.stringify(result, null, 2));*/
-
-                if (result != null) {
-                    let count = result.data.length;
-
-                    _this.viewData5.sourceCollection = result.data;
-                }
-            }
-
-            //파일 업로더
-            setUploader() {
-                let _this = this;
-                $('#addFile').prop('disabled', false);
-
-                let accept_files = 'jpg,jpeg,gif,png,xlsx,xls';
-                let accept = '.' + accept_files.split(',').join(',.');
-
-                //if ($('#fileUploadBox').children().length > 0)
-                //    return;
-                if (_this.uploader)
-                    return;
-
-                _this.uploader = $('#fileUploadDiv').yuFileUploader(
-                    {
-                        fileIdsCtl: '#srchFileId',
-                        dropZone: 'fileuploadAx',
-                        boxZone: 'fileuploadAx',
-                        others: '', // 파일저장 상위경로
-                        filepath: 'material', // 파일저장 하위경로
-                        addfileext: 'Y', // 저장시 파일확장자 포함 파일이름저장
-                        icons: {
-                            'download': '<i class="fa fa-download" aria-hidden="true"></i>',
-                            'delete': '<i class="fa fa-minus-circle" aria-hidden="true"></i>'
-                        },
-                        emptymsg: '파일을 Drag&amp;Drop하거나 클릭하여 업로드를 진행하세요' + '(업로드 후 저장버튼을 클릭하세요.)',
-
-                        multiple: true,  // 멑티업로드 허용여부
-                        maxcnt: 5, // 업로드 최대갯수
-                        accept: accept, // 허용 확장자 image/* .gif,.jpg,.png
-                        accepts: accept_files,    // 드래그로 업로드할 때 체크할 용도
-                        fileSize: 50,   // Mega
-                        tableName: 'material',
-                        attachName: 'drawing',
-                    }
-                );
-                _this.uploader.can_write = userinfo.can_write();
-                _this.uploader.mode = 'disable';
-            }
 
             //검사항목
             showTestList(mat_pk) {
@@ -1539,264 +529,35 @@
 
                 let result = AjaxUtil.getSyncData(url, data);
                 if (result.data != null) {
-                    _this.viewData6.sourceCollection = result.data;
+                    _this.viewData2.sourceCollection = result.data;
                 }
             }
 
-            showpriceEdit(data) {
+            showAccountEdit() {
                 let _this = this;
-                let content = tmpl('MaterialTemplate', data);
+                let content = tmpl('AccountTemplate', {});
                 let $content = $(content);
 
-                let modalContainer = new PopupDraggable('히스토리 조회');
-                modalContainer.open({ width: 1025, height: 500, $content });
+                let modalContainer = new PopupDraggable('계정과목 등록');
+                modalContainer.open({width: 1025, height: 370, $content});
 
-                let target = $content.find('#price-history-grid');
-                _this.viewData8 = data || [];
-
-                setTimeout(() => {
-                    _this.grid8 = new wijmo.grid.FlexGrid('#price-history-grid', {
-                        selectionMode: wijmo.grid.SelectionMode.Row,
-                        headersVisibility: wijmo.grid.HeadersVisibility.Column,
-                        autoGenerateColumns: false,
-                        showMarquee: true,
-                        isReadOnly: false,
-                        formatItem: (sender, e) => {
-                            if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
-                                e.cell.style.textAlign = 'center';
-                            }
-                        },
-                        columns: [
-                            {binding: 'CompanyName', header: '업체명', width: '*', align: 'left',},
-                            {binding: 'type', header: '구분', width: 120, align: 'center',},
-                            {binding: 'UnitPrice', header: '단가', width: 120, align: 'right',},
-                            {binding: 'FormerUnitPrice', header: '이전단가', width: 120, align: 'right',},
-                            {binding: 'ApplyStartDate', header: '적용시작일', width: 120, align: 'center',},
-                            {binding: 'ApplyEndDate', header: '적용종료일', width: 120, align: 'center',},
-                            {binding: 'ChangerName', header: '변경자', width: 120, align: 'left',},
-                            {binding: 'ChangeDate', header: '변경일', width: 120, align: 'center',},
-                        ],
-                        itemsSource: _this.viewData8
+                $content.find('#btnAccountSave').on('click', function () {
+                    let $form = $content.find('#AccountForm');
+                    Alert.confirm('', '저장하시겠습니까?', function () {
+                        /*_this.saveBOMData($form);*/
                     });
+                });
 
-                    this.grid8.formatItem.addHandler((s, e) => {
-                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
-                            let col = s.columns[e.col];
-                            let item = s.rows[e.row].dataItem;
 
-                            if (col.binding === "type") {
-                                e.cell.textContent = (item.type === '01') ? '매입' : '매출';
-                            }
-                        }
-                    });
-
-                    let $btnTest = $content.find('#btnTest');
-                    $btnTest.click(function () {
-                        _this.grid8.collectionView.refresh();
-                    });
-                }, 0);
             }
-
-
 
         }
 
         let page = null;
 
         $(document).ready(function (e) {
-            page = new MaterialPage();
+            page = new AccountsubjectPage();
             //page.searchDataBind();
-
-            // 검색버튼
-            $('#btnSearch').click(function (e) {
-                page.searchDataBind();
-            });
-
-            $('#keyword').on('keypress', function (e) {
-                if (event.keyCode == 13) {
-                    page.searchDataBind();
-                }
-            });
-
-
-            $('.tab_links .tab').click(function (e) {
-                let target = e.currentTarget.name;
-                page.current_tab = target;
-                let mat_pk = $('#matBasicForm').find('#id').val();
-                //if (mat_pk == '')
-                //    return;
-                page.test_grid.setData([]);
-
-                if (target == 'tab_unitcost') {
-                    $('#tab_unitcost').removeClass("hidden");
-                    if (mat_pk)
-                        page.showPriceList(mat_pk);
-                } else if (target == 'tab_production') {
-                    //$('.tabs .tab_production_tab').css('visibility', 'visible');
-                    //$('#tab_production_tab').css('visibility', 'visible');
-                } else if (target == 'tab_bom') {
-                    $('#tab_bom').removeClass("hidden");
-                    if (mat_pk)
-                        page.showBomList(mat_pk);
-                } else if (target == 'tab_bom_reverse') {
-                    $('#tab_bom_reverse').removeClass("hidden");
-                    if (mat_pk)
-                        page.showBomReverseList(mat_pk);
-                } else if (target == 'tab_routing') {
-                    $('#tab_routing').removeClass("hidden");
-                    let routing_pk = $('#Routing_id').val();
-                    //if (routing_pk)
-                    page.showRoutingProcessList(routing_pk);
-                } else if (target == 'tab_test_master') {
-                    $('#tab_test_master').removeClass("hidden");
-                    //if (mat_pk)
-                    page.showTestList(mat_pk);
-                }
-            });
-
-            // 기본정보 신규버튼
-            $('#btnNew').click(function (e) {
-
-                // 기본정보 리셋
-                $('#matBasicForm')[0].reset();
-                $('#matBasicForm').find('#id').val('');
-
-                $('#matBasicForm').find('input, select, textarea').each(function () {
-                    if ($(this).is(':disabled')) {
-                        $(this).removeAttr('disabled');
-                    }
-                });
-                $('#matProductionForm').find('input, select, textarea').each(function () {
-                    if ($(this).is(':disabled')) {
-                        $(this).removeAttr('disabled');
-                    }
-                });
-                $('#matStockForm').find('input, select, textarea').each(function () {
-                    if ($(this).is(':disabled')) {
-                        $(this).removeAttr('disabled');
-                    }
-                });
-                $('#priceForm').find('input, select, textarea').each(function () {
-                    if ($(this).is(':disabled')) {
-                        $(this).removeAttr('disabled');
-                    }
-                });
-
-                // 생산정보 리셋
-                $('#matProductionForm')[0].reset();
-                // 재고정보 리셋
-                $('#matStockForm')[0].reset();
-                // 검사정보 리셋
-                $('#matTestForm')[0].reset();
-                // 라우팅정보 리셋
-                //$('#matRoutingForm')[0].reset();
-
-                // 단가정보 리셋
-                /*page.price_grid.setData([]);*/
-                $('#companyPriceForm')[0].reset();
-                $('#companyPriceForm').find('#price_id').val('');
-
-                $('#companyPriceForm').find('input, select').each(function () {
-                    if (!$(this).is(':disabled')) {
-                        $(this).attr('disabled', 'disabled');
-                    }
-                });
-
-                /*page.grid.clearSelect();*/
-
-                //page.setButtonDisable(true, false, true);
-                page.setButtonState();
-                //page.setPriceButtonDisabled(true, true, true);
-                page.setPriceButtonState();
-
-                // uploder
-                $('#DataPk').val('');
-
-                let today_string = CommonUtil.getYYYYMMDD();
-            });
-
-            // 기본정보 저장버튼
-            $(document).on('click', '#btnSave', function (e) {
-                let basicData = FormUtil.extractForm($('#matBasicForm'));
-                let stockData = FormUtil.extractForm($('#matStockForm'));
-                let data = $.extend({}, basicData, stockData);
-                console.log("버튼눌림");
-
-                if (!data.MaterialGroup_id) {
-                    Alert.alert('', '품목 그룹을 선택해 주세요');
-                    $('#matBasicForm #MaterialGroup_id').focus();  // 해당 input으로 포커스 이동
-                    return;
-                }
-                if (!data.Code) {
-                    Alert.alert('', '품목코드(바코드)를 입력해 주세요');
-                    $('#matBasicForm #Code').focus();  // 해당 input으로 포커스 이동
-                    return;
-                }
-                if (!data.Name) {
-                    Alert.alert('', '품목명을 입력해 주세요');
-                    $('#matBasicForm #Name').focus();  // 해당 input으로 포커스 이동
-                    return;
-                }
-                if (!data.Unit_id) {
-                    Alert.alert('', '단위를 선택해 주세요');
-                    $('#matBasicForm #Unit_id').focus();  // 해당 input으로 포커스 이동
-                    return;
-                }
-                if (!data.Factory_id) {
-                    Alert.alert('', '공장을 선택해 주세요');
-                    $('#matBasicForm #Factory_id').focus();  // 해당 input으로 포커스 이동
-                    return;
-                }
-                if (!data.StoreHouse_id) {
-                    Alert.alert('', '기본 재고 창고를 선택해 주세요');
-                    $('#matStockForm #StoreHouse_id').focus();  // 해당 input으로 포커스 이동
-                    // 탭 이동 및 내용 표시
-                    $('a[href="#tab_inventory"]').tab('show');  // 탭 전환
-                    $('#tab_basic').hide();
-                    $('#tab_inventory').show();  // 해당 탭 내용 표시
-                    return;
-                }
-
-                if (!data.MinOrder) {
-                    Alert.alert('', '최소 발주량을 입력해 주세요');
-                    $('#matStockForm #MinOrder').focus();  // 해당 input으로 포커스 이동
-                    // 탭 이동 및 내용 표시
-                    $('a[href="#tab_inventory"]').tab('show');  // 탭 전환
-                    $('#tab_basic').hide();
-                    $('#tab_inventory').show();  // 해당 탭 내용 표시
-                    return;
-                }
-
-                if (!data.MaxOrder) {
-                    Alert.alert('', '최대 발주량을 입력해 주세요');
-                    $('#matStockForm #MaxOrder').focus();  // 해당 input으로 포커스 이동
-                    // 탭 이동 및 내용 표시
-                    $('a[href="#tab_inventory"]').tab('show');  // 탭 전환
-                    $('#tab_basic').hide();
-                    $('#tab_inventory').show();  // 해당 탭 내용 표시
-                    return;
-                }
-
-                if (!data.ValidDays) {
-                    Alert.alert('', '사용기한(일)를 입력해 주세요');
-                    $('#matStockForm #ValidDays').focus();  // 해당 input으로 포커스 이동
-                    // 탭 이동 및 내용 표시
-                    $('a[href="#tab_inventory"]').tab('show');  // 탭 전환
-                    $('#tab_basic').hide();
-                    $('#tab_inventory').show();  // 해당 탭 내용 표시
-                    return;
-                }
-
-                Alert.confirm('',
-                    '저장하시겠습니까?',
-                    function () {
-                        page.saveData()
-                    },
-                    function () {
-                    }
-                );
-            });
-
 
             // 기본정보 삭제버튼
             $('#btnDelete').click(function (e) {
@@ -1811,35 +572,9 @@
             });
 
             // 단가 히스토리버튼
-            $('#btnPriceHistory').click(function (e) {
-                let price_grid = wijmo.Control.getControl('#price-grid');
-                let selectedRow = price_grid.selection.row;
-
-                // 선택한 행의 데이터 가져오기 (단일 객체)
-                let selectedItem = price_grid.rows[selectedRow].dataItem;
-                /*console.log(selectedItem);*/
-                let id = selectedItem.Material_id; // ID 값 가져오기
-                let id2 = selectedItem.Company_id;
-                let data = {
-                    'mat_pk': id,
-                    'com_pk': id2
-                }
-
-                let url = '/api/definition/material/readPriceHistory';
-                let result = AjaxUtil.getSyncData(url, data);
-                if (result.success) {
-                    page.showpriceEdit(result.data);
-                } else {
-                    Alert.alert('', "오류가 발생했습니다.");
-                }
+            $('#btnBomNew').click(function (e) {
+                page.showAccountEdit();
             });
-
-
-            $('#cboTestMasterGroup').change(function (e) {
-                let group_pk = $('#cboTestMasterGroup').val();
-                AjaxUtil.fillSelectOptions($('#cboTestMaster'), 'test_master', 'choose', '', group_pk);
-            });
-
 
             /* let newRow = {
                     id: 0,
@@ -2019,28 +754,6 @@
                 );
             });
 
-            // 라우팅 선택
-            $('#Routing_id').change(function (e) {
-                let route_pk = $('#Routing_id').val();
-                page.showRoutingProcessList(route_pk);
-            });
-
-            // 라우팅 저장버튼
-            $('#btnRoutingSave').click(function (e) {
-                Alert.confirm('',
-                    '라우팅 정보를 저장하시겠습니까?',
-                    function () {
-                        page.saveRoutingData()
-                    },
-                    function () {
-                    }
-                );
-            });
-
-
-            $('#btnExcel').click(function (e) {
-                page.grid.exportExcel('품목정보.xls');
-            });
 
 
             if (userinfo.group_code == 'admin') {
@@ -2048,44 +761,6 @@
                 //$('#btnGridSetting').attr('style', 'visibility:visible');
                 $('#btnGridSetting').css('visibility', 'visible');
             }
-
-            $(".tab-links a").on("click", function () {
-                const id = $(this).attr("id");
-                const showButtons = ["tabs_basic", "tabs_production", "tabs_inventory", "tabs_unitcost"];
-
-                if (showButtons.includes(id)) {
-                    $(".button-wrap.button-list").show();
-
-                    if (id === "tabs_unitcost") {
-                        // 저장 버튼만 이동해서 보여주기
-                        $("#btnNew").parent().hide();
-                        $("#btnDelete").parent().hide();
-
-                        // 저장 버튼을 따로 복사해서 옮겨 붙이기
-                        const $saveBtn = $("#btnSave").closest("li").clone();
-                        // 버튼 안의 <button>에 다시 id 부여
-                        $saveBtn.find("button").attr("id", "btnSave");
-
-                        $saveBtn.find("#btnSave").addClass("unitcost-save-btn");
-                        $("#unitcostSaveButtonContainer").html($saveBtn).show();
-
-
-                        // 기존 버튼 영역 숨기기
-                        $(".button-wrap.button-list").hide();
-                    } else {
-                        // 버튼들 원래대로 복원
-                        $(".button-wrap.button-list li").show();
-                        $(".button-wrap.button-list").show();
-                        $("#unitcostSaveButtonContainer").hide();
-                    }
-
-                } else {
-                    $(".button-wrap.button-list").hide();
-                    $("#unitcostSaveButtonContainer").hide();
-                }
-            });
-
-
 
 
             page.searchDataBind();
