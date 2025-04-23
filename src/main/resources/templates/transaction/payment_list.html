@@ -34,23 +34,6 @@
 
                     <dl>
                         <dt>
-                            <label for="cboWorkcenter">
-                                구분<span class="eq"></span>
-                            </label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <select id="cboWorkcenter" name="cboWorkcenter">
-                                    <option value="00">전 체</option>
-                                    <option value="01">입 금</option>
-                                    <option value="02">출 금</option>
-                                </select>
-                            </div>
-                        </dd>
-                    </dl>
-
-                    <dl>
-                        <dt>
                             <label for="actNm">
                                 계좌명<span class="eq"></span>
                             </label>
@@ -62,6 +45,34 @@
                         </dd>
                     </dl>
 
+                    <dl>
+                        <dt>
+                            <label for="">
+                                입금형태
+                            </label>
+                        </dt>
+                        <dd>
+                            <select id="" name="cboWorkcenter">
+                                <option value="00">예 금</option>
+                                <option value="01">현 금</option>
+                                <option value="02">어 음</option>
+                                <option value="03">CMS</option>
+                                <option value="04">지 로</option>
+                                <option value="05">선수금</option>
+                                <option value="06">기 타</option>
+                            </select>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label for="">
+                                적 요
+                            </label>
+                        </dt>
+                        <dd>
+                            <input type="text" id="">
+                        </dd>
+                    </dl>
                     <dl>
                         <dt>
                             <label for="">
@@ -96,45 +107,11 @@
                         </dd>
                     </dl>
                 </div>
-                <div class="button-wrap" style="margin-left: auto">
-                    <ul>
-                        <li>
-                            &nbsp;&nbsp;
-                            <a class="btn btn-excell" title="등록" id="btnAddInput">
-                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                추가
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-delete" title="삭제" id="btnPlanDel">
-                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                삭제
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-edit" title="수정" id="btnPlanSave">
-                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
-                                수정
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-excell" title="등록" id="btnPlanInput">
-                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                저장
-                            </a>
-                        </li>
-                    </ul>
-                </div>
             </div>
             <div class="container-fluid">
-                <div id="theGrid" style="height: 200px;"></div>
+                <div id="theGrid" style="height: 600px;"></div>
             </div>
-            <div>
-                <h3 style="margin-top: 30px; margin-bottom: 15px">상세정보</h3>
-            </div>
-            <div class="container-fluid">
-                <div id="theGrid3" style="height: 200px;"></div>
-            </div>
+
         </section>
     </div>
 
@@ -302,54 +279,28 @@
                     });
                     // ✅ Footer 패널 사용 설정
                     this.grid.columnFooters.rows.push(new wijmo.grid.Row());
-                    this.grid.bottomLeftCells.setCellData(0, 0, '총합');
+                    this.grid.bottomLeftCells.setCellData(0, 0, '월 계');
+                    this.grid.columnFooters.rows.push(new wijmo.grid.Row());
+                    this.grid.bottomLeftCells.setCellData(0, 0, '합 계');
 
                     // ✅ Footer 합계 값 설정 (수동)
                     this.grid.loadedRows.addHandler(() => {
                         const rows = this.grid.rows;
-                        const footer = this.grid.columnFooters.rows[0];
+                        const footerMonth = this.grid.columnFooters.rows[0];
+                        const footerTotal = this.grid.columnFooters.rows[1];
 
                         const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
 
-                        footer.dataItem = {
-                            mat_grp_name: '합계'
+                        footerMonth.dataItem = {
+                            mat_grp_name: '월 계'
                             // year_qty_sum: getSum('year_qty_sum'),
                             // year_money_sum: getSum('year_money_sum'),
                         };
-                    });
-
-                    //상세정보 그리드 바인드
-                    this.grid2 = new wijmo.grid.FlexGrid('#theGrid3', {
-                        autoGenerateColumns: false,
-                        selectionMode: wijmo.grid.SelectionMode.Row,
-                        headersVisibility: wijmo.grid.HeadersVisibility.Column,
-                        isReadOnly: true,
-                        showMarquee: true,
-                        formatItem: (sender, e) => {
-                            if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
-                                e.cell.style.textAlign = 'center';
-                            }
-                        },
-                        columns: [
-                            {binding: 'workorder_number', header: '거래처명', width: 130, align: 'center'},
-                            {binding: 'production_date', header: '일자', width: 120, align: 'center'},
-                            {binding: 'shift_name', header: '구분', width: 120, align: 'center'},
-                            {binding: 'mat_type_name', header: '금액', width: 120, align: 'center'},
-                            {binding: 'mat_grp_name', header: '잔액', width: 120, align: 'left'},
-                            {binding: 'mat_code', header: '품목', width: 110, align: 'left'},
-                            {binding: 'mat_name', header: '입금형태', width: 120, align: 'left'}
-                        ]
-                    });
-
-                    new FlexGridContextMenu(this.grid2);
-                    this.grid2.downloadFileName = '작업 지시 등록 내역';
-
-                    this.grid2.hostElement.addEventListener('dblclick', function (e) {
-                        let items = _this.grid2.selectedItems;
-                        if (items.length === 0) {
-                            return false;
-                        }
-                        $('#btnPlanSave').trigger('click');
+                        footerTotal.dataItem = {
+                            mat_grp_name: '합 계'
+                            // year_qty_sum: getSum('year_qty_sum'),
+                            // year_money_sum: getSum('year_money_sum'),
+                        };
                     });
 
                     AjaxUtil.fillSelectOptions($('#cboMatType'), 'system_code', 'all', false, 'mat_type', 'product,semi');
@@ -382,7 +333,6 @@
                     //     _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
                     // }
                     _this.grid.itemsSource = new wijmo.collections.CollectionView([{},{},{}]);
-                    _this.grid2.itemsSource = new wijmo.collections.CollectionView([{},{},{}]);
 
                 }
 
