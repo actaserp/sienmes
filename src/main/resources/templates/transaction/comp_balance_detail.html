@@ -1,0 +1,267 @@
+<html layout:decorate="~{layout_page}">
+<th:block layout:fragment="content">
+
+  <div class="layout-contents">
+    <div class="page-title-wrap">
+      <div class="left">
+        <h2>거래처별 잔액 명세(입금)</h2>
+        <a title="북마크" class="bookmark toggle">
+          내 메뉴
+        </a>
+      </div>
+      <ul class="page-navi">
+        <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+        <li>입금관리</li>
+        <li>거래처별 잔액 명세(입금)</li>
+      </ul>
+    </div>
+
+    <section class="section">
+      <div class="section-top">
+        <div class="search-wrap">
+          <dl id="searchComArea">
+            <dt>
+              거래처
+            </dt>
+            <dd>
+              <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
+              <input type="hidden" id="cboCompanyHidden">
+              &nbsp;
+              <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                업체 검색
+              </a>
+            </dd>
+          </dl>
+          <dl>
+            <dt>
+              조회기간<span class="eq">*</span>
+            </dt>
+            <dd>
+              <ul class="date-box">
+                <li>
+                  <input type="date" id="srchStartDt" name="srchStartDt">
+                  <label for="srchStartDt" class="hide">시작일</label>
+                </li>
+                <li>
+                  <input type="date" id="srchEndDt" name="srchEndDt">
+                  <label for="srchEndDt" class="hide">종료일</label>
+                </li>
+              </ul>
+            </dd>
+          </dl>
+          <dl>
+            <dt>&nbsp;</dt>
+            <dd>
+              <li>
+                <a class="btn btn-delete" title="검색" id="btnSearch">
+                  <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                  <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                  검색
+                </a>
+              </li>
+            </dd>
+          </dl>
+        </div>
+      </div>
+      <div class="container-fluid">
+        <div id="theGrid" style="height: 350px;" ></div>
+      </div>
+    </section>
+    <section>
+      <div class="left_align">
+        <h3 data-labelCd="매출 내역">매출 내역</h3>
+      </div>
+      <div class="container-fluid">
+        <div id="sales-details" style="height: 350px;" ></div>
+      </div>
+    </section>
+  </div>
+</th:block>
+
+<th:block layout:fragment="scripts">
+  <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
+  <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
+  <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+  <script type="text/javascript">
+    class CompBalanceDetailPage {
+      constructor() {
+        this.grid = null;
+        this.grid3 = null;
+        this.$btnEdit = $('#btnEdit');
+        this.$btnAddNew = $('#btnAddNew');
+        this.viewData = new wijmo.collections.CollectionView();
+        this.init();
+      }
+
+      init() {
+        let _this = this;
+        this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+          selectionMode: wijmo.grid.SelectionMode.Row,
+          headersVisibility: wijmo.grid.HeadersVisibility.Column,
+          autoGenerateColumns: false,
+          showMarquee: true,
+          isReadOnly: true,
+          formatItem: (sender, e) => {
+            if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+              e.cell.style.textAlign = 'center';
+            }
+          },
+          columns: [
+            {binding: 'BaljuPrice', header: '거래처명', width: 100, align: 'right'},
+            {binding: 'BaljuVat', header: '일자', width: 100, align: 'right'},
+            {binding: 'BaljuTotalPrice', header: '매출금액', width: 100, align: 'right'},
+            {binding: 'StateName', header: '입금금액', width: 80, align: 'center'},
+            {binding: 'SujuQty2', header: '품목', width: 100, align: 'right'},
+            {binding: 'SujuQty3', header: '입급형태', width: 100, align: 'right'},
+            {binding: 'ShipmentStateName', header: '은행/어음번호', width: 100, align: 'center'},
+            {binding: 'DueDate', header: '계좌/만기일', width: 120, align: 'center'},
+            {binding: 'DueDate', header: '거래구분', width: 120, align: 'center'},
+            {binding: 'Description', header: '적요', width: 200}
+          ],
+          itemsSource: this.viewData, // 데이터를 설정할 배열
+        });
+        // ✅ Footer 패널 사용 설정
+        this.grid.columnFooters.rows.push(new wijmo.grid.Row());
+        this.grid.bottomLeftCells.setCellData(0, 0, '총합');
+
+        // ✅ Footer 합계 값 설정 (수동)
+        this.grid.loadedRows.addHandler(() => {
+          const rows = this.grid.rows;
+          const footer = this.grid.columnFooters.rows[0];
+
+          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+
+          footer.dataItem = {
+            tot_price_sum: getSum('tot_price_sum'),
+          };
+        });
+
+        new FlexGridContextMenu(this.grid);
+        this.grid.downloadFileName = '거래처잔액명세 집계';
+
+        this.grid3 = new wijmo.grid.FlexGrid('#sales-details', {
+          selectionMode: wijmo.grid.SelectionMode.Row,
+          headersVisibility: wijmo.grid.HeadersVisibility.Column,
+          autoGenerateColumns: false,
+          showMarquee: true,
+          isReadOnly: true,
+          formatItem: (sender, e) => {
+            if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+              e.cell.style.textAlign = 'center';
+            }
+          },
+          columns: [
+            {binding: 'BaljuPrice', header: '거래처명', width: 100, align: 'right'},
+            {binding: 'BaljuVat', header: '일자', width: 100, align: 'right'},
+            {binding: 'SujuQty2', header: '품목', width: 100, align: 'right'},
+            {binding: 'SujuQty3', header: '수량', width: 100, align: 'right'},
+            {binding: 'SujuQty3', header: '단가', width: 100, align: 'right'},
+            {binding: 'SujuQty3', header: '공급가', width: 100, align: 'right'},
+            {binding: 'ShipmentStateName', header: '부과세', width: 100, align: 'center'},
+            {binding: 'Description', header: '합계', width: 200}
+          ],
+          itemsSource: this.viewData, // 데이터를 설정할 배열
+        });
+        // ✅ Footer 패널 사용 설정
+        this.grid3.columnFooters.rows.push(new wijmo.grid.Row());
+        this.grid3.bottomLeftCells.setCellData(0, 0, '총합');
+
+        // ✅ Footer 합계 값 설정 (수동)
+        this.grid3.loadedRows.addHandler(() => {
+          const rows = this.grid3.rows;
+          const footer = this.grid3.columnFooters.rows[0];
+
+          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+
+          footer.dataItem = {
+            tot_price_sum: getSum('tot_price_sum'),
+          };
+        });
+
+        new FlexGridContextMenu(this.grid3);
+        this.grid3.downloadFileName = '거래처잔액명세 매출 내역';
+
+      }
+
+      searchMainData() {
+        let _this = this;
+        let url = ''
+        let data = {
+          'cboCompany': $("#cboCompanyHidden").val()
+        }
+        let fnsuccess = function (result) {
+          if (result != null) {
+            _this.viewData.sourceCollection = result.data;
+          }
+        };
+        AjaxUtil.getAsyncData(url, data, fnsuccess);
+      }
+    }
+    let page = null;
+
+    $(document).ready(function (e) {
+
+      page = new CompBalanceDetailPage();
+
+      AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '', 'sale');
+
+      $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
+      $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
+
+      page.searchMainData();
+
+      // 검색
+      $('#btnSearch').click(function (e) {
+        if ($('#cboCompanyHidden').val() === '' && $('#cboCompany').val() !== '') {
+          Alert.alert('', '업체명은 업체검색 버튼을 통해서 \n 검색해주세요');
+          return;
+        }
+        page.searchMainData();
+      });
+
+      $('#btnGridSetting').click(function (e) {
+        let _this = this;
+        let fix_cols = page.grid_config.frozenColumnIndex;
+        page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
+      });
+
+      $('#btnCompanySearch').click(function () {
+        let poppage = new PopCompComponent();
+        let $poppage = $(poppage);
+        let searchcallback = function (items) {
+          // $content.find('#cboCompany').val(items.id);
+          // $content.find('#CompanyName').val(items.compname);
+          console.log('items : ',items);
+          document.getElementById('cboCompany').value = items.compname;
+          document.getElementById('cboCompanyHidden').value = items.id;
+        };
+
+        poppage.show(searchcallback);
+      });
+      $('#cboCompany').on('input', function () {
+        const val = $(this).val();
+        if (val === '') {
+          $('#cboCompanyHidden').val('');
+        }
+      });
+      // .btn-clear 클릭 후 input 이벤트 강제 발생
+      $(document).on('click', '.btn-clear', function () {
+        const $input = $(this).siblings('input[type="text"]');
+        $input.val('');
+        $input.trigger('input'); // 🔥 input 이벤트 강제 발생
+      });
+      // 초기화 버튼 클릭 이벤트
+      $('#btnClear').click(function () {
+
+        document.getElementById('cboCompany').value = '';
+        document.getElementById('cboCompanyHidden').value = '';
+      });
+
+    })
+  </script>
+
+</th:block>
+
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+</html>
