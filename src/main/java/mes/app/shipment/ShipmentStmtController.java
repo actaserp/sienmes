@@ -1,5 +1,10 @@
 package mes.app.shipment;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,8 +12,14 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
+import mes.app.util.UtilClass;
+import mes.domain.entity.MatCompUprice;
+import mes.domain.repository.MatCompUpriceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +42,7 @@ import mes.domain.services.DateUtil;
 
 @RestController
 @RequestMapping("/api/shipment/shipment_stmt")
+@Slf4j
 public class ShipmentStmtController {
 
 	@Autowired
@@ -40,6 +52,9 @@ public class ShipmentStmtController {
 	private ShipmentStmtService shipmentStmtService;
 
 	@Autowired
+	private MatCompUpriceRepository matCompUpriceRepository;
+
+	@Autowired
 	ShipmentHeadRepository shipmentHeadRepository;
 
 	@Autowired
@@ -47,7 +62,7 @@ public class ShipmentStmtController {
 
 	@Autowired
 	TradeStmtService tradeStmtService;
-	
+
 	// 출하지시 목록 조회
 	@GetMapping("/order_list")
 	public AjaxResult getOrderList(
@@ -69,17 +84,16 @@ public class ShipmentStmtController {
 	@GetMapping("/shipment_item_list")
 	public AjaxResult getShipmentItemList(
 			@RequestParam(value="head_id", required=false) String head_id,
+			@RequestParam(value="company_id", required=false) Integer company_id,
 			@RequestParam(value="calc_money", required=false) String calc_money) {
 		
-		List<Map<String, Object>> items = null; 
-
-		if ("Y".equals(calc_money)) {
-			items = this.shipmentStmtService.getShipmentItemForStmtList(Integer.parseInt(head_id));
-		} else {
-			items = this.shipmentListService.getShipmentItemList(head_id);	
-		}		
-		
+		List<Map<String, Object>> items = null;
 		AjaxResult result = new AjaxResult();
+
+
+		items = this.shipmentListService.getShipmentItemList(head_id, company_id);
+
+		result.success = true;
 		result.data = items;
 		
 		return result;
@@ -116,10 +130,10 @@ public class ShipmentStmtController {
 				result.success = false;
 				return result;				
 			} else {				
-				Float qty_sum = null;
-				Float price_sum = null;
-				Float vat_sum = null;
-				
+				double price_sum = 0.0;
+				double vat_sum = 0.0;
+				List<MatCompUprice> matCompUpriceList = new ArrayList<>();
+
 				for (int i = 0; i < item.size(); i++) {
 					
 					Integer ship_pk = (Integer) item.get(i).get("ship_pk");
@@ -127,52 +141,86 @@ public class ShipmentStmtController {
 					
 					if (shipment != null) {
 						
-						String vat_exempt_yn = (String) item.get(i).get("vat_exempt_yn");
+						/*String vat_exempt_yn = (String) item.get(i).get("vat_exempt_yn");
 						
 						if (vat_exempt_yn == null || vat_exempt_yn == "") {
 							vat_exempt_yn = "N";
-						}
+						}*/
 			            
-						Float unit_price = CommonUtil.tryFloatNull(item.get(i).get("unit_price"));
-						Float order_qty = shipment.getOrderQty();
-						
-			            if (qty_sum == null) {
-			            	qty_sum = (float) 0;
-			            }
-			            
-						qty_sum += order_qty;
-	
-		                Float vat = (float) 0;
-		                Float price = (float) 0;
-		                
-			            if (unit_price != null) {
-			            	
-			            	if (price_sum == null) {
-			            		price_sum = (float) 0;
-				            }
-			            	
-			            	price = unit_price * order_qty;
-			                price_sum += price;
-	                    
-			                if ("Y".equals(vat_exempt_yn)) {
-	                        	vat = (float) 0;
-	                        } else {
-	                        	vat = (float) (price * 0.1);
-	                        }
+						Double unit_price = CommonUtil.tryDoubleNull(item.get(i).get("unit_price"));
+						Double order_qty = shipment.getOrderQty();
+						String invatyn = (String) item.get(i).get("invatyn");
 
-			            	if (vat_sum == null) {
-			            		vat_sum = (float) 0;
-				            }			        
-			            	
-	                        vat_sum += vat;
-			            } else {			            	
-			            	unit_price = null;
-		                    price = null;
-		                    vat  = null;
-			            }
-			            
-	                    shipment.setUnitPrice(unit_price);
-	                    shipment.setPrice(price); 
+						Integer material_id = UtilClass.getInt(item.get(i), "material_id");
+						Integer company_id = UtilClass.getInt(item.get(i), "company_id");
+
+						Boolean flag = Boolean.TRUE.equals(item.get(i).get("flag"));
+
+						double price = 0;
+						double vat = 0;
+
+						if(invatyn.equals("N")){
+							price = unit_price * order_qty;
+							vat = price * 0.1;
+
+							price_sum += price;
+							vat_sum += vat;
+
+						}else{
+							double vat_exam_price = (unit_price * ((double) 10 /11));
+
+							price = vat_exam_price * order_qty;
+							vat = (unit_price * 0.1) * order_qty;
+
+							price_sum += price;
+							vat_sum += vat;
+
+						}
+						shipment.setUnitPrice(unit_price);
+						shipment.setPrice(price);
+						shipment.setVat(vat);
+
+						MatCompUprice matCompUprice = new MatCompUprice();
+						//unit_price
+						if(flag){
+							//flag가 true면 mat_comp_uprice에 이력이 없음 --> 신규추가
+							matCompUprice.set_created(Timestamp.from(ZonedDateTime.now().toInstant()));
+
+							matCompUprice.set_creater_id(user.getId());
+							matCompUprice.setUnitPrice(unit_price);
+							matCompUprice.setFormerUnitPrice(null);
+							matCompUprice.setApplyStartDate(Timestamp.from(ZonedDateTime.now().toInstant()));
+							matCompUprice.setApplyEndDate(
+									Timestamp.from(ZonedDateTime.of(LocalDateTime.of(2100, 12, 31, 0, 0), ZoneId.of("Asia/Seoul")).toInstant())
+							);
+							matCompUprice.setChangeDate(Timestamp.from(ZonedDateTime.now().toInstant()));
+							matCompUprice.setChangerName("관리자");
+							matCompUprice.setCompanyId(company_id);
+							matCompUprice.setMaterialId(material_id);
+							matCompUprice.setType("02");
+
+							matCompUpriceList.add(matCompUprice);
+
+						}else{
+							//이력이 있다는 뜻
+							MatCompUprice matCompUprice1 = matCompUpriceRepository.findLastestOne(company_id, material_id, PageRequest.of(0, 1))
+									.stream()
+									.findFirst()
+									.orElse(null);
+
+							Double formerUnitPrice =  matCompUprice1.getUnitPrice();
+
+							matCompUprice1.setUnitPrice(unit_price);
+							matCompUprice1.setFormerUnitPrice(formerUnitPrice);
+							matCompUprice1.setChangeDate(Timestamp.from(ZonedDateTime.now().toInstant()));
+
+							matCompUpriceList.add(matCompUprice1);
+						}
+
+						matCompUpriceRepository.saveAll(matCompUpriceList);
+
+	                    shipment.setUnitPrice(unit_price.doubleValue());
+	                    shipment.setPrice(price);
 	                    shipment.setVat(vat);
 	                    shipment.set_audit(user);
 	                    
@@ -180,7 +228,6 @@ public class ShipmentStmtController {
 					}
 				}
 
-                head.setTotalQty(qty_sum);
                 head.setTotalPrice(price_sum);
                 head.setTotalVat(vat_sum);
                 head.set_audit(user);
@@ -224,9 +271,13 @@ public class ShipmentStmtController {
 	// 거래명세서 출력
 	@PostMapping("/print_trade_stmt")
 	public AjaxResult printTradingStatement(
-			@RequestParam(value="head_id", required=false) Integer head_id) {
+			@RequestParam(value="head_id", required=false) Integer head_id,
+			@RequestParam(value="company_id") Integer company_id
+			) {
+
+
 		Map<String, Object> header = this.tradeStmtService.getTradeStmtHeaderInfo(head_id);
-		List<Map<String, Object>> items = this.tradeStmtService.getTradeStmtItemList(head_id);
+		List<Map<String, Object>> items = this.tradeStmtService.getTradeStmtItemList(head_id, company_id);
 		
         Map<String, Object> rtnData = new HashMap<String, Object>();
         rtnData.putAll(header);

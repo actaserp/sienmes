@@ -3,7 +3,12 @@ package mes.app.shipment.service;
 import java.sql.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import mes.domain.entity.Suju;
+import mes.domain.repository.SujuRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
@@ -16,6 +21,9 @@ public class ShipmentOrderService {
 
 	@Autowired
 	SqlRunner sqlRunner;
+
+	@Autowired
+	SujuRepository sujuRepository;
 	
 	public List<Map<String, Object>> getSujuList(String dateFrom, String dateTo, String notShip, String compPk,
 			String matGrpPk, String matPk, String keyword) {
@@ -237,6 +245,42 @@ public class ShipmentOrderService {
             order by m."Code", m."Name"
 		 """;
 		
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
+
+		return items;
+	}
+
+	public List<Suju> getRelationSujuList(List<Map<String, Object>> items){
+
+		List<Integer> SuJuItems = items.stream()
+				.map(item -> item.get("suju_pk"))
+				.filter(val -> !val.toString().trim().isEmpty())
+				.map(val -> Integer.parseInt(val.toString()))
+				.collect(Collectors.toList());
+
+
+		List<Suju> byIdIn = sujuRepository.findByIdIn(SuJuItems);
+
+		System.out.println("Su");
+		return byIdIn;
+	}
+
+	public List<Map<String, Object>> getProdcutList (Set<Integer> mat_id, Integer companyId){
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("mat_id", mat_id);
+		paramMap.addValue("company_id", companyId);
+
+		String sql = """
+				select distinct on ("Material_id") *
+				from mat_comp_uprice
+				where "Material_id" IN (:mat_id)
+				AND "Type" = '02'
+				AND "Company_id" = :company_id
+				AND "ApplyEndDate" > CURRENT_DATE
+				ORDER BY "Material_id", "ApplyStartDate" desc
+		""";
+
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
 
 		return items;

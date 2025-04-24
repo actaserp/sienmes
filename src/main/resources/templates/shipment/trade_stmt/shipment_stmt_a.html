@@ -92,7 +92,7 @@
                     <span class="right_align rpt" data-labelCd="출하 지시 목록">출하지시 목록</span>
                     <button type="button" class="btn-default y_write_auth" id="btnStatementIssue" data-labelCd="발행 처리">발행 처리</button>
                     <button type="button" class="btn-default y_write_auth" id="btnStatementPrint" title="거래명세서 출력1"><i class="fas fa-print"></i></button>
-                    <button type="button" class="btn-default" id="btnStatementExcel" title="거래명세서 출력2"><i class="fas fa-print"></i></button>
+                    <!--<button type="button" class="btn-default" id="btnStatementExcel" title="거래명세서 출력2"><i class="fas fa-print"></i></button>-->
                 </div>
                 <div id="theGrid" style="height: 350px;"></div>
             </div>
@@ -197,7 +197,7 @@
                         _this.ship_state = selectedRowData.state;
                         _this.issue_yn = selectedRowData.issue_yn;
 
-                        _this.searchDetail();
+                        _this.searchDetail(null, selectedRowData.company_id);
 
                         console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
                         console.log('선택된 행 데이터:', selectedRowData);
@@ -222,19 +222,7 @@
                         { binding: 'mat_code', header: '제품코드', width: '*', align: 'center', isReadOnly: true },
                         { binding: 'mat_name', header: '제품명', width: 260, align: 'left', isReadOnly: true },
                         { binding: 'unit_name', header: '단위', width: 120, align: 'center', isReadOnly: true },
-                        {
-                            binding: 'order_qty',
-                            header: '출하량(지시)',
-                            maxWidth: 120,
-                            align: 'right',
-                            isReadOnly: false, // 편집 가능
-                            editor: new wijmo.input.InputNumber(document.createElement('div'), {
-                                format: 'n0', // 정수 형식
-                                min: 0,       // 최소값 설정
-                                max: 99999,   // 최대값 설정
-                                step: 1       // 증가/감소 단위
-                            })
-                        },
+                        { binding: 'ship_qty', header: '출하량', width: 120, align: 'right', isReadOnly: true },
                         {
                             binding: 'unit_price',
                             header: '단가',
@@ -248,6 +236,10 @@
                                 step: 1       // 증가/감소 단위
                             })
                         },
+                        { binding: 'flag', header: '단가값소유구분값', width: 100, align: 'center', isReadOnly: true, visible: false},
+                        { binding: 'material_id', header: '품목id', width: 100, align: 'center', isReadOnly: true, visible: false},
+                        { binding: 'company_id', header: '회사id', width: 100, align: 'center', isReadOnly: true, visible: false},
+                        { binding: 'invatyn', header: '부가세포함', width: 100, align: 'center', isReadOnly: true },
                         { binding: 'price', header: '공급가', width: 120, align: 'right', isReadOnly: true },
                         { binding: 'vat', header: '부가세', width: 120, align: 'right', isReadOnly: true },
                         { binding: 'description', header: '비고', width: '*', align: 'left', isReadOnly: false },
@@ -283,7 +275,7 @@
 
             }
 
-            searchDetail(calcMoney) {
+            searchDetail(calcMoney, company_id) {
                 if(calcMoney){
                     if(page.issue_yn == 'Y'){
                         Alert.alert('', '이미 명세서 발행한 건은 금액 재계산할 수 없습니다.');
@@ -295,14 +287,18 @@
 
                 let data = {};
                 data['head_id'] = page.head_id;
+                data['company_id'] = company_id;
                 data['calc_money'] = calcMoney ? 'Y' : 'N';
 
                 let url = this.baseUrl + '/shipment_item_list';
                 let result = AjaxUtil.getSyncData(url, data);
 
-                if (result != null) {
-                    _this.addNewRow(result.data);
-
+                if(result.success){
+                    if (result != null) {
+                        _this.addNewRow(result.data);
+                    }
+                }else{
+                    Alert.alert('', result.message);
                 }
             }
 
@@ -310,14 +306,25 @@
                 let cv = this.grid2.collectionView;
                 console.log(data);
                 data.forEach(item => {
+                    let flag = false;
+                    const unit_price = item['unit_price'];
+                    if(unit_price === '' || unit_price === null){
+                        flag = true;
+                    }
+
+
                     let newRow = {
                         ship_pk : item['ship_pk'],
                         mat_grp_name: item['mat_grp_name'],
                         mat_code: item['mat_code'],
                         mat_name: item['mat_name'],
                         unit_name: item['unit_name'],
-                        order_qty: item['order_qty'],
+                        ship_qty: item['ship_qty'],
                         unit_price: item['unit_price'],
+                        flag: flag,
+                        material_id : item['material_id'],
+                        company_id : item['company_id'],
+                        invatyn : item['invatyn'],
                         price : item['price'],
                         vat : item['vat'],
                         description: item['description'],
@@ -344,6 +351,7 @@
             }
 
             saveUnitPrice(){
+                let _this = this;
                 if (page.issue_yn == 'Y') {
                     Alert.alert('', '이미 발행된 건입니다.');
                     return;
@@ -360,7 +368,8 @@
                     if (res.success == true) {
 
                         Notify.success('단가 저장했습니다.');
-                        page.searchDetail();
+                        page.searchMain();
+                        _this.grid2.itemsSource = [];
                     } else {
                         Alert.alert('', '단가 저장 실패.');
                         return;
@@ -453,6 +462,9 @@
 
                 let test = false;
                 let data = {};
+                let selectItem = _this.grid1.selectedItems;
+                console.log('거래처', selectItem);
+
                 if (test) {
                     data = test_data;
                     let content = tmpl('printTemplate', data);
@@ -464,6 +476,7 @@
 
                 let param = {};
                 param['head_id'] = page.head_id;
+                param['company_id'] = selectItem[0].company_id;
 
                 let fnSuccess = function (result) {
                     if (result.data) {

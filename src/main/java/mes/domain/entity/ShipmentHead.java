@@ -32,10 +32,10 @@ public class ShipmentHead extends AbstractAuditModel{
 	Float totalQty;
 	
 	@Column(name = "\"TotalPrice\"")
-	Float totalPrice;
+	Double totalPrice;
 	
 	@Column(name = "\"TotalVat\"")
-	Float totalVat;
+	Double totalVat;
 	
 	@Column(name = "\"Description\"")
 	String description;
