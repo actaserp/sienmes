@@ -1,0 +1,562 @@
+<html layout:decorate="~{layout_page}">
+<head>
+    <style>
+        .button115px{
+            width: 115px;
+        }
+    </style>
+</head>
+<th:block layout:fragment="content">
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>입출금 입력</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
+            </div>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>입금관리</li>
+                <li>입출금 입력</li>
+            </ul>
+        </div>
+        <form id="searchForm" autocomplete="off">
+            <section class="section">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label>
+                                    거래처<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="text"  id="srchStartDt" name="srchStartDt"  />
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label>
+                                    구분
+                                </label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboCompany" name="cboCompany" >
+                                </select>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label>
+                                    계좌명
+                                </label>
+                            </dt>
+                            <dd>
+                                <input type="text"  id="" name=""  />
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label>
+                                    조회기간<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="date" id="2" name=""  />
+                                    <span class="slow_sign">~</span>
+                                    <input type="date" id="33" name="" />
+                                </div>
+                            </dd>
+                        </dl>
+
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSetting">
+                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                        <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                        설정
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+
+                    </div>
+                </div>
+            </section>
+        </form>
+
+
+        <section class="section">
+
+            <div class="grid_box" id="divList">
+                <div class="title_box">
+                   <!-- <span class="right_align rpt" data-labelCd="출하 지시 목록">출하지시 목록</span>-->
+                    <ul >
+                        <li class="right_align rpt"  style="margin-right: 5px">
+                            <a class="btn btn-excell" title="등록" id="btnAddNew">
+                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                저장
+                            </a>
+                        </li>
+                        <li class="right_align rpt"  style="margin-right: 5px">
+                            <a class="btn btn-delete" title="삭제" id="btnDelete">
+                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                수정
+                            </a>
+                        </li>
+                        <li class="right_align rpt"  style="margin-right: 5px">
+                            <a class="btn btn-edit" title="수정" id="btnEdit">
+                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
+                                삭제
+                            </a>
+                        </li>
+                        <li class="right_align rpt"  style="margin-right: 5px">
+                            <a class="btn btn-edit" title="수정" id="btnEdit">
+                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
+                                추가
+                            </a>
+                        </li>
+                    </ul>
+                    <button type="button" class="btn-default y_write_auth" id="btnStatementIssue" data-labelCd="발행 처리">발행 처리</button>
+                    <button type="button" class="btn-default y_write_auth" id="btnStatementPrint" title="거래명세서 출력1"><i class="fas fa-print"></i></button>
+                    <!--<button type="button" class="btn-default" id="btnStatementExcel" title="거래명세서 출력2"><i class="fas fa-print"></i></button>-->
+                </div>
+                <div id="theGrid" style="height: 350px;"></div>
+            </div>
+        </section>
+
+        <section>
+            <div class="grid_box">
+                <div class="title_box">
+                </div>
+                <div id="theGrid2" style="height: 350px;"></div>
+            </div>
+        </section>
+    </div>
+
+
+    <script type="text/x-tmpl" id="settingTemplate">
+        <div class="content_wrap popup">
+    <form id="searchForm2" autocomplete="off">
+    <section class="section">
+        <div class="" style="display : block; margin-bottom : 10px;">
+            <div class="title-box">
+                    <ul >
+                        <li class="right_align rpt"  style="margin: 10px 0px">
+                            <a class="btn btn-excell" title="등록" id="btnAddNew">
+                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                저장
+                            </a>
+                        </li>
+                    </ul>
+
+            </div>
+
+        </div>
+        <div id="SettingGrid" style="height: 300px; display : block;"></div>
+    </section>
+    <div class="tab-wrap">
+        <ul class="tab-links">
+                <li><a id='anchor' href="#tabs_first">거래내역수집</a></li>
+                <li><a href="#tabs_second">계좌등록/수정</a></li>
+        </ul>
+        <div>
+            <section class="tab-item" id="tabs_first" style="border-top-left-radius: 0;">
+                <div class="title-box">
+                    <ul style="display: flex; align-items: center; list-style: none; padding: 0; margin: 0; width: 100%;">
+                        <li>
+                            <span style='margin-right: 5px;'>거래수집기간</span>
+                        </li>
+                        <li>
+                            <input type='date' id="transactionFrDate" name="transactionFrDate" /> ~
+                            <input type='date' id="transactionToDate" name="transactionToDate" />
+                        </li>
+                         <li>
+                            <span style='color: tomato; margin-left : 5px'>* 최대3개월</span>
+                        </li>
+                        <li class="right_align rpt" style="margin: 10px 0px; margin-left: auto;">
+                            <a class="btn btn-excell" title="등록" id="btnAddNew">
+                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                계좌내역수집
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div id="tab1Grid" style="height: 200px; display : block;"></div>
+            </section>
+
+            <section class="tab-item" id="tabs_second" style="border-top-left-radius: 0; padding-top: 15px;">
+                <div>
+
+                            <table class="write-table"
+                                   style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                                <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
+                                <input type="hidden" id="id" name="id"/>
+                                <tbody>
+                                <tr>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="factory_id"><span class="eq">*</span>팝빌아이디</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select id="factory_id" name="factory_id"
+                                                style="width: 100%;"></select>
+                                    </td>
+
+                                    <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
+                                        <label for="code"><span class="eq">*</span>팝빌PW</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <input type="text" style="width: 100%;" id="code"
+                                               name="code">
+                                    </td>
+                                    <th>
+                                        <button class='button115px' type='button'>가입여부확인</button>
+                                    </th>
+                                    <td>
+
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="Process_id"><span class="eq">*</span>은행명</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select style="width: 100%;" id="Process_id"
+                                                name="Process_id"></select>
+                                    </td>
+
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="process_storehouse_id">계좌번호</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select id="process_storehouse_id" name="process_storehouse_id"
+                                                style="width: 100%;"></select>
+                                    </td>
+                                     <th>
+                                        <button class='button115px' type='button'>계좌등록</button>
+                                        <button class='button115px' type='button'>계좌정보수정</button>
+                                    </th>
+                                    <td>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="Process_id"><span class="eq">*</span>은행아이디</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select style="width: 100%;" id="Process_id"
+                                                name="Process_id"></select>
+                                    </td>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="Process_id"><span class="eq">*</span>온라인계정비번</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select style="width: 100%;" id="Process_id"
+                                                name="Process_id"></select>
+                                    </td>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="Process_id"><span class="eq">*</span>결제비번</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select style="width: 100%;" id="Process_id"
+                                                name="Process_id"></select>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="Process_id"><span class="eq">*</span>계좌유형</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select style="width: 100%;" id="Process_id"
+                                                name="Process_id"></select>
+                                    </td>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="Process_id"><span class="eq">*</span>생년월일</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <select style="width: 100%;" id="Process_id"
+                                                name="Process_id"></select>
+                                    </td>
+                                    <th>
+                                    </th>
+                                    <td>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                    </div>
+            </section>
+        </div>
+    </div>
+    </form>
+        <!--
+        <div class="popup-button">
+            <button type="button" class="btn-popup" id="btnCompSelect" ><span data-commonCd="출하목록반영">출하목록반영</span></button>
+            <button type="button" class="btn-popup" id="btn-search-close"><span data-commonCd="닫기">닫기</span></button>
+        </div>
+        -->
+</div>
+    </script>
+
+</th:block>
+
+<th:block layout:fragment="scripts">
+    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <th:block th:replace="/shipment/trade_stmt/trade_stmt_tmpl :: printTemplate"></th:block>
+    <script type="text/javascript">
+
+        class ShipmentOrderPage {
+            constructor() {
+                this.baseUrl = '/api/shipment/shipment_stmt';
+                this.grid1 = null;
+                this.grid2 = null;
+                this.setting_grid = null;
+                this.tab1Grid = null;
+
+                this.head_id = 0;
+                this.ship_state = '';
+                this.issue_yn = '';
+                this.loading = true;
+
+                this.viewData = new wijmo.collections.CollectionView();
+                this.viewData2 = new wijmo.collections.CollectionView();
+                this.viewData3 = new wijmo.collections.CollectionView();
+                this.viewData4 = new wijmo.collections.CollectionView();
+
+                this.$btnSetting = $('#btnSetting');
+
+                this.init();
+
+            }
+
+            init() {
+
+                let _this = this;
+                this.grid1 = new wijmo.grid.FlexGrid('#theGrid', {
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    allowSorting: 'MultiColumn',
+                    selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
+                    isReadOnly: true,
+                    columns: [
+
+                        { binding: 'company_name', header: '일자', width: '*', align: 'left' },
+                        { binding: 'order_date', header: '입금금액', width: '*', align: 'center' },
+                        { binding: 'total_qty',  header: ' 출금금액', width: '*', align: 'right'},
+                        { binding: 'total_price',header: ' 수수료', width: '*', align: 'right'},
+                        { binding: 'total_vat',  header: ' 적요', width: 150, align: 'right'},
+                        { binding: 'state_name', header: '코드', width: 150, align: 'center' },
+                        { binding: 'issue_yn',   header: '거래처명', width: 150, align: 'center' },
+                        { binding: 'stmt_number', header: '거래구분', width: 150, align: 'center' },
+                        { binding: 'issue_date', header: '은행', width: '*', align: 'center' },
+                        { binding: 'issue_date', header: '계좌', width: '*', align: 'center' },
+                        { binding: 'issue_date', header: '입금형태', width: '*', align: 'center' },
+
+                    ],
+                    itemsSource: this.viewData,
+                    formatItem: function (s, e) {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center'; // 헤더 텍스트 가운데 정렬
+                        }
+                    },
+
+                });
+
+                // 데이터 로드 후 초기 선택 상태 해제
+                this.grid1.loadedRows.addHandler(() => {
+                    setTimeout(() => {
+                        this.grid1.select(-1, -1); // 선택 상태 초기화
+                    }, 0); // 비동기로 처리하여 초기 선택 해제
+                });
+                // 선택 변경 이벤트
+                this.grid1.selectionChanged.addHandler((s, e) => {
+                    // 첫 로드 시 선택 동작 방지
+
+                    //처음엔 boolean으로 했는데 차라리 카운팅이 나은듯함.
+                    /*if (this.loading) {
+                        this.loading++;
+                        return;
+                    }*/
+                    if (this.loading) {
+                        // 로딩 중일 때 이벤트 무시
+                        return;
+                    }
+
+                    // 유효한 행이 선택되었는지 확인
+                    let selectedRowIndex = this.grid1.selection.row;
+                    if (selectedRowIndex >= 0) {
+                        let selectedRowData = this.grid1.rows[selectedRowIndex].dataItem;
+
+                        // TODO: 비즈니스 로직
+                        _this.head_id = selectedRowData.id;
+                        _this.ship_state = selectedRowData.state;
+                        _this.issue_yn = selectedRowData.issue_yn;
+
+                        _this.searchDetail(null, selectedRowData.company_id);
+
+                        console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
+                        console.log('선택된 행 데이터:', selectedRowData);
+                    }
+                });
+                //this.loading = false;
+                new FlexGridContextMenu(this.grid1);
+                this.grid1.downloadFileName = '출하지시 목록';
+                let selector = new wijmo.grid.selector.Selector(this.grid1, {
+                    itemChecked: (e, ctx) => {
+
+
+                    }
+                })
+
+
+                ////////////////////////////////////////////////////
+
+                this.grid2 = new wijmo.grid.FlexGrid('#theGrid2', {
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    allowSorting: 'MultiColumn',
+                    selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
+                    isReadOnly: false,
+                    columns: [
+                        { binding: 'mat_grp_name', header: '거래처명', width: '*', align: 'left', isReadOnly: true  },
+                        { binding: 'mat_code', header: '일자', width: '*', align: 'center', isReadOnly: true },
+                        { binding: 'mat_name', header: '구분', width: 260, align: 'left', isReadOnly: true },
+                        { binding: 'unit_name', header: '금액', width: 120, align: 'center', isReadOnly: true },
+                        { binding: 'ship_qty', header: '잔액', width: 120, align: 'right', isReadOnly: true },
+                        { binding: 'flag', header: '품목', width: 100, align: 'center', isReadOnly: true},
+                        { binding: 'material_id', header: '입금형태', width: 100, align: 'center', isReadOnly: true},
+
+                    ],
+                    itemsSource: this.viewData2,
+                    formatItem: function (s, e) {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center'; // 헤더 텍스트 가운데 정렬
+                            const column = s.columns[e.col];
+                            if (column.binding === 'unit_price') {
+                                e.cell.style.color = 'rgb(85, 103, 255)'; // 텍스트 색상 설정
+                                e.cell.style.fontWeight = 'bold'; // 텍스트 굵게
+                            }
+                        }
+                    },
+
+                });
+                //맨 앞에 헤더부분 없애기
+                this.grid2.rowHeaders.columns.splice(0, 1);
+                // 데이터 로드 후 초기 선택 상태 해제
+
+                this.grid2.selectionChanged.addHandler((s, e) => {
+
+                    let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
+                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
+                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
+
+                    }
+                });
+                new FlexGridContextMenu(this.grid2);
+                this.grid2.downloadFileName = '출하 내역';
+
+                this.$btnSetting.click(function(){
+                    let defaultData = {}; _this.showSettingForm(defaultData);
+                })
+
+
+            }
+
+            showSettingForm(data){
+                let _this = this;
+                let content = tmpl('settingTemplate', data);
+                let $content = $(content);
+
+                let modalContainer = new PopupDraggable('설정창');
+                modalContainer.open({width: 1600, height: 750, $content});
+
+
+                this.setting_grid = new wijmo.grid.FlexGrid('#SettingGrid', {
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    allowSorting: 'MultiColumn',
+                    selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
+                    isReadOnly: false,
+                    columns: [
+                        {binding: 'JumunNumber', header: '은행연동', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '금융기관', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '금융기관명', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '관리코드', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '계좌번호', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '계좌명칭', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '은행아이디', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '은행계정비밃번호', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '결제비밃번호', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '계좌유형', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '생년월일', width: '*', align: 'center', isReadOnly: true},
+                    ],
+                    itemsSource: this.viewData3
+                })
+
+                this.tab1Grid = new wijmo.grid.FlexGrid('#tab1Grid', {
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    allowSorting: 'MultiColumn',
+                    selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
+                    isReadOnly: false,
+                    columns: [
+                        {binding: 'JumunNumber', header: '일자', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '입금금액', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '출금금액', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '수수료', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '적요', width: '*', align: 'center', isReadOnly: true},
+                    ],
+                    itemsSource: this.viewData4
+                })
+
+                $('#anchor').click();
+                $('#transactionFrDate').val(getFirstDayOfThreeMonthsAgo());
+                $('#transactionToDate').val(getNowDate());
+
+                $('#btn-search-close').click(function(e){
+                    modalContainer.close();
+                })
+            }
+
+
+
+        }
+
+
+        let page = null;
+
+
+        $(document).ready(function (e) {
+            page = new ShipmentOrderPage();
+
+
+
+            page.searchMain();
+        })
+    </script>
+
+</th:block>
+</html>

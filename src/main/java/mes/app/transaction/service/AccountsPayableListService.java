@@ -1,4 +1,4 @@
-package mes.app.transaction.Service;
+package mes.app.transaction.service;
 
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;

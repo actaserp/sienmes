@@ -1,6 +1,5 @@
 package mes.app.transaction;
 
-import mes.app.shipment.service.ShipmentListService;
 import mes.app.transaction.service.SalesInvoiceService;
 import mes.domain.model.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
