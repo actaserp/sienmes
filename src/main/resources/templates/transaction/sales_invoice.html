@@ -1,0 +1,749 @@
+<html layout:decorate="~{layout_page}">
+<head>
+    <style>
+        .wj-cell .v-center {
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<th:block layout:fragment="content">
+
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>매출 계산서 관리</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
+            </div>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>입금 관리</li>
+                <li>매출 계산서 관리</li>
+            </ul>
+        </div>
+
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label for="cboInvoice">
+                                검색 구분<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboInvoice" name="cboInvoice">
+                                    <option value="tax">세금계산서</option>
+                                    <option value="bill">계산서</option>
+                                </select>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label for="cboCompany">
+                                거래처
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select class="form-control2" id="cboCompany" name="cboCompany" ></select>
+                            </div>
+                        </dd>
+                    </dl>
+<!--                    <dl>-->
+<!--                        <dt>-->
+<!--                            <label for="cboAlign">-->
+<!--                                정렬<span class="eq"></span>-->
+<!--                            </label>-->
+<!--                        </dt>-->
+<!--                        <dd>-->
+<!--                            <div class="srch-box">-->
+<!--                                <select id="cboAlign" name="cboAlign">-->
+<!--                                    <option value="createDate">작성일자</option>-->
+<!--                                    <option value="issueDate">발행일자</option>-->
+<!--                                </select>-->
+<!--                            </div>-->
+<!--                        </dd>-->
+<!--                    </dl>-->
+                    <dl>
+                        <dt>
+                            조회기간<span class="eq">*</span>
+                        </dt>
+                        <dd>
+                            <ul class="date-box">
+                                <li>
+                                    <input type="date" id="srchStartDt" name="srchStartDt">
+                                    <label for="srchStartDt" class="hide">시작일</label>
+                                </li>
+                                <li>
+                                    <input type="date" id="srchEndDt" name="srchEndDt">
+                                    <label for="srchEndDt" class="hide">종료일</label>
+                                </li>
+                            </ul>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>&nbsp;</dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="button-wrap">
+                    <ul>
+                        <li>
+                            <a class="btn" title="거래명세서 출력" id="btnPrint">
+                                거래명세서 출력
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn" title="출고 리스트" id="btnShipList">
+                                출고 리스트
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn" title="계산서 일괄 등록" id="btnAddBatch">
+                                계산서 일괄 등록
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn" title="계산서 등록" id="btnAddNew">
+                                계산서 등록
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="section-top">
+                <div class="search-wrap">
+<!--                    <form id="totalForm">-->
+<!--                        <table class="write-table">-->
+<!--                            <colgroup>-->
+<!--                                <col class="wp20">-->
+<!--                                <col class="wauto">-->
+<!--                                <col class="wp20">-->
+<!--                                <col class="wauto">-->
+<!--                                <col class="wp20">-->
+<!--                                <col class="wauto">-->
+<!--                            </colgroup>-->
+<!--                            <tbody>-->
+<!--                            <tr>-->
+<!--                                <th style="text-align: center">-->
+<!--                                    <label for="totalAmount">총 합계금액</label>-->
+<!--                                </th>-->
+<!--                                <td>-->
+<!--                                    <input id="totalAmount" name="totalAmount" readonly/>-->
+<!--                                </td>-->
+<!--                                <th style="text-align: center">-->
+<!--                                    <label for="totalSupPrice">총 공급가액</label>-->
+<!--                                </th>-->
+<!--                                <td>-->
+<!--                                    <input id="totalSupPrice" name="totalSupPrice" readonly />-->
+<!--                                </td>-->
+<!--                                <th style="text-align: center">-->
+<!--                                    <label for="totalTax">총 세액</label>-->
+<!--                                </th>-->
+<!--                                <td>-->
+<!--                                    <input id="totalTax" name="totalTax" readonly />-->
+<!--                                </td>-->
+<!--                            </tr>-->
+<!--                            </tbody>-->
+<!--                        </table>-->
+<!--                    </form>-->
+                    <dl>
+                        <dt>
+                            <label for="totalAmount">
+                                총 합계금액
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input class="form-control2" id="totalAmount" name="totalAmount" readonly>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label for="totalSupPrice">
+                                총 공급가액
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input class="form-control2" id="totalSupPrice" name="totalSupPrice" readonly>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label for="totalTax">
+                                총 세액
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input class="form-control2" id="totalTax" name="totalTax" readonly>
+                            </div>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="button-wrap">
+                    <ul>
+                        <li>
+                            <a class="btn btn-delete" title="삭제" id="btnDelete">
+                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                삭제
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn btn-edit" title="수정" id="btnEdit">
+                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
+                                수정
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn" title="역발행/재전송" id="btnIssue">
+                                역발행/재전송
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div id="theGrid" style="height: 730px;"></div>
+            </div>
+        </section>
+    </div>
+    <script type="text/x-tmpl" id="addShipListPopup">
+        <div class="content_wrap popup">
+            <div class="section-top">
+                <div class="search-wrap" style="justify-content: flex-start;">
+                  <dl>
+                    <dt style="display:flex;">
+                      조회기간
+                    </dt>
+                    <dd>
+                      <ul class="date-box">
+                        <li>
+                          <input type="date" id="srchStartDt" name="srchStartDt">
+                          <label for="srchStartDt" class="hide">시작일</label>
+                        </li>
+                        <li>
+                          <input type="date" id="srchEndDt" name="srchEndDt">
+                          <label for="srchEndDt" class="hide">종료일</label>
+                        </li>
+                      </ul>
+                    </dd>
+                  </dl>
+
+                  <dl>
+                    <dt>&nbsp;</dt>
+                    <dd>
+                      <li>
+                        <a class="btn btn-delete" title="검색" id="btnSearch">
+                          <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                          <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                          검색
+                        </a>
+                      </li>
+                    </dd>
+                  </dl>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div id="ship-list-grid" style="height: 400px;"></div>
+            </div>
+            <div class="popup-button">
+                <button type="button" class="btn-popup y_write_auth" id="btnShipAction">계산서 등록</button>
+                <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
+            </div>
+
+        </div>
+    </script>
+
+</th:block>
+
+<th:block layout:fragment="scripts">
+    <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
+    <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
+    <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+    <th:block th:replace="/common/popup_invoice :: popup_invoice"></th:block>
+
+    <script type="text/javascript">
+
+        function formatNumberInput(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        function getCleanValue(id) {
+            return document.getElementById(id).value.replace(/,/g, '');
+        }
+
+        class SalesInvoicePage {
+            constructor() {
+                this.url = '/api/tran/tran';
+                this.grid = null;
+                this.$btnEdit = $('#btnEdit');
+                this.$btnAddNew = $('#btnAddNew');
+                this.viewData = new wijmo.collections.CollectionView();
+                this.init();
+            }
+
+
+            init() {
+                let _this = this;
+                this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                    },
+                    columns: [
+                        {binding: 'CompanyName', header: '작성일자', width: 90},
+                        {binding: 'SujuTypeName', header: '발급일자', width: 90, align: 'center'},
+                        {binding: 'JumunDate', header: '사업자 번호', width: 120, align: 'center'},
+                        {binding: 'MaterialGroupName', header: '상호', width: 100},
+                        {binding: 'product_code', header: '품명', width: 100},
+                        {binding: 'product_name', header: '합계금액', width: 160},
+                        {binding: 'unit', header: '공급가액', width: 60, align: 'center'},
+                        {binding: 'SujuQty', header: '세액', width: 80, align: 'right', format: 'n0'},
+                        {binding: 'unitPrice', header: '전송일자', width: 90, align: 'right', format: 'n0'},
+                        {binding: 'Vat', header: '상태', width: 100, align: 'right', format: 'n0'},
+                        {binding: 'totalAmount', header: '구분', width: 100, align: 'right', format: 'n0'},
+                        {binding: 'DueDate', header: '대표자', width: 100, align: 'center'},
+                        {binding: 'StateName', header: '이메일', width: 80, align: 'center'},
+                        {binding: 'ShipmentStateName', header: '주소', width: 80, align: 'center'},
+                    ],
+                    itemsSource: this.viewData, // 데이터를 설정할 배열
+                });
+
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = '매출 계산서 내역';
+
+                this.grid.hostElement.addEventListener('dblclick', function (e) {
+                    let items = _this.grid.selectedItems;
+                    if (items.length === 0) {
+                        return false;
+                    }
+                    _this.$btnEdit.trigger('click');
+                });
+
+                let nowDate = CommonUtil.getYYYYMMDD();
+                let dueDate = CommonUtil.getYYYYMMDD(10);
+
+                //수주등록 클릭
+                this.$btnAddNew.click(function (e) {
+                    let defaultData = {
+                        id: '',
+                        mode: 'new',
+                        JumunDate: nowDate,
+                        DueDate: dueDate,
+                        State: 'received'
+                    };
+                    _this.showInvoiceForm(defaultData);
+                });
+
+                // 수주 수정 클릭
+                this.$btnEdit.click(function (e) {
+                    let selectedItems = _this.grid.selectedItems;
+
+                    if (selectedItems.length === 1) {
+
+                        let data = {
+                            id: selectedItems[0].id,
+                            action: 'detail'
+                        };
+                        let fnsuccess = function (result) {
+                            console.log('edit', result.data);
+                            result.data['mode'] = 'edit';
+                            _this.showInvoiceForm(result.data);
+                        };
+                        AjaxUtil.getAsyncData(_this.url + '/detail', data, fnsuccess);
+                    } else if (items.length > 1) {
+                        Alert.alert('', '데이터를 하나만 선택하세요.');
+                    } else {
+                        Alert.alert('', '선택된 데이터가 없습니다.');
+                    }
+
+                });
+
+                // 삭제 버튼
+                $('#btnDelete').click(function (e) {
+                    let items = _this.grid.selectedItems;
+                    console.log('items', items);
+                    if (items.length > 0) {
+                        Alert.confirm('', '삭제하시겠습니까?',
+                            function () {
+                                let id = items[0].id;
+                                let state = items[0].State;
+                                let ShipmentStateName = items[0].ShipmentStateName;
+                                _this.deleteSujuData(id, state, ShipmentStateName);
+                            },
+                            function () {
+                            }
+                        );
+                    } else {
+                        Alert.alert('', '삭제할 항목을 선택해주세요.', function () {
+                            $(this).focus();
+                        });
+                    }
+                });
+
+                // 엔터키 검색
+                $('#keyword').on('keypress', function (e) {
+                    if (e.keyCode === 13) {
+                        _this.searchMainData();
+                    }
+                });
+            }
+
+            showInvoiceForm(data) {
+                let _this = this;
+                let content = tmpl('popup_invoiceTemplate', data);
+                let $content = $(content);
+
+                let modalContainer = null;
+                if (data.mode === 'new') {
+                    modalContainer = new PopupDraggable('등록');
+                } else {
+                    modalContainer = new PopupDraggable('수정');
+                }
+                modalContainer.open({width: 1050, height: 620, $content});
+
+
+
+                $content.find('#btnCompanySearch').click(function () {
+                    let poppage = new PopCompComponent();
+                    let $poppage = $(poppage);
+                    let searchcallback = function (items) {
+                        console.log('btnCompanySearch', items);
+                        $content.find('#cboCompany').val(items.id);
+                        $content.find('#CompanyName').val(items.compname);
+
+                        if ($Material_id.val() && $cboCompany.val()) {
+                            tryShowPrice();
+                        }
+                    };
+
+                    poppage.show(searchcallback);
+                });
+
+                // 저장버튼
+                let $btnPopSujuSave = $('#btnPopSujuSave');
+
+
+                //팝업타이틀 설정
+                let $popTitle = $content.find('#popTitle');
+                if (data.mode === 'new') {
+                    $popTitle.text('계산서 등록');
+                } else {
+                    // 수주 수정시 제품그룹과 제품을 수정하게 할 것 인지?
+                    $popTitle.text('계산서 수정');
+
+                }
+                // FormUtil.BindDataForm(data, $sujuForm);
+                let $invatyn = $content.find('#invatyn');
+
+
+
+                // 수주등록 팝업 저장버튼 클릭
+                $btnPopSujuSave.click(function (e) {
+
+                    //수주일, 납기일 체크?
+                    let data = FormUtil.extractForm($sujuForm);
+                    console.log('$btnPopSujuSave', data);
+
+
+                    if ((data.Material_id == null) || (data.Material_id === '')) {
+                        Alert.alert('', '제품을 선택하세요.');
+                        return;
+                    }
+
+                    if (($CompanyName.val() == null) || ($CompanyName.val() === '')) {
+                        Alert.alert('', '판매처를 선택하세요.');
+                        return;
+                    }
+
+                    if ($SujuQty.val() === '') {
+                        Alert.alert('', '수주량을 입력하세요.');
+                        return;
+                    }
+
+                    let currentUnitPrice = $content.find('#unitPrice').val();
+                    let unitPriceChanged = originalUnitPrice != null &&
+                        parseFloat($content.find('#unitPrice').val().replace(/,/g, '')) !== originalUnitPrice;
+
+
+                    Alert.confirm('', '저장하시겠습니까?', function () {
+                        let doSave = function () {
+                            let url = _this.url + '/manual_save';
+                            data.SujuQty = data.SujuQty.replace(/,/g, '');
+                            data.unitPrice.replace(/,/g, '');
+
+                            let fnSaveSuccess = function (result) {
+                                Notify.success("저장되었습니다.");
+                                _this.searchMainData();
+                                modalContainer.close();
+                            };
+
+                            AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
+                        };
+
+                        if (unitPriceChanged) {
+                            let now = new Date();
+                            let hh = String(now.getHours()).padStart(2, '0');
+                            let mm = String(now.getMinutes()).padStart(2, '0');
+                            let ss = String(now.getSeconds()).padStart(2, '0');
+
+                            let applyStartDate = `${data.JumunDate}T${hh}:${mm}:${ss}`;
+
+                            // 단가 저장 먼저 수행
+                            let priceData = {
+                                Material_id: data.Material_id,
+                                Company_id: data.Company_id,
+                                UnitPrice: data.unitPrice.replace(/,/g, ''),
+                                ApplyStartDate: applyStartDate,
+                                type: '02',
+                                ChangerName: userinfo.username
+                            };
+
+                            AjaxUtil.postAsyncData('/api/definition/material/savePrice', priceData, function (res) {
+                                if (res.success) {
+                                    doSave(); // 수주 저장 진행
+                                } else {
+                                    Alert.alert('단가 저장 실패', res.message || '알 수 없는 오류');
+                                }
+                            });
+                        } else {
+                            doSave(); // 단가 변경 없으면 수주만 저장
+                        }
+                    });
+
+                });
+            }
+
+            deleteSujuData(id, state, ShipmentStateName) {
+                let _this = this;
+                let url = _this.url + '/delete';
+                let data = {'id':id, 'State': state, 'ShipmentStateName': ShipmentStateName}
+                let fnsuccess = function (res) {
+                    if (res.success) {
+                        Notify.success('삭제되었습니다.');
+                        _this.searchMainData();
+                    } else {
+                        Alert.alert('', res.message);
+                    }
+                };
+
+                AjaxUtil.postAsyncData(url, data, fnsuccess);
+            }
+
+            // exportExcel() {
+            //     var targetview = this.grid;
+            //     targetview.exportExcel('수주내역.xls');
+            // }
+
+            searchMainData() {
+                let _this = this;
+                let date_kind = $('#cboDateKind').val();
+                let start = $('#srchStartDt').val();
+                let end = $('#srchEndDt').val();
+                let url = this.url + '/read';
+
+                let data = {
+                    'date_kind': date_kind,
+                    'start': start,
+                    'end': end,
+                    'action': 'read'
+                };
+
+                let fnsuccess = function (result) {
+                    if (result != null) {
+                        console.log('result.data',result.data);
+                        _this.viewData.sourceCollection = result.data;
+                    }
+                };
+                AjaxUtil.getAsyncData(url, data, fnsuccess);
+            }
+
+            showShipListPopup() {
+                let _this = this;
+
+                let content = tmpl('addShipListPopup', {});
+                let $content = $(content);
+                let modalContainer = new PopupDraggable('출고 리스트');
+                modalContainer.open({width: 1300, height: 670, $content});
+
+                this.shipListGrid = new wijmo.grid.FlexGrid('#ship-list-grid', {
+                    autoGenerateColumns: false,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
+                    allowMerging: 'ColumnHeaders',
+                    formatItem: (s, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            e.cell.style.color = '';
+                            e.cell.style.textAlign = '';
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+
+                            const binding = s.columns[e.col].binding;
+
+                            if (binding === 'StoreHouse_id' || binding === 'inputQty' || binding === 'Description2') {
+                                e.cell.style.color = '#5567ff'; // 글자 색 적용
+                            }
+                        }
+                    },
+                    columns: [
+                        {binding: 'company_name', header: '거래처', width: 100, align: 'left', isReadOnly: true, allowMerging: true},
+                        {binding: 'ship_date', header: '출하일', width: 120, align: 'center', isReadOnly: true, allowMerging: true},
+                        {binding: 'total_qty', header: '총 지시량', width: 140, align: 'center', isReadOnly: true, allowMerging: true},
+                        {binding: 'total_price', header: '총 공급가', width: 150, align: 'left', isReadOnly: true, allowMerging: true},
+                        {binding: 'total_vat', header: '총 세액', width: 150, align: 'left', isReadOnly: true, allowMerging: true},
+                        {binding: 'total_amount', header: '총액', width: 150, align: 'left', isReadOnly: true, allowMerging: true},
+                        {binding: 'state_name', header: '상태', width: 60, align: 'center', isReadOnly: true, allowMerging: true},
+                        {binding: 'issue_yn', header: '발행 여부', width: 80, align: 'right', isReadOnly: true},
+                        {binding: 'issue_date', header: '발행 일자', width: 90, align: 'right', isReadOnly: true},
+                        {binding: 'description', header: '비고', width: 90, align: 'right', isReadOnly: true, allowMerging: true},
+                    ],
+                    itemsSource: new wijmo.collections.CollectionView([]),
+                });
+                let selector = null;
+
+                new FlexGridContextMenu(this.shipListGrid);
+                this.shipListGrid.downloadFileName = '출고 리스트';
+
+                let extraRow = new wijmo.grid.Row();
+                extraRow.allowMerging = true;
+
+                let panel = this.shipListGrid.columnHeaders;
+                panel.rows.splice(0, 0, extraRow)
+
+                for (let colIndex = 7; colIndex <= 8; colIndex++) {
+                    panel.setCellData(0, colIndex, '거래명세서');
+                }
+
+                ['company_name', 'ship_date', 'total_qty', 'total_price', 'total_vat'
+                    , 'total_amount', 'state_name', 'description'].forEach((binding) => {
+                    let col = this.shipListGrid.getColumn(binding);
+                    col.allowMerging = true;
+                    panel.setCellData(0, col.index, col.header);
+                });
+
+                this.shipListGrid.formatItem.addHandler(function (s, e) {
+                    if (e.panel == s.columnHeaders && e.range.rowSpan > 1) {
+                        var html = e.cell.innerHTML;
+                        e.cell.innerHTML = '<div class="v-center">' + html + '</div>';
+                    }
+                });
+
+                $content.find('#btnSearch').on('click', function () {
+                    fnLoadShipList();
+                });
+
+                let start = $content.find('#srchStartDt');
+                let end = $content.find('#srchEndDt');
+
+                start.val(CommonUtil.getYYYYMMDD(-7));
+                end.val(CommonUtil.getYYYYMMDD());
+
+                let fnLoadShipList = function () {
+                    let fnsuccess = function (result) {
+                        if (result.data !== null) {
+                            _this.shipListGrid.itemsSource = new wijmo.collections.CollectionView(result.data);
+                            selector = new wijmo.grid.selector.Selector(_this.shipListGrid);
+
+                        }
+                    };
+                    let shipParam = {
+                        'srchStartDt': start.val(),
+                        'srchEndDt': end.val(),
+                    };
+
+                    console.log('shipParam', shipParam);
+                    AjaxUtil.getAsyncData(_this.url + '/shipment_head_list', shipParam, fnsuccess);
+
+                };
+
+                fnLoadShipList();
+
+                $content.find('#btnShipAction').on('click', function () {
+
+                    let url = _this.url + '/save_balju';
+                    let items = _this.shipListGrid.rows
+                        .filter(row => row.isSelected)
+                        .map(row => row.dataItem);
+
+                    console.log(items);
+
+                    if (!items || items.length === 0) {
+                        Alert.alert('', '저장할 항목을 선택하세요.');
+                        return;
+                    }
+
+                    let fnSuccess = function (res) {
+                        if (!res.success) {
+                            Alert.alert('', res.message);
+                        } else {
+                            Notify.success('저장되었습니다');
+                            // page.searchDataBind();
+                            modalContainer.modal.close();
+                        }
+                    };
+
+                    AjaxUtil.postJsonAsyncData(url, items, fnSuccess);
+                });
+
+            }
+
+        }
+
+        let page = null;
+
+        $(document).ready(function (e) {
+
+            page = new SalesInvoicePage();
+
+
+            $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
+            $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
+            AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', false);
+
+            // page.searchMainData();
+
+
+            // 검색
+            $('#btnSearch').click(function (e) {
+                page.searchMainData();
+            });
+
+            $('#btnShipList').on('click', function () {
+                page.showShipListPopup();
+            });
+
+        })
+    </script>
+
+</th:block>
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+</html>

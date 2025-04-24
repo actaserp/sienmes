@@ -1,0 +1,734 @@
+<th:block th:fragment="popup_invoice">
+    <head>
+        <style id="invoice_css">
+            .taxinvoice_write {
+                float: left;
+                margin: 10px 0 0 0;
+                width: 780px;
+            }
+
+            #taxtype_area {
+                width: 100%;
+                border-top: 2px solid #a5a5a5;
+                background-color: #fafafa;
+            }
+
+            #taxtype_area .taxtype .taxtype_radio p {
+                float: left;
+                padding: 8px 25px 12px 25px;
+                color: #555;
+            }
+
+            #taxtype_area .taxtype .taxtype_radio span {
+                float: left;
+                padding: 7px 0 12px 0;
+            }
+
+            #taxtype_area .taxtype .taxtype_radio span label {
+                color: #555;
+            }
+
+            #taxtype_area .taxtype .taxtype_radio label.for {
+                curosr: pointer;
+                padding-left: 3px;
+            }
+
+            #taxtype_area .taxtype .client_radio p {
+                float: left;
+                padding: 8px 19px 12px 19px;
+                color: #555;
+            }
+
+            #taxtype_area .taxtype .client_radio span {
+                float: left;
+                padding: 7px 0 12px 0;
+                margin: 0 0 0 45px;
+            }
+
+            #taxtype_area .taxtype .client_radio span.mgl_46 {
+                margin-left: 46px;
+            }
+
+            #taxtype_area .taxtype .client_radio span label {
+                color: #555;
+            }
+
+            #taxtype_area .taxtype .client_radio label.for {
+                curosr: pointer;
+                padding-left: 3px;
+            }
+
+            #taxTotalList .PT label.for {
+                curosr: pointer;
+                padding-left: 3px;
+            }
+
+            .rad {
+                width: 13px;
+                height: 13px;
+                margin-bottom: 1px;
+                vertical-align: middle;
+                cursor: pointer;
+            }
+
+            .PT .pt1 {
+                float: left;
+                margin: 16px 0 0 19%;
+            }
+
+            .PT .pt2 {
+                float: left;
+                margin: 16px 0 0 12px;
+            }
+
+            .PT .pt_s {
+                float: left;
+                margin: 0 0 0 12px;
+            }
+
+            #area_form textArea {
+                overflow: hidden;
+            }
+
+            #area_form {
+                float: left;
+            }
+
+            #area_form #etax_area_form {
+                width: 776px;
+                padding: 0px;
+            }
+
+            #area_form #etax_area_form .etax_table {
+                width: 100%;
+                border-spacing: 0px 0px;
+            }
+
+            #area_form #etax_area_form .etax_table th {
+                font-weight: normal;
+                padding-top: 2px;
+                padding-bottom: 2px;
+                line-height: 15px;
+                height: 20px;
+            }
+
+            #area_form #etax_area_form .etax_table th, x:-moz-any-link, x:default {
+                height: 25px;
+                *height: 20px;
+            }
+
+            #area_form #etax_area_form .etax_table td {
+                color: #333333;
+                padding-top: 1px;
+                padding-bottom: 3px;
+                height: 20px;
+            }
+
+            #area_form #etax_area_form .etax_table td input.in_txt {
+                margin: 2px 0px 0px 0px;
+            }
+
+            #area_form #etax_area_form .etax_table td textarea {
+                float: left;
+                margin: 2px 0px 0px 0px;
+                resize: none;
+            }
+
+            #area_form #etax_area_form .etax_table td, x:-moz-any-link, x:default {
+                height: 25px;
+                *height: 20px;
+            }
+
+            #area_form #etax_area_form .table_border_red th {
+                color: #e62324;
+            }
+
+            #area_form #etax_area_form .table_border_blue th {
+                color: #3070ad;
+            }
+
+            #etax_area_form .table_border_red tbody th {
+                border-top: 1px solid #f58c8c;
+                border-left: 1px solid #f58c8c;
+            }
+
+            #etax_area_form .table_border_red tbody th.invoicer_bg {
+                background-color: #fff6f6;
+            }
+
+            #etax_area_form .table_border_red tbody td {
+                border-top: 1px solid #f58c8c;
+                border-left: 1px solid #f58c8c;
+            }
+
+            #etax_area_form .table_border_red .underline {
+                border-bottom: 1px solid #f58c8c;
+            }
+
+            #etax_area_form .table_border_red tbody th.splitline {
+                padding: 0 0 0 0 !important;
+                height: 0 !important;
+            }
+
+            #etax_area_form .table_border_blue tbody th {
+                border-top: 1px solid #5b9adf;
+                border-left: 1px solid #5b9adf;
+            }
+
+            #etax_area_form .table_border_blue tbody th.invoicer_bg {
+                background-color: #f0f6fd;
+            }
+
+            #etax_area_form .table_border_blue tbody td {
+                border-top: 1px solid #5b9adf;
+                border-left: 1px solid #5b9adf;
+            }
+
+            #etax_area_form .table_border_blue .underline {
+                border-bottom: 1px solid #5b9adf;
+            }
+
+            #etax_area_form .table_border_blue tbody th.splitline {
+                padding: 0 0 0 0 !important;
+                height: 0 !important;
+            }
+
+            #area_form #etax_area_form .etax_table .invoicer_border {
+                border-top: 1px solid #f58c8c;
+                border-left: 1px solid #f58c8c;
+                color: #e62324;
+            }
+
+            #area_form #etax_area_form .etax_table th.invoicer_border {
+                color: #e62324;
+            }
+
+            #area_form #etax_area_form .etax_table th.invoicee_border {
+                color: #3070ad;
+            }
+
+            #area_form #etax_area_form .etax_table .invoicee_border {
+                border-top: 1px solid #5b9adf;
+                border-left: 1px solid #5b9adf;
+            }
+
+            #area_form #etax_area_form .etax_table .invoicee_t_none {
+                border-top: none;
+            }
+
+            #area_form #etax_area_form .etax_table .invoicee_l_none {
+                border-left: none;
+            }
+
+            #area_form #etax_area_form .etax_table .item_border {
+                border-top: 1px solid #dfdfdf;
+                border-left: 1px solid #dfdfdf;
+            }
+
+            #area_form #etax_area_form .etax_table .item_l_border {
+                border-left: 1px solid #dfdfdf;
+            }
+
+            #area_form #etax_area_form .etax_table .item_t_border {
+                border-top: 1px solid #dfdfdf;
+            }
+
+            #area_form #etax_area_form #tax_button.invoicer_border {
+                height: 38px;
+                padding: 13px 15px 9px 15px;
+                border-top: 1px solid #f58c8c;
+            }
+
+            #area_form #etax_area_form #tax_button.invoicee_border {
+                height: 38px;
+                padding: 13px 15px 9px 15px;
+                border-top: 1px solid #5b9adf;
+            }
+
+            .gray_bg {
+                background-color: #f1f3f6;
+            }
+
+            .invoicee_blue {
+                color: #0071c9;
+            }
+
+            .autoDeal {
+                margin: 0 18px 0 0;
+            }
+
+            ul.modify_step {
+                float: left;
+                width: 780px;
+                margin: 9px 0 40px 0;
+            }
+
+            ul.modify_step li {
+                float: left;
+                height: 49px;
+                border-top: 1px solid #dfdfdf;
+                border-bottom: 3px solid #808080;
+            }
+
+            ul.modify_step li span.num {
+                float: left;
+                margin: 13px 0 0 18px;
+                font-size: 25px;
+                font-weight: bold;
+                color: #cdcdcd;
+            }
+
+            ul.modify_step li span.text {
+                float: left;
+                margin: 13px 0 0 12px;
+                font-size: 15px;
+                color: #777;
+            }
+
+            ul.modify_step li.step_on {
+                width: 198px;
+                height: 53px;
+                padding: 0 0 0 55px;
+                border-top: 5px solid #276cc7;
+                border-left: 3px solid #276cc7;
+                border-right: 3px solid #276cc7;
+                border-bottom: none;
+            }
+
+            ul.modify_step li.step_on span.num {
+                float: left;
+                margin: 13px 0 0 0;
+                font-size: 26px;
+                font-weight: bold;
+                color: #ff4747;
+                line-height: 26px;
+            }
+
+            ul.modify_step li.step_on span.text {
+                float: left;
+                margin: 12px 0 0 13px;
+                font-size: 20px;
+                font-weight: bold;
+                color: #000;
+                line-height: 26px;
+            }
+
+            ul.modify_step li.step_off_l {
+                width: 207px;
+                margin: 5px 0 0 0;
+                padding: 0 0 0 53px;
+                border-left: 1px solid #dfdfdf;
+            }
+
+            ul.modify_step li.step_off_r {
+                width: 209px;
+                margin: 5px 0 0 0;
+                padding: 0 0 0 50px;
+                border-right: 1px solid #dfdfdf;
+            }
+
+            ul.modify_step li.width_206 {
+                width: 206px;
+            }
+
+            input[type="radio"]:checked::after {
+                content: "";
+                position: absolute;
+                top: 3px;
+                left: 3px;
+                width: 8px;
+                height: 8px;
+                background: rgb(255, 255, 255);
+                border-width: 6px;
+                border-style: solid;
+                border-color: rgb(36, 124, 255);
+                border-image: initial;
+                border-radius: 100%;
+            }
+
+
+        </style>
+    </head>
+    <script type="text/x-tmpl" id="popup_invoiceTemplate">
+
+        <div class="content_wrap popup">
+
+            <section class="section">
+
+                <form id="taxForm">
+                <div class="section-top">
+
+                        <div id="taxtype_area">
+                            <div class="taxtype">
+                                <div class="taxtype_radio">
+                                    <p class="taxtype_icon bold">과세형태</p><span class="fl_l bold pdt_8 c_555">:</span>
+                                    <span class="mgl_19"><input checked="checked" class="rad" type="radio" value="과세" id="TaxType1" name="TaxType"><label class="for" for="TaxType1">과세(10%)</label></span>
+                                    <span class="mgl_17"><input class="rad" type="radio" value="영세" id="TaxType2" name="TaxType"><label class="for" for="TaxType2">영세(0%)</label></span>
+                                    <span class="mgl_16"><input class="rad" type="radio" value="면세" id="TaxType3" name="TaxType"><label class="for" for="TaxType3">면세(세액없음)</label></span>
+                                </div>
+                                <div class="client_radio">
+                                    <p class="taxtype_icon bold">거래처유형</p><span class="fl_l bold c_555 mg_0 pdt_8">:</span>
+                                    <span class="mgl_20"><input checked="checked" class="rad" type="radio" value="사업자" id="InvoiceeType1" name="InvoiceeType"><label class="for" for="InvoiceeType1">사업자</label></span>
+                                    <span><input class="rad" type="radio" value="개인" id="InvoiceeType2" name="InvoiceeType"><label class="for" for="InvoiceeType2">개인</label></span>
+                                    <span class="mgl_46"><input class="rad" type="radio" value="외국인" id="InvoiceeType3" name="InvoiceeType"><label class="for" for="InvoiceeType3">외국인</label></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    <div class="container-fluid">
+                        <div id="area_form">
+                            <div id="etax_area_form" class="border_red">
+                                <table class="etax_table table_border_red" summary="세금계산서">
+                                    <thead>
+                                        <tr>
+                                            <th class="al_c" colspan="46" rowspan="2">
+
+                                            <span class="ft_24 bold" id="taxName">세금계산서</span>
+                                            </th>
+                                            <th class="al_c" colspan="12" rowspan="2"><span>공 급 자</span><br>(보 관 용)</th>
+                                            <td colspan="6" rowspan="2"></td>
+                                            <th class="al_r pdr_3" colspan="10">책번호 : </th>
+                                            <td class="al_l pdl_3" colspan="10"><input class="in_txt numeric" maxlength="4" style="width:63px;" tabindex="1" type="text" id="Kwon" name="Kwon" value=""></td>
+                                            <th class="al_l" colspan="4">권</th>
+                                            <td class="al_l pdl_3" colspan="10"><input class="in_txt numeric" maxlength="4" style="width:63px;" tabindex="2" type="text" id="Ho" name="Ho" value=""></td>
+                                            <th class="al_l" colspan="2">호</th>
+                                        </tr>
+                                    <tr>
+                                        <th class="al_r pdr_3" colspan="10">일련번호 : </th>
+                                        <td class="al_l pdl_3" colspan="26"><input class="in_txt" maxlength="27" style="width:172px;margin:0px;" tabindex="3" type="text" id="SerialNum" name="SerialNum" value=""></td>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="InvoiceList">
+                                        <tr>
+                                            <th class="splitline noborder_t" colspan="50"></th>
+                                            <th class="splitline noborder_t" colspan="50"></th>
+                                        </tr>
+                                        <tr>
+                                            <th class="al_c invoicer_bg noborder_l" colspan="3" rowspan="6"><span class="bold lh_30">공<br>급<br>자</span></th>
+                                            <th class="al_c bold" colspan="8">등록번호</th>
+                                            <td class="al_l pdl_3" colspan="23"><input class="in_txt numeric al_c letspc_0 readonly" maxlength="12" tabindex="4" type="text" style="width:95%" id="InvoicerCorpNum" name="InvoicerCorpNum" value="177-86-02466" readonly="readonly"></td>
+
+                                            <th class="al_c" colspan="8">종사업장</th>
+                                            <td class="al_l pdl_3" colspan="8"><input class="in_txt numeric letspc_0" maxlength="4" style="width:85%" tabindex="5" type="text" id="InvoicerTaxRegID" name="InvoicerTaxRegID" value=""></td>
+
+                                            <th class="al_c  invoicer_bg" colspan="3" rowspan="6"><span class="bold lh_16">공<br>급<br>받<br>는<br>자</span></th>
+                                            <th class="al_c bold" colspan="8">등록번호</th>
+                                            <td class="al_l pdl_3" colspan="23"><input class="in_txt numeric al_c letspc_0" maxlength="12" tabindex="14" type="text" style="width:134px" id="InvoiceeCorpNum" name="InvoiceeCorpNum" value=""><button class="btn_white_gradient mgl_2" id="btnSelectInvoicee" style="margin-top:2px;height:20px;" type="button">선택</button></td>
+
+                                            <th class="al_c" colspan="8">종사업장</th>
+                                            <td class="al_l pdl_3" colspan="8"><input class="in_txt numeric letspc_0" maxlength="4" style="width:85%;" tabindex="15" type="text" id="InvoiceeTaxRegID" name="InvoiceeTaxRegID" value=""></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="al_c bold" colspan="8"><span>상</span><span class="mgl_20">호</span></th>
+                                            <td class="al_l pdl_3" colspan="23"><textarea class="txt_ar kr" maxlength="200" style="width:95%; height:27px;" tabindex="6" id="InvoicerCorpName" name="InvoicerCorpName">(주)엑타스</textarea></td>
+                                            <th class="al_c bold lh_14" colspan="4"><p>성</p><p>명</p></th>
+                                            <td class="al_l pdl_3" colspan="12"><textarea class="txt_ar kr" maxlength="100" style="width:90%; height:27px;" tabindex="7" id="InvoicerCEOName" name="InvoicerCEOName">박금성</textarea></td>
+                                            <th class="al_c bold" colspan="8"><span>상</span><span class="mgl_20">호</span></th>
+                                            <td class="al_l pdl_3" colspan="23"><textarea class="txt_ar kr" maxlength="200" style="width:95%; height:27px;" tabindex="16" id="InvoiceeCorpName" name="InvoiceeCorpName"></textarea></td>
+                                            <th class="al_c bold lh_14" colspan="4">성<br>명</th>
+                                            <td class="al_l pdl_3" colspan="12"><textarea class="txt_ar kr" maxlength="100" style="width:90%; height:27px;" tabindex="17" id="InvoiceeCEOName" name="InvoiceeCEOName"></textarea></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="al_c  lh_14" colspan="8"><p><span>사</span><span class="mgl_4">업</span><span class="mgl_4">장</span></p><p><span>주</span><span class="mgl_20">소</span></p></th>
+                                            <td class="al_l pdl_3" colspan="39"><textarea class="txt_ar kr" maxlength="300" style="width:97%; height:27px;" tabindex="8" id="InvoicerAddr" name="InvoicerAddr">서울 금천구 벚꽃로 244  911호</textarea></td>
+                                            <th class="al_c lh_14" colspan="8"><p><span>사</span><span class="mgl_4">업</span><span class="mgl_4">장</span></p><p><span>주</span><span class="mgl_20">소</span></p></th>
+                                            <td class="al_l pdl_3" colspan="39"><textarea class="txt_ar kr" maxlength="300" style="width:97%; height:27px;" tabindex="18" id="InvoiceeAddr" name="InvoiceeAddr"></textarea></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="al_c" colspan="8"><span>업</span><span class="mgl_20">태</span></th>
+                                            <td class="al_l pdl_3" colspan="17"><textarea class="txt_ar kr" maxlength="100" style="width:94%; height:27px;" tabindex="9" id="InvoicerBizType" name="InvoicerBizType">정보통신</textarea></td>
+                                            <th class="al_c lh_14" colspan="4"><p>종</p><p>목</p></th>
+                                            <td class="al_l pdl_3" colspan="18"><textarea class="txt_ar kr" maxlength="100" style="width:93%; height:27px;" tabindex="10" id="InvoicerBizClass" name="InvoicerBizClass">소프트웨어개발</textarea></td>
+                                            <th class="al_c" colspan="8"><span>업</span><span class="mgl_20">태</span></th>
+                                            <td class="al_l pdl_3" colspan="17"><textarea class="txt_ar kr" maxlength="100" style="width:94%; height:27px;" tabindex="19" id="InvoiceeBizType" name="InvoiceeBizType"></textarea></td>
+                                            <th class="al_c lh_14" colspan="4"><p>종</p><p>목</p></th>
+                                            <td class="al_l pdl_3" colspan="18"><textarea class="txt_ar kr" maxlength="100" style="width:93%; height:27px;" tabindex="20" id="InvoiceeBizClass" name="InvoiceeBizClass"></textarea></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="al_c" colspan="8"><span>담</span><span class="mgl_4">당</span><span class="mgl_4">자</span></th>
+                                            <td class="al_l pdl_3" colspan="17"><input class="in_txt kr" maxlength="100" style="width:94%;" tabindex="11" type="text" id="InvoicerContactName" name="InvoicerContactName" value="장기영"></td>
+                                            <th class="al_c" colspan="6">연락처</th>
+                                            <td class="al_l pdl_3" colspan="16"><input class="in_txt numeric" maxlength="20" style="width:92%;" tabindex="12" type="text" id="InvoicerTEL" name="InvoicerTEL" value="010-3020-0159"></td>
+                                            <th class="al_c" colspan="8"><span>담</span><span class="mgl_4">당</span><span class="mgl_4">자</span></th>
+                                            <td class="al_l pdl_3" colspan="17"><input class="in_txt kr" maxlength="100" style="width:94%;" tabindex="21" type="text" id="InvoiceeContactName1" name="InvoiceeContactName1" value=""></td>
+                                            <th class="al_c" colspan="6">연락처</th>
+                                            <td class="al_l pdl_3" colspan="16"><input class="in_txt numeric" maxlength="20" style="width:92%;" tabindex="22" type="text" id="InvoiceeTEL1" name="InvoiceeTEL1" value=""></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="al_c" colspan="8"><span>이</span><span class="mgl_4">메</span><span class="mgl_4">일</span></th>
+                                            <td class="al_l pdl_3" colspan="39"><input class="in_txt en" maxlength="100" style="width:97%;" tabindex="13" type="text" id="InvoicerEmail" name="InvoicerEmail" value="aarmani@hanmail.net"></td>
+
+                                            <th class="al_c" colspan="8"><span>이</span><span class="mgl_4">메</span><span class="mgl_4">일</span></th>
+
+                                            <td class="al_l pdl_3" colspan="39"><input class="in_txt en" maxlength="100" style="width:66%;" tabindex="23" type="text" id="InvoiceeEmail1" name="InvoiceeEmail1" value="">&nbsp;<a class="btn_white_gradient pdl_5 pdr_5 mgt_2 lh_17" id="SaveInvoiceeClientInfo"><img alt="주소록에저장" src="/images/common/write/icon_save.gif">&nbsp;주소록에 저장</a></td>
+                                        </tr>
+                                    </tbody>
+
+
+                                    <!-- <tbody th:if="${IssueType} == '위수탁'" id="TrustList">
+                                        <tr>
+                                            <th colspan="50" class="splitline noborder_t"></th>
+                                            <th colspan="50" class="splitline noborder_t"></th>
+                                        </tr>
+                                        <tr>
+                                            <th colspan="11" class="al_c noborder_l"><span class="bold">수탁자</span></th>
+                                            <td colspan="89" class="pdl_3 pdr_3">
+                                                <span th:text="${taxinvoiceInfo.TrusteeCorpName}"></span>&nbsp;(<span class="letspc_0" th:text="${SiteUtil.FormatCorpNum(taxinvoiceInfo.TrusteeCorpNum)}"></span>,&nbsp;종사업장:<input type="text" th:field="*{TrusteeTaxRegID}" class="in_txt numeric" style="width:31px;" maxlength="4" tabindex="24" />) , <span th:text="${taxinvoiceInfo.TrusteeCEOName}"></span> , <span th:text="${taxinvoiceInfo.TrusteeBizType}"></span>  / <span th:text="${taxinvoiceInfo.TrusteeBizClass}"></span>
+                                                <input type="hidden" name="TrusteeCorpNum" th:field="*{TrusteeCorpNum}" />
+                                                <input type="hidden" th:field="*{TrusteeCorpName}" />
+                                                <input type="hidden" th:field="*{TrusteeCEOName}" />
+                                                <input type="hidden" th:field="*{TrusteeAddr}" />
+                                                <input type="hidden" th:field="*{TrusteeBizType}" />
+                                                <input type="hidden" th:field="*{TrusteeBizClass}" />
+                                                <input type="hidden" th:field="*{TrusteeContactName}" />
+                                                <input type="hidden" th:field="*{TrusteeTEL}" />
+                                                <input type="hidden" th:field="*{TrusteeEmail}" />
+                                            </td>
+                                        </tr>
+                                    </tbody> -->
+                                    <tbody id="TotalList">
+                                    <tr>
+                                            <th class="splitline noborder_t" colspan="50"></th>
+                                            <th class="splitline noborder_t" colspan="50"></th>
+                                        </tr>
+                                        <tr>
+                                            <th class="al_c noborder_l" colspan="11"><span class="bold">작성일자</span>&nbsp;<img class="hand val_m" id="WriteDateImg" onblur="date_recover($('#WriteDate'))" onclick="$('#WriteDate').dpDisplay(); date_replace($('#WriteDate')); return false;" src="/images/common/table/icon_calendar.gif"></th>
+                                            <th class="al_c pet0 gray_border_l" colspan="47"><span class="bold">공급가액</span></th>
+                                            <th class="al_c pet1 gray_border_l" colspan="42"><span class="bold">세&nbsp;&nbsp;&nbsp;&nbsp;액</span></th>
+                                        </tr>
+                                        <tr>
+                                            <td class="al_c noborder_l gray_border_t" colspan="11"><input class="in_txt numeric al_c dtpicker dp-applied" maxlength="10" onblur="date_recover(this)" onclick="date_replace(this); $('#WriteDate').dpDisplay();" style="width:85%; font-size:12px !important" tabindex="34" type="text" id="WriteDate" name="WriteDate" value="2025-04-24"></td>
+                                            <td class="al_l pet0 pdl_3 gray_border_t gray_border_l" colspan="47"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" style="width: 352px;" type="text" id="SupplyCostTotal" name="SupplyCostTotal" value=""></td>
+                                            <td class="al_l pet1 pdl_3 gray_border_t gray_border_l" colspan="42"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" style="width:97%;" type="text" id="TaxTotal" name="TaxTotal" value=""></td>
+                                        </tr>
+                                    </tbody>
+                                    <tbody id="remarkList">
+                                        <tr>
+                                            <th class="splitline noborder_t" colspan="50"></th>
+                                            <th class="splitline noborder_t" colspan="50"></th>
+                                        </tr>
+                                        <tr>
+                                            <th class="al_c noborder_l" colspan="11"><span class="bold">비고1</span></th>
+                                            <td class="al_l pdl_3 gray_border_l" colspan="85"><input class="in_txt kr" maxlength="150" style="width:646px;" tabindex="35" type="text" id="Remark1" name="Remark1" value=""></td>
+                                            <td class="al_c item_l_border gray_border_l" colspan="4">
+                                                <button id="addRemark" type="button"><img alt="" class="val_m pdt_3" src="/images/common/write/icon_add.gif"></button>
+                                            </td>
+                                        </tr>
+                                        <tr id="remark2" class="none">
+                                            <th class="al_c noborder_l gray_border_t" colspan="11"><span class="bold">비고2</span></th>
+                                            <td class="al_l pdl_3 gray_border_l gray_border_t" colspan="85"><input class="in_txt kr" maxlength="150" style="width:646px;" tabindex="36" type="text" id="Remark2" name="Remark2" value=""></td>
+                                            <td class="al_c item_l_border gray_border_l gray_border_t" colspan="4">
+                                                <button id="removeRemark2" type="button"><img alt="" class="val_m pdt_3" src="/images/common/write/icon_del.gif"></button>
+                                            </td>
+                                        </tr>
+                                        <tr id="remark3" class="none">
+                                            <th class="al_c noborder_l gray_border_t" colspan="11"><span class="bold">비고3</span></th>
+                                            <td class="al_l pdl_3 gray_border_l gray_border_t" colspan="85"><input class="in_txt kr" maxlength="150" style="width:646px;" tabindex="37" type="text" id="Remark3" name="Remark3" value=""></td>
+                                            <td class="al_c item_l_border gray_border_l gray_border_t" colspan="4">
+                                                <button id="removeRemark3" type="button"><img alt="" class="val_m pdt_3" src="/images/common/write/icon_del.gif"></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tbody id="WriteTypeList">
+                                        <tr>
+                                            <th class="splitline noborder_t" colspan="50"></th>
+                                            <th class="splitline noborder_t" colspan="50"></th>
+                                        </tr>
+                                        <tr>
+                                            <th class="gray_bg al_c noborder_l" colspan="11"><span class="bold">작성방법</span></th>
+                                            <td class="gray_bg gray_border_l" colspan="89">
+                                                <span class="pdl_10"><input checked="checked" class="rad" id="WriteType1" name="WriteType" tabindex="38" type="radio" value="직접입력"><label class="for" for="WriteType1">직접입력</label></span>
+                                                <span class="pdl_39"><input class="rad" id="WriteType2" name="WriteType" tabindex="29" type="radio" value="수량단가"><label class="for" for="WriteType2" id="WCostVAT">단가 부가세포함</label></span>
+
+                                                <span class="pdl_39 sm" id="lblWriteType">
+                                                    <input class="rad" id="WriteType4" name="WriteType" tabindex="40" type="radio" value="합계금액"><label class="for" for="WriteType4">합계금액</label>&nbsp;&nbsp;<button class="btn_white_gradient" id="totalAmountAct" type="button">계산</button>
+                                                </span>
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="splitline noborder_t" colspan="50"></th>
+                                            <th class="splitline noborder_t" colspan="50"></th>
+                                        </tr>
+                                    </tbody>
+                                    <tbody id="taxList">
+
+                                        <tr>
+                                            <th class="al_c noborder_l" colspan="4"><span class="bold">월</span></th>
+                                            <th class="al_c item_l_border" colspan="4"><span class="bold">일</span></th>
+                                            <th class="al_c item_l_border" colspan="24"><span class="bold">품&nbsp;&nbsp;목</span></th>
+                                            <th class="al_c item_l_border" colspan="14"><span class="bold">규&nbsp;&nbsp;격</span></th>
+                                            <th class="al_c pet2 item_l_border" colspan="8"><span class="bold">수&nbsp;&nbsp;량</span></th>
+                                            <th class="al_c pet3 item_l_border" colspan="8"><span class="bold">단&nbsp;&nbsp;가</span></th>
+                                            <th class="al_c pet4 item_l_border" colspan="12"><span class="bold">공급가액</span></th>
+                                            <th class="al_c pet5 item_l_border" colspan="10"><span class="bold">세&nbsp;&nbsp;액</span></th>
+                                            <th class="al_c item_l_border" colspan="12"><span class="bold">비&nbsp;&nbsp;고</span></th>
+                                            <th class="al_c item_l_border" colspan="4"><button id="btnAddFiveDetails" type="button"><img alt="" class="val_m pdt_3" src="/images/common/write/icon_add.gif"></button></th>
+                                        </tr>
+                                        <tr id="item_0">
+                                            <td class="al_l pdl_3 noborder_l item_t_border" colspan="4">
+                                                <input type="hidden" id="detailList0.SerialNum" name="detailList[0].SerialNum" value="1">
+                                                <input type="hidden" id="detailList0.PurchaseDT" name="detailList[0].PurchaseDT" value="">
+                                                <input class="in_txt numeric al_c in_detail" maxlength="2" style="width:67%; height:25px;" tabindex="50" type="text" id="detailList0.PurchaseDT1" value="">
+                                            </td>
+                                            <td class="al_l pdl_3 item_border" colspan="4">
+                                                <input class="in_txt numeric al_c in_detail" maxlength="2" style="width:67%; height:25px;" tabindex="50" type="text" id="detailList0.PurchaseDT2" value="">
+                                            </td>
+                                            <td class="al_l pdl_3 item_border" colspan="24">
+                                                <textarea class="txt_ar" maxlength="100" style="width:81%; height:25px;" tabindex="50" id="detailList0.ItemName" name="detailList[0].ItemName"></textarea><button class="mgt_3 mgl_3" type="button" id="btnViewItem_0"><img alt="" class="val_m pdt_3" src="/images/common/write/icon_search.gif"></button>
+                                            </td>
+                                            <td class="al_l pdl_3 item_border" colspan="14"><textarea class="txt_ar" maxlength="60" style="width:91%; height:25px;" tabindex="50" id="detailList0.Spec" name="detailList[0].Spec"></textarea></td>
+                                            <td class="al_l pdl_3 item_border pet2" colspan="8"><input class="in_txt numeric number al_r in_detail" maxlength="16" style="width:85%; height:25px;" tabindex="50" type="text" id="detailList0.Qty" name="detailList[0].Qty" value=""></td>
+                                            <td class="al_l pdl_3 item_border pet3" colspan="8"><input class="in_txt numeric number al_r in_detail" maxlength="22" style="width:85%; height:25px;" tabindex="50" type="text" id="detailList0.UnitCost" name="detailList[0].UnitCost" value=""></td>
+                                            <td class="al_l pdl_3 item_border pet4" colspan="12"><input class="in_txt numeric money al_r in_detail" maxlength="22" style="width:89%; height:25px;" tabindex="50" type="text" id="detailList0.SupplyCost" name="detailList[0].SupplyCost" value=""></td>
+                                            <td class="al_l pdl_3 item_border pet5" colspan="10"><input class="in_txt numeric money al_r in_detail" maxlength="22" style="width:89%; height:25px;" tabindex="50" type="text" id="detailList0.Tax" name="detailList[0].Tax" value=""></td>
+                                            <td class="al_l pdl_3 item_border" colspan="12"><textarea class="txt_ar" maxlength="100" style="width:89%; height:25px;" tabindex="50" id="detailList0.Remark" name="detailList[0].Remark"></textarea></td>
+                                            <td class="al_c item_border" colspan="4"><button type="button" id="btnDelItem_0"><img alt="" class="val_m pdt_3" src="/images/common/write/icon_del.gif"></button></td>
+                                        </tr>
+                                        <tr id="item_1">
+                                            <td class="al_l pdl_3 noborder_l item_t_border" colspan="4">
+                                                <input type="hidden" id="detailList1.SerialNum" name="detailList[1].SerialNum" value="2">
+                                                <input type="hidden" id="detailList1.PurchaseDT" name="detailList[1].PurchaseDT" value="">
+                                                <input class="in_txt numeric al_c in_detail" maxlength="2" style="width:67%; height:25px;" tabindex="50" type="text" id="detailList1.PurchaseDT1" value="">
+                                            </td>
+                                            <td class="al_l pdl_3 item_border" colspan="4">
+                                                <input class="in_txt numeric al_c in_detail" maxlength="2" style="width:67%; height:25px;" tabindex="50" type="text" id="detailList1.PurchaseDT2" value="">
+                                            </td>
+                                            <td class="al_l pdl_3 item_border" colspan="24">
+                                                <textarea class="txt_ar" maxlength="100" style="width:81%; height:25px;" tabindex="50" id="detailList1.ItemName" name="detailList[1].ItemName"></textarea><button class="mgt_3 mgl_3" type="button" id="btnViewItem_1"><img alt="" class="val_m pdt_3" src="/images/common/write/icon_search.gif"></button>
+                                            </td>
+                                            <td class="al_l pdl_3 item_border" colspan="14"><textarea class="txt_ar" maxlength="60" style="width:91%; height:25px;" tabindex="50" id="detailList1.Spec" name="detailList[1].Spec"></textarea></td>
+                                            <td class="al_l pdl_3 item_border pet2" colspan="8"><input class="in_txt numeric number al_r in_detail" maxlength="16" style="width:85%; height:25px;" tabindex="50" type="text" id="detailList1.Qty" name="detailList[1].Qty" value=""></td>
+                                            <td class="al_l pdl_3 item_border pet3" colspan="8"><input class="in_txt numeric number al_r in_detail" maxlength="22" style="width:85%; height:25px;" tabindex="50" type="text" id="detailList1.UnitCost" name="detailList[1].UnitCost" value=""></td>
+                                            <td class="al_l pdl_3 item_border pet4" colspan="12"><input class="in_txt numeric money al_r in_detail" maxlength="22" style="width:89%; height:25px;" tabindex="50" type="text" id="detailList1.SupplyCost" name="detailList[1].SupplyCost" value=""></td>
+                                            <td class="al_l pdl_3 item_border pet5" colspan="10"><input class="in_txt numeric money al_r in_detail" maxlength="22" style="width:89%; height:25px;" tabindex="50" type="text" id="detailList1.Tax" name="detailList[1].Tax" value=""></td>
+                                            <td class="al_l pdl_3 item_border" colspan="12"><textarea class="txt_ar" maxlength="100" style="width:89%; height:25px;" tabindex="50" id="detailList1.Remark" name="detailList[1].Remark"></textarea></td>
+                                            <td class="al_c item_border" colspan="4"><button type="button" id="btnDelItem_1"><img alt="" class="val_m pdt_3" src="/images/common/write/icon_del.gif"></button></td>
+                                        </tr>
+                                        <tr id="item_2">
+                                            <td class="al_l pdl_3 noborder_l item_t_border" colspan="4">
+                                                <input type="hidden" id="detailList2.SerialNum" name="detailList[2].SerialNum" value="3">
+                                                <input type="hidden" id="detailList2.PurchaseDT" name="detailList[2].PurchaseDT" value="">
+                                                <input class="in_txt numeric al_c in_detail" maxlength="2" style="width:67%; height:25px;" tabindex="50" type="text" id="detailList2.PurchaseDT1" value="">
+                                            </td>
+                                            <td class="al_l pdl_3 item_border" colspan="4">
+                                                <input class="in_txt numeric al_c in_detail" maxlength="2" style="width:67%; height:25px;" tabindex="50" type="text" id="detailList2.PurchaseDT2" value="">
+                                            </td>
+                                            <td class="al_l pdl_3 item_border" colspan="24">
+                                                <textarea class="txt_ar" maxlength="100" style="width:81%; height:25px;" tabindex="50" id="detailList2.ItemName" name="detailList[2].ItemName"></textarea><button class="mgt_3 mgl_3" type="button" id="btnViewItem_2"><img alt="" class="val_m pdt_3" src="/images/common/write/icon_search.gif"></button>
+                                            </td>
+                                            <td class="al_l pdl_3 item_border" colspan="14"><textarea class="txt_ar" maxlength="60" style="width:91%; height:25px;" tabindex="50" id="detailList2.Spec" name="detailList[2].Spec"></textarea></td>
+                                            <td class="al_l pdl_3 item_border pet2" colspan="8"><input class="in_txt numeric number al_r in_detail" maxlength="16" style="width:85%; height:25px;" tabindex="50" type="text" id="detailList2.Qty" name="detailList[2].Qty" value=""></td>
+                                            <td class="al_l pdl_3 item_border pet3" colspan="8"><input class="in_txt numeric number al_r in_detail" maxlength="22" style="width:85%; height:25px;" tabindex="50" type="text" id="detailList2.UnitCost" name="detailList[2].UnitCost" value=""></td>
+                                            <td class="al_l pdl_3 item_border pet4" colspan="12"><input class="in_txt numeric money al_r in_detail" maxlength="22" style="width:89%; height:25px;" tabindex="50" type="text" id="detailList2.SupplyCost" name="detailList[2].SupplyCost" value=""></td>
+                                            <td class="al_l pdl_3 item_border pet5" colspan="10"><input class="in_txt numeric money al_r in_detail" maxlength="22" style="width:89%; height:25px;" tabindex="50" type="text" id="detailList2.Tax" name="detailList[2].Tax" value=""></td>
+                                            <td class="al_l pdl_3 item_border" colspan="12"><textarea class="txt_ar" maxlength="100" style="width:89%; height:25px;" tabindex="50" id="detailList2.Remark" name="detailList[2].Remark"></textarea></td>
+                                            <td class="al_c item_border" colspan="4"><button type="button" id="btnDelItem_2"><img alt="" class="val_m pdt_3" src="/images/common/write/icon_del.gif"></button></td>
+                                        </tr>
+                                        <tr id="item_3">
+                                            <td class="al_l pdl_3 noborder_l item_t_border" colspan="4">
+                                                <input type="hidden" id="detailList3.SerialNum" name="detailList[3].SerialNum" value="4">
+                                                <input type="hidden" id="detailList3.PurchaseDT" name="detailList[3].PurchaseDT" value="">
+                                                <input class="in_txt numeric al_c in_detail" maxlength="2" style="width:67%; height:25px;" tabindex="50" type="text" id="detailList3.PurchaseDT1" value="">
+                                            </td>
+                                            <td class="al_l pdl_3 item_border" colspan="4">
+                                                <input class="in_txt numeric al_c in_detail" maxlength="2" style="width:67%; height:25px;" tabindex="50" type="text" id="detailList3.PurchaseDT2" value="">
+                                            </td>
+                                            <td class="al_l pdl_3 item_border" colspan="24">
+                                                <textarea class="txt_ar" maxlength="100" style="width:81%; height:25px;" tabindex="50" id="detailList3.ItemName" name="detailList[3].ItemName"></textarea><button class="mgt_3 mgl_3" type="button" id="btnViewItem_3"><img alt="" class="val_m pdt_3" src="/images/common/write/icon_search.gif"></button>
+                                            </td>
+                                            <td class="al_l pdl_3 item_border" colspan="14"><textarea class="txt_ar" maxlength="60" style="width:91%; height:25px;" tabindex="50" id="detailList3.Spec" name="detailList[3].Spec"></textarea></td>
+                                            <td class="al_l pdl_3 item_border pet2" colspan="8"><input class="in_txt numeric number al_r in_detail" maxlength="16" style="width:85%; height:25px;" tabindex="50" type="text" id="detailList3.Qty" name="detailList[3].Qty" value=""></td>
+                                            <td class="al_l pdl_3 item_border pet3" colspan="8"><input class="in_txt numeric number al_r in_detail" maxlength="22" style="width:85%; height:25px;" tabindex="50" type="text" id="detailList3.UnitCost" name="detailList[3].UnitCost" value=""></td>
+                                            <td class="al_l pdl_3 item_border pet4" colspan="12"><input class="in_txt numeric money al_r in_detail" maxlength="22" style="width:89%; height:25px;" tabindex="50" type="text" id="detailList3.SupplyCost" name="detailList[3].SupplyCost" value=""></td>
+                                            <td class="al_l pdl_3 item_border pet5" colspan="10"><input class="in_txt numeric money al_r in_detail" maxlength="22" style="width:89%; height:25px;" tabindex="50" type="text" id="detailList3.Tax" name="detailList[3].Tax" value=""></td>
+                                            <td class="al_l pdl_3 item_border" colspan="12"><textarea class="txt_ar" maxlength="100" style="width:89%; height:25px;" tabindex="50" id="detailList3.Remark" name="detailList[3].Remark"></textarea></td>
+                                            <td class="al_c item_border" colspan="4"><button type="button" id="btnDelItem_3"><img alt="" class="val_m pdt_3" src="/images/common/write/icon_del.gif"></button></td>
+                                        </tr>
+                                    </tbody>
+                                    <tbody id="taxTotalList">
+                                        <tr>
+                                            <th class="splitline noborder_t" colspan="50"></th>
+                                            <th class="splitline noborder_t" colspan="50"></th>
+                                        </tr>
+                                        <tr>
+                                            <th class="al_c noborder_l" colspan="26"><span class="bold">합&nbsp;계&nbsp;금&nbsp;액</span></th>
+                                            <th class="al_c" colspan="12">현&nbsp;&nbsp;&nbsp;금</th>
+                                            <th class="al_c" colspan="12">수&nbsp;&nbsp;&nbsp;표</th>
+                                            <th class="al_c" colspan="12">어&nbsp;&nbsp;&nbsp;음</th>
+                                            <th class="al_c" colspan="12">외상미수금</th>
+                                            <th class="al_c" colspan="26" rowspan="2">
+                                                <div class="PT fl_l" style="width:100%;">
+                                                    <span class="pt1 c_333">이 금액을</span>
+                                                    <div class="pt_s">
+                                                        <p><input class="rad" id="PurposeType1" tabindex="55" type="radio" value="영수" name="PurposeType"><label class="for c_333" for="PurposeType1">영수</label></p>
+                                                        <p><input checked="checked" class="rad" id="PurposeType2" tabindex="55" type="radio" value="청구" name="PurposeType"><label class="for c_333" for="PurposeType2">청구</label></p>
+                                                        <p><input class="rad" id="PurposeType3" tabindex="55" type="radio" value="없음" name="PurposeType"><label class="for c_333" for="PurposeType3">없음</label></p>
+                                                    </div>
+                                                    <span class="pt2 c_333">함</span>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <td class="al_l pdl_3 noborder_l" colspan="26"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" style="width:95%;" type="text" id="TotalAmount" name="TotalAmount" value=""></td>
+                                            <td class="al_l pdl_3" colspan="12"><input class="in_txt numeric money al_r" maxlength="22" style="width:90%;" tabindex="51" type="text" id="Cash" name="Cash" value=""></td>
+                                            <td class="al_l pdl_3" colspan="12"><input class="in_txt numeric money al_r" maxlength="22" style="width:90%;" tabindex="52" type="text" id="ChkBill" name="ChkBill" value=""></td>
+                                            <td class="al_l pdl_3" colspan="12"><input class="in_txt numeric money al_r" maxlength="22" style="width:90%;" tabindex="53" type="text" id="Note" name="Note" value=""></td>
+                                            <td class="al_l pdl_3" colspan="12"><input class="in_txt numeric money al_r" maxlength="22" style="width:90%;" tabindex="54" type="text" id="Credit" name="Credit" value=""></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div id="tax_button" class="invoicer_border">
+                                    <div>
+                                        <div class="fl_l">
+                                            <p class="btn_normal mgt_2" id="taxTemp"><a>임시저장</a></p>
+
+                                            <p class="btn_normal mgl_5 mgt_2" id="btnFormReset"><a>작성취소</a></p>
+
+                                            <p class="btn_normal mgl_5 mgt_2" id="taxSendEx" tabindex="57"><a class="hand">발행예정</a></p>
+
+                                        </div>
+                                        <div class="fl_r">
+                                            <p class="btn_action" id="taxRegistIssue" tabindex="56"><img class="hand val_m mgr_5" src="/images/common/btn/btn_action_icon.gif">발행</p>
+                                        </div>
+                                        <div class="fl_r autoDeal mgt_8">
+                                            <input class="ckb" id="AutoWriteDealInvoice" name="AutoWriteDealInvoice" type="checkbox" value="1"><label class="for" for="AutoWriteDealInvoice">거래명세서 동시 작성</label>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </form>
+            </section>
+
+            <div class="popup-button">
+                <button type="button" class="btn-popup" id="btnCompSelect" ><span data-commonCd="선택">선택</span></button>
+                <button type="button" class="btn-popup" id="btn-search-close"><span data-commonCd="닫기">닫기</span></button>
+            </div>
+
+
+        </div>
+    </script>
+
+    <script type="text/javascript">
+
+        class PopInvoiceComponent {
+            constructor() {
+
+                this.grid = null;
+                this.viewData = new wijmo.collections.CollectionView();
+                this.selectedItem = null;
+                this.callback = null;
+                this.modalContainer = new PopupDraggable('업체 선택');
+            }
+
+            close() {
+                this.modalContainer.close();
+            }
+        }
+
+    </script>
