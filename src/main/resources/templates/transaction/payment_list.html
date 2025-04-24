@@ -26,7 +26,7 @@
                         <dd>
                             <ul class="date-box">
                                 <li>
-                                    <input type="text" id="paycomp" name="keyword" />
+                                    <input type="text" id="company" name="keyword" />
                                 </li>
                             </ul>
                         </dd>
@@ -34,13 +34,13 @@
 
                     <dl>
                         <dt>
-                            <label for="actNm">
+                            <label for="accountNum">
                                 계좌명<span class="eq"></span>
                             </label>
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <input type="text" id="actNm">
+                                <input type="text" id="accountNum">
                             </div>
                         </dd>
                     </dl>
@@ -59,12 +59,12 @@
                     </dl>
                     <dl>
                         <dt>
-                            <label for="">
+                            <label for="remark">
                                 적 요
                             </label>
                         </dt>
                         <dd>
-                            <input type="text" id="">
+                            <input type="text" id="remark">
                         </dd>
                     </dl>
                     <dl>
@@ -302,65 +302,26 @@
                     let _this = this;
                     let date_from = $('#date_from').val();
                     let date_to = $('#date_to').val();
-                    let cboMatType = $('#cboMatType').val();
-                    let cboMatGroup = $('#cboMatGroup').val();
-                    let keyword = $('#keyword').val();
-                    let cboWorkcenter = $('#cboWorkcenter').val();
-                    let url = '/api/production/prod_order_a'
+                    let company = $('#company').val();
+                    let accountNum = $('#accountNum').val();
+                    let depositType = $('#depositType').val();
+                    let remark = $('#remark').val();
+                    let url = '/api/transaction/payment_list'
                     let data = {
                         'date_from': date_from,
                         'date_to': date_to,
-                        'workcenter_pk': cboWorkcenter,
-                        'mat_type': cboMatType,
-                        'mat_grp_pk': cboMatGroup,
-                        'keyword': keyword,
+                        'companyCode': company,
+                        'accountNum': accountNum,
+                        'depositType': depositType,
+                        'remark': remark
                     };
-                    // let result = AjaxUtil.getSyncData(url + "/read", data);
-                    // if (result.data != null) {
-                    //     _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
-                    // }
-                    _this.grid.itemsSource = new wijmo.collections.CollectionView([{},{},{}]);
-
-                }
-
-                //저장
-                saveOrder($form, modalContainer) {
-                    let _this = this;
-                    let url = '/api/production/prod_order_a/save';
-                    let data = FormUtil.extractForm($form);
-
-                    let fnSuccess = function (res) {
-                        if (!res.success) {
-                            modalContainer.close();
-                            Alert.alert('', res.message);
-                        } else {
-                            modalContainer.close();
-                            Notify.success('저장되었습니다.');
-                            _this.searchMainData();
-                        }
+                    let result = AjaxUtil.getSyncData(url + "/read", data);
+                    if (result.data != null) {
+                        _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
                     }
-
-                    AjaxUtil.postAsyncData(url, data, fnSuccess);
                 }
 
-                //삭제
-                deleteOrder(id) {
-                    let _this = this;
-                    let url = '/api/production/prod_order_a/delete';
-                    let data = {'id': id}
 
-                    let fnSuccess = function (res) {
-                        if (res.success) {
-                            Notify.success('삭제되었습니다.');
-                            _this.searchMainData();
-                        } else {
-                            Notify.success('삭제에 실패하였습니다.');
-                            _this.searchMainData();
-                        }
-                    }
-
-                    AjaxUtil.postAsyncData(url, data, fnSuccess);
-                }
 
                 showPopUp(data, action) {
                     let _this = this;
