@@ -367,5 +367,13 @@ public class PopupController {
 
 
 	}
+
+	@RequestMapping("/search_Account")
+	public AjaxResult getSearchAccount(){
+			AjaxResult result = new AjaxResult();
+
+			return result;
+	}
+
 	
 }

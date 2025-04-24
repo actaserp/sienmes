@@ -99,7 +99,7 @@ public class ShipmentDoaController {
 					//Shipment sm = new Shipment();
 					//sm = this.shipmentRepository.getShipmentById(smList.get(j).getId());
 					Shipment sm = smList.get(j);
-					Float orderQty = smList.get(j).getOrderQty();
+					Double orderQty = smList.get(j).getOrderQty();
 					sm.setQty(orderQty);
 					sm.set_status("a");
 					sm.set_audit(user);
@@ -147,7 +147,7 @@ public class ShipmentDoaController {
 			int orderQty = Integer.parseInt(data.get(i).get("order_qty").toString());
 			Shipment sm = this.shipmentRepository.getShipmentById(Integer.parseInt(data.get(i).get("ship_pk").toString()));
 			
-			sm.setQty((float)orderQty);
+			sm.setQty((double)orderQty);
 			sm.set_status("a");
 			sm.set_audit(user);
 			this.shipmentRepository.save(sm);

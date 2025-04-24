@@ -65,7 +65,7 @@ public class TradeStmtService {
 	            , sh."State" as state
 	            , fn_code_name('shipment_state', sh."State") as state_name
 	            , sh."StatementIssuedYN" as issue_yn
-	            , sh."StatementNumber" as stmt_number 
+	            , sh."StatementNumber" as stmt_number
 	            , sh."IssueDate" as issue_date
 	            from shipment_head sh 
 	            left join company c on c.id = sh."Company_id"   
@@ -81,12 +81,13 @@ public class TradeStmtService {
         return header;
 	}
 	
-	public List<Map<String, Object>> getTradeStmtItemList(int head_id){
+	public List<Map<String, Object>> getTradeStmtItemList(int head_id, int company_id){
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
         // 2. detail 데이터 조회
         paramMap = new MapSqlParameterSource();
 		paramMap.addValue("head_id", head_id);
-		
+		paramMap.addValue("companyId", company_id);
+
         String sql = """
         		select s.id as ship_pk
 	            , to_char(sh."ShipDate", 'mm-dd') as data_date
@@ -99,15 +100,39 @@ public class TradeStmtService {
 				, s."OrderQty" as order_qty 
 				, s."Qty" as ship_qty
 				, s."Description" as description 
-				, s."UnitPrice" as unit_price
-				, s."Price" as price 
-				, s."Vat" as vat 
+				,case
+				when s."SourceTableName" = 'product' then mcu."UnitPrice"
+				else su."UnitPrice"
+				end as unit_price
+				,TRUNC((
+				                       CASE
+				                         WHEN s."SourceTableName" = 'product' THEN mcu."UnitPrice" * s."Qty"
+				                         WHEN su."InVatYN" = 'Y' THEN (su."UnitPrice" * (10.0 / 11)) * s."Qty"
+				                         ELSE su."UnitPrice" * s."Qty"
+				                       END
+				                     )::numeric, 2) AS price	
+				,TRUNC((
+				                                 CASE
+				                                   WHEN s."SourceTableName" = 'product' THEN (mcu."UnitPrice" * s."Qty") * 0.1
+				                                   WHEN su."InVatYN" = 'Y' THEN (su."UnitPrice" - (su."UnitPrice" * (10.0 / 11))) * s."Qty"
+				                                   ELSE (su."UnitPrice" * s."Qty") * 0.1
+				                                 END
+				                               )::numeric, 2) AS vat
 	            , m."VatExemptionYN" as vat_exempt_yn
 				from shipment  s
 				inner join material m on m.id = s."Material_id" 
 				inner join mat_grp mg on mg.id = m."MaterialGroup_id"
 				left join unit u on u.id = m."Unit_id" 
 	            inner join shipment_head sh on sh.id = s."ShipmentHead_id"  
+	            left join (	
+				             			select distinct on ("Material_id") "Material_id", "UnitPrice"
+				             			from mat_comp_uprice
+				         				WHERE "Type" = '02'
+				             				AND "Company_id" = :companyId
+				             				AND "ApplyEndDate" > CURRENT_DATE
+				             			order by "Material_id", "ApplyStartDate" desc
+				         				) mcu on mcu."Material_id" = s."Material_id" and s."SourceTableName" = 'product'
+	            left join suju su on su.id = s."SourceDataPk"	
 				where s."ShipmentHead_id" = :head_id
 	            order by m."Code", m."Name"        		
         		""";

@@ -72,10 +72,11 @@ public class ShipmentListService {
 		return items;
 	}
 
-	public List<Map<String, Object>> getShipmentItemList(String headId) {
+	public List<Map<String, Object>> getShipmentItemList(String headId, Integer company_id) {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("headId", headId);
-		
+		paramMap.addValue("companyId", company_id);
+
 		String sql = """
 				select s.id as ship_pk
 				, s."Material_id" as mat_pk
@@ -85,12 +86,33 @@ public class ShipmentListService {
 	            , m."UnitPrice" as mat_unit_price
 	            , coalesce((s."OrderQty" * m."UnitPrice"), 0) as order_mat_price
 				, u."Name" as unit_name
-				, s."OrderQty" as order_qty 
+				, s."OrderQty" as order_qty
 				, s."Qty" as ship_qty
-				, s."Description" as description 
-				, s."UnitPrice" as unit_price
-				, s."Price" as price 
-				, s."Vat" as vat 
+				, s."Description" as description
+				, sh."Company_id" as company_id
+				, m.id as material_id
+				,case
+					when s."SourceTableName" = 'product' then mcu."UnitPrice"
+					else su."UnitPrice"
+				end as unit_price
+				
+				,case
+					when s."SourceTableName" = 'product' then 'N'
+					else su."InVatYN"
+				end as invatyn
+			
+				,TRUNC((
+				                  CASE
+				                    WHEN s."SourceTableName" = 'product' THEN mcu."UnitPrice" * s."Qty"
+				                    WHEN su."InVatYN" = 'Y' THEN (su."UnitPrice" * (10.0 / 11)) * s."Qty"
+				                    ELSE su."UnitPrice" * s."Qty"
+				                  END
+				                )::numeric, 2) AS price
+				,case
+					when s."SourceTableName" = 'product' then (mcu."UnitPrice" * s."Qty") * 0.1
+					when su."InVatYN" = 'Y' then (su."UnitPrice" - (su."UnitPrice" * (10.0/11))) * s."Qty"
+					else (su."UnitPrice" * s."Qty") * 0.1
+				end as vat
 	            , m."VatExemptionYN" as vat_exempt_yn
 	            , s."SourceDataPk" as src_data_pk
 	            , s."SourceTableName" as src_table_name
@@ -99,6 +121,15 @@ public class ShipmentListService {
 				inner join mat_grp mg on mg.id = m."MaterialGroup_id"
 				left join unit u on u.id = m."Unit_id" 
 	            inner join shipment_head sh on sh.id = s."ShipmentHead_id"  
+	            left join (	
+				             			select distinct on ("Material_id") "Material_id", "UnitPrice"
+				             			from mat_comp_uprice
+				         				WHERE "Type" = '02'
+				             				AND "Company_id" = :companyId
+				             				AND "ApplyEndDate" > CURRENT_DATE
+				             			order by "Material_id", "ApplyStartDate" desc
+				         				) mcu on mcu."Material_id" = s."Material_id" and s."SourceTableName" = 'product'
+				left join suju su on su.id = s."SourceDataPk"	
 				where s."ShipmentHead_id" = cast(:headId as Integer)
 	            order by m."Code", m."Name"
 				""";

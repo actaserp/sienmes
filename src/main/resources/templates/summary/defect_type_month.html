@@ -90,7 +90,7 @@
                         <div id="theGrid1" style="height: 730px;"></div>
                     </div>
                 </section>
-                <section class="tab-item" id="tabs_portion" style="border-top-left-radius: 0; display: flex;">
+                <section class="tab-item" id="tabs_portion" style="border-top-left-radius: 0; display: none;">
                     <div class="container-fluid" style="width: 72%">
                         <div id="theGrid3" style="height: 730px;"></div>
                     </div>
@@ -102,7 +102,7 @@
                         <!-- <div id="chart" class="chart-canvas"></div>-->
                     </div>
                 </section>
-                <section class="tab-item" id="tabs_portion_detail" style="border-top-left-radius: 0; display: flex;">
+                <section class="tab-item" id="tabs_portion_detail" style="border-top-left-radius: 0; display: none;">
                     <div class="container-fluid" style="width: 72%">
                         <div id="theGrid4" style="height: 730px;"></div>
                     </div>
@@ -616,21 +616,29 @@
         });
 
         let target = 'tabs_count';
-        $('.tab_links .tab_link').click(function (e) {
-            target = e.currentTarget.id;
-            if (target == 'tabs_count') {
-                page.searchMainData(target);
-            }
-            else if (target == 'tabs_portion') {
-                page.searchMainData(target);
-            }
-            else if (target == 'tabs_portion_detail') {
-                page.searchProductData(target);
+        $('.tab-links a').click(function (e) {
+            e.preventDefault(); // 링크 기본 이동 막기
+
+            // 모든 탭 숨김
+            $('.tab-item').css('display', 'none');
+
+            // 현재 선택된 탭 ID 얻기
+            const target = $(this).attr('href'); // → "#tabs_count"
+
+            // 해당 탭만 보이게
+            $(target).css('display', 'flex');
+
+            // 데이터 로드 (id에서 # 제거하고 처리)
+            const cleanTarget = target.replace('#', '');
+            if (cleanTarget === 'tabs_count' || cleanTarget === 'tabs_portion') {
+                page.searchMainData(cleanTarget);
+            } else if (cleanTarget === 'tabs_portion_detail') {
+                page.searchProductData(cleanTarget);
             }
 
-            page.current_tab = target;
-
+            page.current_tab = cleanTarget;
         });
+
 
         $('#cboMatType').change(function () {
             let mat_grp_pk = $('#cboMatType').val();

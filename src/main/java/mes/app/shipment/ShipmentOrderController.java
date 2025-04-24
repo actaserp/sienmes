@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 import mes.domain.entity.*;
-import mes.domain.repository.MaterialRepository;
+import mes.domain.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -24,9 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import mes.app.shipment.service.ShipmentOrderService;
 import mes.domain.model.AjaxResult;
-import mes.domain.repository.RelationDataRepository;
-import mes.domain.repository.ShipmentHeadRepository;
-import mes.domain.repository.ShipmentRepository;
 import mes.domain.services.CommonUtil;
 
 @RestController
@@ -50,7 +47,8 @@ public class ShipmentOrderController {
 
 	@Autowired
 	MaterialRepository materialRepository;
-	
+
+
 	@GetMapping("/suju_list")
 	public AjaxResult getSujuList(
 			@RequestParam("srchStartDt") String dateFrom,
@@ -103,7 +101,10 @@ public class ShipmentOrderController {
 		
 		List<Map<String, Object>> data = CommonUtil.loadJsonListMap(Q.getFirst("Q").toString());
 		ShipmentHead smh = new ShipmentHead();
-		
+
+		List<Suju> relationSujuList = shipmentOrderService.getRelationSujuList(data);
+
+		System.out.println(relationSujuList);
 		smh.setCompanyId(CompanyId);
 		smh.setShipDate(shipDate);
 		smh.setOrderDate(today);
@@ -111,20 +112,42 @@ public class ShipmentOrderController {
 		smh.set_audit(user);
 		smh.setState("ordered");
 		
-		smh = this.shipmentHeadRepository.save(smh);
-		
+
 		int orderSum = 0;
+		double totalPrice = 0;
+		double totalVat = 0;
+
 
 		// 1. 출하에 포함된 mat_id 추출
 		Set<Integer> matIds = data.stream()
 				.map(d -> (Integer) d.get("mat_id"))
 				.collect(Collectors.toSet());
 
+		//수주가 아닌 품목대상일때 해당 품목에 대한 단가 정보를 가져와야 해서
+		Set<Integer> product_materialId = data.stream()
+				.filter(s -> {
+					Object sujuPk = s.get("suju_pk");
+					return sujuPk == null || sujuPk.toString().trim().isEmpty();
+				})
+				.map(s -> (Integer) s.get("mat_id"))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
+
+		List<Map<String, Object>> productItems = new LinkedList<>();
+
+		if(product_materialId.size() > 0){
+			productItems = shipmentOrderService.getProdcutList(product_materialId, CompanyId);
+		}
+
 		// 2. 해당 품목의 현재고 조회
 		List<Material> materialList = materialRepository.findByIdIn(matIds);
 
+
+
 		Map<Integer, Material> materialMap = materialList.stream()
 				.collect(Collectors.toMap(Material::getId, Function.identity()));
+
+
 
 
 		//출하하려는 항목의 누적 클래스, 여기서만 사용하는 클래스라서 이너클래스로 생성함
@@ -179,6 +202,7 @@ public class ShipmentOrderController {
 				}
 			}
 		}
+		smh = this.shipmentHeadRepository.save(smh);
 
 
 		for(int i = 0; i < data.size(); i++) {
@@ -191,23 +215,86 @@ public class ShipmentOrderController {
 
 
 			Shipment sm = new Shipment();
-
+			int mat_id = (int) data.get(i).get("mat_id");
 			sm.setShipmentHeadId(smh.getId());
-			sm.setMaterialId((int)data.get(i).get("mat_id"));
-			sm.setOrderQty((float)orderQty);
-			sm.setQty((float) 0);
+			sm.setMaterialId(mat_id);
+			sm.setOrderQty((double)orderQty);
+			sm.setQty((double) 0);
 			if (data.get(i).get("description") != null) {
 			sm.setDescription((String)data.get(i).get("description"));
 			}
 
 			Object sujuPkObj = data.get(i).get("suju_pk");
-			sm.setSourceDataPk(sujuPkObj == "" ? null : (int) sujuPkObj);
+			Integer suJuPkParsedInt = sujuPkObj == "" ? null : (int) sujuPkObj;
+			sm.setSourceDataPk(suJuPkParsedInt);
 
 			if(TableName.equals("product")) {
 				sm.setSourceTableName(TableName);
+
+				if(productItems != null && !productItems.isEmpty()){
+
+					Map<String, Object> productList = productItems.stream()
+							.filter(s -> {
+								Object materialId = s.get("Material_id");
+								return materialId != null && materialId.equals(mat_id);
+							})
+									.findFirst().orElse(null);
+
+					Double unitPrice = null;
+
+					if(productList != null){
+						 unitPrice = ((Double) productList.get("UnitPrice"));
+
+						sm.setUnitPrice(unitPrice);
+						sm.setPrice(unitPrice * orderQty);
+						totalPrice += unitPrice * orderQty;
+						totalVat += (unitPrice * orderQty) * 0.1;
+					}else{
+						sm.setUnitPrice(null);
+						sm.setPrice(null);
+						totalVat += 0;
+						totalPrice += 0;
+					}
+
+				}else{
+					sm.setUnitPrice(null);
+					sm.setPrice(null);
+					sm.setVat(null);
+					totalVat += 0;
+					totalPrice += 0;
+				}
+
 			} else if (TableName.equals("suju")) {
 
-				sm.setSourceTableName("rela_data");
+
+				Suju item = relationSujuList.stream()
+						.filter(s -> Objects.equals(s.getId(), suJuPkParsedInt))
+						.findFirst()
+						.orElse(null);
+
+				if (item != null) {
+					double qty = item.getSujuQty();
+					if (item.getVat() != null) {
+						double vat = item.getVat().doubleValue();
+
+
+						double UnitVat = vat / qty;
+						double VatSum = UnitVat * orderQty;
+
+						sm.setUnitPrice(VatSum);
+						totalVat += VatSum;
+					}
+					if (item.getPrice() != null) {
+						double price = item.getPrice().doubleValue();
+
+						double UnitPrice = price / qty;
+						double PriceSum = UnitPrice * orderQty;
+
+						sm.setPrice(PriceSum);
+						totalPrice += PriceSum;
+					}
+					sm.setSourceTableName("rela_data");
+				}
 			}
 			sm.set_audit(user);
 			sm = this.shipmentRepository.save(sm);
@@ -230,7 +317,9 @@ public class ShipmentOrderController {
 		}
 
 		smh.setTotalQty((float)orderSum);
-		
+		smh.setTotalPrice(totalPrice);
+		smh.setTotalVat(totalVat);
+
 		smh = this.shipmentHeadRepository.save(smh);
 		
 		result.data = smh;

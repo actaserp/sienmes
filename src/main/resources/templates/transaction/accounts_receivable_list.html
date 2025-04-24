@@ -4,7 +4,7 @@
   <div class="layout-contents">
     <div class="page-title-wrap">
       <div class="left">
-        <h2>거래처별 잔액 명세(출금)</h2>
+        <h2>미수금 현황</h2>
         <a title="북마크" class="bookmark toggle">
           내 메뉴
         </a>
@@ -12,7 +12,7 @@
       <ul class="page-navi">
         <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
         <li>입금관리</li>
-        <li>거래처별 잔액 명세(출금)</li>
+        <li>미수금 현황</li>
       </ul>
     </div>
 
@@ -24,13 +24,8 @@
               거래처
             </dt>
             <dd>
-              <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
+              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="업체검색버튼으로 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
-              &nbsp;
-              <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                업체 검색
-              </a>
             </dd>
           </dl>
           <dl>
@@ -54,8 +49,7 @@
             <dt>&nbsp;</dt>
             <dd>
               <li>
-                <a class="btn btn-delete" title="검색" id="btnSearch">
-                  <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                <a class="btn btn-search" title="검색" id="btnMainSearch">
                   <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                   검색
                 </a>
@@ -64,16 +58,23 @@
           </dl>
         </div>
       </div>
-      <div class="container-fluid">
-        <div id="theGrid" style="height: 350px;" ></div>
-      </div>
-    </section>
-    <section>
-      <div class="left_align">
-        <h3 data-labelCd="매출 내역">매출 내역</h3>
-      </div>
-      <div class="container-fluid">
-        <div id="sales-details" style="height: 350px;" ></div>
+      <div class="tab-wrap">
+        <ul class="tab-links">
+          <li><a href="#tabs_total" style="border-radius: 6px 0 0 0;">집계</a></li>
+          <li><a href="#tabs_sales_details" style="border-radius: 0 6px 0 0;">상세</a></li>
+        </ul>
+        <div>
+          <section class="tab-item" id="tabs_total" style="border-top-left-radius: 0;">
+            <div class="container-fluid">
+              <div id="theGrid" style="height: 730px;"></div>
+            </div>
+          </section>
+          <section class="tab-item" id="tabs_sales_details" style="border-top-left-radius: 0;">
+            <div class="container-fluid">
+              <div id="sales-details" style="height: 730px;"></div>
+            </div>
+          </section>
+        </div>
       </div>
     </section>
   </div>
@@ -84,7 +85,7 @@
   <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
   <th:block th:replace="/common/popup_company :: popup_company"></th:block>
   <script type="text/javascript">
-    class CompBalanceDetailPage {
+    class AccountsReceivableListPage {
       constructor() {
         this.grid = null;
         this.grid3 = null;
@@ -108,37 +109,39 @@
             }
           },
           columns: [
-            {binding: 'BaljuPrice', header: '거래처명', width: 100, align: 'right'},
-            {binding: 'BaljuVat', header: '일자', width: 100, align: 'right'},
-            {binding: 'BaljuTotalPrice', header: '매출금액', width: 100, align: 'right'},
-            {binding: 'StateName', header: '입금금액', width: 80, align: 'center'},
-            {binding: 'SujuQty2', header: '품목', width: 100, align: 'right'},
-            {binding: 'SujuQty3', header: '입급형태', width: 100, align: 'right'},
-            {binding: 'ShipmentStateName', header: '은행/어음번호', width: 100, align: 'center'},
-            {binding: 'DueDate', header: '계좌/만기일', width: 120, align: 'center'},
-            {binding: 'DueDate', header: '거래구분', width: 120, align: 'center'},
-            {binding: 'Description', header: '적요', width: 200}
+            {binding: 'BaljuVat', header: '코드', width: 100, align: 'center'},
+            {binding: 'BaljuTotalPrice', header: '거래처명', width: 130, align: 'right'},
+            {binding: 'StateName', header: '전잔액', width: 200, align: 'right'},
+            {binding: 'SujuQty2', header: '매출액', width: 200, align: 'right'},
+            {binding: 'SujuQty3', header: '입금액', width: 200, align: 'right'},
+            {binding: 'ShipmentStateName', header: '잔액', width: 200, align: 'right'}
           ],
           itemsSource: this.viewData, // 데이터를 설정할 배열
         });
+
+        new FlexGridContextMenu(this.grid);
+        this.grid.downloadFileName = '미수금 집계 현황';
+        this.grid.hostElement.addEventListener('dblclick', function (e) {
+          let items = _this.grid.selectedItems;
+          if (items.length === 0) {
+            return false;
+          }
+          _this.$btnEdit.trigger('click');
+        });
         // ✅ Footer 패널 사용 설정
         this.grid.columnFooters.rows.push(new wijmo.grid.Row());
-        this.grid.bottomLeftCells.setCellData(0, 0, '총합');
+        this.grid.bottomLeftCells.setCellData(0, 0, '합 계');
 
         // ✅ Footer 합계 값 설정 (수동)
         this.grid.loadedRows.addHandler(() => {
           const rows = this.grid.rows;
-          const footer = this.grid.columnFooters.rows[0];
+          const footerTotal = this.grid.columnFooters.rows[0];
 
           const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
-
-          footer.dataItem = {
-            tot_price_sum: getSum('tot_price_sum'),
+          footerTotal.dataItem = {
+            mat_grp_name: '합 계'
           };
         });
-
-        new FlexGridContextMenu(this.grid);
-        this.grid.downloadFileName = '거래처잔액명세 집계';
 
         this.grid3 = new wijmo.grid.FlexGrid('#sales-details', {
           selectionMode: wijmo.grid.SelectionMode.Row,
@@ -152,42 +155,53 @@
             }
           },
           columns: [
-            {binding: 'BaljuPrice', header: '거래처명', width: 100, align: 'right'},
-            {binding: 'BaljuVat', header: '일자', width: 100, align: 'right'},
-            {binding: 'SujuQty2', header: '품목', width: 100, align: 'right'},
-            {binding: 'SujuQty3', header: '수량', width: 100, align: 'right'},
-            {binding: 'SujuQty3', header: '단가', width: 100, align: 'right'},
-            {binding: 'SujuQty3', header: '공급가', width: 100, align: 'right'},
-            {binding: 'ShipmentStateName', header: '부과세', width: 100, align: 'center'},
-            {binding: 'Description', header: '합계', width: 200}
+            {binding: 'BaljuPrice', header: '일자', width: 100, align: 'center'},
+            {binding: 'BaljuVat', header: '코드', width: 100, align: 'center'},
+            {binding: 'BaljuTotalPrice', header: '거래처명', width: 150, align: 'center'},
+            {binding: 'StateName', header: '금액', width: 200, align: 'right'},
+            {binding: 'SujuQty2', header: '입급형태', width: 100, align: 'right'},
+            {binding: 'SujuQty3', header: '은행', width: 120, align: 'center'},
+            {binding: 'ShipmentStateName', header: '계좌', width: 200, align: 'right'},
+            {binding: 'DueDate', header: '거래구분', width: 120, align: 'center'},
+            {binding: 'Description', header: '적요', width: 200, align: 'right'}
           ],
           itemsSource: this.viewData, // 데이터를 설정할 배열
         });
+
+        new FlexGridContextMenu(this.grid3);
+        this.grid3.downloadFileName = '미수금 상세현황';
+        this.grid3.hostElement.addEventListener('dblclick', function (e) {
+          let items = _this.grid.selectedItems;
+          if (items.length === 0) {
+            return false;
+          }
+          _this.$btnEdit.trigger('click');
+        });
         // ✅ Footer 패널 사용 설정
         this.grid3.columnFooters.rows.push(new wijmo.grid.Row());
-        this.grid3.bottomLeftCells.setCellData(0, 0, '총합');
+        this.grid3.bottomLeftCells.setCellData(0, 0, '합 계');
 
         // ✅ Footer 합계 값 설정 (수동)
         this.grid3.loadedRows.addHandler(() => {
           const rows = this.grid3.rows;
-          const footer = this.grid3.columnFooters.rows[0];
+          const footerTotal = this.grid3.columnFooters.rows[0];
 
           const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
 
-          footer.dataItem = {
-            tot_price_sum: getSum('tot_price_sum'),
+          footerTotal.dataItem = {
+            mat_grp_name: '합 계'
+            // year_qty_sum: getSum('year_qty_sum'),
+            // year_money_sum: getSum('year_money_sum'),
           };
         });
-
-        new FlexGridContextMenu(this.grid3);
-        this.grid3.downloadFileName = '거래처잔액명세 매출 내역';
 
       }
 
       searchMainData() {
         let _this = this;
-        let url = '/api/transaction/vendor_balance_detail'
+        let url = ''
         let data = {
+          'cboYear': $("#cboYear").val(),
           'cboCompany': $("#cboCompanyHidden").val()
         }
         let fnsuccess = function (result) {
@@ -202,9 +216,10 @@
 
     $(document).ready(function (e) {
 
-      page = new CompBalanceDetailPage();
+      page = new AccountsReceivableListPage();
 
       AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '', 'sale');
+      AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);
 
       $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
       $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
@@ -233,12 +248,13 @@
           // $content.find('#cboCompany').val(items.id);
           // $content.find('#CompanyName').val(items.compname);
           console.log('items : ',items);
-          document.getElementById('cboCompany').value = items.compname;
+          document.getElementById('btnCompanySearch').value = items.compname;
           document.getElementById('cboCompanyHidden').value = items.id;
         };
 
         poppage.show(searchcallback);
       });
+
       $('#cboCompany').on('input', function () {
         const val = $(this).val();
         if (val === '') {

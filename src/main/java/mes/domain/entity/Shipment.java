@@ -26,19 +26,19 @@ public class Shipment extends AbstractAuditModel{
 	String itemCode;
 	
 	@Column(name = "\"Qty\"")
-	Float qty;
+	Double qty;
 	
 	@Column(name = "\"OrderQty\"")
-	Float orderQty;
+	Double orderQty;
 	
 	@Column(name = "\"UnitPrice\"")
-	Float unitPrice;
+	Double unitPrice;
 	
 	@Column(name = "\"Price\"")
-	Float price;
+	Double price;
 	
 	@Column(name = "\"Vat\"")
-	Float vat;
+	Double vat;
 	
 	@Column(name = "\"Description\"")
 	String description;

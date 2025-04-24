@@ -11,8 +11,8 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>생산 관리</li>
-                <li>작업 지시 등록</li>
+                <li>출금 관리</li>
+                <li>지급 현황</li>
             </ul>
         </div>
 
@@ -21,17 +21,12 @@
                 <div class="search-wrap">
                     <dl>
                         <dt>
-                            생산일<span class="eq">*</span>
+                            거래처<span class="eq">*</span>
                         </dt>
                         <dd>
                             <ul class="date-box">
                                 <li>
-                                    <input type="date" id="date_from" name="date_from">
-                                    <label for="date_from" class="hide">시작일</label>
-                                </li>
-                                <li>
-                                    <input type="date" id="date_to" name="date_to">
-                                    <label for="date_to" class="hide">종료일</label>
+                                    <input type="text" id="company" name="keyword" />
                                 </li>
                             </ul>
                         </dd>
@@ -39,55 +34,57 @@
 
                     <dl>
                         <dt>
-                            <label for="cboWorkcenter">
-                                워크센터<span class="eq"></span>
+                            <label for="accountNum">
+                                계좌명<span class="eq"></span>
                             </label>
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <select id="cboWorkcenter" name="cboWorkcenter">
-                                </select>
+                                <input type="text" id="accountNum">
                             </div>
                         </dd>
                     </dl>
 
                     <dl>
                         <dt>
-                            <label for="cboMatType">
-                                품목구분<span class="eq"></span>
+                            <label for="depositType">
+                                입금형태
                             </label>
                         </dt>
                         <dd>
-                            <div class="srch-box">
-                                <select id="cboMatType" name="cboMatType">
-                                </select>
-                            </div>
-                        </dd>
-                    </dl>
+                            <select id="depositType" name="depositType">
 
-                    <dl>
-                        <dt>
-                            <label for="cboMatGroup">
-                                품목그룹
-                            </label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <select id="cboMatGroup" name="cboMatGroup">
-                                </select>
-                            </div>
+                            </select>
                         </dd>
                     </dl>
                     <dl>
                         <dt>
-                            <label for="keyword">
-                                품목명/코드
+                            <label for="remark">
+                                적 요
                             </label>
                         </dt>
                         <dd>
-                            <div class="srch-box">
-                                <input id="keyword" name="keyword" />
-                            </div>
+                            <input type="text" id="remark">
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label for="">
+                                조회기간
+                            </label>
+                        </dt>
+                        <dd>
+                            <ul class="date-box">
+                                <li>
+                                    <input type="date" id="date_from" name="date_from">
+                                    <label for="date_from" class="hide">시작일</label>
+                                </li>
+                                ~
+                                <li>
+                                    <input type="date" id="date_to" name="date_to">
+                                    <label for="date_to" class="hide">종료일</label>
+                                </li>
+                            </ul>
                         </dd>
                     </dl>
 
@@ -104,32 +101,11 @@
                         </dd>
                     </dl>
                 </div>
-                <div class="button-wrap">
-                    <ul>
-                        <li>
-                            <a class="btn btn-excell" title="등록" id="btnPlanInput">
-                                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                등록
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-delete" title="삭제" id="btnPlanDel">
-                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                삭제
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-edit" title="수정" id="btnPlanSave">
-                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
-                                수정
-                            </a>
-                        </li>
-                    </ul>
-                </div>
             </div>
             <div class="container-fluid">
-                <div id="theGrid" style="height: 680px;"></div>
+                <div id="theGrid" style="height: 600px;"></div>
             </div>
+
         </section>
     </div>
 
@@ -263,7 +239,7 @@
                         autoGenerateColumns: false,
                         selectionMode: wijmo.grid.SelectionMode.Row,
                         headersVisibility: wijmo.grid.HeadersVisibility.Column,
-                        isReadOnly: true,
+                        isReadOnly: false,
                         showMarquee: true,
                         formatItem: (sender, e) => {
                             if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
@@ -271,19 +247,17 @@
                             }
                         },
                         columns: [
-                            {binding: 'workorder_number', header: '작지번호', width: 150, align: 'center'},
-                            {binding: 'production_date', header: '생산일', width: 120, align: 'center'},
-                            {binding: 'shift_name', header: '근무조', width: 100, align: 'center'},
-                            {binding: 'mat_type_name', header: '제품구분', width: 100, align: 'center'},
-                            {binding: 'mat_grp_name', header: '제품그룹', width: 120, align: 'left'},
-                            {binding: 'mat_code', header: '제품코드', width: 100, align: 'left'},
-                            {binding: 'mat_name', header: '제품명', width: 180, align: 'left'},
-                            {binding: 'unit_name', header: '단위', width: 60, align: 'center'},
-                            {binding: 'order_qty', header: '지시량', width: 100, align: 'right'},
-                            {binding: 'workcenter_name', header: '워크센터', width: 150, align: 'left'},
-                            {binding: 'equip_name', header: '설비', width: 100, align: 'left'},
-                            {binding: 'state_name', header: '상태', width: 100, align: 'center'},
-                            {binding: 'description', header: '비고', width: 100, align: 'left'}
+                            {binding: 'workorder_number', header: '일자', width: 130, align: 'center'},
+                            {binding: 'production_date', header: '입금금액', width: 120, align: 'center'},
+                            {binding: 'shift_name', header: '출금금액', width: 120, align: 'center'},
+                            {binding: 'mat_type_name', header: '수수료', width: 100, align: 'center'},
+                            {binding: 'mat_grp_name', header: '적요', width: 450, align: 'left'},
+                            {binding: 'mat_code', header: '코드', width: 110, align: 'left'},
+                            {binding: 'mat_name', header: '거래처명', width: 200, align: 'left'},
+                            {binding: 'unit_name', header: '거래구분', width: 130, align: 'center'},
+                            {binding: 'order_qty', header: '은행', width: 120, align: 'right'},
+                            {binding: 'workcenter_name', header: '계좌', width: 180, align: 'left'},
+                            {binding: 'equip_name', header: '입금형태', width: 100, align: 'left'}
                         ]
                     });
 
@@ -297,12 +271,30 @@
                         }
                         $('#btnPlanSave').trigger('click');
                     });
+                    // ✅ Footer 패널 사용 설정
+                    this.grid.columnFooters.rows.push(new wijmo.grid.Row());
+                    this.grid.bottomLeftCells.setCellData(0, 0, '월 계');
+                    this.grid.columnFooters.rows.push(new wijmo.grid.Row());
+                    this.grid.bottomLeftCells.setCellData(0, 0, '합 계');
 
-                    AjaxUtil.fillSelectOptions($('#cboMatType'), 'system_code', 'all', false, 'mat_type', 'product,semi');
-                    AjaxUtil.fillSelectOptions($('#cboMatGroup'), 'material_group', 'all', false, $('#cboMatType').val());
-                    AjaxUtil.fillSelectOptions($('#cboWorkcenter'), 'workcenter', 'choose', false);
-                    $('#cboMatType').change(function (e) {
-                        AjaxUtil.fillSelectOptions($('#cboMatGroup'), 'material_group', 'all', false, $('#cboMatType').val());
+                    // ✅ Footer 합계 값 설정 (수동)
+                    this.grid.loadedRows.addHandler(() => {
+                        const rows = this.grid.rows;
+                        const footerMonth = this.grid.columnFooters.rows[0];
+                        const footerTotal = this.grid.columnFooters.rows[1];
+
+                        const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+
+                        footerMonth.dataItem = {
+                            mat_grp_name: '월 계'
+                            // year_qty_sum: getSum('year_qty_sum'),
+                            // year_money_sum: getSum('year_money_sum'),
+                        };
+                        footerTotal.dataItem = {
+                            mat_grp_name: '합 계'
+                            // year_qty_sum: getSum('year_qty_sum'),
+                            // year_money_sum: getSum('year_money_sum'),
+                        };
                     });
                 }
 
@@ -310,64 +302,26 @@
                     let _this = this;
                     let date_from = $('#date_from').val();
                     let date_to = $('#date_to').val();
-                    let cboMatType = $('#cboMatType').val();
-                    let cboMatGroup = $('#cboMatGroup').val();
-                    let keyword = $('#keyword').val();
-                    let cboWorkcenter = $('#cboWorkcenter').val();
-                    let url = '/api/production/prod_order_a'
+                    let company = $('#company').val();
+                    let accountNum = $('#accountNum').val();
+                    let depositType = $('#depositType').val();
+                    let remark = $('#remark').val();
+                    let url = '/api/transaction/payment_list'
                     let data = {
                         'date_from': date_from,
                         'date_to': date_to,
-                        'workcenter_pk': cboWorkcenter,
-                        'mat_type': cboMatType,
-                        'mat_grp_pk': cboMatGroup,
-                        'keyword': keyword,
+                        'companyCode': company,
+                        'accountNum': accountNum,
+                        'depositType': depositType,
+                        'remark': remark
                     };
                     let result = AjaxUtil.getSyncData(url + "/read", data);
                     if (result.data != null) {
                         _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
                     }
-
                 }
 
-                //저장
-                saveOrder($form, modalContainer) {
-                    let _this = this;
-                    let url = '/api/production/prod_order_a/save';
-                    let data = FormUtil.extractForm($form);
 
-                    let fnSuccess = function (res) {
-                        if (!res.success) {
-                            modalContainer.close();
-                            Alert.alert('', res.message);
-                        } else {
-                            modalContainer.close();
-                            Notify.success('저장되었습니다.');
-                            _this.searchMainData();
-                        }
-                    }
-
-                    AjaxUtil.postAsyncData(url, data, fnSuccess);
-                }
-
-                //삭제
-                deleteOrder(id) {
-                    let _this = this;
-                    let url = '/api/production/prod_order_a/delete';
-                    let data = {'id': id}
-
-                    let fnSuccess = function (res) {
-                        if (res.success) {
-                            Notify.success('삭제되었습니다.');
-                            _this.searchMainData();
-                        } else {
-                            Notify.success('삭제에 실패하였습니다.');
-                            _this.searchMainData();
-                        }
-                    }
-
-                    AjaxUtil.postAsyncData(url, data, fnSuccess);
-                }
 
                 showPopUp(data, action) {
                     let _this = this;
@@ -477,7 +431,6 @@
                         //$content.find('#cboEquipment').val(result.equip_pk);
 
                     })
-
 
                     $content.find('#btn_save').on('click', function (e) {
 
@@ -618,6 +571,27 @@
                     $('#btnGridSetting').css('visibility', 'visible');
                 }
 
+                // 거래처 focus시 거래처 검색 모달
+                $('#paycomp').focus(function () {
+                    let pop = new PopMatComponent();
+                    pop.material_type = 'product,sangpum';
+                    pop.show(function (item) {
+                        console.log('$btnProductSearch', item);
+                    });
+                    pop.searchDataBind();
+                });
+
+                // 계좌명 focus시 계좌명 검색 모달
+                $('#actNm').focus(function () {
+                    let pop = new PopMatComponent();
+                    pop.material_type = 'product,sangpum';
+                    pop.show(function (item) {
+                        console.log('$btnProductSearch', item);
+                    });
+                    pop.searchDataBind();
+                });
+
+                AjaxUtil.fillSelectOptions($('#depositType'), 'system_code', 'all', false, 'deposit_type');
                 page.searchMainData();
 
             })

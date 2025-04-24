@@ -73,5 +73,23 @@ public class ShipmentStmtService {
 		return items;
 	}
 
+	public List<Map<String, Object>> checkMatPrice_record(Integer company_id, Integer material_id) {
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("company_id", company_id);
+		paramMap.addValue("material_id", material_id);
+
+		String sql = """
+				select * from mat_comp_uprice
+				where "Company_id" = :company_id
+				AND "Material_id" = :material_id
+				AND "ApplyEndDate" > CURRENT_DATE
+				ORDER BY "ApplyStartDate" desc
+				limit 1;
+				""";
+		List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
+
+		return items;
+	}
+
 	
 }

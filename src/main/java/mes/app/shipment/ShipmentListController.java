@@ -42,7 +42,7 @@ public class ShipmentListController {
 			@RequestParam("head_id") String headId
 			) {
 		
-		List<Map<String, Object>> items = this.shipmentListService.getShipmentItemList(headId);
+		List<Map<String, Object>> items = this.shipmentListService.getShipmentItemList(headId, null);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;
