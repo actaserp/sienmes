@@ -223,9 +223,11 @@ public class ShipmentDoBController {
 				
 				if (material != null) {				
 					Float currentStock = material.getCurrentStock() != null ? material.getCurrentStock() : 0;
-					Float shipQty = shipmentList.get(i).getQty() != null ? shipmentList.get(i).getQty() : 0;
-					
-					if (Float.compare(currentStock, shipQty) < 0) {
+					Double shipQty = shipmentList.get(i).getQty() != null ? shipmentList.get(i).getQty() : 0;
+
+					Float parsedShipQty = shipQty.floatValue();
+
+					if (Float.compare(currentStock, parsedShipQty) < 0) {
 						result.success = false;
 						result.message = "재고 수량이 부족합니다.";
 						return result; 

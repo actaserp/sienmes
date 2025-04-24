@@ -43,7 +43,7 @@ public class TradeStmtExcelController {
 		
 		// 저장할 데이터 셋팅
 		Map<String, Object> header = this.tradeStmtService.getTradeStmtHeaderInfo(head_id);
-		List<Map<String, Object>> items = this.tradeStmtService.getTradeStmtItemList(head_id);
+		List<Map<String, Object>> items = this.tradeStmtService.getTradeStmtItemList(head_id, 0);
 		
 		// 거래명세서 샘플 파일 설정
 		if (items.size() > 12) {
