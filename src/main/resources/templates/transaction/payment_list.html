@@ -47,19 +47,13 @@
 
                     <dl>
                         <dt>
-                            <label for="">
+                            <label for="depositType">
                                 입금형태
                             </label>
                         </dt>
                         <dd>
-                            <select id="" name="cboWorkcenter">
-                                <option value="00">예 금</option>
-                                <option value="01">현 금</option>
-                                <option value="02">어 음</option>
-                                <option value="03">CMS</option>
-                                <option value="04">지 로</option>
-                                <option value="05">선수금</option>
-                                <option value="06">기 타</option>
+                            <select id="depositType" name="depositType">
+
                             </select>
                         </dd>
                     </dl>
@@ -301,13 +295,6 @@
                             // year_qty_sum: getSum('year_qty_sum'),
                             // year_money_sum: getSum('year_money_sum'),
                         };
-                    });
-
-                    AjaxUtil.fillSelectOptions($('#cboMatType'), 'system_code', 'all', false, 'mat_type', 'product,semi');
-                    AjaxUtil.fillSelectOptions($('#cboMatGroup'), 'material_group', 'all', false, $('#cboMatType').val());
-                    AjaxUtil.fillSelectOptions($('#cboWorkcenter'), 'workcenter', 'choose', false);
-                    $('#cboMatType').change(function (e) {
-                        AjaxUtil.fillSelectOptions($('#cboMatGroup'), 'material_group', 'all', false, $('#cboMatType').val());
                     });
                 }
 
@@ -643,6 +630,7 @@
                     pop.searchDataBind();
                 });
 
+                AjaxUtil.fillSelectOptions($('#depositType'), 'system_code', 'all', false, 'deposit_type');
                 page.searchMainData();
 
             })
