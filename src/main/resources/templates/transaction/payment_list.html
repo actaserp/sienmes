@@ -225,6 +225,8 @@
 
     <th:block layout:fragment="scripts">
         <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
+        <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+        <th:block th:replace="/common/popup_account :: popup_account" />
         <script type="text/javascript">
 
             class production_require {
@@ -501,76 +503,12 @@
                     page.searchMainData();
                 });
 
-                // 엑셀 다운로드
-                $('#btnExcel').on('click', function () {
-                    page.exportExcel();
-                });
-
-                // 계획수정
-                $('#btnPlanSave').click(function (e) {
-                    let items = page.grid.selectedItems;
-                    let result = null;
-                    let action = 'update';
-                    if (!items.length) {
-                        Alert.alert('', "항목을 선택해주세요.");
-                        return false;
-                    }
-                    if (items.length > 0) {
-                        let data = {'jr_pk': items[0].id};
-                        let url = '/api/production/prod_order_a/detail';
-                        result = AjaxUtil.getSyncData(url, data);
-                    }
-                    page.showPopUp(result.data, action);
-                });
-
-                // 삭제
-                $('#btnPlanDel').click(function (e) {
-                    let items = page.grid.selectedItems;
-                    if (items.length > 0) {
-                        if (items[0].state != "ordered") {
-                            Alert.alert('', "지시상태만 삭제할 수 있습니다.")
-                            return;
-                        }
-                        Alert.confirm('', "삭제하시겠습니까?",
-                            function () {
-                                let id = items[0].id;
-                                page.deleteOrder(id);
-                            }
-                        );
-                    } else if (items.length < 1) {
-                        Alert.alert('', "지시목록를 선택해 주세요.")
-                    }
-
-                });
-
-                // 지시등록
-                $('#btnPlanInput').on('click', function () {
-
-                    let data = {
-                        'id': '',
-                        'shift_name': '',
-                        'shift_code': '',
-                        'mat_name': '',
-                        'order_qty': '',
-                        'unit_name': '',
-                        'workcenter_name': '',
-                        'equip_name': '',
-                        'description': '',
-                        'production_date': today,
-                    }
-                    let action = 'new';
-
-
-                    page.showPopUp(data, action);
-                });
-
-
                 if (userinfo.group_code == 'admin') {
                     $('#btnGridSetting').css('visibility', 'visible');
                 }
 
                 // 거래처 focus시 거래처 검색 모달
-                $('#paycomp').focus(function () {
+                $('#company').focus(function () {
                     let pop = new PopMatComponent();
                     pop.material_type = 'product,sangpum';
                     pop.show(function (item) {
@@ -579,14 +517,14 @@
                     pop.searchDataBind();
                 });
 
-                // 계좌명 focus시 계좌명 검색 모달
-                $('#actNm').focus(function () {
-                    let pop = new PopMatComponent();
-                    pop.material_type = 'product,sangpum';
-                    pop.show(function (item) {
-                        console.log('$btnProductSearch', item);
-                    });
-                    pop.searchDataBind();
+                //계좌 팝업
+                $('#accountNum').focus(function () {
+                    let poppage = new PopAccountComponent();
+                    let searchcallback = function (items) {
+                        console.log('btnAccountName items : ', items);
+                        // document.getElementById('btnAccountName').value = items.compname;
+                    };
+                    poppage.show(searchcallback);
                 });
 
                 AjaxUtil.fillSelectOptions($('#depositType'), 'system_code', 'all', false, 'deposit_type');
