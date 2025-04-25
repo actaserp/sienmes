@@ -197,7 +197,7 @@
                             <span style='color: tomato; margin-left : 5px'>* 최대3개월</span>
                         </li>
                         <li class="right_align rpt" style="margin: 10px 0px; margin-left: auto;">
-                            <a class="btn btn-excell" title="등록" id="btnAddNew">
+                            <a class="btn btn-excell" title="등록" id="AccountCollection">
                                 <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
                                 계좌내역수집
                             </a>
@@ -352,7 +352,7 @@
 
         class TransactionInput {
             constructor() {
-                this.baseUrl = '/api/shipment/shipment_stmt';
+                this.url = '/api/transaction/input';
                 this.grid1 = null;
                 this.grid2 = null;
                 this.setting_grid = null;
@@ -523,20 +523,40 @@
                     selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
                     isReadOnly: false,
                     columns: [
-                        {binding: 'JumunNumber', header: '은행연동', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '금융기관', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '금융기관명', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '관리코드', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '계좌번호', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '계좌명칭', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '은행아이디', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '은행계정비밃번호', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '결제비밃번호', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '계좌유형', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '생년월일', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'popyn', header: '은행연동', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'bank', header: '금융기관', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'bankname', header: '금융기관명', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'managementnum', header: '관리코드', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'accountnumber', header: '계좌번호', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'accountname', header: '계좌명칭', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'onlinebankid', header: '온라인뱅크아이디', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'onlinebankpw', header: '은행계정비밀번호', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'paymentpw', header: '결제비밀번호', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'accounttype', header: '계좌유형', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'birth', header: '생년월일', width: '*', align: 'center', isReadOnly: true},
                     ],
                     itemsSource: this.viewData3
                 })
+                this.setting_grid.loadedRows.addHandler(() => {
+                    setTimeout(() => {
+                        this.setting_grid.select(-1, -1); // 선택 상태 초기화
+                    }, 0); // 비동기로 처리하여 초기 선택 해제
+                });
+                let isInitialLoad = true; // 초기 상태 플래그
+
+                this.setting_grid.selectionChanged.addHandler((s, e) => {
+                    if (isInitialLoad) {
+                        isInitialLoad = false; // 초기 로드 이후 플래그 해제
+                        this.setting_grid.select(-1, -1); // 선택 상태 해제
+                        return;
+                    }
+
+                    let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
+                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
+                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
+
+                    }
+                });
 
                 this.tab1Grid = new wijmo.grid.FlexGrid('#tab1Grid', {
                     autoGenerateColumns: false,
@@ -553,9 +573,9 @@
                     ],
                     itemsSource: this.viewData4
                 })
-
+                _this.searchRegisterAccount();
                 $('#anchor').click();
-                $('#transactionFrDate').val(getFirstDayOfThreeMonthsAgo());
+                $('#transactionFrDate').val(getNowDateMinus7());
                 $('#transactionToDate').val(getNowDate());
 
                 $('#btn-search-close').click(function(e){
@@ -566,7 +586,10 @@
                     _this.submitRegistBankAccount();
                 })
 
-
+                //계좌내역수집 클릭
+                $('#AccountCollection').click(function(){
+                    _this.AccountListCollection();
+                })
 
                 //계좌유형 선택값에 따라 변경
                 $('#accountType').on('change', function(){
@@ -598,6 +621,54 @@
                     $toggle.attr('src', isPassword ? '/images/icon/btn-hidden.svg' : '/images/icon/btn-show.svg');
                 })
             }
+
+
+            AccountListCollection(){
+                let _this = this;
+                const frdate = $('#transactionFrDate').val();
+                const todate = $('#transactionToDate').val();
+                if(!calculateDay(frdate, todate)){
+                    Alert.alert('', '최대 3개월치만 가능합니다.')
+                    return;
+                }
+
+                let SelecteItem = this.setting_grid.selectedItems;
+                if(SelecteItem.length < 1){
+                    Alert.alert('', '선택된 계좌가 없습니다.');
+                    return;
+                }
+
+                console.log('sleect', SelecteItem);
+
+                const formData = {
+                    frdate : frdate,
+                    todate : todate,
+                    accountnumber : SelecteItem[0].accountnumber,
+                    managementnum : SelecteItem[0].managementnum
+                }
+
+                let fnSuccess = function(res){
+                    Alert.alert('', res.message);
+                }
+                AjaxUtil.postAsyncData('/EasyFinBankService/requestJob', formData, fnSuccess);
+
+            }
+
+            searchRegisterAccount(){
+                let _this = this;
+
+                let param = {
+
+                }
+                let result = AjaxUtil.getSyncData(_this.url + "/registerAccount", param);
+
+                if(result.data != null){
+                    _this.viewData3.sourceCollection = result.data;
+                    console.log('list', result.data);
+                }
+
+            }
+
 
             submitRegistBankAccount(){
                 let form = FormUtil.extractForm($('#EasyFinBankAccountForm'));
