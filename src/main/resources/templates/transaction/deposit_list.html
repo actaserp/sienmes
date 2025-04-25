@@ -37,6 +37,7 @@
             <dd>
               <div class="srch-box">
                 <input type="text" id="btnAccountName" name="btnAccountName" placeholder="클릭해서 검색하세요.">
+                <input type="hidden" id="cboBankId">
               </div>
             </dd>
           </dl>
@@ -55,13 +56,13 @@
           </dl>
           <dl>
             <dt>
-              <label for="txtMatName">
+              <label for="txtDescription">
                 적요
               </label>
             </dt>
             <dd>
               <div class="srch-box">
-                <input class="form-control2" type="text" id="txtMatName" name="txtMatName"/>
+                <input class="form-control2" type="text" id="txtDescription" name="txtDescription"/>
               </div>
             </dd>
           </dl>
@@ -134,15 +135,15 @@
             }
           },
           columns: [
-            {binding: 'BaljuPrice', header: '일자', width: 100, align: 'right'},
-            {binding: 'BaljuVat', header: '코드', width: 100, align: 'right'},
-            {binding: 'BaljuTotalPrice', header: '거래처명', width: 200, align: 'right'},
-            {binding: 'StateName', header: '금액', width: 80, align: 'center'},
-            {binding: 'SujuQty2', header: '입급형태', width: 100, align: 'right'},
-            {binding: 'SujuQty3', header: '은행', width: 100, align: 'right'},
-            {binding: 'ShipmentStateName', header: '계좌', width: 200, align: 'center'},
-            {binding: 'DueDate', header: '거래구분', width: 120, align: 'center'},
-            {binding: 'Description', header: '적요', width: 250}
+            {binding: 'trdate', header: '일자', width: 100, align: 'right'},
+            {binding: 'accin', header: '코드', width: 100, align: 'right'},
+            {binding: 'CompanyName', header: '거래처명', width: 200, align: 'right'},
+            {binding: 'iotype', header: '금액', width: 80, align: 'center'},
+            {binding: 'deposit_type', header: '입급형태', width: 100, align: 'right'},
+            {binding: 'banknm', header: '은행', width: 100, align: 'right'},
+            {binding: 'accnum', header: '계좌', width: 200, align: 'center'},
+            {binding: 'tradenm', header: '거래구분', width: 120, align: 'center'},
+            {binding: 'remark1', header: '적요', width: 250}
           ],
           itemsSource: this.viewData, // 데이터를 설정할 배열
         });
@@ -192,16 +193,15 @@
 
       searchMainData() {
         let _this = this;
-        let url = ''
+        let url = '/api/transaction/DepositList/read'
 
-        let nowDate = CommonUtil.getYYYYMMDD();
-        let dueDate = CommonUtil.getYYYYMMDD(10);
 
         let data = {
-          nowDate,
-          dueDate,
-          'cboYear': $("#cboYear").val(),
-          'cboCompany': $("#cboCompanyHidden").val()
+          'srchStartDt' : $("#srchStartDt").val(),
+          'srchEndDt' : $("#srchEndDt").val(),
+          'cboDepositType' : $('#cboDepositType').val(),  //입금형태
+          'cboCompany': $("#cboCompanyHidden").val(),
+          'txtDescription' : $("#txtDescription").val()
         }
         let fnsuccess = function (result) {
           if (result != null) {
@@ -217,7 +217,6 @@
 
       page = new DepositListPage();
 
-      AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '', 'sale');
       AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);
       AjaxUtil.fillSelectOptions($('#cboDepositType'), 'system_code', 'all', false, 'deposit_type', '');
 
@@ -259,7 +258,8 @@
         let poppage = new PopAccountComponent();
         let searchcallback = function (items) {
           console.log('btnAccountName items : ', items);
-          // document.getElementById('btnAccountName').value = items.compname;
+          document.getElementById('btnAccountName').value = items.accountName;
+          document.getElementById('cboBankId').value = items.bankId;
         };
         poppage.show(searchcallback);
       });

@@ -382,7 +382,10 @@ public class PopupController {
 						ta.bankid as "bankId",
 						ta.accnum as "accountNumber",
 						ta.accname as "accountName",
-						ta.popsort as popsort
+						CASE 
+								 WHEN ta.popsort = '1' THEN '개인'
+								 WHEN ta.popsort = '0' THEN '법인'
+						 END AS "accountType"
 						from tb_account ta
 						left join tb_xbank tx on ta.bankid = tx.bankid
 						where 1 =1
