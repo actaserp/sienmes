@@ -4,6 +4,9 @@
         .button115px{
             width: 115px;
         }
+        .wp100per {
+            width: 100% !important;
+        }
     </style>
 </head>
 <th:block layout:fragment="content">
@@ -156,7 +159,7 @@
 
     <script type="text/x-tmpl" id="settingTemplate">
         <div class="content_wrap popup">
-    <form id="searchForm2" autocomplete="off">
+
     <section class="section">
         <div class="" style="display : block; margin-bottom : 10px;">
             <div class="title-box">
@@ -206,7 +209,7 @@
 
             <section class="tab-item" id="tabs_second" style="border-top-left-radius: 0; padding-top: 15px;">
                 <div>
-
+                            <form id="EasyFinBankAccountForm" autocomplete="off">
                             <table class="write-table"
                                    style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                                 <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
@@ -214,19 +217,23 @@
                                 <tbody>
                                 <tr>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="factory_id"><span class="eq">*</span>팝빌아이디</label>
+                                        <label for="factory_id">팝빌아이디</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select id="factory_id" name="factory_id"
-                                                style="width: 100%;"></select>
+                                        <input type='text' class='wp100per' id='PopBillId' name='PopBillId' />
                                     </td>
 
                                     <th style="width: 7%; padding: 5px; border: 1px solid #ddd; text-align: center;">
-                                        <label for="code"><span class="eq">*</span>팝빌PW</label>
+                                        <label for="code">팝빌PW</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="text" style="width: 100%;" id="code"
-                                               name="code">
+                                        <div class="pw-wrapper" style="position: relative; width: 100%;">
+                                            <input type="password" class="wp100per pw-input" name="PopBillPw" />
+                                            <img class="pw-toggle"
+                                                 src="/images/icon/btn-show.svg"
+                                                 alt="비밀번호 보기"
+                                                 style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; cursor: pointer;" />
+                                        </div>
                                     </td>
                                     <th>
                                         <button class='button115px' type='button'>가입여부확인</button>
@@ -241,19 +248,20 @@
                                         <label for="Process_id"><span class="eq">*</span>은행명</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select style="width: 100%;" id="Process_id"
-                                                name="Process_id"></select>
+                                        <select id='BankName' class='wp100per' name='BankName'>
+                                            <option value='0004'>국민</option>
+                                            <option value='0081'>하나</option>
+                                        </select>
                                     </td>
 
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="process_storehouse_id">계좌번호</label>
+                                        <label for="process_storehouse_id"><span class="eq">*</span>계좌번호</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select id="process_storehouse_id" name="process_storehouse_id"
-                                                style="width: 100%;"></select>
+                                        <input type='text'  id='AccountNumber' maxlength='20' name='AccountNumber' class='wp100per'/>
                                     </td>
                                      <th>
-                                        <button class='button115px' type='button'>계좌등록</button>
+                                        <button class='button115px' type='button' id='registerAccount'>계좌등록</button>
                                         <button class='button115px' type='button'>계좌정보수정</button>
                                     </th>
                                     <td>
@@ -265,40 +273,53 @@
                                         <label for="Process_id"><span class="eq">*</span>은행아이디</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select style="width: 100%;" id="Process_id"
-                                                name="Process_id"></select>
+                                        <input type='text' class='wp100per' id='BankId' name='BankId'   />
                                     </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                         <label for="Process_id"><span class="eq">*</span>온라인계정비번</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select style="width: 100%;" id="Process_id"
-                                                name="Process_id"></select>
+                                        <div class="pw-wrapper" style="position: relative; width: 100%;">
+                                            <input type="password" class="wp100per pw-input" id="BankPw" name="BankPw" />
+                                            <img class="pw-toggle"
+                                                 src="/images/icon/btn-show.svg"
+                                                 alt="비밀번호 보기"
+                                                 style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                                                        width: 20px; height: 20px; cursor: pointer;" />
+                                        </div>
                                     </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                         <label for="Process_id"><span class="eq">*</span>결제비번</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select style="width: 100%;" id="Process_id"
-                                                name="Process_id"></select>
+                                        <div class="pw-wrapper" style="position: relative; width: 100%; margin-top: 10px;">
+                                            <input type="password" class="wp100per pw-input" maxlength='4' id="PaymentPw" name="PaymentPw" />
+                                            <img class="pw-toggle"
+                                                 src="/images/icon/btn-show.svg"
+                                                 alt="비밀번호 보기"
+                                                 style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                                                        width: 20px; height: 20px; cursor: pointer;" />
+                                        </div>
                                     </td>
 
                                 </tr>
-                                <tr>
+                                <tr id="identityRow">
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                         <label for="Process_id"><span class="eq">*</span>계좌유형</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select style="width: 100%;" id="Process_id"
-                                                name="Process_id"></select>
+                                        <select style="width: 100%;" id="accountType"
+                                                name="accountType">
+                                               <option value='개인'>개인</option>
+                                               <option value='법인'>법인</option>
+                                        </select>
                                     </td>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="Process_id"><span class="eq">*</span>생년월일</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select style="width: 100%;" id="Process_id"
-                                                name="Process_id"></select>
-                                    </td>
+                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;" id="identityLabelCell">
+                                            <label for="birth"><span class="eq">*</span><span id="identityLabelText">생년월일</span></label>
+                                        </th>
+                                        <td style="width: 15%; padding: 5px; border: 1px solid #ddd;" id="identityInputCell">
+                                            <input type='text' placeholder = 'YYMMDD' id='birth' class='wp100per' name='identityNumber' />
+                                        </td>
                                     <th>
                                     </th>
                                     <td>
@@ -306,12 +327,12 @@
                                 </tr>
                                 </tbody>
                             </table>
-
+                            </form>
                     </div>
             </section>
         </div>
     </div>
-    </form>
+
         <!--
         <div class="popup-button">
             <button type="button" class="btn-popup" id="btnCompSelect" ><span data-commonCd="출하목록반영">출하목록반영</span></button>
@@ -328,7 +349,8 @@
     <th:block th:replace="/shipment/trade_stmt/trade_stmt_tmpl :: printTemplate"></th:block>
     <script type="text/javascript">
 
-        class ShipmentOrderPage {
+
+        class TransactionInput {
             constructor() {
                 this.baseUrl = '/api/shipment/shipment_stmt';
                 this.grid1 = null;
@@ -539,6 +561,96 @@
                 $('#btn-search-close').click(function(e){
                     modalContainer.close();
                 })
+
+                $('#registerAccount').click(function(e){
+                    _this.submitRegistBankAccount();
+                })
+
+
+
+                //계좌유형 선택값에 따라 변경
+                $('#accountType').on('change', function(){
+                    const selectedType = $(this).val();
+                    const $input = $('#identityInputCell input');
+
+                    if(selectedType === '법인'){
+                        $('#identityLabelText').text('사업자번호');
+
+                        $input.attr('id', 'corpnum');
+                        $input.attr('name', 'identityNumber');
+                        $input.attr('placeholder', '123-45-67890')
+                    }else{
+                        $('#identityLabelText').text('생년월일');
+
+                        $input.attr('id', 'birth');
+                        $input.attr('name', 'identityNumber');
+                        $input.attr('placeholder', 'YYMMDD')
+                    }
+                });
+
+                //비밀번호 보이게
+                $(document).on('click', '.pw-toggle', function(){
+                    const $toggle = $(this);
+                    const $input = $toggle.siblings('.pw-input');
+                    const isPassword = $input.attr('type') === 'password';
+
+                    $input.attr('type', isPassword ? 'text' : 'password');
+                    $toggle.attr('src', isPassword ? '/images/icon/btn-hidden.svg' : '/images/icon/btn-show.svg');
+                })
+            }
+
+            submitRegistBankAccount(){
+                let form = FormUtil.extractForm($('#EasyFinBankAccountForm'));
+                console.log('aaaa', form);
+
+                const requiredFields = {
+                    AccountNumber: '계좌번호를 기입해주세요.',
+                    BankName: '은행명을 기입해주세요.',
+                    PaymentPw: '결제비번을 기입해주세요.',
+                    accountType: '계좌유형을 기입해주세요.',
+                };
+
+
+                //유효성 검사
+                for (const key in requiredFields) {
+                    const value = form[key];
+
+                    if (!value || value.trim() === ''){
+                        Alert.alert('', requiredFields[key]);
+                        return;
+                    }
+
+                    if(value === '개인'){
+                        let val = $('#birth').val().trim();
+                        if(val === ''){
+                            Alert.alert('', '생년월일을 기입해주세요');
+                            return;
+                        }
+                        const birthRegex = /^\d{6}$/;
+                        if(!birthRegex.test(val)){
+                            Alert.alert('', '생년월일은 YYMMDD 형식의 6자리 숫자여야 합니다.');
+                            return;
+                        }
+                    }else if(value === '법인'){
+                        let val = $('#corpnum').val().trim();
+
+                        if (val === '') {
+                            Alert.alert('', '사업자번호를 기입해주세요');
+                            return;
+                        }
+
+                        const corpNumRegex = /^\d{10}$/;
+                        if (!corpNumRegex.test(val)) {
+                            Alert.alert('', '사업자번호는 숫자 10자리여야 합니다');
+                            return;
+                        }
+                    }
+                }
+
+                let fnSuccess = function (res) {
+                    Alert.alert('', res.message);
+                }
+                AjaxUtil.postAsyncData('/EasyFinBankService/registBankAccount', form, fnSuccess);
             }
 
 
@@ -550,11 +662,10 @@
 
 
         $(document).ready(function (e) {
-            page = new ShipmentOrderPage();
+            page = new TransactionInput();
 
 
 
-            page.searchMain();
         })
     </script>
 
