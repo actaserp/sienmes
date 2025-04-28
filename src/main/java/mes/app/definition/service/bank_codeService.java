@@ -27,8 +27,8 @@ public class bank_codeService {
             SELECT bankid AS id,
                    "banknm" AS name,
                    "remark" AS remark,
-                   "bankpopcd" AS bankPopCd,
-                   "banksubcd" AS bankSubCd
+                   "bankpopcd" AS bankpopcd,
+                   "banksubcd" AS banksubcd
             FROM tb_xbank
             WHERE useyn = '1'
         """;

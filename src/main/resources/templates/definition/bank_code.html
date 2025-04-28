@@ -70,7 +70,7 @@
                                 <label for="bankPopCd">팝빌기관코드</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <select id="bankPopCd" name="bankPopCd" style="width: 100%;">
+                                <select id="bankpopcd" name="bankpopcd" style="width: 100%;">
                                     <option value="">No</option>
                                     <option value="Y">Yes</option>
                                 </select>
@@ -79,7 +79,7 @@
 
                         <tr>
                             <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="remark"><span class="eq">*</span>설명</label>
+                                <label for="remark"><span class="eq"></span>설명</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <input type="text" id="remark" name="remark" style="width: 100%;">
@@ -88,7 +88,7 @@
                                 <label for="bankSubCd">참가기관코드</label>
                             </th>
                             <td style="padding: 5px; border: 1px solid #ddd;" colspan="3">
-                                <select id="bankSubCd" name="bankSubCd" style="width: 100%;">
+                                <select id="banksubcd" name="banksubcd" style="width: 100%;">
                                     <option value="">No</option>
                                     <option value="Y">Yes</option>
                                 </select>
@@ -115,8 +115,8 @@
             {binding: 'id', header: 'id', width: 200, align: 'center', visible: false},
             {binding: 'name', header: '은행명', width: 200, align: 'center'},
             {binding: 'remark', header: '설명', width: 250, align: 'center'},
-            {binding: 'bankPopCd', header: '팝빌기관코드', width: 200, align: 'center'},
-            {binding: 'bankSubCd', header: '참가기관코드', width: 200, align: 'center'},
+            {binding: 'bankpopcd', header: '팝빌기관코드', width: 200, align: 'center'},
+            {binding: 'banksubcd', header: '참가기관코드', width: 200, align: 'center'},
             {binding: '', header: '', width: '*', align: 'center'}
         ];
 
@@ -160,12 +160,11 @@
 
             theGrid.hostElement.addEventListener('dblclick', function (e) {
                 let selectedItem = theGrid.selectedItems[0];
-
                 document.getElementById('id').value = selectedItem.id;
                 document.getElementById('name').value = selectedItem.name;
                 document.getElementById('remark').value = selectedItem.remark;
-                document.getElementById('bankPopCd').value = selectedItem.bankPopCd;
-                document.getElementById('bankSubCd').value = selectedItem.bankSubCd;
+                document.getElementById('bankpopcd').value = selectedItem.bankpopcd;
+                document.getElementById('banksubcd').value = selectedItem.banksubcd;
 
                 setButtonState();
             });
