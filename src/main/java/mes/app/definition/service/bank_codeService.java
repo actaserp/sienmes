@@ -24,41 +24,41 @@ public class bank_codeService {
         param.addValue("name", name);
 
         String sql = """
-            SELECT id,
-                   "Name" AS name,
-                   "Description" AS description,
-                   "PopbillAgencyCode" AS popbill_agency_code,
-                   "EvalAgencyCode" AS eval_agency_code
-            FROM bank_code
-            WHERE 1=1
+            SELECT bankid AS id,
+                   "banknm" AS name,
+                   "remark" AS remark,
+                   "bankpopcd" AS bankPopCd,
+                   "banksubcd" AS bankSubCd
+            FROM tb_xbank
+            WHERE useyn = '1'
         """;
 
         if (StringUtils.isNotEmpty(name)) {
-            sql += " AND upper(\"Name\") LIKE concat('%%', upper(:name), '%%') ";
+            sql += " AND upper(\"banknm\") LIKE concat('%%', upper(:name), '%%') ";
         }
 
-        sql += " ORDER BY id";
+        sql += " ORDER BY bankid";
 
         return this.sqlRunner.getRows(sql, param);
     }
 
-    /**
-     * 상세 조회 (사용 안 할 수도 있음)
+    /*
+      상세 조회 (사용 안 할 수도 있음)
      */
-    public Map<String, Object> getBankCodeDetail(int id) {
-        MapSqlParameterSource param = new MapSqlParameterSource();
-        param.addValue("id", id);
-
-        String sql = """
-            SELECT id,
-                   "Name" AS name,
-                   "Description" AS description,
-                   "PopbillAgencyCode" AS popbill_agency_code,
-                   "EvalAgencyCode" AS eval_agency_code
-            FROM bank_code
-            WHERE id = :id
-        """;
-
-        return this.sqlRunner.getRow(sql, param);
-    }
+//    public Map<String, Object> getBankCodeDetail(int id) {
+//        MapSqlParameterSource param = new MapSqlParameterSource();
+//        param.addValue("id", id);
+//
+//        String sql = """
+//            SELECT id,
+//                   "Name" AS name,
+//                   "Description" AS description,
+//                   "PopbillAgencyCode" AS popbill_agency_code,
+//                   "EvalAgencyCode" AS eval_agency_code
+//            FROM bank_code
+//            WHERE id = :id
+//        """;
+//
+//        return this.sqlRunner.getRow(sql, param);
+//    }
 }

@@ -28,8 +28,8 @@ public class bank_codeController {
 
     // 은행코드 목록 조회
     @GetMapping("/read")
-    public AjaxResult getBankCodeList(@RequestParam(value = "unit_name", required = false) String unitName) {
-        List<Map<String, Object>> items = this.bankCodeService.getBankCodeList(unitName);
+    public AjaxResult getBankCodeList(@RequestParam(value = "bank_name", required = false) String bankName) {
+        List<Map<String, Object>> items = this.bankCodeService.getBankCodeList(bankName);
         AjaxResult result = new AjaxResult();
         result.data = items;
         return result;
@@ -50,8 +50,8 @@ public class bank_codeController {
             @RequestParam(value = "id", required = false) Integer id,
             @RequestParam("name") String name, // BANKNM
             @RequestParam("remark") String remark, // 비고(REMARK)
-            @RequestParam(value = "bank_pop_cd", required = false) String bankPopCd, // BANKPOPCD
-            @RequestParam(value = "bank_sub_cd", required = false) String bankSubCd, // BANKSUBCD
+            @RequestParam(value = "bankPopCd", required = false) String bankPopCd, // BANKPOPCD
+            @RequestParam(value = "bankSubCd", required = false) String bankSubCd, // BANKSUBCD
             Authentication auth
     ) {
         AjaxResult result = new AjaxResult();
