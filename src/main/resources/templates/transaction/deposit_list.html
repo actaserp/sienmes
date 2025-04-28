@@ -24,7 +24,7 @@
               거래처
             </dt>
             <dd>
-              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="업체검색버튼으로 검색하세요.">
+              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="클릭해서 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
             </dd>
           </dl>
@@ -62,7 +62,7 @@
             </dt>
             <dd>
               <div class="srch-box">
-                <input class="form-control2" type="text" id="txtDescription" name="txtDescription"/>
+                <input class="form-control2" type="text" id="txtDescription" name="txtDescription" placeholder="적요"/>
               </div>
             </dd>
           </dl>
@@ -136,14 +136,14 @@
           },
           columns: [
             {binding: 'trdate', header: '일자', width: 100, align: 'right'},
-            {binding: 'accin', header: '코드', width: 100, align: 'right'},
+            {binding: 'ioid', header: '코드', width: 100, align: 'right',visible: false },
             {binding: 'CompanyName', header: '거래처명', width: 200, align: 'right'},
-            {binding: 'iotype', header: '금액', width: 80, align: 'center'},
+            {binding: 'accin', header: '금액', width: 200, align: 'center'},
             {binding: 'deposit_type', header: '입급형태', width: 100, align: 'right'},
-            {binding: 'banknm', header: '은행', width: 100, align: 'right'},
+            {binding: 'banknm', header: '은행', width: 150, align: 'center'},
             {binding: 'accnum', header: '계좌', width: 200, align: 'center'},
             {binding: 'tradenm', header: '거래구분', width: 120, align: 'center'},
-            {binding: 'remark1', header: '적요', width: 250}
+            {binding: 'remark3', header: '적요', width: 250}
           ],
           itemsSource: this.viewData, // 데이터를 설정할 배열
         });
@@ -166,25 +166,56 @@
         // ✅ Footer 합계 값 설정 (수동)
         this.grid.loadedRows.addHandler(() => {
           const rows = this.grid.rows;
-          const footerMonth = this.grid.columnFooters.rows[0];
-          const footerTotal = this.grid.columnFooters.rows[1];
 
-          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+          const monthGroups = {};
 
-          footerMonth.dataItem = {
-            BaljuTotalPrice: '월 계'
-            // year_qty_sum: getSum('year_qty_sum'),
-            // year_money_sum: getSum('year_money_sum'),
-          };
-          footerTotal.dataItem = {
-            BaljuTotalPrice: '합 계'
-            // year_qty_sum: getSum('year_qty_sum'),
-            // year_money_sum: getSum('year_money_sum'),
-          };
+          // 1. 월별로 데이터 모으기
+          rows.forEach(r => {
+            const dateStr = r.dataItem.trdate;
+            if (!dateStr) return;
+
+            const date = new Date(dateStr);
+            const year = ('' + date.getFullYear()).substring(2, 4);
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const period = `${year}-${month}`; // ex: 25-03
+
+            if (!monthGroups[period]) {
+              monthGroups[period] = [];
+            }
+            monthGroups[period].push(r);
+          });
+
+          // 2. 기존 Footer Row 초기화 (중복 방지)
+          this.grid.columnFooters.rows.clear();
+
+          // 3. 월별로 Footer Row 추가
+          const periods = Object.keys(monthGroups).sort(); // 월 정렬
+          periods.forEach((period, idx) => {
+            const group = monthGroups[period];
+            const sumAccin = group.map(r => +r.dataItem.accin || 0).reduce((a, b) => a + b, 0);
+
+            const footerRow = new wijmo.grid.Row(); // Footer Row 하나 추가
+            this.grid.columnFooters.rows.push(footerRow);
+
+            // Footer 데이터 세팅
+            this.grid.columnFooters.setCellData(idx, 0, `${period} 월계`);
+            this.grid.columnFooters.setCellData(idx, 3, sumAccin); // accin 합계 (4번째 컬럼 accin에 표시)
+          });
+
+          // 4. 마지막에 전체 합계 추가 (선택)
+          const totalAccin = rows.map(r => +r.dataItem.accin || 0).reduce((a, b) => a + b, 0);
+
+          const footerRowTotal = new wijmo.grid.Row();
+          this.grid.columnFooters.rows.push(footerRowTotal);
+
+          const totalRowIndex = this.grid.columnFooters.rows.length - 1;
+          this.grid.columnFooters.setCellData(totalRowIndex, 0, '합 계');
+          this.grid.columnFooters.setCellData(totalRowIndex, 3, totalAccin);
         });
 
+
         // 엔터키 검색
-        $('#keyword').on('keypress', function (e) {
+        $('#txtDescription').on('keypress', function (e) {
           if (e.keyCode === 13) {
             _this.searchMainData();
           }
@@ -195,17 +226,18 @@
         let _this = this;
         let url = '/api/transaction/DepositList/read'
 
-
         let data = {
           'srchStartDt' : $("#srchStartDt").val(),
           'srchEndDt' : $("#srchEndDt").val(),
+          'AccountName' : $("#cboBankId").val(), //계좌명(accid로 검색)
           'cboDepositType' : $('#cboDepositType').val(),  //입금형태
           'cboCompany': $("#cboCompanyHidden").val(),
           'txtDescription' : $("#txtDescription").val()
         }
         let fnsuccess = function (result) {
           if (result != null) {
-            _this.viewData.sourceCollection = result.data;
+            _this.viewData = new wijmo.collections.CollectionView(result.data); // 새로 생성
+            _this.grid.itemsSource = _this.viewData; // 다시 바인딩
           }
         };
         AjaxUtil.getAsyncData(url, data, fnsuccess);
@@ -220,19 +252,24 @@
       AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);
       AjaxUtil.fillSelectOptions($('#cboDepositType'), 'system_code', 'all', false, 'deposit_type', '');
 
-      $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
-      $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
+      let today = new Date();
+      let monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+      $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(monthStart));
+      $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(today));
 
       page.searchMainData();
 
       // 검색
       $('#btnSearch').click(function (e) {
-        if ($('#cboCompanyHidden').val() === '' && $('#cboCompany').val() !== '') {
-          Alert.alert('', '업체명은 업체검색 버튼을 통해서 \n 검색해주세요');
-          return;
+        if ($('#cboCompany').val() !== '' && $('#cboCompanyHidden').val() === '') {
+           // 업체명 텍스트는 썼지만, 업체 검색 버튼 안 눌렀을 때
+            page.searchMainData();
+        } else {
+          page.searchMainData();
         }
-        page.searchMainData();
       });
+
 
       $('#btnGridSetting').click(function (e) {
         let _this = this;
@@ -244,32 +281,39 @@
         let poppage = new PopCompComponent();
         let $poppage = $(poppage);
         let searchcallback = function (items) {
-          // $content.find('#cboCompany').val(items.id);
-          // $content.find('#CompanyName').val(items.compname);
-          console.log('items : ',items);
+         //console.log('items : ',items);
           document.getElementById('btnCompanySearch').value = items.compname;
           document.getElementById('cboCompanyHidden').value = items.id;
         };
 
         poppage.show(searchcallback);
       });
-      //계좌 팝업
-      $('#btnAccountName').click(function () {
-        let poppage = new PopAccountComponent();
-        let searchcallback = function (items) {
-          console.log('btnAccountName items : ', items);
-          document.getElementById('btnAccountName').value = items.accountName;
-          document.getElementById('cboBankId').value = items.bankId;
-        };
-        poppage.show(searchcallback);
-      });
 
-      $('#cboCompany').on('input', function () {
+      $('#btnCompanySearch').on('input', function () {
         const val = $(this).val();
         if (val === '') {
           $('#cboCompanyHidden').val('');
         }
       });
+
+      //계좌 팝업
+      $('#btnAccountName').click(function () {
+        let poppage = new PopAccountComponent();
+        let searchcallback = function (items) {
+          //console.log('btnAccountName items : ', items);
+          document.getElementById('btnAccountName').value = items.accountName;
+          document.getElementById('cboBankId').value = items.accid;
+        };
+        poppage.show(searchcallback);
+      });
+
+      $('#btnAccountName').on('input', function () {
+        const val = $(this).val();
+        if (val === '') {
+          $('#cboBankId').val('');
+        }
+      });
+
       // .btn-clear 클릭 후 input 이벤트 강제 발생
       $(document).on('click', '.btn-clear', function () {
         const $input = $(this).siblings('input[type="text"]');
