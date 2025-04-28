@@ -375,20 +375,21 @@ public class PopupController {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("bankName", bankName);
 		paramMap.addValue("accountNumber", accountNumber);
-		//log.info("계좌 팝업 요청 들어옴, bankName:{}, accountNumber:{}", bankName, accountNumber);
+//		log.info("계좌 팝업 요청 들어옴, bankName:{}, accountNumber:{}", bankName, accountNumber);
 		String sql = """
-					select
-						tx.banknm as "BankName",
-						ta.bankid as "bankId",
-						ta.accnum as "accountNumber",
-						ta.accname as "accountName",
-						CASE 
-								 WHEN ta.popsort = '1' THEN '개인'
-								 WHEN ta.popsort = '0' THEN '법인'
-						 END AS "accountType"
-						from tb_account ta
-						left join tb_xbank tx on ta.bankid = tx.bankid
-						where 1 =1
+				select
+				ta.accid,
+				tx.banknm as "BankName",
+				ta.bankid as "bankId",
+				ta.accnum as "accountNumber",
+				ta.accname as "accountName",
+				CASE 
+					WHEN ta.popsort = '1' THEN '개인'
+					WHEN ta.popsort = '0' THEN '법인'
+					END AS "accountType"
+				from tb_account ta
+				left join tb_xbank tx on ta.bankid = tx.bankid
+				where 1 =1
 				""";
 
 		if (bankName != null && !bankName.isEmpty()) {

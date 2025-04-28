@@ -17,35 +17,53 @@ public class DepositListService {
   @Autowired
   SqlRunner sqlRunner;
 
-  public List<Map<String, Object>> getDepositList(String depositType, Timestamp start, Timestamp end, String company, String txtDescription) {
+  public List<Map<String, Object>> getDepositList(String depositType, Timestamp start, Timestamp end, String company, String txtDescription, String AccountName) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
 
     paramMap.addValue("start", start);
     paramMap.addValue("end", end);
     paramMap.addValue("company", company);
     paramMap.addValue("txtDescription", txtDescription);
+    paramMap.addValue("AccountName", AccountName);
 
     String sql = """
         select
-           tb.trdate ,
+           tb.ioid,
+           TO_CHAR(tb.trdate::DATE, 'YYYY-MM-DD') AS trdate,
            tb.accin ,
-           c."Name" as "CompanyName" ,
+           tb.remark1 as "CompanyName" ,
+            -- c."Name" as "CompanyName" ,
            tb.iotype ,
            sc."Value" as deposit_type,
            sc."Code" as deposit_code,
            tb.banknm ,
            tb.accnum ,
            tt.tradenm ,
-           tb.remark1
+           tb.remark3
            from tb_banktransit tb
            left join company c on c.id = tb.cltcd
            left join  sys_code sc on sc."Code" = tb.iotype
            left join tb_trade tt on tb.trid = tt.trid
-           where 1=1 
+           WHERE tb.ioflag = '0'
+           and TO_DATE(tb.trdate, 'YYYYMMDD') between :start and :end
         """;
     if (depositType != null && !depositType.isEmpty()) {
       sql += " AND sc.\"Value\" ILIKE :depositType ";
       paramMap.addValue("depositType", "%" + depositType + "%");
+    }
+
+    if (company != null && !company.isEmpty()) {
+      sql += " AND tb.cltcd = :company ";
+      paramMap.addValue("company", "%" + company + "%");
+    }
+
+    if (txtDescription != null && !txtDescription.isEmpty()) {
+      sql += " AND tb.remark3 ILIKE :txtDescription ";
+      paramMap.addValue("txtDescription", "%" + txtDescription + "%");
+    }
+    if (AccountName != null && !AccountName.isEmpty()) {
+      sql += " AND tb.accid = :AccountName ";
+      paramMap.addValue("AccountName", AccountName );
     }
 
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);

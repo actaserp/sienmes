@@ -14,7 +14,7 @@
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <input type="text" id="BankName" name="BankName" style="width:160px;"/>
+                                <input type="text" id="BankName" name="BankName" style="width:160px;" placeholder="은행명"/>
                             </div>
                         </dd>
                     </dl>
@@ -26,7 +26,7 @@
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <input class="form-control2" type="text" id="account_number" name="account_number" style="width:160px;"/>
+                                <input class="form-control2" type="text" id="account_number" name="account_number" style="width:240px;" placeholder="특수문자 제외하고 입력해주세요."/>
                             </div>
                         </dd>
                     </dl>
@@ -134,6 +134,19 @@
         this.$BankName = $content.find('#BankName');
         this.$accountNumber = $content.find('#account_number');
         this.$btnCompSelect = $content.find('#btnCompSelect');
+
+        // 엔터키로 검색
+        this.$BankName.on('keypress', function (e) {
+          if (e.keyCode === 13) {
+            _this.searchDataBind();
+          }
+        });
+
+        this.$accountNumber.on('keypress', function (e) {
+          if (e.keyCode === 13) {
+            _this.searchDataBind();
+          }
+        });
 
 
         this.$btnCompSearch.click(function (e) {
