@@ -24,8 +24,6 @@ public class DepositListService {
     paramMap.addValue("end", end);
     paramMap.addValue("company", company);
     paramMap.addValue("txtDescription", txtDescription);
-    paramMap.addValue("AccountName", AccountName);
-
     String sql = """
         select
            tb.ioid,
@@ -36,7 +34,7 @@ public class DepositListService {
            tb.iotype ,
            sc."Value" as deposit_type,
            sc."Code" as deposit_code,
-           tb.banknm ,
+           ta.accname  as banknm ,
            tb.accnum ,
            tt.tradenm ,
            tb.remark3
@@ -44,6 +42,7 @@ public class DepositListService {
            left join company c on c.id = tb.cltcd
            left join  sys_code sc on sc."Code" = tb.iotype
            left join tb_trade tt on tb.trid = tt.trid
+           left join tb_account ta on tb.accid = ta.accid
            WHERE tb.ioflag = '0'
            and TO_DATE(tb.trdate, 'YYYYMMDD') between :start and :end
         """;
@@ -63,7 +62,7 @@ public class DepositListService {
     }
     if (AccountName != null && !AccountName.isEmpty()) {
       sql += " AND tb.accid = :AccountName ";
-      paramMap.addValue("AccountName", AccountName );
+      paramMap.addValue("AccountName", Integer.parseInt(AccountName));
     }
 
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);

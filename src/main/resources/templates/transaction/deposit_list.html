@@ -166,28 +166,53 @@
         // ✅ Footer 합계 값 설정 (수동)
         this.grid.loadedRows.addHandler(() => {
           const rows = this.grid.rows;
-          const footerMonth = this.grid.columnFooters.rows[0];
-          const footerTotal = this.grid.columnFooters.rows[1];
 
-          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
-          // ✅ 1. 제일 첫 번째 데이터 기준으로 연-월 추출
-          let period = '';
-          if (rows.length > 0 && rows[0].dataItem.trdate) {
-            const date = new Date(rows[0].dataItem.trdate);
-            const year = ('' + date.getFullYear()).substring(2, 4); // '2025' → '25'
-            const month = ('0' + (date.getMonth() + 1)).slice(-2); // 월은 0부터 시작이라 +1 필요
-            period = `${year}-${month}`; // '25-04' 형식
-          }
-          footerMonth.dataItem = {
-            trdate: period,
-            CompanyName: '월 계',
-            accin: getSum('accin'),
-          };
-          footerTotal.dataItem = {
-            CompanyName: '합 계',
-            accin: getSum('accin'),
-          };
+          const monthGroups = {};
+
+          // 1. 월별로 데이터 모으기
+          rows.forEach(r => {
+            const dateStr = r.dataItem.trdate;
+            if (!dateStr) return;
+
+            const date = new Date(dateStr);
+            const year = ('' + date.getFullYear()).substring(2, 4);
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const period = `${year}-${month}`; // ex: 25-03
+
+            if (!monthGroups[period]) {
+              monthGroups[period] = [];
+            }
+            monthGroups[period].push(r);
+          });
+
+          // 2. 기존 Footer Row 초기화 (중복 방지)
+          this.grid.columnFooters.rows.clear();
+
+          // 3. 월별로 Footer Row 추가
+          const periods = Object.keys(monthGroups).sort(); // 월 정렬
+          periods.forEach((period, idx) => {
+            const group = monthGroups[period];
+            const sumAccin = group.map(r => +r.dataItem.accin || 0).reduce((a, b) => a + b, 0);
+
+            const footerRow = new wijmo.grid.Row(); // Footer Row 하나 추가
+            this.grid.columnFooters.rows.push(footerRow);
+
+            // Footer 데이터 세팅
+            this.grid.columnFooters.setCellData(idx, 0, `${period} 월계`);
+            this.grid.columnFooters.setCellData(idx, 3, sumAccin); // accin 합계 (4번째 컬럼 accin에 표시)
+          });
+
+          // 4. 마지막에 전체 합계 추가 (선택)
+          const totalAccin = rows.map(r => +r.dataItem.accin || 0).reduce((a, b) => a + b, 0);
+
+          const footerRowTotal = new wijmo.grid.Row();
+          this.grid.columnFooters.rows.push(footerRowTotal);
+
+          const totalRowIndex = this.grid.columnFooters.rows.length - 1;
+          this.grid.columnFooters.setCellData(totalRowIndex, 0, '합 계');
+          this.grid.columnFooters.setCellData(totalRowIndex, 3, totalAccin);
         });
+
 
         // 엔터키 검색
         $('#txtDescription').on('keypress', function (e) {
