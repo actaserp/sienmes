@@ -1,21 +1,23 @@
 package mes.app.popup;
 
 
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-
+import lombok.extern.slf4j.Slf4j;
+import mes.domain.model.AjaxResult;
+import mes.domain.services.DateUtil;
+import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import mes.domain.model.AjaxResult;
-import mes.domain.services.DateUtil;
-import mes.domain.services.SqlRunner;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/popup")
 public class PopupController {
@@ -364,16 +366,45 @@ public class PopupController {
 		result.data = this.sqlRunner.getRows(sql, paramMap);
 
 		return result;
-
-
 	}
 
-	@RequestMapping("/search_Account")
-	public AjaxResult getSearchAccount(){
-			AjaxResult result = new AjaxResult();
+	@GetMapping("/search_Account")
+	public AjaxResult getSearchAccount(@RequestParam(value = "BankName")String bankName,
+																		 @RequestParam(value = "accountNumber") String accountNumber) {
+		AjaxResult result = new AjaxResult();
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("bankName", bankName);
+		paramMap.addValue("accountNumber", accountNumber);
+		//log.info("계좌 팝업 요청 들어옴, bankName:{}, accountNumber:{}", bankName, accountNumber);
+		String sql = """
+					select
+						tx.banknm as "BankName",
+						ta.bankid as "bankId",
+						ta.accnum as "accountNumber",
+						ta.accname as "accountName",
+						CASE 
+								 WHEN ta.popsort = '1' THEN '개인'
+								 WHEN ta.popsort = '0' THEN '법인'
+						 END AS "accountType"
+						from tb_account ta
+						left join tb_xbank tx on ta.bankid = tx.bankid
+						where 1 =1
+				""";
 
-			return result;
+		if (bankName != null && !bankName.isEmpty()) {
+			sql += " AND banknm ILIKE :bankName ";
+			paramMap.addValue("bankName", "%" + bankName + "%");
+		}
+
+		if (accountNumber != null && !accountNumber.isEmpty()) {
+			sql += " AND ta.accnum ILIKE :accountNumber ";
+			paramMap.addValue("accountNumber", "%" + accountNumber + "%");
+		}
+
+//		log.info(" 최종 SQL: {}", sql);
+//		log.info(" 파라미터: {}", paramMap.getValues());
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+		return result;
 	}
 
-	
-}
+	}

@@ -67,8 +67,8 @@
       <div class="tab-wrap">
 
         <ul class="tab-links">
-          <li><a href="#tabs_count" style="border-radius: 6px 0 0 0;">부적합량</a></li>
-          <li><a href="#tabs_portion">부적합률</a></li>
+          <li><a href="#tabs_count" style="border-radius: 6px 0 0 0;">집계</a></li>
+          <li><a href="#tabs_portion" style="border-radius: 0 6px 0 0;">상세</a></li>
         </ul>
         <div>
           <section class="tab-item" id="tabs_count" style="border-top-left-radius: 0;">
@@ -225,12 +225,12 @@
               }
             },
             columns: [
-              {binding: 'workorder_number', header: '코드', width: 130, align: 'center'},
-              {binding: 'production_date', header: '거래처명', width: 120, align: 'center'},
-              {binding: 'shift_name', header: '전잔액', width: 120, align: 'center'},
-              {binding: 'mat_type_name', header: '매출액', width: 100, align: 'center'},
-              {binding: 'mat_grp_name', header: '입금액', width: 450, align: 'left'},
-              {binding: 'mat_code', header: '잔액', width: 110, align: 'left'}
+              {binding: 'cltcd', header: '코드', width: 130, align: 'center'},
+              {binding: 'Name', header: '거래처명', width: 320, align: 'center'},
+              {binding: 'yearamt', header: '전잔액', width: 220, align: 'center'},
+              {binding: 'totalamt', header: '매입액', width: 200, align: 'center'},
+              {binding: 'accout', header: '지급액', width: 200, align: 'left'},
+              {binding: 'nowamt', header: '잔액', width: 210, align: 'left'}
             ]
           });
 
@@ -242,7 +242,7 @@
             if (items.length === 0) {
               return false;
             }
-            $('#btnPlanSave').trigger('click');
+            searchDetailData();
           });
 
 
@@ -258,17 +258,17 @@
               }
             },
             columns: [
-              {binding: 'workorder_number', header: '거래처명', width: 130, align: 'center'},
-              {binding: 'production_date', header: '일자', width: 120, align: 'center'},
-              {binding: 'shift_name', header: '구분', width: 120, align: 'center'},
-              {binding: 'mat_type_name', header: '금액', width: 100, align: 'center'},
-              {binding: 'mat_grp_name', header: '잔액', width: 150, align: 'left'},
+              {binding: 'Name', header: '거래처명', width: 130, align: 'center'},
+              {binding: 'todate', header: '일자', width: 120, align: 'center'},
+              {binding: 'iotype', header: '구분', width: 120, align: 'center'},
+              {binding: 'total', header: '금액', width: 100, align: 'center'},
+              {binding: 'nowamt', header: '잔액', width: 150, align: 'left'},
               {binding: 'mat_code', header: '품목', width: 110, align: 'left'},
               {binding: 'mat_name', header: '입금형태', width: 200, align: 'left'},
               {binding: 'unit_name', header: '은행/어음번호', width: 130, align: 'center'},
               {binding: 'order_qty', header: '계좌/만기일', width: 120, align: 'right'},
               {binding: 'workcenter_name', header: '거래구분', width: 180, align: 'left'},
-              {binding: 'equip_name', header: '적요', width: 450, align: 'left'}
+              {binding: 'remark1', header: '적요', width: 450, align: 'left'}
             ]
           });
 
@@ -321,65 +321,36 @@
           let _this = this;
           let date_from = $('#date_from').val();
           let date_to = $('#date_to').val();
-          let cboMatType = $('#cboMatType').val();
-          let cboMatGroup = $('#cboMatGroup').val();
-          let keyword = $('#keyword').val();
-          let cboWorkcenter = $('#cboWorkcenter').val();
-          let url = '/api/production/prod_order_a'
+          let companyCode = $('#companyCode').val();
+          let url = '/api/transaction/accounts_payable_list'
           let data = {
             'date_from': date_from,
             'date_to': date_to,
-            'workcenter_pk': cboWorkcenter,
-            'mat_type': cboMatType,
-            'mat_grp_pk': cboMatGroup,
-            'keyword': keyword,
+            'companyCode': companyCode
           };
-          // let result = AjaxUtil.getSyncData(url + "/read", data);
-          // if (result.data != null) {
-          //     _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
-          // }
-          _this.grid.itemsSource = new wijmo.collections.CollectionView([{},{},{}]);
-          _this.grid2.itemsSource = new wijmo.collections.CollectionView([{},{},{}]);
-
+          let result = AjaxUtil.getSyncData(url + "/read", data);
+          if (result.data != null) {
+            console.log('accounts_payable_list data : ', result.data)
+            _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
+          }
         }
 
-        //저장
-        saveOrder($form, modalContainer) {
+        searchDetailData(){
           let _this = this;
-          let url = '/api/production/prod_order_a/save';
-          let data = FormUtil.extractForm($form);
-
-          let fnSuccess = function (res) {
-            if (!res.success) {
-              modalContainer.close();
-              Alert.alert('', res.message);
-            } else {
-              modalContainer.close();
-              Notify.success('저장되었습니다.');
-              _this.searchMainData();
-            }
+          let date_from = $('#date_from').val();
+          let date_to = $('#date_to').val();
+          let companyCode = $('#companyCode').val();
+          let url = '/api/transaction/accounts_payable_list'
+          let data = {
+            'date_from': date_from,
+            'date_to': date_to,
+            'companyCode': companyCode
+          };
+          let result = AjaxUtil.getSyncData(url + "/detail", data);
+          if (result.data != null) {
+            console.log('accounts_payable_list data : ', result.data)
+            _this.grid2.itemsSource = new wijmo.collections.CollectionView(result.data);
           }
-
-          AjaxUtil.postAsyncData(url, data, fnSuccess);
-        }
-
-        //삭제
-        deleteOrder(id) {
-          let _this = this;
-          let url = '/api/production/prod_order_a/delete';
-          let data = {'id': id}
-
-          let fnSuccess = function (res) {
-            if (res.success) {
-              Notify.success('삭제되었습니다.');
-              _this.searchMainData();
-            } else {
-              Notify.success('삭제에 실패하였습니다.');
-              _this.searchMainData();
-            }
-          }
-
-          AjaxUtil.postAsyncData(url, data, fnSuccess);
         }
 
         showPopUp(data, action) {
@@ -560,6 +531,7 @@
         // 검색
         $('#btnMainSearch').click(function (e) {
           page.searchMainData();
+          page.searchDetailData();
         });
 
         // 엑셀 다운로드

@@ -49,3 +49,17 @@ function getFirstDayOfThreeMonthsAgo(){
     };
     return formattedDate(threeMonthsAgo);
 }
+
+// 3달이상이면 false
+function calculateDay(fd, td){
+
+
+
+    const frdate = new Date(fd);
+    const todate = new Date(td);
+
+    const diffInMs = Math.abs(frdate - todate);
+    const diffDays = diffInMs / (1000 * 60 * 60 * 24);
+
+    return diffDays <= 90;
+}

@@ -59,9 +59,9 @@
             </div>
             <div class="tab-wrap">
                 <ul class="tab-links">
-                    <li><a href="#tabs_sales" style="border-radius: 6px 0 0 0;">매출</a></li>
-                    <li><a href="#tabs_deposit">입금</a></li>
-                    <li><a href="#tabs_accounts_receivable" style="border-radius: 0 6px 0 0;">미수금</a></li>
+                    <li><a href="#tabs_sales" style="border-radius: 6px 0 0 0;">매입</a></li>
+                    <li><a href="#tabs_deposit">지급</a></li>
+                    <li><a href="#tabs_accounts_receivable" style="border-radius: 0 6px 0 0;">미지급</a></li>
                 </ul>
                 <div>
                     <section class="tab-item" id="tabs_sales" style="border-top-left-radius: 0;">
@@ -117,7 +117,7 @@
                 });
 
                 this.grid = new wijmo.grid.FlexGrid('#theGrid', {
-                    frozenColumns: 7,
+                    frozenColumns: 4,
                     frozenRows: 0,
                     allowSorting: wijmo.grid.AllowSorting.MultiColumn,
                     selectionMode: wijmo.grid.SelectionMode.Row,
@@ -136,6 +136,7 @@
                         { binding: 'mat_name', header: '부서', width: 130, align: 'left', allowMerging: true },
                         { binding: 'unit_name', header: '담당자', width: 100, align: 'center', allowSorting: false },
                         ...monthColumns,  // ✅ 여기에서 월별 컬럼을 삽입
+                        { binding: 'total', header: '합계', width: 200, align: 'center', allowSorting: false }
                     ],
                     itemsSource: this.viewData,
                 });
@@ -181,7 +182,7 @@
 
 
                 this.grid3 = new wijmo.grid.FlexGrid('#deposit-grid', {
-                    frozenColumns: 7,
+                    frozenColumns: 4,
                     frozenRows: 0,
                     allowSorting: wijmo.grid.AllowSorting.MultiColumn,
                     selectionMode: wijmo.grid.SelectionMode.Row,
@@ -200,6 +201,7 @@
                         { binding: 'mat_name', header: '부서', width: 130, align: 'left', allowMerging: true },
                         { binding: 'unit_name', header: '담당자', width: 100, align: 'center', allowSorting: false },
                         ...monthColumns,
+                        { binding: 'total', header: '합계', width: 200, align: 'center', allowSorting: false },
                     ],
                     itemsSource: this.viewData,
                 });
@@ -242,7 +244,7 @@
 
 
                 this.grid4 = new wijmo.grid.FlexGrid('#accounts_receivable-grid', {
-                    frozenColumns: 7,
+                    frozenColumns: 4,
                     frozenRows: 0,
                     allowSorting: wijmo.grid.AllowSorting.MultiColumn,
                     selectionMode: wijmo.grid.SelectionMode.Row,
@@ -261,6 +263,7 @@
                         { binding: 'mat_name', header: '부서', width: 130, align: 'left', allowMerging: true },
                         { binding: 'unit_name', header: '담당자', width: 100, align: 'center', allowSorting: false },
                         ...monthColumns,
+                        { binding: 'total', header: '합계', width: 200, align: 'center', allowSorting: false }
                     ],
                     itemsSource: this.viewData,
                 });
@@ -297,17 +300,13 @@
                         }
                     }
                 };
-
                 new FlexGridContextMenu(this.grid4);
                 this.grid4.downloadFileName = '미수금 내역';
-
-
-
             }
 
             searchMainData() {
                 let _this = this;
-                let url = ''
+                let url = '/api/transaction/monthly_purchase_list/read'
                 let data = {
                     'cboYear': $("#cboYear").val(),
                     'cboCompany': $("#cboCompanyHidden").val()
