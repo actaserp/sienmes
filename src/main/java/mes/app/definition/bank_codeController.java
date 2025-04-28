@@ -44,6 +44,25 @@ public class bank_codeController {
         return result;
     }
 
+    // 팝빌기관코드 리스트 조회 (flag = '0')
+    @GetMapping("/popbill_list")
+    public AjaxResult getPopbillList() {
+        List<Map<String, Object>> items = this.bankCodeService.getPopbillList();
+        AjaxResult result = new AjaxResult();
+        System.out.println("🚀 popbill_list 조회 결과: " + items.size() + "건"); // 🔥 추가
+        result.data = items;
+        return result;
+    }
+
+    // 참가기관코드 리스트 조회 (flag = '1')
+    @GetMapping("/participant_list")
+    public AjaxResult getParticipantList() {
+        List<Map<String, Object>> items = this.bankCodeService.getParticipantList();
+        AjaxResult result = new AjaxResult();
+        result.data = items;
+        return result;
+    }
+
     // 은행코드 저장 (등록/수정)
     @PostMapping("/save")
     public AjaxResult saveBankCode(

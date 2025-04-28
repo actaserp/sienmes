@@ -42,6 +42,27 @@ public class bank_codeService {
         return this.sqlRunner.getRows(sql, param);
     }
 
+    public List<Map<String, Object>> getPopbillList() {
+        String sql = """
+        SELECT refcd AS code, refbanknm AS name
+        FROM tb_xbanksub
+        WHERE flag = '0'
+        ORDER BY refcd
+    """;
+        return this.sqlRunner.getRows(sql, new MapSqlParameterSource());
+    }
+
+    public List<Map<String, Object>> getParticipantList() {
+        String sql = """
+        SELECT refcd AS code, refbanknm AS name
+        FROM tb_xbanksub
+        WHERE flag = '1'
+        ORDER BY refcd
+    """;
+        return this.sqlRunner.getRows(sql, new MapSqlParameterSource());
+    }
+
+
     /*
       상세 조회 (사용 안 할 수도 있음)
      */

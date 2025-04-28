@@ -67,12 +67,10 @@
                                 <input type="text" id="name" name="name" style="width: 100%;">
                             </td>
                             <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="bankPopCd">팝빌기관코드</label>
+                                <label for="bankpopcd">팝빌기관코드</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                 <select id="bankpopcd" name="bankpopcd" style="width: 100%;">
-                                    <option value="">No</option>
-                                    <option value="Y">Yes</option>
                                 </select>
                             </td>
                         </tr>
@@ -85,12 +83,10 @@
                                 <input type="text" id="remark" name="remark" style="width: 100%;">
                             </td>
                             <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="bankSubCd">참가기관코드</label>
+                                <label for="banksubcd">참가기관코드</label>
                             </th>
                             <td style="padding: 5px; border: 1px solid #ddd;" colspan="3">
                                 <select id="banksubcd" name="banksubcd" style="width: 100%;">
-                                    <option value="">No</option>
-                                    <option value="Y">Yes</option>
                                 </select>
                             </td>
                         </tr>
@@ -128,7 +124,6 @@
 
         function searchMainData() {
             let bank_name = $('#txtUnit').val();
-
             $.ajax({
                 url: '/api/definition/bank_code/read',
                 type: 'GET',
@@ -232,6 +227,43 @@
             $('#btnNew').click(function() { $('#bankCodeForm')[0].reset(); });
             $('#btnSave').click(saveUnit);
             $('#btnDel').click(deleteUnit);
+
+            // 팝빌기관코드 select 채우기
+            $.ajax({
+                url: '/api/definition/bank_code/popbill_list',
+                type: 'GET',
+                success: function (result) {
+                    if (result.success && result.data.length > 0) {
+                        let options = '<option value="">선택</option>';
+                        result.data.forEach(function(item) {
+                            options += '<option value="' + item.code + '">' + item.name + ' (' + item.code + ')</option>';
+                        });
+                        $('#bankpopcd').html(options);
+                    }
+                },
+                error: function() {
+                    console.error('팝빌기관코드 조회 실패');
+                }
+            });
+
+            // 참가기관코드 select 채우기
+            $.ajax({
+                url: '/api/definition/bank_code/participant_list',
+                type: 'GET',
+                success: function (result) {
+                    if (result.success && result.data.length > 0) {
+                        let options = '<option value="">선택</option>';
+                        result.data.forEach(function(item) {
+                            options += '<option value="' + item.code + '">' + item.name + ' (' + item.code + ')</option>';
+                        });
+                        $('#banksubcd').html(options);
+                    }
+                },
+                error: function() {
+                    console.error('참가기관코드 조회 실패');
+                }
+            });
+
         });
     </script>
 </th:block>
