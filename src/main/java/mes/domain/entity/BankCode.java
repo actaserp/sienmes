@@ -12,27 +12,35 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="BankCode")
+@Table(name = "tb_xbank")  //  테이블 이름 주의
 @NoArgsConstructor
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 public class BankCode extends AbstractAuditModel {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "BANKID") // 은행 ID
+    private Integer id;
 
-    @Column(name = "\"Name\"")
-    String name;
+    @Column(name = "BANKNM")
+    private String name;  // 은행명
 
+    @Column(name = "BANKPOPCD")
+    private String bankPopCd;  // 팝빌관리코드
 
-    @Column(name = "\"Description\"")
-    String description;
+    @Column(name = "BANKPOPNM")
+    private String bankPopNm;  // 팝빌관리코드명
 
+    @Column(name = "BANKSUBCD")
+    private String bankSubCd;  // 기관관리코드
 
-    @Column(name = "\"popbillAgencyCode\"")
-    String popbillAgencyCode;
+    @Column(name = "BANKSUBNM")
+    private String bankSubNm;  // 기관관리코드명
 
-    @Column(name = "\"EvalAgencyCode\"")
-    String evalAgencyCode;
+    @Column(name = "REMARK")
+    private String remark;  // 비고
+
+    @Column(name = "USEYN")
+    private String useYn;  // 사용여부
 }
