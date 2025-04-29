@@ -36,7 +36,8 @@
                             </dt>
                             <dd>
                                 <div class="srch-box">
-                                    <input type="text"  id="srchStartDt" name="srchStartDt"  />
+                                    <input type="text" placeholder="해당 칸을 클릭해주세요"  id="cboCompany" name="cboCompany"  readonly/>
+                                    <input type="hidden"  id="cboCompanyHidden" name="cboCompanyHidden"  />
                                 </div>
                             </dd>
                         </dl>
@@ -47,7 +48,10 @@
                                 </label>
                             </dt>
                             <dd>
-                                <select class="form-control2" id="cboCompany" name="cboCompany" >
+                                <select class="form-control2" id="tradetype" name="tradetype" >
+                                    <option value="">전체</option>
+                                    <option value="0">입금</option>
+                                    <option value="1">출금</option>
                                 </select>
                             </dd>
                         </dl>
@@ -58,7 +62,8 @@
                                 </label>
                             </dt>
                             <dd>
-                                <input type="text"  id="" name=""  />
+                                <input type="text" placeholder="해당 칸을 클릭해주세요"  id="accountName" name="accountName" readonly />
+                                <input type="hidden"  id="accountNameHidden" name="accountNameHidden" />
                             </dd>
                         </dl>
                         <dl>
@@ -69,9 +74,9 @@
                             </dt>
                             <dd>
                                 <div class="srch-box">
-                                    <input type="date" id="2" name=""  />
+                                    <input type="date" id="searchfrdate" name="searchfrdate"  />
                                     <span class="slow_sign">~</span>
-                                    <input type="date" id="33" name="" />
+                                    <input type="date" id="searchtodate" name="searchtodate" />
                                 </div>
                             </dd>
                         </dl>
@@ -115,7 +120,7 @@
                    <!-- <span class="right_align rpt" data-labelCd="출하 지시 목록">출하지시 목록</span>-->
                     <ul >
                         <li class="right_align rpt"  style="margin-right: 5px">
-                            <a class="btn btn-excell" title="등록" id="btnAddNew">
+                            <a class="btn btn-excell" title="등록" id="">
                                 <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
                                 저장
                             </a>
@@ -133,17 +138,15 @@
                             </a>
                         </li>
                         <li class="right_align rpt"  style="margin-right: 5px">
-                            <a class="btn btn-edit" title="수정" id="btnEdit">
+                            <a class="btn btn-edit" title="수정" id="btnAddNew">
                                 <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
                                 추가
                             </a>
                         </li>
                     </ul>
-                    <button type="button" class="btn-default y_write_auth" id="btnStatementIssue" data-labelCd="발행 처리">발행 처리</button>
-                    <button type="button" class="btn-default y_write_auth" id="btnStatementPrint" title="거래명세서 출력1"><i class="fas fa-print"></i></button>
                     <!--<button type="button" class="btn-default" id="btnStatementExcel" title="거래명세서 출력2"><i class="fas fa-print"></i></button>-->
                 </div>
-                <div id="theGrid" style="height: 350px;"></div>
+                <div id="theGrid_TransactionHistory" style="height: 350px;"></div>
             </div>
         </section>
 
@@ -151,7 +154,7 @@
             <div class="grid_box">
                 <div class="title_box">
                 </div>
-                <div id="theGrid2" style="height: 350px;"></div>
+                <div id="theGrid230" style="height: 350px;"></div>
             </div>
         </section>
     </div>
@@ -165,7 +168,7 @@
             <div class="title-box">
                     <ul >
                         <li class="right_align rpt"  style="margin: 10px 0px">
-                            <a class="btn btn-excell" title="등록" id="btnAddNew">
+                            <a class="btn btn-excell" title="등록" id="">
                                 <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
                                 저장
                             </a>
@@ -175,7 +178,7 @@
             </div>
 
         </div>
-        <div id="SettingGrid" style="height: 300px; display : block;"></div>
+        <div id="SettingGrid" style="height: 250px; display : block;"></div>
     </section>
     <div class="tab-wrap">
         <ul class="tab-links">
@@ -236,7 +239,7 @@
                                         </div>
                                     </td>
                                     <th>
-                                        <button class='button115px' type='button'>가입여부확인</button>
+                                        <button class='button115px' id='MemberShipCheck' type='button'>가입여부확인</button>
                                     </th>
                                     <td>
 
@@ -249,8 +252,7 @@
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <select id='BankName' class='wp100per' name='BankName'>
-                                            <option value='0004'>국민</option>
-                                            <option value='0081'>하나</option>
+
                                         </select>
                                     </td>
 
@@ -270,13 +272,13 @@
                                 </tr>
                                 <tr>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="Process_id"><span class="eq">*</span>은행아이디</label>
+                                        <label for="Process_id" id="BankIdInputLabel"><span class="eq" >*</span>인터넷뱅킹아이디</label>
                                     </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;" >
                                         <input type='text' class='wp100per' id='BankId' name='BankId'   />
                                     </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="Process_id"><span class="eq">*</span>온라인계정비번</label>
+                                        <label for="Process_id" id="BankPwInputLabel"><span class="eq" >*</span>온라인계정비번</label>
                                     </th>
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <div class="pw-wrapper" style="position: relative; width: 100%;">
@@ -342,10 +344,19 @@
 </div>
     </script>
 
+
+
+    <script type="text/x-tmpl" id="AddNewDataPopup">
+
+    </script>
+
+
 </th:block>
 
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <th:block th:replace="/common/popup_account :: popup_account" />
+    <th:block th:replace="/common/popup_company :: popup_company"></th:block>
     <th:block th:replace="/shipment/trade_stmt/trade_stmt_tmpl :: printTemplate"></th:block>
     <script type="text/javascript">
 
@@ -353,9 +364,10 @@
         class TransactionInput {
             constructor() {
                 this.url = '/api/transaction/input';
-                this.grid1 = null;
+                this.theGrid_TransactionHistory = null;
                 this.grid2 = null;
                 this.setting_grid = null;
+                this.theGrid_Company = null;
                 this.tab1Grid = null;
 
                 this.head_id = 0;
@@ -367,8 +379,10 @@
                 this.viewData2 = new wijmo.collections.CollectionView();
                 this.viewData3 = new wijmo.collections.CollectionView();
                 this.viewData4 = new wijmo.collections.CollectionView();
+                this.viewData5 = new wijmo.collections.CollectionView();
 
                 this.$btnSetting = $('#btnSetting');
+                this.$btnAddNew = $('#btnAddNew');
 
                 this.init();
 
@@ -377,7 +391,7 @@
             init() {
 
                 let _this = this;
-                this.grid1 = new wijmo.grid.FlexGrid('#theGrid', {
+                this.theGrid_TransactionHistory = new wijmo.grid.FlexGrid('#theGrid_TransactionHistory', {
                     autoGenerateColumns: false,
                     showMarquee: true,
                     allowSorting: 'MultiColumn',
@@ -385,17 +399,17 @@
                     isReadOnly: true,
                     columns: [
 
-                        { binding: 'company_name', header: '일자', width: '*', align: 'left' },
-                        { binding: 'order_date', header: '입금금액', width: '*', align: 'center' },
-                        { binding: 'total_qty',  header: ' 출금금액', width: '*', align: 'right'},
-                        { binding: 'total_price',header: ' 수수료', width: '*', align: 'right'},
-                        { binding: 'total_vat',  header: ' 적요', width: 150, align: 'right'},
-                        { binding: 'state_name', header: '코드', width: 150, align: 'center' },
-                        { binding: 'issue_yn',   header: '거래처명', width: 150, align: 'center' },
-                        { binding: 'stmt_number', header: '거래구분', width: 150, align: 'center' },
-                        { binding: 'issue_date', header: '은행', width: '*', align: 'center' },
-                        { binding: 'issue_date', header: '계좌', width: '*', align: 'center' },
-                        { binding: 'issue_date', header: '입금형태', width: '*', align: 'center' },
+                        { binding: 'trade_date', header: '일자', width: '*', align: 'center' },
+                        { binding: 'input_money', header: '입금금액', width: '*', format: 'n0', aggregate: 'Sum', align: 'right' },
+                        { binding: 'output_money',  header: ' 출금금액', width: '*', format: 'n0', aggregate: 'Sum', align: 'right'},
+                        { binding: 'commission',header: ' 수수료', width: '*', format: 'n0', align: 'right'},
+                        { binding: 'remark',  header: ' 적요', width: 150, align: 'right'},
+                        { binding: 'code', header: '코드', width: 150, align: 'center' },
+                        { binding: 'companyname',   header: '거래처명', width: 150, align: 'center' },
+                        { binding: 'trade_type', header: '거래구분', width: 150, align: 'center' },
+                        { binding: 'bankname', header: '은행', width: '*', align: 'center' },
+                        { binding: 'account', header: '계좌', width: 150, align: 'center' },
+                        { binding: 'iotype', header: '입금형태', width: 120, align: 'center' },
 
                     ],
                     itemsSource: this.viewData,
@@ -403,18 +417,37 @@
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center'; // 헤더 텍스트 가운데 정렬
                         }
-                    },
 
+                        if (e.panel === s.cells) {
+                            const col = s.columns[e.col];
+                            if (col.binding === 'input_money') {
+                                e.cell.style.color = 'dodgerblue';
+                                e.cell.style.fontWeight = 'bold';
+                            }
+                            if (col.binding === 'output_money') {
+                                e.cell.style.color = 'red';
+                                e.cell.style.fontWeight = 'bold';
+                            }
+                        }
+                    },
                 });
+                // 1. footer에 GroupRow 추가
+                this.theGrid_TransactionHistory.columnFooters.rows.push(new wijmo.grid.GroupRow());
+
+// 2. trade_date 컬럼 인덱스 찾기
+                const tradeDateColIndex = this.theGrid_TransactionHistory.columns.findIndex(c => c.binding === 'trade_date');
+
+// 3. 푸터에 'Σ' 찍기
+                this.theGrid_TransactionHistory.columnFooters.setCellData(0, tradeDateColIndex, '합계');
 
                 // 데이터 로드 후 초기 선택 상태 해제
-                this.grid1.loadedRows.addHandler(() => {
+                this.theGrid_TransactionHistory.loadedRows.addHandler(() => {
                     setTimeout(() => {
-                        this.grid1.select(-1, -1); // 선택 상태 초기화
+                        this.theGrid_TransactionHistory.select(-1, -1); // 선택 상태 초기화
                     }, 0); // 비동기로 처리하여 초기 선택 해제
                 });
                 // 선택 변경 이벤트
-                this.grid1.selectionChanged.addHandler((s, e) => {
+                this.theGrid_TransactionHistory.selectionChanged.addHandler((s, e) => {
                     // 첫 로드 시 선택 동작 방지
 
                     //처음엔 boolean으로 했는데 차라리 카운팅이 나은듯함.
@@ -428,27 +461,24 @@
                     }
 
                     // 유효한 행이 선택되었는지 확인
-                    let selectedRowIndex = this.grid1.selection.row;
+                    let selectedRowIndex = this.theGrid_TransactionHistory.selection.row;
                     if (selectedRowIndex >= 0) {
-                        let selectedRowData = this.grid1.rows[selectedRowIndex].dataItem;
+                        let selectedRowData = this.theGrid_TransactionHistory.rows[selectedRowIndex].dataItem;
 
                         // TODO: 비즈니스 로직
                         _this.head_id = selectedRowData.id;
                         _this.ship_state = selectedRowData.state;
                         _this.issue_yn = selectedRowData.issue_yn;
 
-                        _this.searchDetail(null, selectedRowData.company_id);
-
                         console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
                         console.log('선택된 행 데이터:', selectedRowData);
                     }
                 });
                 //this.loading = false;
-                new FlexGridContextMenu(this.grid1);
-                this.grid1.downloadFileName = '출하지시 목록';
-                let selector = new wijmo.grid.selector.Selector(this.grid1, {
+                new FlexGridContextMenu(this.theGrid_TransactionHistory);
+                this.theGrid_TransactionHistory.downloadFileName = '출하지시 목록';
+                let selector = new wijmo.grid.selector.Selector(this.theGrid_TransactionHistory, {
                     itemChecked: (e, ctx) => {
-
 
                     }
                 })
@@ -456,7 +486,7 @@
 
                 ////////////////////////////////////////////////////
 
-                this.grid2 = new wijmo.grid.FlexGrid('#theGrid2', {
+                this.grid2 = new wijmo.grid.FlexGrid('#theGrid230', {
                     autoGenerateColumns: false,
                     showMarquee: true,
                     allowSorting: 'MultiColumn',
@@ -504,8 +534,42 @@
                     let defaultData = {}; _this.showSettingForm(defaultData);
                 })
 
+                this.$btnAddNew.click(function(){
+                    let defaultData = {}; _this.showAddNewDataForm(defaultData);
+                })
+
 
             }
+
+            searchMainData(){
+                let _this = this;
+                let data = FormUtil.extractForm($('#searchForm'));
+
+                console.log('form', data);
+
+                let result = AjaxUtil.getSyncData(_this.url + '/history', data);
+
+                data['accountNameHidden'] = $('#accountNameHidden').val();
+
+                if(result.data != null){
+                    this.viewData.sourceCollection = result.data;
+                }
+            }
+
+            /*showAddNewDataForm(data){
+                let _this = this;
+                let content = tmpl('AddNewDataPopup');
+                let $content = $(content);
+
+                let modalContainer = new PopupDraggable('등록');
+                modalContainer.open({width: 1600, height: 650, $content});
+
+                //모달창 닫기  //data-modal-header-btn="close"
+                $('#btn-search-close').click(function(e){
+                    modalContainer.close();
+                });
+
+            }*/
 
             showSettingForm(data){
                 let _this = this;
@@ -513,7 +577,7 @@
                 let $content = $(content);
 
                 let modalContainer = new PopupDraggable('설정창');
-                modalContainer.open({width: 1600, height: 750, $content});
+                modalContainer.open({width: 1600, height: 650, $content});
 
 
                 this.setting_grid = new wijmo.grid.FlexGrid('#SettingGrid', {
@@ -523,6 +587,7 @@
                     selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
                     isReadOnly: false,
                     columns: [
+                        {binding: 'accountid', header: '계좌id', width: '*', align: 'center', isReadOnly: true, visible: false},
                         {binding: 'popyn', header: '은행연동', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'bank', header: '금융기관', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'bankname', header: '금융기관명', width: '*', align: 'center', isReadOnly: true},
@@ -565,15 +630,29 @@
                     selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
                     isReadOnly: false,
                     columns: [
-                        {binding: 'JumunNumber', header: '일자', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '입금금액', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '출금금액', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'trdate', header: '일자', width: '*', align: 'center', isReadOnly: true},
+                        { binding: 'accin', header: '입금금액', width: '*', align: 'right', format: 'n0', isReadOnly: true },
+                        { binding: 'accout', header: '출금금액', width: '*', align: 'right', format: 'n0', isReadOnly: true },
                         {binding: 'JumunNumber', header: '수수료', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '적요', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'remark1', header: '적요', width: '*', align: 'center', isReadOnly: true},
                     ],
-                    itemsSource: this.viewData4
+                    itemsSource: this.viewData4,
+                    formatItem: function (s, e) {
+                        if (e.panel === s.cells) {
+                            const col = s.columns[e.col];
+                            if (col.binding === 'accin') {
+                                e.cell.style.color = 'dodgerblue';
+                                e.cell.style.fontWeight = 'bold';
+                            }
+                            if (col.binding === 'accout') {
+                                e.cell.style.color = 'tomato';
+                                e.cell.style.fontWeight = 'bold';
+                            }
+                        }
+                    }
                 })
                 _this.searchRegisterAccount();
+
                 $('#anchor').click();
                 $('#transactionFrDate').val(getNowDateMinus7());
                 $('#transactionToDate').val(getNowDate());
@@ -589,6 +668,25 @@
                 //계좌내역수집 클릭
                 $('#AccountCollection').click(function(){
                     _this.AccountListCollection();
+                })
+
+                $('#MemberShipCheck').click(function(){
+                    _this.MemberShipCheck();
+                })
+
+                //은행 콤보박스 바인딩
+                AjaxUtil.fillSelectOptions($('#BankName'), 'bank', 'choose', false);
+
+                $('#BankName').on('change', function(){
+                    const selectedType = $(this).val();
+
+                    if(selectedType === '0031' || selectedType === '0088' || selectedType === '0048'){
+                        $('#BankIdInputLabel').text('조회전용아이디');
+                        $('#BankPwInputLabel').text('조회전용비밀번호');
+                    }else{
+                        $('#BankIdInputLabel').text('인터넷뱅킹아이디');
+                        $('#BankPwInputLabel').text('온라인계정비번');
+                    }
                 })
 
                 //계좌유형 선택값에 따라 변경
@@ -623,6 +721,26 @@
             }
 
 
+            MemberShipCheck(){
+                let _this = this;
+                let selectedItem = _this.setting_grid.selectedItems;
+
+                if(selectedItem.length < 1){
+                    Alert.alert('', '연동 확인할 계좌를 선택해주세요.');
+                    return;
+                }
+
+                //TODO: 테스트를 위해서 하드코딩함.
+                let param = {
+                    corpNum : "1778602466"
+                }
+
+                let result = AjaxUtil.getSyncData('/BaseService/checkIsMember', param);
+
+                Alert.alert('', result.message);
+
+            }
+
             AccountListCollection(){
                 let _this = this;
                 const frdate = $('#transactionFrDate').val();
@@ -644,11 +762,18 @@
                     frdate : frdate,
                     todate : todate,
                     accountnumber : SelecteItem[0].accountnumber,
-                    managementnum : SelecteItem[0].managementnum
+                    managementnum : SelecteItem[0].managementnum,
+                    accountid : SelecteItem[0].accountid
                 }
 
                 let fnSuccess = function(res){
-                    Alert.alert('', res.message);
+
+                    if(!res.success){
+                        Alert.alert('', res.message);
+                        return;
+                    }
+                    _this.viewData4.sourceCollection = res.data;
+
                 }
                 AjaxUtil.postAsyncData('/EasyFinBankService/requestJob', formData, fnSuccess);
 
@@ -735,8 +860,45 @@
         $(document).ready(function (e) {
             page = new TransactionInput();
 
+            $('#searchfrdate').val(getNowDateMinus7());
+            $('#searchtodate').val(getNowDate());
 
 
+
+            $('#accountName').click(function () {
+
+                let poppage = new PopAccountComponent();
+                let searchcallback = function (items) {
+                    console.log('btnAccountName items : ', items);
+
+                    document.getElementById('accountName').value = items.accountName;
+                    document.getElementById('accountNameHidden').value = items.accid;
+
+                };
+                poppage.show(searchcallback);
+
+            });
+
+            //검색버튼 클릭
+            $('#btnSearch').click(function (){
+                page.searchMainData();
+            })
+
+            $('#cboCompany').click(function(){
+                let poppage = new PopCompComponent();
+                let $poppage = $(poppage);
+                let searchcallback = function (items) {
+                    // $content.find('#cboCompany').val(items.id);
+                    // $content.find('#CompanyName').val(items.compname);
+                    console.log('items : ',items);
+                    document.getElementById('cboCompany').value = items.compname;
+                    document.getElementById('cboCompanyHidden').value = items.id;
+                };
+
+                poppage.show(searchcallback);
+            });
+
+            page.searchMainData();
         })
     </script>
 
