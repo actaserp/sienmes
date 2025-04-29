@@ -24,7 +24,7 @@
               거래처
             </dt>
             <dd>
-              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="클릭해서 검색하세요.">
+              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭해서 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
             </dd>
           </dl>
@@ -36,7 +36,7 @@
             </dt>
             <dd>
               <div class="srch-box">
-                <input type="text" id="btnAccountName" name="btnAccountName" placeholder="클릭해서 검색하세요.">
+                <input type="text" id="btnAccountName" name="btnAccountName" placeholder="해당 칸을 클릭해서 검색하세요.">
                 <input type="hidden" id="cboBankId">
               </div>
             </dd>
@@ -62,7 +62,19 @@
             </dt>
             <dd>
               <div class="srch-box">
-                <input class="form-control2" type="text" id="txtDescription" name="txtDescription" placeholder="적요"/>
+                <input class="form-control2" type="text" id="txtDescription" name="txtDescription" placeholder="적요" style="width:150px"/>
+              </div>
+            </dd>
+          </dl>
+          <dl>
+            <dt>
+              <label for="txtEumnum">
+                어음번호
+              </label>
+            </dt>
+            <dd>
+              <div class="srch-box">
+                <input class="form-control2" type="text" id="txtEumnum" name="txtEumnum" placeholder="어음번호" style="width:200px"/>
               </div>
             </dd>
           </dl>
@@ -133,89 +145,56 @@
             if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
               e.cell.style.textAlign = 'center';
             }
+            if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+              const row = sender.rows[e.row];
+              if (row instanceof wijmo.grid.GroupRow) {
+                const group = row.dataItem;
+                const sumAccin = wijmo.getAggregate(wijmo.Aggregate.Sum, group.items, 'accin');
+                e.cell.innerHTML = `<b>${group.name}</b> (월 계: ${sumAccin.toLocaleString()}원)`;
+                e.cell.colSpan = sender.columns.length;
+              }
+            }
           },
           columns: [
-            {binding: 'trdate', header: '일자', width: 100, align: 'right'},
+            {binding: 'trdate', header: '일자', width: 120, align: 'left'},
             {binding: 'ioid', header: '코드', width: 100, align: 'right',visible: false },
-            {binding: 'CompanyName', header: '거래처명', width: 200, align: 'right'},
-            {binding: 'accin', header: '금액', width: 200, align: 'center'},
+            {binding: 'CompanyName', header: '거래처명', width: 180, align: 'left'},
+            {binding: 'accin', header: '금액', width: 120, align: 'right'},
             {binding: 'deposit_type', header: '입급형태', width: 100, align: 'right'},
-            {binding: 'banknm', header: '은행', width: 150, align: 'center'},
-            {binding: 'accnum', header: '계좌', width: 200, align: 'center'},
+            {binding: 'banknm', header: '은행', width: 130, align: 'center'},
+            {binding: 'accnum', header: '계좌', width: 180, align: 'center'},
+            {binding: 'eumnum', header: '어음번호', width: 180, align: 'center'},
+            {binding: 'eumtodt', header: '만기일자', width: 120, align: 'center'},
             {binding: 'tradenm', header: '거래구분', width: 120, align: 'center'},
-            {binding: 'remark3', header: '적요', width: 250}
+            {binding: 'remark1', header: '적요', width: 150},
+            {binding: 'memo', header: '메모', width: 150}
           ],
           itemsSource: this.viewData, // 데이터를 설정할 배열
         });
 
         new FlexGridContextMenu(this.grid);
         this.grid.downloadFileName = '입금 현황';
-        this.grid.hostElement.addEventListener('dblclick', function (e) {
-          let items = _this.grid.selectedItems;
-          if (items.length === 0) {
-            return false;
-          }
-          _this.$btnEdit.trigger('click');
-        });
-        // ✅ Footer 패널 사용 설정
-        this.grid.columnFooters.rows.push(new wijmo.grid.Row());
-        this.grid.bottomLeftCells.setCellData(0, 0, '월 계');
-        this.grid.columnFooters.rows.push(new wijmo.grid.Row());
-        this.grid.bottomLeftCells.setCellData(0, 0, '합 계');
 
-        // ✅ Footer 합계 값 설정 (수동)
+        //Footer 패널 사용 설정
+        this.grid.columnFooters.rows.push(new wijmo.grid.Row());
+        this.grid.bottomLeftCells.setCellData(0, 0, '합계');
+
+        // Footer 합계 값 설정 (수동)
         this.grid.loadedRows.addHandler(() => {
           const rows = this.grid.rows;
+          const footer = this.grid.columnFooters.rows[0];
 
-          const monthGroups = {};
+          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
 
-          // 1. 월별로 데이터 모으기
-          rows.forEach(r => {
-            const dateStr = r.dataItem.trdate;
-            if (!dateStr) return;
-
-            const date = new Date(dateStr);
-            const year = ('' + date.getFullYear()).substring(2, 4);
-            const month = ('0' + (date.getMonth() + 1)).slice(-2);
-            const period = `${year}-${month}`; // ex: 25-03
-
-            if (!monthGroups[period]) {
-              monthGroups[period] = [];
-            }
-            monthGroups[period].push(r);
-          });
-
-          // 2. 기존 Footer Row 초기화 (중복 방지)
-          this.grid.columnFooters.rows.clear();
-
-          // 3. 월별로 Footer Row 추가
-          const periods = Object.keys(monthGroups).sort(); // 월 정렬
-          periods.forEach((period, idx) => {
-            const group = monthGroups[period];
-            const sumAccin = group.map(r => +r.dataItem.accin || 0).reduce((a, b) => a + b, 0);
-
-            const footerRow = new wijmo.grid.Row(); // Footer Row 하나 추가
-            this.grid.columnFooters.rows.push(footerRow);
-
-            // Footer 데이터 세팅
-            this.grid.columnFooters.setCellData(idx, 0, `${period} 월계`);
-            this.grid.columnFooters.setCellData(idx, 3, sumAccin); // accin 합계 (4번째 컬럼 accin에 표시)
-          });
-
-          // 4. 마지막에 전체 합계 추가 (선택)
-          const totalAccin = rows.map(r => +r.dataItem.accin || 0).reduce((a, b) => a + b, 0);
-
-          const footerRowTotal = new wijmo.grid.Row();
-          this.grid.columnFooters.rows.push(footerRowTotal);
-
-          const totalRowIndex = this.grid.columnFooters.rows.length - 1;
-          this.grid.columnFooters.setCellData(totalRowIndex, 0, '합 계');
-          this.grid.columnFooters.setCellData(totalRowIndex, 3, totalAccin);
+          footer.dataItem = {
+            CompanyName: "합계",
+            accin: getSum('accin'),
+          };
         });
 
 
         // 엔터키 검색
-        $('#txtDescription').on('keypress', function (e) {
+        $('#txtDescription, #txtEumnum').on('keypress', function (e) {
           if (e.keyCode === 13) {
             _this.searchMainData();
           }
@@ -232,14 +211,27 @@
           'AccountName' : $("#cboBankId").val(), //계좌명(accid로 검색)
           'cboDepositType' : $('#cboDepositType').val(),  //입금형태
           'cboCompany': $("#cboCompanyHidden").val(),
-          'txtDescription' : $("#txtDescription").val()
+          'txtDescription' : $("#txtDescription").val(),
+          'txtEumnum' :$('#txtEumnum').val()
         }
-        let fnsuccess = function (result) {
+        let fnsuccess = function(result) {
           if (result != null) {
-            _this.viewData = new wijmo.collections.CollectionView(result.data); // 새로 생성
-            _this.grid.itemsSource = _this.viewData; // 다시 바인딩
+            _this.viewData = new wijmo.collections.CollectionView(result.data);
+
+            _this.viewData.groupDescriptions.push(
+              new wijmo.collections.PropertyGroupDescription('trdate', (item, prop) => {
+                if (!item[prop]) return '';
+                const date = new Date(item[prop]);
+                const year = date.getFullYear();
+                const month = ('0' + (date.getMonth() + 1)).slice(-2);
+                return `${year}년${month}월`; // 여기!
+              })
+            );
+
+            _this.grid.itemsSource = _this.viewData;
           }
         };
+
         AjaxUtil.getAsyncData(url, data, fnsuccess);
       }
     }

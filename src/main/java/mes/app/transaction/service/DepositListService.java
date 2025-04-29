@@ -17,7 +17,7 @@ public class DepositListService {
   @Autowired
   SqlRunner sqlRunner;
 
-  public List<Map<String, Object>> getDepositList(String depositType, Timestamp start, Timestamp end, String company, String txtDescription, String AccountName) {
+  public List<Map<String, Object>> getDepositList(String depositType, Timestamp start, Timestamp end, String company, String txtDescription, String AccountName, String txtEumnum) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
 
     paramMap.addValue("start", start);
@@ -29,15 +29,16 @@ public class DepositListService {
            tb.ioid,
            TO_CHAR(tb.trdate::DATE, 'YYYY-MM-DD') AS trdate,
            tb.accin ,
-           tb.remark1 as "CompanyName" ,
-            -- c."Name" as "CompanyName" ,
+           c."Name" as "CompanyName" ,
            tb.iotype ,
            sc."Value" as deposit_type,
            sc."Code" as deposit_code,
            ta.accname  as banknm ,
            tb.accnum ,
            tt.tradenm ,
-           tb.remark3
+           tb.remark1,
+           tb.eumnum,
+           tb.eumtodt
            from tb_banktransit tb
            left join company c on c.id = tb.cltcd
            left join  sys_code sc on sc."Code" = tb.iotype
@@ -57,13 +58,21 @@ public class DepositListService {
     }
 
     if (txtDescription != null && !txtDescription.isEmpty()) {
-      sql += " AND tb.remark3 ILIKE :txtDescription ";
+      sql += " AND tb.remark1 ILIKE :txtDescription ";
       paramMap.addValue("txtDescription", "%" + txtDescription + "%");
     }
     if (AccountName != null && !AccountName.isEmpty()) {
       sql += " AND tb.accid = :AccountName ";
       paramMap.addValue("AccountName", Integer.parseInt(AccountName));
     }
+    if (txtEumnum != null && !txtEumnum.isEmpty()) {
+      sql += " AND tb.eumnum ILIKE :txtEumnum ";
+      paramMap.addValue("txtEumnum", "%" + txtEumnum + "%");
+    }
+
+    sql +="""
+        ORDER BY tb.trdate ASC
+        """;
 
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
 //    log.info("입금현황 read SQL: {}", sql);
