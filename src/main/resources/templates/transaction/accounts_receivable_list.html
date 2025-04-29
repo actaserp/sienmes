@@ -24,8 +24,13 @@
               거래처
             </dt>
             <dd>
-              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="업체검색버튼으로 검색하세요.">
+              <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
+              &nbsp;
+              <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                업체 검색
+              </a>
             </dd>
           </dl>
           <dl>
@@ -49,7 +54,7 @@
             <dt>&nbsp;</dt>
             <dd>
               <li>
-                <a class="btn btn-search" title="검색" id="btnMainSearch">
+                <a class="btn btn-search" title="검색" id="btnSearch">
                   <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                   검색
                 </a>
@@ -109,12 +114,12 @@
             }
           },
           columns: [
-            {binding: 'BaljuVat', header: '코드', width: 100, align: 'center'},
-            {binding: 'BaljuTotalPrice', header: '거래처명', width: 130, align: 'right'},
-            {binding: 'StateName', header: '전잔액', width: 200, align: 'right'},
-            {binding: 'SujuQty2', header: '매출액', width: 200, align: 'right'},
-            {binding: 'SujuQty3', header: '입금액', width: 200, align: 'right'},
-            {binding: 'ShipmentStateName', header: '잔액', width: 200, align: 'right'}
+            {binding: 'code', header: '코드', width: 100, align: 'center'},
+            {binding: 'cltName', header: '거래처명', width: 130, align: 'right'},
+            {binding: 'receivables', header: '전잔액', width: 200, align: 'right'},
+            {binding: 'sales', header: '매출액', width: 200, align: 'right'},
+            {binding: 'AmountDeposited', header: '입금액', width: 200, align: 'right'},
+            {binding: 'balance', header: '잔액', width: 200, align: 'right'}
           ],
           itemsSource: this.viewData, // 데이터를 설정할 배열
         });
@@ -139,7 +144,11 @@
 
           const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
           footerTotal.dataItem = {
-            mat_grp_name: '합 계'
+            code: '합 계',
+            receivables: getSum('receivables'),
+            sales: getSum('sales'),
+            AmountDeposited: getSum('AmountDeposited'),
+            balance: getSum('balance'),
           };
         });
 
@@ -155,13 +164,15 @@
             }
           },
           columns: [
-            {binding: 'BaljuPrice', header: '일자', width: 100, align: 'center'},
-            {binding: 'BaljuVat', header: '코드', width: 100, align: 'center'},
             {binding: 'BaljuTotalPrice', header: '거래처명', width: 150, align: 'center'},
+            {binding: 'BaljuPrice', header: '일자', width: 100, align: 'center'},
+            {binding: 'BaljuVat', header: '구분', width: 100, align: 'center'},
             {binding: 'StateName', header: '금액', width: 200, align: 'right'},
+            {binding: 'StateName2', header: '잔액', width: 200, align: 'right'},
+            {binding: 'SujuQty3', header: '품목', width: 120, align: 'center'},
             {binding: 'SujuQty2', header: '입급형태', width: 100, align: 'right'},
-            {binding: 'SujuQty3', header: '은행', width: 120, align: 'center'},
-            {binding: 'ShipmentStateName', header: '계좌', width: 200, align: 'right'},
+            {binding: 'SujuQty3', header: '은행/어음번호', width: 120, align: 'center'},
+            {binding: 'ShipmentStateName', header: '계좌/만기일', width: 200, align: 'right'},
             {binding: 'DueDate', header: '거래구분', width: 120, align: 'center'},
             {binding: 'Description', header: '적요', width: 200, align: 'right'}
           ],
@@ -179,37 +190,61 @@
         });
         // ✅ Footer 패널 사용 설정
         this.grid3.columnFooters.rows.push(new wijmo.grid.Row());
-        this.grid3.bottomLeftCells.setCellData(0, 0, '합 계');
+        this.grid3.bottomLeftCells.setCellData(0, 0, '매출계');
+        this.grid3.columnFooters.rows.push(new wijmo.grid.Row());
+        this.grid3.bottomLeftCells.setCellData(0, 0, '입금계');
 
         // ✅ Footer 합계 값 설정 (수동)
         this.grid3.loadedRows.addHandler(() => {
           const rows = this.grid3.rows;
-          const footerTotal = this.grid3.columnFooters.rows[0];
+          const SalesTotal = this.grid3.columnFooters.rows[0];
+          const DepositTotal = this.grid3.columnFooters.rows[1];
 
-          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
-
-          footerTotal.dataItem = {
-            mat_grp_name: '합 계'
-            // year_qty_sum: getSum('year_qty_sum'),
-            // year_money_sum: getSum('year_money_sum'),
+          const getSumByCondition = (field, conditionField, conditionValue) => {
+            return rows
+              .filter(r => r.dataItem[conditionField] === conditionValue) // 조건 필터
+              .map(r => +r.dataItem[field] || 0) // 해당 필드 숫자로 변환
+              .reduce((a, b) => a + b, 0); // 합산
           };
+
+          SalesTotal.dataItem = {
+            BaljuTotalPrice: '합계',
+            BaljuVat: '매출계',
+            StateName: getSumByCondition('StateName', 'BaljuVat', '매출'),
+            StateName2: getSumByCondition('StateName2', 'BaljuVat', '매출'),
+          };
+
+          DepositTotal.dataItem = {
+            BaljuVat: '입금계',
+            StateName: getSumByCondition('StateName', 'BaljuVat', '입금'),
+            StateName2: getSumByCondition('StateName2', 'BaljuVat', '입금'),
+          };
+
         });
 
       }
 
       searchMainData() {
         let _this = this;
-        let url = ''
-        let data = {
-          'cboYear': $("#cboYear").val(),
-          'cboCompany': $("#cboCompanyHidden").val()
+        let url = '/api/transaction/AccRList'
+        let param = {
+          'srchStartDt' : $("#srchStartDt").val(),
+          'srchEndDt' : $("#srchEndDt").val(),
+          'cboCompany' : $("#cboCompanyHidden").val(),
         }
-        let fnsuccess = function (result) {
-          if (result != null) {
-            _this.viewData.sourceCollection = result.data;
+        // 집계 데이터 조회
+        AjaxUtil.getAsyncData(url+'/TotalList', param, function (result) {
+          if (result != null && result.data) {
+            _this.grid.itemsSource = result.data; // 집계 grid에 바인딩
           }
-        };
-        AjaxUtil.getAsyncData(url, data, fnsuccess);
+        });
+
+        // 상세 데이터 조회
+        AjaxUtil.getAsyncData(url+'/DetailList', param, function (result) {
+          if (result != null && result.data) {
+            _this.grid3.itemsSource = result.data; // 상세 grid3에 바인딩
+          }
+        });
       }
     }
     let page = null;
@@ -221,8 +256,12 @@
       AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '', 'sale');
       AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);
 
-      $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
-      $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
+      let today = new Date();
+      let monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+      $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(monthStart));
+      $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(today));
+
 
       page.searchMainData();
 
@@ -240,15 +279,12 @@
         let fix_cols = page.grid_config.frozenColumnIndex;
         page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
       });
-
       $('#btnCompanySearch').click(function () {
         let poppage = new PopCompComponent();
         let $poppage = $(poppage);
         let searchcallback = function (items) {
-          // $content.find('#cboCompany').val(items.id);
-          // $content.find('#CompanyName').val(items.compname);
           console.log('items : ',items);
-          document.getElementById('btnCompanySearch').value = items.compname;
+          document.getElementById('cboCompany').value = items.compname;
           document.getElementById('cboCompanyHidden').value = items.id;
         };
 

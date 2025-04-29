@@ -249,15 +249,15 @@
                             }
                         },
                         columns: [
-                            {binding: 'TRDATE', header: '일자', width: 130, align: 'center'},
+                            {binding: 'trdate', header: '일자', width: 130, align: 'center'},
                             {binding: 'id', header: '코드', width: 120, align: 'center'},
                             {binding: 'Name', header: '거래처명', width: 220, align: 'center'},
-                            {binding: 'ACCOUT', header: '금액', width: 100, align: 'center'},
-                            {binding: 'IOTYPE', header: '지급형태', width: 130, align: 'left'},
-                            {binding: 'BANKNM', header: '은행', width: 110, align: 'left'},
-                            {binding: 'ACCNUM', header: '계좌', width: 200, align: 'left'},
-                            {binding: 'TRID', header: '거래구분', width: 450, align: 'center'},
-                            {binding: 'REMARK1', header: '적요', width: 120, align: 'right'}
+                            {binding: 'accout', header: '금액', width: 100, align: 'left'},
+                            {binding: 'iotype', header: '지급형태', width: 130, align: 'left'},
+                            {binding: 'banknm', header: '은행', width: 110, align: 'left'},
+                            {binding: 'accnum', header: '계좌', width: 200, align: 'center'},
+                            {binding: 'trid', header: '거래구분', width: 120, align: 'center'},
+                            {binding: 'remark1', header: '적요', width: 450, align: 'left'}
                         ]
                     });
 
@@ -317,6 +317,7 @@
                     };
                     let result = AjaxUtil.getSyncData(url + "/read", data);
                     if (result.data != null) {
+                        console.log("data : ", result.data)
                         _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
                     }
                 }

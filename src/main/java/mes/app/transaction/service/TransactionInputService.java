@@ -30,6 +30,7 @@ public class TransactionInputService {
 
         String sql = """
                 SELECT
+                 a.accid as accountid,
                  b.banknm as bankname,
                  b.bankpopcd as managementnum,
                  accnum as accountNumber,
@@ -37,9 +38,7 @@ public class TransactionInputService {
                  onlineid as onlineBankId,
                  onlinepw as onlineBankPw,
                  accpw as paymentPw,
-                 popsort as accountType,
                  accbirth as birth,
-                 popyn as popyn,
                  case when popyn = '1' then true
                  else false
                  end as popyn,
@@ -55,4 +54,49 @@ public class TransactionInputService {
 
         return items;
     }
+
+    public List<Map<String, Object>> getTransactionHistory(String searchfrdate, String searchtodate, String TradeType, Integer parsedAccountId){
+
+        MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+        parameterSource.addValue("searchfrdate", searchfrdate);
+        parameterSource.addValue("searchtodate", searchtodate);
+        parameterSource.addValue("accid", parsedAccountId);
+        parameterSource.addValue("ioflag", TradeType);
+
+
+        String sql = """
+                SELECT to_char(to_date(trdate, 'YYYYMMDD'), 'YYYY-MM-DD') as trade_date
+                ,accin as input_money
+                ,accout as output_money
+                ,feeamt as commission
+                ,remark1 as remark
+                ,trid as trade_type
+                ,banknm as bankname
+                ,accnum as account
+                FROM public.tb_banktransit
+                where trdate between :searchfrdate and :searchtodate
+                """;
+
+        if(TradeType != null && !TradeType.isEmpty()){
+            sql += """
+                    AND ioflag = :ioflag
+                    """;
+        }
+
+        if(parsedAccountId != null){
+            sql += """
+                    AND accid = :accid
+                    """;
+        }
+
+        sql += """
+                ORDER BY trdate desc
+                """;
+
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, parameterSource);
+
+        return items;
+    }
+
+
 }

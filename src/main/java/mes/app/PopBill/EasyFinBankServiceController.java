@@ -77,6 +77,12 @@ public class EasyFinBankServiceController {
             }
         }
 
+        if(bankName.equals("0031") || bankName.equals("0088") || bankName.equals("0048")){
+            result.success = false;
+            result.message = "아이엠뱅크, 신한은행, 신협중앙회는 조회전용 계정이 필수입니다.";
+            return result;
+        }
+
         log.info("도달");
 
         EasyFinBankAccountForm bankInfo = new EasyFinBankAccountForm();
@@ -109,7 +115,8 @@ public class EasyFinBankServiceController {
     public AjaxResult requestJob(@RequestParam String frdate,
                              @RequestParam String todate,
                              @RequestParam String accountnumber,
-                             @RequestParam String managementnum) {
+                             @RequestParam String managementnum,
+                                 @RequestParam Integer accountid) {
         /**
          * 계좌 거래내역을 확인하기 위해 팝빌에 수집요청을 합니다. (조회기간 단위 : 최대 1개월)
          * - 조회일로부터 최대 3개월 이전 내역까지 조회할 수 있습니다.
@@ -146,7 +153,13 @@ public class EasyFinBankServiceController {
             }
 
             List<EasyFinBankSearchDetail> list = searchInfo.getList();
-            List<Map<String, Object>> mapList = convertToMapList(list);
+            List<Map<String, Object>> mapList = easyFinBankCustomService.convertToMapList(list);
+
+            //비동기로 DB에 내역 저장
+            easyFinBankCustomService.saveBankDataAsync(list, jobID, accountnumber, accountid);
+
+
+
             System.out.println(mapList);
 
             result.success = true;
@@ -165,7 +178,7 @@ public class EasyFinBankServiceController {
 
     public String waitForJobComplete(String CorpNum, String jobId) throws InterruptedException, PopbillException {
         int maxRetry = 10;
-        int inteval = 400;
+        int inteval = 1000;
 
         for(int i=0; i < maxRetry; i++){
             EasyFinBankJobState jobState = easyFinBankService.getJobState(CorpNum, jobId);
@@ -190,30 +203,5 @@ public class EasyFinBankServiceController {
     }
 
 
-    public List<Map<String, Object>> convertToMapList(List<EasyFinBankSearchDetail> detailList) {
-        List<Map<String, Object>> result = new ArrayList<>();
 
-        for (EasyFinBankSearchDetail detail : detailList) {
-            Map<String, Object> map = new LinkedHashMap<>(); // 순서 유지
-
-            map.put("tid", detail.getTid());
-            map.put("accountID", detail.getAccountID());
-            map.put("trdate", detail.getTrdate());
-            map.put("trserial", detail.getTrserial());
-            map.put("trdt", detail.getTrdt());
-            map.put("accIn", detail.getAccIn());
-            map.put("accOut", detail.getAccOut());
-            map.put("balance", detail.getBalance());
-            map.put("remark1", detail.getRemark1());
-            map.put("remark2", detail.getRemark2());
-            map.put("remark3", detail.getRemark3());
-            map.put("remark4", detail.getRemark4());
-            map.put("regDT", detail.getRegDT());
-            map.put("memo", detail.getMemo());
-
-            result.add(map);
-        }
-
-        return result;
-    }
 }

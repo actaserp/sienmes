@@ -32,8 +32,8 @@ public class PaymentListService {
 
         String sql = """
                 SELECT b.TRDATE,
-                    c.id,
-                    c."Name",
+                    -- c.id,
+                    -- c."Name",
                     b.ACCOUT,
                     b.IOTYPE,
                     b.BANKNM,
@@ -41,8 +41,9 @@ public class PaymentListService {
                     b.TRID,
                     b.REMARK1
                  FROM tb_banktransit b 
-                 JOIN company c ON c.id = b.cltcd 
+                 -- JOIN company c ON c.id = b.cltcd 
                  WHERE 1=1
+                 AND ioflag = '1'
         		""";
         if(companyCode != null){
             sql += " AND c.id = :companyCode";

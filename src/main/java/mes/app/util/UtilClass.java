@@ -15,4 +15,15 @@ public class UtilClass {
         return null;
     }
 
+    public static Integer parseInteger(Object obj){
+        if(obj == null) return null;
+        if (obj instanceof Integer) return (Integer) obj;
+
+        try{
+            return Integer.parseInt(obj.toString());
+        }catch (NumberFormatException e){
+            return null;
+        }
+    }
+
 }
