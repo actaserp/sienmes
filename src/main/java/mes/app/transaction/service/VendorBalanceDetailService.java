@@ -34,12 +34,12 @@ public class VendorBalanceDetailService {
                           FROM tb_invoicdetail d
                           GROUP BY d.misdate, d.misnum
                       ), invoice_data AS (
-                          SELECT\s
+                          SELECT
                               i.cltcd,
                               i.misdate,
                               i.totalamt,
                               ds.대표항목,
-                              CASE\s
+                              CASE
                                   WHEN ds.기타건수 > 0 THEN ds.대표항목 || ' 외 ' || ds.기타건수 || '건'
                                   ELSE ds.대표항목
                               END AS item_summary
@@ -47,7 +47,7 @@ public class VendorBalanceDetailService {
                           LEFT JOIN detail_summary ds
                               ON i.misdate = ds.misdate AND i.misnum = ds.misnum
                       ), bank_data AS (
-                          SELECT\s
+                          SELECT
                               b.cltcd,
                               b.accout,
                               b.balance,
@@ -76,11 +76,12 @@ public class VendorBalanceDetailService {
                           ON c.id = i.cltcd
                       LEFT JOIN bank_data bd
                           ON c.id = bd.cltcd
-                      ORDER BY c."Name", i.misdate NULLS LAST, bd.todate NULLS LAST
+                      
         		""";
-//        if(companyCode != null){
-//            sql += " WHERE M.Code = :companyCode";
-//        }
+        if(companyCode != null){
+            sql += " WHERE c.Code = :companyCode";
+        }
+        sql += " ORDER BY c.\"Name\", i.misdate NULLS LAST, bd.todate NULLS LAST";
 
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);

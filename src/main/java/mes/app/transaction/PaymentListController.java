@@ -30,10 +30,11 @@ public class PaymentListController {
             @RequestParam(value="accountNum", required=false) String accountNum,
             @RequestParam(value="depositType", required=false) String depositType,
             @RequestParam(value="remark", required=false) String remark,
+            @RequestParam(value="eumNum", required=false) String eumNum,
             HttpServletRequest request) {
         AjaxResult result = new AjaxResult();
 
-        result.data = paymentListService.getPaymentList(date_from, date_to, companyCode, accountNum, depositType, remark);
+        result.data = paymentListService.getPaymentList(date_from, date_to, companyCode, accountNum, depositType, remark, eumNum);
 
         return result;
     }

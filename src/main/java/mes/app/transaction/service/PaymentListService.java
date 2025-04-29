@@ -19,7 +19,8 @@ public class PaymentListService {
                                                     Integer companyCode,
                                                     String accountNum,
                                                     String depositType,
-                                                    String remark) {
+                                                    String remark,
+                                                    String eumNum) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
@@ -28,20 +29,22 @@ public class PaymentListService {
         dicParam.addValue("companyCode", companyCode);
         dicParam.addValue("accountNum", accountNum);
         dicParam.addValue("depositType", depositType);
-        dicParam.addValue("remark", remark);
+        dicParam.addValue("remark", "%" + remark + "%");
+        dicParam.addValue("eumNum", eumNum);
 
         String sql = """
                 SELECT b.TRDATE,
-                    -- c.id,
-                    -- c."Name",
+                    c.id,
+                    c."Name",
                     b.ACCOUT,
                     b.IOTYPE,
-                    b.BANKNM,
+                    a.accname,
                     b.ACCNUM,
                     b.TRID,
-                    b.REMARK1
+                    b.REMARK1 || ' ' || b.REMARK2 || ' ' || b.REMARK3 || ' ' || b.REMARK4 AS remark
                  FROM tb_banktransit b 
-                 -- JOIN company c ON c.id = b.cltcd 
+                 LEFT JOIN company c ON c.id = b.cltcd 
+                 LEFT JOIN tb_account a ON b.accnum = a.accnum
                  WHERE 1=1
                  AND ioflag = '1'
         		""";
@@ -55,8 +58,12 @@ public class PaymentListService {
             sql += " AND b.IOTYPE = :depositType";
         }
         if(remark != null && !remark.isEmpty()){
-            sql += " AND b.REMARK1 = :remark";
+            sql += " AND COALESCE(b.REMARK1, '') || COALESCE(b.REMARK2, '') || COALESCE(b.REMARK3, '') || COALESCE(b.REMARK4, '') LIKE :remark";
         }
+        if(eumNum != null && !eumNum.isEmpty()){
+            sql += " AND b.eumnum = :eumNum";
+        }
+        sql += " ORDER BY b.TRDATE ASC";
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 

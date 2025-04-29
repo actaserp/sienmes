@@ -107,7 +107,8 @@ public class AccountsPayableListService {
                           x.todate,
                           x.remark1,
                           x.total,
-                          SUM(x.total) OVER (PARTITION BY x.id ORDER BY x.todate, x.remarkCnt ROWS UNBOUNDED PRECEDING) AS nowamt
+                          SUM(x.total) OVER (PARTITION BY x.id ORDER BY x.todate, x.remarkCnt ROWS UNBOUNDED PRECEDING) AS nowamt,
+                          a."Name"
                       FROM (
                          
                           SELECT
@@ -145,6 +146,7 @@ public class AccountsPayableListService {
                           FROM tb_banktransit b
                           WHERE b.trdate BETWEEN '20250101' AND '20250423'
                       ) x
+                      LEFT JOIN company a ON x.id = a.id
                       ORDER BY x.id, x.todate, x.remarkCnt
         		""";
         if(companyCode != null){

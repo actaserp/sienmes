@@ -29,6 +29,16 @@
               <input type="text" id="trdCom" name="trdCom">
             </dd>
           </dl>
+          <dl>
+            <dt>
+              <label for="eumNum">
+                어음번호
+              </label>
+            </dt>
+            <dd>
+              <input type="text" id="eumNum">
+            </dd>
+          </dl>
           <dl id="searchComArea">
             <dt>
               <label for="">
@@ -68,7 +78,7 @@
 
         <ul class="tab-links">
           <li><a href="#tabs_count" style="border-radius: 6px 0 0 0;">집계</a></li>
-          <li><a href="#tabs_portion" style="border-radius: 0 6px 0 0;">상세</a></li>
+          <li><a href="#tabs_portion_detail" style="border-radius: 0 6px 0 0;">상세</a></li>
         </ul>
         <div>
           <section class="tab-item" id="tabs_count" style="border-top-left-radius: 0;">
@@ -76,7 +86,7 @@
               <div id="theGrid1" style="height: 730px;"></div>
             </div>
           </section>
-          <section class="tab-item" id="tabs_portion" style="border-top-left-radius: 0; display: none;">
+          <section class="tab-item" id="tabs_portion_detail" style="border-top-left-radius: 0; display: none;">
             <div class="container-fluid">
               <div id="theGrid3" style="height: 730px;"></div>
             </div>
@@ -261,12 +271,14 @@
               {binding: 'Name', header: '거래처명', width: 130, align: 'center'},
               {binding: 'todate', header: '일자', width: 120, align: 'center'},
               {binding: 'iotype', header: '구분', width: 120, align: 'center'},
-              {binding: 'total', header: '금액', width: 100, align: 'center'},
-              {binding: 'nowamt', header: '잔액', width: 150, align: 'left'},
+              {binding: 'total', header: '금액', width: 100, align: 'right'},
+              {binding: 'nowamt', header: '잔액', width: 150, align: 'right'},
               {binding: 'mat_code', header: '품목', width: 110, align: 'left'},
               {binding: 'mat_name', header: '입금형태', width: 200, align: 'left'},
-              {binding: 'unit_name', header: '은행/어음번호', width: 130, align: 'center'},
-              {binding: 'order_qty', header: '계좌/만기일', width: 120, align: 'right'},
+              {binding: 'unit_name', header: '은행', width: 130, align: 'center'},
+              {binding: 'unit_name', header: '어음번호', width: 130, align: 'center'},
+              {binding: 'unit_name', header: '계좌', width: 130, align: 'center'},
+              {binding: 'order_qty', header: '만기일', width: 120, align: 'right'},
               {binding: 'workcenter_name', header: '거래구분', width: 180, align: 'left'},
               {binding: 'remark1', header: '적요', width: 450, align: 'left'}
             ]
@@ -348,7 +360,7 @@
           };
           let result = AjaxUtil.getSyncData(url + "/detail", data);
           if (result.data != null) {
-            console.log('accounts_payable_list data : ', result.data)
+            console.log('accounts_payable_detail_list data : ', result.data)
             _this.grid2.itemsSource = new wijmo.collections.CollectionView(result.data);
           }
         }
@@ -604,12 +616,14 @@
 
         // 거래처 focus시 거래처 검색 모달
         $('#trdCom').focus(function () {
-          let pop = new PopMatComponent();
-          pop.material_type = 'product,sangpum';
-          pop.show(function (item) {
-            console.log('$btnProductSearch', item);
-          });
-          pop.searchDataBind();
+          let poppage = new PopCompComponent();
+          let $poppage = $(poppage);
+          let searchcallback = function (items) {
+            console.log('items : ',items);
+            document.getElementById('trdCom').value = items.compname;
+          };
+
+          poppage.show(searchcallback);
         });
 
         // 계좌명 focus시 계좌명 검색 모달
@@ -638,10 +652,10 @@
 
           // 데이터 로드 (id에서 # 제거하고 처리)
           const cleanTarget = target.replace('#', '');
-          if (cleanTarget === 'tabs_count' || cleanTarget === 'tabs_portion') {
+          if (cleanTarget === 'tabs_count') {
             page.searchMainData(cleanTarget);
           } else if (cleanTarget === 'tabs_portion_detail') {
-            page.searchProductData(cleanTarget);
+            page.searchDetailData(cleanTarget);
           }
 
           page.current_tab = cleanTarget;

@@ -1,5 +1,4 @@
 <html layout:decorate="~{layout_page}">
-
 <th:block layout:fragment="content">
     <div class="layout-contents">
         <div class="page-title-wrap">
@@ -26,7 +25,8 @@
                         <dd>
                             <ul class="date-box">
                                 <li>
-                                    <input type="text" id="company" name="keyword" />
+                                    <input type="text" id="btnCompanySearch" name="keyword" />
+                                    <input type="hidden" id="cboCompanyHidden" name="keyword" />
                                 </li>
                             </ul>
                         </dd>
@@ -69,38 +69,49 @@
                     </dl>
                     <dl>
                         <dt>
-                            <label for="">
-                                조회기간
+                            <label for="eumNum">
+                                어음번호
                             </label>
                         </dt>
                         <dd>
-                            <ul class="date-box">
-                                <li>
-                                    <input type="date" id="date_from" name="date_from">
-                                    <label for="date_from" class="hide">시작일</label>
-                                </li>
-                                ~
-                                <li>
-                                    <input type="date" id="date_to" name="date_to">
-                                    <label for="date_to" class="hide">종료일</label>
-                                </li>
-                            </ul>
-                        </dd>
-                    </dl>
-
-                    <dl>
-                        <dt>&nbsp;</dt>
-                        <dd>
-                            <li>
-                                <a class="btn btn-delete" title="검색" id="btnMainSearch">
-                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    검색
-                                </a>
-                            </li>
+                            <input type="text" id="eumNum">
                         </dd>
                     </dl>
                 </div>
+            </div>
+            <div style="display: flex;">
+                <dl>
+                    <dt>
+                        <label for="">
+                            조회기간
+                        </label>
+                    </dt>
+                    <dd>
+                        <ul class="date-box">
+                            <li>
+                                <input type="date" id="date_from" name="date_from">
+                                <label for="date_from" class="hide">시작일</label>
+                            </li>
+                            ~
+                            <li>
+                                <input type="date" id="date_to" name="date_to">
+                                <label for="date_to" class="hide">종료일</label>
+                            </li>
+                        </ul>
+                    </dd>
+                </dl>
+
+                <dl>
+                    <dd>
+                        <li>
+                            <a class="btn btn-delete" title="검색" id="btnMainSearch">
+                                <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                검색
+                            </a>
+                        </li>
+                    </dd>
+                </dl>
             </div>
             <div class="container-fluid">
                 <div id="theGrid" style="height: 600px;"></div>
@@ -252,12 +263,13 @@
                             {binding: 'trdate', header: '일자', width: 130, align: 'center'},
                             {binding: 'id', header: '코드', width: 120, align: 'center'},
                             {binding: 'Name', header: '거래처명', width: 220, align: 'center'},
-                            {binding: 'accout', header: '금액', width: 100, align: 'left'},
+                            {binding: 'accout', header: '금액', width: 100, align: 'right'},
                             {binding: 'iotype', header: '지급형태', width: 130, align: 'left'},
-                            {binding: 'banknm', header: '은행', width: 110, align: 'left'},
+                            {binding: 'accname', header: '은행', width: 110, align: 'center'},
                             {binding: 'accnum', header: '계좌', width: 200, align: 'center'},
                             {binding: 'trid', header: '거래구분', width: 120, align: 'center'},
-                            {binding: 'remark1', header: '적요', width: 450, align: 'left'}
+                            {binding: 'memo', header: '메모', width: 450, align: 'left'},
+                            {binding: 'remark', header: '적요', width: 350, align: 'left'}
                         ]
                     });
 
@@ -302,10 +314,11 @@
                     let _this = this;
                     let date_from = $('#date_from').val();
                     let date_to = $('#date_to').val();
-                    let company = $('#company').val();
+                    let company = $('#cboCompanyHidden').val();
                     let accountNum = $('#accountNum').val();
                     let depositType = $('#depositType').val();
                     let remark = $('#remark').val();
+                    let eumNum = $('#eumNum').val();
                     let url = '/api/transaction/payment_list'
                     let data = {
                         'date_from': date_from,
@@ -313,7 +326,8 @@
                         'companyCode': company,
                         'accountNum': accountNum,
                         'depositType': depositType,
-                        'remark': remark
+                        'remark': remark,
+                        'eumNum': eumNum
                     };
                     let result = AjaxUtil.getSyncData(url + "/read", data);
                     if (result.data != null) {
@@ -509,13 +523,16 @@
                 }
 
                 // 거래처 focus시 거래처 검색 모달
-                $('#company').focus(function () {
-                    let pop = new PopMatComponent();
-                    pop.material_type = 'product,sangpum';
-                    pop.show(function (item) {
-                        console.log('$btnProductSearch', item);
-                    });
-                    pop.searchDataBind();
+                $('#btnCompanySearch').focus(function () {
+                    let poppage = new PopCompComponent();
+                    let $poppage = $(poppage);
+                    let searchcallback = function (items) {
+                        console.log('items : ',items);
+                        document.getElementById('btnCompanySearch').value = items.compname;
+                        document.getElementById('cboCompanyHidden').value = items.id;
+                    };
+
+                    poppage.show(searchcallback);
                 });
 
                 //계좌 팝업
@@ -528,10 +545,31 @@
                     poppage.show(searchcallback);
                 });
 
+                // text '' 일경우 hidden 값 초기화
+                $('#btnCompanySearch').on('input', function () {
+                    const val = $(this).val();
+                    if (val === '') {
+                        $('#cboCompanyHidden').val('');
+                    }
+                });
+                $('#btnAccountName').on('input', function () {
+                    const val = $(this).val();
+                    if (val === '') {
+                        $('#cboBankId').val('');
+                    }
+                });
+                // .btn-clear 클릭 후 input 이벤트 강제 발생
+                $(document).on('click', '.btn-clear', function () {
+                    const $input = $(this).siblings('input[type="text"]');
+                    $input.val('');
+                    $input.trigger('input'); // 🔥 input 이벤트 강제 발생
+                });
+
                 AjaxUtil.fillSelectOptions($('#depositType'), 'system_code', 'all', false, 'deposit_type');
                 page.searchMainData();
 
             })
         </script>
     </th:block>
+</th:block>
 </html>
