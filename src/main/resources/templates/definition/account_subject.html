@@ -81,7 +81,7 @@
                                     id="btnSaveSubject" style="width: 115px; height: 36px;">저장</span>
                             </button>
 
-                            <button type="button" class="btn-danger" id=""
+                            <button type="button" class="btn-danger" id="btndelSubject"
                                     style="width: 115px; height: 36px;">삭제
                             </button>
                         </div>
@@ -329,12 +329,21 @@
                     let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
                     if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
                         let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
-                        let mat_pk = selectedRowData.id; // 품목 ID 가져오기
+                        let id = selectedRowData.acccd; // 품목 ID 가져오기
                         /*console.log(selectedRowData);*/
 
                         // 상세 정보 표시
-                      /*  _this.showDetail(mat_pk);*/
+                        /*_this.showDetail(id);*/
 
+                    }
+                });
+
+                this.grid.hostElement.addEventListener('dblclick', (e) => {
+                    let hitTest = this.grid.hitTest(e);
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        let row = hitTest.row;
+                        let selectedItem = this.grid.rows[row].dataItem;
+                        _this.showDetail(selectedItem.acccd);
                     }
                 });
 
@@ -404,9 +413,44 @@
                 let result = AjaxUtil.getSyncData(url + '/read');
                 if (result.success) {
                        _this.viewData.sourceCollection = result.data;
-                       console.log(result.data);
                 }
             }
+
+            showDetail(id) {
+                let _this = this;
+                let data = { id };
+                let url = '/api/definition/Accsubject';
+
+                let result = AjaxUtil.getSyncData(url + "/AddDetail", data);
+
+                let processedData = [];
+
+                // result.data가 null이 아니고, 배열이면서, 빈 배열이 아닌 경우만 처리
+                if (result.data != null && Array.isArray(result.data) && result.data.length > 0) {
+                    processedData = result.data.filter(item => {
+                        // 항목에 필요한 필드 값들이 null이나 빈 문자열이 아닌 경우만 포함
+                        return item.code != null && item.name != null && item.required != null && item.used != null;
+                    }).map(item => ({
+                        ...item,
+                        required: item.required == "1",
+                        used: item.used == "Y"
+                    }));
+                }
+
+                // 데이터가 없으면 빈 배열로 처리
+                if (processedData.length === 0) {
+                    processedData = [];
+                }
+
+                // 데이터가 없으면 빈 그리드 처리
+                _this.viewData2.sourceCollection = processedData;
+
+                if (_this.subject_grid) {
+                    _this.subject_grid.itemsSource = null; // 기존 항목 초기화
+                    _this.subject_grid.itemsSource = _this.viewData2; // 새로운 데이터로 갱신
+                }
+            }
+
 
             //계정과목 저장
             saveData($form) {
@@ -414,14 +458,12 @@
 
                 let url = '/api/definition/Accsubject/save';
                 let data = FormUtil.extractForm($form);
-                /*console.log("보내는 데이터",data);*/
 
                 let fnSuccess = function (res) {
                     if (!res.success) {
                         Alert.alert('', res.message);
                     } else {
                         Alert.alert('', "저장되었습니다.");
-                        /*_this.close()*/
                         _this.searchDataBind()
                     }
                 };
@@ -441,7 +483,11 @@
                 let data = {id: id};
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Alert.alert('', '삭제되었습니다'); // Notification
+                        Alert.alert('', '삭제되었습니다');
+
+                        if (_this.subject_grid) {
+                            _this.subject_grid.itemsSource = [];
+                        }
                         _this.searchDataBind();
                     } else {
                         Alert.alert('', res.message);
@@ -452,13 +498,27 @@
             }
 
 
-            showAccountEdit(data) {
+            showAccountEdit(data,data2) {
                 let _this = this;
-                let content = tmpl('AccountTemplate', {});
+                let content = tmpl('AccountTemplate', data);
                 let $content = $(content);
 
-                let modalContainer = new PopupDraggable('계정과목 등록');
+
+                let modalContainer = new PopupDraggable(data2.acccd ? '계정과목 수정' : '계정과목 등록');
                 modalContainer.open({width: 1025, height: 370, $content});
+
+                FormUtil.BindDataForm(data2, $('#AccountForm'));
+                let drcrValue = data2.drcr; // drcr 값 (1 또는 2)
+                let $drcrCheckboxes = $content.find('input[name="drcr"]'); // name="drcr"인 체크박스들 찾기
+
+                $drcrCheckboxes.each(function() {
+                    if (this.value === String(drcrValue)) {
+                        $(this).prop('checked', true);
+                    } else {
+                        $(this).prop('checked', false);
+                    }
+                });
+
 
                 let $cacccd = $content.find('#cacccd');
 
@@ -495,19 +555,29 @@
                     $uacccd.val(uacccd || '');
                 });
 
+                if (data2.acclv > 0) {
+                    let targetAcclv = data2.acclv - 1;
+                    let matchedItem = data.find(item => item.acclv == targetAcclv);
+
+                    if (matchedItem) {
+                        $cboUacccd.val(matchedItem.acccd);
+                        $acclv.val(matchedItem.acclv);
+                        $uacccd.val(matchedItem.acccd);
+                    }
+                }
+
 
                 $content.find('#btnAccountSave').on('click', function () {
                     let $form = $content.find('#AccountForm');
                     Alert.confirm('', '저장하시겠습니까?', function () {
                         _this.saveData($form);
+                        $('#AccountForm')[0].reset();
+
                     });
                 });
 
             }
 
-            /*close() {
-                modalContainer.close();
-            }*/
         }
 
         let page = null;
@@ -521,8 +591,8 @@
                 let url = '/api/definition/Accsubject';
 
                 let result = AjaxUtil.getSyncData(url + '/list');
-
-                page.showAccountEdit(result);
+                let id = '';
+                page.showAccountEdit(result,id);
 
             });
 
@@ -563,17 +633,34 @@
                 );
             });
 
+
             // 계정과목 수정
-            /*$('#btnAccedit').click(function (e) {
-                Alert.confirm('',
-                    '수정하시겠습니까?',
-                    function () {
-                        page.deleteData()
-                    },
-                    function () {
+            $('#btnAccedit').click(function (e) {
+                let url = '/api/definition/Accsubject';
+                let result = AjaxUtil.getSyncData(url + '/list');
+
+                let grid = wijmo.Control.getControl('#theGrid');
+                let selection = grid.selection;
+
+                if (selection.row > -1) {
+                    let item = grid.rows[selection.row].dataItem;
+
+                    if (item) {
+                        let id = item.acccd;
+                        let url = '/api/definition/Accsubject/detail';
+                        let result2 = AjaxUtil.getSyncData(url, { id: id });
+
+                        if (result2.success && result2.data) {
+                            page.showAccountEdit(result, result2.data);
+                        } else {
+                            Alert.alert("상세조회 오류", "상세 데이터가 없습니다.");
+                        }
                     }
-                );
-            });*/
+                } else {
+                    Alert.alert("선택 오류", "편집할 계정과목을 선택하세요.");
+                }
+            });
+
 
 
             let selectedAcccd = null;
@@ -625,7 +712,8 @@
 
                 let data = {
                     Q: JSON.stringify(list),
-                    id: selectedAcccd
+                    id: selectedAcccd,
+                    deleteYn: "N"
                 };
 
                 console.log(data);
@@ -637,6 +725,57 @@
                       page.searchDataBind()
                 }
             });
+
+            $('#btndelSubject').click(function (e) {
+                let url = '/api/definition/Accsubject/add';
+                let grid = page.subject_grid;
+                let selectedRow = grid.selection.row; // 선택된 행 인덱스
+                let selectedItems = page.grid.selectedItems;
+                let data3 = selectedItems[0];
+
+                if (selectedRow >= 0) {
+                    let viewdata2 = grid.collectionView.items; // 데이터를 올바르게 가져오기
+                    let selectedItem = viewdata2[selectedRow];
+
+                    if (!selectedItem || !selectedItem.code || !selectedItem.name) {
+                        console.log("삭제할 데이터의 코드 또는 이름이 없음:", selectedItem);
+                        Alert.alert('삭제할 데이터의 필수 정보를 찾을 수 없습니다.');
+                        return;
+                    }
+
+                    let id = data3.acccd;
+                    grid.collectionView.remove(selectedItem); // 그리드에서 항목 제거
+
+                    // 서버에 삭제할 데이터 전송
+                    let data = {
+                        Q: JSON.stringify([selectedItem]),  // 수정된 부분: 선택된 항목만 전송
+                        id: id,
+                        deleteYn: "Y"
+                    };
+
+                    /*console.log(data);*/
+
+                    // 서버에 데이터 전송
+                    AjaxUtil.postAsyncData(url, data, function (result) {
+                        if (result.data != null) {
+                            Alert.alert('', `${selectedItem.code} (${selectedItem.name}) 항목이 삭제되었습니다.`);
+                            page.searchDataBind(); // 데이터 갱신
+                        } else {
+                            Alert.alert('', '서버 처리에 실패했습니다.');
+                        }
+                    });
+                } else {
+                    Alert.alert('삭제할 행을 선택하세요.');
+                }
+            });
+
+
+
+
+
+
+
+
 
             page.searchDataBind()
         });

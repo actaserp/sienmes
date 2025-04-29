@@ -17,10 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/definition/Accsubject")
@@ -95,17 +93,36 @@ public class AccsubjectController {
 
     @PostMapping("/delete")
     public AjaxResult deleteAcc(@RequestParam(value="id") String id ) {
+        // accSubject 삭제
         this.accSubjectRepository.deleteById(id);
+
+        // accManage 삭제
+        List<Accmanage> accmanageList = accmanageRepository.findById_Acccd(id);
+        if (!accmanageList.isEmpty()) {
+            accmanageRepository.deleteAll(accmanageList);
+        }
+
         AjaxResult result = new AjaxResult();
         return result;
     }
+
+    @RequestMapping("/detail")
+    public AjaxResult getAccDetail(
+            @RequestParam(value="id") String id
+    ) {
+        AjaxResult result = new AjaxResult();
+        result.data = this.accSubjectService.getAccDetail(id);
+        return result;
+    }
+
 
 
     @PostMapping("/add")
     @Transactional
     public AjaxResult saveTestMaster(
-            @RequestParam("Q") String qJson,  // 문자열로 넘어온 JSON
-            @RequestParam("id") String id,    // 'id'는 acccd로 사용
+            @RequestParam("Q") String qJson,
+            @RequestParam("id") String id,
+            @RequestParam(value = "deleteYn", required = false, defaultValue = "N") String deleteYn,
             HttpServletRequest request,
             Authentication auth) {
 
@@ -113,38 +130,75 @@ public class AccsubjectController {
         User user = (User) auth.getPrincipal();
         List<Accmanage> savedData = new ArrayList<>();
 
-       /* // 기존 데이터 삭제
-        if (id != null) {
-            accmanageRepository.deleteByAcccd(id);
-        }*/
-
-        // JSON 문자열 파싱
         List<Map<String, Object>> data = CommonUtil.loadJsonListMap(qJson);
+
+
         for (Map<String, Object> item : data) {
-            Accmanage Ag = new Accmanage();
-            Ag.setAcccd(id); // acccd는 id 값
-
-            // 각 필드 추출 및 매핑
-            Ag.setItemcd((String) item.get("code"));
-            Ag.setItemnm((String) item.get("name"));
-
-
+            String itemcd = (String) item.get("code");
+            String itemnm = (String) item.get("name");
             Boolean required = (Boolean) item.get("required");
-            Ag.setEssyn(required != null && required ? "1" : "0");
-
             Boolean used = (Boolean) item.get("used");
-            Ag.setUseyn(used != null && used ? "Y" : "N");
 
-            savedData.add(accmanageRepository.save(Ag));
+            AccmanageId accmanageId = new AccmanageId();
+            accmanageId.setAcccd(id);
+            accmanageId.setItemcd(itemcd);
+
+            Optional<Accmanage> existingData = accmanageRepository.findById(accmanageId);
+          /*  System.out.println("existingData확인: " + existingData);*/
+
+            Accmanage target;
+            if (existingData.isPresent()) {
+                target = existingData.get();
+            } else {
+                target = new Accmanage();
+                target.setId(accmanageId);
+            }
+
+            target.setItemnm(itemnm);
+            target.setEssyn(required != null && required ? "1" : "0");
+            target.setUseyn(used != null && used ? "Y" : "N");
+
+            Accmanage saved = accmanageRepository.save(target);
+
+            savedData.add(saved);
         }
 
-        // 저장된 데이터 다시 조회
-        Optional<Accmanage> finalData = accmanageRepository.findByAcccd(id);
-        result.data = finalData;
+        // deleteYn이 "Y"일 때만 삭제 실행
+        if ("Y".equalsIgnoreCase(deleteYn)) {
+            // 클라이언트에서 넘어온 데이터의 "code" 값 (삭제할 항목) 추출
+            Set<String> deletedItemcds = data.stream()
+                    .map(item -> (String) item.get("code"))
+                    .collect(Collectors.toSet());
 
+            // DB에서 동일한 acccd와 itemcd를 기준으로 삭제할 항목을 조회
+            List<Accmanage> existingRecords = accmanageRepository.findById_Acccd(id); // `acccd`로 모든 항목 조회
+            for (Accmanage existing : existingRecords) {
+                // 클라이언트에서 넘어온 항목 중 삭제할 항목에 해당하는 경우 삭제
+                if (deletedItemcds.contains(existing.getId().getItemcd())) {
+                    accmanageRepository.delete(existing);
+                 /*   System.out.println("삭제된 데이터: " + existing);*/
+                }
+            }
+        }
+
+        for (Accmanage accmanage : savedData) {
+            /*System.out.println("저장된 데이터 확인: " + accmanage);*/
+        }
+
+        result.data = savedData;
         return result;
     }
 
+
+
+    @RequestMapping("/AddDetail")
+    public AjaxResult getAddDetail(
+            @RequestParam(value="id") String id
+    ) {
+        AjaxResult result = new AjaxResult();
+        result.data = this.accSubjectService.getAddDetail(id);
+        return result;
+    }
 
 
     /*

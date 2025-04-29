@@ -15,7 +15,6 @@ public class AccSubjectService {
     @Autowired
     SqlRunner sqlRunner;
 
-
     public List<Map<String, Object>> getAccList() {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
@@ -87,5 +86,50 @@ public class AccSubjectService {
 
         return result;
     }
+
+    public Map<String, Object> getAccDetail(String id){
+        MapSqlParameterSource paramMap = new MapSqlParameterSource();
+        paramMap.addValue("id", id);
+
+        String sql = """	
+             select b.acccd
+	            , b.accnm
+	            , b.accprtnm
+	            , b.uacccd
+	            , b.acclv
+	            , b.drcr
+	            , b.dcpl
+	            , b.spyn
+	            , b.useyn
+	            , b.cacccd
+	            , b.etccode
+	            from tb_accsubject b
+	            where b.acccd=:id
+            """;
+
+        return this.sqlRunner.getRow(sql, paramMap);
+    }
+
+    public List<Map<String, Object>> getAddDetail(String id) {
+        MapSqlParameterSource paramMap = new MapSqlParameterSource();
+        paramMap.addValue("id", id);
+
+        String sql = """
+            select
+                m.itemcd as code,
+                m.itemnm as name,
+                m.essyn as required,
+                m.useyn as used
+            from tb_accsubject b
+            left join tb_accmanage m on b.acccd = m.acccd
+            where b.acccd = :id
+        """;
+
+        return this.sqlRunner.getRows(sql, paramMap);
+    }
+
+
+
+
 
 }
