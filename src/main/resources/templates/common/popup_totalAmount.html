@@ -70,12 +70,47 @@
 
             let content = tmpl('popup_totalAmountTemplate', {});
             let $content = $(content);
-            this.modalContainer.open({ width: 490, height: 380, $content });
+            this.modalContainer.open({ width: 490, height: 350, $content });
 
             this.$calSupplyCost = $content.find('#calSupplyCost');
             this.$calTax = $content.find('#calTax');
+            this.$calTotal = $content.find('#calTotal');
 
+            const $btnConfirm = $content.find('#btnCompSelect');
+
+            $btnConfirm.on('click', function () {
+                let raw = _this.$calTotal.val().replace(/,/g, ''); // 합계
+                let total = parseFloat(raw) || 0;
+
+                let supplyCost = Math.floor(total / 1.1);
+                let tax = total - supplyCost;
+
+                if (_this.callback) {
+                    _this.callback({
+                        total: total,
+                        supplyCost: supplyCost,
+                        tax: tax
+                    });
+                }
+
+                _this.close(); // 팝업 닫기
+            });
+
+            this.$calTotal.on('input', function () {
+                let raw = $(this).val().replace(/,/g, '');
+                if (raw.length > 0) {
+                    $(this).val(Number(raw).toLocaleString());
+                }
+
+                let total = parseFloat(raw) || 0;
+                let supplyCost = Math.floor(total / 1.1);
+                let tax = total - supplyCost;
+
+                _this.$calSupplyCost.val(supplyCost.toLocaleString());
+                _this.$calTax.val(tax.toLocaleString());
+            });
         }
+
 
         close() {
             this.modalContainer.close();
@@ -90,7 +125,6 @@
             background: #f9f9f9;
             border: 1px solid #ddd;
             padding: 10px 15px;
-            margin-bottom: 20px;
             border-radius: 4px;
         }
 

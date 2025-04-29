@@ -427,11 +427,23 @@
                 let modalContainer = null;
                 if (data.mode === 'new') {
                     modalContainer = new PopupDraggable('등록');
+
+                    let purposeType = AjaxUtil.getSyncData('/api/definition/code/getvalue', { code: 'PurposeType' });
+                    console.log('purposeType', purposeType.data);
+
+                    if (purposeType.data.Value === '영수') {
+                        $content.find('#PurposeType1').prop('checked', true);
+                    } else if (purposeType.data.Value === '청구') {
+                        $content.find('#PurposeType2').prop('checked', true);
+                    } else if (purposeType.data.Value === '없음') {
+                        $content.find('#PurposeType3').prop('checked', true);
+                    }
                 } else {
                     modalContainer = new PopupDraggable('수정');
                 }
                 modalContainer.open({width: 1200, height: 680, $content});
                 initializeDetailRows();
+
 
                 // 매출 구분
                 let $saleType = $content.find('#sale_type');
@@ -447,7 +459,7 @@
                         $content.find('#InvoicerCorpNum').val(result.data.saupnum);
                         // $content.find('#InvoicerTaxRegID').val(result.data);
                         $content.find('#InvoicerCorpName').val(result.data.spjangnm);
-                        // $content.find('#InvoicerCEOName').val(result.data.compname);
+                        $content.find('#InvoicerCEOName').val(result.data.prenm);
                         $content.find('#InvoicerAddr').val(result.data.address);
                         $content.find('#InvoicerBizType').val(result.data.biztype);
                         $content.find('#InvoicerBizClass').val(result.data.item);
@@ -565,76 +577,105 @@
                         $row.find('textarea[id$=".ItemName"]').val(item.Name || '');
                         $row.find('textarea[id$=".Spec"]').val(item.Spec || '');
 
-                        checkAndTryShowPrice($row);
+                        // checkAndTryShowPrice($row);
 
                     });
 
                     pop.searchDataBind();
                 });
 
-                // 합계금액 클릭, 합계금액 옆 계산버튼 클릭
-                let $totalAmountAct = $content.find('#totalAmountAct');
-                $totalAmountAct.click(function () {
+                // "합계금액" 라디오 버튼 클릭
+                $content.find('#WriteType4').click(function (event) {
+                    event.stopPropagation(); // 이벤트 버블링 막기
+                    openPopup();
+                });
+
+                // "계산" 버튼 클릭
+                $content.find('#totalAmountAct').click(function (event) {
+                    event.stopPropagation(); // 이벤트 버블링 막기
+                    openPopup();
+                });
+
+                function openPopup() {
                     let poppage = new PopTotalAmountComponent();
 
                     let searchcallback = function (items) {
-                        console.log('btnCompanySearch', items);
+                        console.log('totalAmountAct', items);
+                        let index = 0;
+                        while (true) {
+                            let $supplyCost = $content.find('#detailList' + index + '\\.SupplyCost');
+                            let $tax = $content.find('#detailList' + index + '\\.Tax');
+
+                            // 없으면 반복 종료
+                            if ($supplyCost.length === 0 || $tax.length === 0) {
+                                break;
+                            }
+
+                            // 비어있는 행 찾기
+                            if ($supplyCost.val().trim() === '' && $tax.val().trim() === '') {
+                                $supplyCost.val(items.supplyCost.toLocaleString());
+                                $tax.val(items.tax.toLocaleString());
+                                break; // 입력했으면 멈춘다
+                            }
+
+                            index++;
+                        }
 
                     };
 
                     poppage.show(searchcallback);
-                });
+                }
 
-                $content.find('#InvoiceeID').change(function () {
-                    $content.find('tr[id^="item_"]').each(function () {
-                        checkAndTryShowPrice($(this));
-                    });
-                });
+                // $content.find('#InvoiceeID').change(function () {
+                //     $content.find('tr[id^="item_"]').each(function () {
+                //         checkAndTryShowPrice($(this));
+                //     });
+                // });
 
                 // 단가 가져오기
-                function checkAndTryShowPrice($row) {
-                    const $Material_id = $row.find('input[id$=".ItemId"]');
-                    const $InvoiceeID = $content.find('#InvoiceeID'); // 거래처 id
-                    const today = new Date().getFullYear().toString();
-                    const month = $row.find('input[id$=".PurchaseDT1"]').val();
-                    const day = $row.find('input[id$=".PurchaseDT2"]').val();
+                // function checkAndTryShowPrice($row) {
+                //     const $Material_id = $row.find('input[id$=".ItemId"]');
+                //     const $InvoiceeID = $content.find('#InvoiceeID'); // 거래처 id
+                //     const today = new Date().getFullYear().toString();
+                //     const month = $row.find('input[id$=".PurchaseDT1"]').val();
+                //     const day = $row.find('input[id$=".PurchaseDT2"]').val();
+                //
+                //     const monthStr = month ? month.padStart(2, '0') : '01';
+                //     const dayStr = day ? day.padStart(2, '0') : '01';
+                //     const JumunDate = `${today}-${monthStr}-${dayStr}`;
+                //
+                //     if ($Material_id.val() && $InvoiceeID.val() && JumunDate) {
+                //         tryShowPrice($Material_id.val(), $InvoiceeID.val(), $row, JumunDate);
+                //     }
+                // }
 
-                    const monthStr = month ? month.padStart(2, '0') : '01';
-                    const dayStr = day ? day.padStart(2, '0') : '01';
-                    const JumunDate = `${today}-${monthStr}-${dayStr}`;
+                // $(document).on('change', 'input[id$=".PurchaseDT1"], input[id$=".PurchaseDT2"]', function () {
+                //     const $row = $(this).closest('tr');
+                //     checkAndTryShowPrice($row);
+                // });
 
-                    if ($Material_id.val() && $InvoiceeID.val() && JumunDate) {
-                        tryShowPrice($Material_id.val(), $InvoiceeID.val(), $row, JumunDate);
-                    }
-                }
-
-                $(document).on('change', 'input[id$=".PurchaseDT1"], input[id$=".PurchaseDT2"]', function () {
-                    const $row = $(this).closest('tr');
-                    checkAndTryShowPrice($row);
-                });
-
-                function tryShowPrice(mat_pk, company_id, row, JumunDate) {
-                    let url = '/api/sales/suju/readPriceSuju';
-                    let data = {
-                        'mat_pk': mat_pk,
-                        'company_id': company_id,
-                        'JumunDate': JumunDate
-                    };
-
-                    if (mat_pk && company_id && JumunDate) {
-                        let fnsuccess = function (result) {
-                            console.log('단가 결과', result);
-                            if (result && result.data && result.data.length > 0) {
-                                let unitPrice = parseFloat(result.data[0].UnitPrice);
-                                row.find('input[id$=".UnitCost"]').val(unitPrice.toLocaleString());
-                            } else {
-                                row.find('input[id$=".UnitCost"]').val('');
-                            }
-                        };
-
-                        AjaxUtil.getAsyncData(url, data, fnsuccess);
-                    }
-                }
+                // function tryShowPrice(mat_pk, company_id, row, JumunDate) {
+                //     let url = '/api/sales/suju/readPriceSuju';
+                //     let data = {
+                //         'mat_pk': mat_pk,
+                //         'company_id': company_id,
+                //         'JumunDate': JumunDate
+                //     };
+                //
+                //     if (mat_pk && company_id && JumunDate) {
+                //         let fnsuccess = function (result) {
+                //             console.log('단가 결과', result);
+                //             if (result && result.data && result.data.length > 0) {
+                //                 let unitPrice = parseFloat(result.data[0].UnitPrice);
+                //                 row.find('input[id$=".UnitCost"]').val(unitPrice.toLocaleString());
+                //             } else {
+                //                 row.find('input[id$=".UnitCost"]').val('');
+                //             }
+                //         };
+                //
+                //         AjaxUtil.getAsyncData(url, data, fnsuccess);
+                //     }
+                // }
 
             }
 

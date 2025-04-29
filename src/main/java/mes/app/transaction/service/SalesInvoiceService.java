@@ -57,6 +57,7 @@ public class SalesInvoiceService {
 			, "spjangnm"
 			, "adresa"
 			, "adresb"
+			, "prenm"
 			, ("adresa" || ' ' || COALESCE("adresb", '')) AS address
 			, "biztype"
 			, "item"

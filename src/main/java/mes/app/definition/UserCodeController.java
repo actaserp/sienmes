@@ -165,5 +165,14 @@ public class UserCodeController {
 		return result;
 	}
 
+	@GetMapping("/getvalue")
+	public AjaxResult getValue(@RequestParam("code") String code) {
+		Map<String, Object> item = this.codeService.getValue(code);
+
+		AjaxResult result = new AjaxResult();
+		result.data = item;
+		return result;
+	}
+
 	
 }

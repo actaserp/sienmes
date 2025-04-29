@@ -223,6 +223,19 @@ public class UserCodeService {
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
         
         return items;
-	}	
+	}
+
+	public Map<String, Object> getValue(String code) {
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("code", code);
+		String sql = """
+				select "Value"
+				from sys_code 
+				where "Code" = :code;
+			""";
+		Map<String, Object> item = this.sqlRunner.getRow(sql, dicParam);
+		return item;
+	}
 	
 }

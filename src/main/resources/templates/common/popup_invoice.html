@@ -913,21 +913,27 @@
             if (taxType === '영세') {
                 $('#taxName').text('영세율 세금계산서');
                 $('#WCostVAT').text('수량단가');
+                $('#WriteType2').val('수량단가');
                 $('#lblWriteType').hide();
+                $('#WriteType1').prop('checked', true);
                 $('input[id$=".Tax"]').attr('readonly', true);
                 $('.tax-related').show();
                 updateTaxLayout('과세'); // 영세지만 세액 칸은 유지
             } else if (taxType === '면세') {
                 $('#taxName').text('계산서');
                 $('#WCostVAT').text('수량단가');
+                $('#WriteType2').val('수량단가');
                 $('#lblWriteType').hide();
                 $('input[id$=".Tax"]').attr('readonly', true);
+                $('#WriteType1').prop('checked', true);
                 updateTaxLayout('면세'); // 세액 숨기고 colspan 수정
             } else if (taxType === '과세'){
                 $('#taxName').text('세금계산서');
                 $('#WCostVAT').text('단가 부가세포함');
+                $('#WriteType2').val('단가 부가세포함');
                 $('#lblWriteType').show();
                 $('input[id$=".Tax"]').removeAttr('readonly');
+                $('#WriteType1').prop('checked', true);
                 updateTaxLayout('과세');
             } else if (taxType === '개인'){
                 $('#InvoiceeCorpNum').attr('readonly', true);
@@ -988,7 +994,7 @@
             } else if (taxType === '단가 부가세포함') {
                 $('#taxList').find('input[id$="SupplyCost"], input[id$="Tax"]').prop('readonly', true);
             } else if (taxType === '합계금액'){
-
+                $('#taxList').find('input[id$="SupplyCost"], input[id$="Tax"]').prop('readonly', false);
             }
         });
 
@@ -1181,6 +1187,87 @@
 
             detailRowCount = $('tr[id^="item_"]').length;
         }
+
+        $(document).on('input', '#taxList input[id$="Qty"], #taxList input[id$="UnitCost"], #taxList input[id$="SupplyCost"], #taxList input[id$="Tax"]', function () {
+            let raw = $(this).val().replace(/,/g, ''); // 기존 콤마 제거
+            if (raw.length > 0 && !isNaN(raw)) {
+                $(this).val(Number(raw).toLocaleString()); // 숫자면 콤마 다시 붙이기
+            }
+        });
+
+
+        $(document).on('input', 'input[id$="SupplyCost"], input[id$="Tax"]', function () {
+            updateTotals();
+        });
+
+        function updateTotals() {
+            let supplyCostSum = 0;
+            let taxSum = 0;
+            let index = 0;
+
+            while (true) {
+                let $supplyCost = $('#detailList' + index + '\\.SupplyCost');
+                let $tax = $('#detailList' + index + '\\.Tax');
+
+                if ($supplyCost.length === 0 || $tax.length === 0) {
+                    break;
+                }
+
+                let supplyCostVal = parseFloat($supplyCost.val().replace(/,/g, '')) || 0;
+                let taxVal = parseFloat($tax.val().replace(/,/g, '')) || 0;
+
+                supplyCostSum += supplyCostVal;
+                taxSum += taxVal;
+
+                index++;
+            }
+
+            $('#SupplyCostTotal').val(supplyCostSum.toLocaleString());
+            $('#TaxTotal').val(taxSum.toLocaleString());
+            $('#TotalAmount').val((supplyCostSum + taxSum).toLocaleString());
+        }
+
+        $(document).on('input', '#taxList input[id$="Qty"], #taxList input[id$="UnitCost"]', function () {
+            const $row = $(this).closest('tr');
+            const taxType = $('input[name="WriteType"]:checked').val();
+            const $qty = $row.find('input[id$="Qty"]');
+            const $unitCost = $row.find('input[id$="UnitCost"]');
+            const $supplyCost = $row.find('input[id$="SupplyCost"]');
+            const $tax = $row.find('input[id$="Tax"]');
+
+            let qtyRaw = $qty.val().replace(/,/g, '').trim();
+            let unitCostRaw = $unitCost.val().replace(/,/g, '').trim();
+
+            // 수량과 단가 모두 값이 있을 때만 재계산
+            if (qtyRaw !== '' && unitCostRaw !== '') {
+                let qty = parseFloat(qtyRaw) || 0;
+                let unitCost = parseFloat(unitCostRaw) || 0;
+
+                let supplyCost = 0;
+                let tax = 0;
+
+                if (taxType === '단가 부가세포함') {
+                    let total = qty * unitCost;
+                    supplyCost = Math.floor(total / 1.1);
+                    tax = total - supplyCost;
+                } else {
+                    supplyCost = qty * unitCost;
+                    tax = Math.floor(supplyCost * 0.1);
+                }
+
+                $supplyCost.val(supplyCost.toLocaleString());
+                $tax.val(tax.toLocaleString());
+            }
+            // else: 수량이나 단가 하나라도 비었으면 계산하지 않고 기존 값 그대로 유지
+
+            updateTotals(); // 공급가액 세액 합계 다시 계산
+        });
+
+
+
+
+
+
 
 
 
