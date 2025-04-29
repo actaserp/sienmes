@@ -53,25 +53,25 @@
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <select class="form-control2" id="cboCompany" name="cboCompany" ></select>
+                                <select class="form-control2" id="cboCompany" name="cboCompany"></select>
                             </div>
                         </dd>
                     </dl>
-<!--                    <dl>-->
-<!--                        <dt>-->
-<!--                            <label for="cboAlign">-->
-<!--                                정렬<span class="eq"></span>-->
-<!--                            </label>-->
-<!--                        </dt>-->
-<!--                        <dd>-->
-<!--                            <div class="srch-box">-->
-<!--                                <select id="cboAlign" name="cboAlign">-->
-<!--                                    <option value="createDate">작성일자</option>-->
-<!--                                    <option value="issueDate">발행일자</option>-->
-<!--                                </select>-->
-<!--                            </div>-->
-<!--                        </dd>-->
-<!--                    </dl>-->
+                    <!--                    <dl>-->
+                    <!--                        <dt>-->
+                    <!--                            <label for="cboAlign">-->
+                    <!--                                정렬<span class="eq"></span>-->
+                    <!--                            </label>-->
+                    <!--                        </dt>-->
+                    <!--                        <dd>-->
+                    <!--                            <div class="srch-box">-->
+                    <!--                                <select id="cboAlign" name="cboAlign">-->
+                    <!--                                    <option value="createDate">작성일자</option>-->
+                    <!--                                    <option value="issueDate">발행일자</option>-->
+                    <!--                                </select>-->
+                    <!--                            </div>-->
+                    <!--                        </dd>-->
+                    <!--                    </dl>-->
                     <dl>
                         <dt>
                             조회기간<span class="eq">*</span>
@@ -130,40 +130,40 @@
             </div>
             <div class="section-top">
                 <div class="search-wrap">
-<!--                    <form id="totalForm">-->
-<!--                        <table class="write-table">-->
-<!--                            <colgroup>-->
-<!--                                <col class="wp20">-->
-<!--                                <col class="wauto">-->
-<!--                                <col class="wp20">-->
-<!--                                <col class="wauto">-->
-<!--                                <col class="wp20">-->
-<!--                                <col class="wauto">-->
-<!--                            </colgroup>-->
-<!--                            <tbody>-->
-<!--                            <tr>-->
-<!--                                <th style="text-align: center">-->
-<!--                                    <label for="totalAmount">총 합계금액</label>-->
-<!--                                </th>-->
-<!--                                <td>-->
-<!--                                    <input id="totalAmount" name="totalAmount" readonly/>-->
-<!--                                </td>-->
-<!--                                <th style="text-align: center">-->
-<!--                                    <label for="totalSupPrice">총 공급가액</label>-->
-<!--                                </th>-->
-<!--                                <td>-->
-<!--                                    <input id="totalSupPrice" name="totalSupPrice" readonly />-->
-<!--                                </td>-->
-<!--                                <th style="text-align: center">-->
-<!--                                    <label for="totalTax">총 세액</label>-->
-<!--                                </th>-->
-<!--                                <td>-->
-<!--                                    <input id="totalTax" name="totalTax" readonly />-->
-<!--                                </td>-->
-<!--                            </tr>-->
-<!--                            </tbody>-->
-<!--                        </table>-->
-<!--                    </form>-->
+                    <!--                    <form id="totalForm">-->
+                    <!--                        <table class="write-table">-->
+                    <!--                            <colgroup>-->
+                    <!--                                <col class="wp20">-->
+                    <!--                                <col class="wauto">-->
+                    <!--                                <col class="wp20">-->
+                    <!--                                <col class="wauto">-->
+                    <!--                                <col class="wp20">-->
+                    <!--                                <col class="wauto">-->
+                    <!--                            </colgroup>-->
+                    <!--                            <tbody>-->
+                    <!--                            <tr>-->
+                    <!--                                <th style="text-align: center">-->
+                    <!--                                    <label for="totalAmount">총 합계금액</label>-->
+                    <!--                                </th>-->
+                    <!--                                <td>-->
+                    <!--                                    <input id="totalAmount" name="totalAmount" readonly/>-->
+                    <!--                                </td>-->
+                    <!--                                <th style="text-align: center">-->
+                    <!--                                    <label for="totalSupPrice">총 공급가액</label>-->
+                    <!--                                </th>-->
+                    <!--                                <td>-->
+                    <!--                                    <input id="totalSupPrice" name="totalSupPrice" readonly />-->
+                    <!--                                </td>-->
+                    <!--                                <th style="text-align: center">-->
+                    <!--                                    <label for="totalTax">총 세액</label>-->
+                    <!--                                </th>-->
+                    <!--                                <td>-->
+                    <!--                                    <input id="totalTax" name="totalTax" readonly />-->
+                    <!--                                </td>-->
+                    <!--                            </tr>-->
+                    <!--                            </tbody>-->
+                    <!--                        </table>-->
+                    <!--                    </form>-->
                     <dl>
                         <dt>
                             <label for="totalAmount">
@@ -282,6 +282,7 @@
     <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
     <th:block th:replace="/common/popup_company :: popup_company"></th:block>
     <th:block th:replace="/common/popup_invoice :: popup_invoice"></th:block>
+    <th:block th:replace="/common/popup_totalAmount :: popup_totalAmount"></th:block>
 
     <script type="text/javascript">
 
@@ -417,6 +418,7 @@
                 });
             }
 
+            // 계산서 등록 팝업
             showInvoiceForm(data) {
                 let _this = this;
                 let content = tmpl('popup_invoiceTemplate', data);
@@ -428,124 +430,220 @@
                 } else {
                     modalContainer = new PopupDraggable('수정');
                 }
-                modalContainer.open({width: 1050, height: 620, $content});
+                modalContainer.open({width: 1200, height: 680, $content});
+                initializeDetailRows();
+
+                // 매출 구분
+                let $saleType = $content.find('#sale_type');
+                AjaxUtil.fillSelectOptions($saleType, 'system_code', 'choose', false, 'sale_type');
+
+                // 공급자 정보 불러오기
+                let data1 = {
+                    spjangcd: 'ZZ',
+                };
+                let url = _this.url + '/invoicer_read';
+                let fnSaveSuccess = function (result) {
+                    if (result.success) {
+                        $content.find('#InvoicerCorpNum').val(result.data.saupnum);
+                        // $content.find('#InvoicerTaxRegID').val(result.data);
+                        $content.find('#InvoicerCorpName').val(result.data.spjangnm);
+                        // $content.find('#InvoicerCEOName').val(result.data.compname);
+                        $content.find('#InvoicerAddr').val(result.data.address);
+                        $content.find('#InvoicerBizType').val(result.data.biztype);
+                        $content.find('#InvoicerBizClass').val(result.data.item);
+                        $content.find('#InvoicerContactName').val(result.data.agnertel1);
+                        $content.find('#InvoicerTEL').val(result.data.agnertel2);
+                        $content.find('#InvoicerEmail').val(result.data.emailadres);
+
+                    }
+                };
+                AjaxUtil.getAsyncData(url, data1, fnSaveSuccess);
 
 
 
-                $content.find('#btnCompanySearch').click(function () {
+                let oldBusinessNumber = null;
+                // 선택 버튼(거래처 조회)
+                $content.find('#btnSelectInvoicee').click(function () {
                     let poppage = new PopCompComponent();
-                    let $poppage = $(poppage);
+
                     let searchcallback = function (items) {
                         console.log('btnCompanySearch', items);
-                        $content.find('#cboCompany').val(items.id);
-                        $content.find('#CompanyName').val(items.compname);
-
-                        if ($Material_id.val() && $cboCompany.val()) {
-                            tryShowPrice();
-                        }
+                        $content.find('#InvoiceeID').val(items.id).trigger('change');
+                        $content.find('#InvoiceeCorpNum').val(items.business_number);
+                        $content.find('#InvoiceeTaxRegID').val(items.invoiceetaxregid);
+                        $content.find('#InvoiceeCorpName').val(items.compname);
+                        $content.find('#InvoiceeCEOName').val(items.invoiceeceoname);
+                        $content.find('#InvoiceeAddr').val(items.invoiceeaddr);
+                        $content.find('#InvoiceeBizType').val(items.invoiceebiztype);
+                        $content.find('#InvoiceeBizClass').val(items.invoiceebizclass);
+                        $content.find('#InvoiceeContactName1').val(items.invoiceecontactname1);
+                        $content.find('#InvoiceeTEL1').val(items.invoiceetel1);
+                        $content.find('#InvoiceeEmail1').val(items.invoiceeemail1);
+                        oldBusinessNumber = items.business_number;
                     };
 
                     poppage.show(searchcallback);
                 });
 
                 // 저장버튼
-                let $btnPopSujuSave = $('#btnPopSujuSave');
+                let $saveInvoicer = $content.find('#saveInvoicer');
+                let $taxForm = $content.find('#taxForm');
 
-
-                //팝업타이틀 설정
-                let $popTitle = $content.find('#popTitle');
-                if (data.mode === 'new') {
-                    $popTitle.text('계산서 등록');
-                } else {
-                    // 수주 수정시 제품그룹과 제품을 수정하게 할 것 인지?
-                    $popTitle.text('계산서 수정');
-
-                }
-                // FormUtil.BindDataForm(data, $sujuForm);
-                let $invatyn = $content.find('#invatyn');
-
-
-
-                // 수주등록 팝업 저장버튼 클릭
-                $btnPopSujuSave.click(function (e) {
+                $saveInvoicer.click(function (e) {
 
                     //수주일, 납기일 체크?
-                    let data = FormUtil.extractForm($sujuForm);
-                    console.log('$btnPopSujuSave', data);
+                    let data = FormUtil.extractForm($taxForm);
+                    console.log('$taxForm', data);
+
+                    let id = data.InvoiceeID;
+                    let newBusinessNumber = data.InvoiceeCorpNum;
 
 
-                    if ((data.Material_id == null) || (data.Material_id === '')) {
-                        Alert.alert('', '제품을 선택하세요.');
-                        return;
-                    }
-
-                    if (($CompanyName.val() == null) || ($CompanyName.val() === '')) {
-                        Alert.alert('', '판매처를 선택하세요.');
-                        return;
-                    }
-
-                    if ($SujuQty.val() === '') {
-                        Alert.alert('', '수주량을 입력하세요.');
-                        return;
-                    }
-
-                    let currentUnitPrice = $content.find('#unitPrice').val();
-                    let unitPriceChanged = originalUnitPrice != null &&
-                        parseFloat($content.find('#unitPrice').val().replace(/,/g, '')) !== originalUnitPrice;
-
-
-                    Alert.confirm('', '저장하시겠습니까?', function () {
-                        let doSave = function () {
-                            let url = _this.url + '/manual_save';
-                            data.SujuQty = data.SujuQty.replace(/,/g, '');
-                            data.unitPrice.replace(/,/g, '');
-
-                            let fnSaveSuccess = function (result) {
+                    if (id && oldBusinessNumber && oldBusinessNumber !== newBusinessNumber) {
+                        Alert.confirm('', '사업자등록번호가 변경되었습니다.\n수정하시겠습니까?\n취소하면 새로 등록합니다.',
+                            function () {
+                                // 확인(수정 선택)
+                                let url = _this.url + '/invoicee_save';
+                                let fnSaveSuccess = function (result) {
+                                    if (result.success) {
+                                        Alert.alert('', '저장되었습니다.');
+                                    } else {
+                                        Alert.alert('', result.message);
+                                    }
+                                };
+                                AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
+                            },
+                            function () {
+                                // 취소(신규 선택)
+                                data.InvoiceeID = '';
+                                let url = _this.url + '/invoicee_save';
+                                let fnSaveSuccess = function (result) {
+                                    if (result.success) {
+                                        Alert.alert('', '저장되었습니다.');
+                                        $content.find('#InvoiceeID').val(result.data.id);
+                                    } else {
+                                        Alert.alert('', result.message);
+                                    }
+                                };
+                                AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
+                            }
+                        );
+                    } else {
+                        // id 없거나 사업자번호 변경 안된 경우 그냥 저장
+                        let url = _this.url + '/invoicee_save';
+                        let fnSaveSuccess = function (result) {
+                            if (result.success) {
                                 Notify.success("저장되었습니다.");
-                                _this.searchMainData();
-                                modalContainer.close();
-                            };
-
-                            AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
+                            } else {
+                                Notify.error(result.message || "저장에 실패했습니다.");
+                            }
                         };
-
-                        if (unitPriceChanged) {
-                            let now = new Date();
-                            let hh = String(now.getHours()).padStart(2, '0');
-                            let mm = String(now.getMinutes()).padStart(2, '0');
-                            let ss = String(now.getSeconds()).padStart(2, '0');
-
-                            let applyStartDate = `${data.JumunDate}T${hh}:${mm}:${ss}`;
-
-                            // 단가 저장 먼저 수행
-                            let priceData = {
-                                Material_id: data.Material_id,
-                                Company_id: data.Company_id,
-                                UnitPrice: data.unitPrice.replace(/,/g, ''),
-                                ApplyStartDate: applyStartDate,
-                                type: '02',
-                                ChangerName: userinfo.username
-                            };
-
-                            AjaxUtil.postAsyncData('/api/definition/material/savePrice', priceData, function (res) {
-                                if (res.success) {
-                                    doSave(); // 수주 저장 진행
-                                } else {
-                                    Alert.alert('단가 저장 실패', res.message || '알 수 없는 오류');
-                                }
-                            });
-                        } else {
-                            doSave(); // 단가 변경 없으면 수주만 저장
-                        }
-                    });
+                        AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
+                    }
 
                 });
+
+                // 작성일자
+                let $writeDate = $content.find('#writeDate');
+                let today = CommonUtil.getYYYYMMDD();
+                $writeDate.val(today);
+
+                // 품목 추가 버튼
+                $(document).on('click', 'a[id^="btnViewItem_"]', function (e) {
+                    e.preventDefault();
+
+
+                    const $btn = $(this);
+                    const $row = $btn.closest('tr'); // 버튼이 속한 tr
+
+                    const pop = new PopMatComponent();
+                    pop.material_type = 'product,sangpum';
+
+                    pop.show(function (item) {
+
+                        $row.find('input[id$=".ItemId"]').val(item.id || '');
+                        $row.find('textarea[id$=".ItemName"]').val(item.Name || '');
+                        $row.find('textarea[id$=".Spec"]').val(item.Spec || '');
+
+                        checkAndTryShowPrice($row);
+
+                    });
+
+                    pop.searchDataBind();
+                });
+
+                // 합계금액 클릭, 합계금액 옆 계산버튼 클릭
+                let $totalAmountAct = $content.find('#totalAmountAct');
+                $totalAmountAct.click(function () {
+                    let poppage = new PopTotalAmountComponent();
+
+                    let searchcallback = function (items) {
+                        console.log('btnCompanySearch', items);
+
+                    };
+
+                    poppage.show(searchcallback);
+                });
+
+                $content.find('#InvoiceeID').change(function () {
+                    $content.find('tr[id^="item_"]').each(function () {
+                        checkAndTryShowPrice($(this));
+                    });
+                });
+
+                // 단가 가져오기
+                function checkAndTryShowPrice($row) {
+                    const $Material_id = $row.find('input[id$=".ItemId"]');
+                    const $InvoiceeID = $content.find('#InvoiceeID'); // 거래처 id
+                    const today = new Date().getFullYear().toString();
+                    const month = $row.find('input[id$=".PurchaseDT1"]').val();
+                    const day = $row.find('input[id$=".PurchaseDT2"]').val();
+
+                    const monthStr = month ? month.padStart(2, '0') : '01';
+                    const dayStr = day ? day.padStart(2, '0') : '01';
+                    const JumunDate = `${today}-${monthStr}-${dayStr}`;
+
+                    if ($Material_id.val() && $InvoiceeID.val() && JumunDate) {
+                        tryShowPrice($Material_id.val(), $InvoiceeID.val(), $row, JumunDate);
+                    }
+                }
+
+                $(document).on('change', 'input[id$=".PurchaseDT1"], input[id$=".PurchaseDT2"]', function () {
+                    const $row = $(this).closest('tr');
+                    checkAndTryShowPrice($row);
+                });
+
+                function tryShowPrice(mat_pk, company_id, row, JumunDate) {
+                    let url = '/api/sales/suju/readPriceSuju';
+                    let data = {
+                        'mat_pk': mat_pk,
+                        'company_id': company_id,
+                        'JumunDate': JumunDate
+                    };
+
+                    if (mat_pk && company_id && JumunDate) {
+                        let fnsuccess = function (result) {
+                            console.log('단가 결과', result);
+                            if (result && result.data && result.data.length > 0) {
+                                let unitPrice = parseFloat(result.data[0].UnitPrice);
+                                row.find('input[id$=".UnitCost"]').val(unitPrice.toLocaleString());
+                            } else {
+                                row.find('input[id$=".UnitCost"]').val('');
+                            }
+                        };
+
+                        AjaxUtil.getAsyncData(url, data, fnsuccess);
+                    }
+                }
+
             }
+
+
 
             deleteSujuData(id, state, ShipmentStateName) {
                 let _this = this;
                 let url = _this.url + '/delete';
-                let data = {'id':id, 'State': state, 'ShipmentStateName': ShipmentStateName}
+                let data = {'id': id, 'State': state, 'ShipmentStateName': ShipmentStateName}
                 let fnsuccess = function (res) {
                     if (res.success) {
                         Notify.success('삭제되었습니다.');
@@ -579,7 +677,7 @@
 
                 let fnsuccess = function (result) {
                     if (result != null) {
-                        console.log('result.data',result.data);
+                        console.log('result.data', result.data);
                         _this.viewData.sourceCollection = result.data;
                     }
                 };
@@ -615,16 +713,72 @@
                         }
                     },
                     columns: [
-                        {binding: 'company_name', header: '거래처', width: 100, align: 'left', isReadOnly: true, allowMerging: true},
-                        {binding: 'ship_date', header: '출하일', width: 120, align: 'center', isReadOnly: true, allowMerging: true},
-                        {binding: 'total_qty', header: '총 지시량', width: 140, align: 'center', isReadOnly: true, allowMerging: true},
-                        {binding: 'total_price', header: '총 공급가', width: 150, align: 'left', isReadOnly: true, allowMerging: true},
-                        {binding: 'total_vat', header: '총 세액', width: 150, align: 'left', isReadOnly: true, allowMerging: true},
-                        {binding: 'total_amount', header: '총액', width: 150, align: 'left', isReadOnly: true, allowMerging: true},
-                        {binding: 'state_name', header: '상태', width: 60, align: 'center', isReadOnly: true, allowMerging: true},
+                        {
+                            binding: 'company_name',
+                            header: '거래처',
+                            width: 100,
+                            align: 'left',
+                            isReadOnly: true,
+                            allowMerging: true
+                        },
+                        {
+                            binding: 'ship_date',
+                            header: '출하일',
+                            width: 120,
+                            align: 'center',
+                            isReadOnly: true,
+                            allowMerging: true
+                        },
+                        {
+                            binding: 'total_qty',
+                            header: '총 지시량',
+                            width: 140,
+                            align: 'center',
+                            isReadOnly: true,
+                            allowMerging: true
+                        },
+                        {
+                            binding: 'total_price',
+                            header: '총 공급가',
+                            width: 150,
+                            align: 'left',
+                            isReadOnly: true,
+                            allowMerging: true
+                        },
+                        {
+                            binding: 'total_vat',
+                            header: '총 세액',
+                            width: 150,
+                            align: 'left',
+                            isReadOnly: true,
+                            allowMerging: true
+                        },
+                        {
+                            binding: 'total_amount',
+                            header: '총액',
+                            width: 150,
+                            align: 'left',
+                            isReadOnly: true,
+                            allowMerging: true
+                        },
+                        {
+                            binding: 'state_name',
+                            header: '상태',
+                            width: 60,
+                            align: 'center',
+                            isReadOnly: true,
+                            allowMerging: true
+                        },
                         {binding: 'issue_yn', header: '발행 여부', width: 80, align: 'right', isReadOnly: true},
                         {binding: 'issue_date', header: '발행 일자', width: 90, align: 'right', isReadOnly: true},
-                        {binding: 'description', header: '비고', width: 90, align: 'right', isReadOnly: true, allowMerging: true},
+                        {
+                            binding: 'description',
+                            header: '비고',
+                            width: 90,
+                            align: 'right',
+                            isReadOnly: true,
+                            allowMerging: true
+                        },
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
                 });

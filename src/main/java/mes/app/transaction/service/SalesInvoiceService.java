@@ -47,5 +47,31 @@ public class SalesInvoiceService {
 		return items;
 	}
 
+	public Map<String, Object> getInvoicerDatail(String spjangcd) {
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("spjangcd", spjangcd);
+
+		String sql = """
+			select "saupnum"
+			, "spjangnm"
+			, "adresa"
+			, "adresb"
+			, ("adresa" || ' ' || COALESCE("adresb", '')) AS address
+			, "biztype"
+			, "item"
+			, "tel1"
+			, "agnertel1"
+			, "agnertel2"
+			, "emailadres"
+			from tb_xa012
+			where spjangcd = :spjangcd
+			""";
+
+		Map<String,Object> item = this.sqlRunner.getRow(sql, paramMap);
+
+		return item;
+	}
+
 
 }
