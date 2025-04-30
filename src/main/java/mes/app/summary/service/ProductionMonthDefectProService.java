@@ -102,7 +102,7 @@ public class ProductionMonthDefectProService {
 		}
 		
 		sql += """
-				order by A.mat_type_name, A.mat_grp_name, A.mat_name	  
+				order by A.mat_type_name, A.mat_grp_name, A.mat_name	
 				""";
 		
 		
