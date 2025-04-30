@@ -588,7 +588,6 @@
                 <div class="section-top">
                         <input type="hidden" id="ItemKey" name="ItemKey" >
                         <input type="hidden" id="ChargeDirection" name="ChargeDirection" value="정과금">
-                        <input type="hidden" id="IssueTiming" name="IssueTiming" value="직접발행">
                         <input type="hidden" id="IssueType" name="IssueType" value="정발행">
                         <input type="hidden" id="ModifyCode" name="ModifyCode" >
                         <div id="taxtype_area">
@@ -621,7 +620,7 @@
                                             <th class="al_c" colspan="12" rowspan="2"><span>공 급 자</span><br>(보 관 용)</th>
                                             <th colspan="16" rowspan="2">
                                                 <span>매출구분</span>
-                                                <select class="in_txt" id="sale_type" style="width:140px; line-height:1;"></select>
+                                                <select class="in_txt" id="sale_type" name="sale_type" style="width:140px; line-height:1;"></select>
                                             </th>
                                             <th class="al_r pdr_3" colspan="10">책번호 : </th>
                                             <td class="al_l pdl_3" colspan="10"><input class="in_txt numeric" maxlength="4" tabindex="1" type="text" id="Kwon" name="Kwon" ></td>
@@ -719,7 +718,7 @@
                                             <th class="al_c pet1 gray_border_l tax-related" colspan="42"><span class="bold">세액</span></th>
                                         </tr>
                                         <tr>
-                                            <td class="al_c noborder_l gray_border_t" colspan="11"><input type="date" id="writeDate" class="in_txt numeric al_c dp-applied" maxlength="10" style="min-width: 114px; background: none; padding: 0px 0px 0px 8px;"></td>
+                                            <td class="al_c noborder_l gray_border_t" colspan="11"><input type="date" id="writeDate" name="writeDate" class="in_txt numeric al_c dp-applied" maxlength="10" style="min-width: 114px; background: none; padding: 0px 0px 0px 8px;"></td>
                                             <td class="al_l pet0 pdl_3 gray_border_t gray_border_l" colspan="47"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="SupplyCostTotal" name="SupplyCostTotal" ></td>
                                             <td class="al_l pet1 pdl_3 gray_border_t gray_border_l tax-related" colspan="42"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="TaxTotal" name="TaxTotal" ></td>
                                         </tr>
@@ -804,10 +803,10 @@
                                             <td class="al_l pdl_3 noborder_l item_t_border" colspan="4">
                                                 <input type="hidden" id="detailList0.SerialNum" name="detailList[0].SerialNum" >
                                                 <input type="hidden" id="detailList0.PurchaseDT" name="detailList[0].PurchaseDT" >
-                                                <input class="in_txt numeric al_c in_detail" maxlength="2" tabindex="50" type="text" id="detailList0.PurchaseDT1">
+                                                <input class="in_txt numeric al_c in_detail" maxlength="2" tabindex="50" type="text" id="detailList0.PurchaseDT1" name="detailList[0].PurchaseDT1">
                                             </td>
                                             <td class="al_l pdl_3 item_border" colspan="4">
-                                                <input class="in_txt numeric al_c in_detail" maxlength="2" tabindex="50" type="text" id="detailList0.PurchaseDT2">
+                                                <input class="in_txt numeric al_c in_detail" maxlength="2" tabindex="50" type="text" id="detailList0.PurchaseDT2" name="detailList[0].PurchaseDT2">
                                             </td>
                                             <td class="al_l pdl_3 item_border" colspan="24">
                                                 <div class="align-center-wrap">
@@ -871,7 +870,7 @@
 
 
             <div class="popup-button">
-                <button type="button" class="btn-popup" id="btnCompSelect" ><span data-commonCd="발행">발행</span></button>
+                <button type="button" class="btn-popup" id="btnInvoiceSave" ><span data-commonCd="저장">저장</span></button>
                 <button type="button" class="btn-popup" id="modal-close-button"><span data-commonCd="닫기">닫기</span></button>
             </div>
 
@@ -1262,6 +1261,65 @@
 
             updateTotals(); // 공급가액 세액 합계 다시 계산
         });
+
+        function formatBizNum(value) {
+            value = value.replace(/[^0-9]/g, '').slice(0, 10);
+            if (value.length > 3 && value.length <= 5) {
+                return value.slice(0, 3) + '-' + value.slice(3);
+            } else if (value.length > 5) {
+                return value.slice(0, 3) + '-' + value.slice(3, 5) + '-' + value.slice(5);
+            }
+            return value;
+        }
+
+        $(document).on('input', '#InvoicerCorpNum, #InvoiceeCorpNum', function () {
+            $(this).val(formatBizNum($(this).val()));
+        });
+
+        function formatPhoneNumber(value) {
+            value = value.replace(/[^0-9]/g, '');
+
+            // 서울 지역번호 (02)
+            if (value.startsWith('02')) {
+                if (value.length > 2 && value.length <= 5) {
+                    return value.slice(0, 2) + '-' + value.slice(2);
+                } else if (value.length > 5 && value.length <= 9) {
+                    return value.slice(0, 2) + '-' + value.slice(2, 5) + '-' + value.slice(5);
+                } else if (value.length > 9) {
+                    return value.slice(0, 2) + '-' + value.slice(2, 6) + '-' + value.slice(6, 10);
+                }
+            }
+
+            // 나머지 지역번호 (031, 051, 010 등)
+            if (value.length > 3 && value.length <= 6) {
+                return value.slice(0, 3) + '-' + value.slice(3);
+            } else if (value.length > 6 && value.length <= 10) {
+                return value.slice(0, 3) + '-' + value.slice(3, 6) + '-' + value.slice(6);
+            } else if (value.length > 10) {
+                return value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
+            }
+
+            return value;
+        }
+
+        $(document).on('input', '#InvoicerTEL, #InvoiceeTEL1', function () {
+            $(this).val(formatPhoneNumber($(this).val()));
+        });
+
+        $(document).on('input', '#Cash, #ChkBill, #Note, #Credit', function () {
+            let inputVal = $(this).val().replace(/[^0-9]/g, ''); // 숫자만 남김
+            if (inputVal === '') {
+                $(this).val('');
+                return;
+            }
+            let formatted = Number(inputVal).toLocaleString('en-US'); // 천 단위 , 추가
+            $(this).val(formatted);
+        });
+
+
+
+
+
 
 
 

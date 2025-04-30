@@ -39,22 +39,23 @@
                         <dd>
                             <div class="srch-box">
                                 <select id="cboInvoice" name="cboInvoice">
-                                    <option value="tax">세금계산서</option>
-                                    <option value="bill">계산서</option>
+                                    <option value="" selected>전체</option>
+                                    <option value="과세">세금계산서</option>
+                                    <option value="영세">영세율 세금계산서</option>
+                                    <option value="면세">계산서</option>
                                 </select>
                             </div>
                         </dd>
                     </dl>
                     <dl>
                         <dt>
-                            <label for="cboCompany">
+                            <label for="btnCompanySearch">
                                 거래처
                             </label>
                         </dt>
                         <dd>
-                            <div class="srch-box">
-                                <select class="form-control2" id="cboCompany" name="cboCompany"></select>
-                            </div>
+                            <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭해서 검색하세요.">
+                            <input type="hidden" id="cboCompanyHidden">
                         </dd>
                     </dl>
                     <!--                    <dl>-->
@@ -130,40 +131,6 @@
             </div>
             <div class="section-top">
                 <div class="search-wrap">
-                    <!--                    <form id="totalForm">-->
-                    <!--                        <table class="write-table">-->
-                    <!--                            <colgroup>-->
-                    <!--                                <col class="wp20">-->
-                    <!--                                <col class="wauto">-->
-                    <!--                                <col class="wp20">-->
-                    <!--                                <col class="wauto">-->
-                    <!--                                <col class="wp20">-->
-                    <!--                                <col class="wauto">-->
-                    <!--                            </colgroup>-->
-                    <!--                            <tbody>-->
-                    <!--                            <tr>-->
-                    <!--                                <th style="text-align: center">-->
-                    <!--                                    <label for="totalAmount">총 합계금액</label>-->
-                    <!--                                </th>-->
-                    <!--                                <td>-->
-                    <!--                                    <input id="totalAmount" name="totalAmount" readonly/>-->
-                    <!--                                </td>-->
-                    <!--                                <th style="text-align: center">-->
-                    <!--                                    <label for="totalSupPrice">총 공급가액</label>-->
-                    <!--                                </th>-->
-                    <!--                                <td>-->
-                    <!--                                    <input id="totalSupPrice" name="totalSupPrice" readonly />-->
-                    <!--                                </td>-->
-                    <!--                                <th style="text-align: center">-->
-                    <!--                                    <label for="totalTax">총 세액</label>-->
-                    <!--                                </th>-->
-                    <!--                                <td>-->
-                    <!--                                    <input id="totalTax" name="totalTax" readonly />-->
-                    <!--                                </td>-->
-                    <!--                            </tr>-->
-                    <!--                            </tbody>-->
-                    <!--                        </table>-->
-                    <!--                    </form>-->
                     <dl>
                         <dt>
                             <label for="totalAmount">
@@ -172,7 +139,7 @@
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <input class="form-control2" id="totalAmount" name="totalAmount" readonly>
+                                <input style="text-align: right;max-width: 200px;" class="form-control2" id="totalAmount" name="totalAmount" readonly>
                             </div>
                         </dd>
                     </dl>
@@ -184,7 +151,7 @@
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <input class="form-control2" id="totalSupPrice" name="totalSupPrice" readonly>
+                                <input style="text-align: right;max-width: 200px;" class="form-control2" id="totalSupPrice" name="totalSupPrice" readonly>
                             </div>
                         </dd>
                     </dl>
@@ -196,7 +163,7 @@
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <input class="form-control2" id="totalTax" name="totalTax" readonly>
+                                <input style="text-align: right;max-width: 200px;" class="form-control2" id="totalTax" name="totalTax" readonly>
                             </div>
                         </dd>
                     </dl>
@@ -216,8 +183,23 @@
                             </a>
                         </li>
                         <li>
-                            <a class="btn" title="역발행/재전송" id="btnIssue">
+                            <a class="btn btn-edit" title="수정" id="btnIssue" >
+                                발행
+                            </a>
+                        </li>
+                        <li style="display: none;">
+                            <a class="btn btn-edit" title="수정" id="btnIssueCancel">
+                                발행 취소
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn" title="역발행/재전송" id="btnReIssue">
                                 역발행/재전송
+                            </a>
+                        </li>
+                        <li style="display: none;">
+                            <a class="btn" title="역발행/재전송" id="btnModifyInvoice">
+                                수정 세금계산서 발행
                             </a>
                         </li>
                     </ul>
@@ -310,7 +292,7 @@
                 let _this = this;
                 this.grid = new wijmo.grid.FlexGrid('#theGrid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
                     autoGenerateColumns: false,
                     showMarquee: true,
                     isReadOnly: true,
@@ -320,20 +302,21 @@
                         }
                     },
                     columns: [
-                        {binding: 'CompanyName', header: '작성일자', width: 90},
-                        {binding: 'SujuTypeName', header: '발급일자', width: 90, align: 'center'},
-                        {binding: 'JumunDate', header: '사업자 번호', width: 120, align: 'center'},
-                        {binding: 'MaterialGroupName', header: '상호', width: 100},
-                        {binding: 'product_code', header: '품명', width: 100},
-                        {binding: 'product_name', header: '합계금액', width: 160},
-                        {binding: 'unit', header: '공급가액', width: 60, align: 'center'},
-                        {binding: 'SujuQty', header: '세액', width: 80, align: 'right', format: 'n0'},
-                        {binding: 'unitPrice', header: '전송일자', width: 90, align: 'right', format: 'n0'},
-                        {binding: 'Vat', header: '상태', width: 100, align: 'right', format: 'n0'},
-                        {binding: 'totalAmount', header: '구분', width: 100, align: 'right', format: 'n0'},
-                        {binding: 'DueDate', header: '대표자', width: 100, align: 'center'},
-                        {binding: 'StateName', header: '이메일', width: 80, align: 'center'},
-                        {binding: 'ShipmentStateName', header: '주소', width: 80, align: 'center'},
+                        {binding: 'misdate', header: '작성일자', width: 110, align: 'center'},
+                        {binding: 'misnum', header: '작성번호', width: 90, visible: false},
+                        {binding: 'cltcd', header: '회사id', width: 90, visible: false},
+                        {binding: 'ivercorpnum', header: '사업자 번호', width: 150, align: 'center'},
+                        {binding: 'ivercorpnm', header: '상호', width: 130, align: 'left'},
+                        {binding: 'item_summary', header: '품명', width: 100},
+                        {binding: 'totalamt', header: '합계금액', width: 110, align: 'right', format: 'n0'},
+                        {binding: 'supplycost', header: '공급가액', width: 110, align: 'right', format: 'n0'},
+                        {binding: 'taxtotal', header: '세액', width: 110, align: 'right', format: 'n0'},
+                        {binding: 'statecode', header: '상태', width: 100, align: 'center'},
+                        {binding: 'taxtype', header: '구분', width: 100, align: 'center'},
+                        {binding: 'misgubun_name', header: '매출구분', width: 100, align: 'center'},
+                        {binding: 'iverceonm', header: '대표자', width: 100, align: 'center'},
+                        {binding: 'iveremail', header: '이메일', width: 130, align: 'center'},
+                        {binding: 'iveraddr', header: '주소', width: 150, align: 'center'},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
@@ -357,9 +340,6 @@
                     let defaultData = {
                         id: '',
                         mode: 'new',
-                        JumunDate: nowDate,
-                        DueDate: dueDate,
-                        State: 'received'
                     };
                     _this.showInvoiceForm(defaultData);
                 });
@@ -392,30 +372,32 @@
                 $('#btnDelete').click(function (e) {
                     let items = _this.grid.selectedItems;
                     console.log('items', items);
-                    if (items.length > 0) {
-                        Alert.confirm('', '삭제하시겠습니까?',
-                            function () {
-                                let id = items[0].id;
-                                let state = items[0].State;
-                                let ShipmentStateName = items[0].ShipmentStateName;
-                                _this.deleteSujuData(id, state, ShipmentStateName);
-                            },
-                            function () {
-                            }
-                        );
-                    } else {
-                        Alert.alert('', '삭제할 항목을 선택해주세요.', function () {
-                            $(this).focus();
-                        });
+
+                    if (items.length === 0) {
+                        Alert.alert('', '삭제할 항목을 선택해주세요.');
+                        return;
                     }
+
+                    Alert.confirm('', '선택한 항목을 삭제하시겠습니까?', function () {
+                        const deleteList = items.map(item => ({
+                            misnum: item.misnum,
+                            misdate: item.misdate.replace(/-/g, '')  // '2025-04-30' → '20250430'
+                        }));
+
+                        let url = _this.url + '/invoice_delete';
+                        AjaxUtil.postJsonData(url, deleteList, function (res) {
+                            if (res.success) {
+                                Alert.alert('', '삭제가 완료되었습니다.', function () {
+                                    _this.searchMainData();
+                                });
+                            } else {
+                                Alert.alert('', '삭제 중 오류가 발생했습니다.');
+                            }
+                        });
+                    });
+
                 });
 
-                // 엔터키 검색
-                $('#keyword').on('keypress', function (e) {
-                    if (e.keyCode === 13) {
-                        _this.searchMainData();
-                    }
-                });
             }
 
             // 계산서 등록 팝업
@@ -456,7 +438,7 @@
                 let url = _this.url + '/invoicer_read';
                 let fnSaveSuccess = function (result) {
                     if (result.success) {
-                        $content.find('#InvoicerCorpNum').val(result.data.saupnum);
+                        $content.find('#InvoicerCorpNum').val(result.data.saupnum).trigger('input');
                         // $content.find('#InvoicerTaxRegID').val(result.data);
                         $content.find('#InvoicerCorpName').val(result.data.spjangnm);
                         $content.find('#InvoicerCEOName').val(result.data.prenm);
@@ -464,14 +446,12 @@
                         $content.find('#InvoicerBizType').val(result.data.biztype);
                         $content.find('#InvoicerBizClass').val(result.data.item);
                         $content.find('#InvoicerContactName').val(result.data.agnertel1);
-                        $content.find('#InvoicerTEL').val(result.data.agnertel2);
+                        $content.find('#InvoicerTEL').val(result.data.agnertel2).trigger('input');
                         $content.find('#InvoicerEmail').val(result.data.emailadres);
 
                     }
                 };
                 AjaxUtil.getAsyncData(url, data1, fnSaveSuccess);
-
-
 
                 let oldBusinessNumber = null;
                 // 선택 버튼(거래처 조회)
@@ -479,9 +459,8 @@
                     let poppage = new PopCompComponent();
 
                     let searchcallback = function (items) {
-                        console.log('btnCompanySearch', items);
                         $content.find('#InvoiceeID').val(items.id).trigger('change');
-                        $content.find('#InvoiceeCorpNum').val(items.business_number);
+                        $content.find('#InvoiceeCorpNum').val(items.business_number).trigger('input');
                         $content.find('#InvoiceeTaxRegID').val(items.invoiceetaxregid);
                         $content.find('#InvoiceeCorpName').val(items.compname);
                         $content.find('#InvoiceeCEOName').val(items.invoiceeceoname);
@@ -489,9 +468,11 @@
                         $content.find('#InvoiceeBizType').val(items.invoiceebiztype);
                         $content.find('#InvoiceeBizClass').val(items.invoiceebizclass);
                         $content.find('#InvoiceeContactName1').val(items.invoiceecontactname1);
-                        $content.find('#InvoiceeTEL1').val(items.invoiceetel1);
+                        $content.find('#InvoiceeTEL1').val(items.invoiceetel1).trigger('input');
                         $content.find('#InvoiceeEmail1').val(items.invoiceeemail1);
                         oldBusinessNumber = items.business_number;
+
+
                     };
 
                     poppage.show(searchcallback);
@@ -626,6 +607,45 @@
                     poppage.show(searchcallback);
                 }
 
+                // 계산서 저장 버튼
+                let $btnInvoiceSave = $content.find('#btnInvoiceSave');
+
+                $btnInvoiceSave.click(function (e) {
+                    let data = FormUtil.extractForm($taxForm);
+
+                    for (let i = 0; i < 20; i++) {
+                        let month = data[`detailList[${i}].PurchaseDT1`];
+                        let day = data[`detailList[${i}].PurchaseDT2`];
+
+                        if (month && day) {
+                            // 두 값 모두 있을 때만 처리
+                            const paddedMonth = month.padStart(2, '0');
+                            const paddedDay = day.padStart(2, '0');
+                            data[`detailList[${i}].PurchaseDT`] = `${paddedMonth}${paddedDay}`;
+                        }
+
+                        // 원래 필드는 제거 (서버에 안 보내도 되게)
+                        delete data[`detailList[${i}].PurchaseDT1`];
+                        delete data[`detailList[${i}].PurchaseDT2`];
+                    }
+
+                    console.log('taxForm', data);
+
+                    Alert.confirm('', '저장하시겠습니까?', function () {
+                        let url = _this.url + '/invoice_save';
+
+                        let fnSaveSuccess = function (result) {
+                            Notify.success("저장되었습니다.");
+                            modalContainer.close();
+                        };
+
+                        AjaxUtil.postJsonAsyncData(url, data, fnSaveSuccess);
+                    });
+
+                });
+
+                // let data = FormUtil.extractForm($taxForm);
+
                 // $content.find('#InvoiceeID').change(function () {
                 //     $content.find('tr[id^="item_"]').each(function () {
                 //         checkAndTryShowPrice($(this));
@@ -680,7 +700,6 @@
             }
 
 
-
             deleteSujuData(id, state, ShipmentStateName) {
                 let _this = this;
                 let url = _this.url + '/delete';
@@ -697,29 +716,43 @@
                 AjaxUtil.postAsyncData(url, data, fnsuccess);
             }
 
-            // exportExcel() {
-            //     var targetview = this.grid;
-            //     targetview.exportExcel('수주내역.xls');
-            // }
-
+            // 계산서 가져오기
             searchMainData() {
                 let _this = this;
-                let date_kind = $('#cboDateKind').val();
+                let invoice_kind = $('#cboInvoice').val();
+                let cboCompany = $('#cboCompanyHidden').val();
                 let start = $('#srchStartDt').val();
                 let end = $('#srchEndDt').val();
                 let url = this.url + '/read';
 
                 let data = {
-                    'date_kind': date_kind,
+                    'invoice_kind': invoice_kind,
+                    'cboCompany': cboCompany,
                     'start': start,
                     'end': end,
                     'action': 'read'
                 };
-
+                let selector = null;
                 let fnsuccess = function (result) {
                     if (result != null) {
                         console.log('result.data', result.data);
-                        _this.viewData.sourceCollection = result.data;
+                        _this.grid.itemsSource = result.data;
+                        selector = new wijmo.grid.selector.Selector(_this.grid);
+
+                        let totalAmt = 0, totalSupply = 0, totalTax = 0;
+                        result.data.forEach(item => {
+                            totalAmt += item.totalamt || 0;
+                            totalSupply += item.supplycost || 0;
+                            totalTax += item.taxtotal || 0;
+                        });
+
+                        // 천 단위 콤마 포맷
+                        const formatNumber = (n) => n.toLocaleString('ko-KR');
+
+                        // 값 넣기
+                        $('#totalAmount').val(formatNumber(totalAmt));
+                        $('#totalSupPrice').val(formatNumber(totalSupply));
+                        $('#totalTax').val(formatNumber(totalTax));
                     }
                 };
                 AjaxUtil.getAsyncData(url, data, fnsuccess);
@@ -773,7 +806,7 @@
                         {
                             binding: 'total_qty',
                             header: '총 지시량',
-                            width: 140,
+                            width: 120,
                             align: 'center',
                             isReadOnly: true,
                             allowMerging: true
@@ -782,7 +815,7 @@
                             binding: 'total_price',
                             header: '총 공급가',
                             width: 150,
-                            align: 'left',
+                            align: 'right',
                             isReadOnly: true,
                             allowMerging: true
                         },
@@ -790,7 +823,7 @@
                             binding: 'total_vat',
                             header: '총 세액',
                             width: 150,
-                            align: 'left',
+                            align: 'right',
                             isReadOnly: true,
                             allowMerging: true
                         },
@@ -798,7 +831,7 @@
                             binding: 'total_amount',
                             header: '총액',
                             width: 150,
-                            align: 'left',
+                            align: 'right',
                             isReadOnly: true,
                             allowMerging: true
                         },
@@ -922,10 +955,8 @@
 
             $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
             $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
-            AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', false);
 
-            // page.searchMainData();
-
+            page.searchMainData();
 
             // 검색
             $('#btnSearch').click(function (e) {
@@ -935,6 +966,42 @@
             $('#btnShipList').on('click', function () {
                 page.showShipListPopup();
             });
+
+            $('#btnCompanySearch').click(function () {
+                let poppage = new PopCompComponent();
+                let $poppage = $(poppage);
+                let searchcallback = function (items) {
+                    //console.log('items : ',items);
+                    document.getElementById('btnCompanySearch').value = items.compname;
+                    document.getElementById('cboCompanyHidden').value = items.id;
+
+                    // 수동으로 input 이벤트 발생
+                    $('#btnCompanySearch').trigger('input');
+                };
+
+                poppage.show(searchcallback);
+            });
+
+            // input 감지 → x 버튼 표시/숨김, 히든값 클리어
+            $(document).on('input', '#btnCompanySearch', function () {
+                let $clearBtn = $(this).closest('.input-clear').find('.btn-clear');
+                let value = $(this).val().trim();
+
+                if (value) {
+                    $clearBtn.show();
+                } else {
+                    console.log('[DEBUG] cleared');
+                    $clearBtn.hide();
+                    $('#cboCompanyHidden').val('');
+                }
+            });
+
+            // x 버튼 클릭 → 텍스트 초기화 및 input 이벤트 트리거
+            $(document).on('click', '.btn-clear', function () {
+                const $input = $(this).siblings('input[type="text"]');
+                $input.val('').trigger('input'); // 🔥 input 이벤트 강제 발생
+            });
+
 
         })
     </script>
