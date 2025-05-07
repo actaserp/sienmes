@@ -31,7 +31,11 @@ public class HomeController {
 	Settings settings;	
 	
 	@RequestMapping(value= "/", method=RequestMethod.GET)
-    public ModelAndView pageIndex(HttpServletRequest request, HttpSession session) {	
+    public ModelAndView pageIndex(HttpServletRequest request, HttpSession session) {
+
+		// User-Agent 확인
+		String userAgent = request.getHeader("User-Agent").toLowerCase();
+		boolean isMobile = userAgent.contains("mobile") || userAgent.contains("android") || userAgent.contains("iphone");
 		
         SecurityContext sc = SecurityContextHolder.getContext();
         Authentication auth = sc.getAuthentication();         
@@ -58,8 +62,8 @@ public class HomeController {
 		mv.addObject("mqtt_host", mqtt_host);
 		mv.addObject("mqtt_web_port", mqtt_web_port);
 		mv.addObject("hmi_topic", hmi_topic);
-		
-		mv.setViewName("index");		
+
+		mv.setViewName(isMobile ? "mobile/mobile_main" : "index");
 		
 		return mv;
 	}
