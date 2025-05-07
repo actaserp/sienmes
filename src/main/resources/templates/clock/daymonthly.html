@@ -24,125 +24,147 @@
             </ul>
         </div>
 
-        <section class="section">
-            <div class="section-top">
-                <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            <label>단위명</label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <input type="text" class="form-control2" id="txtUnit" name="txtUnit">
+        <div class="tab-wrap">
+            <ul class="tab-links">
+                <li>
+                    <a href="#tab1" title="일별">일별</a>
+                </li>
+                <li>
+                    <a href="#tab2" title="월별">월별</a>
+                </li>
+            </ul>
+
+            <div class="tab-contents">
+                <section class="tab-item" id="tab1" >
+                    <div class="section-top">
+                        <div class="search-wrap">
+                            <dl>
+                                <dt>
+                                    <label>년월</label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <input type="month" class="form-control2" id="startdate" name="startdate">
+                                    </div>
+                                </dd>
+                            </dl>
+
+                            <dl>
+                                <dt>
+                                    <label>근무구분</label>
+                                </dt>
+                                <dd>
+                                   <select>
+                                       <option value="0">고정근무</option>
+                                       <option value="1">재량근무</option>
+                                       <option value="2">시차출퇴근</option>
+                                   </select>
+                                </dd>
+                            </dl>
+
+                            <!--<dl>
+                                <dt><span class="eq"></span></dt>
+                                <dd>
+                                    <li>
+                                        <a class="btn btn-delete" title="검색" id="btnSearch">
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            검색
+                                        </a>
+                                    </li>
+                                </dd>
+                            </dl>-->
+                        </div>
+                        <div class="button-wrap">
+                            <ul>
+                                <li>
+                                    <a class="btn btn-excell" title="저장" id="btnSave">
+                                        <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
+                                        저장
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div> <!--//section-top end -->
+
+                    <div class="row">
+                        <div class="col wp15">
+                            <div class="container-fluid">
+                                <div id="grid" style="height: 650px; max-height: 650px;"></div>
                             </div>
-                        </dd>
-                    </dl>
+                        </div>
 
-                    <dl>
-                        <dt><span class="eq"></span></dt>
-                        <dd>
-                            <li>
-                                <a class="btn btn-delete" title="검색" id="btnSearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    검색
-                                </a>
-                            </li>
-                        </dd>
-                    </dl>
-                </div>
-            </div> <!--//section-top end -->
-            <div class="container-fluid">
-                <p id="selectedItem"></p>
-                <div id="theGrid" style="height: 480px; max-height: 480px;"></div>
+                        <div class="wp85">
+                            <div class="container-fluid">
+                                <p id="selectedItem"></p>
+                                <div id="day-grid" style="height: 650px; max-height: 650px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="tab-item" id="tab2" >
+                    <div class="section-top">
+                        <div class="search-wrap">
+                            <dl>
+                                <dt>
+                                    <label>년월</label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <input type="month" class="form-control2" id="startdate2" name="startdate">
+                                    </div>
+                                </dd>
+                            </dl>
+
+                            <dl>
+                                <dt>
+                                    <label>사원명</label>
+                                </dt>
+                                <dd>
+                                    <select>
+                                        <option value="">전체</option>
+                                    </select>
+                                </dd>
+                            </dl>
+
+                            <dl>
+                                <dt>
+                                    <label>근무구분</label>
+                                </dt>
+                                <dd>
+                                    <select>
+                                        <option value="0">고정근무</option>
+                                        <option value="1">재량근무</option>
+                                        <option value="2">시차출퇴근</option>
+                                    </select>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="button-wrap">
+                            <ul>
+                                <li>
+                                    <a class="btn btn-excell" title="저장" id="btnSave2">
+                                        <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
+                                        월정산
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="btn btn-excell" title="저장" id="btnSave3">
+                                        <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
+                                        저장
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="container-fluid">
+                        <p id="selectedItem"></p>
+                        <div id="monthly-grid" style="height: 650px; max-height: 650px;"></div>
+                    </div>
+
+                </section>
             </div>
-            <div class="btn-wrap">
-            </div>
-        </section>
-        <section>
-            <div class="section-top">
-                <div class="search-wrap">
-                    <ul>
-                        <li>
-                            <!-- <a class="btn btn-excell" title="신규등록" id="btnNew" >
-                                 <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                 신규등록
-                             </a>-->
-                            <button type="button" class="btn-default" id="btnNew" name="btnNew"
-                                    style="height: 36px; width:115px;">
-                                <i class="fas fa-plus"></i>신규등록
-                            </button>
-                        </li>
-
-                        <li>
-                            <!-- <a class="btn btn-edit" id="btnSave" title="저장">
-                                 <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
-                                 저장
-                             </a>-->
-                            <button type="button" class="btn-default y_write_auth" id="btnSave"
-                                    style="float:none; height: 36px; width:115px;">
-                                <i class="fas fa-save"></i>저장
-                            </button>
-                        </li>
-
-                        <li>
-                            <!--  <a class="btn btn-delete" title="삭제" id="btnDel">
-                                  <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                  삭제
-                              </a>-->
-                            <button type="button" class="btn-danger y_write_auth" id="btnDel"
-                                    style="float:none; height: 36px; width:115px;"><i
-                                    class="fas fa-trash"></i>삭제
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="table-wrap" style=" overflow-x: auto;">
-                <form id="unitForm">
-                    <table>
-                        <caption style="text-align: left; margin-bottom: 8px;">등록테이블</caption>
-                        <colgroup>
-                            <col class="wp20">
-                            <col class="wp30">
-                            <col class="wp20">
-                            <col class="wp30">
-                        </colgroup>
-                        <input type="hidden" id="id" name="id"/>
-                        <tbody>
-                        <tr>
-                            <th>
-                                <label for="name"><span class="eq">*</span>단위명</label>
-                            </th>
-                            <td >
-                                <input type="text" id="name" name="name" style="width: 100%;">
-                            </td>
-                            <th>
-                                <label for="piece_yn">낱개단위</label>
-                            </th>
-                            <td >
-                                <select type="text" id="piece_yn" name="pieceYN" style="width: 100%;">
-                                    <option value="">No</option>
-                                    <option value="Y">Yes</option>
-                                </select>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>
-                                <label for="description"><span class="eq">*</span>설명</label>
-                            </th>
-                            <td colspan="3">
-                                <input type="text" id="description" name="description" style="width: 100%;">
-                                <!--<textarea id="description" name="description"></textarea>-->
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
-            <!--//tab-wrap end-->
-        </section>
+        </div>
     </div> <!--//layout-contents end -->
 
     <footer style="margin-top: 24px;">
@@ -151,259 +173,224 @@
 
 </th:block>
 <th:block layout:fragment="scripts">
-    <th:block th:replace="/common/approve_box :: approve_box"></th:block>
-    <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
-    <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
-    <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
-
+    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
     <script type="text/javascript">
-
-        var theGrid;
-        var viewdata;
-
-        let columns = [
-            {binding: 'id', header: 'id', width: 200, align: 'center', visible: false},
-            {binding: 'name', header: '단위명', width: 200, align: 'center'},
-            {binding: 'description', header: '설명', width: 250, align: 'center'},
-            {binding: 'piece_yn', header: '낱개단위YN', width: 200, align: 'center'},
-            {binding: '', header: '', width: "*", align: 'center'}
-        ];
-
-        document.readyState === 'complete' ? init() : window.onload = init;
-
-        function init() {
-            let data2 = [];
-            let unit_name = $('#txtUnit').val();
-
-
-            $.ajax({
-                url: '/api/definition/unit/read',
-                type: 'GET',
-                data: {
-                    'unit_name': unit_name,
-                },
-                async: false,
-                success: function (data) {
-                    data2 = data.data;
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    console.error('Error fetching log_count data:', textStatus, errorThrown);
-                }
-            })
-
-            viewdata = new wijmo.collections.CollectionView(data2);
-
-            theGrid = new wijmo.grid.FlexGrid('#theGrid', {
-                autoGenerateColumns: false,
-                showMarquee: true,
-                columns: columns,
-                isReadOnly: true,
-                itemsSource: viewdata
-            });
-
-            theGrid.hostElement.addEventListener('dblclick', function (e) {
-                let selectedItem = theGrid.selectedItems[0];
-
-                document.getElementById('id').value = selectedItem.id;
-                document.getElementById('name').value = selectedItem.name;
-                document.getElementById('description').value = selectedItem.description;
-                document.getElementById('piece_yn').value = selectedItem.piece_yn;
-
-                setButtonState();
-
-            });
-
-            theGrid.rowHeaders.columns.splice(0, 1);
-            /*  new FlexGridContextMenu(theGrid);*/
-
-        }
-
-        function setButtonState() {
-            let pk = $('#id').val();
-            $('#btnNew').prop('disabled', false);
-            $('#btnSave').prop('disabled', false);
-            if (pk) {
-                $('#btnDel').prop('disabled', false);
-
-                $('#unitForm input input').each(function () {
-                    $(this).prop('disabled', false);
-                });
-
-                $('#unitForm textarea').each(function () {
-                    $(this).prop('disabled', false);
-                });
-
-            } else {
-                $('#btnDel').prop('disabled', true);
-            }
-        }
-
-
-        function searchMainData() {
-
-            let unit_name = $('#txtUnit').val();
-
-            $.ajax({
-                url: '/api/definition/unit/read',
-                type: 'GET',
-                data: {
-                    'unit_name': unit_name,
-                },
-                success: function (result) {
-                    if (result.success) {
-                        grid_binding(result.data);
-                    } else {
-                        console.log("Error occurred");
-                    }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    console.error('Error fetching log_list data:', textStatus, errorThrown);
-                }
-            });
-
-            $('#unitForm')[0].reset();
-            $('#description').text('');
-            $('#unitForm').find('select, input, textarea').each(function () {
-                if (!$(this).is(':disabled')) {
-                    $(this).attr('disabled', 'disabled');
-                }
-            });
-
-            //_this.setButtonDisable(false, true, true);
-            setButtonState();
-
-        }
-
-        function grid_binding(data) {
-
-            let formattedData = data.map(item => ({
-                name: item.name,
-                description: item.description,
-                piece_yn: item.piece_yn,
-
-            }));
-
-            theGrid.columns.clear();
-            theGrid.autoGenerateColumns = false;
-
-            columns.forEach(colDef => {
-                let col = new wijmo.grid.Column(colDef);
-                theGrid.columns.push(col);
-            });
-
-            viewdata = new wijmo.collections.CollectionView(formattedData);
-
-            theGrid.itemsSource = viewdata;
-            theGrid.refresh();
-
-        }
-
-        function saveUnit() {
-            let url = '/api/definition/unit/save';
-            //let url = '/api/definition/unit?action=save';
-
-            //let data = $('#unitForm').serialize();
-            let data = FormUtil.extractForm($('#unitForm'));
-
-            // 필수입력 check routine
-            if (!data.name) {
-                Alert.alert('', '단위명을 입력해주세요.');
-                $('#unitForm #name').focus();
-                return false;
-            } else if (!data.description) {
-                Alert.alert('', '설명를 입력해주세요.');
-                $('#unitForm #description').focus();
-                return false;
+        class DayMonthlyPage {
+            constructor() {
+                this.url = '/api/definition/area';
+                this.viewData = new wijmo.collections.CollectionView();
+                this.viewData2 = new wijmo.collections.CollectionView();
+                this.viewData3 = new wijmo.collections.CollectionView();
+                this.grid = null;
+                this.grid2 = null;
+                this.grid3 = null;
+                this.init();
             }
 
-            Alert.confirm('', '저장하시겠습니까?', function () {
-                let fnSuccess = function (result) {
-                    if (result.success) {
-                        Alert.alert('', '저장되었습니다');
-                        searchMainData(); // 저장 후 데이터 갱신
-                    } else {
-                        Alert.alert('저장 실패', result.message);
-                        console.error('저장 실패:', result.message);
+            init() {
+                let _this = this;
+
+                this.grid = new wijmo.grid.FlexGrid('#day-grid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    frozenColumns: 9,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                    },
+                    columns: [
+                        {binding: '', header: '마감', width: 70, align: 'center'},
+                        {binding: '', header: '순번', width: 70, align: 'center'},
+                        {binding: '', header: '일자', width: 100, align: 'center' },
+                        {binding: '', header: '사원명', width: 120, align: 'left' },
+                        {binding: '', header: '직위', width: 100, align: 'left' },
+                        {binding: '', header: '출근', width: 100, align: 'left' },
+                        {binding: '', header: '퇴근', width: 100, align: 'center'},
+                        {binding: '', header: '구분', width: 100, align: 'center'},
+                        {binding: '', header: '근무시간', width: 100, align: 'center'},
+                        {binding: '', header: '지각', width: '*', align: 'center'},
+                        {binding: '', header: '연장', width: '*', align: 'center'},
+                        {binding: '', header: '야간', width: '*', align: 'center'},
+                        {binding: '', header: '휴가', width: '*', align: 'center'},
+                        {binding: '', header: '결근', width: '*', align: 'center'},
+                        {binding: '', header: '특근', width: '*', align: 'center'},
+                    ],
+                    itemsSource: this.viewData, // 데이터를 설정할 배열
+                });
+
+                let selector = new wijmo.grid.selector.Selector(this.grid, {
+                    itemChecked: (e, ctx) => {
+                        SelectItem = this.grid.rows.filter(r => r.isSelected);
+
                     }
-                };
-                // 데이터 저장 요청
-                AjaxUtil.postAsyncData(url, data, fnSuccess);
-            });
+                });
 
-        }
-
-        function deleteUnit() {
-            let url = '/api/definition/unit/delete';
-            let id = $('#unitForm').find('#id').val();
-            let data = {'id': id};
-
-            Alert.confirm('', '삭제하시겠습니까?', function () {
-                let fnSuccess = function (result) {
-                    if (result.success) {
-                        Alert.alert('', '삭제되었습니다');
-                        searchMainData(); // 저장 후 데이터 갱신
-                    } else {
-                        Alert.alert('삭제 실패', result.message);
-                        console.error('저장 실패:', result.message);
+                /*this.grid.hostElement.addEventListener('dblclick', (e) => {
+                    let hitTest = this.grid.hitTest(e);
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        let row = hitTest.row;
+                        let selectedItem = this.grid.rows[row].dataItem;
+                        _this.showDetail(selectedItem.id)
                     }
-                };
-                // 데이터 저장 요청
-                AjaxUtil.postAsyncData(url, data, fnSuccess);
-            });
+                });*/
 
-        }
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = '일별근태현황';
 
-        $(document.body).ready(function (e) {
-            setButtonState();
 
-            // 검색버튼 클릭
-            $('#btnSearch').click(function (e) {
-                searchMainData();
-            });
+                this.grid2 = new wijmo.grid.FlexGrid('#grid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                    },
+                    columns: [
+                        {binding: '', header: '일자', width: '*', align: 'center'},
+                        {binding: '', header: '요일', width: '*', align: 'center'},
+                    ],
+                    itemsSource: this.viewData2, // 데이터를 설정할 배열
+                });
 
-            // 엔터키 검색
-            $('#txtUnit').on('keypress', function (e) {
-                if (event.keyCode == 13) {
-                    searchMainData();
+                new FlexGridContextMenu(this.grid2);
+                this.grid2.downloadFileName = '일/월별근태현황';
+
+
+
+                this.grid3 = new wijmo.grid.FlexGrid('#monthly-grid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    formatItem: (sender, e) => {
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                            e.cell.style.textAlign = 'center';
+                        }
+                    },
+                    columns: [
+                        {binding: '', header: '마감', width: 70, align: 'center'},
+                        {binding: '', header: '사원명', width: 120, align: 'left' },
+                        {binding: '', header: '직위', width: 120, align: 'left' },
+                        {binding: '', header: '근무일수', width: 120, align: 'center'},
+                        {binding: '', header: '정상일', width: 120, align: 'center'},
+                        {binding: '', header: '시간', width: 120, align: 'center'},
+                        {binding: '', header: '지각', width: '*', align: 'center'},
+                        {binding: '', header: '조퇴', width: '*', align: 'center'},
+                        {binding: '', header: '연장', width: '*', align: 'center'},
+                        {binding: '', header: '야간', width: '*', align: 'center'},
+                        {binding: '', header: '휴가', width: '*', align: 'center'},
+                        {binding: '', header: '결근', width: '*', align: 'center'},
+                        {binding: '', header: '특근', width: '*', align: 'center'},
+                    ],
+                    itemsSource: this.viewData3, // 데이터를 설정할 배열
+                });
+
+                let selector2 = new wijmo.grid.selector.Selector(this.grid3, {
+                    itemChecked: (e, ctx) => {
+                        SelectItem = this.grid3.rows.filter(r => r.isSelected);
+
+                    }
+                });
+
+                /*this.grid.hostElement.addEventListener('dblclick', (e) => {
+                    let hitTest = this.grid.hitTest(e);
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        let row = hitTest.row;
+                        let selectedItem = this.grid.rows[row].dataItem;
+                        _this.showDetail(selectedItem.id)
+                    }
+                });*/
+
+                new FlexGridContextMenu(this.grid3);
+                this.grid3.downloadFileName = '월별근태현황';
+
+            }
+
+
+            showDetail(idx) {
+                let param = { 'id': idx };
+
+                let result = AjaxUtil.getSyncData(this.url+'/detail', param);
+                if (result.success) {
+                    FormUtil.BindDataForm(result.data, $('#basicForm'));
+                    //$('#description').text(result.description);
                 }
-            });
 
+                //page.setButtonDisable(false, false, false);
+                page.setButtonState();
+            }
 
-            //신규버튼 클릭
-            $('#btnNew').click(function (e) {
+            searchMainData() {
+                let _this = this;
+                //let txtName = $('#txtName').val();
+                //let url = '/api/definition/area?txtName='+txtName;
+               /* let data = {
+                    'txtName' :$('#txtName').val(),
+                    //'action':'read'
+                }
+                let result = AjaxUtil.getSyncData(this.url+'/read', data);
+                console.log(result);
 
-                $('#unitForm')[0].reset();
-                $('#id').val('');
-                $('#description').val('');
+                if (result && result.data) {
+                    _this.viewData.sourceCollection = result.data;
+                }*/
 
-                $('#unitForm input, select').each(function () {
-                    if ($(this).is(':disabled')) {
-                        $(this).removeAttr('disabled');
+            }//searchMainData
+
+            saveArea() {
+                let _this = this;
+                let url = '/api/definition/area/save';
+                //데이터입력체크루틴 누락
+
+                //let data = $('#basicForm').serialize();
+                let data = FormUtil.extractForm($('#basicForm'));
+                if (!data.name) {
+                    Alert.alert('', '에어리어 이름을 입력해주세요.');
+                    $('#basicForm #name').focus();
+                    return;
+                }
+
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('','저장되었습니다'); // Notification
+                        _this.searchMainData();
+                    }  else if (!res.success) {
+                        Alert.alert('', res.message);
                     }
-                });
+                };
+                AjaxUtil.postAsyncData(url, data, fnSuccess);
+            }
 
-                $('#unitForm textarea').each(function () {
-                    if ($(this).is(':disabled')) {
-                        $(this).removeAttr('disabled');
-                    }
-                });
-                //page.setButtonDisable(true, false, true);
-                setButtonState();
-            });
 
-            //저장버튼 클릭
-            $('#btnSave').click(function (e) {
-                saveUnit();
-            });
+        }
 
-            //삭제버튼 클릭
-            $('#btnDel').click(function (e) {
-                deleteUnit();
+        let page = null;
+
+        $(document).ready(function (e) {
+            //yullinAuth.inspection();
+            yullinAuth.removeWriteButton();
+            page = new DayMonthlyPage();
+            $('#startdate').val(CommonUtil.getYYYYMMDD().substring(0, 7));
+            $('#startdate2').val(CommonUtil.getYYYYMMDD().substring(0, 7));
+
+            page.searchMainData();
+
+            $('#btnSearch').click(function (ex) {
+                page.searchMainData();
             });
 
         });
-
     </script>
+
 </th:block>
 
 </html>
