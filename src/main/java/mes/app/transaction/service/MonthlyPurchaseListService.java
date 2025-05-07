@@ -24,30 +24,25 @@ public class MonthlyPurchaseListService {
 
         String data_year = cboYear;
 
-        paramMap.addValue("date_form",data_year+"-01-01" );
+        paramMap.addValue("date_from",data_year+"-01-01" );
         paramMap.addValue("date_to",data_year+"-12-31" );
 
-        data_column = "A.defect_pro";
+        data_column = "A.defect_money";
 
         String sql = """
-				 with A as 
+				with A as 
 	            (
-	            select i. *,
-	                c."Name",
-	            , fn_code_name('mat_type', mg."MaterialType") as mat_type_name
-	            , i.misgubun
-	            , m."Code" as mat_code
-	            , m."Name" as mat_name
-                , u."Name" as unit_name
-	            , EXTRACT(MONTH FROM TO_DATE(i.misdate, 'YYYYMMDD')) AS data_month
-	            , coalesce(sum(jr."DefectQty"),0) as defect_qty
-                , sum(jr."DefectQty") * m."UnitPrice" as defect_money
-	            ,(coalesce(sum(jr."GoodQty"),0) + coalesce(sum(jr."DefectQty"),0)) as prod_sum
-	            , 100 * coalesce(sum(jr."DefectQty"),0) / nullif(coalesce(sum(jr."GoodQty"),0) + coalesce(sum(jr."DefectQty"),0),0 ) as defect_pro
-	            from tb_invoicement i
-	            left join company c on i.cltcd = c.id
-	            where i.misdate between cast(:date_form as date) and cast(:date_to as date)
-                and jr."State" = 'finished'
+                    select
+                        i.cltcd
+                        , c."Name"
+                        , i.icerdeptnm
+                        , i.misgubun
+                        , i.icerpernm
+                        , EXTRACT(MONTH FROM TO_DATE(i.misdate, 'YYYYMMDD')) AS data_month
+                         , sum(i.totalamt) as defect_money
+                        from tb_invoicement i
+                        left join company c on i.cltcd = c.id
+                        where TO_DATE(i.misdate, 'YYYYMMDD') between cast(:date_form as date) and cast(:date_to as date)
 				""";
 
         if(cboCompany != null) {
@@ -56,16 +51,11 @@ public class MonthlyPurchaseListService {
 					""";
         }
         sql += """
-				group by jr."Material_id", mg."MaterialType", mg."Name" , m."Name" , m."Code", m."UnitPrice"
-                , u."Name"
-                , extract (month from jr."ProductionDate") 
-	            )
-	            select A.mat_pk, A.mat_type_name, A.mat_grp_name, A.mat_code, A.mat_name
-                , A.unit_name
-                , round((100 * sum(defect_qty) / nullif(sum(prod_sum),0))::decimal,3) as year_defect_pro 
-                , sum(defect_qty) as year_defect_qty 
+                group by i.cltcd, c."Name", i.icerdeptnm, i.misgubun , i.icerpernm,
+                    EXTRACT(MONTH FROM TO_DATE(i.misdate, 'YYYYMMDD'))
+                    )
+                select A."Name", A.icerdeptnm, A.misgubun, A.icerpernm
                 , sum(defect_money) as year_defect_money
-                , sum(prod_sum) as prod_Sum
 				""";
 
         for(int i=1; i<13; i++) {
@@ -76,12 +66,12 @@ public class MonthlyPurchaseListService {
 
         sql += """ 
 				from A 
-				group by A.mat_pk, A.mat_type_name, A.mat_grp_name, A.mat_code, A.mat_name, A.unit_name
+				group by A."Name", A.icerdeptnm, A.misgubun, A.icerpernm
 				""";
 
-        sql += """
-				order by A.mat_type_name, A.mat_grp_name, A.mat_name	  
-				""";
+//        sql += """
+//				order by A.mat_type_name, A.mat_grp_name, A.mat_name
+//				""";
 
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
