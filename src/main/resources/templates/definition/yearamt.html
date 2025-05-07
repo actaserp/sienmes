@@ -44,9 +44,9 @@
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <select  id="cboamt" name="cboamt">
-                                    <option value="0">매입</option>
-                                    <option value="1">매출</option>
+                                <select  id="ioflag" name="ioflag">
+                                    <option value="0">매출</option>
+                                    <option value="1">매입</option>
                                 </select>
                             </div>
                         </dd>
@@ -60,6 +60,15 @@
                             <div class="srch-box">
                                 <input type="text" class="form-control2" id="searchtradenm" name="searchtradenm">
                             </div>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>
+                            <label>전체선택</label>
+                        </dt>
+                        <dd>
+                            <input type="checkbox" id="Allcheck">
                         </dd>
                     </dl>
 
@@ -79,12 +88,17 @@
                 <div class="button-wrap">
                     <ul>
                         <li>
-                            <button type="button" class="btn-danger " id="btnDel"
+                            <button type="button" class="btn-excellt btn-default" id=""
+                                    style="width: 115px; height: 36px;">마감</button>
+                        </li>
+
+                        <li>
+                            <button type="button" class="btn-delete btn-danger " id="btnDel"
                                     style=" width: 115px; height: 36px;"><i
                                     class="fas fa-trash"></i>삭제</button>
                         </li>
                         <li>
-                            <button type="button" class="btn-default" id="btnSave"
+                            <button type="button" class="btn-excellt btn-default" id="btnSave"
                                     style="width: 115px; height: 36px;"><i
                                     class="fas fa-save"></i>저장</button>
                         </li>
@@ -166,20 +180,18 @@
             searchMainData() {
                 let _this = this;
                 let param = {
+                    'cboYear': $('#cboYear').val(),
+                    'ioflag': $('#ioflag').val(),
                     'searchtradenm': $('#searchtradenm').val(),
-                    'searchioflag': $('#searchioflag').val(),
                 }
 
-               /* let url = '/api/definition/trade';
+                let url = '/api/definition/yearamt';
 
                 let result = AjaxUtil.getSyncData(url + '/read',param);
 
                 if (result.data != null) {
                     _this.viewData.sourceCollection = result.data;
                 }
-
-                $('#tradeForm')[0].reset();
-                $('#tradeForm').find('#id').val('');*/
             }
 
             saveData() {

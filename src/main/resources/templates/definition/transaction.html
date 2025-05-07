@@ -133,13 +133,17 @@
                                 <label for="acccd">계정코드</label>
                             </th>
                             <td>
-                                <input type="text" id="acccd" name="acccd" style="width: 100%">
+                                <input type="text" id="acccd" name="acccd" style="display: inline-block; width: 45%;" placeholder="클릭해서 검색하세요.">
+                                <input type="text" id="accname1" name="accname1" style="display: inline-block; width: 45%; margin-left: 4%;" readonly>
                             </td>
+
+
                             <th>
                                 <label for="reacccd">상대계정</label>
                             </th>
                             <td>
-                                <input type="text" id="reacccd" name="reacccd" style="width: 100%" readonly>
+                                <input type="text" id="reacccd" name="reacccd" style="display: inline-block; width: 45%;" placeholder="클릭해서 검색하세요.">
+                                <input type="text" id="accname2" name="accname2" style="display: inline-block; width: 45%; margin-left: 4%;" readonly>
                             </td>
                         </tr>
 
@@ -396,9 +400,18 @@
 
 
 
+            let selectedTriggerId = null;
+
             $('#acccd').on('click', function () {
-                 pop.show();
+                selectedTriggerId = 'acccd';
+                pop.show(selectedTriggerId);
             });
+
+            $('#reacccd').on('click', function () {
+                selectedTriggerId = 'reacccd';
+                pop.show(selectedTriggerId);
+            });
+
 
 
             $('#searchtradenm').on('keypress', function (e) {
@@ -449,7 +462,7 @@
             }
 
 
-            show() {
+            show(selectedTriggerId) {
                 let _this = this;
 
                 let content = tmpl('TradTemplate', {});
@@ -506,20 +519,24 @@
                 // 저장 버튼 클릭 이벤트
                 $content.find('#btnAccountSave').click(() => {
                     if (this.selectedItem) {
-                        // 선택된 계정 정보
                         let acccd = this.selectedItem.acccd;
-                        let accnm = this.selectedItem.accnm;
+                        let accname = this.selectedItem.accnm;
 
-                        // 부모 화면의 input에 값 설정
-                        $('#acccd').val(acccd);
-                        $('#reacccd').val(accnm);
+                        // 어떤 버튼으로 모달이 열렸는지에 따라 분기
+                        if (selectedTriggerId === 'acccd') {
+                            $('#acccd').val(acccd);
+                            $('#accname1').val(accname);
+                        } else if (selectedTriggerId === 'reacccd') {
+                            $('#reacccd').val(acccd);
+                            $('#accname2').val(accname);
+                        }
 
-                        // 모달 닫기
                         this.close();
                     } else {
-                        Alert.alert('','계정을 선택해주세요.');
+                        Alert.alert('', '계정을 선택해주세요.');
                     }
                 });
+
 
                 $content.find('#material-search-close, #btn-material-search-close').on('click', function () {
                     _this.close();

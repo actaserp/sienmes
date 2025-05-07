@@ -53,7 +53,9 @@ public class AccSubjectService {
                  A.acccd as acccd
                  , A.accnm as accnm
                  from tb_accsubject A
-                where A.acccd like concat('%',:code,'%')
+                where 
+                A.spyn = '1'
+                AND A.acccd like concat('%',:code,'%')
                 AND A.accnm like concat('%',:name,'%')
                 order by A.acccd
                 """;
@@ -68,7 +70,7 @@ public class AccSubjectService {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
         String sql = """
-                SELECT acccd, accnm, acclv
+                SELECT acccd, accnm, acclv, spyn
                 FROM tb_accsubject
             """;
         // SQL 실행
@@ -80,6 +82,7 @@ public class AccSubjectService {
                     map.put("acccd", (String) row.get("acccd"));
                     map.put("accnm", (String) row.get("accnm"));
                     map.put("acclv", String.valueOf(row.get("acclv")));
+                    map.put("spyn",  (String) row.get("spyn"));
                     return map;
                 })
                 .toList();

@@ -95,7 +95,7 @@ public class TradeController {
     }
 
 
-    @RequestMapping("/search_acc")
+    @GetMapping("/search_acc")
     public AjaxResult getAccSearchList(
             @RequestParam(value="searchCode", required=false) String code,
             @RequestParam(value="searchName", required=false) String name
