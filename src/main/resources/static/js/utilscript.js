@@ -36,6 +36,14 @@ function getNowDateMinus7(){
     return formattedDate(sevenDaysAgo);
 }
 
+//현재 시간, HH:mm
+function getNowTime(){
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`
+}
+
 function getFirstDayOfThreeMonthsAgo(){
     const today = new Date();
 
@@ -63,3 +71,40 @@ function calculateDay(fd, td){
 
     return diffDays <= 90;
 }
+
+function validationCheck(FormData, checklist){
+
+    for(let key in checklist){
+        const value = FormData[key];
+
+        if(value === null || value === ''){
+            const text = checklist[key];
+
+            Alert.alert('', `${text} 항목이 빈 값입니다.`);
+            return false;
+        }
+    }
+    return true
+}
+
+function ApiSuccessMessage(res){
+    console.log(res);
+    console.log('func', typeof func);
+    if(res === null || res === undefined){
+        Alert.alert('', '에러가 발생하였습니다.');
+    }
+    Alert.alert('', res.message);
+}
+
+function selectBoxBinding(id, arr){
+
+    const selectedBox = document.getElementById(id);
+
+    arr.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.value;
+        option.textContent = item.text;
+        selectedBox.appendChild(option);
+    })
+}
+

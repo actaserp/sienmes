@@ -116,7 +116,8 @@ public class EasyFinBankServiceController {
                              @RequestParam String todate,
                              @RequestParam String accountnumber,
                              @RequestParam String managementnum,
-                                 @RequestParam Integer accountid) {
+                                 @RequestParam Integer accountid,
+                                 @RequestParam String bankname) {
         /**
          * 계좌 거래내역을 확인하기 위해 팝빌에 수집요청을 합니다. (조회기간 단위 : 최대 1개월)
          * - 조회일로부터 최대 3개월 이전 내역까지 조회할 수 있습니다.
@@ -156,7 +157,7 @@ public class EasyFinBankServiceController {
             List<Map<String, Object>> mapList = easyFinBankCustomService.convertToMapList(list);
 
             //비동기로 DB에 내역 저장
-            easyFinBankCustomService.saveBankDataAsync(list, jobID, accountnumber, accountid);
+            easyFinBankCustomService.saveBankDataAsync(list, jobID, accountnumber, accountid, bankname);
 
 
 

@@ -1,12 +1,10 @@
 package mes.app.PopBill.service;
 
 
-import com.popbill.api.PopbillException;
-import com.popbill.api.Response;
-import com.popbill.api.easyfin.EasyFinBankAccountForm;
 import com.popbill.api.easyfin.EasyFinBankSearchDetail;
 import lombok.extern.slf4j.Slf4j;
 import mes.app.PopBill.dto.EasyFinBankAccountFormDto;
+import mes.app.transaction.service.TransactionInputService;
 import mes.app.util.UtilClass;
 import mes.domain.entity.TB_ACCOUNT;
 import mes.domain.entity.TB_BANKTRANSIT;
@@ -15,11 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -28,7 +24,13 @@ public class EasyFinBankCustomService {
     private TB_BANKTRANSITRepository tB_BANKTRANSITRepository;
 
     @Autowired
+    private TransactionInputService transactionInputService;
+
+    @Autowired
     private com.popbill.api.EasyFinBankService easyFinBankService;
+
+    @Autowired
+    BankTransitTransactionalService bankTransitTransactionalService;
 
     public void Insert_Tb_Account(EasyFinBankAccountFormDto form){
         TB_ACCOUNT account = new TB_ACCOUNT();
@@ -40,32 +42,46 @@ public class EasyFinBankCustomService {
         //account.setBankid();
     }
 
-    //TODO: 복합키로 가져가야 데이터 중복저장을 막을 수 있을것같다.
+    //TODO: tid를 기준으로 중복저장 방지함 , tid 목록을 메모리에 적재한다음 유효성 판단할 것
     /**
      * 비동기나 트랜잭션은 프록시 객체에서 처리하는데 Spring이 만들어주는
      * 프록시는 **Spring 컨테이너에서 관리되는 객체(Bean)**에만 적용
      * 그러므로 외부 클래스에서 호출해야 한다.
+     *
+     * 저장메서드와 비동기 메서드를 클래스별로 분리한 이유 -> Async랑 Transaction 이랑 같이 쓰면 안먹음
+     *
      * **/
     @Async
-    @Transactional
-    public void saveBankDataAsync(List<EasyFinBankSearchDetail> list, String jobID, String accountNumber, Integer accountid){
+    public void saveBankDataAsync(List<EasyFinBankSearchDetail> list, String jobID, String accountNumber, Integer accountid, String bankname){
 
-        System.out.println("After Thread Name ::" + Thread.currentThread().getName());
+
+        List<String> tidList = getTidList(list);
+        Map<String, Integer> cltCdRelationRemarkList =
+        convertToRemarkCltcdMap(transactionInputService.getCltCdRelationRemarkList());
+
+
+        Map<String, TB_BANKTRANSIT> existing = tB_BANKTRANSITRepository.findByTidIn(tidList)
+                .stream()
+                .collect(Collectors.toMap(TB_BANKTRANSIT::getTid, Function.identity()));
+
+
 
         List<TB_BANKTRANSIT> tb_banktransitList = new ArrayList<>();
 
         for(EasyFinBankSearchDetail  map : list){
             TB_BANKTRANSIT entity = new TB_BANKTRANSIT();
 
-            Integer accIn = UtilClass.parseInteger(map.getAccIn());
-            String inoutFlag;
-            if(accIn == 0){
-                inoutFlag = "1";
-            }else{
-                inoutFlag = "0";
+            String tid = map.getTid();
+            String remark = map.getRemark1();
+
+            if(existing.containsKey(tid)){
+                continue;
             }
 
-            entity.setTid( map.getTid());
+            Integer accIn = UtilClass.parseInteger(map.getAccIn());
+            String inoutFlag = (accIn == 0) ? "1" : "0";
+
+            entity.setTid(tid);
             entity.setTrdate( map.getTrdate());
             entity.setTrserial(UtilClass.parseInteger(map.getTrserial()));
             entity.setTrdt(map.getTrdt());
@@ -82,10 +98,23 @@ public class EasyFinBankCustomService {
             entity.setIoflag(inoutFlag);
             entity.setAccnum(accountNumber);
             entity.setAccid(accountid);
+            entity.setBanknm(bankname);
+
+            if(remark != null && cltCdRelationRemarkList.containsKey(remark)){
+                entity.setCltcd(cltCdRelationRemarkList.get(remark));
+            }
             tb_banktransitList.add(entity);
 
         }
-        tB_BANKTRANSITRepository.saveAll(tb_banktransitList);
+        bankTransitTransactionalService.saveBankDataTransactional(tb_banktransitList);
+    }
+
+    public List<String> getTidList(List<EasyFinBankSearchDetail> list){
+
+        return list.stream()
+                .map(dto -> dto.getTid())
+                .collect(Collectors.toList());
+
     }
 
     public List<Map<String, Object>> convertToMapList(List<EasyFinBankSearchDetail> detailList) {
@@ -109,6 +138,21 @@ public class EasyFinBankCustomService {
             result.add(map);
         }
 
+        return result;
+    }
+
+    public Map<String, Integer> convertToRemarkCltcdMap(List<Map<String, Object>> list){
+        Map<String, Integer> result = new HashMap<>();
+
+        for(Map<String, Object> row : list){
+            String remark = (String) row.get("remark1");
+            Integer cltcdObj = UtilClass.parseInteger(row.get("cltcd"));
+
+            if(remark != null && cltcdObj != null){
+                result.put(remark, cltcdObj);
+
+            }
+        }
         return result;
     }
 }

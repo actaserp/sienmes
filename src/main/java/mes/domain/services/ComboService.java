@@ -71,6 +71,7 @@ public class ComboService {
 		this._dicFunc_.put("system_code", this.system_code);
 		this._dicFunc_.put("system_codetype", this.system_codetype);
 		this._dicFunc_.put("tag", this.tag); 
+		this._dicFunc_.put("trade", this.trade);
 		this._dicFunc_.put("tag_group", this.tag_group);
 		this._dicFunc_.put("test_item", this.test_item);
 		this._dicFunc_.put("test_master", this.test_master);
@@ -83,6 +84,7 @@ public class ComboService {
 		this._dicFunc_.put("user_group", this.user_group);
 		this._dicFunc_.put("user_profile", this.user_profile);
 		this._dicFunc_.put("workcenter", this.workcenter);
+		this._dicFunc_.put("iotype", this.iotype);
 	}
 
 	public List<Map<String, Object>> getComboList(String comboType, String cond1, String cond2, String cond3){
@@ -795,6 +797,24 @@ public class ComboService {
         dicParam.addValue("cond3", cond3);
         return this.sqlRunner.getRows(sql, dicParam);
 	};
+
+	ComboDataFunction iotype=(String cond1, String cond2, String cond3)-> {
+		String	sql = "select id as Value, \"Value\" as text from sys_code where \"CodeType\" = 'deposit_type'order by \"Value\" ";
+		/*if (StringUtils.hasText(cond1)) {
+			sql +="and \"Process_id\" in (select unnest(string_to_array(:cond1,','))::int)";
+		}
+		if (StringUtils.hasText(cond2)) {
+			sql +="and \"Area_id\" = :cond2 ";
+		}*/
+		//sql += " order by \"Name\" ";
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		/*
+		dicParam.addValue("cond1", cond1);
+		dicParam.addValue("cond2", cond2);
+		dicParam.addValue("cond3", cond3);
+		*/
+		return this.sqlRunner.getRows(sql, dicParam);
+	};
 	
 	ComboDataFunction master_data=(String cond1, String cond2, String cond3)-> {
 		String sql = "select \"id\" as Value, \"Name\" as text from master_t where 1=1 ";
@@ -840,6 +860,25 @@ public class ComboService {
 			sql +="and \"DASConfig_id\" = cast(:cond3 as Integer) ";
 		}
 		sql += " order by \"tag_name\" ";
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("cond1", cond1);
+		dicParam.addValue("cond2", cond2);
+		dicParam.addValue("cond3", cond3);
+		return this.sqlRunner.getRows(sql, dicParam);
+	};
+
+	ComboDataFunction trade=(String cond1, String cond2, String cond3)-> {
+		String sql = "select \"trid\" as Value, \"tradenm\" as text from tb_trade where 1=1 ";
+		/*if (StringUtils.hasText(cond1)) {
+			sql +="and \"Equipment_id\" = cast(:cond1 as Integer) ";
+		}
+		if (StringUtils.hasText(cond2)) {
+			sql +="and \"tag_group_id\" = cast(:cond2 as Integer) ";
+		}
+		if (StringUtils.hasText(cond3)) {
+			sql +="and \"DASConfig_id\" = cast(:cond3 as Integer) ";
+		}*/
+		sql += " order by \"trid\" ";
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("cond1", cond1);
 		dicParam.addValue("cond2", cond2);

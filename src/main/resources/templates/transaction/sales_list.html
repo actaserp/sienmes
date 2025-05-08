@@ -1,0 +1,543 @@
+<html layout:decorate="~{layout_page}">
+<head>
+    <style>
+        .radio-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .radio-wrap input[type="radio"] {
+            appearance: none;
+            -webkit-appearance: none; /* 사파리용 */
+            width: 16px;
+            height: 16px;
+
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .radio-wrap input[type="radio"]::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 8px;
+            height: 8px;
+            background-color: #666;
+            border-radius: 50%;
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .radio-wrap input[type="radio"]:checked::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<th:block layout:fragment="content">
+    <div class="layout-contents">
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>매출 현황</h2>
+                <a title="북마크" class="bookmark toggle">
+                    내 메뉴
+                </a>
+            </div>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>입금관리</li>
+                <li>매출 현황</li>
+            </ul>
+        </div>
+        <div class="tab-wrap">
+            <ul class="tab-links">
+                <li>
+                    <a href="#tab1" title="목록" id="listTabLink">목록</a>
+                </li>
+                <li>
+                    <a href="#tab2" title="등록" id="inputTabLink">등록</a>
+                </li>
+            </ul>
+            <div class="tab-contents">
+                <section class="tab-item" id="tab1">
+                    <form id="searchForm" autocomplete="off">
+                        <section class="section">
+                            <div class="section-top">
+                                <div class="search-wrap">
+                                    <dl>
+                                        <dt>
+                                            <label>
+                                                기간<span class="eq"></span>
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <div class="srch-box">
+                                                <input type="date" id="searchfrdate" name="searchfrdate"  />
+                                                <span class="slow_sign">~</span>
+                                                <input type="date" id="searchtodate" name="searchtodate" />
+                                            </div>
+                                        </dd>
+                                    </dl>
+                                    <dl>
+                                        <dt>
+                                            <label>
+                                                거래처<span class="eq"></span>
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <div class="srch-box">
+                                                <input type="text" placeholder="해당 칸을 클릭해주세요"  id="cboCompany" name="cboCompany"/>
+                                                <input type="hidden"  id="cboCompanyHidden" name="cboCompanyHidden"  />
+                                            </div>
+                                        </dd>
+                                    </dl>
+
+                                    <dl>
+                                        <dt>
+                                            <label>
+                                                매출구분
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <select class="form-control2" id="saletype" name="saletype" >
+
+                                            </select>
+                                        </dd>
+                                    </dl>
+
+                                    <dl>
+                                        <dt>
+                                            <label>
+                                                과세형태<span class="eq"></span>
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <div class="srch-box">
+                                                <div class="radio-wrap">
+                                                    <input type="radio" name="opt" id="radio1" >
+                                                    <label for="radio1">과세(10%)</label>
+                                                </div>
+                                                <div class="radio-wrap">
+                                                    <input type="radio" name="opt" id="radio2">
+                                                    <label for="radio2">영세(0%)</label>
+                                                </div>
+                                                <div class="radio-wrap">
+                                                    <input type="radio" name="opt" id="radio2">
+                                                    <label for="radio2">면세 (세액없음)</label>
+                                                </div>
+                                                <div class="radio-wrap">
+                                                    <input type="radio" name="opt" id="radio2" checked>
+                                                    <label for="radio2">전체</label>
+                                                </div>
+                                            </div>
+                                        </dd>
+                                    </dl>
+
+                                    <dl>
+                                        <dt>&nbsp;</dt>
+                                        <dd>
+                                            <li>
+                                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                                    검색
+                                                </a>
+                                            </li>
+                                        </dd>
+                                    </dl>
+
+                                </div>
+                            </div>
+                        </section>
+                    </form>
+
+
+                    <section class="section">
+
+                        <div class="grid_box" id="divList">
+
+                            <div id="theGrid_saleList" style="height: 350px;"></div>
+                        </div>
+                    </section>
+                </section>
+
+                <section class="tab-item" id="tab2">
+                    <form id="searchForm" autocomplete="off">
+                        <section class="section">
+                            <div class="section-top">
+                                <div class="search-wrap">
+                                    <dl>
+                                        <dt>
+                                            <label>
+                                                기간<span class="eq"></span>
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <div class="srch-box">
+                                                <input type="date" id="searchfrdate" name="searchfrdate"  />
+                                                <span class="slow_sign">~</span>
+                                                <input type="date" id="searchtodate" name="searchtodate" />
+                                            </div>
+                                        </dd>
+                                    </dl>
+                                    <dl>
+                                        <dt>
+                                            <label>
+                                                거래처<span class="eq"></span>
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <div class="srch-box">
+                                                <input type="text" placeholder="해당 칸을 클릭해주세요"  id="cboCompany" name="cboCompany"/>
+                                                <input type="hidden"  id="cboCompanyHidden" name="cboCompanyHidden"  />
+                                            </div>
+                                        </dd>
+                                    </dl>
+
+                                    <dl>
+                                        <dt>
+                                            <label>
+                                                매출구분
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <select class="form-control2" id="saletype" name="saletype" >
+
+                                            </select>
+                                        </dd>
+                                    </dl>
+
+                                    <dl>
+                                        <dt>
+                                            <label>
+                                                과세형태<span class="eq"></span>
+                                            </label>
+                                        </dt>
+                                        <dd>
+                                            <div class="srch-box">
+                                                <div class="radio-wrap">
+                                                    <input type="radio" name="opt" id="radio1" >
+                                                    <label for="radio1">과세(10%)</label>
+                                                </div>
+                                                <div class="radio-wrap">
+                                                    <input type="radio" name="opt" id="radio2">
+                                                    <label for="radio2">영세(0%)</label>
+                                                </div>
+                                                <div class="radio-wrap">
+                                                    <input type="radio" name="opt" id="radio2">
+                                                    <label for="radio2">면세 (세액없음)</label>
+                                                </div>
+                                                <div class="radio-wrap">
+                                                    <input type="radio" name="opt" id="radio2" checked>
+                                                    <label for="radio2">전체</label>
+                                                </div>
+                                            </div>
+                                        </dd>
+                                    </dl>
+
+                                    <dl>
+                                        <dt>&nbsp;</dt>
+                                        <dd>
+                                            <li>
+                                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                                    검색
+                                                </a>
+                                            </li>
+                                        </dd>
+                                    </dl>
+
+                                </div>
+                            </div>
+                            <table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; text-align: center; font-family: sans-serif;">
+                                <thead>
+                                <tr>
+                                    <th>구분</th>
+                                    <th>매출처수</th>
+                                    <th>매수</th>
+                                    <th>공급가액</th>
+                                    <th>세액</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td><strong style="color: red;">합&nbsp;&nbsp;&nbsp;&nbsp;계</strong></td>
+                                    <td>785</td>
+                                    <td>839</td>
+                                    <td>163,148,778</td>
+                                    <td>16,314,898</td>
+                                </tr>
+                                <tr>
+                                    <td>사업자등록번호 발행분</td>
+                                    <td>434</td>
+                                    <td>486</td>
+                                    <td>143,780,054</td>
+                                    <td>143,588,054</td>
+                                </tr>
+                                <tr>
+                                    <td>주민등록번호 발행분</td>
+                                    <td>351</td>
+                                    <td>353</td>
+                                    <td>16,314,898</td>
+                                    <td>13,070,924</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div id="theGrid_saleList2" style="height: 350px;"></div>
+                        </section>
+                    </form>
+
+                    <!--<section class="section">
+
+                        <div class="grid_box" id="divList2">
+
+
+                        </div>
+                    </section>-->
+                </section>
+            </div>
+        </div>
+
+
+    </div>
+</th:block>
+
+<th:block layout:fragment="scripts">
+    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <th:block th:replace="/common/popup_account :: popup_account" />
+    <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+    <th:block th:replace="/shipment/trade_stmt/trade_stmt_tmpl :: printTemplate"></th:block>
+    <script type="text/javascript">
+
+        const salesData = [
+            { 일련번호: 1, 사업자등록번호: '-', 상호: '홀운동기룡하이빌', 매수: 1, 공급가액: 56000, 세액: 5600 },
+            { 일련번호: 2, 사업자등록번호: '-', 상호: '대경아르체아파트', 매수: 1, 공급가액: 182400, 세액: 18240 },
+            { 일련번호: 3, 사업자등록번호: '-', 상호: '페트라빌', 매수: 1, 공급가액: 90909, 세액: 9091 },
+            { 일련번호: 4, 사업자등록번호: '-', 상호: '일광빌딩2차', 매수: 1, 공급가액: 84800, 세액: 8480 },
+            { 일련번호: 5, 사업자등록번호: '-', 상호: '정진빌딩', 매수: 1, 공급가액: 100000, 세액: 10000 },
+            { 일련번호: 6, 사업자등록번호: '101-82-22657', 상호: '서울여자간호대학교 휴먼캐슬', 매수: 1, 공급가액: 65800, 세액: 6580 },
+            { 일련번호: 7, 사업자등록번호: '101-82-69992', 상호: '기독교대한감리회예수사랑교회', 매수: 1, 공급가액: 80955, 세액: 8095 },
+            { 일련번호: 8, 사업자등록번호: '-', 상호: '서울문화유체국', 매수: 2, 공급가액: 360000, 세액: 36000 },
+            { 일련번호: 9, 사업자등록번호: '102-13-93738', 상호: '공간관리소(영화빌리지)', 매수: 1, 공급가액: 100000, 세액: 10000 },
+            { 일련번호: 10, 사업자등록번호: '102-39-04399', 상호: '송학빌딩', 매수: 1, 공급가액: 60000, 세액: 6000 },
+            { 일련번호: 11, 사업자등록번호: '102-80-00837', 상호: '쉐레미오피스텔', 매수: 1, 공급가액: 140000, 세액: 14000 },
+            { 일련번호: 12, 사업자등록번호: '104-10-62971', 상호: '양지타빌', 매수: 1, 공급가액: 58800, 세액: 5880 },
+            { 일련번호: 13, 사업자등록번호: '104-81-24695', 상호: '조선일보사(구, 디지털서울문화예술)', 매수: 1, 공급가액: 65800, 세액: 6580 },
+            { 일련번호: 14, 사업자등록번호: '105-05-83693', 상호: 'P.M.SE빌', 매수: 1, 공급가액: 65800, 세액: 6580 },
+            { 일련번호: 15, 사업자등록번호: '105-07-55809', 상호: '마인드월드', 매수: 1, 공급가액: 183636, 세액: 18364 },
+            { 일련번호: 16, 사업자등록번호: '105-07-85957', 상호: '예건빌딩', 매수: 1, 공급가액: 85764, 세액: 8576 },
+            { 일련번호: 17, 사업자등록번호: '105-09-67537', 상호: '주연빌딩', 매수: 1, 공급가액: 90909, 세액: 9091 },
+            { 일련번호: 18, 사업자등록번호: '105-10-41004', 상호: '마니하우스', 매수: 1, 공급가액: 58000, 세액: 5800 },
+            { 일련번호: 19, 사업자등록번호: '105-14-32842', 상호: 'BS빌딩', 매수: 1, 공급가액: 90909, 세액: 9091 },
+            { 일련번호: 20, 사업자등록번호: '105-17-74909', 상호: '푸른솔리빙텔', 매수: 1, 공급가액: 90000, 세액: 9000 }
+        ];
+
+        const mockData = [
+            {
+                매출일자: '2025-04-01',
+                매출구분: '부품교체',
+                거래처코드: '018641b',
+                거래처명: '보령누락본부1기-1단지',
+                발송EMAIL: 'gktrhr012@naver.com',
+                품명: '103동1호 비상장치 LP PHO1',
+                규격: '24',
+                공급가: 432967,
+                부가세: 43297,
+                합계: 476264,
+                수정사유: '',
+                발행상태: '발행'
+            },
+            {
+                매출일자: '2025-04-01',
+                매출구분: '부품교체',
+                거래처코드: '021368a',
+                거래처명: '운행등록 마곡11타입',
+                발송EMAIL: 'mk991020@naver.com',
+                품명: '버튼 쪽 및 홀더 + 스프링 구매',
+                규격: '14',
+                공급가: 286000,
+                부가세: 28600,
+                합계: 314600,
+                수정사유: '',
+                발행상태: '발행'
+            },
+            {
+                매출일자: '2025-04-02',
+                매출구분: '부품교체',
+                거래처코드: '136823',
+                거래처명: '주식회사 화태',
+                발송EMAIL: 'dnqeyo3@naver.com',
+                품명: '24년1호승강기ELD배터리교체',
+                규격: '1',
+                공급가: 217000,
+                부가세: 21700,
+                합계: 238700,
+                수정사유: '',
+                발행상태: '발행'
+            },
+            {
+                매출일자: '2025-04-03',
+                매출구분: '부품교체',
+                거래처코드: '101340',
+                거래처명: '백석로엘이엔지(주)',
+                발송EMAIL: 'hills3151@naver.com',
+                품명: '115동1호기 주판 긴급교체',
+                규격: '1',
+                공급가: 5597727,
+                부가세: 559727,
+                합계: 6157000,
+                수정사유: '',
+                발행상태: '발행'
+            },
+            {
+                매출일자: '2025-04-04',
+                매출구분: '부품교체',
+                거래처코드: 'N20609',
+                거래처명: '블링이샵아트공업사협동조합',
+                발송EMAIL: 'sms85702@naver.com',
+                품명: 'ELD배터리 교체(11층 1호기)',
+                규격: '23',
+                공급가: 195200,
+                부가세: 19520,
+                합계: 214720,
+                수정사유: '',
+                발행상태: '발행'
+            },
+            {
+                매출일자: '2025-04-08',
+                매출구분: '부품교체',
+                거래처코드: '000023',
+                거래처명: '한정도타워',
+                발송EMAIL: 'dabservices@naver.com',
+                품명: '3/21 방문 배선 교체(1층)',
+                규격: '1',
+                공급가: 40000,
+                부가세: 4000,
+                합계: 44000,
+                수정사유: '',
+                발행상태: '발행'
+            },
+            {
+                매출일자: '2025-04-08',
+                매출구분: '부품교체',
+                거래처코드: '000020',
+                거래처명: '대화프라자',
+                발송EMAIL: 'helic10@hanmail.net',
+                품명: '승강기 메인컨택 REPAIR후 재작동',
+                규격: '1',
+                공급가: 1818182,
+                부가세: 181818,
+                합계: 2000000,
+                수정사유: '',
+                발행상태: '발행'
+            },
+            {
+                매출일자: '2025-05-08',
+                매출구분: '부품교체',
+                거래처코드: '000020',
+                거래처명: '한빛미디어',
+                발송EMAIL: 'helic10@hanmail.net',
+                품명: '승강기 메인컨택 REPAIR후 재작동',
+                규격: '1',
+                공급가: 1818182,
+                부가세: 181818,
+                합계: 2000000,
+                수정사유: '',
+                발행상태: '발행'
+            },
+            {
+                매출일자: '2025-05-12',
+                매출구분: '부품교체',
+                거래처코드: '000020',
+                거래처명: '대화프라자',
+                발송EMAIL: 'helic10@hanmail.net',
+                품명: '승강기 부속품 교체',
+                규격: '1',
+                공급가: 1818182,
+                부가세: 181818,
+                합계: 2000000,
+                수정사유: '',
+                발행상태: '발행'
+            }
+            // 생략된 행도 동일한 형식으로 추가 가능
+        ];
+
+        class SalesList {
+            constructor() {
+                this.grid1 = null;
+                this.grid2 = null;
+
+                this.init();
+                this.viewData = new wijmo.collections.CollectionView();
+                this.viewData2 = new wijmo.collections.CollectionView();
+            }
+
+            init() {
+                let _this = this;
+
+                const cv = new wijmo.collections.CollectionView(mockData);
+                cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription('매출일자', function (item, prop) {
+                    return item[prop].substring(0, 7); // '2025-04'
+                }));
+
+                // 3. FlexGrid 생성
+                    this.grid1 = new wijmo.grid.FlexGrid('#theGrid_saleList', {
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    allowSorting: 'MultiColumn',
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    isReadOnly: true,
+                    itemsSource: cv,
+                    groupHeaderFormat: '{value}월 매출 - 총 {count}건',
+                    columns: [
+                        { binding: '매출일자', header: '매출일자', align: 'center', width: '*' },
+                        { binding: '매출구분', header: '매출구분', align: 'center', width: '*' },
+                        { binding: '거래처코드', header: '거래처코드', align: 'right', width: '*'},
+                        { binding: '거래처명', header: '거래처명', align: 'right', width: '*' },
+                        { binding: '발송EMAIL', header: '발송EMAIL', align: 'right', width: '*' },
+                        { binding: '품명', header: '품명', align: 'left', width: 150 },
+                        { binding: '규격', header: '규격', align: 'center', width: 100 },
+                        { binding: '공급가', header: '공급가', align: 'right', width: 120, aggregate: 'Sum' },
+                        { binding: '부가세', header: '부가세', align: 'right', width: 120, aggregate: 'Sum' },
+                        { binding: '합계', header: '합계', align: 'right', width: 120, aggregate: 'Sum' },
+                        { binding: '수정사유', header: '수정사유', align: 'center', width: 100 },
+                        { binding: '발행상태', header: '발행상태', align: 'center', width: 100 }
+                    ]
+                });
+
+
+                this.grid2 = new wijmo.grid.FlexGrid('#theGrid_saleList2', {
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    allowSorting: 'MultiColumn',
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    isReadOnly: true,
+                    itemsSource: salesData,
+                    columns: [
+                        { binding: '일련번호', header: '일련번호', align: 'center', width: '*' },
+                        { binding: '사업자등록번호', header: '사업자등록번호', align: 'center', width: '*' },
+                        { binding: '상호', header: '상호 (법인명)', align: 'left', width: '*'},
+                        { binding: '매수', header: '매수', align: 'right', width: '*' },
+                        { binding: '공급가액', header: '공급가액', align: 'right', width: '*' },
+                        { binding: '세액', header: '세액', align: 'right', width: 150 },
+                    ]
+                });
+
+            }
+        }
+
+        let page = null;
+
+
+        $(document).ready(function (e) {
+            page = new SalesList();
+
+
+        })
+    </script>
+
+</th:block>
+</html>

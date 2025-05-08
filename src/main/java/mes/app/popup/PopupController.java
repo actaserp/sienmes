@@ -381,6 +381,36 @@ public class PopupController {
 		return result;
 	}
 
+	@RequestMapping("/search_Bank")
+	public AjaxResult getSearchBank(
+			@RequestParam(value = "bankCode", required = false) String bankCode,
+			@RequestParam(value = "bankName", required = false) String bankName){
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+
+		AjaxResult result = new AjaxResult();
+
+		String sql = """
+            select bankid, banknm as bankname, bankpopcd as bankcode
+			from tb_xbank
+			where useyn = '1'
+			""";
+
+		if (bankCode != null && !bankCode.isEmpty()) {
+			sql += " AND bankpopcd ILIKE :bankpopcd ";
+			paramMap.addValue("bankpopcd", "%" + bankCode + "%");
+		}
+
+		if (bankName != null && !bankName.isEmpty()) {
+			sql += " AND banknm ILIKE :bankName ";
+			paramMap.addValue("bankName", "%" + bankName + "%");
+		}
+
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+
+		return result;
+	}
+
 	@GetMapping("/search_Account")
 	public AjaxResult getSearchAccount(@RequestParam(value = "BankName")String bankName,
 																		 @RequestParam(value = "accountNumber") String accountNumber) {
