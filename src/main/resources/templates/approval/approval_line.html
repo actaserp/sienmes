@@ -1,0 +1,967 @@
+<html layout:decorate="~{layout_page}" xmlns:layout="http://www.w3.org/1999/xhtml">
+<style>
+  #theGrid {
+    width: 100%;
+    height: 400px;
+    overflow: auto; /* 스크롤 활성화 */
+  }
+
+  .wj-flexgrid .wj-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    overflow: auto;
+  }
+  /* ✅ 가장 먼저: disabled 상태에선 hover 무시 */
+  .popup-button button:disabled:hover,
+  .popup-button .btn:disabled:hover,
+  .popup-button .btn-navy:disabled:hover {
+    background-color: #ccc !important;
+    color: #999 !important;
+    border: 1px solid #ccc !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+  }
+
+  /* ✅ 기존 hover는 disabled가 아닐 때만 적용 */
+  .popup-button button:not(:disabled):hover,
+  .popup-button .btn:not(:disabled):hover,
+  .popup-button .btn-navy:not(:disabled):hover {
+    background-color: #F5F6FA;
+    border: 1px solid #03428E;
+    color: #03428E;
+  }
+
+  #pdfWrapper {
+    display: flex;
+    width: 100%;
+    gap: 10px; /* 좌우 여백 */
+  }
+
+  #pdfView {
+    flex: 6;
+    max-width: 60%;
+  }
+
+  #pdfView2 {
+    flex: 4;
+    max-width: 40%;
+  }
+
+  #pdfView, #pdfView2 {
+    padding: 10px;
+    background: #f8f9fa;
+    overflow-y: auto;
+    max-height: 500px;
+  }
+
+</style>
+<th:block layout:fragment="content">
+  <div class="layout-contents">
+    <!-- Page Title -->
+    <div class="page-title-wrap">
+      <div class="left">
+        <h2>결재목록현황</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img src="/images/icon/ico-down.png"
+                                                                               alt="알람 아이콘"></a>
+        <!--<a title="북마크" class="bookmark toggle">
+            내메뉴
+        </a>-->
+      </div>
+      <ul class="page-navi">
+        <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+        <li>결재목록</li>
+        <li>결재목록현황</li>
+      </ul>
+    </div>
+    <!-- Select -->
+    <div class="search-wrap" id="searchWrap" style="display: none; padding-top:10px">
+      <ul>
+        <li>
+          <select title="사업장코드" id="search_spjangcd" name="search_sjangcd"
+                  onchange="init()">
+            <option value="" hidden selected disabled>선택</option>
+            <option value="ZZ">대한럭비협회</option>
+            <!-- 지역 옵션을 JavaScript에서 동적으로 채움 -->
+          </select>
+        </li>
+      </ul>
+    </div>
+    <div class="tab-contents">
+      <section class="tab-item" id="tab2" style="height: 830px; overflow: hidden;">
+        <div class="section-top">
+          <div class="search-wrap">
+            <dl>
+              <dt>
+                <label for="searchUserNm">
+                  작성일자<span class="eq">*</span>
+                </label>
+              </dt>
+              <dd>
+                <ul class="date-box">
+                  <li>
+                    <input type="date" id="startDate" name="startDate">
+                    <label for="startDate" class="hide">시작일</label>
+                  </li>
+                  <li>
+                    <input type="date" id="endDate" name="endDate">
+                    <label for="endDate" class="hide">종료일</label>
+                  </li>
+                </ul>
+              </dd>
+            </dl>
+            <dl>
+              <dt>
+                <label for="SearchPayment">
+                  진행구분<span class="eq"></span>
+                </label>
+              </dt>
+              <dd>
+                <div class="srch-box">
+                  <select id="SearchPayment" name="SearchPayment">
+                    <option value="all"></option>
+                  </select>
+                </div>
+              </dd>
+            </dl>
+            <dl>
+              <dt>
+                <label for="searchUserNm">
+                  제목<span class="eq">*</span>
+                </label>
+              </dt>
+              <dd>
+                <div class="srch-box">
+                  <input type="text" id="searchUserNm" name="searchUserNm" class="input-srch"
+                         placeholder="제목" style="border-radius: 5px;">
+                </div>
+              </dd>
+            </dl>
+            <dl>
+              <dt>&nbsp;</dt>
+              <dd>
+                <li>
+                  <a class="btn btn-delete" title="검색" id="searchButton1" onclick="Search()">
+                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                    검색
+                  </a>
+                </li>
+              </dd>
+            </dl>
+          </div>
+        </div>
+
+        <div class="container-fluid">
+          <p id="selectedItem"></p>
+          <div id="theGrid1" style="max-height:200px"></div>
+          <div id="theGrid" style="max-height: 570px"></div>
+        </div>
+      </section>
+    </div> <!--//tab-wrap end-->
+  </div> <!--//layout-contents end -->
+  <footer>
+    <p>ⓒ factCheck corp.All rights reserved.</p>
+  </footer>
+
+  <div class="dashboard-layout-popup">
+    <div class="popup-overlay" id="popup1"></div>
+    <div class="popup-wrapper" id="wrapper1">
+      <div class="popup-title">
+        <h3>결재 승인</h3>
+        <a onclick="NewClose()" title="팝업닫기" class="btn-popup-close">
+          <img src="/images/icon/btn-popup-close.svg" alt="닫기">
+        </a>
+      </div>
+      <div class="popup-contents">
+        <form id="MarketingForm" autocomplete="off">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <div class="table-wrap">
+            <table class="view-table" id="selectedData" style="max-height: 740px;">
+              <caption>결재승인 테이블</caption>
+              <colgroup>
+                <col class="wp20">
+                <col class="wauto">
+              </colgroup>
+              <tbody>
+              <tr >
+                <th>전표 보기</th>
+                <th>첨부파일 보기</th>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <div id="pdfWrapper" style="display: flex;">
+                    <div id="pdfView" class="tab-item wp60" style="display: block;">
+                      <div id="pdfContainer" style="
+                              width: 100%;
+                              height: auto;
+                              padding: 10px;
+                              background: #f8f9fa;
+                              overflow-y: auto;
+                              max-height: 500px;">
+                        <!-- PDF 페이지가 동적으로 추가됩니다. -->
+                      </div>
+                    </div>
+                    <div id="pdfView2" class="tab-item wp40" style="display: block;">
+                      <div id="pdfContainer2" style="
+                              width: 100%;
+                              height: auto;
+                              padding: 10px;
+                              background: #f8f9fa;
+                              overflow-y: auto;
+                              max-height: 500px;">
+                        <!-- PDF 페이지가 동적으로 추가됩니다. -->
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th><label for="remark"> 사유</label></th>
+                <td colspan="3">
+                  <input id="remark" name="remark" class="wp100" placeholder="사유"/>
+                  <input id="appgubun" type="hidden"><!--결재구분-->
+                  <input id="appnum" type="hidden"> <!--문서번호-->
+                  <input id="appperid" type="hidden"><!--사원번호-->
+                  <input id="papercd" type="hidden"><!--문서코드-->
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </form>
+      </div>
+      <div class="popup-button">
+        <button class="btn-navy btn-reject" onclick="Statechange('reject')">반려</button>
+        <button class="btn-navy btn-hold" onclick="Statechange('hold')">보류</button>
+        <button class="btn-navy btn-approve" onclick="Statechange('approve')">승인</button>
+        <button class="btn-navy btn-cancel" onclick="Statechange('cancel')">승인취소</button>
+        <button class="btn-popup-close" onclick="NewClose()">종료</button>
+      </div>
+    </div>
+  </div>
+
+</th:block>
+<th:block layout:fragment="scripts">
+  <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script><!-- PDF.js 라이브러리 추가 -->
+  <script type="text/javascript">
+    let theGrid;
+    let theGrid1;
+    let isBindSpjangcdCalled = false;
+
+    $(document).ready(function () {
+      // 현재 날짜 설정
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth();
+
+      //시작일: 이번 달 1일
+      const startOfMonth = new Date(year, month, 1);
+      const startFormatted = `${startOfMonth.getFullYear()}-${String(startOfMonth.getMonth() + 1).padStart(2, '0')}-${String(startOfMonth.getDate()).padStart(2, '0')}`;
+      $('#startDate').val(startFormatted);
+
+      // 종료일
+      const endOfMonth = new Date(year, month + 1, 0);
+      const endMonthFormatted = `${endOfMonth.getFullYear()}-${String(endOfMonth.getMonth() + 1).padStart(2, '0')}-${String(endOfMonth.getDate()).padStart(2, '0')}`;
+      $('#endDate').val(endMonthFormatted);
+      init();
+
+      const appgubun = $('#appgubun').val();
+      setButtonStateByAppgubun(appgubun);
+    });
+
+    document.getElementById('searchUserNm').addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        fetchListData(); // 엔터 키를 눌렀을 때 실행할 함수
+      }
+    })
+
+    function init() {
+      if (!isBindSpjangcdCalled) {
+        bindSpjangcd();
+        isBindSpjangcdCalled = true; // 플래그 업데이트
+      }
+      fetchListData();
+      fetchListData1();
+    }
+
+    function Search(){
+      fetchListData();
+      fetchListData1();
+    }
+
+    function fetchListData() {
+      let data = [];
+
+      const params = {
+        search_spjangcd: $('#search_spjangcd').val(),
+        startDate: $('#startDate').val(),
+        endDate: $('#endDate').val(),
+        SearchPayment: $('#SearchPayment').val(),
+        searchUserNm: $('#searchUserNm').val()
+      };
+
+      console.log("수집 데이터(결재 목록)", params);
+
+      // 서버에서 데이터 가져오기
+      $.ajax({
+        url: '/api/PaymentDetail/read',
+        type: 'GET',
+        data: params,
+        async: false,
+        success: function (response) {
+          console.log("서버에서 받은 데이터 :", response);
+          // 응답이 올바르게 도착했고, data 속성이 배열인지 확인
+          if (response && Array.isArray(response.data)) {
+            console.log("서버에서 받은 데이터 목록:", response.data); //실제 데이터 확인
+          }
+          if (response && Array.isArray(response.data)) {
+            data = response.data.map((item, index) => ({
+              rownum: index + 1,
+              appdate: item.appdate || '',
+              appgubun: item.appgubun || '',
+              appgubun_display: item.appgubun_display || '',
+              appnum: item.appnum || '',
+              appperid: item.appperid || '',
+              papercd: item.papercd || '',
+              papercd_name : item.papercd_name || '',
+              remark: item.remark || '',
+              repodate: item.repodate || '',
+              repoperid: item.repoperid || '',
+              repopernm: item.repopernm || '',
+              title: item.title || '',
+              fileList: item.fileList || [],
+              isdownload: item.isdownload || false
+            }));
+            const jeonpyoFiles = [];
+            const atchFiles = [];
+
+            data.forEach(item => {
+              if (item.isdownload && item.fileList.length > 0) {
+                item.fileList.forEach(file => {
+                  const fileInfo = {
+                    filepath: file.filepath,
+                    filesvnm: file.filesvnm,
+                    fileornm: file.fileornm
+                  };
+                  if (file.fileType === '전표') {
+                    jeonpyoFiles.push(fileInfo);
+                  } else if (file.fileType === '첨부') {
+                    atchFiles.push(fileInfo);
+                  }
+                });
+              }
+            });
+          }
+        },
+        error: function () {
+          console.error("데이터를 가져오는 중 오류가 발생했습니다.");
+        }
+      });
+
+      while (data.length < 15) {
+        data.push({
+          rownum: data.length + 1,
+          appdate: '',
+          appgubun: '',
+          appgubun_display: '',
+          appnum: '',
+          appperid: '',
+          papercd: '',
+          papercd_name:'',
+          remark: '',
+          repodate: '',
+          repoperid: '',
+          repopernm: '',
+          title: '',
+          fileList: '',
+          jeonpyoFiles:'',
+          atchFiles:'',
+          isdownload: ''
+        });
+      }
+
+      const viewdata = new wijmo.collections.CollectionView(data);
+
+      if (!theGrid) {
+        theGrid = new wijmo.grid.FlexGrid('#theGrid', {
+          autoGenerateColumns: false,
+          showMarquee: true,
+          isReadOnly: true,
+          selectionMode: 'ListBox',
+          virtualizationThreshold: 1,
+          columns: [
+            {binding: 'rownum', header: '순번', width: 70, align: 'center'},
+            {binding: 'appnum', header: '문서번호', width: '*', minWidth: 100, align: 'center', visible: false},
+            {binding: 'repodate', header: '상신일자', width: '*', minWidth: 110, align: 'center'},
+            {binding: 'repopernm', header: '작성자명', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'papercd', header: '문서명', width: '*', minWidth: 250, align: 'center', visible: false},
+            {binding: 'papercd_name', header: '문서명', width: '*', minWidth: 250, align: 'center'},
+            {binding: 'appgubun', header: '결재구분', width: '*', minWidth: 100, align: 'center', visible: false},
+            {binding: 'appgubun_display', header: '결재구분', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'appdate', header: '결재일자', width: '*', minWidth: 110, align: 'center'},
+            {binding: 'title', header: '제목', width: '*', align: 'center', minWidth: 250},
+            {binding: 'remark', header: '사유', width: '*', align: 'left', minWidth: 100},
+            {binding: 'fileList', header: '다운로드', width: '*', minWidth: 120, align: 'center', visible: false },
+            {binding: 'jeonpyoFiles', header: '전표파일', width: '*', minWidth: 120, align: 'center'},
+            {binding: 'atchFiles', header: '첨부파일', width: '*', minWidth: 120, align: 'center'},
+            {binding: 'isdownload', visible: false},
+            {binding: 'appperid', header: '', visible: false},
+            {binding: 'repoperid', header: '', visible: false},
+          ],
+          itemsSource: viewdata,
+          itemFormatter: function (panel, r, c, cell) {
+            if (panel.cellType === wijmo.grid.CellType.Cell) {
+              let item = panel.rows[r].dataItem;
+              let col = panel.columns[c];
+
+              // 📥 전체 다운로드 컬럼
+              if (panel.columns[c].binding === 'fileList') {
+                cell.innerHTML = ''; // 기존 내용 삭제
+
+                if (item.isdownload && item.fileList.length > 0) {
+                  let file = item.fileList[0]; // 첫 번째 파일
+                  let downloadBtn = document.createElement("a");
+                  downloadBtn.href = "#";
+                  downloadBtn.classList.add("btn-filedown");
+                  downloadBtn.title = "다운로드"
+                  downloadBtn.textContent = file.fileornm;
+
+                  downloadBtn.onclick = function (event) {
+                    event.preventDefault();
+                    downloadFile(item.fileList);
+                  };
+
+                  cell.appendChild(downloadBtn);
+                }
+              }
+
+              // 📄 전표파일 컬럼
+              else if (col.binding === 'jeonpyoFiles') {
+                const jeonpyoFiles = Array.isArray(item.fileList)
+                        ? item.fileList.filter(f => f.fileType === '전표')
+                        : [];
+                if (jeonpyoFiles.length > 0) {
+                  jeonpyoFiles.forEach(file => {
+                    const btn = document.createElement("a");
+                    btn.href = "#";
+                    btn.classList.add("btn-filedown");
+                    btn.title = "전표파일";
+                    btn.textContent = "전표 다운로드";
+                    //btn.textContent = file.fileornm;
+                    btn.onclick = function (e) {
+                      e.preventDefault();
+                      downloadFile([file]);
+                    };
+                    cell.appendChild(btn);
+                    cell.appendChild(document.createElement("br"));
+                  });
+                } else {
+                  cell.textContent = '';
+                }
+              }
+              // 📎 첨부파일 컬럼
+              else if (col.binding === 'atchFiles') {
+                const atchFiles = Array.isArray(item.fileList)
+                        ? item.fileList.filter(f => f.fileType === '첨부')
+                        : [];
+                if (atchFiles.length > 0) {
+                  atchFiles.forEach(file => {
+                    const btn = document.createElement("a");
+                    btn.href = "#";
+                    btn.classList.add("btn-filedown");
+                    btn.title = "첨부파일";
+                    btn.textContent = "다운로드";
+                    // btn.textContent = file.fileornm;
+                    btn.onclick = function (e) {
+                      e.preventDefault();
+                      downloadFile([file]);
+                    };
+                    cell.appendChild(btn);
+                    cell.appendChild(document.createElement("br"));
+                  });
+                } else {
+                  cell.textContent = '';
+                }
+              }
+            }
+          }
+        });
+        theGrid.rowHeaders.columns.splice(0, 1);
+        attachDoubleClickEvent(theGrid); //더블 클릭 이벤트
+        new FlexGridContextMenu(theGrid);
+        window.downloadFileName = '결재 목록';
+      } else {
+        theGrid.itemsSource = viewdata;
+      }
+    }
+
+    function attachDoubleClickEvent(grid) {
+      let lastClickTime = 0;
+      grid.hostElement.addEventListener('click', function (e) {
+        const now = new Date().getTime();
+
+        if (now - lastClickTime < 300) { // 300ms 이내 클릭 -> 더블클릭 처리
+          const ht = grid.hitTest(e);
+
+          if (ht.cellType === wijmo.grid.CellType.Cell) {
+            const rowData = grid.rows[ht.row].dataItem; // 더블 클릭한 행의 데이터
+            console.log('Row Data:', rowData); // 디버깅
+
+            if (rowData) {
+              modifyData(rowData);
+              modifyData2(rowData);
+              NewSave2(); // 팝업 열기
+            }
+          }
+        }
+        lastClickTime = now;
+      });
+    }
+    function modifyData(rowData) {
+      console.log("✔️ 더블클릭한 행의 데이터:", rowData);
+      let container = document.getElementById("pdfContainer");
+
+      // ✅ appnum 값을 currentRealId로 설정
+      currentRealId = rowData.appnum || "";
+      appgubun = rowData.appgubun || '';
+      appnum = rowData.appnum || '';
+      remark = rowData.remark || '';
+      papercd = rowData.papercd ||'';
+      document.getElementById('appnum').value = currentRealId;
+      document.getElementById('appgubun').value = appgubun;
+      document.getElementById('remark').value = remark;
+      document.getElementById('papercd').value = papercd;
+
+      let params = {appnum: rowData.appnum};
+
+      console.log("📂 요청할 데이터:", params);
+
+      $.ajax({
+        url: '/api/PaymentDetail/pdf',  // ✅ PDF 파일을 요청하는 API
+        type: 'GET',
+        data: params,
+        xhrFields: {responseType: 'blob'},  // ✅ 응답을 Blob 형식으로 받음
+        success: function (response) {
+          console.log("📂 PDF 데이터 수신 완료");
+
+          let filepath = URL.createObjectURL(response); // ✅ Blob 데이터를 URL로 변환
+          console.log("📂 PDF URL 생성됨:", filepath);
+
+          container.innerHTML = ""; // 기존 내용 초기화
+          showPdf(filepath);  // ✅ PDF 렌더링 함수 호출
+        },
+        error: function () {
+          console.error("🚨 데이터 요청 중 오류 발생");
+          container.innerHTML = "<p style='color:red;'>PDF 파일을 불러올 수 없습니다.</p>";
+        }
+      });
+    }
+    function showPdf(filepath) {
+      console.log(" PDF.js를 사용하여 PDF 렌더링:", filepath);
+
+      let container = document.getElementById("pdfContainer");
+      container.innerHTML = ""; // 기존 내용 초기화
+
+      // 🛠 PDF.js를 이용하여 PDF 불러오기
+      pdfjsLib.getDocument({url: filepath}).promise.then(pdf => {  // ✅ PDF.js는 Blob URL을 객체 형태로 받아야 함.
+        console.log(" PDF 로드 완료. 총 페이지 수:", pdf.numPages);
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          pdf.getPage(pageNum).then(page => {
+            let viewport = page.getViewport({scale: 1.5}); // 기본 스케일
+
+            // 🛠 컨테이너 너비에 맞춰 PDF를 자동 확대
+            let scale = container.clientWidth / viewport.width;
+            let scaledViewport = page.getViewport({scale: scale});
+
+            // 페이지별 <canvas> 생성
+            let canvas = document.createElement("canvas");
+            canvas.classList.add("pdf-page");
+            container.appendChild(canvas);
+
+            let context = canvas.getContext("2d");
+
+            // 🛠 PDF 크기를 컨테이너에 맞게 설정
+            let scaleFactor = 3; // 3배 확대
+            canvas.width = scaledViewport.width * scaleFactor;
+            canvas.height = scaledViewport.height * scaleFactor;
+            canvas.style.width = "100%"; // 컨테이너에 맞게 꽉 채우기
+            canvas.style.height = "auto"; // 세로 비율 유지
+
+            // 고해상도 렌더링 (텍스트 선명하게)
+            let renderContext = {
+              canvasContext: context,
+              viewport: scaledViewport,
+              transform: [scaleFactor, 0, 0, scaleFactor, 0, 0]
+            };
+
+            page.render(renderContext);
+          });
+        }
+      }).catch(error => {
+        console.error("❌ PDF 렌더링 오류:", error);
+        Alert.alert('', " PDF를 불러올 수 없습니다.");
+      });
+    }
+
+    function modifyData2(rowData) {
+      console.log("✔️ 더블클릭한 행의 데이터:", rowData);
+      let container = document.getElementById("pdfContainer2");
+
+      // ✅ appnum 값을 currentRealId로 설정
+      currentRealId = rowData.appnum || "";
+      appgubun = rowData.appgubun || '';
+      appnum = rowData.appnum || '';
+      remark = rowData.remark || '';
+      appperid = rowData.appperid || '';
+
+      document.getElementById('appnum').value = currentRealId;
+      document.getElementById('appgubun').value = appgubun;
+      document.getElementById('remark').value = remark;
+      document.getElementById('appperid').value = appperid;
+
+      let params = {appnum: rowData.appnum};
+
+      console.log("📂 요청할 데이터:", params);
+
+      $.ajax({
+        url: '/api/PaymentDetail/pdf2',  // ✅ PDF 파일을 요청하는 API
+        type: 'GET',
+        data: params,
+        xhrFields: {responseType: 'blob'},  // ✅ 응답을 Blob 형식으로 받음
+        success: function (response) {
+          console.log("📂 PDF 데이터 수신 완료");
+
+          let filepath = URL.createObjectURL(response); // ✅ Blob 데이터를 URL로 변환
+          console.log("📂 PDF URL 생성됨:", filepath);
+
+          container.innerHTML = ""; // 기존 내용 초기화
+          showPdf2(filepath);  // ✅ PDF 렌더링 함수 호출
+        },
+        error: function () {
+          console.error("🚨 데이터 요청 중 오류 발생");
+          container.innerHTML = "<p style='color:red;'>첨부된 파일이 없습니다.</p>";
+        }
+      });
+    }
+
+    function showPdf2(filepath) {
+      console.log(" PDF.js를 사용하여 PDF 렌더링:", filepath);
+
+      let container = document.getElementById("pdfContainer2");
+      container.innerHTML = ""; // 기존 내용 초기화
+
+      // 🛠 PDF.js를 이용하여 PDF 불러오기
+      pdfjsLib.getDocument({url: filepath}).promise.then(pdf => {  // ✅ PDF.js는 Blob URL을 객체 형태로 받아야 함.
+        console.log(" PDF 로드 완료. 총 페이지 수:", pdf.numPages);
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          pdf.getPage(pageNum).then(page => {
+            let viewport = page.getViewport({scale: 1.5}); // 기본 스케일
+
+            // 🛠 컨테이너 너비에 맞춰 PDF를 자동 확대
+            let scale = container.clientWidth / viewport.width;
+            let scaledViewport = page.getViewport({scale: scale});
+
+            // 페이지별 <canvas> 생성
+            let canvas = document.createElement("canvas");
+            canvas.classList.add("pdf-page");
+            container.appendChild(canvas);
+
+            let context = canvas.getContext("2d");
+
+            // 🛠 PDF 크기를 컨테이너에 맞게 설정
+            let scaleFactor = 3; // 3배 확대
+            canvas.width = scaledViewport.width * scaleFactor;
+            canvas.height = scaledViewport.height * scaleFactor;
+            canvas.style.width = "100%"; // 컨테이너에 맞게 꽉 채우기
+            canvas.style.height = "auto"; // 세로 비율 유지
+
+            // 고해상도 렌더링 (텍스트 선명하게)
+            let renderContext = {
+              canvasContext: context,
+              viewport: scaledViewport,
+              transform: [scaleFactor, 0, 0, scaleFactor, 0, 0]
+            };
+
+            page.render(renderContext);
+          });
+        }
+      }).catch(error => {
+        console.error("❌ PDF 렌더링 오류:", error);
+        Alert.alert('', " PDF를 불러올 수 없습니다.");
+      });
+    }
+
+    // 결재 상태 업데이트
+    function Statechange(action) {
+      const appnum = document.getElementById("appnum").value; //문서번호
+      const appgubun = document.getElementById("appgubun").value; //결재구분
+      const remark = document.getElementById("remark").value; //사유
+      const appperid =  document.getElementById('appperid').value;
+      const papercd =  document.getElementById('papercd').value;
+
+      if (!appnum || !appgubun) {
+        Alert.alert('', "문서번호와 결재구분이 없습니다.");
+        return;
+      }
+
+      console.log("상태 변경 요청:", {action, appnum, appgubun, remark});
+
+      $.ajax({
+        url: '/api/PaymentDetail/changeState',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          appnum: appnum,
+          appgubun: appgubun,
+          action: action,
+          remark: remark,
+          appperid: appperid,
+          papercd : papercd
+        }),
+        headers: {
+          'X-CSRF-Token': $('[name=_csrf]').val() // CSRF 토큰을 헤더에 추가
+        },
+        success: function (response) {
+          Alert.alert('', "결재가 되었습니다.");
+          NewClose(); // 팝업 닫기
+          fetchListData();
+          fetchListData1();
+        },
+        error: function () {
+          Alert.alert('', "상태 변경 중 오류 발생");
+        }
+      });
+    }
+
+    function setButtonStateByAppgubun(appgubun, currentUserId) {
+      const $btnReject = $('.btn-reject');
+      const $btnHold = $('.btn-hold');
+      const $btnApprove = $('.btn-approve');
+      const $btnCancel = $('.btn-cancel');
+
+      // 초기화
+      [$btnReject, $btnHold, $btnApprove, $btnCancel].forEach(btn => btn.prop("disabled", true));
+
+      $.ajax({
+        url: '/api/PaymentDetail/currentApprovalInfo',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ appnum: appnum }),
+        headers: {
+          'X-CSRF-Token': $('[name=_csrf]').val()
+        },
+        success: function (response) {
+          const canCancel = response.data?.canCancel === true;
+          const isApproved = response.data?.isApproved === true;
+
+          switch (appgubun) {
+            case "101": // 결재 중
+              if (canCancel && isApproved) {
+                // 🔓 이미 결재한 상태라면 → 승인취소만 가능
+                $btnCancel.prop("disabled", false);
+                console.log("✅ 이미 결재함 → 승인취소만 활성화");
+              } else if (canCancel && !isApproved) {
+                // 🔓 내가 결재자고 아직 결재 안 했으면 → 일반 결재 가능
+                [$btnReject, $btnHold, $btnApprove].forEach(btn => btn.prop("disabled", false));
+                console.log("🟢 결재 가능 상태 → 결재 버튼들 활성화");
+              } else {
+                console.log("🚫 결재자가 아님 또는 뒤 결재자 있음 → 버튼 비활성화");
+              }
+              break;
+
+            case "001": // 대기
+              console.log("🟢 대기 상태 → 전체 버튼 활성화");
+              [$btnReject, $btnHold, $btnApprove].forEach(btn => btn.prop("disabled", false));
+              break;
+
+            case "201": // 보류
+              $btnReject.prop("disabled", false);
+              $btnApprove.prop("disabled", false);
+              break;
+
+            case "131": // 반려
+            default:
+              console.log("⛔ 처리불가 상태 → 전체 비활성화");
+              break;
+          }
+        },
+        error: function () {
+          console.log("⚠️ Ajax 실패");
+        }
+      });
+    }
+
+    function downloadFile(fileList) {
+      if (!fileList || fileList.length === 0) {
+        console.warn("다운로드할 파일이 없습니다.");
+        return;
+      }
+
+      console.log("다운로드할 파일 목록:", fileList);
+
+      let downloadList = fileList.map(file => ({
+        filepath: file.filepath,
+        filesvnm: file.filesvnm,
+        fileornm: file.fileornm
+      }));
+
+      let downloadUrl = '/api/PaymentList/downloader';
+
+      // 파일 리스트를 서버에 전송하여 다운로드 실행
+      downloadFiles(downloadList, downloadUrl);
+    }
+
+    function NewSave2() {
+      let popup = document.getElementById('popup1');
+      let wrapper = document.getElementById('wrapper1');
+
+      const appgubun = $('#appgubun').val();
+      console.log("📌 팝업 열기 - appgubun:", appgubun);  // 로그로 확인
+
+      setButtonStateByAppgubun(appgubun);
+
+      popup.style.display = 'block';
+      wrapper.style.display = 'block';
+    }
+
+    function NewClose() {
+      // 팝업 닫기
+      let popup = document.getElementById('popup1');
+      let wrapper = document.getElementById('wrapper1');
+      clearForm();  // 폼 초기화
+      popup.style.display = 'none';
+      wrapper.style.display = 'none';
+    }
+
+    // 폼 초기화 함수
+    function clearForm() {
+      // 폼 요소 선택
+      const form = document.getElementById('MarketingForm');
+
+      if (form) {
+        form.reset(); // 모든 입력 필드 초기화
+      }
+
+      // 파일 입력 필드 초기화
+      let fileInput = document.getElementById('fileInput2');
+      if (fileInput) {
+        fileInput.value = "";
+      }
+
+    }
+
+    function fetchListData1() {
+      let data = [];
+
+      const params = {
+        search_spjangcd: $('#search_spjangcd').val(),
+        startDate: $('#startDate').val(),
+        endDate: $('#endDate').val(),
+        searchUserNm: $('#searchUserNm').val()
+      };
+
+      // 서버에서 데이터 가져오기
+      $.ajax({
+        url: '/api/PaymentDetail/read1',
+        type: 'GET',
+        data: params,
+        async: false,
+        success: function (response) {
+          console.log("서버에서 받은 데이터:", response);
+
+          if (response && response.data) {
+            const userName = response.data.userName || ''; // 사용자 이름 가져오기
+            const paymentList = response.data.paymentList || []; // 결재 목록 가져오기
+
+            if (Array.isArray(paymentList)) {
+              console.log("서버에서 받은 데이터 목록:", paymentList);
+
+              data = paymentList.map((item) => ({
+                userName: userName, // 모든 항목에 동일한 사용자 이름 추가
+                appgubun1: (item.appgubun1 || '0') + "건",
+                appgubun2: (item.appgubun2 || '0') + "건",
+                appgubun3: (item.appgubun3 || '0') + "건",
+                appgubun4: (item.appgubun4 || '0') + "건"
+              }));
+            }
+          }
+        },
+        error: function () {
+          console.error("데이터를 가져오는 중 오류가 발생했습니다.");
+        }
+      });
+
+      // 데이터가 비어 있으면 기본값 추가 (그리드가 깨지지 않도록)
+      if (data.length < 1) {
+        data.push({
+          userName: '',
+          appgubun1: '',
+          appgubun2: '',
+          appgubun3: '',
+          appgubun4: ''
+        });
+      }
+
+      const viewdata = new wijmo.collections.CollectionView(data);
+
+      if (!theGrid1) {
+        theGrid1 = new wijmo.grid.FlexGrid('#theGrid1', {
+          autoGenerateColumns: false,
+          showMarquee: true,
+          isReadOnly: true,
+          columns: [
+            {binding: 'userName', header: '결재자명', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'appgubun1', header: '결재대기', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'appgubun2', header: '결재문서', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'appgubun4', header: '보류문서', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'appgubun3', header: '반려문서', width: '*', minWidth: 100, align: 'center'},
+          ],
+          itemsSource: viewdata,
+        });
+        theGrid1.rowHeaders.columns.splice(0, 1);
+        new FlexGridContextMenu(theGrid1);
+        window.downloadFileName = '문서 현황';
+      } else {
+        theGrid1.itemsSource = viewdata;
+      }
+    }
+
+    //공통코드
+    const selectConfigs = [
+      {parentCode: 'Payment', elementId: 'SearchPayment'},
+    ];
+
+    selectConfigs.forEach(config => {
+      initializeSelect3({
+        url: '/api/PaymentList/payType',
+        params: {parentCode: config.parentCode},
+        elementId: config.elementId,
+        valueField: "code",
+        textField: "value",
+        includeAllOption: true, // "전체" 옵션 사용
+        // defaultValue: "001" // 기본 선택값 [대기]
+      });
+    });
+
+    //사업장 코드
+    function bindSpjangcd() {
+      $.ajax({
+        url: '/api/PaymentList/bindSpjangcd',
+        type: 'GET',
+        async: false,
+        success: function (data) {
+          data2 = data.data;
+          const selectElement = document.getElementById('search_spjangcd');
+          if (selectElement) {
+            selectElement.value = data2; // value 속성으로 선택
+          }
+        }
+      })
+    }
+
+
+  </script>
+</th:block>
+</html>

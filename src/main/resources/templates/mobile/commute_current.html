@@ -173,36 +173,78 @@
     <div class="layout-contents" >
       <!-- 검색 영역  -->
       <div class="search-wrap">
-
+        <div class="srch-tit aco-hd">
+          <p>기본검색</p>
+          <a href="#" title="열기/닫기" class="btn-aco">
+            <img src="/assets_mobile/images/icon/ico-down.svg" alt="열기/닫기">
+          </a>
+        </div>
+        <div class="srch-cont aco-cont">
+          <dl>
+            <dt>조회일자</dt>
+            <dd>
+              <div style="display: flex; gap: 10px">
+                <div style="width: 100%">
+                  <input type="date" id="SearchKeywords">
+                </div>
+              </div>
+            </dd>
+          </dl>
+          <dl>
+            <dt>구분</dt>
+            <dd>
+              <div style="display: flex; gap: 10px">
+                <div style="width: 100%">
+                  <select>
+                    <option>전체</option>
+                  </select>
+                </div>
+              </div>
+            </dd>
+          </dl>
+          <div class="srch-btn">
+            <button class="btn-dark" onclick="searchdata()">조회</button>
+          </div>
+        </div>
       </div>
       <!-- 컨텐츠 영역  -->
       <div class="contents-wrap">
-        <dl style="margin-bottom: 10px">
-          <div class="search-container">
-            <input type="hidden" id="postno">
-            <!-- 현재 날자 출력 -->
-            <div>
-              <input type="text" id="searchDate">
-            </div>
-            <!-- ip 검색 시간(현재시간) -->
-            <div>
-              <input type="text" id="searchTime" >
-            </div>
-            <!-- 현재ip -->
-            <div>
-              <input type="text" id="ipAddress" >
-            </div>
-            <!-- 사용자 정보 -->
-            <div>
-              <input type="text" id="userInfo" >
-            </div>
-          </div>
-          <!-- 버튼 -->
-          <button onclick="" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); background-color: #03428E; color: #FFFFFF">사내출근</button>
-          <button onclick="" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); background-color: red; color: #FFFFFF">사내퇴근</button>
-          <button onclick="" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); background-color: #03428E; color: #FFFFFF">외부출근</button>
-          <button onclick="" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); background-color: red; color: #FFFFFF">외부퇴근</button>
-        </dl>
+        <div id="theGrid">
+          <table>
+            <tr>
+              <th>일자</th>
+              <th>근태</th>
+              <th>출근</th>
+              <th>퇴근</th>
+              <th>근무시간</th>
+              <th>구분</th>
+            </tr>
+            <tr>
+              <td>4.01</td>
+              <td>정상</td>
+              <td>08:55</td>
+              <td>18:25</td>
+              <td>8</td>
+              <td>정상</td>
+            </tr>
+            <tr>
+              <td>4.02</td>
+              <td>정상</td>
+              <td>09:30</td>
+              <td>18:15</td>
+              <td>7.5</td>
+              <td>지각</td>
+            </tr>
+            <tr>
+              <td>4.03</td>
+              <td>출장</td>
+              <td>00:00</td>
+              <td>00:00</td>
+              <td>0</td>
+              <td></td>
+            </tr>
+          </table>
+        </div>
       </div><!--// contents-wrap end-->
       <div id="addressWrap" class="contents-wrap">
 
@@ -224,7 +266,6 @@
   // if (username && username !== 'null') localStorage.setItem('username', username);
   // if (groupname && groupname !== 'null') localStorage.setItem('groupname', groupname);
 </script>
-
 <script type="text/javascript">
 
   $(document).ready(function () {

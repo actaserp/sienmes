@@ -173,40 +173,37 @@
         <div class="layout-contents" >
             <!-- 검색 영역  -->
             <div class="search-wrap">
-
+                <div class="srch-tit aco-hd">
+                    <p>기본검색</p>
+                    <a href="#" title="열기/닫기" class="btn-aco">
+                        <img src="/assets_mobile/images/icon/ico-down.svg" alt="열기/닫기">
+                    </a>
+                </div>
+                <div class="srch-cont aco-cont">
+                    <dl>
+                        <dt>조회년도</dt>
+                        <dd>
+                            <div style="display: flex; gap: 10px">
+                                <div style="width: 100%">
+                                    <input type="date" id="SearchKeywords" placeholder="조회할 주소를 입력해주세요">
+                                </div>
+                            </div>
+                        </dd>
+                    </dl>
+                    <div class="srch-btn">
+                        <button class="btn-dark" onclick="searchdata()">조회</button>
+                    </div>
+                </div>
             </div>
             <!-- 컨텐츠 영역  -->
-            <div class="contents-wrap">
-                <dl style="margin-bottom: 10px">
-                    <div class="search-container">
-                        <input type="hidden" id="postno">
-                        <!-- 현재 날자 출력 -->
-                        <div>
-                            <input type="text" id="searchDate">
-                        </div>
-                        <!-- ip 검색 시간(현재시간) -->
-                        <div>
-                            <input type="text" id="searchTime" >
-                        </div>
-                        <!-- 현재ip -->
-                        <div>
-                            <input type="text" id="ipAddress" >
-                        </div>
-                        <!-- 사용자 정보 -->
-                        <div>
-                            <input type="text" id="userInfo" >
-                        </div>
+            <div class="contents-wrap" style="display: none">
+                <div>
+                    <H4 style="margin-bottom: 20px;    text-align: center; line-height: 1.5; font-size: 18px;font-weight: bold;max-width: 90%;word-break: keep-all;overflow-wrap: break-word;white-space: normal;">주소 : </H4>
+                    <div class="chart-wrap" style="margin-bottom: 20px;">
+                        <canvas id="SignupOfWeek" style="width: 740px; height: 550px;"></canvas>
                     </div>
-                    <!-- 버튼 -->
-                    <button onclick="" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); background-color: #03428E; color: #FFFFFF">사내출근</button>
-                    <button onclick="" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); background-color: red; color: #FFFFFF">사내퇴근</button>
-                    <button onclick="" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); background-color: #03428E; color: #FFFFFF">외부출근</button>
-                    <button onclick="" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); background-color: red; color: #FFFFFF">외부퇴근</button>
-                </dl>
-            </div><!--// contents-wrap end-->
-            <div id="addressWrap" class="contents-wrap">
-
-            </div>
+                </div>
+            </div> <!--// contents-wrap end-->
         </div> <!--//layout-contents end -->
 
     </div> <!-- //mobile-layout-contents end-->
@@ -224,13 +221,138 @@
     // if (username && username !== 'null') localStorage.setItem('username', username);
     // if (groupname && groupname !== 'null') localStorage.setItem('groupname', groupname);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="text/javascript">
 
     $(document).ready(function () {
+        searchDeductionData();
     });
 
 
+    // REALID 값으로 차감 내역 조회 후 차트 업데이트
+    function searchDeductionData() {
+        $.ajax({
+            url: '/api/commute_current/read',
+            type: 'GET',
+            data: {
+            },
+            success: function (response) {
+                console.log(response); // 응답 데이터 확인
 
+                let chartWrap = document.querySelector(".chart-wrap");
+                chartWrap.innerHTML = `<canvas id="SignupOfWeek" style="width: 740px; height: 550px;"></canvas>`;
+                response.data = {};
+                response.data.data = [];
+                response.data.data = [
+                    {
+                        "HISSEQ": 242,
+                        "REALID": 512,
+                        "HISNM": "근저당권설정",
+                        "HISAMT": "220000000",
+                        "HISPOINT": 29,
+                        "REGSTAND": "A1",
+                        "HISFLAG": "1",
+                        "REMARK": "집(부동산)을 담보로 은행에서 대출을 받았어요.",
+                        "HISDATE": "20210201",
+                        "HISPOINT_PERCENT": 82.860000000000,
+                        "REALADD": "인천 광역시 부평구 영성동로18번길 20 서해그랑블 제 203 동 제 20 층 제 2001 호"
+                    },
+                    {
+                        "HISSEQ": 243,
+                        "REALID": 512,
+                        "HISNM": "근저당권설정",
+                        "HISAMT": "77000000",
+                        "HISPOINT": 4,
+                        "REGSTAND": "A1",
+                        "HISFLAG": "0",
+                        "REMARK": "집(부동산)을 담보로 은행에서 대출을 받았어요.",
+                        "HISDATE": "20231201",
+                        "HISPOINT_PERCENT": 11.430000000000,
+                        "REALADD": "인천 광역시 부평구 영성동로18번길 20 서해그랑블 제 203 동 제 20 층 제 2001 호"
+                    },
+                    {
+                        "HISSEQ": 244,
+                        "REALID": 512,
+                        "HISNM": "항목차감",
+                        "HISAMT": null,
+                        "HISPOINT": 2,
+                        "REGSTAND": null,
+                        "HISFLAG": null,
+                        "REMARK": "마지막 항목별 추가 차감점수입니다.",
+                        "HISDATE": null,
+                        "HISPOINT_PERCENT": 5.710000000000,
+                        "REALADD": "인천 광역시 부평구 영성동로18번길 20 서해그랑블 제 203 동 제 20 층 제 2001 호"
+                    }
+                ]
+                if (response.success && Array.isArray(response.data.data)) {
+
+                    data2 = response.data.data;
+                    // 데이터 변환
+                    let labels = data2.map(item => `${item.HISNM} (${item.HISPOINT_PERCENT}%)`);
+                    let data = data2.map(item => item.HISPOINT_PERCENT);
+
+                    // 기존 차트 제거 (이미 생성된 경우)
+                    if (window.myPieChart) {
+                        window.myPieChart.destroy();
+                    }
+
+                    // 캔버스 요소 가져오기
+                    let ctx = document.getElementById('SignupOfWeek').getContext('2d');
+
+                    // 새로운 차트 생성
+                    window.myPieChart = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: '차감 내역',
+                                data: data,
+                                backgroundColor: 'blue',
+                                borderColor: '#ffffff',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (tooltipItem) {
+                                            let label = tooltipItem.label || '';
+                                            let value = tooltipItem.raw || 0;
+                                            return `${label}: ${value}`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    console.error("데이터가 올바르지 않습니다.");
+                }
+                // 등급, 점수 바인드
+                document.querySelector(".contents-wrap h4").innerText = `생산부 홍길동 사원 2025 출퇴근현황`;
+
+                // 차트 보여주기
+                let contentsWrap = document.querySelector('.contents-wrap');
+                if (contentsWrap) {
+                    contentsWrap.style.display = 'block';
+                }
+                let canvas = document.getElementById("SignupOfWeek");
+                if (canvas) {
+                    canvas.style.display = 'block';
+                } else {
+                    console.error("SignupOfWeek 요소를 찾을 수 없습니다.");
+                }
+            },
+            error: function (error) {
+                console.error("데이터 불러오기 실패:", error);
+            }
+        });
+    }
 
 </script>
 </body>
