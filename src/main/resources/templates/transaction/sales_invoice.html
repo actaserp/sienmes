@@ -54,7 +54,7 @@
                             </label>
                         </dt>
                         <dd>
-                            <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭해서 검색하세요.">
+                            <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭하여 검색" style="width: 180px;">
                             <input type="hidden" id="cboCompanyHidden">
                         </dd>
                     </dl>
@@ -118,12 +118,17 @@
                         </li>
                         <li>
                             <a class="btn" title="계산서 일괄 등록" id="btnAddBatch">
-                                계산서 일괄 등록
+                                일괄 등록
                             </a>
                         </li>
                         <li>
-                            <a class="btn" title="계산서 등록" id="btnAddNew">
-                                계산서 등록
+                            <a class="btn" title="정발행 작성" id="btnAddNewRegular">
+                                정발행 작성
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn" title="역발행 작성" id="btnAddNewReverse">
+                                역발행 작성
                             </a>
                         </li>
                     </ul>
@@ -272,7 +277,8 @@
                 this.url = '/api/tran/tran';
                 this.grid = null;
                 this.$btnEdit = $('#btnEdit');
-                this.$btnAddNew = $('#btnAddNew');
+                this.$btnAddNewRegular = $('#btnAddNewRegular');
+                this.$btnAddNewReverse = $('#btnAddNewReverse');
                 this.viewData = new wijmo.collections.CollectionView();
                 this.init();
                 this.invoiceSelector = null;
@@ -345,7 +351,7 @@
 
 
                 //수주등록 클릭
-                this.$btnAddNew.click(function (e) {
+                this.$btnAddNewRegular.click(function (e) {
                     let defaultData = {
                         id: '',
                         mode: 'new',
@@ -365,7 +371,6 @@
                             action: 'detail'
                         };
                         let fnsuccess = function (result) {
-                            console.log('edit', result.data);
                             result.data['mode'] = 'edit';
                             _this.showInvoiceForm(result.data);
                         };
@@ -383,7 +388,6 @@
                     const items = _this.grid.rows
                         .filter(row => row.isSelected)
                         .map(row => row.dataItem);
-                    console.log('items', items);
 
                     if (items.length === 0) {
                         Alert.alert('', '삭제할 항목을 선택해주세요.');
@@ -516,7 +520,7 @@
 
                 }
                 modalContainer.open({width: 1200, height: 680, $content});
-                initializeDetailRows();
+                initializeDetailRows(data.detailList || []);
 
 
                 let oldBusinessNumber = null;
@@ -551,7 +555,6 @@
 
                     //수주일, 납기일 체크?
                     let data = FormUtil.extractForm($taxForm);
-                    console.log('$taxForm', data);
 
                     let id = data.InvoiceeID;
                     let newBusinessNumber = data.InvoiceeCorpNum;
@@ -565,7 +568,6 @@
                                 let fnSaveSuccess = function (result) {
                                     if (result.success) {
                                         Alert.alert('', '저장되었습니다.');
-                                        _this.searchMainData();
                                     } else {
                                         Alert.alert('', result.message);
                                     }
@@ -608,24 +610,19 @@
                 $writeDate.val(today);
 
                 // 품목 추가 버튼
-                $(document).on('click', 'a[id^="btnViewItem_"]', function (e) {
+                $(document).off('click', 'a[id^="btnViewItem_"]').on('click', 'a[id^="btnViewItem_"]', function (e) {
                     e.preventDefault();
 
-
                     const $btn = $(this);
-                    const $row = $btn.closest('tr'); // 버튼이 속한 tr
+                    const $row = $btn.closest('tr');
 
                     const pop = new PopMatComponent();
                     pop.material_type = 'product,sangpum';
 
                     pop.show(function (item) {
-
                         $row.find('input[id$=".ItemId"]').val(item.id || '');
                         $row.find('textarea[id$=".ItemName"]').val(item.Name || '');
                         $row.find('textarea[id$=".Spec"]').val(item.Spec || '');
-
-                        // checkAndTryShowPrice($row);
-
                     });
 
                     pop.searchDataBind();
@@ -647,7 +644,6 @@
                     let poppage = new PopTotalAmountComponent();
 
                     let searchcallback = function (items) {
-                        console.log('totalAmountAct', items);
                         let index = 0;
                         while (true) {
                             let $supplyCost = $content.find('#detailList' + index + '\\.SupplyCost');
@@ -695,14 +691,13 @@
                         delete data[`detailList[${i}].PurchaseDT2`];
                     }
 
-                    console.log('taxForm', data);
-
                     Alert.confirm('', '저장하시겠습니까?', function () {
                         let url = _this.url + '/invoice_save';
 
                         let fnSaveSuccess = function (result) {
                             Notify.success("저장되었습니다.");
                             modalContainer.close();
+                            _this.searchMainData();
                         };
 
                         AjaxUtil.postJsonAsyncData(url, data, fnSaveSuccess);
@@ -750,7 +745,6 @@
                 //
                 //     if (mat_pk && company_id && JumunDate) {
                 //         let fnsuccess = function (result) {
-                //             console.log('단가 결과', result);
                 //             if (result && result.data && result.data.length > 0) {
                 //                 let unitPrice = parseFloat(result.data[0].UnitPrice);
                 //                 row.find('input[id$=".UnitCost"]').val(unitPrice.toLocaleString());
@@ -958,7 +952,6 @@
                         'srchEndDt': end.val(),
                     };
 
-                    console.log('shipParam', shipParam);
                     AjaxUtil.getAsyncData(_this.url + '/shipment_head_list', shipParam, fnsuccess);
 
                 };
@@ -972,7 +965,6 @@
                         .filter(row => row.isSelected)
                         .map(row => row.dataItem);
 
-                    console.log(items);
 
                     if (!items || items.length === 0) {
                         Alert.alert('', '저장할 항목을 선택하세요.');
@@ -1021,7 +1013,6 @@
                 let poppage = new PopCompComponent();
                 let $poppage = $(poppage);
                 let searchcallback = function (items) {
-                    //console.log('items : ',items);
                     document.getElementById('btnCompanySearch').value = items.compname;
                     document.getElementById('cboCompanyHidden').value = items.id;
 
@@ -1040,7 +1031,6 @@
                 if (value) {
                     $clearBtn.show();
                 } else {
-                    console.log('[DEBUG] cleared');
                     $clearBtn.hide();
                     $('#cboCompanyHidden').val('');
                 }

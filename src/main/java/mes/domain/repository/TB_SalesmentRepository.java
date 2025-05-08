@@ -1,5 +1,6 @@
 package mes.domain.repository;
 
+import groovy.lang.Tuple2;
 import mes.domain.entity.TB_ACCOUNT;
 import mes.domain.entity.TB_Salesment;
 import mes.domain.entity.TB_SalesmentId;
@@ -20,8 +21,7 @@ public interface TB_SalesmentRepository extends JpaRepository<TB_Salesment, TB_S
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM TB_Salesment m WHERE CONCAT(m.id.misdate, '_', m.id.misnum) IN :keys")
-    void deleteByKeyList(@Param("keys") List<String> keys);
+    void deleteByIdIn(List<TB_SalesmentId> ids);
 
 
 }

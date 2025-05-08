@@ -937,6 +937,8 @@
             } else if (taxType === '개인'){
                 $('#InvoiceeCorpNum').attr('readonly', true);
             }
+
+            recalculateTaxesIfNeeded();
         });
 
         $(document).on('change', 'input[name="InvoiceeType"]', function () {
@@ -1050,12 +1052,13 @@
 
         let detailRowCount = 0; // 현재 detail 행의 개수 (전역)
 
-        function initializeDetailRows() {
+        // 품목 행 디폴트
+        function initializeDetailRows(data = []) {
             const $originRow = $('#item_0');
+            const rowCount = Math.max(data.length, 4);
 
-            for (let i = 0; i < 4; i++) {  // 0,1,2,3
+            for (let i = 0; i < rowCount; i++) {
                 let $newRow = $originRow.clone();
-
                 $newRow.attr('id', 'item_' + i);
 
                 $newRow.find('input, textarea, a').each(function () {
@@ -1069,33 +1072,43 @@
                             .replace(/btnDelItem_\d+/g, 'btnDelItem_' + i);
                         $this.attr('id', newId);
                     }
+
                     if (oldName) {
                         const newName = oldName.replace(/detailList\[\d+\]/g, 'detailList[' + i + ']');
                         $this.attr('name', newName);
                     }
-                    if ($this.is('input[type="text"], input[type="hidden"], textarea')) {
-                        $this.val('');
+
+                    if ($this.is('input[type="text"], input[type="hidden"], textarea') && data[i]) {
+                        const match = $this.attr('name')?.match(/detailList\[\d+\]\.(\w+)/);
+                        const field = match?.[1];
+                        if (field && data[i]?.[field] !== undefined) {
+                            $this.val(data[i][field]);
+                        } else {
+                            $this.val('');
+                        }
                     }
                 });
 
-                // ➡ SerialNum도 i+1로 설정
                 $newRow.find('input[id$=".SerialNum"]').val(i + 1);
 
                 if (i === 0) {
-                    $originRow.replaceWith($newRow); // 최초는 원본 교체
+                    $originRow.replaceWith($newRow);
                 } else {
                     $('#item_' + (i - 1)).after($newRow);
                 }
             }
 
-            detailRowCount = 4; // 초기 4줄 완료
+            detailRowCount = rowCount;
         }
 
 
+
+        // 품목행 추가 버튼
         $(document).on('click', '#btnAddFiveDetails', function () {
             addFiveDetails();
         });
 
+        // 품목행 삭제 버튼
         $(document).on('click', 'a[id^="btnDelItem_"]', function () {
             const $row = $(this).closest('tr');
 
@@ -1116,7 +1129,7 @@
             reindexDetailRows();
         });
 
-
+        // 품목 5번째 행부터 추가
         function addFiveDetails() {
             let currentRowCount = $('tr[id^="item_"]').length;
 
@@ -1155,7 +1168,7 @@
         }
 
 
-
+        // 품목행 인덱스 재정렬
         function reindexDetailRows() {
             $('tr[id^="item_"]').each(function (index) {
                 const $row = $(this);
@@ -1187,18 +1200,8 @@
             detailRowCount = $('tr[id^="item_"]').length;
         }
 
-        $(document).on('input', '#taxList input[id$="Qty"], #taxList input[id$="UnitCost"], #taxList input[id$="SupplyCost"], #taxList input[id$="Tax"]', function () {
-            let raw = $(this).val().replace(/,/g, ''); // 기존 콤마 제거
-            if (raw.length > 0 && !isNaN(raw)) {
-                $(this).val(Number(raw).toLocaleString()); // 숫자면 콤마 다시 붙이기
-            }
-        });
 
-
-        $(document).on('input', 'input[id$="SupplyCost"], input[id$="Tax"]', function () {
-            updateTotals();
-        });
-
+        // 총합계 계산 (공급가액 + 세액)
         function updateTotals() {
             let supplyCostSum = 0;
             let taxSum = 0;
@@ -1208,16 +1211,13 @@
                 let $supplyCost = $('#detailList' + index + '\\.SupplyCost');
                 let $tax = $('#detailList' + index + '\\.Tax');
 
-                if ($supplyCost.length === 0 || $tax.length === 0) {
-                    break;
-                }
+                if ($supplyCost.length === 0 || $tax.length === 0) break;
 
                 let supplyCostVal = parseFloat($supplyCost.val().replace(/,/g, '')) || 0;
                 let taxVal = parseFloat($tax.val().replace(/,/g, '')) || 0;
 
                 supplyCostSum += supplyCostVal;
                 taxSum += taxVal;
-
                 index++;
             }
 
@@ -1226,42 +1226,108 @@
             $('#TotalAmount').val((supplyCostSum + taxSum).toLocaleString());
         }
 
-        $(document).on('input', '#taxList input[id$="Qty"], #taxList input[id$="UnitCost"]', function () {
-            const $row = $(this).closest('tr');
-            const taxType = $('input[name="WriteType"]:checked').val();
+        function recalculateTaxesForRow($row) {
+            const taxMode = $('input[name="TaxType"]:checked').val();       // 과세 / 영세 / 면세
+            const writeType = $('input[name="WriteType"]:checked').val();   // 단가 유형
+
             const $qty = $row.find('input[id$="Qty"]');
             const $unitCost = $row.find('input[id$="UnitCost"]');
             const $supplyCost = $row.find('input[id$="SupplyCost"]');
             const $tax = $row.find('input[id$="Tax"]');
 
-            let qtyRaw = $qty.val().replace(/,/g, '').trim();
-            let unitCostRaw = $unitCost.val().replace(/,/g, '').trim();
+            let qty = parseFloat($qty.val().replace(/,/g, '').trim()) || 0;
+            let unitCost = parseFloat($unitCost.val().replace(/,/g, '').trim()) || 0;
+            let supplyCost = parseFloat($supplyCost.val().replace(/,/g, '').trim()) || 0;
 
-            // 수량과 단가 모두 값이 있을 때만 재계산
-            if (qtyRaw !== '' && unitCostRaw !== '') {
-                let qty = parseFloat(qtyRaw) || 0;
-                let unitCost = parseFloat(unitCostRaw) || 0;
+            // 1. 수량 또는 단가가 바뀐 경우 → 공급가 재계산
+            const isQtyOrUnitChanged = $(event.target).is($qty) || $(event.target).is($unitCost);
+            if (isQtyOrUnitChanged && qty > 0 && unitCost > 0) {
+                supplyCost = qty * unitCost;
+                $supplyCost.val(supplyCost.toLocaleString());
+            }
 
-                let supplyCost = 0;
-                let tax = 0;
+            // 2. 세액 계산
+            let tax = 0;
+            if (taxMode === '과세') {
+                tax = Math.floor(supplyCost * 0.1);
+            }
 
-                if (taxType === '단가 부가세포함') {
-                    let total = qty * unitCost;
-                    supplyCost = Math.floor(total / 1.1);
-                    tax = total - supplyCost;
-                } else {
-                    supplyCost = qty * unitCost;
-                    tax = Math.floor(supplyCost * 0.1);
+            $tax.val(tax.toLocaleString());
+        }
+
+        function recalculateTaxesIfNeeded() {
+            const taxType = $('input[name="TaxType"]:checked').val();
+
+            let index = 0;
+            while (true) {
+                const $supplyCost = $('#detailList' + index + '\\.SupplyCost');
+                const $tax = $('#detailList' + index + '\\.Tax');
+
+                if ($supplyCost.length === 0 || $tax.length === 0) break;
+
+                let supplyCostVal = $supplyCost.val().replace(/,/g, '').trim();
+                let supplyCost = parseFloat(supplyCostVal) || 0;
+
+                if (supplyCost > 0) {
+                    if (taxType === '영세' || taxType === '면세') {
+                        $tax.val('0');
+                    } else if (taxType === '과세') {
+                        let tax = Math.floor(supplyCost * 0.1);
+                        $tax.val(tax.toLocaleString());
+                    }
                 }
 
-                $supplyCost.val(supplyCost.toLocaleString());
-                $tax.val(tax.toLocaleString());
+                index++;
             }
-            // else: 수량이나 단가 하나라도 비었으면 계산하지 않고 기존 값 그대로 유지
 
-            updateTotals(); // 공급가액 세액 합계 다시 계산
+            updateTotals();
+        }
+
+        // 수량 또는 단가 입력 → 공급가 + 세액 계산
+        $(document).on('input', '#taxList input[id$="Qty"], #taxList input[id$="UnitCost"]', function () {
+            const $row = $(this).closest('tr');
+            const $qty = $row.find('input[id$="Qty"]');
+            const $unitCost = $row.find('input[id$="UnitCost"]');
+
+            const qtyVal = $qty.val().replace(/,/g, '').trim();
+            const unitCostVal = $unitCost.val().replace(/,/g, '').trim();
+
+            if (qtyVal !== '' && unitCostVal !== '') {
+                recalculateTaxesForRow($row);
+                updateTotals();
+            }
         });
 
+        // 공급가 입력 → 세액 계산
+        $(document).on('input', '#taxList input[id$="SupplyCost"]', function () {
+            const $row = $(this).closest('tr');
+            const taxMode = $('input[name="TaxType"]:checked').val();
+            const $supplyCost = $row.find('input[id$="SupplyCost"]');
+            const $tax = $row.find('input[id$="Tax"]');
+
+            let supplyCost = parseFloat($supplyCost.val().replace(/,/g, '').trim()) || 0;
+            let tax = taxMode === '과세' ? Math.floor(supplyCost * 0.1) : 0;
+
+            $tax.val(tax.toLocaleString());
+            updateTotals();
+        });
+
+        // 세액 직접 입력 시 → 합계 업데이트
+        $(document).on('input', '#taxList input[id$="Tax"]', function () {
+            updateTotals();
+        });
+
+        // 수량, 단가, 공급가액, 세액 필드 입력 시 숫자형으로 포맷팅 (천단위 콤마)
+        $(document).on('input', '#taxList input[id$="Qty"], #taxList input[id$="UnitCost"], #taxList input[id$="SupplyCost"], #taxList input[id$="Tax"]', function () {
+            let raw = $(this).val().replace(/,/g, ''); // 기존 콤마 제거
+            if (raw.length > 0 && !isNaN(raw)) {
+                $(this).val(Number(raw).toLocaleString()); // 숫자면 콤마 다시 붙이기
+            }
+        });
+
+
+
+        // 사업자등록번호 포맷팅 (###-##-#####)
         function formatBizNum(value) {
             value = value.replace(/[^0-9]/g, '').slice(0, 10);
             if (value.length > 3 && value.length <= 5) {
@@ -1272,10 +1338,12 @@
             return value;
         }
 
+        // 사업자번호 입력 시 자동 포맷 적용
         $(document).on('input', '#InvoicerCorpNum, #InvoiceeCorpNum', function () {
             $(this).val(formatBizNum($(this).val()));
         });
 
+        // 전화번호 포맷팅 (지역번호 감지)
         function formatPhoneNumber(value) {
             value = value.replace(/[^0-9]/g, '');
 
@@ -1302,10 +1370,12 @@
             return value;
         }
 
+        // 전화번호 입력 시 자동 포맷 적용
         $(document).on('input', '#InvoicerTEL, #InvoiceeTEL1', function () {
             $(this).val(formatPhoneNumber($(this).val()));
         });
 
+        // 금액 입력 시 숫자만 허용 + 천단위 콤마 포맷 적용
         $(document).on('input', '#Cash, #ChkBill, #Note, #Credit', function () {
             let inputVal = $(this).val().replace(/[^0-9]/g, ''); // 숫자만 남김
             if (inputVal === '') {
@@ -1315,18 +1385,6 @@
             let formatted = Number(inputVal).toLocaleString('en-US'); // 천 단위 , 추가
             $(this).val(formatted);
         });
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
