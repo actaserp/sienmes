@@ -1,11 +1,14 @@
 package mes.app;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import mes.app.system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -28,8 +31,11 @@ public class HomeController {
 	SystemOptionRepository systemOptionRepository;
 	
 	@Autowired
-	Settings settings;	
-	
+	Settings settings;
+
+	@Autowired
+	UserService userService;
+
 	@RequestMapping(value= "/", method=RequestMethod.GET)
     public ModelAndView pageIndex(HttpServletRequest request, HttpSession session) {
 
@@ -42,15 +48,28 @@ public class HomeController {
         User user = (User)auth.getPrincipal();
         String username = user.getUserProfile().getName();
 		String userid = user.getUsername();
+		Integer groupid = user.getUserProfile().getUserGroup().getId();
+		String groupname = user.getUserProfile().getUserGroup().getName();
+		String spjangcd = user.getSpjangcd();
                 
         SystemOption sysOpt= this.systemOptionRepository.getByCode("LOGO_TITLE");
         String logoTitle = sysOpt.getValue();
         
         //q = this.systemOptionRepository.getByCode("main_menu");        
-        
+
+		List<Map<String, Object>> spjangList= null;
+		if (groupid == 1){
+			spjangList = userService.getSpjangList();
+		} else {
+			spjangList = userService.getSpjang(spjangcd);
+		}
+
 		ModelAndView mv = new ModelAndView();
+		session.setAttribute("spjangList", spjangList);
 		mv.addObject("username", username);
 		mv.addObject("userid", userid);
+		mv.addObject("groupname", groupname);
+		session.setAttribute("spjangcd", spjangcd);
 		mv.addObject("userinfo", user);
 		mv.addObject("system_title", logoTitle);
 		mv.addObject("default_menu_code", "wm_dashboard_summary");

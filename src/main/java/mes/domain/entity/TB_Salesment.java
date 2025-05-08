@@ -36,6 +36,7 @@ public class TB_Salesment {
     private Integer chkbill;
     private Integer credit;
     private Integer note;
+    private String invoiceetype;
 
     private String remark1;
     private String remark2;

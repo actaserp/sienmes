@@ -28,9 +28,10 @@ public class MaterialCurrentStockController {
 			@RequestParam(value="mat_grp_pk", required=false) Integer mat_grp_pk,
 			@RequestParam(value="mat_name", required=false) String mat_name,
 			@RequestParam(value="store_house_id", required=false) Integer store_house_id,
+			@RequestParam(value="spjangcd", required=false) String spjangcd,
 			HttpServletRequest request) {
 		
-		List<Map<String, Object>> items = this.MaterialCurrentStockService.getMaterialCurrentStockList(mat_type, mat_grp_pk, mat_name, store_house_id);
+		List<Map<String, Object>> items = this.MaterialCurrentStockService.getMaterialCurrentStockList(mat_type, mat_grp_pk, mat_name, store_house_id, spjangcd);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;

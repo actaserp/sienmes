@@ -16,13 +16,14 @@ public class MaterialCurrentStockService {
 	SqlRunner sqlRunner;
 	
 	// 재고 현황 조회 
-	public List<Map<String, Object>> getMaterialCurrentStockList(String mat_type, Integer mat_grp_pk, String mat_name, Integer store_house_id) {
+	public List<Map<String, Object>> getMaterialCurrentStockList(String mat_type, Integer mat_grp_pk, String mat_name, Integer store_house_id, String spjangcd) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();  
 		paramMap.addValue("mat_type", mat_type);
 		paramMap.addValue("mat_grp_pk", mat_grp_pk);
 		paramMap.addValue("mat_name", mat_name);
 		paramMap.addValue("store_house_id", store_house_id);
+		paramMap.addValue("spjangcd", spjangcd);
 		
 		String sql = """
 			select m.id, fn_code_name('mat_type', mg."MaterialType") as mat_type_name
@@ -48,6 +49,7 @@ public class MaterialCurrentStockService {
             left join mat_lot ml on ml."StoreHouse_id"  = sh.id and m.id = ml."Material_id" and ml."CurrentStock" > 0
             where 1 = 1
             and m."Useyn" = '0'
+            and m."spjangcd" =:spjangcd
 			""";
 		if (StringUtils.isEmpty(mat_type)==false) sql +=" and mg.\"MaterialType\" = :mat_type ";
 		if (mat_grp_pk != null) sql +=" and mg.\"id\" = :mat_grp_pk ";

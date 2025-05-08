@@ -187,7 +187,7 @@ public class SalesInvoiceController {
 		// 2. 필드 매핑
 		salesment.setIssuetype((String) form.get("IssueType")); // 발행형태
 		salesment.setTaxtype((String) form.get("TaxType")); // 과세형태
-		// InvoiceeType 거래처유형
+		salesment.setInvoiceetype((String) form.get("InvoiceeType")); // 거래처 유형
 		salesment.setMisgubun(form.get("sale_type").toString()); // 매출구분
 		salesment.setKwon(parseInt(form.get("Kwon"))); // 권
 		salesment.setHo(parseInt(form.get("Ho"))); // 호
@@ -276,6 +276,21 @@ public class SalesInvoiceController {
 		tb_salesmentRepository.save(salesment); // cascade = ALL 이면 detail도 함께 저장됨
 
 		result.success = true;
+
+		return result;
+	}
+
+	@GetMapping("/invoice_detail")
+	public AjaxResult getInvoiceDetail(
+			@RequestParam("misdate") String misdate,
+			@RequestParam("misnum") String misnum,
+			HttpServletRequest request) {
+		misdate = misdate.replaceAll("-", "");
+
+		Map<String, Object> item = this.salesInvoiceService.getInvoiceDetail(misdate, misnum);
+
+		AjaxResult result = new AjaxResult();
+		result.data = item;
 
 		return result;
 	}

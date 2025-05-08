@@ -62,6 +62,9 @@ public class User implements Serializable {
 	
 	@Column(name = "date_joined")
 	Timestamp date_joined;
+
+	@Column(name = "spjangcd")
+	String spjangcd;
 	
 	@JsonManagedReference
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

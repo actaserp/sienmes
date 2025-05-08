@@ -206,7 +206,7 @@
                 </div>
             </div>
             <div class="container-fluid">
-                <div id="theGrid" style="height: 730px;"></div>
+                <div id="theGrid" style="height: 660px;"></div>
             </div>
         </section>
     </div>
@@ -267,16 +267,6 @@
     <th:block th:replace="/common/popup_totalAmount :: popup_totalAmount"></th:block>
 
     <script type="text/javascript">
-
-        function formatNumberInput(input) {
-            let value = input.value.replace(/[^0-9]/g, '');
-            input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        }
-
-        function getCleanValue(id) {
-            return document.getElementById(id).value.replace(/,/g, '');
-        }
-
         class SalesInvoicePage {
             constructor() {
                 this.url = '/api/tran/tran';
@@ -285,8 +275,10 @@
                 this.$btnAddNew = $('#btnAddNew');
                 this.viewData = new wijmo.collections.CollectionView();
                 this.init();
-            }
+                this.invoiceSelector = null;
+                this.shipSelector = null
 
+            }
 
             init() {
                 let _this = this;
@@ -299,6 +291,12 @@
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnFooter) {
+                            const col = sender.columns[e.col];
+                            if (col.binding === 'item_summary') {
+                                e.cell.style.textAlign = 'center';
+                            }
                         }
                     },
                     columns: [
@@ -324,6 +322,19 @@
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '매출 계산서 내역';
 
+                // 하단 합계 행 추가
+                this.grid.columnFooters.rows.push(new wijmo.grid.GroupRow());
+
+                // 데이터 변경 시 합계 업데이트
+                this.grid.collectionView.collectionChanged.addHandler(() => {
+                    _this.updateFooter();
+                });
+                this.invoiceSelector = new wijmo.grid.selector.Selector(this.grid, {
+                    itemChecked: () => {
+                        this.updateSelectedTotals();
+                    }
+                })
+
                 this.grid.hostElement.addEventListener('dblclick', function (e) {
                     let items = _this.grid.selectedItems;
                     if (items.length === 0) {
@@ -332,8 +343,6 @@
                     _this.$btnEdit.trigger('click');
                 });
 
-                let nowDate = CommonUtil.getYYYYMMDD();
-                let dueDate = CommonUtil.getYYYYMMDD(10);
 
                 //수주등록 클릭
                 this.$btnAddNew.click(function (e) {
@@ -351,7 +360,8 @@
                     if (selectedItems.length === 1) {
 
                         let data = {
-                            id: selectedItems[0].id,
+                            misdate: selectedItems[0].misdate,
+                            misnum: selectedItems[0].misnum,
                             action: 'detail'
                         };
                         let fnsuccess = function (result) {
@@ -359,8 +369,8 @@
                             result.data['mode'] = 'edit';
                             _this.showInvoiceForm(result.data);
                         };
-                        AjaxUtil.getAsyncData(_this.url + '/detail', data, fnsuccess);
-                    } else if (items.length > 1) {
+                        AjaxUtil.getAsyncData(_this.url + '/invoice_detail', data, fnsuccess);
+                    } else if (selectedItems.length > 1) {
                         Alert.alert('', '데이터를 하나만 선택하세요.');
                     } else {
                         Alert.alert('', '선택된 데이터가 없습니다.');
@@ -370,7 +380,9 @@
 
                 // 삭제 버튼
                 $('#btnDelete').click(function (e) {
-                    let items = _this.grid.selectedItems;
+                    const items = _this.grid.rows
+                        .filter(row => row.isSelected)
+                        .map(row => row.dataItem);
                     console.log('items', items);
 
                     if (items.length === 0) {
@@ -397,6 +409,50 @@
                     });
 
                 });
+            }
+
+            updateSelectedTotals() {
+                const selectedItems = this.grid.rows
+                    .filter(row => row.isSelected)
+                    .map(row => row.dataItem);
+                let _this = this;
+                let totalAmt = 0, totalSupply = 0, totalTax = 0;
+
+                selectedItems.forEach(item => {
+                    totalAmt += item.totalamt || 0;
+                    totalSupply += item.supplycost || 0;
+                    totalTax += item.taxtotal || 0;
+                });
+
+                const formatNumber = (n) => n.toLocaleString('ko-KR');
+                $('#totalAmount').val(formatNumber(totalAmt));
+                $('#totalSupPrice').val(formatNumber(totalSupply));
+                $('#totalTax').val(formatNumber(totalTax));
+            }
+
+
+            // 하단 합계 업데이트 함수
+            updateFooter() {
+                let totalamtSum = 0;
+                let supplycostSum = 0;
+                let taxtotalSum = 0;
+
+                // grid 합계 계산
+                if (this.grid && this.grid.collectionView) {
+                    this.grid.collectionView.items.forEach(item => {
+                        totalamtSum += item.totalamt || 0; // undefined일 경우 0 처리
+                        supplycostSum += item.supplycost || 0; // undefined일 경우 0 처리
+                        taxtotalSum += item.taxtotal || 0; // undefined일 경우 0 처리
+                    });
+
+                    // columnFooters의 첫 번째 행을 가져와 합계 업데이트
+                    let footerRow = this.grid.columnFooters.rows[0];
+
+                    this.grid.columnFooters.setCellData(footerRow.index, 'item_summary', '합계');
+                    this.grid.columnFooters.setCellData(footerRow.index, 'totalamt', totalamtSum);
+                    this.grid.columnFooters.setCellData(footerRow.index, 'supplycost', supplycostSum);
+                    this.grid.columnFooters.setCellData(footerRow.index, 'taxtotal', taxtotalSum);
+                }
 
             }
 
@@ -407,11 +463,15 @@
                 let $content = $(content);
 
                 let modalContainer = null;
+                let $taxForm = $content.find('#taxForm');
+                // 매출 구분
+                let $saleType = $content.find('#sale_type');
+                AjaxUtil.fillSelectOptions($saleType, 'system_code', 'choose', false, 'sale_type');
+
                 if (data.mode === 'new') {
                     modalContainer = new PopupDraggable('등록');
 
                     let purposeType = AjaxUtil.getSyncData('/api/definition/code/getvalue', { code: 'PurposeType' });
-                    console.log('purposeType', purposeType.data);
 
                     if (purposeType.data.Value === '영수') {
                         $content.find('#PurposeType1').prop('checked', true);
@@ -420,38 +480,44 @@
                     } else if (purposeType.data.Value === '없음') {
                         $content.find('#PurposeType3').prop('checked', true);
                     }
+
+                    // 공급자 정보 불러오기
+                    let data1 = {
+                        spjangcd: 'ZZ',
+                    };
+                    let url = _this.url + '/invoicer_read';
+                    let fnSaveSuccess = function (result) {
+                        if (result.success) {
+                            $content.find('#InvoicerCorpNum').val(result.data.saupnum).trigger('input');
+                            // $content.find('#InvoicerTaxRegID').val(result.data);
+                            $content.find('#InvoicerCorpName').val(result.data.spjangnm);
+                            $content.find('#InvoicerCEOName').val(result.data.prenm);
+                            $content.find('#InvoicerAddr').val(result.data.address);
+                            $content.find('#InvoicerBizType').val(result.data.biztype);
+                            $content.find('#InvoicerBizClass').val(result.data.item);
+                            $content.find('#InvoicerContactName').val(result.data.agnertel1);
+                            $content.find('#InvoicerTEL').val(result.data.agnertel2).trigger('input');
+                            $content.find('#InvoicerEmail').val(result.data.emailadres);
+
+                        }
+                    };
+                    AjaxUtil.getAsyncData(url, data1, fnSaveSuccess);
+
                 } else {
                     modalContainer = new PopupDraggable('수정');
+                    setTimeout(() => {
+                        FormUtil.BindInvoiceDataForm(data, $content.find('#taxForm'));
+                        $content.find('#InvoiceeCorpNum').prop('readonly', true);
+                        $content.find('#writeDate')
+                            .prop('readonly', true)
+                            .css('background-color', '#EDEFF5');
+                        $content.find('#btnInvoiceSave span').text('수정');
+                    }, 0);
+
                 }
                 modalContainer.open({width: 1200, height: 680, $content});
                 initializeDetailRows();
 
-
-                // 매출 구분
-                let $saleType = $content.find('#sale_type');
-                AjaxUtil.fillSelectOptions($saleType, 'system_code', 'choose', false, 'sale_type');
-
-                // 공급자 정보 불러오기
-                let data1 = {
-                    spjangcd: 'ZZ',
-                };
-                let url = _this.url + '/invoicer_read';
-                let fnSaveSuccess = function (result) {
-                    if (result.success) {
-                        $content.find('#InvoicerCorpNum').val(result.data.saupnum).trigger('input');
-                        // $content.find('#InvoicerTaxRegID').val(result.data);
-                        $content.find('#InvoicerCorpName').val(result.data.spjangnm);
-                        $content.find('#InvoicerCEOName').val(result.data.prenm);
-                        $content.find('#InvoicerAddr').val(result.data.address);
-                        $content.find('#InvoicerBizType').val(result.data.biztype);
-                        $content.find('#InvoicerBizClass').val(result.data.item);
-                        $content.find('#InvoicerContactName').val(result.data.agnertel1);
-                        $content.find('#InvoicerTEL').val(result.data.agnertel2).trigger('input');
-                        $content.find('#InvoicerEmail').val(result.data.emailadres);
-
-                    }
-                };
-                AjaxUtil.getAsyncData(url, data1, fnSaveSuccess);
 
                 let oldBusinessNumber = null;
                 // 선택 버튼(거래처 조회)
@@ -480,7 +546,6 @@
 
                 // 저장버튼
                 let $saveInvoicer = $content.find('#saveInvoicer');
-                let $taxForm = $content.find('#taxForm');
 
                 $saveInvoicer.click(function (e) {
 
@@ -500,6 +565,7 @@
                                 let fnSaveSuccess = function (result) {
                                     if (result.success) {
                                         Alert.alert('', '저장되었습니다.');
+                                        _this.searchMainData();
                                     } else {
                                         Alert.alert('', result.message);
                                     }
@@ -732,27 +798,12 @@
                     'end': end,
                     'action': 'read'
                 };
-                let selector = null;
+
+
                 let fnsuccess = function (result) {
                     if (result != null) {
-                        console.log('result.data', result.data);
                         _this.grid.itemsSource = result.data;
-                        selector = new wijmo.grid.selector.Selector(_this.grid);
-
-                        let totalAmt = 0, totalSupply = 0, totalTax = 0;
-                        result.data.forEach(item => {
-                            totalAmt += item.totalamt || 0;
-                            totalSupply += item.supplycost || 0;
-                            totalTax += item.taxtotal || 0;
-                        });
-
-                        // 천 단위 콤마 포맷
-                        const formatNumber = (n) => n.toLocaleString('ko-KR');
-
-                        // 값 넣기
-                        $('#totalAmount').val(formatNumber(totalAmt));
-                        $('#totalSupPrice').val(formatNumber(totalSupply));
-                        $('#totalTax').val(formatNumber(totalTax));
+                        _this.updateFooter();
                     }
                 };
                 AjaxUtil.getAsyncData(url, data, fnsuccess);
@@ -856,7 +907,6 @@
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
                 });
-                let selector = null;
 
                 new FlexGridContextMenu(this.shipListGrid);
                 this.shipListGrid.downloadFileName = '출고 리스트';
@@ -899,7 +949,7 @@
                     let fnsuccess = function (result) {
                         if (result.data !== null) {
                             _this.shipListGrid.itemsSource = new wijmo.collections.CollectionView(result.data);
-                            selector = new wijmo.grid.selector.Selector(_this.shipListGrid);
+                            _this.shipSelector = new wijmo.grid.selector.Selector(_this.shipListGrid);
 
                         }
                     };

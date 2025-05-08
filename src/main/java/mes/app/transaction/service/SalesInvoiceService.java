@@ -112,6 +112,86 @@ public class SalesInvoiceService {
 		return items;
 	}
 
+	public Map<String, Object> getInvoiceDetail(String misdate, String misnum) {
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("misdate", misdate);
+		paramMap.addValue("misnum", misnum);
+
+		String sql = """ 
+		SELECT\s
+			m.misdate,
+			m.misnum,
+			m.issuetype AS "IssueType",
+			m.taxtype AS "TaxType",
+			m.misgubun AS "sale_type",
+			m.kwon AS "Kwon",
+			m.ho AS "Ho",
+			m.serialnum AS "SerialNum",
+			m."invoiceeType" AS "InvoiceeType",
+			
+			m.icercorpnum AS "InvoicerCorpNum",
+			m.icerregid AS "InvoicerTaxRegID",
+			m.icercorpnm AS "InvoicerCorpName",
+			m.icerceonm AS "InvoicerCEOName",
+			m.iceraddr AS "InvoicerAddr",
+			m.icerbiztype AS "InvoicerBizType",
+			m.icerbizclass AS "InvoicerBizClass",
+			m.icerpernm AS "InvoicerContactName",
+			m.icertel AS "InvoicerTEL",
+			m.iceremail AS "InvoicerEmail",
+	  
+			m.cltcd AS "InvoiceeID",
+			m.ivercorpnum AS "InvoiceeCorpNum",
+			m.iverregid AS "InvoiceeTaxRegID",
+			m.ivercorpnm AS "InvoiceeCorpName",
+			m.iverceonm AS "InvoiceeCEOName",
+			m.iveraddr AS "InvoiceeAddr",
+			m.iverbiztype AS "InvoiceeBizType",
+			m.iverbizclass AS "InvoiceeBizClass",
+			m.iverpernm AS "InvoiceeContactName1",
+			m.ivertel AS "InvoiceeTEL1",
+			m.iveremail AS "InvoiceeEmail1",
+	  
+			m.supplycost AS "SupplyCostTotal",
+			m.taxtotal AS "TaxTotal",
+			m.remark1 AS "Remark1",
+			m.remark2 AS "Remark2",
+			m.remark3 AS "Remark3",
+			m.totalamt AS "TotalAmount",
+			m.cash AS "Cash",
+			m.chkbill AS "ChkBill",
+			m.note AS "Note",
+			m.credit AS "Credit",
+			m.purposetype AS "PurposeType",
+			m.statecode AS "StateCode"
+		FROM tb_salesment m
+		WHERE m.misdate = :misdate AND m.misnum = :misnum
+		""";
+
+		String detailSql = """ 
+		SELECT
+			 d."Material_id" AS "ItemId",
+			 d.itemnm AS "ItemName",
+			 d.spec AS "Spec",
+			 d.qty AS "Qty",
+			 d.unitcost AS "UnitCost",
+			 d.supplycost AS "SupplyCost",
+			 d.taxtotal AS "Tax",
+			 d.remark AS "Remark",
+			 d.purchasedt AS "PurchaseDT",
+			 d.misseq AS "SerialNum"
+		 FROM tb_salesdetail d
+		 WHERE d.misdate = :misdate AND d.misnum = :misnum
+		 ORDER BY d.misseq
+		""";
+
+		Map<String, Object> master = this.sqlRunner.getRow(sql, paramMap);
+		List<Map<String, Object>> detailList = this.sqlRunner.getRows(detailSql, paramMap);
+
+		master.put("detailList", detailList);
+		return master;
+	}
+
 	public Map<String, Object> getInvoicerDatail(String spjangcd) {
 
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();

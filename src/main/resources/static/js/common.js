@@ -644,6 +644,118 @@ let FormUtil = {
                 }
             }
         });
+    },
+    BindInvoiceDataForm: function (_resultSet, $form) {
+        $.each(_resultSet, function (key, value) {
+            // 빈스트링으로 오는 값은 반드시 null 값으로 치환한다. 또는 json 에서 null 로 넘겨준다
+            // 치환하지 않고 빈스트링값('') 으로 처리하면 input[value=] 이렇게 되어 오류 발생함.
+            if (key === '') value = null;
+            if (value === '') value = null;
+
+            var $frmCtl = $form.find('[name=' + key + ']');
+
+            if ($frmCtl.length === 0)
+                return true;
+            let object = $frmCtl[0];
+            var tagName = object === undefined ? '' : object.tagName.toUpperCase();
+            var tagClassName = object === undefined ? '' : object.className.toUpperCase();
+            let type_name = object.type;
+
+            if (tagName === 'SELECT') {
+
+                //if ($('#' + key).is(':disabled')) { $('#' + key).removeAttr('disabled'); }
+                if ($frmCtl.is(':disabled')) { $frmCtl.removeAttr('disabled'); }
+                //$('#' + key + ' > option').each(function () {
+                //$('#' + key + ' > option').each(function () {
+                //    $(this).removeProp('selected');
+                //});
+                //$('#' + key + ' > option[value=' + value + ']').prop('selected', true);
+                //_f$formorm.find('[name=' + key + '] > option[value=' + value + ']').prop('selected', true);
+                $frmCtl.val(value);
+            } else if (tagName === 'INPUT' || tagName === 'TEXTAREA') {
+
+                if ($frmCtl.is(':disabled')) { $frmCtl.removeAttr('disabled'); }
+                if (type_name === 'checkbox') {
+                    let checkValue = $frmCtl.val();
+                    if (checkValue !== undefined)
+                        $frmCtl.prop('checked', value === checkValue);
+                    else
+                        $frmCtl.prop('checked', value);
+                    //$frmCtl.attr('checked', value);
+                } else if (type_name === 'radio') {
+                    console.log('라디오 바인딩 시도:', key, value);
+                    $frmCtl.removeAttr('checked');
+                    let escapedValue = value.replace(/"/g, '\\"');
+                    var $radioCtl = $('input:radio[name=' + key + ']:input[value=' + escapedValue + ']');
+                    $radioCtl.prop('checked', true);
+                    $radioCtl.attr('checked', true);
+                } else {
+                    if ($.isNumeric(value) || value === null) {
+                        let biznumFields = ['InvoicerCorpNum', 'InvoiceeCorpNum'];
+                        let phoneFields = ['InvoicerTEL', 'InvoiceeTEL1'];
+                        let numberFields = ['unitPrice', 'vat', 'price', 'totalAmount', 'SupplyCostTotal', 'TaxTotal', 'TotalAmount'];
+
+                        if (biznumFields.includes(key)) {
+                            let raw = (value || '').replace(/[^\d]/g, '');
+                            if (raw.length === 10) {
+                                $frmCtl.val(raw.replace(/(\d{3})(\d{2,3})(\d{5})/, '$1-$2-$3'));
+                            } else {
+                                $frmCtl.val(raw);
+                            }
+                        } else if (phoneFields.includes(key)) {
+                            let raw = (value || '').replace(/[^\d]/g, '');
+                            if (raw.startsWith('02')) {
+                                $frmCtl.val(raw.replace(/(\d{2})(\d{3,4})(\d{4})/, '$1-$2-$3'));
+                            } else {
+                                $frmCtl.val(raw.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3'));
+                            }
+                        } else if (numberFields.includes(key)) {
+                            $frmCtl.val(Number(value).toLocaleString());
+                        } else {
+                            $frmCtl.val(value);
+                        }
+                    } else {
+                        $frmCtl.val(value.replace('&amp;', '&'));
+                    }
+                }
+            } else if (tagName === 'SPAN') {
+                if (tagClassName === 'DATE') {
+                    var ddspan = new Date(value);
+                    $frmCtl.text(ddspan.toLocaleString());
+                } else {
+                    $frmCtl.text(value);
+                }
+            }
+        });
+        // 상세 품목 바인딩
+        if (Array.isArray(_resultSet.detailList)) {
+            for (let i = 0; i < _resultSet.detailList.length; i++) {
+                let item = _resultSet.detailList[i];
+
+                // 만약 행이 부족하면 동적으로 행 추가
+                let $row = $('#detailList' + i + '\\.ItemName').closest('tr');
+                if ($row.length === 0) {
+                    // 행이 없으면 행 추가 함수 호출 (행 추가 버튼 트리거 또는 함수 직접 호출)
+                    $('#btnAddDetailRow').click(); // 또는 initializeDetailRows(i+1); 등 사용
+                    $row = $('#detailList' + i + '\\.ItemName').closest('tr');
+                }
+
+                // 각 필드에 값 채우기
+                $row.find('[name="detailList[' + i + '].ItemId"]').val(item.ItemId);
+                $row.find('[name="detailList[' + i + '].ItemName"]').val(item.ItemName);
+                $row.find('[name="detailList[' + i + '].Spec"]').val(item.Spec);
+                $row.find('[name="detailList[' + i + '].Qty"]').val(item.Qty);
+                $row.find('[name="detailList[' + i + '].UnitCost"]').val(item.UnitCost.toLocaleString());
+                $row.find('[name="detailList[' + i + '].SupplyCost"]').val(item.SupplyCost.toLocaleString());
+                $row.find('[name="detailList[' + i + '].Tax"]').val(item.Tax.toLocaleString());
+                $row.find('[name="detailList[' + i + '].Remark"]').val(item.Remark);
+                if (item.PurchaseDT?.length === 4) {
+                    $row.find('[name="detailList[' + i + '].PurchaseDT1"]').val(item.PurchaseDT.substring(0, 2));
+                    $row.find('[name="detailList[' + i + '].PurchaseDT2"]').val(item.PurchaseDT.substring(2, 4));
+                }
+            }
+        }
+
     }
 };
 
