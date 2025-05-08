@@ -27,9 +27,9 @@ public class AccountsReceivableListController {
   public AjaxResult getTotalList(
       @RequestParam(value="srchStartDt", required=false) String start_date,
       @RequestParam(value="srchEndDt", required=false) String end_date,
-      @RequestParam(value = "cboCompany", required=false) String company,
+      @RequestParam(value = "cboCompany", required=false) Integer company,
       HttpServletRequest request) {
-    log.info("미수금 현황 집계 read ---  :start:{}, end:{} ,company:{} ", start_date, end_date, company);
+    //log.info("미수금 현황 집계 read ---  :start:{}, end:{} ,company:{} ", start_date, end_date, company);
     start_date = start_date + " 00:00:00";
     end_date = end_date + " 23:59:59";
 
@@ -50,7 +50,7 @@ public class AccountsReceivableListController {
   public AjaxResult getDetailList(
       @RequestParam(value="srchStartDt", required=false) String start_date,
       @RequestParam(value="srchEndDt", required=false) String end_date,
-      @RequestParam(value = "cboCompany", required=false) String company,
+      @RequestParam(value = "code", required=false) String company,
       HttpServletRequest request) {
     log.info("미수금 현황 상세 read ---  :start:{}, end:{} ,company:{} ", start_date, end_date, company);
 

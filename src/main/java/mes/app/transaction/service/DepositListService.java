@@ -27,34 +27,37 @@ public class DepositListService {
     String sql = """
         select
            tb.ioid,
-           TO_CHAR(tb.trdate::DATE, 'YYYY-MM-DD') AS trdate,
+           TO_CHAR(TO_DATE(tb.trdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS trdate,
            tb.accin ,
            c."Name" as "CompanyName" ,
            tb.iotype ,
            sc."Value" as deposit_type,
            sc."Code" as deposit_code,
-           ta.accname  as banknm ,
+           tb.banknm,
            tb.accnum ,
            tt.tradenm ,
            tb.remark1,
            tb.eumnum,
-           tb.eumtodt
+           CASE 
+             WHEN LENGTH(TRIM(tb.eumtodt)) = 8 THEN TO_CHAR(TO_DATE(tb.eumtodt, 'YYYYMMDD'), 'YYYY-MM-DD')
+             ELSE NULL
+           END AS eumtodt,
+           tb.memo
            from tb_banktransit tb
            left join company c on c.id = tb.cltcd
            left join  sys_code sc on sc."Code" = tb.iotype
            left join tb_trade tt on tb.trid = tt.trid
-           left join tb_account ta on tb.accid = ta.accid
            WHERE tb.ioflag = '0'
-           and TO_DATE(tb.trdate, 'YYYYMMDD') between :start and :end
+           AND TO_DATE(tb.trdate, 'YYYYMMDD') BETWEEN :start AND :end
         """;
     if (depositType != null && !depositType.isEmpty()) {
-      sql += " AND sc.\"Value\" ILIKE :depositType ";
-      paramMap.addValue("depositType", "%" + depositType + "%");
+      sql += " AND tb.iotype = :depositType ";
+      paramMap.addValue("depositType",  depositType );
     }
 
     if (company != null && !company.isEmpty()) {
       sql += " AND tb.cltcd = :company ";
-      paramMap.addValue("company", "%" + company + "%");
+      paramMap.addValue("company", Integer.parseInt(company));
     }
 
     if (txtDescription != null && !txtDescription.isEmpty()) {
@@ -73,10 +76,9 @@ public class DepositListService {
     sql +="""
         ORDER BY tb.trdate ASC
         """;
-
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-//    log.info("입금현황 read SQL: {}", sql);
-//    log.info("SQL Parameters: {}", paramMap.getValues());
+    //log.info("입금현황 read SQL: {}", sql);
+    //log.info("SQL Parameters: {}", paramMap.getValues());
     return items;
   }
 

@@ -141,42 +141,6 @@
                     itemsSource: this.viewData,
                 });
                 this.grid.rowHeaders.columns.splice(0, 1);
-                this.grid.itemFormatter = function (panel, row, col, cell) {
-                    if (panel.cellType === wijmo.grid.CellType.Cell) {
-                        const colName = panel.columns[col].binding;
-                        const item = panel.rows[row].dataItem;
-
-                        //모든 셀 공통 초기화 (기존 스타일 제거)
-                        cell.style.backgroundColor = '';
-                        cell.style.color = '';
-                        cell.style.fontWeight = '';
-                        cell.style.textAlign = '';
-                        cell.style.verticalAlign = '';
-                        cell.style.display = '';
-                        cell.style.alignItems = '';
-                        cell.style.justifyContent = '';
-
-                        //'전체' 업체명인 셀만 스타일 적용
-                        if (
-                            colName === 'company_name' &&
-                            typeof item?.[colName] === 'string' &&
-                            item[colName].trim() === '전체'
-                        ) {
-                            cell.style.backgroundColor = '#f0f9ff';
-                            cell.style.color = '#007acc';
-                            cell.style.fontWeight = 'bold';
-                        }
-
-                        //중앙 정렬 컬럼
-                        if (['mat_grp_name', 'mat_code', 'mat_name', 'unit_name'].includes(colName)) {
-                            cell.style.textAlign = 'center';
-                            cell.style.verticalAlign = 'middle';
-                            cell.style.display = 'flex';
-                            cell.style.alignItems = 'center';
-                            cell.style.justifyContent = 'center';
-                        }
-                    }
-                };
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '발주 내역';
 
@@ -207,38 +171,6 @@
                 });
 
                 this.grid3.rowHeaders.columns.splice(0, 1);
-
-                this.grid3.itemFormatter = function (panel, row, col, cell) {
-                    if (panel.cellType === wijmo.grid.CellType.Cell) {
-                        const colName = panel.columns[col].binding;
-                        const item = panel.rows[row].dataItem;
-
-                        // 초기화
-                        cell.style.backgroundColor = '';
-                        cell.style.color = '';
-                        cell.style.fontWeight = '';
-                        cell.style.textAlign = '';
-                        cell.style.verticalAlign = '';
-                        cell.style.display = '';
-                        cell.style.alignItems = '';
-                        cell.style.justifyContent = '';
-
-                        if (colName === 'company_name' && item?.[colName]?.trim() === '전체') {
-                            cell.style.backgroundColor = '#f0f9ff';
-                            cell.style.color = '#007acc';
-                            cell.style.fontWeight = 'bold';
-                        }
-
-                        if (['mat_grp_name', 'mat_code', 'mat_name', 'unit_name'].includes(colName)) {
-                            cell.style.textAlign = 'center';
-                            cell.style.verticalAlign = 'middle';
-                            cell.style.display = 'flex';
-                            cell.style.alignItems = 'center';
-                            cell.style.justifyContent = 'center';
-                        }
-                    }
-                };
-
                 new FlexGridContextMenu(this.grid3);
                 this.grid3.downloadFileName = '입금 내역';
 
@@ -269,37 +201,6 @@
                 });
 
                 this.grid4.rowHeaders.columns.splice(0, 1);
-
-                this.grid4.itemFormatter = function (panel, row, col, cell) {
-                    if (panel.cellType === wijmo.grid.CellType.Cell) {
-                        const colName = panel.columns[col].binding;
-                        const item = panel.rows[row].dataItem;
-
-                        // 초기화
-                        cell.style.backgroundColor = '';
-                        cell.style.color = '';
-                        cell.style.fontWeight = '';
-                        cell.style.textAlign = '';
-                        cell.style.verticalAlign = '';
-                        cell.style.display = '';
-                        cell.style.alignItems = '';
-                        cell.style.justifyContent = '';
-
-                        if (colName === 'company_name' && item?.[colName]?.trim() === '전체') {
-                            cell.style.backgroundColor = '#f0f9ff';
-                            cell.style.color = '#007acc';
-                            cell.style.fontWeight = 'bold';
-                        }
-
-                        if (['mat_grp_name', 'mat_code', 'mat_name', 'unit_name'].includes(colName)) {
-                            cell.style.textAlign = 'center';
-                            cell.style.verticalAlign = 'middle';
-                            cell.style.display = 'flex';
-                            cell.style.alignItems = 'center';
-                            cell.style.justifyContent = 'center';
-                        }
-                    }
-                };
                 new FlexGridContextMenu(this.grid4);
                 this.grid4.downloadFileName = '미수금 내역';
             }

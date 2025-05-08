@@ -1,8 +1,7 @@
 package mes.app.transaction;
 
-import mes.app.transaction.Service.PaymentListService;
+import mes.app.transaction.service.PaymentListService;
 import mes.domain.model.AjaxResult;
-import mes.domain.repository.EquRunRepository;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/transaction/payment_list")
@@ -24,17 +26,23 @@ public class PaymentListController {
     // 지급현황 리스트 조회
     @GetMapping("/read")
     public AjaxResult getEquipmentRunChart(
-            @RequestParam(value="date_from", required=false) String date_from,
-            @RequestParam(value="date_to", required=false) String date_to,
-            @RequestParam(value="companyCode", required=false) Integer companyCode,
-            @RequestParam(value="accountNum", required=false) String accountNum,
-            @RequestParam(value="depositType", required=false) String depositType,
-            @RequestParam(value="remark", required=false) String remark,
-            @RequestParam(value="eumNum", required=false) String eumNum,
-            HttpServletRequest request) {
-        AjaxResult result = new AjaxResult();
+        @RequestParam(value="cboDepositType", required=false) String depositType,
+        @RequestParam(value="srchStartDt", required=false) String start_date,
+        @RequestParam(value="srchEndDt", required=false) String end_date,
+        @RequestParam(value = "cboCompany", required=false) String company,
+        @RequestParam(value = "txtDescription", required = false) String txtDescription,
+        @RequestParam(value = "AccountName", required = false) String AccountName,
+        @RequestParam(value = "txtEumnum", required = false) String txtEumnum,
+        HttpServletRequest request) {
+        start_date = start_date + " 00:00:00";
+        end_date = end_date + " 23:59:59";
 
-        result.data = paymentListService.getPaymentList(date_from, date_to, companyCode, accountNum, depositType, remark, eumNum);
+        Timestamp start = Timestamp.valueOf(start_date);
+        Timestamp end = Timestamp.valueOf(end_date);
+
+        List<Map<String, Object>> items  = this.paymentListService.getPaymentList(depositType,start, end, company, txtDescription,AccountName, txtEumnum);
+        AjaxResult result = new AjaxResult();
+        result.data = items;
 
         return result;
     }

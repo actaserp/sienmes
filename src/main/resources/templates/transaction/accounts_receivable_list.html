@@ -114,7 +114,7 @@
             }
           },
           columns: [
-            {binding: 'code', header: '코드', width: 100, align: 'center'},
+            {binding: 'cltcd', header: '코드', width: 100, align: 'center'},
             {binding: 'cltName', header: '거래처명', width: 130, align: 'right'},
             {binding: 'receivables', header: '전잔액', width: 200, align: 'right'},
             {binding: 'sales', header: '매출액', width: 200, align: 'right'},
@@ -127,11 +127,16 @@
         new FlexGridContextMenu(this.grid);
         this.grid.downloadFileName = '미수금 집계 현황';
         this.grid.hostElement.addEventListener('dblclick', function (e) {
-          let items = _this.grid.selectedItems;
-          if (items.length === 0) {
-            return false;
-          }
-          _this.$btnEdit.trigger('click');
+          let selectedItem = _this.grid.selectedItems[0];
+          if (!selectedItem) return;
+
+          let code = selectedItem.code; // 선택된 거래처 코드
+
+          // 상세 데이터 다시 조회
+          _this.loadDetailData(code);
+
+          // 탭 전환
+          _this.switchToDetailTab();
         });
         // ✅ Footer 패널 사용 설정
         this.grid.columnFooters.rows.push(new wijmo.grid.Row());
@@ -164,30 +169,25 @@
             }
           },
           columns: [
-            {binding: 'BaljuTotalPrice', header: '거래처명', width: 150, align: 'center'},
+            {binding: 'BaljuTotalPrice', header: '거래처명', width: 150, align: 'left'},
             {binding: 'BaljuPrice', header: '일자', width: 100, align: 'center'},
             {binding: 'BaljuVat', header: '구분', width: 100, align: 'center'},
-            {binding: 'StateName', header: '금액', width: 200, align: 'right'},
-            {binding: 'StateName2', header: '잔액', width: 200, align: 'right'},
+            {binding: 'StateName', header: '금액', width: 150, align: 'right'},
+            {binding: 'StateName2', header: '잔액', width: 150, align: 'right'},
             {binding: 'SujuQty3', header: '품목', width: 120, align: 'center'},
             {binding: 'SujuQty2', header: '입급형태', width: 100, align: 'right'},
-            {binding: 'SujuQty3', header: '은행/어음번호', width: 120, align: 'center'},
-            {binding: 'ShipmentStateName', header: '계좌/만기일', width: 200, align: 'right'},
+            {binding: 'SujuQty3', header: '은행', width: 120, align: 'center'},
+            {binding: 'ShipmentStateName', header: '계좌', width: 180, align: 'right'},
+            {binding: 'SujuQty3', header: '어음번호', width: 150, align: 'center'},
+            {binding: 'ShipmentStateName', header: '만기일', width: 120, align: 'right'},
             {binding: 'DueDate', header: '거래구분', width: 120, align: 'center'},
-            {binding: 'Description', header: '적요', width: 200, align: 'right'}
+            {binding: 'Description', header: '메모', width: 200, align: 'right'}
           ],
           itemsSource: this.viewData, // 데이터를 설정할 배열
         });
 
         new FlexGridContextMenu(this.grid3);
         this.grid3.downloadFileName = '미수금 상세현황';
-        this.grid3.hostElement.addEventListener('dblclick', function (e) {
-          let items = _this.grid.selectedItems;
-          if (items.length === 0) {
-            return false;
-          }
-          _this.$btnEdit.trigger('click');
-        });
         // ✅ Footer 패널 사용 설정
         this.grid3.columnFooters.rows.push(new wijmo.grid.Row());
         this.grid3.bottomLeftCells.setCellData(0, 0, '매출계');
@@ -238,13 +238,27 @@
             _this.grid.itemsSource = result.data; // 집계 grid에 바인딩
           }
         });
+      }
+      loadDetailData(code) {
+        let _this = this;
+        let url = '/api/transaction/AccRList/DetailList';
+        let param = {
+          'srchStartDt' : $("#srchStartDt").val(),
+          'srchEndDt' : $("#srchEndDt").val(),
+          'cboCompany' : $("#cboCompanyHidden").val(),
+          'code' : code  // 🔥 여기 코드 필터
+        };
 
-        // 상세 데이터 조회
-        AjaxUtil.getAsyncData(url+'/DetailList', param, function (result) {
+        AjaxUtil.getAsyncData(url, param, function (result) {
           if (result != null && result.data) {
-            _this.grid3.itemsSource = result.data; // 상세 grid3에 바인딩
+            _this.grid3.itemsSource = result.data;
+          } else {
+            _this.grid3.itemsSource = []; // 데이터 없으면 초기화
           }
         });
+      }
+      switchToDetailTab() {
+        $('a[href="#tabs_sales_details"]').click();
       }
     }
     let page = null;

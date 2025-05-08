@@ -33,7 +33,7 @@ public class DepositListController {
       @RequestParam(value = "AccountName", required = false) String AccountName,
       @RequestParam(value = "txtEumnum", required = false) String txtEumnum,
       HttpServletRequest request) {
-//    log.info("입금현황 read : depositType:{}, start_date:{}, end_date:{},company:{}, txtDescription:{} ,AccountName:{}, txtEumnum:{}", depositType, start_date, end_date, company, txtDescription, AccountName, txtEumnum);
+    //log.info("입금현황 read : depositType:{}, start_date:{}, end_date:{},company:{}, txtDescription:{} ,AccountName:{}, txtEumnum:{}", depositType, start_date, end_date, company, txtDescription, AccountName, txtEumnum);
     start_date = start_date + " 00:00:00";
     end_date = end_date + " 23:59:59";
 

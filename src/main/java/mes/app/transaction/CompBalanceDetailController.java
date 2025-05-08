@@ -22,17 +22,16 @@ public class CompBalanceDetailController {
   @Autowired
   CompBalanceDetailServicr compBalanceDetailServicr;
 
-  // 거래처잔액 명세(입금)
+  // 거래처잔액 명세(입금 관리)
   @GetMapping("/read")
   public AjaxResult getList(
       @RequestParam(value="srchStartDt", required=false) String start_date,
       @RequestParam(value="srchEndDt", required=false) String end_date,
       @RequestParam(value = "cboCompany", required=false) String company,
       HttpServletRequest request) {
-    //log.info("거래처잔액 명세(입금) read ---  :start:{}, end:{} ,company:{} ", start_date, end_date, company);
+//    log.info("거래처잔액 명세(입금 관리) read ---  :start:{}, end:{} ,company:{} ", start_date, end_date, company);
     start_date = start_date + " 00:00:00";
     end_date = end_date + " 23:59:59";
-
     Timestamp start = Timestamp.valueOf(start_date);
     Timestamp end = Timestamp.valueOf(end_date);
 

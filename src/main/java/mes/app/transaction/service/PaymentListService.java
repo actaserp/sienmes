@@ -1,72 +1,82 @@
-package mes.app.transaction.Service;
+package mes.app.transaction.service;
 
+import lombok.extern.slf4j.Slf4j;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class PaymentListService {
     @Autowired
     SqlRunner sqlRunner;
 
     // 지급현황 리스트 조회
-    public List<Map<String, Object>> getPaymentList(String date_from,
-                                                    String date_to,
-                                                    Integer companyCode,
-                                                    String accountNum,
-                                                    String depositType,
-                                                    String remark,
-                                                    String eumNum) {
-
-        MapSqlParameterSource dicParam = new MapSqlParameterSource();
-
-        dicParam.addValue("date_from", date_from);
-        dicParam.addValue("date_to", date_to);
-        dicParam.addValue("companyCode", companyCode);
-        dicParam.addValue("accountNum", accountNum);
-        dicParam.addValue("depositType", depositType);
-        dicParam.addValue("remark", "%" + remark + "%");
-        dicParam.addValue("eumNum", eumNum);
-
+    public List<Map<String, Object>> getPaymentList(String depositType, Timestamp start, Timestamp end, String company, String txtDescription, String AccountName, String txtEumnum) {
+        MapSqlParameterSource paramMap = new MapSqlParameterSource();
+        paramMap.addValue("start", start);
+        paramMap.addValue("end", end);
+        paramMap.addValue("company", company);
+        paramMap.addValue("txtDescription", txtDescription);
         String sql = """
-                SELECT b.TRDATE,
-                    c.id,
-                    c."Name",
-                    b.ACCOUT,
-                    b.IOTYPE,
-                    a.accname,
-                    b.ACCNUM,
-                    b.TRID,
-                    b.REMARK1 || ' ' || b.REMARK2 || ' ' || b.REMARK3 || ' ' || b.REMARK4 AS remark
-                 FROM tb_banktransit b 
-                 LEFT JOIN company c ON c.id = b.cltcd 
-                 LEFT JOIN tb_account a ON b.accnum = a.accnum
-                 WHERE 1=1
-                 AND ioflag = '1'
-        		""";
-        if(companyCode != null){
-            sql += " AND c.id = :companyCode";
+        select
+           tb.ioid,
+           TO_CHAR(TO_DATE(tb.trdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS trdate,
+           tb.accout ,
+           c."Name" as "CompanyName" ,
+           tb.iotype ,
+           sc."Value" as deposit_type,
+           sc."Code" as deposit_code,
+           tb.banknm,
+           tb.accnum ,
+           tt.tradenm ,
+           tb.remark1,
+           --rb.REMARK1 || ' ' || b.REMARK2 || ' ' || b.REMARK3 || ' ' || b.REMARK4 AS remark,
+           tb.eumnum,
+           TO_CHAR(tb.eumtodt::DATE, 'YYYY-MM-DD') AS eumtodt,
+           tb.memo
+           from tb_banktransit tb
+           left join company c on c.id = tb.cltcd
+           left join  sys_code sc on sc."Code" = tb.iotype
+           left join tb_trade tt on tb.trid = tt.trid
+           WHERE tb.ioflag = '1'
+           -- and tb.spjangcd =:spjangcd
+           AND TO_DATE(tb.trdate, 'YYYYMMDD') BETWEEN :start AND :end
+        """;
+        if (depositType != null && !depositType.isEmpty()) {
+            sql += " AND tb.iotype = :depositType ";
+            paramMap.addValue("depositType",  depositType );
         }
-        if(accountNum != null && !accountNum.isEmpty()){
-            sql += " AND b.ACCNUM = :AccountNumber";
-        }
-        if(depositType != null && !depositType.isEmpty()){
-            sql += " AND b.IOTYPE = :depositType";
-        }
-        if(remark != null && !remark.isEmpty()){
-            sql += " AND COALESCE(b.REMARK1, '') || COALESCE(b.REMARK2, '') || COALESCE(b.REMARK3, '') || COALESCE(b.REMARK4, '') LIKE :remark";
-        }
-        if(eumNum != null && !eumNum.isEmpty()){
-            sql += " AND b.eumnum = :eumNum";
-        }
-        sql += " ORDER BY b.TRDATE ASC";
 
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+        if (company != null && !company.isEmpty()) {
+            sql += " AND tb.cltcd = :company ";
+            paramMap.addValue("company", Integer.parseInt(company));
+        }
 
+        if (txtDescription != null && !txtDescription.isEmpty()) {
+            sql += " AND tb.remark1 ILIKE :txtDescription ";
+            paramMap.addValue("txtDescription", "%" + txtDescription + "%");
+        }
+        if (AccountName != null && !AccountName.isEmpty()) {
+            sql += " AND tb.accid = :AccountName ";
+            paramMap.addValue("AccountName", Integer.parseInt(AccountName));
+        }
+        if (txtEumnum != null && !txtEumnum.isEmpty()) {
+            sql += " AND tb.eumnum ILIKE :txtEumnum ";
+            paramMap.addValue("txtEumnum", "%" + txtEumnum + "%");
+        }
+
+        sql +="""
+        ORDER BY tb.trdate ASC
+        """;
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
+//        log.info("지급현황 read SQL: {}", sql);
+//        log.info("SQL Parameters: {}", paramMap.getValues());
         return items;
     }
 

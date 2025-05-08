@@ -17,7 +17,7 @@ public class AccountsReceivableListServie {
   SqlRunner sqlRunner;
 
 
-  public List<Map<String, Object>> getTotalList(Timestamp start, Timestamp end, String company) {
+  public List<Map<String, Object>> getTotalList(Timestamp start, Timestamp end, Integer company) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
 
     paramMap.addValue("start", start);
@@ -35,6 +35,7 @@ public class AccountsReceivableListServie {
          )
          SELECT
              m.id AS cltcd,
+             m."Name" as cltName,
              COALESCE(y.yearamt, 0) AS receivables,
              COALESCE(s.TOTALAMT, 0) AS sales,
              COALESCE(b.ACCIN, 0) AS "AmountDeposited",
@@ -66,7 +67,7 @@ public class AccountsReceivableListServie {
          ) b ON m.id = b.cltcd
          WHERE COALESCE(y.yearamt, 0) + COALESCE(s.TOTALAMT, 0) - COALESCE(b.ACCIN, 0) <> 0
         """;
-    if (company != null && !company.isEmpty()) {
+    if (company != null) {
       sql += " AND y.cltcd = :company ";
       paramMap.addValue("company", company);
     }
@@ -130,21 +131,8 @@ public class AccountsReceivableListServie {
         """;
 
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-    log.info("미수금 현황 상세 read SQL: {}", sql);
-    log.info("SQL Parameters: {}", paramMap.getValues());
+//    log.info("미수금 현황 상세 read SQL: {}", sql);
+//    log.info("SQL Parameters: {}", paramMap.getValues());
     return items;
   }
-
-
-  /*
-  * select * from tb_salesment; -- 매출 내역 관리
-select * from tb_salesdetail; -- 매출 내역 관리 상세
-
-select * from tb_invoicement; -- 매입 내역관리
-select * from tb_invoicdetail;-- 매입 내역 상세
-*
-* 이거 사용해서 상세 내용을  만들어야하는지 질문 하기
-*
-  *
-  * */
 }
