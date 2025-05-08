@@ -663,14 +663,7 @@ let FormUtil = {
 
             if (tagName === 'SELECT') {
 
-                //if ($('#' + key).is(':disabled')) { $('#' + key).removeAttr('disabled'); }
                 if ($frmCtl.is(':disabled')) { $frmCtl.removeAttr('disabled'); }
-                //$('#' + key + ' > option').each(function () {
-                //$('#' + key + ' > option').each(function () {
-                //    $(this).removeProp('selected');
-                //});
-                //$('#' + key + ' > option[value=' + value + ']').prop('selected', true);
-                //_f$formorm.find('[name=' + key + '] > option[value=' + value + ']').prop('selected', true);
                 $frmCtl.val(value);
             } else if (tagName === 'INPUT' || tagName === 'TEXTAREA') {
 
@@ -693,7 +686,7 @@ let FormUtil = {
                     if ($.isNumeric(value) || value === null) {
                         let biznumFields = ['InvoicerCorpNum', 'InvoiceeCorpNum'];
                         let phoneFields = ['InvoicerTEL', 'InvoiceeTEL1'];
-                        let numberFields = ['unitPrice', 'vat', 'price', 'totalAmount', 'SupplyCostTotal', 'TaxTotal', 'TotalAmount'];
+                        let numberFields = ['unitPrice', 'vat', 'price', 'totalAmount', 'SupplyCostTotal', 'TaxTotal', 'TotalAmount', 'Cash', 'ChkBill', 'Note', 'Credit'];
 
                         if (biznumFields.includes(key)) {
                             let raw = (value || '').replace(/[^\d]/g, '');
@@ -745,9 +738,16 @@ let FormUtil = {
                 $row.find('[name="detailList[' + i + '].ItemName"]').val(item.ItemName);
                 $row.find('[name="detailList[' + i + '].Spec"]').val(item.Spec);
                 $row.find('[name="detailList[' + i + '].Qty"]').val(item.Qty);
-                $row.find('[name="detailList[' + i + '].UnitCost"]').val(item.UnitCost.toLocaleString());
-                $row.find('[name="detailList[' + i + '].SupplyCost"]').val(item.SupplyCost.toLocaleString());
-                $row.find('[name="detailList[' + i + '].Tax"]').val(item.Tax.toLocaleString());
+                $row.find('[name="detailList[' + i + '].UnitCost"]').val(
+                    item.UnitCost != null ? Number(item.UnitCost).toLocaleString() : ''
+                );
+                $row.find('[name="detailList[' + i + '].SupplyCost"]').val(
+                    item.SupplyCost != null ? Number(item.SupplyCost).toLocaleString() : ''
+                );
+                $row.find('[name="detailList[' + i + '].Tax"]').val(
+                    item.Tax != null ? Number(item.Tax).toLocaleString() : ''
+                );
+
                 $row.find('[name="detailList[' + i + '].Remark"]').val(item.Remark);
                 if (item.PurchaseDT?.length === 4) {
                     $row.find('[name="detailList[' + i + '].PurchaseDT1"]').val(item.PurchaseDT.substring(0, 2));
@@ -758,6 +758,7 @@ let FormUtil = {
 
     }
 };
+
 
 let AjaxUtil = {
     failureCallback: function (req, status, error) {
