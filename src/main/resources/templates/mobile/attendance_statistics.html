@@ -228,6 +228,36 @@
         searchDeductionData();
     });
 
+    // 파스텔톤 색상 리스트
+    const colorPalette = [
+        "#FFDDDD", "#B0E0E6", "#C1E1C1", "#FFF4B0", "#FFCCE5",
+        "#AFE1AF", "#FFD8B1", "#D8BFD8", "#D4EDDA", "#C6DEFF",
+        "#FFDEAD", "#e8b4c9", "#E4DBFF", "#FF6384"
+    ];
+
+    // 색상을 랜덤으로 섞기 (Fisher-Yates 알고리즘)
+    function shuffleColors(array) {
+        let shuffled = array.slice(); // 원본 배열을 복사해서 사용
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    // 섞인 색상 배열 생성
+    let shuffledColors = shuffleColors(colorPalette);
+    let colorIndex = 0;
+
+    // 랜덤 색상 선택 함수 (겹치지 않게)
+    function getRandomColor() {
+        if (colorIndex >= shuffledColors.length) {
+            // 모든 색상을 사용했으면 다시 섞기
+            shuffledColors = shuffleColors(colorPalette);
+            colorIndex = 0;
+        }
+        return shuffledColors[colorIndex++];
+    }
 
     // REALID 값으로 차감 내역 조회 후 차트 업데이트
     function searchDeductionData() {
@@ -247,7 +277,7 @@
                     {
                         "HISSEQ": 242,
                         "REALID": 512,
-                        "HISNM": "근저당권설정",
+                        "HISNM": "연차",
                         "HISAMT": "220000000",
                         "HISPOINT": 29,
                         "REGSTAND": "A1",
@@ -260,7 +290,7 @@
                     {
                         "HISSEQ": 243,
                         "REALID": 512,
-                        "HISNM": "근저당권설정",
+                        "HISNM": "훈련",
                         "HISAMT": "77000000",
                         "HISPOINT": 4,
                         "REGSTAND": "A1",
@@ -273,7 +303,7 @@
                     {
                         "HISSEQ": 244,
                         "REALID": 512,
-                        "HISNM": "항목차감",
+                        "HISNM": "반차",
                         "HISAMT": null,
                         "HISPOINT": 2,
                         "REGSTAND": null,
@@ -288,8 +318,9 @@
 
                     data2 = response.data.data;
                     // 데이터 변환
-                    let labels = data2.map(item => `${item.HISNM} (${item.HISPOINT_PERCENT}%)`);
-                    let data = data2.map(item => item.HISPOINT_PERCENT);
+                    let labels = data2.map(item => `${item.HISNM} (${item.HISPOINT})`);
+                    let data = data2.map(item => item.HISPOINT);
+                    let backgroundColors = labels.map(() => getRandomColor()); // 각 항목별 랜덤 색상
 
                     // 기존 차트 제거 (이미 생성된 경우)
                     if (window.myPieChart) {
@@ -307,7 +338,7 @@
                             datasets: [{
                                 label: '차감 내역',
                                 data: data,
-                                backgroundColor: 'blue',
+                                backgroundColor: backgroundColors,
                                 borderColor: '#ffffff',
                                 borderWidth: 2
                             }]
@@ -334,7 +365,7 @@
                     console.error("데이터가 올바르지 않습니다.");
                 }
                 // 등급, 점수 바인드
-                document.querySelector(".contents-wrap h4").innerText = `생산부 홍길동 사원 2025 출퇴근현황`;
+                document.querySelector(".contents-wrap h4").innerText = `생산부 홍길동 사원 2025 근태현황`;
 
                 // 차트 보여주기
                 let contentsWrap = document.querySelector('.contents-wrap');

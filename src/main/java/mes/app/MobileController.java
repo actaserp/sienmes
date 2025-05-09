@@ -37,6 +37,11 @@ public class MobileController {
         model.addAttribute("currentPage", "user_info");
         return "/mobile/user_info";
     }
+    @GetMapping("/attendance_modify")
+    public String modifyAttendance(Model model) {
+        model.addAttribute("currentPage", "attendance_modify");
+        return "/mobile/attendance_modify";
+    }
 
     @Getter
     public class TempDto{

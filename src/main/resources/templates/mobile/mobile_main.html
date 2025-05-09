@@ -113,16 +113,32 @@
 
   .currentData {
     display: inline-block;     /* 인라인 요소에 width 적용 가능하게 함 */
-    min-width: 250px;          /* 최소 너비 설정 */
     width: 100%;
     height: 45px;              /* 높이 설정 */
-    border: 1px solid #ccc;    /* input처럼 보이도록 테두리 추가 */
     padding: 3px 8px;          /* 안쪽 여백 설정 */
-    background-color: white;   /* 배경색 설정 */
+    background-color: #9acaf4;   /* 배경색 설정 */
     vertical-align: middle;    /* 텍스트 수직 정렬 */
-    margin: 10px 0 10px 0;
     text-align: center;
+    /*border: 1px solid darkgray;*/
+    align-content: center;
+    font-size: large;
+    color: white;
   }
+
+  .office_btn {
+    background-color: #007aff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 100px;
+    height: 100px;
+    font-size: 1.2em;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: block;
+  }
+
 
 </style>
 <head>
@@ -150,6 +166,7 @@
   <script src="/js/common.js?v=1060"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script> <!-- Slide js -->
   <script src="/js/Mobile.js"></script>
+  <script src="https://kit.fontawesome.com/84dc79ac13.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -188,34 +205,31 @@
           <div class="search-container">
             <input type="hidden" id="postno">
             <!-- 현재 날자 출력 -->
-            <div>
-              <span id="searchDate" class="currentData"></span>
+            <div style="display: flex">
+              <span id="searchDate" class="currentData" style="border-radius: 10px 0 0 0; text-align: justify;"></span>
+              <span id="userInfo" class="currentData" style="border-radius: 0 10px 0 0; text-align: end">생산부 홍길동 사원</span>
             </div>
             <!-- ip 검색 시간(현재시간) -->
             <div>
-              <span id="searchTime" class="currentData"></span>
+              <span id="searchTime" class="currentData" style="height: 100px; font-size: 40px;"></span>
             </div>
             <!-- 현재ip -->
             <div>
-              <span id="ipAddress" class="currentData"></span>
-            </div>
-            <!-- 사용자 정보 -->
-            <div>
-              <span id="userInfo" class="currentData"></span>
+              <span id="ipAddress" class="currentData" style="border-radius: 0 0 10px 10px;"></span>
             </div>
           </div>
           <!-- 버튼 -->
-          <button onclick="" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); background-color: #03428E; color: #FFFFFF">사내출근</button>
-          <button onclick="" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); background-color: red; color: #FFFFFF">사내퇴근</button>
-          <button onclick="" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); background-color: #03428E; color: #FFFFFF">외부출근</button>
-          <button onclick="" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); background-color: red; color: #FFFFFF">외부퇴근</button>
+          <div id="inside" style="display: none; gap: 13%; justify-content: center; margin-top: 50px;">
+            <button onclick="" class="office_btn" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); "><i class="fa-solid fa-briefcase fa_xl" style="color: #ffffff;"></i><br>사내출근</button>
+            <button onclick="" class="office_btn" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);  background-color: red;"><i class="fa-solid fa-person-walking fa-xl" style="color: #ffffff;"></i><br>사내퇴근</button>
+          </div>
+          <div id="outside" style="display: none; gap: 13%; justify-content: center; margin-top: 50px;">
+            <button onclick="" class="office_btn" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); "><i class="fa-solid fa-briefcase fa_xl" style="color: #ffffff;"></i><br>외부출근</button>
+            <button onclick="" class="office_btn" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);  background-color: red;"><i class="fa-solid fa-person-walking fa_xl" style="color: #fafafa;"></i><br>외부퇴근</button>
+          </div>
         </dl>
       </div><!--// contents-wrap end-->
-      <div id="addressWrap" class="contents-wrap">
-
-      </div>
     </div> <!--//layout-contents end -->
-
   </div> <!-- //mobile-layout-contents end-->
 </div> <!-- //page-wrapper end-->
 <script th:inline="javascript">
@@ -231,20 +245,6 @@
   // if (username && username !== 'null') localStorage.setItem('username', username);
   // if (groupname && groupname !== 'null') localStorage.setItem('groupname', groupname);
 </script>
-<script>
-  // 🔄 5초마다 IP 주소 조회
-  setInterval(() => {
-    fetch('https://api.ipify.org?format=json')
-            .then(response => response.json())
-            .then(data => {
-              // IP 주소를 화면에 업데이트
-              document.getElementById('ipAddress').innerText = data.ip;
-            })
-            .catch(error => {
-              console.error("IP 조회 중 에러 발생: ", error);
-            });
-  }, 5000); // 5000ms = 5초
-</script>
 <script type="text/javascript">
   // 현재 날짜 설정 (페이지 로딩 시 1회 설정)
   // 요일 이름 배열
@@ -258,7 +258,25 @@
     const weekDay = weekDays[today.getDay()];
     document.getElementById('searchDate').innerText = `${year}.${month}.${date}(${weekDay})`;
   };
-
+  // 🔄 5초마다 IP 주소 조회
+  setInterval(() => {
+    fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+              // IP 주소를 화면에 업데이트
+              document.getElementById('ipAddress').innerText = 'IP : ' + data.ip;
+              if(data.ip === '106.240.249.66') {
+                console.log('사내 IP 확인')
+                document.getElementById('inside').style.display='flex';
+              }else{
+                console.log('외부 IP 확인')
+                document.getElementById('inside').style.display='flex';
+              }
+            })
+            .catch(error => {
+              console.error("IP 조회 중 에러 발생: ", error);
+            });
+  }, 5000); // 5000ms = 5초
   // 시간 업데이트
   // 🔄 5초마다 시간 업데이트
   setInterval(() => {
