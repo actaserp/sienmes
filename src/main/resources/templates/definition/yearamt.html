@@ -54,21 +54,23 @@
 
                     <dl>
                         <dt>
-                            <label>업체명</label>
+                            <label>거래처ID</label>
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <input type="text" class="form-control2" id="searchtradenm" name="searchtradenm">
+                                <input type="text" class="form-control2" id="searchId" name="searchId">
                             </div>
                         </dd>
                     </dl>
 
                     <dl>
                         <dt>
-                            <label>전체선택</label>
+                            <label>거래처명</label>
                         </dt>
                         <dd>
-                            <input type="checkbox" id="Allcheck">
+                            <div class="srch-box">
+                                <input type="text" class="form-control2" id="searchname" name="searchname">
+                            </div>
                         </dd>
                     </dl>
 
@@ -83,13 +85,29 @@
                             </li>
                         </dd>
                     </dl>
+
+                    <dl>
+                        <dt>
+                            <label>마감유무 전체선택</label>
+                        </dt>
+                        <dd>
+                            <input type="checkbox" id="Allcheck">
+                        </dd>
+                    </dl>
+
+
                 </div>
 
                 <div class="button-wrap">
                     <ul>
                         <li>
-                            <button type="button" class="btn-excellt btn-default" id=""
+                            <button type="button" class="btn-excellt btn-default" id="btnMagam"
                                     style="width: 115px; height: 36px;">마감</button>
+                        </li>
+
+                        <li>
+                            <button type="button" class="btn-excellt btn-default" id="btnMagamCancel"
+                                    style="width: 115px; height: 36px; display: none;">마감취소</button>
                         </li>
 
                         <li>
@@ -107,7 +125,7 @@
             </div> <!--//section-top end -->
             <div class="container-fluid">
                 <p id="selectedItem"></p>
-                <div id="yearamt-grid" style="height: 580px; max-height: 580px;"></div>
+                <div id="yearamt-grid" style="height: 720px; max-height: 720px;"></div>
             </div>
         </section>
     </div> <!--//layout-contents end -->
@@ -121,115 +139,250 @@
                 this.grid = null;
                 this.selectedPk = null;
                 this.viewData = new wijmo.collections.CollectionView();
-                this.baseUrl = '/api/definition/trade';
+                this.baseUrl = '/api/definition/yearamt';
                 this.init();
             }
 
             init() {
                 let _this = this;
+
+                // FlexGrid 초기화
                 this.grid = new wijmo.grid.FlexGrid('#yearamt-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
                     autoGenerateColumns: false,
                     showMarquee: true,
-                    isReadOnly: true,
+                    isReadOnly: false,
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
                     },
                     columns: [
-                        {binding: 'cltcd', header: '거래처ID', width: 180, align: 'left'},
-                        {binding: 'ioflag', header: '입/출구분', width: 120, align: 'center'},
-                        {binding: 'yyyymm', header: '마감년월', width: 200, align: 'center'},
-                        {binding: 'yearamt', header: '마감금액', width: 250, align: 'left'},
-                        {binding: 'endyn', header: '마감유무', width: 130, align: 'left'},
+                        {binding: 'cltcd', header: '거래처ID', width: 100, align: 'center'},
+                        {binding: 'company_name', header: '거래처명', width: 270, align: 'center'},
+                        {binding: 'ioflag', header: '매출/매입구분', width: 120, align: 'center'},
+                        {binding: 'yyyymm', header: '마감년월', width: 130, align: 'center'},
+                        {binding: 'balance', header: '마감금액', width: 250, align: 'right'},
+                        {binding: 'endyn', header: '마감유무', width: 130, align: 'center', dataType: 'Boolean'},
                         {binding: '', header: '', width: "*", align: 'left'},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
 
-                this.grid.hostElement.addEventListener('dblclick', (e) => {
-                    let hitTest = this.grid.hitTest(e);
-                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
-                        let row = hitTest.row;
-                        let item = this.grid.rows[row].dataItem;
-                        _this.showDetail(item.trid);
+                // 데이터 로드 후 초기 선택 상태 해제
+                this.grid.loadedRows.addHandler(() => {
+                    setTimeout(() => {
+                        this.grid.select(-1, -1); // 선택 상태 초기화
+                    }, 0); // 비동기로 처리하여 초기 선택 해제
+                });
+
+                let selector = new wijmo.grid.selector.Selector(this.grid, {
+                    itemChecked: function () {
+
+                    }
+                })
+
+                // selectionChanged 이벤트 처리 (this.grid에서 호출)
+                let isInitialLoad = true; // 초기 상태 플래그
+                this.grid.selectionChanged.addHandler((s, e) => {
+                    if (isInitialLoad) {
+                        isInitialLoad = false; // 초기 로드 이후 플래그 해제
+                        return;
+                    }
+
+                    let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
+                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
+                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
+                        console.log(selectedRowData); // 선택된 데이터 출력
+
+
+                        // 마감 여부에 따라 버튼 표시 상태 조절
+                        if (selectedRowData.endyn === true) {
+                            document.getElementById("btnMagam").style.display = "none";
+                            document.getElementById("btnMagamCancel").style.display = "";
+                        } else {
+                            document.getElementById("btnMagam").style.display = "";
+                            document.getElementById("btnMagamCancel").style.display = "none";
+                        }
 
                     }
                 });
 
+                // 셀 포맷팅
                 this.grid.formatItem.addHandler((s, e) => {
                     if (e.panel.cellType === wijmo.grid.CellType.Cell) {
                         let col = s.columns[e.col];
                         let item = s.rows[e.row].dataItem;
 
                         if (col.binding === "ioflag") {
-                            e.cell.textContent = (item.ioflag === 0 || item.ioflag === '0') ? '입금' : '출금';
+                            e.cell.textContent = (item.ioflag === 0 || item.ioflag === '0') ? '매출' : '매입';
                         }
 
+                        // yyyymm을 yyyy-mm으로 포맷
+                        if (col.binding === "yyyymm" && item.yyyymm) {
+                            let yyyymm = item.yyyymm.toString();
+                            if (yyyymm.length === 6) {
+                                e.cell.textContent = yyyymm.substring(0, 4) + '-' + yyyymm.substring(4, 6);
+                            }
+                        }
                     }
                 });
 
+                // ContextMenu 및 다운로드 파일 설정
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '거래구분';
 
+                // 'Allcheck' 체크박스 이벤트
+                document.getElementById('Allcheck').addEventListener('change', function () {
+                    let isChecked = this.checked;
+
+                    // viewData가 CollectionView일 경우 .items 배열 사용
+                    _this.viewData.items.forEach(item => {
+                        item.endyn = isChecked;
+                    });
+
+                    // 그리드 다시 그리기
+                    _this.grid.invalidate();
+                });
             }
 
-            // 거래구분 조회
+
+            //  조회
             searchMainData() {
                 let _this = this;
                 let param = {
                     'cboYear': $('#cboYear').val(),
                     'ioflag': $('#ioflag').val(),
-                    'searchtradenm': $('#searchtradenm').val(),
+                    'searchId': $('#searchId').val(),
+                    'searchname': $('#searchname').val(),
                 }
 
                 let url = '/api/definition/yearamt';
 
                 let result = AjaxUtil.getSyncData(url + '/read',param);
-
+                console.log(result.data);
                 if (result.data != null) {
+                    result.data.forEach(item => {
+                        item.endyn = (item.endyn === 'Y'); // true or false로 변환
+                    });
+
                     _this.viewData.sourceCollection = result.data;
                 }
+
             }
 
             saveData() {
                 let _this = this;
-                let data = FormUtil.extractForm($('#tradeForm'));
-                let url = '/api/definition/trade/save'
+                let url = '/api/definition/yearamt/save';
 
-                if (!data.tradenm) {
-                    Alert.alert('', '거래구분명을 입력해주세요.');
+                // 선택된 행들 가져오기
+                let selectedItems = _this.grid.rows
+                    .filter(row => row.isSelected)  // Selector에서 체크된 행
+                    .map(row => row.dataItem);
+
+                // 유효성 체크
+                if (selectedItems.length === 0) {
+                    Alert.alert('', '선택된 행이 없습니다.');
                     return;
                 }
 
-                let fnSuccess = function (res) {
-                    Alert.alert('','저장되었습니다');
-                    _this.searchMainData();
+                // 서버로 전송할 데이터
+                let data = {
+                    list: selectedItems
                 };
-                AjaxUtil.postAsyncData(url, data, fnSuccess);
+
+                console.log(data);
+                let fnSuccess = function (res) {
+                    Alert.alert('', '저장되었습니다');
+                    _this.searchMainData(); // 저장 후 갱신
+                };
+                AjaxUtil.postJsonData(url, data, fnSuccess);
+
             }
 
 
-            showDetail(trid){
-                let param = {'id': trid};
-                let url = '/api/definition/trade'
+            saveMagam() {
+                let _this = this;
+                let url = '/api/definition/yearamt/magam';
 
-                let result = AjaxUtil.getSyncData(url + '/detail', param);
-                if (result.success != null) {
-                    FormUtil.BindDataForm(result.data, $('#tradeForm'));
-                    $('#id').val(result.data.trid);
+                // 선택된 행들 가져오기
+                let selectedItems = _this.grid.rows
+                    .filter(row => row.isSelected)  // Selector에서 체크된 행
+                    .map(row => row.dataItem);
+
+                // 유효성 체크
+                if (selectedItems.length === 0) {
+                    Alert.alert('', '선택된 행이 없습니다.');
+                    return;
                 }
 
+                // 서버로 전송할 데이터
+                let data = {
+                    list: selectedItems
+                };
+
+                console.log(data);
+
+                let fnSuccess = function (res) {
+                    Alert.alert('', '마감되었습니다');
+                    _this.searchMainData(); // 저장 후 갱신
+                };
+                AjaxUtil.postJsonData(url, data, fnSuccess);
+
             }
 
-            deleteData(id) {
+            saveMagamCancel() {
+                let _this = this;
+                let url = '/api/definition/yearamt/magamCancel';
+
+                // 선택된 행들 가져오기
+                let selectedItems = _this.grid.rows
+                    .filter(row => row.isSelected)  // Selector에서 체크된 행
+                    .map(row => row.dataItem);
+
+                // 유효성 체크
+                if (selectedItems.length === 0) {
+                    Alert.alert('', '선택된 행이 없습니다.');
+                    return;
+                }
+
+                // 서버로 전송할 데이터
+                let data = {
+                    list: selectedItems
+                };
+
+                console.log(data);
+
+                let fnSuccess = function (res) {
+                    Alert.alert('', '마감되었습니다');
+                    _this.searchMainData(); // 저장 후 갱신
+                };
+                AjaxUtil.postJsonData(url, data, fnSuccess);
+            }
+
+
+            deleteData() {
                 let _this = this;
 
-                let url = '/api/definition/trade/delete';
+                let url = '/api/definition/yearamt/magamCancel';
 
-                let data = {id: id};
+                // 선택된 행들 가져오기
+                let selectedItems = _this.grid.rows
+                    .filter(row => row.isSelected)  // Selector에서 체크된 행
+                    .map(row => row.dataItem);
+
+                // 유효성 체크
+                if (selectedItems.length === 0) {
+                    Alert.alert('', '선택된 행이 없습니다.');
+                    return;
+                }
+
+                // 서버로 전송할 데이터
+                let data = {
+                    list: selectedItems
+                };
+
                 let fnSuccess = function (res) {
                     if (res.success) {
                         Alert.alert('', '삭제되었습니다'); // Notification
@@ -249,9 +402,12 @@
         $(document.body).ready(function (e) {
             page = new YearamtPage();
 
-            page.searchMainData();
-            AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);
+            AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false, function() {
+                // 콜백에서 첫 번째 옵션을 자동 선택
+                $('#cboYear').val($('#cboYear option:first').val());
+            });
 
+            page.searchMainData();
             //검색
             $('#btnSearch').click(function (e) {
                 page.searchMainData();
@@ -268,17 +424,37 @@
                 );
             });
 
-            $('#btnDel').click(function (e) {
-                let id = $('#tradeForm').find('#id').val();
+            $('#btnMagam').click(function (e) {
+                Alert.confirm('',
+                    '마감하시겠습니까?',
+                    function () {
+                        page.saveMagam()
+                    },
+                    function () {
+                    }
+                );
+            });
 
-                if (id == '') {
-                    Alert.alert('', '선택된 데이터가 없습니다.');
-                    return;
-                }
+            $('#btnMagamCancel').click(function (e) {
+                Alert.confirm('',
+                    '마감취소 하시겠습니까?',
+                    function () {
+                        page.saveMagamCancel()
+                    },
+                    function () {
+                    }
+                );
+            });
+
+
+
+
+            $('#btnDel').click(function (e) {
+
                 Alert.confirm('',
                     '삭제하시겠습니까?',
                     function () {
-                        page.deleteData(id)
+                        page.deleteData()
                     },
                     function () {
                     }
