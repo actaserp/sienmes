@@ -32,15 +32,17 @@ public class DepositListController {
       @RequestParam(value = "txtDescription", required = false) String txtDescription,
       @RequestParam(value = "AccountName", required = false) String AccountName,
       @RequestParam(value = "txtEumnum", required = false) String txtEumnum,
+      @RequestParam(value = "spjangcd")String spjangcd,
       HttpServletRequest request) {
-    //log.info("입금현황 read : depositType:{}, start_date:{}, end_date:{},company:{}, txtDescription:{} ,AccountName:{}, txtEumnum:{}", depositType, start_date, end_date, company, txtDescription, AccountName, txtEumnum);
+    /*log.info("입금현황 read : depositType:{}, start_date:{}, end_date:{},company:{}, txtDescription:{} ,AccountName:{}, txtEumnum:{}, spjangcd:{}",
+        depositType, start_date, end_date, company, txtDescription, AccountName, txtEumnum, spjangcd);*/
     start_date = start_date + " 00:00:00";
     end_date = end_date + " 23:59:59";
 
     Timestamp start = Timestamp.valueOf(start_date);
     Timestamp end = Timestamp.valueOf(end_date);
 
-    List<Map<String, Object>> items = this.depositListService.getDepositList(depositType,start, end, company, txtDescription,AccountName, txtEumnum);
+    List<Map<String, Object>> items = this.depositListService.getDepositList(depositType,start, end, company, txtDescription,AccountName, txtEumnum, spjangcd);
 
     AjaxResult result = new AjaxResult();
     result.data = items;

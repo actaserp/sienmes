@@ -25,6 +25,7 @@
                         <dd>
                             <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭해서 검색하세요." style="width:225px">
                             <input type="hidden" id="cboCompanyHidden">
+                            <input type="hidden" id="spjangcdHidden">
                         </dd>
                     </dl>
                     <dl>
@@ -129,6 +130,7 @@
                 this.grid = null;
                 this.$btnEdit = $('#btnEdit');
                 this.$btnAddNew = $('#btnAddNew');
+                this.spjangcd = $('#spjangcdHidden');
                 this.viewData = new wijmo.collections.CollectionView();
                 this.init();
             }
@@ -212,7 +214,8 @@
                     'cboDepositType' : $('#cboDepositType').val(),  //입금형태
                     'cboCompany': $("#cboCompanyHidden").val(),
                     'txtDescription' : $("#txtDescription").val(),
-                    'txtEumnum' :$('#txtEumnum').val()
+                    'txtEumnum' :$('#txtEumnum').val(),
+                    spjangcd: this.spjangcd.val()  //사업장 코드
                 }
                 let fnsuccess = function(result) {
                     if (result != null) {
@@ -238,6 +241,11 @@
         let page = null;
 
         $(document).ready(function (e) {
+
+            const spjangcd = sessionStorage.getItem('spjangcd');
+            if (spjangcd) {
+                $('#spjangcdHidden').val(spjangcd);
+            }
 
             page = new PaymentList();
 

@@ -26,10 +26,11 @@ public class VendorBalanceDetailController {
             @RequestParam(value="fromDate", required=false) String date_from,
             @RequestParam(value="toDate", required=false) String date_to,
             @RequestParam(value="cboCompany", required=false) Integer companyCode,
+            @RequestParam(value = "spjangcd") String spjangcd,
             HttpServletRequest request) {
         AjaxResult result = new AjaxResult();
 
-        result.data = vendorBalanceDetailService.getPaymentList(date_from, date_to, companyCode);
+        result.data = vendorBalanceDetailService.getPaymentList(date_from, date_to, companyCode, spjangcd);
 
         return result;
     }

@@ -23,10 +23,11 @@ public class MonthlySalesListController {
   @GetMapping("/SalesRead")
   public AjaxResult getMonthlySalesList(
       @RequestParam(value="cboYear",required=false) String cboYear,
-      @RequestParam(value="cboCompany",required=false) Integer cboCompany
+      @RequestParam(value="cboCompany",required=false) Integer cboCompany,
+      @RequestParam(value = "spjangcd") String spjangcd
   ) {
-    //log.info("월별 매출현황(매출)read : cboYear:{}, cboCompany:{} ", cboYear, cboCompany);
-    List<Map<String,Object>> items = this.monthlySalesListService.getSalesList(cboYear,cboCompany);
+    //log.info("월별 매출현황(매출)read : cboYear:{}, cboCompany:{} , spjangcd:{}", cboYear, cboCompany,spjangcd);
+    List<Map<String,Object>> items = this.monthlySalesListService.getSalesList(cboYear,cboCompany, spjangcd);
 
     AjaxResult result = new AjaxResult();
     result.data = items;
@@ -36,10 +37,11 @@ public class MonthlySalesListController {
   @GetMapping("/DepositRead")
   public AjaxResult getMonthDepositList(
       @RequestParam(value="cboYear",required=false) String cboYear,
-      @RequestParam(value="cboCompany",required=false) Integer cboCompany
+      @RequestParam(value="cboCompany",required=false) Integer cboCompany,
+      @RequestParam(value = "spjangcd") String spjangcd
   ) {
-    //log.info("월별 매출현황(입금) read : cboYear:{}, cboCompany:{} ", cboYear, cboCompany);
-    List<Map<String,Object>> items = this.monthlySalesListService.getMonthDepositList(cboYear,cboCompany);
+    //log.info("월별 매출현황(입금) read : cboYear:{}, cboCompany:{} , spjangcd:{} ", cboYear, cboCompany, spjangcd);
+    List<Map<String,Object>> items = this.monthlySalesListService.getMonthDepositList(cboYear,cboCompany, spjangcd);
 
     AjaxResult result = new AjaxResult();
     result.data = items;

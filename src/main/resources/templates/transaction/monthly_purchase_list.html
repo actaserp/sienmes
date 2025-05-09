@@ -36,6 +36,7 @@
                         <dd>
                             <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
                             <input type="hidden" id="cboCompanyHidden">
+                            <input type="hidden" id="spjangcdHidden">
                             &nbsp;
                             <a class="btn btn-delete" title="검색" id="btnCompanySearch">
                                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
@@ -98,6 +99,7 @@
                 this.grid4= null;
                 this.$btnEdit = $('#btnEdit');
                 this.$btnAddNew = $('#btnAddNew');
+                this.spjangcd = $('#spjangcdHidden');
                 this.viewData = new wijmo.collections.CollectionView();
                 this.init();
             }
@@ -142,7 +144,7 @@
                 });
                 this.grid.rowHeaders.columns.splice(0, 1);
                 new FlexGridContextMenu(this.grid);
-                this.grid.downloadFileName = '발주 내역';
+                this.grid.downloadFileName = '월별 매입 현황(매입)';
 
 
                 this.grid3 = new wijmo.grid.FlexGrid('#deposit-grid', {
@@ -172,7 +174,7 @@
 
                 this.grid3.rowHeaders.columns.splice(0, 1);
                 new FlexGridContextMenu(this.grid3);
-                this.grid3.downloadFileName = '입금 내역';
+                this.grid3.downloadFileName = '월별 매입 현황(지급)';
 
 
                 this.grid4 = new wijmo.grid.FlexGrid('#accounts_receivable-grid', {
@@ -202,7 +204,7 @@
 
                 this.grid4.rowHeaders.columns.splice(0, 1);
                 new FlexGridContextMenu(this.grid4);
-                this.grid4.downloadFileName = '미수금 내역';
+                this.grid4.downloadFileName = '월별 매입 현황(미지급)';
             }
 
             searchMainData() {
@@ -210,7 +212,8 @@
                 let url = '/api/transaction/monthly_purchase_list/read'
                 let data = {
                     'cboYear': $("#cboYear").val(),
-                    'cboCompany': $("#cboCompanyHidden").val()
+                    'cboCompany': $("#cboCompanyHidden").val(),
+                    spjangcd: this.spjangcd.val()
                 }
                 let fnsuccess = function (result) {
                     if (result != null) {
@@ -223,7 +226,10 @@
         let page = null;
 
         $(document).ready(function (e) {
-
+            const spjangcd = sessionStorage.getItem('spjangcd');
+            if (spjangcd) {
+                $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
+            }
             page = new MonthlySalesListPage();
 
             AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '', 'sale');

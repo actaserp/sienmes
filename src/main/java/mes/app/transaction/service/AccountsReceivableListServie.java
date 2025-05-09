@@ -73,8 +73,8 @@ public class AccountsReceivableListServie {
     }
 
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-//    log.info("미수금 집계 read SQL: {}", sql);
-//    log.info("SQL Parameters: {}", paramMap.getValues());
+    //log.info("미수금 집계 read SQL: {}", sql);
+    //log.info("SQL Parameters: {}", paramMap.getValues());
     return items;
 
   }

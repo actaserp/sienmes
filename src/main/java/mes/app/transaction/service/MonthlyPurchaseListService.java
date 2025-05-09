@@ -80,10 +80,11 @@ public class MonthlyPurchaseListService {
         return items;
     }*/
     // 월별 매입 현황 리스트 조회
-    public List<Map<String, Object>> getPurchaseList(String cboYear, Integer cboCompany) {
+    public List<Map<String, Object>> getPurchaseList(String cboYear, Integer cboCompany, String spjangcd) {
       MapSqlParameterSource paramMap = new MapSqlParameterSource();
       paramMap.addValue("cboYear", cboYear);
       paramMap.addValue("cboCompany", cboCompany);
+      paramMap.addValue("spjangcd", spjangcd);
 
       String data_column = "A.defect_money";
       String data_year = cboYear;
@@ -105,8 +106,9 @@ public class MonthlyPurchaseListService {
                 EXTRACT(MONTH FROM TO_DATE(i.misdate, 'YYYYMMDD')) AS data_month,
                 SUM(i.totalamt) AS defect_money
             FROM tb_invoicement i
-            LEFT JOIN company c ON i.cltcd = c.id
+            LEFT JOIN company c ON i.cltcd = c.id and i.spjangcd = c.spjangcd
             WHERE TO_DATE(i.misdate, 'YYYYMMDD') BETWEEN CAST(:date_from AS date) AND CAST(:date_to AS date)
+            and i.spjangcd = :spjangcd
         """);
 
       // 회사 조건이 있을 경우 필터 추가

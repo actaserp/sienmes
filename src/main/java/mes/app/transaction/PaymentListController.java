@@ -1,5 +1,6 @@
 package mes.app.transaction;
 
+import lombok.extern.slf4j.Slf4j;
 import mes.app.transaction.service.PaymentListService;
 import mes.domain.model.AjaxResult;
 import mes.domain.services.SqlRunner;
@@ -14,6 +15,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/transaction/payment_list")
 public class PaymentListController {
@@ -33,14 +35,17 @@ public class PaymentListController {
         @RequestParam(value = "txtDescription", required = false) String txtDescription,
         @RequestParam(value = "AccountName", required = false) String AccountName,
         @RequestParam(value = "txtEumnum", required = false) String txtEumnum,
+        @RequestParam(value = "spjangcd")String spjangcd,
         HttpServletRequest request) {
+        /*log.info("지급현황 read : depositType:{}, start_date:{}, end_date:{},company:{}, txtDescription:{} ,AccountName:{}, txtEumnum:{}, spjangcd:{}",
+            depositType, start_date, end_date, company, txtDescription, AccountName, txtEumnum, spjangcd);*/
         start_date = start_date + " 00:00:00";
         end_date = end_date + " 23:59:59";
 
         Timestamp start = Timestamp.valueOf(start_date);
         Timestamp end = Timestamp.valueOf(end_date);
 
-        List<Map<String, Object>> items  = this.paymentListService.getPaymentList(depositType,start, end, company, txtDescription,AccountName, txtEumnum);
+        List<Map<String, Object>> items  = this.paymentListService.getPaymentList(depositType,start, end, company, txtDescription,AccountName, txtEumnum, spjangcd);
         AjaxResult result = new AjaxResult();
         result.data = items;
 

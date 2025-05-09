@@ -26,6 +26,7 @@
             <dd>
               <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
+              <input type="hidden" id="spjangcdHidden">
               &nbsp;
               <a class="btn btn-delete" title="검색" id="btnCompanySearch">
                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
@@ -82,6 +83,7 @@
         this.grid3 = null;
         this.$btnEdit = $('#btnEdit');
         this.$btnAddNew = $('#btnAddNew');
+        this.spjangcd = $('#spjangcdHidden');
         this.viewData = new wijmo.collections.CollectionView();
         this.init();
       }
@@ -145,7 +147,8 @@
         let data = {
           'cboCompany': $("#cboCompanyHidden").val(),
           'fromDate': $("#fromDate").val(),
-          'toDate': $("#toDate").val()
+          'toDate': $("#toDate").val(),
+          spjangcd: this.spjangcd.val()
         }
         let fnsuccess = function (result) {
           if (result != null) {
@@ -159,9 +162,12 @@
 
     $(document).ready(function (e) {
 
-      page = new CompBalanceDetailPage();
+      const spjangcd = sessionStorage.getItem('spjangcd');
+      if (spjangcd) {
+        $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
+      }
 
-      //AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '', 'sale');
+      page = new CompBalanceDetailPage();
 
       $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
       $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
@@ -185,10 +191,7 @@
 
       $('#btnCompanySearch').click(function () {
         let poppage = new PopCompComponent();
-        let $poppage = $(poppage);
         let searchcallback = function (items) {
-          // $content.find('#cboCompany').val(items.id);
-          // $content.find('#CompanyName').val(items.compname);
           console.log('items : ',items);
           document.getElementById('cboCompany').value = items.compname;
           document.getElementById('cboCompanyHidden').value = items.id;

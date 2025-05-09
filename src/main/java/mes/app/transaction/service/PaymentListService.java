@@ -17,12 +17,13 @@ public class PaymentListService {
     SqlRunner sqlRunner;
 
     // 지급현황 리스트 조회
-    public List<Map<String, Object>> getPaymentList(String depositType, Timestamp start, Timestamp end, String company, String txtDescription, String AccountName, String txtEumnum) {
+    public List<Map<String, Object>> getPaymentList(String depositType, Timestamp start, Timestamp end, String company, String txtDescription, String AccountName, String txtEumnum, String spjangcd) {
         MapSqlParameterSource paramMap = new MapSqlParameterSource();
         paramMap.addValue("start", start);
         paramMap.addValue("end", end);
         paramMap.addValue("company", company);
         paramMap.addValue("txtDescription", txtDescription);
+        paramMap.addValue("spjangcd", spjangcd);
         String sql = """
         select
            tb.ioid,
@@ -38,15 +39,19 @@ public class PaymentListService {
            tb.remark1,
            --rb.REMARK1 || ' ' || b.REMARK2 || ' ' || b.REMARK3 || ' ' || b.REMARK4 AS remark,
            tb.eumnum,
-           TO_CHAR(tb.eumtodt::DATE, 'YYYY-MM-DD') AS eumtodt,
+            CASE 
+             WHEN LENGTH(TRIM(tb.eumtodt)) = 8 THEN TO_CHAR(TO_DATE(tb.eumtodt, 'YYYYMMDD'), 'YYYY-MM-DD')
+             ELSE NULL
+           END AS eumtodt,
            tb.memo
            from tb_banktransit tb
-           left join company c on c.id = tb.cltcd
+           left join company c on c.id = tb.cltcd  and tb.spjangcd =  c.spjangcd 
            left join  sys_code sc on sc."Code" = tb.iotype
-           left join tb_trade tt on tb.trid = tt.trid
+           left join tb_trade tt on tb.trid = tt.trid and tb.spjangcd = tt.spjangcd
            WHERE tb.ioflag = '1'
            -- and tb.spjangcd =:spjangcd
            AND TO_DATE(tb.trdate, 'YYYYMMDD') BETWEEN :start AND :end
+           and tb.spjangcd = :spjangcd
         """;
         if (depositType != null && !depositType.isEmpty()) {
             sql += " AND tb.iotype = :depositType ";

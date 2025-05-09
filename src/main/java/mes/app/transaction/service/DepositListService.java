@@ -17,13 +17,14 @@ public class DepositListService {
   @Autowired
   SqlRunner sqlRunner;
 
-  public List<Map<String, Object>> getDepositList(String depositType, Timestamp start, Timestamp end, String company, String txtDescription, String AccountName, String txtEumnum) {
+  public List<Map<String, Object>> getDepositList(String depositType, Timestamp start, Timestamp end, String company, String txtDescription, String AccountName, String txtEumnum, String spjangcd) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
 
     paramMap.addValue("start", start);
     paramMap.addValue("end", end);
     paramMap.addValue("company", company);
     paramMap.addValue("txtDescription", txtDescription);
+    paramMap.addValue("spjangcd", spjangcd);
     String sql = """
         select
            tb.ioid,
@@ -44,11 +45,12 @@ public class DepositListService {
            END AS eumtodt,
            tb.memo
            from tb_banktransit tb
-           left join company c on c.id = tb.cltcd
+           left join company c on c.id = tb.cltcd and tb.spjangcd =  c.spjangcd 
            left join  sys_code sc on sc."Code" = tb.iotype
-           left join tb_trade tt on tb.trid = tt.trid
+           left join tb_trade tt on tb.trid = tt.trid and tt.spjangcd = tb.spjangcd
            WHERE tb.ioflag = '0'
            AND TO_DATE(tb.trdate, 'YYYYMMDD') BETWEEN :start AND :end
+           AND tb.spjangcd =  :spjangcd
         """;
     if (depositType != null && !depositType.isEmpty()) {
       sql += " AND tb.iotype = :depositType ";
@@ -77,8 +79,8 @@ public class DepositListService {
         ORDER BY tb.trdate ASC
         """;
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-    //log.info("입금현황 read SQL: {}", sql);
-    //log.info("SQL Parameters: {}", paramMap.getValues());
+//    log.info("입금현황 read SQL: {}", sql);
+//    log.info("SQL Parameters: {}", paramMap.getValues());
     return items;
   }
 

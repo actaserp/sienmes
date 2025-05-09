@@ -25,10 +25,11 @@ public class MonthlyPurchaseListController {
     public AjaxResult getEquipmentRunChart(
             @RequestParam(value="cboYear", required=false) String cboYear,
             @RequestParam(value="cboCompany", required=false) Integer cboCompany,
+            @RequestParam(value = "spjangcd") String spjangcd,
             HttpServletRequest request) {
         AjaxResult result = new AjaxResult();
 
-        result.data = monthlyPurchaseListService.getPurchaseList(cboYear, cboCompany);
+        result.data = monthlyPurchaseListService.getPurchaseList(cboYear, cboCompany, spjangcd);
 
         return result;
     }

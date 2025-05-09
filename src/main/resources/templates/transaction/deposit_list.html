@@ -25,6 +25,7 @@
             <dd>
               <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭해서 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
+              <input type="hidden" id="spjangcdHidden">
             </dd>
           </dl>
           <dl>
@@ -129,6 +130,7 @@
         this.$btnEdit = $('#btnEdit');
         this.$btnAddNew = $('#btnAddNew');
         this.viewData = new wijmo.collections.CollectionView();
+        this.spjangcd = $('#spjangcdHidden');
         this.init();
       }
 
@@ -157,7 +159,7 @@
           columns: [
             {binding: 'trdate', header: '일자', width: 120, align: 'left'},
             {binding: 'ioid', header: '코드', width: 100, align: 'right',visible: false },
-            {binding: 'CompanyName', header: '거래처명', width: 160, align: 'left'},
+            {binding: 'CompanyName', header: '거래처명', width: 160, align: 'center'},
             {binding: 'accin', header: '금액', width: 120, align: 'right'},
             {binding: 'deposit_type', header: '입급형태', width: 80, align: 'center'},
             {binding: 'banknm', header: '은행', width: 130, align: 'center'},
@@ -211,7 +213,8 @@
           'cboDepositType' : $('#cboDepositType').val(),  //입금형태
           'cboCompany': $("#cboCompanyHidden").val(),
           'txtDescription' : $("#txtDescription").val(),
-          'txtEumnum' :$('#txtEumnum').val()
+          'txtEumnum' :$('#txtEumnum').val(),
+          spjangcd: this.spjangcd.val()  //사업장 코드
         }
         let fnsuccess = function(result) {
           if (result != null) {
@@ -237,6 +240,11 @@
     let page = null;
 
     $(document).ready(function (e) {
+
+      const spjangcd = sessionStorage.getItem('spjangcd');
+      if (spjangcd) {
+        $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
+      }
 
       page = new DepositListPage();
 

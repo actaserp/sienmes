@@ -1,5 +1,6 @@
-package mes.app.transaction.Service;
+package mes.app.transaction.service;
 
+import lombok.extern.slf4j.Slf4j;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class AccountsPayableListService {
     @Autowired
@@ -154,7 +156,8 @@ public class AccountsPayableListService {
         }
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
-
+//        log.info("미지금 현황 상세 SQL: {}", sql);
+//        log.info("SQL Parameters: {}", dicParam.getValues());
         return items;
     }
 

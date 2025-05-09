@@ -16,10 +16,11 @@ public class MonthlySalesListService {
   @Autowired
   SqlRunner sqlRunner;
 
-  public List<Map<String, Object>> getSalesList(String cboYear, Integer cboCompany) {
+  public List<Map<String, Object>> getSalesList(String cboYear, Integer cboCompany, String spjangcd) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
     paramMap.addValue("cboYear", cboYear);
     paramMap.addValue("cboCompany", cboCompany);
+    paramMap.addValue("spjangcd", spjangcd);
 
     String data_year = cboYear;
     paramMap.addValue("date_form", data_year + "0101");
@@ -34,9 +35,10 @@ public class MonthlySalesListService {
                 ts.*,
                 TO_CHAR(TO_DATE(ts.misdate, 'YYYYMMDD'), 'MM') AS sales_month
             FROM tb_salesment ts
-            WHERE ts.misdate BETWEEN :date_form AND :date_to
+            WHERE ts.misdate BETWEEN :date_form AND :date_to 
+            and ts.spjangcd = :spjangcd
         """);
-
+// and ts.spjangcd = :spjangcd
     // 회사 필터 조건을 CTE 내부에 삽입
     if (cboCompany != null) {
       sql.append(" AND ts.cltcd = :cboCompany");
@@ -49,8 +51,8 @@ public class MonthlySalesListService {
         SELECT
             c."Name" AS comp_name,
             sc."Value" AS misgubun,
-            ps.icerdeptnm,
-            ps.icerceonm
+            ps.iverpernm,
+            ps.iverdeptnm
         """);
 
     // 월별 합계 컬럼 추가 (mon_1 ~ mon_12)
@@ -69,8 +71,8 @@ public class MonthlySalesListService {
         FROM parsed_sales ps
         LEFT JOIN company c ON c.id = ps.cltcd
         LEFT JOIN sys_code sc ON sc."Code" = ps.misgubun
-        GROUP BY c."Name", sc."Value", ps.icerdeptnm, ps.icerceonm
-        ORDER BY c."Name", ps.icerdeptnm, ps.icerceonm
+        GROUP BY c."Name", sc."Value", ps.iverpernm, ps.iverdeptnm
+        ORDER BY c."Name", ps.iverpernm, ps.iverdeptnm
         """);
 
     // 로그 출력
@@ -83,10 +85,11 @@ public class MonthlySalesListService {
   }
 
   // 입금
-  public List<Map<String, Object>> getMonthDepositList(String cboYear, Integer cboCompany) {
+  public List<Map<String, Object>> getMonthDepositList(String cboYear, Integer cboCompany, String spjangcd) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
     paramMap.addValue("cboYear", cboYear);
     paramMap.addValue("cboCompany", cboCompany);
+    paramMap.addValue("spjangcd", spjangcd);
 
     String data_year = cboYear;
     paramMap.addValue("date_form", data_year + "0101");

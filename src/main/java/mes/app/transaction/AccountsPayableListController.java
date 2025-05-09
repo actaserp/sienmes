@@ -1,6 +1,6 @@
 package mes.app.transaction;
 
-import mes.app.transaction.Service.AccountsPayableListService;
+import mes.app.transaction.service.AccountsPayableListService;
 import mes.domain.model.AjaxResult;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
