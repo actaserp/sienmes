@@ -1,5 +1,7 @@
 package mes.app.transaction.service;
 
+import com.popbill.api.*;
+import com.popbill.api.taxinvoice.Taxinvoice;
 import mes.domain.entity.*;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.CompanyRepository;
@@ -15,10 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,54 +40,83 @@ public class SalesInvoiceService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-	public List<Map<String, Object>> getList(String invoice_kind, Integer cboCompany, Timestamp start, Timestamp end) {
+	@Autowired
+	private CloseDownService closeDownService;
+
+	@Autowired
+	private TaxinvoiceService taxinvoiceService;
+
+	public List<Map<String, Object>> getList(String invoice_kind, Integer cboStatecode, Integer cboCompany, Timestamp start, Timestamp end) {
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("invoice_kind", invoice_kind);
+		dicParam.addValue("cboStatecode", cboStatecode);
 		dicParam.addValue("cboCompany", cboCompany);
 		dicParam.addValue("start", start);
 		dicParam.addValue("end", end);
 
 		String sql = """
-        select
-            TO_CHAR(TO_DATE(m."misdate", 'YYYYMMDD'), 'YYYY-MM-DD') AS misdate,
-            m.misnum,
-            m.misgubun,
-            fn_code_name('sale_type', m.misgubun) as misgubun_name,
-            m.cltcd,
-            SUBSTRING(m.ivercorpnum FROM 1 FOR 3) || '-' ||
-            SUBSTRING(m.ivercorpnum FROM 4 FOR 2) || '-' ||
-            SUBSTRING(m.ivercorpnum FROM 6 FOR 5) AS ivercorpnum,
-            m.ivercorpnm,
-            m.totalamt,
-            m.supplycost,
-            m.taxtotal,
-            m.statecode,
-            m.iverceonm,
-            m.iveremail,
-            m.iveraddr,
-            m.taxtype,
-            CASE\s
-				WHEN COUNT(d.itemnm) > 1 THEN\s
-					(
-						SELECT d2.itemnm
-						FROM tb_salesdetail d2
-						WHERE d2.misdate = m.misdate AND d2.misnum = m.misnum
-						ORDER BY d2.misseq
-						LIMIT 1
-					) || ' 외 ' || (COUNT(d.itemnm) - 1) || '개'
-				WHEN COUNT(d.itemnm) = 1 THEN\s
-					MIN(d.itemnm)
-				ELSE NULL
-			END AS item_summary
-        from tb_salesment m
-        left join tb_salesdetail d
-            on m.misdate = d.misdate and m.misnum = d.misnum
-        where 1 = 1
+			WITH detail_summary AS (
+			   SELECT\s
+				   misdate,
+				   misnum,
+				   MIN(itemnm) AS first_itemnm,
+				   COUNT(itemnm) AS item_count
+			   FROM tb_salesdetail
+			   GROUP BY misdate, misnum
+		   )
+		   
+		   SELECT
+			   TO_CHAR(TO_DATE(m.misdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS misdate,
+			   m.misnum,
+			   m.misgubun,
+			   sale_type_code."Value" AS misgubun_name,  -- fn_code_name 제거
+			   m.cltcd,
+			   SUBSTRING(m.ivercorpnum FROM 1 FOR 3) || '-' ||
+			   SUBSTRING(m.ivercorpnum FROM 4 FOR 2) || '-' ||
+			   SUBSTRING(m.ivercorpnum FROM 6 FOR 5) AS ivercorpnum,
+			   m.ivercorpnm,
+			   m.totalamt,
+			   m.supplycost,
+			   m.taxtotal,
+			   m.statecode,
+			   state_code."Value" AS statecode_name, -- fn_code_name 제거
+			   TO_CHAR(TO_TIMESTAMP(m.statedt, 'YYYYMMDDHH24MISS'), 'YYYY-MM-DD HH24:MI:SS') AS statedt_formatted,
+			   m.iverceonm,
+			   m.iveremail,
+			   m.iveraddr,
+			   m.taxtype,
+			   CASE
+				   WHEN ds.item_count > 1 THEN ds.first_itemnm || ' 외 ' || (ds.item_count - 1) || '개'
+				   WHEN ds.item_count = 1 THEN ds.first_itemnm
+				   ELSE NULL
+			   END AS item_summary
+		   
+		   FROM tb_salesment m
+		   
+		   LEFT JOIN tb_salesdetail d
+			   ON m.misdate = d.misdate AND m.misnum = d.misnum
+		   
+		   LEFT JOIN detail_summary ds
+			   ON m.misdate = ds.misdate AND m.misnum = ds.misnum
+		   
+		   LEFT JOIN sys_code sale_type_code
+			   ON sale_type_code."CodeType" = 'sale_type'
+			   AND sale_type_code."Code" = m.misgubun
+		   
+		   LEFT JOIN sys_code state_code
+			   ON state_code."CodeType" = 'state_code_pb'
+			   AND state_code."Code" = m.statecode::text
+		   
+		   WHERE 1 = 1
         """; // 조건은 아래에서 붙임
 
 		if (invoice_kind != null && !invoice_kind.isEmpty()) {
 			sql += " and m.taxtype = :invoice_kind ";
+		}
+
+		if (cboStatecode != null) {
+			sql += " and m.statecode = :cboStatecode ";
 		}
 
 		if (cboCompany != null) {
@@ -98,10 +128,11 @@ public class SalesInvoiceService {
 		}
 
 		sql += """
-        group by 
-            m.misdate, m.misnum, m.misgubun, m.cltcd, m.ivercorpnum, m.ivercorpnm,
-            m.totalamt, m.supplycost, m.taxtotal, m.statecode, m.iverceonm,
-            m.iveremail, m.iveraddr, m.taxtype
+		GROUP BY
+			m.misdate, m.misnum, m.misgubun, sale_type_code."Value", m.cltcd, m.ivercorpnum,
+			m.ivercorpnm, m.totalamt, m.supplycost, m.taxtotal, m.statecode,
+			state_code."Value", m.statedt, m.iverceonm, m.iveremail,
+			m.iveraddr, m.taxtype, ds.first_itemnm, ds.item_count
         order by m.misdate desc
         """;
 
@@ -152,6 +183,8 @@ public class SalesInvoiceService {
 		company.setCompanyType("sale");
 		company.set_audit(user);
 		company.setRelyn("0");
+		company.setSpjangcd(paramMap.get("spjangcd"));
+
 
 		company = companyRepository.save(company);
 		result.data = company;
@@ -179,6 +212,9 @@ public class SalesInvoiceService {
 
 		TB_Salesment salesment = new TB_Salesment();
 		salesment.setId(id);
+
+		LocalDateTime now = LocalDateTime.now();
+		String statedt = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 
 		// 2. 필드 매핑
 		salesment.setIssuetype((String) form.get("IssueType")); // 발행형태
@@ -234,13 +270,14 @@ public class SalesInvoiceService {
 		salesment.setNote(parseMoney(form.get("Note"))); // 어음
 		salesment.setCredit(parseMoney(form.get("Credit"))); // 외상미수금
 		salesment.setPurposetype((String) form.get("PurposeType"));
-		salesment.setStatecode("저장");
+		salesment.setStatecode(100);
+		salesment.setStatedt(statedt);
 
 		if (isUpdate) {
 			tb_salesDetailRepository.deleteByMisdateAndMisnum(misdate, misnum);
 		}
 
-//		salesment.setSpjangcd((String) form.get("spjangcd")); // sessionStorage에서 넘겨받은 값
+		salesment.setSpjangcd((String) form.get("spjangcd"));
 		int serialIndex = 1;
 		// 3. 상세 목록 매핑
 		List<TB_SalesDetail> details = new ArrayList<>();
@@ -262,7 +299,14 @@ public class SalesInvoiceService {
 			detail.setSupplycost(parseMoney(form.get(prefix + ".SupplyCost")));
 			detail.setTaxtotal(parseMoney(form.get(prefix + ".Tax")));
 			detail.setRemark((String) form.get(prefix + ".Remark"));
-			detail.setPurchasedt((String) form.get(prefix + ".PurchaseDT"));
+			detail.setSpjangcd((String) form.get("spjangcd"));
+			String purchaseDT = (String) form.get(prefix + ".PurchaseDT");
+			if (purchaseDT != null && purchaseDT.length() == 4) {
+				String fullPurchaseDT = misdate.substring(0, 4) + purchaseDT;
+				detail.setPurchasedt(fullPurchaseDT);
+			} else {
+				detail.setPurchasedt(null);
+			}
 			detail.setSalesment(salesment); // 양방향 설정
 
 			details.add(detail);
@@ -320,6 +364,7 @@ public class SalesInvoiceService {
 		String sql = """ 
 		SELECT\s
 			m.misdate,
+			TO_CHAR(TO_DATE(m.misdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS "writeDate",
 			m.misnum,
 			m.issuetype AS "IssueType",
 			m.taxtype AS "TaxType",
@@ -378,7 +423,7 @@ public class SalesInvoiceService {
 			 d.supplycost AS "SupplyCost",
 			 d.taxtotal AS "Tax",
 			 d.remark AS "Remark",
-			 d.purchasedt AS "PurchaseDT",
+			 SUBSTRING(d.purchasedt FROM 5 FOR 4) AS "PurchaseDT",
 			 d.misseq AS "SerialNum"
 		 FROM tb_salesdetail d
 		 WHERE d.misdate = :misdate AND d.misnum = :misnum
@@ -418,6 +463,161 @@ public class SalesInvoiceService {
 
 		return item;
 	}
+
+	@Transactional
+	public AjaxResult issueInvoice(List<Map<String, String>> issueList) {
+		AjaxResult result = new AjaxResult();
+
+		if (issueList.isEmpty()) {
+			result.success = false;
+			result.message = "세금계산서가 선택되지 않았습니다.";
+			return result;
+		}
+
+		List<TB_SalesmentId> idList = issueList.stream()
+				.map(item -> new TB_SalesmentId(item.get("misdate"), item.get("misnum")))
+				.toList();
+
+		List<TB_Salesment> salesList = tb_salesmentRepository.findAllById(idList);
+		if (salesList.isEmpty()) {
+			result.success = false;
+			result.message = "해당 세금계산서를 찾을 수 없습니다.";
+			return result;
+		}
+
+		String invoicerCorpNum = salesList.get(0).getIcercorpnum();
+
+		// 1. 휴/폐업 상태 확인
+		AjaxResult checkResult = checkInvoiceeStates(salesList, invoicerCorpNum);
+		if (!checkResult.success) {
+			return checkResult;
+		}
+
+		// 2. 발행 처리
+//		AjaxResult issueResult = callPopbillIssue(salesList);
+//		result.success = issueResult.success;
+//		result.message = issueResult.message;
+		return result;
+	}
+
+
+	// 팝빌 처리
+//	private AjaxResult callPopbillIssue(List<TB_Salesment> salesList) {
+//		AjaxResult result = new AjaxResult();
+//
+//		try {
+//			for (TB_Salesment sm : salesList) {
+//				// 팝빌 전자세금계산서 객체 생성
+//				Taxinvoice taxinvoice = makeTaxInvoiceObject(sm);
+//
+//				// 팝빌 발행 요청
+//				Response response = taxinvoiceService.RegistIssue(
+//						sm.getIcercorpnum(),  // 공급자 사업자번호
+//						taxinvoice,           // 전자세금계산서 객체
+//						null, null, null      // Memo, 이메일제외여부, 문자제외여부
+//				);
+//
+//				// 응답 처리 (성공 시 승인번호 등 저장 가능)
+//				sm.setStatecode(200); // 예시: 발행 완료 상태
+//
+//			}
+//
+//			tb_salesmentRepository.saveAll(salesList);
+//			result.success = true;
+//			result.message = "세금계산서 발행이 완료되었습니다.";
+//
+//		} catch (PopbillException e) {
+//			result.success = false;
+//			result.message = "팝빌 발행 실패: " + e.getMessage();
+//		}
+//
+//		return result;
+//	}
+
+	/**
+	 * 거래처(공급받는자) 휴/폐업 상태를 조회하고 IVCLOSE 컬럼에 상태 저장.
+	 * - 상태코드: null (실패), "0" (미등록), "1" (사업중), "2" (폐업), "3" (휴업)
+	 * - salesList 에는 TB_Salesment 목록이 담겨 있어야 하며,
+	 * - 저장까지 함께 처리됨
+	 */
+	public AjaxResult checkInvoiceeStates(List<TB_Salesment> salesList, String invoicerCorpNum) {
+		AjaxResult result = new AjaxResult();
+
+		if (salesList.size() == 1) {
+			TB_Salesment sm = salesList.get(0);
+			String invoiceeCorpNum = sm.getIvercorpnum();
+
+			try {
+				CorpState corpState = closeDownService.CheckCorpNum(invoicerCorpNum, invoiceeCorpNum, null);
+				String state = corpState != null ? corpState.getState() : null;
+				sm.setIvclose(state);
+				tb_salesmentRepository.save(sm);
+
+				result.success = true;
+				result.message = switchIvcloseMessage(state);
+
+			} catch (PopbillException e) {
+				result.success = false;
+				result.message = "팝빌 상태 조회 실패: " + e.getMessage();
+			}
+
+		} else {
+			String[] corpNumList = salesList.stream()
+					.map(TB_Salesment::getIvercorpnum)
+					.distinct()
+					.toArray(String[]::new);
+
+			try {
+				CorpState[] corpStates = closeDownService.CheckCorpNum(invoicerCorpNum, corpNumList, null);
+
+				Map<String, String> corpStateMap = new HashMap<>();
+				for (CorpState state : corpStates) {
+					corpStateMap.put(state.getCorpNum(), state.getState());
+				}
+
+				List<String> errorList = new ArrayList<>();
+
+				for (TB_Salesment sm : salesList) {
+					String corpNum = sm.getIvercorpnum();
+					String state = corpStateMap.getOrDefault(corpNum, null);
+					sm.setIvclose(state);
+
+					if (!"1".equals(state)) {
+						String stateMsg = switchIvcloseMessage(state);
+						errorList.add(sm.getIvercorpnm() + " (" + corpNum + ") : " + stateMsg);
+					}
+				}
+
+				tb_salesmentRepository.saveAll(salesList);
+
+				if (!errorList.isEmpty()) {
+					result.success = false;
+					result.message = "다음 공급받는자가 휴/폐업 상태입니다:\n" + String.join("\n", errorList);
+				} else {
+					result.success = true;
+					result.message = "모든 거래처가 사업중입니다.";
+				}
+
+			} catch (PopbillException e) {
+				result.success = false;
+				result.message = "팝빌 상태 일괄 조회 실패: " + e.getMessage();
+			}
+		}
+		System.out.println("휴폐업 조회" + result);
+		return result;
+	}
+
+
+	private String switchIvcloseMessage(String state) {
+		if (state == null) return "확인 실패 (null)";
+		else if ("0".equals(state)) return "미등록 사업자입니다.";
+		else if ("1".equals(state)) return "사업중입니다.";
+		else if ("2".equals(state)) return "폐업 상태입니다.";
+		else if ("3".equals(state)) return "휴업 상태입니다.";
+		else return "알 수 없는 상태 (" + state + ")";
+	}
+
+
 
 	@Transactional
 	public AjaxResult deleteSalesment(List<Map<String, String>> deleteList) {

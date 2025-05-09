@@ -1,5 +1,6 @@
 package mes.app.transaction;
 
+import com.popbill.api.*;
 import mes.app.transaction.service.SalesInvoiceService;
 import mes.domain.entity.*;
 import mes.domain.model.AjaxResult;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/tran/tran")
@@ -21,7 +23,7 @@ public class SalesInvoiceController {
 	
 	@Autowired
 	private SalesInvoiceService salesInvoiceService;
-	
+
 	@GetMapping("/shipment_head_list")
 	public AjaxResult getShipmentHeadList(
 			@RequestParam("srchStartDt") String dateFrom,
@@ -66,6 +68,7 @@ public class SalesInvoiceController {
 			@RequestParam(value="start", required=false) String start_date,
 			@RequestParam(value="end", required=false) String end_date,
 			@RequestParam(value="cboCompany", required=false) Integer cboCompany,
+			@RequestParam(value="cboStatecode", required=false) Integer cboStatecode,
 			HttpServletRequest request) {
 
 		start_date = start_date + " 00:00:00";
@@ -74,7 +77,7 @@ public class SalesInvoiceController {
 		Timestamp start = Timestamp.valueOf(start_date);
 		Timestamp end = Timestamp.valueOf(end_date);
 
-		List<Map<String, Object>> items = this.salesInvoiceService.getList(invoice_kind, cboCompany, start, end);
+		List<Map<String, Object>> items = this.salesInvoiceService.getList(invoice_kind, cboStatecode, cboCompany, start, end);
 
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -84,7 +87,14 @@ public class SalesInvoiceController {
 
 	@PostMapping("/invoice_save")
 	public AjaxResult saveInvoice(@RequestBody Map<String, Object> form) {
-		return salesInvoiceService.saveInvoice(form);
+
+        return salesInvoiceService.saveInvoice(form);
+	}
+
+	@PostMapping("/invoice_issue")
+	public AjaxResult issueInvoice(@RequestBody List<Map<String, String>> issueList) {
+
+		return salesInvoiceService.issueInvoice(issueList);
 	}
 
 	@GetMapping("/invoice_detail")
@@ -104,6 +114,7 @@ public class SalesInvoiceController {
 
 	@PostMapping("/invoice_delete")
 	public AjaxResult deleteSalesment(@RequestBody List<Map<String, String>> deleteList) {
+
 		return salesInvoiceService.deleteSalesment(deleteList);
 	}
 

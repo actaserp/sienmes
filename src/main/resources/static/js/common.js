@@ -569,6 +569,7 @@ let FormUtil = {
         });
 
         values['invatyn'] = $form.find('#invatyn').is(':checked') ? 'Y' : 'N';
+        values['spjangcd'] = sessionStorage.getItem('spjangcd');
 
         return values;
     },

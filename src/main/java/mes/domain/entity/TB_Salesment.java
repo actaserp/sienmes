@@ -72,7 +72,7 @@ public class TB_Salesment {
     private String ivertel2;
     private String iverhp2;
 
-    private Integer ivclose;
+    private String ivclose;
     private Boolean iversendyn;
 
     private String ntscfnum;
@@ -80,7 +80,8 @@ public class TB_Salesment {
     private String mgtkey;
     private String orgmgtkey;
     private Integer modifycd;
-    private String statecode;
+    private Integer statecode;
+    private String statedt;
     private String misgubun;
 
     private String spjangcd;

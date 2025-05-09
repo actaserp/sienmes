@@ -49,6 +49,18 @@
                     </dl>
                     <dl>
                         <dt>
+                            <label for="cboInvoice">
+                                상태<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="cboStatecode" name="cboStatecode" style="width: 120px;"></select>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
                             <label for="btnCompanySearch">
                                 거래처
                             </label>
@@ -126,11 +138,6 @@
                                 정발행 작성
                             </a>
                         </li>
-                        <li>
-                            <a class="btn" title="역발행 작성" id="btnAddNewReverse">
-                                역발행 작성
-                            </a>
-                        </li>
                     </ul>
                 </div>
             </div>
@@ -198,8 +205,8 @@
                             </a>
                         </li>
                         <li>
-                            <a class="btn" title="역발행/재전송" id="btnReIssue">
-                                역발행/재전송
+                            <a class="btn" title="재전송" id="btnReIssue">
+                                재전송
                             </a>
                         </li>
                         <li style="display: none;">
@@ -278,7 +285,6 @@
                 this.grid = null;
                 this.$btnEdit = $('#btnEdit');
                 this.$btnAddNewRegular = $('#btnAddNewRegular');
-                this.$btnAddNewReverse = $('#btnAddNewReverse');
                 this.viewData = new wijmo.collections.CollectionView();
                 this.init();
                 this.invoiceSelector = null;
@@ -306,27 +312,30 @@
                         }
                     },
                     columns: [
-                        {binding: 'misdate', header: '작성일자', width: 110, align: 'center'},
+                        {binding: 'misdate', header: '작성일자', width: 100, align: 'center'},
                         {binding: 'misnum', header: '작성번호', width: 90, visible: false},
                         {binding: 'cltcd', header: '회사id', width: 90, visible: false},
-                        {binding: 'ivercorpnum', header: '사업자 번호', width: 150, align: 'center'},
+                        {binding: 'ivercorpnum', header: '사업자 번호', width: 120, align: 'center'},
                         {binding: 'ivercorpnm', header: '상호', width: 130, align: 'left'},
                         {binding: 'item_summary', header: '품명', width: 100},
                         {binding: 'totalamt', header: '합계금액', width: 110, align: 'right', format: 'n0'},
                         {binding: 'supplycost', header: '공급가액', width: 110, align: 'right', format: 'n0'},
-                        {binding: 'taxtotal', header: '세액', width: 110, align: 'right', format: 'n0'},
-                        {binding: 'statecode', header: '상태', width: 100, align: 'center'},
-                        {binding: 'taxtype', header: '구분', width: 100, align: 'center'},
-                        {binding: 'misgubun_name', header: '매출구분', width: 100, align: 'center'},
-                        {binding: 'iverceonm', header: '대표자', width: 100, align: 'center'},
+                        {binding: 'taxtotal', header: '세액', width: 100, align: 'right', format: 'n0'},
+                        {binding: 'statecode_name', header: '상태', width: 80, align: 'center'},
+                        {binding: 'taxtype', header: '구분', width: 80, align: 'center'},
+                        {binding: 'misgubun_name', header: '매출구분', width: 80, align: 'center'},
+                        {binding: 'iverceonm', header: '대표자', width: 90, align: 'center'},
                         {binding: 'iveremail', header: '이메일', width: 130, align: 'center'},
                         {binding: 'iveraddr', header: '주소', width: 150, align: 'center'},
+                        {binding: 'statedt_formatted', header: '상태 변경일시', width: 160, align: 'center'},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
 
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '매출 계산서 내역';
+
+
 
                 // 하단 합계 행 추가
                 this.grid.columnFooters.rows.push(new wijmo.grid.GroupRow());
@@ -359,7 +368,7 @@
                     _this.showInvoiceForm(defaultData);
                 });
 
-                // 수주 수정 클릭
+                // 수정 클릭
                 this.$btnEdit.click(function (e) {
                     let selectedItems = _this.grid.selectedItems;
 
@@ -407,12 +416,46 @@
                                     _this.searchMainData();
                                 });
                             } else {
-                                Alert.alert('', '삭제 중 오류가 발생했습니다.');
+                                Alert.alert('', res.message || '삭제 중 오류가 발생했습니다.');
+                            }
+
+                        });
+                    });
+
+                });
+
+                // 발행 버튼
+                $('#btnIssue').click(function (e) {
+                    const items = _this.grid.rows
+                        .filter(row => row.isSelected)
+                        .map(row => row.dataItem);
+
+                    if (items.length === 0) {
+                        Alert.alert('', '발행할 항목을 선택해주세요.');
+                        return;
+                    }
+
+                    Alert.confirm('', '선택한 항목을 발행하시겠습니까?', function () {
+                        const issueList = items.map(item => ({
+                            misnum: item.misnum,
+                            misdate: item.misdate.replace(/-/g, '')
+                        }));
+
+                        let url = _this.url + '/invoice_issue';
+                        AjaxUtil.postJsonData(url, issueList, function (res) {
+                            if (res.success) {
+                                Alert.alert('', res.message || '발행이 완료되었습니다.', function () {
+                                    console.log('res.success', res);
+                                    _this.searchMainData();
+                                });
+                            } else {
+                                Alert.alert('', res.message || '발행 중 오류가 발생했습니다.');
                             }
                         });
                     });
 
                 });
+
             }
 
             updateSelectedTotals() {
@@ -487,7 +530,7 @@
 
                     // 공급자 정보 불러오기
                     let data1 = {
-                        spjangcd: 'ZZ',
+                        spjangcd: sessionStorage.getItem('spjangcd'),
                     };
                     let url = _this.url + '/invoicer_read';
                     let fnSaveSuccess = function (result) {
@@ -548,17 +591,16 @@
                     poppage.show(searchcallback);
                 });
 
-                // 저장버튼
-                let $saveInvoicer = $content.find('#saveInvoicer');
+                // 정보 저장버튼
+                let $saveInvoicee = $content.find('#saveInvoicee');
 
-                $saveInvoicer.click(function (e) {
+                $saveInvoicee.click(function (e) {
 
                     //수주일, 납기일 체크?
                     let data = FormUtil.extractForm($taxForm);
 
                     let id = data.InvoiceeID;
                     let newBusinessNumber = data.InvoiceeCorpNum;
-
 
                     if (id && oldBusinessNumber && oldBusinessNumber !== newBusinessNumber) {
                         Alert.confirm('', '사업자등록번호가 변경되었습니다.\n수정하시겠습니까?\n취소하면 새로 등록합니다.',
@@ -695,9 +737,13 @@
                         let url = _this.url + '/invoice_save';
 
                         let fnSaveSuccess = function (result) {
-                            Notify.success("저장되었습니다.");
-                            modalContainer.close();
-                            _this.searchMainData();
+                            if (result.success) {
+                                Notify.success("저장되었습니다.");
+                                modalContainer.close();
+                                _this.searchMainData();
+                            } else {
+                                Alert.alert("", result.message || "저장에 실패했습니다.");
+                            }
                         };
 
                         AjaxUtil.postJsonAsyncData(url, data, fnSaveSuccess);
@@ -781,6 +827,7 @@
                 let _this = this;
                 let invoice_kind = $('#cboInvoice').val();
                 let cboCompany = $('#cboCompanyHidden').val();
+                let cboStatecode = $('#cboStatecode').val();
                 let start = $('#srchStartDt').val();
                 let end = $('#srchEndDt').val();
                 let url = this.url + '/read';
@@ -788,6 +835,7 @@
                 let data = {
                     'invoice_kind': invoice_kind,
                     'cboCompany': cboCompany,
+                    'cboStatecode': cboStatecode,
                     'start': start,
                     'end': end,
                     'action': 'read'
@@ -994,6 +1042,7 @@
 
             page = new SalesInvoicePage();
 
+            AjaxUtil.fillSelectOptions($('#cboStatecode'), 'system_code', 'all', '', 'state_code_pb');
 
             $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
             $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
@@ -1039,7 +1088,7 @@
             // x 버튼 클릭 → 텍스트 초기화 및 input 이벤트 트리거
             $(document).on('click', '.btn-clear', function () {
                 const $input = $(this).siblings('input[type="text"]');
-                $input.val('').trigger('input'); // 🔥 input 이벤트 강제 발생
+                $input.val('').trigger('input'); // input 이벤트 강제 발생
             });
 
 

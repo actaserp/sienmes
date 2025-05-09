@@ -130,4 +130,7 @@ public class Company extends AbstractAuditModel {
 
 	@Column(name="relyn")
 	String relyn;
+
+	@Column(name="spjangcd")
+	String spjangcd;
 }
