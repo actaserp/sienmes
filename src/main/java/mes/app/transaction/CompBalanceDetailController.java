@@ -30,7 +30,7 @@ public class CompBalanceDetailController {
       @RequestParam(value = "cboCompany", required=false) String company,
       @RequestParam(value = "spjangcd") String spjangcd,
       HttpServletRequest request) {
-    log.info("거래처잔액 명세(입금 관리) read ---  :start:{}, end:{} ,company:{}, spjangcd:{} ", start_date, end_date, company, spjangcd);
+    //log.info("거래처잔액 명세(입금 관리) read ---  :start:{}, end:{} ,company:{}, spjangcd:{} ", start_date, end_date, company, spjangcd);
     start_date = start_date + " 00:00:00";
     end_date = end_date + " 23:59:59";
     Timestamp start = Timestamp.valueOf(start_date);

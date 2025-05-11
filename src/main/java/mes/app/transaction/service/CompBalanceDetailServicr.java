@@ -43,7 +43,7 @@ public class CompBalanceDetailServicr {
     // yyyymm
     String prevYm = prevMonth.format(DateTimeFormatter.ofPattern("yyyyMM"));
 
-    // 기준일 (예: 20250301)
+    // 기준일
     String baseDate = prevMonth.withDayOfMonth(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
     // SQL 파라미터 등록
@@ -96,6 +96,7 @@ public class CompBalanceDetailServicr {
                 NULL::numeric AS accin,
                 NULL::numeric AS accout,
                 NULL::text AS memo,
+                NULL::text AS remark1,
                 0 AS remaksseq
             FROM company y
             JOIN lasttbl h ON y.id = h.cltcd
@@ -124,6 +125,7 @@ public class CompBalanceDetailServicr {
                 NULL::numeric AS accin,
                 NULL::numeric AS accout,
                 NULL::text AS memo,
+                NULL::text AS remark1,
                 1 AS remaksseq
             FROM tb_salesment s
             LEFT JOIN tb_salesdetail d ON s.misdate = d.misdate AND s.misnum = d.misnum AND s.spjangcd = d.spjangcd
@@ -151,6 +153,7 @@ public class CompBalanceDetailServicr {
                 b.accin,
                 b.accout,
                 b.memo,
+                b.remark1,
                 2 AS remaksseq
             FROM tb_banktransit b
             JOIN company c ON c.id = b.cltcd AND c.spjangcd = b.spjangcd
@@ -182,6 +185,7 @@ public class CompBalanceDetailServicr {
             x.accin,
             x.accout,
             x.memo,
+            x.remark1,
             SUM(
                  CASE
                      WHEN x.summary = '입금액' THEN -1 * COALESCE(x.accin, 0)

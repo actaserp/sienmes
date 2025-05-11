@@ -26,6 +26,7 @@
             <dd>
               <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
+              <input type="hidden" id="spjangcdHidden">
               &nbsp;
               <a class="btn btn-delete" title="검색" id="btnCompanySearch">
                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
@@ -175,13 +176,13 @@
             {binding: 'StateName', header: '금액', width: 150, align: 'right'},
             {binding: 'StateName2', header: '잔액', width: 150, align: 'right'},
             {binding: 'SujuQty3', header: '품목', width: 120, align: 'center'},
-            {binding: 'SujuQty2', header: '입급형태', width: 100, align: 'right'},
+            {binding: 'SujuQty2', header: '입급형태', width: 100, align: 'center'},
             {binding: 'SujuQty3', header: '은행', width: 120, align: 'center'},
-            {binding: 'ShipmentStateName', header: '계좌', width: 180, align: 'right'},
+            {binding: 'ShipmentStateName', header: '계좌', width: 180, align: 'center'},
             {binding: 'SujuQty3', header: '어음번호', width: 150, align: 'center'},
-            {binding: 'ShipmentStateName', header: '만기일', width: 120, align: 'right'},
+            {binding: 'ShipmentStateName', header: '만기일', width: 120, align: 'center'},
             {binding: 'DueDate', header: '거래구분', width: 120, align: 'center'},
-            {binding: 'Description', header: '메모', width: 200, align: 'right'}
+            {binding: 'Description', header: '메모', width: 200, align: 'center'}
           ],
           itemsSource: this.viewData, // 데이터를 설정할 배열
         });
@@ -206,18 +207,19 @@
               .map(r => +r.dataItem[field] || 0) // 해당 필드 숫자로 변환
               .reduce((a, b) => a + b, 0); // 합산
           };
+          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
 
           SalesTotal.dataItem = {
             BaljuTotalPrice: '합계',
             BaljuVat: '매출계',
-            StateName: getSumByCondition('StateName', 'BaljuVat', '매출'),
-            StateName2: getSumByCondition('StateName2', 'BaljuVat', '매출'),
+            // StateName: getSumByCondition('StateName', 'BaljuVat', '매출'),
+            // StateName2: getSumByCondition('StateName2', 'BaljuVat', '매출'),
           };
 
           DepositTotal.dataItem = {
             BaljuVat: '입금계',
-            StateName: getSumByCondition('StateName', 'BaljuVat', '입금'),
-            StateName2: getSumByCondition('StateName2', 'BaljuVat', '입금'),
+            // StateName: getSumByCondition('StateName', 'BaljuVat', '입금'),
+            // StateName2: getSumByCondition('StateName2', 'BaljuVat', '입금'),
           };
 
         });

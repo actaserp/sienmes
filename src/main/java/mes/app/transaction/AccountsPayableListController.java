@@ -1,5 +1,6 @@
 package mes.app.transaction;
 
+import lombok.extern.slf4j.Slf4j;
 import mes.app.transaction.service.AccountsPayableListService;
 import mes.domain.model.AjaxResult;
 import mes.domain.services.SqlRunner;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/transaction/accounts_payable_list")
 public class AccountsPayableListController {
@@ -23,13 +25,14 @@ public class AccountsPayableListController {
     // 미지급현황 리스트 조회
     @GetMapping("/read")
     public AjaxResult getEquipmentRunChart(
-            @RequestParam(value="date_from", required=false) String date_from,
-            @RequestParam(value="date_to", required=false) String date_to,
-            @RequestParam(value="companyCode", required=false) Integer companyCode,
+            @RequestParam(value="srchStartDt", required=false) String start,
+            @RequestParam(value="srchEndDt", required=false) String end,
+            @RequestParam(value="companyCode", required=false) Integer company,
+            @RequestParam(value = "spjangcd") String spjangcd,
             HttpServletRequest request) {
         AjaxResult result = new AjaxResult();
-
-        result.data = accountsPayableListService.getPayableList(date_from, date_to, companyCode);
+        //log.info("미지급금 현황 --- start:{}, end:{} ,company:{}, spjangcd:{} ", start, end, company, spjangcd);
+        result.data = accountsPayableListService.getPayableList(start, end, company,spjangcd);
 
         return result;
     }
@@ -37,13 +40,14 @@ public class AccountsPayableListController {
     // 미지급현황 상세 리스트 조회
     @GetMapping("/detail")
     public AjaxResult getEquipmentRunChartDetail(
-            @RequestParam(value="date_from", required=false) String date_from,
-            @RequestParam(value="date_to", required=false) String date_to,
-            @RequestParam(value="companyCode", required=false) Integer companyCode,
+            @RequestParam(value="srchStartDt", required=false) String start,
+            @RequestParam(value="srchEndDt", required=false) String end,
+            @RequestParam(value="companyCode", required=false) Integer company,
+            @RequestParam(value = "spjangcd") String spjangcd,
             HttpServletRequest request) {
         AjaxResult result = new AjaxResult();
 
-        result.data = accountsPayableListService.getPayableDetailList(date_from, date_to, companyCode);
+        result.data = accountsPayableListService.getPayableDetailList(start, end, company,spjangcd);
 
         return result;
     }

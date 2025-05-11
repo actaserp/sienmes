@@ -19,47 +19,33 @@
     <section class="section">
       <div class="section-top">
         <div class="search-wrap">
-          <dl>
-            <dt>
-              <label for="trdCom">
-                거래처<span class="eq"></span>
-              </label>
-            </dt>
-            <dd>
-              <input type="text" id="trdCom" name="trdCom" placeholder="업체검색버튼으로 검색하세요.">
-            </dd>
-          </dl>
-          <dl>
-            <dt>
-              <label for="eumNum">
-                어음번호
-              </label>
-            </dt>
-            <dd>
-              <input type="text" id="eumNum" placeholder="어음번호">
-            </dd>
-          </dl>
           <dl id="searchComArea">
             <dt>
-              <label for="">
-                조회기간
-              </label>
+              거래처
+            </dt>
+            <dd>
+              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭해서 검색하세요.">
+              <input type="hidden" id="cboCompanyHidden">
+              <input type="hidden" id="spjangcdHidden">
+            </dd>
+          </dl>
+          <dl>
+            <dt>
+              조회기간<span class="eq">*</span>
             </dt>
             <dd>
               <ul class="date-box">
                 <li>
-                  <input type="date" id="date_from" name="date_from">
-                  <label for="date_from" class="hide">시작일</label>
+                  <input type="date" id="srchStartDt" name="srchStartDt">
+                  <label for="srchStartDt" class="hide">시작일</label>
                 </li>
-                ~
                 <li>
-                  <input type="date" id="date_to" name="date_to">
-                  <label for="date_to" class="hide">종료일</label>
+                  <input type="date" id="srchEndDt" name="srchEndDt">
+                  <label for="srchEndDt" class="hide">종료일</label>
                 </li>
               </ul>
             </dd>
           </dl>
-
           <dl>
             <dt>&nbsp;</dt>
             <dd>
@@ -104,6 +90,7 @@
       class production_require {
         constructor() {
           this.grid = null;
+          this.spjangcd = $('#spjangcdHidden');
           this.init();
         }
 
@@ -196,35 +183,27 @@
             const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
 
             footerMonth.dataItem = {
-              mat_grp_name: '매출계'
-              // year_qty_sum: getSum('year_qty_sum'),
-              // year_money_sum: getSum('year_money_sum'),
+              iotype: "매출계",
+              total: getSum('total'),
+              nowamt : getSum('nowamt'),
             };
             footerTotal.dataItem = {
-              mat_grp_name: '입금계'
-              // year_qty_sum: getSum('year_qty_sum'),
-              // year_money_sum: getSum('year_money_sum'),
+              iotype: '입금계',
+              total: getSum('total'),
+              nowamt : getSum('nowamt'),
             };
-          });
-
-          AjaxUtil.fillSelectOptions($('#cboMatType'), 'system_code', 'all', false, 'mat_type', 'product,semi');
-          AjaxUtil.fillSelectOptions($('#cboMatGroup'), 'material_group', 'all', false, $('#cboMatType').val());
-          AjaxUtil.fillSelectOptions($('#cboWorkcenter'), 'workcenter', 'choose', false);
-          $('#cboMatType').change(function (e) {
-            AjaxUtil.fillSelectOptions($('#cboMatGroup'), 'material_group', 'all', false, $('#cboMatType').val());
           });
         }
 
         searchMainData() {
           let _this = this;
-          let date_from = $('#date_from').val();
-          let date_to = $('#date_to').val();
-          let companyCode = $('#companyCode').val();
+          let cboCompany = $("#cboCompanyHidden").val();
           let url = '/api/transaction/accounts_payable_list'
           let data = {
-            'date_from': date_from,
-            'date_to': date_to,
-            'companyCode': companyCode
+            'srchStartDt' : $("#srchStartDt").val(),
+            'srchEndDt' : $("#srchEndDt").val(),
+            'companyCode': cboCompany,
+            spjangcd: this.spjangcd.val()
           };
           let result = AjaxUtil.getSyncData(url + "/read", data);
           if (result.data != null) {
@@ -235,14 +214,13 @@
 
         searchDetailData(){
           let _this = this;
-          let date_from = $('#date_from').val();
-          let date_to = $('#date_to').val();
-          let companyCode = $('#companyCode').val();
+          let cboCompany = $("#cboCompanyHidden").val();
           let url = '/api/transaction/accounts_payable_list'
           let data = {
-            'date_from': date_from,
-            'date_to': date_to,
-            'companyCode': companyCode
+            'srchStartDt' : $("#srchStartDt").val(),
+            'srchEndDt' : $("#srchEndDt").val(),
+            'companyCode': cboCompany,
+            spjangcd: this.spjangcd.val()
           };
           let result = AjaxUtil.getSyncData(url + "/detail", data);
           if (result.data != null) {
@@ -256,13 +234,18 @@
       let page = null;
 
       $(document).ready(function (e) {
+
+        const spjangcd = sessionStorage.getItem('spjangcd');
+        if (spjangcd) {
+          $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
+        }
         page = new production_require();
 
-        let date_from = CommonUtil.getYYYYMMDD(-7);
+        let srchStartDt = CommonUtil.getYYYYMMDD(-7);
         let today = CommonUtil.getYYYYMMDD();
 
-        $('#date_from').val(date_from);
-        $('#date_to').val(today);
+        $('#srchStartDt').val(srchStartDt);
+        $('#srchEndDt').val(today);
 
         // 검색
         $('#btnMainSearch').click(function (e) {
@@ -270,94 +253,21 @@
           page.searchDetailData();
         });
 
-        // 엑셀 다운로드
-        $('#btnExcel').on('click', function () {
-          page.exportExcel();
-        });
-
-        // 계획수정
-        $('#btnPlanSave').click(function (e) {
-          let items = page.grid.selectedItems;
-          let result = null;
-          let action = 'update';
-          if (!items.length) {
-            Alert.alert('', "항목을 선택해주세요.");
-            return false;
-          }
-          if (items.length > 0) {
-            let data = {'jr_pk': items[0].id};
-            let url = '/api/production/prod_order_a/detail';
-            result = AjaxUtil.getSyncData(url, data);
-          }
-          page.showPopUp(result.data, action);
-        });
-
-        // 삭제
-        $('#btnPlanDel').click(function (e) {
-          let items = page.grid.selectedItems;
-          if (items.length > 0) {
-            if (items[0].state != "ordered") {
-              Alert.alert('', "지시상태만 삭제할 수 있습니다.")
-              return;
-            }
-            Alert.confirm('', "삭제하시겠습니까?",
-                    function () {
-                      let id = items[0].id;
-                      page.deleteOrder(id);
-                    }
-            );
-          } else if (items.length < 1) {
-            Alert.alert('', "지시목록를 선택해 주세요.")
-          }
-
-        });
-
-        // 지시등록
-        $('#btnPlanInput').on('click', function () {
-
-          let data = {
-            'id': '',
-            'shift_name': '',
-            'shift_code': '',
-            'mat_name': '',
-            'order_qty': '',
-            'unit_name': '',
-            'workcenter_name': '',
-            'equip_name': '',
-            'description': '',
-            'production_date': today,
-          }
-          let action = 'new';
-
-
-          page.showPopUp(data, action);
-        });
-
-
         if (userinfo.group_code == 'admin') {
           $('#btnGridSetting').css('visibility', 'visible');
         }
 
         // 거래처 focus시 거래처 검색 모달
-        $('#trdCom').focus(function () {
+        $('#btnCompanySearch').click(function () {
           let poppage = new PopCompComponent();
           let $poppage = $(poppage);
           let searchcallback = function (items) {
-            console.log('items : ',items);
-            document.getElementById('trdCom').value = items.compname;
+            //console.log('items : ',items);
+            document.getElementById('btnCompanySearch').value = items.compname;
+            document.getElementById('cboCompanyHidden').value = items.id;
           };
 
           poppage.show(searchcallback);
-        });
-
-        // 계좌명 focus시 계좌명 검색 모달
-        $('#actNm').focus(function () {
-          let pop = new PopMatComponent();
-          pop.material_type = 'product,sangpum';
-          pop.show(function (item) {
-            console.log('$btnProductSearch', item);
-          });
-          pop.searchDataBind();
         });
 
         // 탭 클릭시 display 조정

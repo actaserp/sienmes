@@ -7,6 +7,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,12 +19,11 @@ public class AccountsReceivableListServie {
   @Autowired
   SqlRunner sqlRunner;
 
-
-  public List<Map<String, Object>> getTotalList(Timestamp start, Timestamp end, Integer company) {
+  public List<Map<String, Object>> getTotalList(String start_date, String end_date, Integer company) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
 
-    paramMap.addValue("start", start);
-    paramMap.addValue("end", end);
+    paramMap.addValue("start", start_date);
+    paramMap.addValue("end", end_date);
     paramMap.addValue("company", company);
 
     String sql= """
@@ -131,8 +133,8 @@ public class AccountsReceivableListServie {
         """;
 
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-//    log.info("미수금 현황 상세 read SQL: {}", sql);
-//    log.info("SQL Parameters: {}", paramMap.getValues());
+    log.info("미수금 현황 상세 read SQL: {}", sql);
+    log.info("SQL Parameters: {}", paramMap.getValues());
     return items;
   }
 }
