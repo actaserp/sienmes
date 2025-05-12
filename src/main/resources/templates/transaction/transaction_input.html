@@ -156,14 +156,20 @@
                             </a>
                         </li>-->
                         <li class="right_align rpt"  style="margin-right: 5px">
+                            <a class="btn btn-delete" title="수정" id="btnBulkEdit">
+                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
+                                일괄수정
+                            </a>
+                        </li>
+                        <li class="right_align rpt"  style="margin-right: 5px">
                             <a class="btn btn-delete" title="수정" id="btnEdit">
-                                <img src="/images/icon/ico-delete.svg" alt="수정 아이콘">
+                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
                                 수정
                             </a>
                         </li>
                         <li class="right_align rpt"  style="margin-right: 5px">
                             <a class="btn btn-edit" title="삭제" id="btnDelete">
-                                <img src="/images/icon/ico-edit.svg" alt="삭제 아이콘">
+                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
                                 삭제
                             </a>
                         </li>
@@ -206,6 +212,16 @@
                                 저장
                             </a>
                         </li>
+
+                    </ul>
+                    <ul >
+                        <li class="right_align rpt"  style="margin: 10px 5px">
+                            <a class="btn btn-excell" title="팝빌연동확인" id="MemberShipCheck">
+                                <img src="/images/icon/ico-plus.svg" alt="팝빌연동확인 아이콘">
+                                팝빌연동확인
+                            </a>
+                        </li>
+
                     </ul>
 
             </div>
@@ -246,12 +262,17 @@
             <section class="tab-item" id="tabs_second" style="border-top-left-radius: 0; padding-top: 15px;">
                 <div>
                             <form id="EasyFinBankAccountForm" autocomplete="off">
+                            <div style="
+    margin-bottom: 10px;
+">
+    <span style="color : tomato;/* margin-bottom: 30px; */">본 계좌등록/수정은 팝빌연동계좌 관련하여 제공되는 기능입니다. 계좌 등록/수정이 아닙니다.</span>
+</div>
                             <table class="write-table"
                                    style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                                 <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
                                 <input type="hidden" id="id" name="id"/>
                                 <tbody>
-                                <tr>
+                                <!--<tr>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                         <label for="factory_id">팝빌아이디</label>
                                     </th>
@@ -271,13 +292,8 @@
                                                  style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; cursor: pointer;" />
                                         </div>
                                     </td>
-                                    <th>
-                                        <button class='button115px' id='MemberShipCheck' type='button'>가입여부확인</button>
-                                    </th>
-                                    <td>
 
-                                    </td>
-                                </tr>
+                                </tr>-->
 
                                 <tr>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
@@ -869,8 +885,7 @@
             EditTransactionData(){
                 let _this = this;
 
-                Alert.alert('', '수정하시겠습니까?',
-                function(){
+                Alert.confirm('', '수정하시겠습니까? 그리드의 모든 데이터가 수정됩니다.', function(){
                     const dataMap = getTradeTypeDataMap(tradetypeList);
                     const dataMap_iotype = getTradeTypeDataMap(iotype);
 
@@ -1019,7 +1034,7 @@
                         {binding: 'accountname', header: '계좌명칭', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'onlinebankid', header: '온라인뱅크아이디', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'onlinebankpw', header: '은행계정비밀번호', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'paymentpw', header: '결제비밀번호', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'paymentpw', header: '결제비밀번호', width: '*', align: 'center'},
                         {binding: 'accounttype', header: '계좌유형', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'birth', header: '생년월일', width: '*', align: 'center', isReadOnly: true},
                     ],
@@ -1146,12 +1161,12 @@
 
             MemberShipCheck(){
                 let _this = this;
-                let selectedItem = _this.setting_grid.selectedItems;
+                /*let selectedItem = _this.setting_grid.selectedItems;
 
                 if(selectedItem.length < 1){
                     Alert.alert('', '연동 확인할 계좌를 선택해주세요.');
                     return;
-                }
+                }*/
 
                 //TODO: 테스트를 위해서 하드코딩함.
                 let param = {
@@ -1183,7 +1198,6 @@
                 const formData = {
                     frdate : frdate,
                     todate : todate,
-                    accountnumber : SelecteItem[0].accountnumber,
                     managementnum : SelecteItem[0].managementnum,
                     accountid : SelecteItem[0].accountid,
                     bankname : SelecteItem[0].bankname
@@ -1364,7 +1378,7 @@
                 page.AccountPopupOpen('accountName', 'accountNameHidden');
             });
 
-            $('#btnEdit').click(function(){
+            $('#btnBulkEdit').click(function(){
                 page.EditTransactionData();
             })
 

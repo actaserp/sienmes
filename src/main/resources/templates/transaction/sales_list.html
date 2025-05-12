@@ -62,7 +62,7 @@
             </ul>
             <div class="tab-contents">
                 <section class="tab-item" id="tab1">
-                    <form id="searchForm1" autocomplete="off">
+
                         <section class="section">
                             <div class="section-top">
                                 <div class="search-wrap">
@@ -151,7 +151,7 @@
                                 </div>
                             </div>
                         </section>
-                    </form>
+
 
 
                     <section class="section">
@@ -164,7 +164,7 @@
                 </section>
 
                 <section class="tab-item" id="tab2">
-                    <form id="searchForm" autocomplete="off">
+
                         <section class="section">
                             <div class="section-top">
                                 <div class="search-wrap">
@@ -230,7 +230,7 @@
                                                     <label for="tax3">면세 (세액없음)</label>
                                                 </div>
                                                 <div class="radio-wrap">
-                                                    <input type="radio" name="taxtype2" id="tax4" value="">
+                                                    <input type="radio" name="taxtype2" id="tax4" value="" checked>
                                                     <label for="tax4">전체</label>
                                                 </div>
                                             </div>
@@ -265,30 +265,29 @@
                                 <tbody>
                                 <tr>
                                     <td><strong style="color: red;">합&nbsp;&nbsp;&nbsp;&nbsp;계</strong></td>
-                                    <td>785</td>
-                                    <td>839</td>
-                                    <td>163,148,778</td>
-                                    <td>16,314,898</td>
+                                    <td id="cltCnt"></td>
+                                    <td id="cnt"></td>
+                                    <td id="supplySum"></td>
+                                    <td id="taxSum"></td>
                                 </tr>
                                 <tr>
                                     <td>사업자등록번호 발행분</td>
-                                    <td>434</td>
-                                    <td>486</td>
-                                    <td>143,780,054</td>
-                                    <td>143,588,054</td>
+                                    <td id="corpCltCnt"></td>
+                                    <td id="corpCnt"></td>
+                                    <td id="corpSupplySum"></td>
+                                    <td id="corpTaxSum"></td>
                                 </tr>
                                 <tr>
                                     <td>주민등록번호 발행분</td>
-                                    <td>351</td>
-                                    <td>353</td>
-                                    <td>16,314,898</td>
-                                    <td>13,070,924</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
                                 </tr>
                                 </tbody>
                             </table>
                             <div id="theGrid_saleList2" style="height: 350px;"></div>
                         </section>
-                    </form>
 
                     <!--<section class="section">
 
@@ -312,30 +311,9 @@
     <th:block th:replace="/shipment/trade_stmt/trade_stmt_tmpl :: printTemplate"></th:block>
     <script type="text/javascript">
 
-        const salesData = [
-            { 일련번호: 1, 사업자등록번호: '-', 상호: '홀운동기룡하이빌', 매수: 1, 공급가액: 56000, 세액: 5600 },
-            { 일련번호: 2, 사업자등록번호: '-', 상호: '대경아르체아파트', 매수: 1, 공급가액: 182400, 세액: 18240 },
-            { 일련번호: 3, 사업자등록번호: '-', 상호: '페트라빌', 매수: 1, 공급가액: 90909, 세액: 9091 },
-            { 일련번호: 4, 사업자등록번호: '-', 상호: '일광빌딩2차', 매수: 1, 공급가액: 84800, 세액: 8480 },
-            { 일련번호: 5, 사업자등록번호: '-', 상호: '정진빌딩', 매수: 1, 공급가액: 100000, 세액: 10000 },
-            { 일련번호: 6, 사업자등록번호: '101-82-22657', 상호: '서울여자간호대학교 휴먼캐슬', 매수: 1, 공급가액: 65800, 세액: 6580 },
-            { 일련번호: 7, 사업자등록번호: '101-82-69992', 상호: '기독교대한감리회예수사랑교회', 매수: 1, 공급가액: 80955, 세액: 8095 },
-            { 일련번호: 8, 사업자등록번호: '-', 상호: '서울문화유체국', 매수: 2, 공급가액: 360000, 세액: 36000 },
-            { 일련번호: 9, 사업자등록번호: '102-13-93738', 상호: '공간관리소(영화빌리지)', 매수: 1, 공급가액: 100000, 세액: 10000 },
-            { 일련번호: 10, 사업자등록번호: '102-39-04399', 상호: '송학빌딩', 매수: 1, 공급가액: 60000, 세액: 6000 },
-            { 일련번호: 11, 사업자등록번호: '102-80-00837', 상호: '쉐레미오피스텔', 매수: 1, 공급가액: 140000, 세액: 14000 },
-            { 일련번호: 12, 사업자등록번호: '104-10-62971', 상호: '양지타빌', 매수: 1, 공급가액: 58800, 세액: 5880 },
-            { 일련번호: 13, 사업자등록번호: '104-81-24695', 상호: '조선일보사(구, 디지털서울문화예술)', 매수: 1, 공급가액: 65800, 세액: 6580 },
-            { 일련번호: 14, 사업자등록번호: '105-05-83693', 상호: 'P.M.SE빌', 매수: 1, 공급가액: 65800, 세액: 6580 },
-            { 일련번호: 15, 사업자등록번호: '105-07-55809', 상호: '마인드월드', 매수: 1, 공급가액: 183636, 세액: 18364 },
-            { 일련번호: 16, 사업자등록번호: '105-07-85957', 상호: '예건빌딩', 매수: 1, 공급가액: 85764, 세액: 8576 },
-            { 일련번호: 17, 사업자등록번호: '105-09-67537', 상호: '주연빌딩', 매수: 1, 공급가액: 90909, 세액: 9091 },
-            { 일련번호: 18, 사업자등록번호: '105-10-41004', 상호: '마니하우스', 매수: 1, 공급가액: 58000, 세액: 5800 },
-            { 일련번호: 19, 사업자등록번호: '105-14-32842', 상호: 'BS빌딩', 매수: 1, 공급가액: 90909, 세액: 9091 },
-            { 일련번호: 20, 사업자등록번호: '105-17-74909', 상호: '푸른솔리빙텔', 매수: 1, 공급가액: 90000, 세액: 9000 }
-        ];
 
         let sales_type = [];
+        let LoadingFlag = false;
         class SalesList {
             constructor() {
                 this.grid1 = null;
@@ -398,36 +376,50 @@
                 this.grid1.columns[1].allowMerging = true;
 
 
+                const cv2 = _this.viewData2;
+                cv2.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription('ivercorpnum', function(item, prop){
+                    return item[prop].substring(0, 7);
+                }));
+
                 this.grid2 = new wijmo.grid.FlexGrid('#theGrid_saleList2', {
                     autoGenerateColumns: false,
                     showMarquee: true,
                     allowSorting: 'MultiColumn',
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     isReadOnly: true,
-                    itemsSource: salesData,
+                    groupHeaderFormat: '사업자 번호: {value} 총 {count} 건',
+                    itemsSource: cv2,
                     columns: [
-                        { binding: '일련번호', header: '일련번호', align: 'center', width: '*' },
-                        { binding: '사업자등록번호', header: '사업자등록번호', align: 'center', width: '*' },
-                        { binding: '상호', header: '상호 (법인명)', align: 'left', width: '*'},
-                        { binding: '매수', header: '매수', align: 'right', width: '*' },
-                        { binding: '공급가액', header: '공급가액', align: 'right', width: '*' },
-                        { binding: '세액', header: '세액', align: 'right', width: 150 },
+                        { binding: 'ivercorpnum', header: '사업자등록번호', align: 'center', width: '*' },
+                        { binding: 'ivercorpnm', header: '상호', align: 'left', width: '*'},
+                        { binding: 'cnt', header: '매수', align: 'right', width: '*' },
+                        { binding: 'supplycost', header: '공급가액', align: 'right', width: '*', aggregate: 'Sum' },
+                        { binding: 'taxtotal', header: '세액', align: 'right', width: 150, aggregate: 'Sum' },
                     ]
                 });
 
+                this.grid2.rowHeaders.columns.splice(0, 1);
+
+            }
+
+            bindingStatisticsField(statistics){
+                $('#cltCnt').text(statistics['cltCnt']);
+                $('#cnt').text(statistics['cnt']);
+                $('#supplySum').text(formatMoney(statistics['supplySum']));
+                $('#taxSum').text(formatMoney(statistics['taxSum']));
             }
 
             searchMain(){
                 let _this = this;
 
                 let data = {
-                    searchfrdate : $('#searchfrdate').val(),
-                    searchtodate : $('#searchtodate').val(),
-                    cltcd : $('#cboCompany').val().trim() === '' ? '' : $('#cboCompanyHidden').val()  ,
-                    sale_type : $('#sale_type').val(),
-                    taxtype : $('input[name=taxtype]:checked').val(),
-                    spjangcd : getSpjangcdFromSession(),
-                };
+                    searchfrdate: $('#searchfrdate').val(),
+                    searchtodate: $('#searchtodate').val(),
+                    cltcd: $('#cboCompany').val().trim() === '' ? '' : $('#cboCompanyHidden').val(),
+                    sale_type: $('#sale_type').val(),
+                    taxtype: $('input[name=taxtype]:checked').val(),
+                    spjangcd: getSpjangcdFromSession(),
+                }
 
                 let result = AjaxUtil.getSyncData(_this.url + '/search', data);
 
@@ -436,6 +428,31 @@
                     _this.viewData.sourceCollection = result.data;
                 }
             }
+
+            searchMain2(type){
+                let _this = this;
+
+                if(type==='load' && LoadingFlag) return;
+
+                let data = {
+                    searchfrdate2: $('#searchfrdate2').val(),
+                    searchtodate2: $('#searchtodate2').val(),
+                    cltcd2: $('#cboCompany2').val().trim() === '' ? '' : $('#cboCompanyHidden2').val(),
+                    sale_type2: $('#sale_type2').val(),
+                    taxtype2: $('input[name=taxtype2]:checked').val(),
+                    spjangcd: getSpjangcdFromSession(),
+                }
+
+                let result = AjaxUtil.getSyncData(_this.url + '/search2', data);
+
+                if(result != null) {
+                    _this.viewData2.sourceCollection = result.data['list'];
+                    _this.bindingStatisticsField(result.data['Statistics']);
+                    LoadingFlag = true; //서브탭 클릭할때마다 서치 방지
+                }
+
+            }
+
         }
 
         let page = null;
@@ -453,9 +470,18 @@
 
             $('#btnSearch').click(function(){
                 page.searchMain();
+            });
+
+            $('#btnSearch2').click(function(){
+                page.searchMain2();
+            });
+
+            $('#inputTabLink').click(function (){
+               page.searchMain2('load');
             })
 
             page.searchMain();
+
 
         })
     </script>

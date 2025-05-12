@@ -129,3 +129,10 @@ function companyPopupOpen(intputId, hiddenid){
     poppage.show(searchcallback);
 }
 
+//숫자 금액으로 변환 , 숫자 아니면 0으로 리턴
+function formatMoney(val){
+    const num = Number(val);
+    if(isNaN(num)) return '0';
+    return num.toLocaleString('en-US')
+}
+

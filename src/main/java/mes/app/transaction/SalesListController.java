@@ -55,4 +55,36 @@ public class SalesListController {
 
         return result;
     }
+
+    @GetMapping("/search2")
+    public AjaxResult searchList2(
+            @RequestParam String spjangcd,
+            @RequestParam String searchfrdate2,
+            @RequestParam String searchtodate2,
+            @RequestParam String sale_type2,
+            @RequestParam String cltcd2,
+            @RequestParam String taxtype2
+    ){
+        searchfrdate2 = searchfrdate2.replaceAll("-", "");
+        searchtodate2 = searchtodate2.replaceAll("-", "");
+
+
+
+        AjaxResult result = new AjaxResult();
+
+        Map<String, Object> paramSet = new HashMap<>();
+        paramSet.put("searchfrdate", searchfrdate2);
+        paramSet.put("searchtodate", searchtodate2);
+        paramSet.put("spjangcd", spjangcd);
+        paramSet.put("cltcd", cltcd2);
+        paramSet.put("taxtype", taxtype2);
+        paramSet.put("misgubun", sale_type2);
+
+        List<Map<String, Object>> list = salesListService.getList2(paramSet);
+        Map<String, Object> StatisticsCalculatorList = salesListService.StatisticsCalculator(list);
+
+        result.data = Map.of("list", list, "Statistics", StatisticsCalculatorList);
+
+        return result;
+    }
 }

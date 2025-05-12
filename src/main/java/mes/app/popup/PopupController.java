@@ -424,7 +424,7 @@ public class PopupController {
 				ta.accid,
 				tx.banknm as "BankName",
 				ta.bankid as "bankId",
-				ta.accnum as "accountNumber",
+				left(ta.accnum, length(ta.accnum) - 4) || '****' as "accountNumber",
 				ta.accname as "accountName",
 				CASE 
 					WHEN ta.popsort = '1' THEN '개인'

@@ -44,11 +44,11 @@ public class TransactionInputService {
                  a.accid as accountid,
                  b.banknm as bankname,
                  b.bankpopcd as managementnum,
-                 accnum as accountNumber,
+                 left(accnum, length(accnum) - 4) || '****' as accountNumber,
                  accname as accountName,
                  onlineid as onlineBankId,
-                 onlinepw as onlineBankPw,
-                 accpw as paymentPw,
+                 left(onlinepw, length(onlinepw) - 3) || '***' as onlineBankPw,
+                 substring(accpw from 1 for 2) || '**' as paymentPw,
                  accbirth as birth,
                  case when popyn = '1' then true
                  else false
@@ -86,7 +86,7 @@ public class TransactionInputService {
                 ,c."Code" as code
                 ,t.tradenm as trade_type
                 ,banknm as bankname
-                ,accnum as account
+                ,left(accnum, length(accnum) - 4) || '****' as account
                 ,s."Value" as depositAndWithdrawalType
                 ,c."Name" as "clientName"
                 ,c.id as cltcd

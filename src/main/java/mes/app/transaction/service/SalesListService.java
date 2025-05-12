@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 
 import java.text.NumberFormat;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
@@ -18,7 +19,6 @@ public class SalesListService {
 
     @Autowired
     SqlRunner sqlRunner;
-
 
     public List<Map<String, Object>> getList(Map<String, Object> parameter){
         MapSqlParameterSource param = new MapSqlParameterSource();
@@ -30,15 +30,12 @@ public class SalesListService {
         String taxtype = UtilClass.getStringSafe(parameter.get("taxtype"));
         String misgubun = UtilClass.getStringSafe(parameter.get("misgubun"));
 
-
-
         param.addValue("spjangcd", spjangcd);
         param.addValue("searchfrdate", searchfrdate);
         param.addValue("searchtodate", searchtodate);
         param.addValue("cltcd", cltcd);
         param.addValue("taxtype", taxtype);
         param.addValue("misgubun", misgubun);
-
 
         String sql = """
                 select
@@ -88,6 +85,93 @@ public class SalesListService {
 
         List<Map<String, Object>> rows = sqlRunner.getRows(sql, param);
         return rows;
+    }
+
+    public List<Map<String, Object>> getList2(Map<String, Object> parameter){
+        MapSqlParameterSource param = new MapSqlParameterSource();
+
+        String spjangcd = UtilClass.getStringSafe(parameter.get("spjangcd"));
+        String searchfrdate = UtilClass.getStringSafe(parameter.get("searchfrdate"));
+        String searchtodate = UtilClass.getStringSafe(parameter.get("searchtodate"));
+        Integer cltcd = UtilClass.parseInteger(parameter.get("cltcd"));
+        String taxtype = UtilClass.getStringSafe(parameter.get("taxtype"));
+        String misgubun = UtilClass.getStringSafe(parameter.get("misgubun"));
+
+        param.addValue("spjangcd", spjangcd);
+        param.addValue("searchfrdate", searchfrdate);
+        param.addValue("searchtodate", searchtodate);
+        param.addValue("cltcd", cltcd);
+        param.addValue("taxtype", taxtype);
+        param.addValue("misgubun", misgubun);
+
+        String sql = """
+                select ivercorpnum
+                ,count(ivercorpnum) as cnt
+                ,ivercorpnm
+                ,SUM(supplycost) as supplycost
+                ,SUM(taxtotal) as taxtotal
+                from tb_salesment
+                where spjangcd = :spjangcd
+                and misdate between :searchfrdate and :searchtodate
+                """;
+
+        if(cltcd != null){
+            sql += """
+                    and cltcd = :cltcd
+                    """;
+        }
+
+        if(taxtype != null && !taxtype.isEmpty()){
+            sql += """
+                    and taxtype = :taxtype
+                    """;
+        }
+
+        if(misgubun != null && !misgubun.isEmpty()){
+            sql += """
+                    and misgubun = :misgubun
+                    """;
+        }
+
+        sql += """
+                group by ivercorpnum, ivercorpnm
+                order by ivercorpnum;
+                """;
+
+        List<Map<String, Object>> rows = sqlRunner.getRows(sql, param);
+        return rows;
+    }
+
+    public Map<String, Object> StatisticsCalculator(List<Map<String, Object>> list){
+
+        Map<String, Object> bucket = new HashMap<>();
+        int cntSum = 0;
+        int supplySum = 0;
+        int taxSum = 0;
+
+
+        for(Map<String, Object> item : list){
+
+            Object cnt = item.get("cnt");
+            Object supply = item.get("supplycost");
+            Object tax = item.get("taxtotal");
+
+            int parsedCnt = cnt != null ? UtilClass.parseInteger(cnt) : 0;
+            int parsedSupply = supply != null ? UtilClass.parseInteger(supply) : 0;
+            int parsedTax = tax != null ? UtilClass.parseInteger(tax) : 0;
+
+            cntSum += parsedCnt;
+            supplySum += parsedSupply;
+            taxSum += parsedTax;
+
+        }
+
+        bucket.put("cltCnt", list.size());
+        bucket.put("cnt", cntSum);
+        bucket.put("supplySum", supplySum);
+        bucket.put("taxSum", taxSum);
+
+        return bucket;
     }
 
     public void bindEnumLabels(List<Map<String, Object>> list){

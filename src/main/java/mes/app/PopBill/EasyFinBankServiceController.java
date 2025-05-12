@@ -14,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import mes.app.PopBill.dto.EasyFinBankAccountFormDto;
 import mes.app.PopBill.enums.BankJobState;
 import mes.app.PopBill.service.EasyFinBankCustomService;
+import mes.domain.entity.TB_ACCOUNT;
 import mes.domain.model.AjaxResult;
+import mes.domain.repository.TB_ACCOUNTRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,6 +34,9 @@ public class EasyFinBankServiceController {
 
     @Autowired
     private EasyFinBankCustomService easyFinBankCustomService;
+
+    @Autowired
+    private TB_ACCOUNTRepository accountRepository;
 
 
     @RequestMapping(value = "listBankAccount", method = RequestMethod.GET)
@@ -114,7 +119,6 @@ public class EasyFinBankServiceController {
     @RequestMapping(value = "requestJob", method = RequestMethod.POST)
     public AjaxResult requestJob(@RequestParam String frdate,
                              @RequestParam String todate,
-                             @RequestParam String accountnumber,
                              @RequestParam String managementnum,
                                  @RequestParam Integer accountid,
                                  @RequestParam String bankname) {
@@ -125,6 +129,12 @@ public class EasyFinBankServiceController {
          */
         AjaxResult result  = new AjaxResult();
         result.success = false;
+        String accountnumber = "";
+
+        Optional<TB_ACCOUNT> acc = accountRepository.findById(accountid);
+        if(acc.isPresent()){
+            accountnumber = acc.get().getAccnum();
+        }
 
         if(accountnumber.isEmpty() || managementnum.isEmpty()){
             result.message = "관리코드 및 계좌번호가 누락되었습니다.";

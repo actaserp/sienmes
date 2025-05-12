@@ -47,22 +47,22 @@
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>입금관리</li>
+                <li>출금 관리</li>
                 <li>매입 현황</li>
             </ul>
         </div>
         <div class="tab-wrap">
             <ul class="tab-links">
                 <li>
-                    <a href="#tab1" title="목록" id="listTabLink">목록</a>
+                    <a href="#tab1" title="상세현황" id="listTabLink">상세현황</a>
                 </li>
                 <li>
-                    <a href="#tab2" title="등록" id="inputTabLink">등록</a>
+                    <a href="#tab2" title="집계현황" id="inputTabLink">집계현황</a>
                 </li>
             </ul>
             <div class="tab-contents">
                 <section class="tab-item" id="tab1">
-                    <form id="searchForm" autocomplete="off">
+
                         <section class="section">
                             <div class="section-top">
                                 <div class="search-wrap">
@@ -97,11 +97,11 @@
                                     <dl>
                                         <dt>
                                             <label>
-                                                매출구분
+                                                매입구분
                                             </label>
                                         </dt>
                                         <dd>
-                                            <select class="form-control2" id="saletype" name="saletype" >
+                                            <select class="form-control2" id="sale_type" name="sale_type" >
 
                                             </select>
                                         </dd>
@@ -116,20 +116,20 @@
                                         <dd>
                                             <div class="srch-box">
                                                 <div class="radio-wrap">
-                                                    <input type="radio" name="opt" id="radio1" >
-                                                    <label for="radio1">과세(10%)</label>
+                                                    <input type="radio" name="taxtype"  value="과세">
+                                                    <label>과세(10%)</label>
                                                 </div>
                                                 <div class="radio-wrap">
-                                                    <input type="radio" name="opt" id="radio2">
-                                                    <label for="radio2">영세(0%)</label>
+                                                    <input type="radio" name="taxtype" value="영세">
+                                                    <label>영세(0%)</label>
                                                 </div>
                                                 <div class="radio-wrap">
-                                                    <input type="radio" name="opt" id="radio2">
-                                                    <label for="radio2">면세 (세액없음)</label>
+                                                    <input type="radio" name="taxtype" value="면세" >
+                                                    <label>면세 (세액없음)</label>
                                                 </div>
                                                 <div class="radio-wrap">
-                                                    <input type="radio" name="opt" id="radio2" checked>
-                                                    <label for="radio2">전체</label>
+                                                    <input type="radio" name="taxtype" value="" checked>
+                                                    <label>전체</label>
                                                 </div>
                                             </div>
                                         </dd>
@@ -151,144 +151,143 @@
                                 </div>
                             </div>
                         </section>
-                    </form>
+
 
 
                     <section class="section">
 
                         <div class="grid_box" id="divList">
 
-                            <div id="theGrid_saleList" style="height: 350px;"></div>
+                            <div id="theGrid_purchaseList" style="height: 350px;"></div>
                         </div>
                     </section>
                 </section>
 
                 <section class="tab-item" id="tab2">
-                    <form id="searchForm" autocomplete="off">
-                        <section class="section">
-                            <div class="section-top">
-                                <div class="search-wrap">
-                                    <dl>
-                                        <dt>
-                                            <label>
-                                                기간<span class="eq"></span>
-                                            </label>
-                                        </dt>
-                                        <dd>
-                                            <div class="srch-box">
-                                                <input type="date" id="searchfrdate" name="searchfrdate"  />
-                                                <span class="slow_sign">~</span>
-                                                <input type="date" id="searchtodate" name="searchtodate" />
+
+                    <section class="section">
+                        <div class="section-top">
+                            <div class="search-wrap">
+                                <dl>
+                                    <dt>
+                                        <label>
+                                            기간<span class="eq"></span>
+                                        </label>
+                                    </dt>
+                                    <dd>
+                                        <div class="srch-box">
+                                            <input type="date" id="searchfrdate2" name="searchfrdate2"  />
+                                            <span class="slow_sign">~</span>
+                                            <input type="date" id="searchtodate2" name="searchtodate2" />
+                                        </div>
+                                    </dd>
+                                </dl>
+                                <dl>
+                                    <dt>
+                                        <label>
+                                            거래처<span class="eq"></span>
+                                        </label>
+                                    </dt>
+                                    <dd>
+                                        <div class="srch-box">
+                                            <input type="text" placeholder="해당 칸을 클릭해주세요"  id="cboCompany2" name="cboCompany2"/>
+                                            <input type="hidden"  id="cboCompanyHidden2" name="cboCompanyHidden2"  />
+                                        </div>
+                                    </dd>
+                                </dl>
+
+                                <dl>
+                                    <dt>
+                                        <label>
+                                            매입구분
+                                        </label>
+                                    </dt>
+                                    <dd>
+                                        <select class="form-control2" id="sale_type2" name="sale_type2" >
+
+                                        </select>
+                                    </dd>
+                                </dl>
+
+                                <dl>
+                                    <dt>
+                                        <label>
+                                            과세형태<span class="eq"></span>
+                                        </label>
+                                    </dt>
+                                    <dd>
+                                        <div class="srch-box">
+                                            <div class="radio-wrap">
+                                                <input type="radio" name="taxtype2" id="tax1" value="과세">
+                                                <label for="tax1">과세(10%)</label>
                                             </div>
-                                        </dd>
-                                    </dl>
-                                    <dl>
-                                        <dt>
-                                            <label>
-                                                거래처<span class="eq"></span>
-                                            </label>
-                                        </dt>
-                                        <dd>
-                                            <div class="srch-box">
-                                                <input type="text" placeholder="해당 칸을 클릭해주세요"  id="cboCompany" name="cboCompany"/>
-                                                <input type="hidden"  id="cboCompanyHidden" name="cboCompanyHidden"  />
+                                            <div class="radio-wrap">
+                                                <input type="radio" name="taxtype2" id="tax2" value="영세">
+                                                <label for="tax2">영세(0%)</label>
                                             </div>
-                                        </dd>
-                                    </dl>
-
-                                    <dl>
-                                        <dt>
-                                            <label>
-                                                매출구분
-                                            </label>
-                                        </dt>
-                                        <dd>
-                                            <select class="form-control2" id="saletype" name="saletype" >
-
-                                            </select>
-                                        </dd>
-                                    </dl>
-
-                                    <dl>
-                                        <dt>
-                                            <label>
-                                                과세형태<span class="eq"></span>
-                                            </label>
-                                        </dt>
-                                        <dd>
-                                            <div class="srch-box">
-                                                <div class="radio-wrap">
-                                                    <input type="radio" name="opt" id="radio1" >
-                                                    <label for="radio1">과세(10%)</label>
-                                                </div>
-                                                <div class="radio-wrap">
-                                                    <input type="radio" name="opt" id="radio2">
-                                                    <label for="radio2">영세(0%)</label>
-                                                </div>
-                                                <div class="radio-wrap">
-                                                    <input type="radio" name="opt" id="radio2">
-                                                    <label for="radio2">면세 (세액없음)</label>
-                                                </div>
-                                                <div class="radio-wrap">
-                                                    <input type="radio" name="opt" id="radio2" checked>
-                                                    <label for="radio2">전체</label>
-                                                </div>
+                                            <div class="radio-wrap">
+                                                <input type="radio" name="taxtype2" id="tax3" value="면세">
+                                                <label for="tax3">면세 (세액없음)</label>
                                             </div>
-                                        </dd>
-                                    </dl>
+                                            <div class="radio-wrap">
+                                                <input type="radio" name="taxtype2" id="tax4" value="" checked>
+                                                <label for="tax4">전체</label>
+                                            </div>
+                                        </div>
+                                    </dd>
+                                </dl>
 
-                                    <dl>
-                                        <dt>&nbsp;</dt>
-                                        <dd>
-                                            <li>
-                                                <a class="btn btn-delete" title="검색" id="btnSearch">
-                                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                                    검색
-                                                </a>
-                                            </li>
-                                        </dd>
-                                    </dl>
+                                <dl>
+                                    <dt>&nbsp;</dt>
+                                    <dd>
+                                        <li>
+                                            <a class="btn btn-delete" title="검색" id="btnSearch2">
+                                                <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                                검색
+                                            </a>
+                                        </li>
+                                    </dd>
+                                </dl>
 
-                                </div>
                             </div>
-                            <table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; text-align: center; font-family: sans-serif;">
-                                <thead>
-                                <tr>
-                                    <th>구분</th>
-                                    <th>매출처수</th>
-                                    <th>매수</th>
-                                    <th>공급가액</th>
-                                    <th>세액</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td><strong style="color: red;">합&nbsp;&nbsp;&nbsp;&nbsp;계</strong></td>
-                                    <td>785</td>
-                                    <td>839</td>
-                                    <td>163,148,778</td>
-                                    <td>16,314,898</td>
-                                </tr>
-                                <tr>
-                                    <td>사업자등록번호 발행분</td>
-                                    <td>434</td>
-                                    <td>486</td>
-                                    <td>143,780,054</td>
-                                    <td>143,588,054</td>
-                                </tr>
-                                <tr>
-                                    <td>주민등록번호 발행분</td>
-                                    <td>351</td>
-                                    <td>353</td>
-                                    <td>16,314,898</td>
-                                    <td>13,070,924</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                            <div id="theGrid_saleList2" style="height: 350px;"></div>
-                        </section>
-                    </form>
+                        </div>
+                        <table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; text-align: center; font-family: sans-serif;">
+                            <thead>
+                            <tr>
+                                <th>구분</th>
+                                <th>매출처수</th>
+                                <th>매수</th>
+                                <th>공급가액</th>
+                                <th>세액</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><strong style="color: red;">합&nbsp;&nbsp;&nbsp;&nbsp;계</strong></td>
+                                <td id="cltCnt"></td>
+                                <td id="cnt"></td>
+                                <td id="supplySum"></td>
+                                <td id="taxSum"></td>
+                            </tr>
+                            <tr>
+                                <td>사업자등록번호 발행분</td>
+                                <td id="corpCltCnt"></td>
+                                <td id="corpCnt"></td>
+                                <td id="corpSupplySum"></td>
+                                <td id="corpTaxSum"></td>
+                            </tr>
+                            <tr>
+                                <td>주민등록번호 발행분</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div id="theGrid_saleList2" style="height: 350px;"></div>
+                    </section>
 
                     <!--<section class="section">
 
