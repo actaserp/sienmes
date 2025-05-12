@@ -864,6 +864,27 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         }
+    }else{
+        // 메뉴 처음 진입시 dep1(전체메뉴) 하위 dep2 요소들 active활성화
+        const activeLink = document.querySelector(`.dep2 a[href*="/"]`);
+        if (activeLink) {
+            activeLink.classList.add("on"); // 현재 페이지 링크 강조
+
+            // 해당 링크가 속한 dep2 찾기
+            const activeDep2 = activeLink.closest("ul");
+            if (activeDep2) {
+                activeDep2.classList.add("active");
+
+                // 해당 dep2의 dep1을 찾아 활성화
+                const targetDep1 = activeDep2.getAttribute("data-menu");
+                if (targetDep1) {
+                    const matchingDep1 = document.querySelector(`.dep1 li[data-target="${targetDep1}"]`);
+                    if (matchingDep1) {
+                        matchingDep1.classList.add("active");
+                    }
+                }
+            }
+        }
     }
 
     // dep1 클릭 이벤트 추가 (메뉴 선택 시 동작)
