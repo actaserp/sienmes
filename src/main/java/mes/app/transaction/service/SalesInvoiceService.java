@@ -1,7 +1,10 @@
 package mes.app.transaction.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.popbill.api.*;
 import com.popbill.api.taxinvoice.Taxinvoice;
+import com.popbill.api.taxinvoice.TaxinvoiceDetail;
 import mes.domain.entity.*;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.CompanyRepository;
@@ -485,139 +488,166 @@ public class SalesInvoiceService {
 			return result;
 		}
 
-		String invoicerCorpNum = salesList.get(0).getIcercorpnum();
-
-		// 1. 휴/폐업 상태 확인
-		AjaxResult checkResult = checkInvoiceeStates(salesList, invoicerCorpNum);
-		if (!checkResult.success) {
-			return checkResult;
-		}
-
-		// 2. 발행 처리
-//		AjaxResult issueResult = callPopbillIssue(salesList);
-//		result.success = issueResult.success;
-//		result.message = issueResult.message;
+		// 발행 처리
+		AjaxResult issueResult = callPopbillIssue(salesList);
+		result.success = issueResult.success;
+		result.message = issueResult.message;
 		return result;
 	}
 
 
 	// 팝빌 처리
-//	private AjaxResult callPopbillIssue(List<TB_Salesment> salesList) {
-//		AjaxResult result = new AjaxResult();
-//
-//		try {
-//			for (TB_Salesment sm : salesList) {
-//				// 팝빌 전자세금계산서 객체 생성
-//				Taxinvoice taxinvoice = makeTaxInvoiceObject(sm);
-//
-//				// 팝빌 발행 요청
-//				Response response = taxinvoiceService.RegistIssue(
-//						sm.getIcercorpnum(),  // 공급자 사업자번호
-//						taxinvoice,           // 전자세금계산서 객체
-//						null, null, null      // Memo, 이메일제외여부, 문자제외여부
-//				);
-//
-//				// 응답 처리 (성공 시 승인번호 등 저장 가능)
-//				sm.setStatecode(200); // 예시: 발행 완료 상태
-//
-//			}
-//
-//			tb_salesmentRepository.saveAll(salesList);
-//			result.success = true;
-//			result.message = "세금계산서 발행이 완료되었습니다.";
-//
-//		} catch (PopbillException e) {
-//			result.success = false;
-//			result.message = "팝빌 발행 실패: " + e.getMessage();
-//		}
-//
-//		return result;
-//	}
+	private AjaxResult callPopbillIssue(List<TB_Salesment> salesList) {
+		// 단건
+		if (salesList.size() == 1) {
+			return callSingleIssue(salesList.get(0));
+		} else {
+			// 벌크(다건)
+			return callBulkIssue(salesList);
+		}
+	}
 
-	/**
-	 * 거래처(공급받는자) 휴/폐업 상태를 조회하고 IVCLOSE 컬럼에 상태 저장.
-	 * - 상태코드: null (실패), "0" (미등록), "1" (사업중), "2" (폐업), "3" (휴업)
-	 * - salesList 에는 TB_Salesment 목록이 담겨 있어야 하며,
-	 * - 저장까지 함께 처리됨
-	 */
-	public AjaxResult checkInvoiceeStates(List<TB_Salesment> salesList, String invoicerCorpNum) {
+	private AjaxResult callSingleIssue(TB_Salesment sm) {
 		AjaxResult result = new AjaxResult();
 
-		if (salesList.size() == 1) {
-			TB_Salesment sm = salesList.get(0);
-			String invoiceeCorpNum = sm.getIvercorpnum();
+		try {
+			Taxinvoice taxinvoice = makeTaxInvoiceObject(sm);
+
 
 			try {
-				CorpState corpState = closeDownService.CheckCorpNum(invoicerCorpNum, invoiceeCorpNum, null);
-				String state = corpState != null ? corpState.getState() : null;
-				sm.setIvclose(state);
-				tb_salesmentRepository.save(sm);
-
-				result.success = true;
-				result.message = switchIvcloseMessage(state);
-
-			} catch (PopbillException e) {
-				result.success = false;
-				result.message = "팝빌 상태 조회 실패: " + e.getMessage();
+				ObjectMapper mapper = new ObjectMapper();
+				System.out.println("=== 팝빌 요청 세금계산서 JSON ===");
+				System.out.println(mapper.writeValueAsString(taxinvoice));
+			} catch (JsonProcessingException e) {
+				System.err.println("JSON 출력 실패: " + e.getMessage());
 			}
 
-		} else {
-			String[] corpNumList = salesList.stream()
-					.map(TB_Salesment::getIvercorpnum)
-					.distinct()
-					.toArray(String[]::new);
 
-			try {
-				CorpState[] corpStates = closeDownService.CheckCorpNum(invoicerCorpNum, corpNumList, null);
+			// 고유 관리번호 필수
+			String mgtKey = sm.getIcercorpnum();
 
-				Map<String, String> corpStateMap = new HashMap<>();
-				for (CorpState state : corpStates) {
-					corpStateMap.put(state.getCorpNum(), state.getState());
-				}
+			System.out.println(taxinvoice);
 
-				List<String> errorList = new ArrayList<>();
+			// 발행 요청
+			taxinvoiceService.registIssue(mgtKey, taxinvoice, false, "", false, "", "", "");
 
-				for (TB_Salesment sm : salesList) {
-					String corpNum = sm.getIvercorpnum();
-					String state = corpStateMap.getOrDefault(corpNum, null);
-					sm.setIvclose(state);
+			sm.setStatecode(200); // 즉시 발행 완료
+			tb_salesmentRepository.save(sm);
 
-					if (!"1".equals(state)) {
-						String stateMsg = switchIvcloseMessage(state);
-						errorList.add(sm.getIvercorpnm() + " (" + corpNum + ") : " + stateMsg);
-					}
-				}
-
-				tb_salesmentRepository.saveAll(salesList);
-
-				if (!errorList.isEmpty()) {
-					result.success = false;
-					result.message = "다음 공급받는자가 휴/폐업 상태입니다:\n" + String.join("\n", errorList);
-				} else {
-					result.success = true;
-					result.message = "모든 거래처가 사업중입니다.";
-				}
-
-			} catch (PopbillException e) {
-				result.success = false;
-				result.message = "팝빌 상태 일괄 조회 실패: " + e.getMessage();
-			}
+			result.success = true;
+			result.message = "세금계산서가 발행되었습니다.";
+		} catch (PopbillException e) {
+			result.success = false;
+			result.message = "팝빌 단건 발행 실패: " + e.getMessage();
 		}
-		System.out.println("휴폐업 조회" + result);
+
+		return result;
+	}
+
+	// 다중
+	private AjaxResult callBulkIssue(List<TB_Salesment> salesList) {
+		AjaxResult result = new AjaxResult();
+
+		try {
+			List<Taxinvoice> invoiceList = new ArrayList<>();
+			String submitId = "BULK_" + System.currentTimeMillis();
+
+			for (TB_Salesment sm : salesList) {
+				Taxinvoice taxinvoice = makeTaxInvoiceObject(sm);
+
+				// 각 세금계산서에 고유 관리키 지정
+				String mgtKey = sm.getIcercorpnum();
+				taxinvoice.setInvoicerMgtKey(mgtKey);
+				sm.setMgtkey(mgtKey);
+				invoiceList.add(taxinvoice);
+			}
+
+			BulkResponse response = taxinvoiceService.bulkSubmit(
+					salesList.get(0).getIcercorpnum(),
+					submitId,
+					invoiceList,
+					false, null
+			);
+
+			for (TB_Salesment sm : salesList) {
+				sm.setStatecode(201); // 예: 발행 요청 상태
+			}
+			tb_salesmentRepository.saveAll(salesList);
+
+			result.success = true;
+			result.message = "벌크 세금계산서 발행 요청이 완료되었습니다.";
+		} catch (PopbillException e) {
+			result.success = false;
+			result.message = "팝빌 벌크 발행 실패: " + e.getMessage();
+		}
+
 		return result;
 	}
 
 
-	private String switchIvcloseMessage(String state) {
-		if (state == null) return "확인 실패 (null)";
-		else if ("0".equals(state)) return "미등록 사업자입니다.";
-		else if ("1".equals(state)) return "사업중입니다.";
-		else if ("2".equals(state)) return "폐업 상태입니다.";
-		else if ("3".equals(state)) return "휴업 상태입니다.";
-		else return "알 수 없는 상태 (" + state + ")";
+	private Taxinvoice makeTaxInvoiceObject(TB_Salesment sm) {
+		Taxinvoice invoice = new Taxinvoice();
+
+		// 공급자 정보
+		invoice.setWriteDate(sm.getId().getMisdate()); // 작성일자 (yyyymmdd)
+		invoice.setIssueType(sm.getIssuetype());       // 발행형태 - 정발행, 역발행 등
+		invoice.setTaxType(sm.getTaxtype());           // 과세형태 - 과세, 영세, 면세
+		invoice.setPurposeType(sm.getPurposetype());   // 영수/청구 구분
+		invoice.setChargeDirection("정과금");
+
+		invoice.setSupplyCostTotal(String.valueOf(Optional.ofNullable(sm.getSupplycost()).orElse(0)));
+		invoice.setTaxTotal(String.valueOf(Optional.ofNullable(sm.getTaxtotal()).orElse(0)));
+		invoice.setTotalAmount(String.valueOf(Optional.ofNullable(sm.getTotalamt()).orElse(0)));
+
+		// 공급자 정보 설정
+		invoice.setInvoicerCorpNum(sm.getIcercorpnum());
+		invoice.setInvoicerCorpName(sm.getIcercorpnm());
+		invoice.setInvoicerCEOName(sm.getIcerceonm());
+		invoice.setInvoicerAddr(sm.getIceraddr());
+		invoice.setInvoicerBizType(sm.getIcerbiztype());
+		invoice.setInvoicerBizClass(sm.getIcerbizclass());
+		invoice.setInvoicerContactName(sm.getIcerpernm());
+		invoice.setInvoicerEmail(sm.getIceremail());
+		invoice.setInvoicerTEL(sm.getIcertel());
+		invoice.setInvoicerMgtKey(sm.getId().getMisdate() + "-" + sm.getId().getMisnum());
+
+		// 공급받는자 정보 설정
+		invoice.setInvoiceeType(sm.getInvoiceetype());
+		invoice.setInvoiceeCorpNum(sm.getIvercorpnum());
+		invoice.setInvoiceeCorpName(sm.getIvercorpnm());
+		invoice.setInvoiceeCEOName(sm.getIverceonm());
+		invoice.setInvoiceeAddr(sm.getIveraddr());
+		invoice.setInvoiceeBizType(sm.getIverbiztype());
+		invoice.setInvoiceeBizClass(sm.getIverbizclass());
+		invoice.setInvoiceeContactName1(sm.getIverpernm());
+		invoice.setInvoiceeEmail1(sm.getIveremail());
+		invoice.setInvoiceeTEL1(sm.getIvertel());
+		invoice.setInvoiceeMgtKey(""); // 공급받는자 문서 번호 > 역발행일 경우 필수
+
+		// 메모 및 기타 정보
+		invoice.setRemark1(sm.getRemark1());
+		invoice.setRemark2(sm.getRemark2());
+		invoice.setRemark3(sm.getRemark3());
+
+		// 세부 품목 정보 설정
+		List<TaxinvoiceDetail> detailList = sm.getDetails().stream().map(d -> {
+			TaxinvoiceDetail detail = new TaxinvoiceDetail();
+			detail.setSerialNum(Short.parseShort(d.getId().getMisseq()));
+			detail.setItemName(Optional.ofNullable(d.getItemnm()).orElse(""));
+			detail.setSpec(Optional.ofNullable(d.getSpec()).orElse(""));
+			detail.setQty(String.valueOf(Optional.ofNullable(d.getQty()).orElse(0)));
+			detail.setUnitCost(String.valueOf(Optional.ofNullable(d.getUnitcost()).orElse(0)));
+			detail.setSupplyCost(String.valueOf(Optional.ofNullable(d.getSupplycost()).orElse(0)));
+			detail.setTax(String.valueOf(Optional.ofNullable(d.getTaxtotal()).orElse(0)));
+			detail.setRemark(Optional.ofNullable(d.getRemark()).orElse(""));
+			return detail;
+		}).toList();
+
+		invoice.setDetailList(detailList);
+
+
+		return invoice;
 	}
-
-
 
 	@Transactional
 	public AjaxResult deleteSalesment(List<Map<String, String>> deleteList) {

@@ -72,7 +72,7 @@ public class TB_Salesment {
     private String ivertel2;
     private String iverhp2;
 
-    private String ivclose;
+    private Integer ivclose;
     private Boolean iversendyn;
 
     private String ntscfnum;
