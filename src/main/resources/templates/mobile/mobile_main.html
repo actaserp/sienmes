@@ -1,132 +1,41 @@
 <!DOCTYPE html>
 <html lang="ko">
 <style>
-  .btn-clear {
-    display: none !important; /* 강제로 숨김 */
-  }
-  .btn-close {
-    display: none !important; /* 강제로 숨김 */
-  }
-  /* 검색 영역 스타일 */
-  #searcharea, #detailarea {
-    position: relative;
-    width: 100%;
-    margin-top: 10px;
+  .contents-wrap{
+
   }
 
-  #searcharea input, #detailarea input {
-    width: 100%;
-    border: none;
-    outline: none;
-    font-size: 16px;
-    padding: 10px;
-  }
-
-  /* 검색 아이콘 (SVG) */
-  .search-icon {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-  }
-
-  /* 검색 가이드 스타일 */
-  .search-guide {
-    padding: 10px;
-    font-size: 14px;
-    color: #666;
-  }
-
-  /* 버튼 스타일 */
-  .btn-select, .btn-login {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  /* 모달 오버레이 (배경 흐리게) */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* 반투명한 검은색 배경 */
-    z-index: 999; /* 모달보다 한 단계 아래 */
-  }
-
-  /* 모달 스타일 */
-  .modal {
-    display: none;
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 400px;
-    height: 650px;
-    max-width: 90%;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    border: none;
-    z-index: 9999;
-  }
-
-  /* 모달 닫기 버튼 스타일 */
-  .modal-close {
-    position: absolute;
-    top: 10px;
-    right: 5px;
-    width: 30px; /* 버튼 크기 */
-    height: 25px;
-    border: none;
-    border-radius: 3px;
-    background: none; !important; /* 배경 제거 */
-    background-color: transparent; !important; /* 배경을 투명하게 */
-    z-index: 1000;
-    cursor: pointer; /* 클릭 가능한 버튼 스타일 */
-  }
-
-  #loadingSpinner {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.8); /* 배경 어둡게 */
+  .ip-card{
+    width: 80%;
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(135deg, #4dd0e1, #81c784);
+    border-radius: 50%;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 9999;
-  }
-
-  #loadingImage {
-    width: 95%; /* 전체 화면의 80% 크기 */
-    max-width: 900px; /* 최대 크기 제한 */
-  }
-  .search-container {
-    background-color: #9acaf4;   /* 배경색 설정 */
-    border-radius: 10px;
-  }
-
-  .currentData {
-    display: inline-block;     /* 인라인 요소에 width 적용 가능하게 함 */
-    width: 100%;
-    height: 45px;              /* 높이 설정 */
-    padding: 3px 8px;          /* 안쪽 여백 설정 */
-
-    vertical-align: middle;    /* 텍스트 수직 정렬 */
-    text-align: center;
-    /*border: 1px solid darkgray;*/
-    align-content: center;
-    font-size: large;
     color: white;
+    margin-bottom: 20px;
+    position: relative;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    margin-left: 10%;
+  }
+
+  .office-card{
+    text-align: center;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btnArea{
+    position: fixed;
+    bottom: 20px;    /* 화면 아래에서 20px */
+    width: 93%;
   }
 
   .office_btn {
@@ -137,12 +46,25 @@
     width: 100px;
     height: 100px;
     font-size: 1.2em;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     transition: background-color 0.3s;
     display: block;
+    margin-top: 10px;
+    margin-bottom: 50px;
+    border: none;
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);
   }
 
+  #officeIcon {
+    color: #ffffff;
+    background-color: #9acaf4;
+    border-radius: 10px;
+    font-size: 2.5em;
+    width: 15%;
+    aspect-ratio: 1 / 1;
+    padding-top: 2%;
+    margin-right: 10%;
+  }
 </style>
 <head>
   <meta charset="UTF-8">
@@ -205,16 +127,16 @@
       <!-- 컨텐츠 영역  -->
       <div class="contents-wrap">
         <dl style="margin-bottom: 10px">
-          <div style="width: 100%; display: flex; justify-content: center; margin: 30px 0 30px 0;">
-            <img src="/assets_mobile/images/logo/actas_log.png" alt="로고 이미지" style="width: 70%">
-          </div>
-          <div class="search-container">
+<!--          <div style="width: 100%; display: flex; justify-content: center; margin: 30px 0 30px 0;">-->
+<!--            <img src="/assets_mobile/images/logo/actas_log.png" alt="로고 이미지" style="width: 70%">-->
+<!--          </div>-->
+          <div class="ip-card">
             <input type="hidden" id="postno">
-
+            <!--현재 정보 카드-->
             <!-- 현재 날자 출력 -->
-            <div style="display: flex">
-              <span id="searchDate" class="currentData" style="text-align: justify;"></span>
-              <span id="userInfo" class="currentData" style="text-align: end">생산부 홍길동 사원</span>
+            <div>
+              <div id="searchDate" class="currentData" style="text-align: justify;"></div>
+              <div id="userInfo" class="currentData" style="text-align: end">생산부 홍길동 사원</div>
             </div>
             <!-- ip 검색 시간(현재시간) -->
             <div>
@@ -225,14 +147,26 @@
               <span id="ipAddress" class="currentData" style="border-radius: 0 0 10px 10px;"></span>
             </div>
           </div>
-          <!-- 버튼 -->
-          <div id="inside" style="display: none; gap: 13%; justify-content: center; margin-top: 50px;">
-            <button onclick="" class="office_btn" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); "><i class="fa-solid fa-briefcase fa_xl" style="color: #ffffff;"></i><br>사내출근</button>
-            <button onclick="" class="office_btn" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);  background-color: red;"><i class="fa-solid fa-person-walking fa-xl" style="color: #ffffff;"></i><br>사내퇴근</button>
+
+          <!-- 출근시간 카드 -->
+          <div class="office-card">
+            <i class="fa-solid fa-stopwatch fa_xl" id="officeIcon"></i>
+            <div>
+              <div class="status">출근</div>
+              <div class="time" id="officeTime" style="font-weight: bold">오전 09:00</div>
+            </div>
           </div>
-          <div id="outside" style="display: none; gap: 13%; justify-content: center; margin-top: 50px;">
-            <button onclick="" class="office_btn" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2); "><i class="fa-solid fa-briefcase fa_xl" style="color: #ffffff;"></i><br>외부출근</button>
-            <button onclick="" class="office_btn" style="margin-top: 10px; margin-bottom: 10px; border: none; box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);  background-color: red;"><i class="fa-solid fa-person-walking fa_xl" style="color: #fafafa;"></i><br>외부퇴근</button>
+
+          <!-- 버튼 -->
+          <div class="btnArea">
+            <div id="inside" style="display: none; gap: 13%; justify-content: center; margin-top: 50px;">
+              <button onclick="" class="office_btn" style=""><i class="fa-solid fa-briefcase fa_xl" style="color: #ffffff;"></i><br>사내출근</button>
+              <button onclick="" class="office_btn" style="background-color: red;"><i class="fa-solid fa-person-walking fa-xl" style="color: #ffffff;"></i><br>사내퇴근</button>
+            </div>
+            <div id="outside" style="display: none; gap: 13%; justify-content: center; margin-top: 50px;">
+              <button onclick="" class="office_btn" style=""><i class="fa-solid fa-briefcase fa_xl" style="color: #ffffff;"></i><br>외부출근</button>
+              <button onclick="" class="office_btn" style="background-color: red;"><i class="fa-solid fa-person-walking fa_xl" style="color: #fafafa;"></i><br>외부퇴근</button>
+            </div>
           </div>
         </dl>
       </div><!--// contents-wrap end-->
