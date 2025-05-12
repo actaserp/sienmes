@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
@@ -24,11 +25,19 @@ public class TransactionInputController {
     
 
     @GetMapping("/registerAccount")
-    public AjaxResult registerAccount(){
+    public AjaxResult registerAccount(@RequestParam String spjangcd){
 
         AjaxResult result = new AjaxResult();
 
-        List<Map<String, Object>> accountList = transactionInputService.getAccountList();
+ /*       Object spjangList = session.getAttribute("spjangList");
+        Map<String, Object> spjang = UtilClass.getSpjanInfoFromSession(spjancd, session);
+
+        String spjangcd = null;
+        if(spjang != null){
+            spjangcd = String.valueOf(spjang.get("spjangcd"));
+        }*/
+
+        List<Map<String, Object>> accountList = transactionInputService.getAccountList(spjangcd);
 
         result.data = accountList;
 

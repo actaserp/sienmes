@@ -132,7 +132,7 @@ public class UserService {
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
 		String sql = """
-        		select spjangcd, spjangnm from tb_xa012;
+        		select spjangcd, spjangnm, saupnum from tb_xa012;
         		""";
 
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
@@ -145,7 +145,7 @@ public class UserService {
 		dicParam.addValue("spjangcd", spjangcd);
 
 		String sql = """
-        		select spjangcd, spjangnm from tb_xa012 where spjangcd = :spjangcd;
+        		select spjangcd, spjangnm, saupnum from tb_xa012 where spjangcd = :spjangcd;
         		""";
 
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);

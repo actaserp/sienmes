@@ -1,11 +1,13 @@
 package mes.app.util;
 
+import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
+import java.util.List;
 
 public class UtilClass {
 
@@ -64,6 +66,44 @@ public class UtilClass {
         }
     }
 
+    /**
+     * 세션에서 사업장 코드를 통해 사업자 번호를 추출하는 메서드
+     * ***/
+    public static Map<String, Object> getSpjanInfoFromSession(String spjangcd, HttpSession httpSession){
+        List<Map<String, Object>> spjangList = (List<Map<String, Object>>) httpSession.getAttribute("spjangList");
 
+        if(spjangList == null) return null;
+
+        for(Map<String, Object> item : spjangList){
+            if(spjangcd.equals(item.get("spjancd"))){
+                return item;
+            }
+        }
+        return null;
+    }
+    /***
+     * 세션에서 사업자번호 추출하는 메서드
+     * **/
+    public static String getsaupnumInfoFromSession(String spjangcd, HttpSession httpSession){
+        List<Map<String, Object>> spjangList = (List<Map<String, Object>>) httpSession.getAttribute("spjangList");
+
+        if(spjangList == null) return null;
+
+        for(Map<String, Object> item : spjangList){
+            if(spjangcd.equals(item.get("spjangcd"))){
+                return String.valueOf(item.get("saupnum"));
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 객체를 안전하게 문자열로 변환한다.
+     * - null일 경우 빈 문자열("") 반환
+     * - null이 아니면 toString() 결과 반환
+     */
+    public static String getStringSafe(Object obj) {
+        return obj == null ? "" : obj.toString().trim();
+    }
 
 }

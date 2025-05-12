@@ -1155,7 +1155,7 @@
 
                 //TODO: 테스트를 위해서 하드코딩함.
                 let param = {
-                    corpNum : "1778602466"
+                    spjangcd : getSpjangcdFromSession()  //1778602466
                 }
 
                 let result = AjaxUtil.getSyncData('/BaseService/checkIsMember', param);
@@ -1168,6 +1168,7 @@
                 let _this = this;
                 const frdate = $('#transactionFrDate').val();
                 const todate = $('#transactionToDate').val();
+
                 if(!calculateDay(frdate, todate)){
                     Alert.alert('', '최대 3개월치만 가능합니다.')
                     return;
@@ -1205,7 +1206,7 @@
                 let _this = this;
 
                 let param = {
-
+                    spjangcd : getSpjangcdFromSession() ?? ''
                 }
                 let result = AjaxUtil.getSyncData(_this.url + "/registerAccount", param);
 
@@ -1319,20 +1320,7 @@
 
         }
 
-        function companyPopupOpen(intputId, hiddenid){
 
-            let poppage = new PopCompComponent();
-            let $poppage = $(poppage);
-            let searchcallback = function (items) {
-                // $content.find('#cboCompany').val(items.id);
-                // $content.find('#CompanyName').val(items.compname);
-
-                document.getElementById(intputId).value = items.compname;
-                document.getElementById(hiddenid).value = items.id;
-            };
-
-            poppage.show(searchcallback);
-        }
 
         function getTradeTypeDataMap(list){
             return new wijmo.grid.DataMap(list, 'value', 'text');

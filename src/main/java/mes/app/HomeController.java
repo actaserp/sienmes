@@ -57,8 +57,8 @@ public class HomeController {
         
         //q = this.systemOptionRepository.getByCode("main_menu");        
 
-		List<Map<String, Object>> spjangList= null;
-		if (groupid == 1){
+		List<Map<String, Object>> spjangList = null;
+		if (groupid == 1){ //관리자
 			spjangList = userService.getSpjangList();
 		} else {
 			spjangList = userService.getSpjang(spjangcd);

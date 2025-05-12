@@ -34,9 +34,10 @@ public class TransactionInputService {
     }
 
 
-    public List<Map<String, Object>> getAccountList(){
+    public List<Map<String, Object>> getAccountList(String spjangcd){
 
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+        parameterSource.addValue("spjangcd", spjangcd);
 
         String sql = """
                 SELECT
@@ -57,6 +58,7 @@ public class TransactionInputService {
                  end as accounttype
                  FROM tb_account a
                 left join tb_xbank b on b.bankid = a.bankid
+                where a.spjangcd = :spjangcd
                  ORDER BY accid ASC
                 """;
 

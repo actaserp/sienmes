@@ -72,6 +72,7 @@ function calculateDay(fd, td){
     return diffDays <= 90;
 }
 
+// 빈 값 항목 체크해줌
 function validationCheck(FormData, checklist){
 
     for(let key in checklist){
@@ -87,15 +88,15 @@ function validationCheck(FormData, checklist){
     return true
 }
 
+// api 호출후 응답메세지 반환
 function ApiSuccessMessage(res){
-    console.log(res);
-    console.log('func', typeof func);
     if(res === null || res === undefined){
         Alert.alert('', '에러가 발생하였습니다.');
     }
     Alert.alert('', res.message);
 }
 
+//셀렉트 박스 바인딩 해줌
 function selectBoxBinding(id, arr){
 
     const selectedBox = document.getElementById(id);
@@ -106,5 +107,25 @@ function selectBoxBinding(id, arr){
         option.textContent = item.text;
         selectedBox.appendChild(option);
     })
+}
+
+function getSpjangcdFromSession(){
+    return sessionStorage.getItem('spjangcd');
+}
+
+//거래처 팝업 오픈해주는 함수
+function companyPopupOpen(intputId, hiddenid){
+
+    let poppage = new PopCompComponent();
+    let $poppage = $(poppage);
+    let searchcallback = function (items) {
+        // $content.find('#cboCompany').val(items.id);
+        // $content.find('#CompanyName').val(items.compname);
+
+        document.getElementById(intputId).value = items.compname;
+        document.getElementById(hiddenid).value = items.id;
+    };
+
+    poppage.show(searchcallback);
 }
 
