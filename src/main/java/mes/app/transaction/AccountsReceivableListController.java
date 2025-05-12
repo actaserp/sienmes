@@ -28,10 +28,11 @@ public class AccountsReceivableListController {
       @RequestParam(value="srchStartDt", required=false) String start_date,
       @RequestParam(value="srchEndDt", required=false) String end_date,
       @RequestParam(value = "cboCompany", required=false) Integer company,
+      @RequestParam(value = "spjangcd") String spjangcd,
       HttpServletRequest request) {
-    //log.info("미수금 현황 집계 read ---  :start:{}, end:{} ,company:{} ", start_date, end_date, company);
+    //log.info("미수금 현황 집계 read ---  :start:{}, end:{} ,company:{}, spjangcd:{] ", start_date, end_date, company, spjangcd);
 
-    List<Map<String, Object>> items = this.accountsReceivableListServie.getTotalList(start_date, end_date, company);
+    List<Map<String, Object>> items = this.accountsReceivableListServie.getTotalList(start_date, end_date, company, spjangcd);
 
     AjaxResult result = new AjaxResult();
     result.data = items;

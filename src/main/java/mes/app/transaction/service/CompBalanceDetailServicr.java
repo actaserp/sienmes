@@ -187,10 +187,7 @@ public class CompBalanceDetailServicr {
             x.memo,
             x.remark1,
             SUM(
-                 CASE
-                     WHEN x.summary = '입금액' THEN -1 * COALESCE(x.accin, 0)
-                     ELSE 0
-                 END
+                 COALESCE(x.accin, 0) - COALESCE(x.accout, 0)
              ) OVER (
                  PARTITION BY x.id
                  ORDER BY x.date, x.remaksseq

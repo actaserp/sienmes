@@ -97,6 +97,7 @@
         this.grid3 = null;
         this.$btnEdit = $('#btnEdit');
         this.$btnAddNew = $('#btnAddNew');
+        this.spjangcd = $('#spjangcdHidden');
         this.viewData = new wijmo.collections.CollectionView();
         this.init();
       }
@@ -233,6 +234,7 @@
           'srchStartDt' : $("#srchStartDt").val(),
           'srchEndDt' : $("#srchEndDt").val(),
           'cboCompany' : $("#cboCompanyHidden").val(),
+          spjangcd: this.spjangcd.val()
         }
         // 집계 데이터 조회
         AjaxUtil.getAsyncData(url+'/TotalList', param, function (result) {
@@ -248,7 +250,8 @@
           'srchStartDt' : $("#srchStartDt").val(),
           'srchEndDt' : $("#srchEndDt").val(),
           'cboCompany' : $("#cboCompanyHidden").val(),
-          'code' : code  // 🔥 여기 코드 필터
+          'code' : code , // 🔥 여기 코드 필터
+          spjangcd: this.spjangcd.val()
         };
 
         AjaxUtil.getAsyncData(url, param, function (result) {
@@ -266,7 +269,10 @@
     let page = null;
 
     $(document).ready(function (e) {
-
+      const spjangcd = sessionStorage.getItem('spjangcd');
+      if (spjangcd) {
+        $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
+      }
       page = new AccountsReceivableListPage();
 
       AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '', 'sale');

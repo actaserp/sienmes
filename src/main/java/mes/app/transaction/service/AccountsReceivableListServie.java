@@ -19,12 +19,13 @@ public class AccountsReceivableListServie {
   @Autowired
   SqlRunner sqlRunner;
 
-  public List<Map<String, Object>> getTotalList(String start_date, String end_date, Integer company) {
+  public List<Map<String, Object>> getTotalList(String start_date, String end_date, Integer company, String spjangcd) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
 
     paramMap.addValue("start", start_date);
     paramMap.addValue("end", end_date);
     paramMap.addValue("company", company);
+    paramMap.addValue("spjangcd", spjangcd);
 
     String sql= """
         WITH LASTTbl as (
@@ -33,6 +34,7 @@ public class AccountsReceivableListServie {
              max(yyyymm) as yyyymm 
              from tb_yearamt
              where yyyymm < '202501' and ioflag = '0' 
+             and spjangcd = :spjangcd
              group by cltcd
          )
          SELECT
@@ -75,8 +77,8 @@ public class AccountsReceivableListServie {
     }
 
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-    //log.info("미수금 집계 read SQL: {}", sql);
-    //log.info("SQL Parameters: {}", paramMap.getValues());
+//    log.info("미수금 집계 read SQL: {}", sql);
+//    log.info("SQL Parameters: {}", paramMap.getValues());
     return items;
 
   }
@@ -96,6 +98,7 @@ public class AccountsReceivableListServie {
              max(yyyymm) as yyyymm 
              from tb_yearamt
              where yyyymm < '202501' and ioflag = '0' 
+             and spjangcd = :spjangcd
              group by cltcd
          )
          SELECT
@@ -133,8 +136,8 @@ public class AccountsReceivableListServie {
         """;
 
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-    log.info("미수금 현황 상세 read SQL: {}", sql);
-    log.info("SQL Parameters: {}", paramMap.getValues());
+//    log.info("미수금 현황 상세 read SQL: {}", sql);
+//    log.info("SQL Parameters: {}", paramMap.getValues());
     return items;
   }
 }
