@@ -1,6 +1,8 @@
 package mes.app.transaction;
 
 
+import lombok.extern.slf4j.Slf4j;
+import mes.Encryption.aop.DecryptField;
 import mes.app.transaction.service.TransactionInputService;
 import mes.app.util.UtilClass;
 import mes.domain.dto.BankTransitDto;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/transaction/input")
+@Slf4j
 public class TransactionInputController {
 
     @Autowired
@@ -45,6 +48,7 @@ public class TransactionInputController {
 
     }
 
+    @DecryptField(column = "account", mask = 4)
     @GetMapping("/history")
     public AjaxResult TransactionHistory(@RequestParam String searchfrdate,
                                          @RequestParam String searchtodate,
@@ -83,7 +87,7 @@ public class TransactionInputController {
             return result;
         }
         try{
-            transactionInputService.saveBanktransit(data);
+            transactionInputService.saveBankTransit(data);
             result.success = true;
             result.message = "저장하였습니다.";
         }catch(Exception e){

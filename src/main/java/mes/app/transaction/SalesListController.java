@@ -2,6 +2,7 @@ package mes.app.transaction;
 
 
 import lombok.extern.slf4j.Slf4j;
+import mes.Encryption.aop.DecryptField;
 import mes.app.transaction.service.SalesListService;
 import mes.app.util.UtilClass;
 import mes.domain.model.AjaxResult;
@@ -59,6 +60,7 @@ public class SalesListController {
         return result;
     }
 
+    @DecryptField(column = "ivercorpnum", mask = 3)
     @GetMapping("/search2")
     public AjaxResult searchList2(
             @RequestParam String spjangcd,
@@ -85,11 +87,6 @@ public class SalesListController {
 
         List<Map<String, Object>> list = salesListService.getList2(paramSet);
 
-        try{
-            UtilClass.decryptEachItem(list, "ivercorpnum", 4);
-        }catch (Exception e){
-            log.error("복호화 중 오류 발생 - class 위치 {}, {}", this.getClass().getSimpleName(), e.getMessage());
-        }
 
         Map<String, Object> StatisticsCalculatorList = salesListService.StatisticsCalculator(list);
 

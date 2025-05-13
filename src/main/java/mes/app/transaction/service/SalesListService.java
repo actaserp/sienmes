@@ -145,9 +145,16 @@ public class SalesListService {
     public Map<String, Object> StatisticsCalculator(List<Map<String, Object>> list){
 
         Map<String, Object> bucket = new HashMap<>();
-        int cntSum = 0;
-        int supplySum = 0;
-        int taxSum = 0;
+
+        int SaupCltSum = 0;
+        int SaupCntSum = 0;
+        int SaupSupplySum = 0;
+        int SaupTaxSum = 0;
+
+        int PersonCltSum = 0;
+        int PersonCntSum = 0;
+        int PersonSupplySum = 0;
+        int PersonTaxSum = 0;
 
 
         for(Map<String, Object> item : list){
@@ -155,25 +162,43 @@ public class SalesListService {
             Object cnt = item.get("cnt");
             Object supply = item.get("supplycost");
             Object tax = item.get("taxtotal");
-            //Object tax = item.get("taxtotal");
+            Object corpnum = item.get("ivercorpnum");
 
 
             int parsedCnt = cnt != null ? UtilClass.parseInteger(cnt) : 0;
             int parsedSupply = supply != null ? UtilClass.parseInteger(supply) : 0;
             int parsedTax = tax != null ? UtilClass.parseInteger(tax) : 0;
+            String parsedCorpNum = corpnum != null ? corpnum.toString() : "";
 
-            cntSum += parsedCnt;
-            supplySum += parsedSupply;
-            taxSum += parsedTax;
-
-            //if()
+            //주민번호 일 경우 (개인)
+            if(parsedCorpNum.length() > 11){
+                PersonCltSum++;
+                PersonCntSum += parsedCnt;
+                PersonSupplySum += parsedSupply;
+                PersonTaxSum += parsedTax;
+            }else{
+                SaupCltSum++;
+                SaupCntSum += parsedCnt;
+                SaupSupplySum += parsedSupply;
+                SaupTaxSum += parsedTax;
+            }
 
         }
 
-        bucket.put("cltCnt", list.size());
-        bucket.put("cnt", cntSum);
-        bucket.put("supplySum", supplySum);
-        bucket.put("taxSum", taxSum);
+        bucket.put("cltCnt", SaupCltSum + PersonCltSum);
+        bucket.put("cnt", SaupCntSum + PersonCntSum);
+        bucket.put("supplySum", SaupSupplySum + PersonSupplySum);
+        bucket.put("taxSum", SaupTaxSum + PersonTaxSum);
+
+        bucket.put("SaupCltSum", SaupCltSum);
+        bucket.put("SaupCntSum", SaupCntSum);
+        bucket.put("SaupSupplySum", SaupSupplySum);
+        bucket.put("SaupTaxSum", SaupTaxSum);
+
+        bucket.put("PersonCltSum", PersonCltSum);
+        bucket.put("PersonCntSum", PersonCntSum);
+        bucket.put("PersonSupplySum", PersonSupplySum);
+        bucket.put("PersonTaxSum", PersonTaxSum);
 
         return bucket;
     }

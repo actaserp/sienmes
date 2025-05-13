@@ -272,17 +272,17 @@
                                 </tr>
                                 <tr>
                                     <td>사업자등록번호 발행분</td>
-                                    <td id="corpCltCnt"></td>
-                                    <td id="corpCnt"></td>
-                                    <td id="corpSupplySum"></td>
-                                    <td id="corpTaxSum"></td>
+                                    <td id="SaupCltSum"></td>
+                                    <td id="SaupCntSum"></td>
+                                    <td id="SaupSupplySum"></td>
+                                    <td id="SaupTaxSum"></td>
                                 </tr>
                                 <tr>
                                     <td>주민등록번호 발행분</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td id="PersonCltSum"></td>
+                                    <td id="PersonCntSum"></td>
+                                    <td id="PersonSupplySum"></td>
+                                    <td id="PersonTaxSum"></td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -378,7 +378,7 @@
 
                 const cv2 = _this.viewData2;
                 cv2.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription('ivercorpnum', function(item, prop){
-                    return item[prop].substring(0, 7);
+                    return item[prop];
                 }));
 
                 this.grid2 = new wijmo.grid.FlexGrid('#theGrid_saleList2', {
@@ -407,6 +407,17 @@
                 $('#cnt').text(statistics['cnt']);
                 $('#supplySum').text(formatMoney(statistics['supplySum']));
                 $('#taxSum').text(formatMoney(statistics['taxSum']));
+
+                $('#SaupCltSum').text(statistics['SaupCltSum']);
+                $('#SaupCntSum').text(statistics['SaupCntSum']);
+                $('#SaupSupplySum').text(formatMoney(statistics['SaupSupplySum']));
+                $('#SaupTaxSum').text(formatMoney(statistics['SaupTaxSum']));
+
+                $('#PersonCltSum').text(statistics['PersonCltSum']);
+                $('#PersonCntSum').text(statistics['PersonCntSum']);
+                $('#PersonSupplySum').text(formatMoney(statistics['PersonSupplySum']));
+                $('#PersonTaxSum').text(formatMoney(statistics['PersonTaxSum']));
+
             }
 
             searchMain(){

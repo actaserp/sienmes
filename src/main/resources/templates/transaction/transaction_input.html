@@ -629,10 +629,12 @@
                         },
                         { binding: 'bankname', header: '은행', width: '*', align: 'center' , isReadOnly : true},
                         { binding: 'account', header: '계좌', width: 150, align: 'center' , isReadOnly : true},
-                        { binding: 'depositandwithdrawaltype', header: '입금형태', width: 120,
-                            dataMap : getTradeTypeDataMap(iotype),
+                        { binding: 'depositandwithdrawaltype', header: '입금형태', width: 120, align: 'center',
+                            /*dataMap : getTradeTypeDataMap(iotype),
                             cellTemplate: '${text}',
-                            align: 'center' },
+                            align: 'center' */
+                            isReadOnly : true
+                        },
                     ],
                     itemsSource: this.viewData,
                     formatItem: function (s, e) {
@@ -640,7 +642,7 @@
                             const col = s.columns[e.col];
 
                             // 수정 가능한 컬럼만 색상 지정
-                            const editableBindings = ['remark', 'code', 'trade_type', 'depositandwithdrawaltype'];
+                            const editableBindings = ['remark', 'code', 'trade_type'];
                             if (editableBindings.includes(col.binding)) {
                                 e.cell.style.color = 'dodgerblue'; // 글씨 잘 보이게
                             }
@@ -910,8 +912,6 @@
                     let result = AjaxUtil.postJsonSyncData(_this.url + '/edit', list);
                     ApiSuccessMessage(result);
                 })
-
-
             }
 
             searchMainData(){
@@ -970,7 +970,7 @@
                 let modalContainer = new PopupDraggable('등록');
                 modalContainer.open({width: 1000, height: 650, $content});
 
-                selectBoxBinding('transactionTypeId', tradetypeList);
+                filterAndBindTradeTypes($('#inoutFlag').val(), tradetypeList, 'transactionTypeId');
                 //AjaxUtil.fillSelectOptions($('#transactionTypeId'), 'trade', 'choose', false);
 
                 //모달창 닫기  //data-modal-header-btn="close"
@@ -999,6 +999,12 @@
                     val = val.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                     $(this).val(val);
                 });
+
+                $('#inoutFlag').on('change', function(){
+                    const selectedType = $(this).val();
+
+                    filterAndBindTradeTypes(selectedType, tradetypeList, 'transactionTypeId');
+                })
 
                 $('#btnPopSave').click(function(){
                     _this.saveNewTransactionData();

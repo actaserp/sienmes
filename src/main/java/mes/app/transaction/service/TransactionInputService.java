@@ -1,6 +1,8 @@
 package mes.app.transaction.service;
 
 
+import mes.Encryption.EncryptionKeyProvider;
+import mes.Encryption.EncryptionUtil;
 import mes.app.util.UtilClass;
 import mes.domain.dto.BankTransitDto;
 import mes.domain.entity.TB_BANKTRANSIT;
@@ -12,6 +14,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
@@ -86,7 +89,7 @@ public class TransactionInputService {
                 ,c."Code" as code
                 ,t.tradenm as trade_type
                 ,banknm as bankname
-                ,left(accnum, length(accnum) - 4) || '****' as account
+                ,accnum as account
                 ,s."Value" as depositAndWithdrawalType
                 ,c."Name" as "clientName"
                 ,c.id as cltcd
@@ -144,12 +147,19 @@ public class TransactionInputService {
     }
 
     @Transactional
-    public Boolean saveBanktransit(BankTransitDto dto) {
+    public void saveBankTransit(BankTransitDto dto) throws Exception {
+
+        String accountNumber = dto.getAccountNumber();
+
+        EncryptionUtil encryption = new EncryptionUtil();
+
+        byte[] key = EncryptionKeyProvider.getKey();
+        String encrypt = encryption.encrypt(accountNumber, key);
+        dto.setAccountNumber(encrypt);
 
         TB_BANKTRANSIT banktransit = BankTransitDto.toEntity(dto);
         tB_BANKTRANSITRepository.save(banktransit);
 
-        return true;
     }
 
     @Transactional
@@ -180,13 +190,11 @@ public class TransactionInputService {
                 Object remark = item.get("remark");
                 Object cltcd = item.get("cltcd");
                 Object tradeType = item.get("trade_type");
-                Object iotype = item.get("depositandwithdrawaltype");
                 Object memo = item.get("memo");
 
                 entity.setRemark1(remark != null ? remark.toString() : null);
                 entity.setCltcd(cltcd != null ? UtilClass.parseInteger(cltcd) : null);
                 entity.setTrid(UtilClass.parseInteger(tradeType));
-                entity.setIotype(iotype != null ? iotype.toString() : null);
                 entity.setMemo(memo != null ? memo.toString() : null);
             }
         }

@@ -47,7 +47,6 @@ public class BankTransitDto {
     private String bankName; // 은행명
 
     @NotBlank(message = "계좌는 필수입니다.")
-    @Pattern(regexp = "^(?!-+$)[\\d-]{1,30}$", message = "계좌번호는 숫자와 하이픈(-)만 입력 가능합니다.")
     private String accountNumber; // 계좌번호
 
     @NotNull(message = "계좌는 필수입니다.")

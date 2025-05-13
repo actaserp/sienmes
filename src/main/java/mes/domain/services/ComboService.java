@@ -868,7 +868,7 @@ public class ComboService {
 	};
 
 	ComboDataFunction trade=(String cond1, String cond2, String cond3)-> {
-		String sql = "select \"trid\" as Value, \"tradenm\" as text from tb_trade where 1=1 ";
+		String sql = "select \"trid\" as Value, ioflag, \"tradenm\" as text from tb_trade where 1=1 ";
 		/*if (StringUtils.hasText(cond1)) {
 			sql +="and \"Equipment_id\" = cast(:cond1 as Integer) ";
 		}

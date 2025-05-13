@@ -50,7 +50,7 @@ public class ResidentNumberEncryptionTest {
 
         byte[] keyBytes = getKeyFromFile();
 
-        String original = "900101-1234567";
+        String original = "알아서뭐하게남의주민번호";
         String encrypted = encrypt(original, keyBytes);
         String decrypted = decrypt(encrypted, keyBytes);
 

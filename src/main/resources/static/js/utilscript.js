@@ -109,6 +109,29 @@ function selectBoxBinding(id, arr){
     })
 }
 
+//입출금 구분에 따라 거래구분을 필터링 후 콤보박스에 바인딩
+//inout : 입금(0)이냐 출금(1)이냐
+//arr : 서버에서 조회환 항목들
+//id : 바인딩하려는 콤보박스 아이디
+function filterAndBindTradeTypes(inout, arr, id){
+    const filterItems = arr.filter(item => item.ioflag === inout);
+
+    console.log('1', inout);
+    console.log('2', arr);
+    console.log('3', filterItems);
+
+
+    const selectedBox = document.getElementById(id);
+    selectedBox.innerHTML = '';
+
+    filterItems.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.value;
+        option.textContent = item.text;
+        selectedBox.appendChild(option);
+    })
+}
+
 function getSpjangcdFromSession(){
     return sessionStorage.getItem('spjangcd');
 }
