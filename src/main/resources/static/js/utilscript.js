@@ -100,6 +100,7 @@ function ApiSuccessMessage(res){
 function selectBoxBinding(id, arr){
 
     const selectedBox = document.getElementById(id);
+    selectedBox.innerHTML = '';
 
     arr.forEach(item => {
         const option = document.createElement('option');
@@ -115,11 +116,6 @@ function selectBoxBinding(id, arr){
 //id : 바인딩하려는 콤보박스 아이디
 function filterAndBindTradeTypes(inout, arr, id){
     const filterItems = arr.filter(item => item.ioflag === inout);
-
-    console.log('1', inout);
-    console.log('2', arr);
-    console.log('3', filterItems);
-
 
     const selectedBox = document.getElementById(id);
     selectedBox.innerHTML = '';

@@ -26,4 +26,10 @@ public class EncryptionUtil {
         return new String(cipher.doFinal(Base64.getDecoder().decode(encryptedText)), "UTF-8");
     }
 
+    public static String encrypt(String plainText) throws Exception {
+        byte[] keyBytes = EncryptionKeyProvider.getKey();
+
+        return encrypt(plainText, keyBytes);
+    }
+
 }

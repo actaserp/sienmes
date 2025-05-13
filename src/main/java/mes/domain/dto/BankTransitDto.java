@@ -93,6 +93,7 @@ public class BankTransitDto {
             accout = money;
         }
 
+        entity.setIoid(dto.getBankTransitId());
         entity.setIoflag(dto.getInoutFlag());  //입출금구분
         entity.setTrdate(dto.getTransactionDate().replaceAll("-", ""));
         entity.setTrdt(UtilClass.combineDateAndHourReturnyyyyMMddHHmmss(dto.getTransactionDate(), dto.getTransactionHour()));
@@ -109,6 +110,7 @@ public class BankTransitDto {
         entity.setAccid(dto.getAccountId());
         entity.setEumnum(dto.getBill());
         entity.setEumtodt(dto.getExpiration());
+        entity.setEtcremark(dto.getEtc());
 
         return entity;
     }

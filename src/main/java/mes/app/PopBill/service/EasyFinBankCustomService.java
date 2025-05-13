@@ -3,6 +3,7 @@ package mes.app.PopBill.service;
 
 import com.popbill.api.easyfin.EasyFinBankSearchDetail;
 import lombok.extern.slf4j.Slf4j;
+import mes.Encryption.EncryptionUtil;
 import mes.app.PopBill.dto.EasyFinBankAccountFormDto;
 import mes.app.transaction.service.TransactionInputService;
 import mes.app.util.UtilClass;
@@ -63,50 +64,53 @@ public class EasyFinBankCustomService {
         Map<String, TB_BANKTRANSIT> existing = tB_BANKTRANSITRepository.findByTidIn(tidList)
                 .stream()
                 .collect(Collectors.toMap(TB_BANKTRANSIT::getTid, Function.identity()));
+        try{
+            List<TB_BANKTRANSIT> tb_banktransitList = new ArrayList<>();
 
+            for(EasyFinBankSearchDetail  map : list){
+                TB_BANKTRANSIT entity = new TB_BANKTRANSIT();
 
+                String tid = map.getTid();
+                String remark = map.getRemark1();
 
-        List<TB_BANKTRANSIT> tb_banktransitList = new ArrayList<>();
+                if(existing.containsKey(tid)){
+                    continue;
+                }
 
-        for(EasyFinBankSearchDetail  map : list){
-            TB_BANKTRANSIT entity = new TB_BANKTRANSIT();
+                Integer accIn = UtilClass.parseInteger(map.getAccIn());
+                String inoutFlag = (accIn == 0) ? "1" : "0";
 
-            String tid = map.getTid();
-            String remark = map.getRemark1();
+                entity.setTid(tid);
+                entity.setTrdate( map.getTrdate());
+                entity.setTrserial(UtilClass.parseInteger(map.getTrserial()));
+                entity.setTrdt(map.getTrdt());
+                entity.setAccin(accIn);
+                entity.setAccout(UtilClass.parseInteger(map.getAccOut()));
+                entity.setBalance(UtilClass.parseInteger(map.getBalance()));
+                entity.setRemark1(map.getRemark1());
+                entity.setRemark2(map.getRemark2());
+                entity.setRemark3(map.getRemark3());
+                entity.setRemark4(map.getRemark4());
+                entity.setRegdt( map.getRegDT());
+                entity.setJobid(jobID);
+                entity.setMemo(map.getMemo());
+                entity.setIoflag(inoutFlag);
+                entity.setAccnum(EncryptionUtil.encrypt(accountNumber));
 
-            if(existing.containsKey(tid)){
-                continue;
+                entity.setAccid(accountid);
+                entity.setBanknm(bankname);
+
+                if(remark != null && cltCdRelationRemarkList.containsKey(remark)){
+                    entity.setCltcd(cltCdRelationRemarkList.get(remark));
+                }
+                tb_banktransitList.add(entity);
+
             }
-
-            Integer accIn = UtilClass.parseInteger(map.getAccIn());
-            String inoutFlag = (accIn == 0) ? "1" : "0";
-
-            entity.setTid(tid);
-            entity.setTrdate( map.getTrdate());
-            entity.setTrserial(UtilClass.parseInteger(map.getTrserial()));
-            entity.setTrdt(map.getTrdt());
-            entity.setAccin(accIn);
-            entity.setAccout(UtilClass.parseInteger(map.getAccOut()));
-            entity.setBalance(UtilClass.parseInteger(map.getBalance()));
-            entity.setRemark1(map.getRemark1());
-            entity.setRemark2(map.getRemark2());
-            entity.setRemark3(map.getRemark3());
-            entity.setRemark4(map.getRemark4());
-            entity.setRegdt( map.getRegDT());
-            entity.setJobid(jobID);
-            entity.setMemo(map.getMemo());
-            entity.setIoflag(inoutFlag);
-            entity.setAccnum(accountNumber);
-            entity.setAccid(accountid);
-            entity.setBanknm(bankname);
-
-            if(remark != null && cltCdRelationRemarkList.containsKey(remark)){
-                entity.setCltcd(cltCdRelationRemarkList.get(remark));
-            }
-            tb_banktransitList.add(entity);
-
+            bankTransitTransactionalService.saveBankDataTransactional(tb_banktransitList);
+        }catch(Exception e){
+            log.error("비동기 저장 중 예외 발생, {}" ,e.getMessage());
+            throw new RuntimeException("비동기 저장 실패", e);
         }
-        bankTransitTransactionalService.saveBankDataTransactional(tb_banktransitList);
     }
 
     public List<String> getTidList(List<EasyFinBankSearchDetail> list){

@@ -270,7 +270,7 @@
                             <table class="write-table"
                                    style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                                 <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
-                                <input type="hidden" id="id" name="id"/>
+
                                 <tbody>
                                 <!--<tr>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
@@ -401,7 +401,7 @@
         <form id="SaveForm">
             <table class="write-table">
                 <caption>주문등록 테이블</caption>
-                <input type="hidden" id="id" name="id">
+                <input type="hidden" id="bankTransitId" name="bankTransitId">
                 <tbody>
                     <tr>
                         <th style="text-align: center">
@@ -590,6 +590,7 @@
                 this.viewData5 = new wijmo.collections.CollectionView();
 
                 this.$btnSetting = $('#btnSetting');
+                this.$btnEdit = $('#btnEdit');
                 this.$btnAddNew = $('#btnAddNew');
 
                 this.init();
@@ -830,11 +831,15 @@
 
                 this.$btnSetting.click(function(){
                     let defaultData = {}; _this.showSettingForm(defaultData);
-                })
+                });
+
+                this.$btnEdit.click(function(){
+                    let defaultData = { SelectedItems }; _this.showAddNewDataForm(defaultData, 'edit');
+                });
 
                 this.$btnAddNew.click(function(){
-                    let defaultData = {}; _this.showAddNewDataForm(defaultData);
-                })
+                    let defaultData = {}; _this.showAddNewDataForm(defaultData, 'new');
+                });
 
                 this.theGrid_TransactionHistory.hostElement.addEventListener('click', (e) => {
                     if (e.target.classList.contains('memo-btn')) {
@@ -962,8 +967,19 @@
                 _this.searchMainData();
             }
 
-            showAddNewDataForm(data){
+            showAddNewDataForm(data, flag){
                 let _this = this;
+
+                const selected = data.SelectedItems;
+
+                if(flag === 'edit' && selected === null){
+                    Alert.alert('', '수정할 데이터를 선택해주세요.'); return false;
+                }else if(flag === 'edit' && selected.length > 1){
+                    Alert.alert('', '단건수정은 하나의 행만 선택해주세요.'); return false;
+                }
+
+                console.log('data', data);
+
                 let content = tmpl('AddNewDataPopup', data);
                 let $content = $(content);
 
@@ -974,6 +990,9 @@
                 //AjaxUtil.fillSelectOptions($('#transactionTypeId'), 'trade', 'choose', false);
 
                 //모달창 닫기  //data-modal-header-btn="close"
+
+
+
                 $('#btn-search-close').click(function(e){
                     modalContainer.close();
                 });
@@ -1002,7 +1021,6 @@
 
                 $('#inoutFlag').on('change', function(){
                     const selectedType = $(this).val();
-
                     filterAndBindTradeTypes(selectedType, tradetypeList, 'transactionTypeId');
                 })
 
@@ -1013,7 +1031,36 @@
                 $('#transactionDate').val(getNowDate());
                 $('#transactionHour').val(getNowTime());
                 $('#regidate').val(getNowDate());
+
+                if(flag === 'edit'){
+
+                    console.log('edit', selected[0]._data);
+                    const item = selected[0]._data
+
+                    $('#transactionDate').val(item.trade_date);
+                    $('#transactionHour').val(item.transactionhour);
+                    $('#inoutFlag').val(item.inoutflag);
+                    $('#CompanyName_Popup').val(item.clientName);
+                    $('#bankName').val(item.bankname);
+                    $('#accountNumber').val(item.account);
+
+                    let money = item.input_money || item.output_money || 0;
+                    $('#money').val(money);
+
+                    $('#inoutFlag').trigger('change');
+                    $('#transactionTypeId').val(item.transactiontypeid);
+                    $('#depositAndWithdrawalType').val(item.iotype);
+                    $('#bill').val(item.bill);
+                    $('#etc').val(item.etc);
+                    $('#expiration').val(item.expiration);
+                    $('#note1').val(item.remark);
+
+                    $('#bankTransitId').val(item.id);
+                    $('#clientId').val(item.cltcd);
+                    $('#accountId').val(item.accountid);
+                }
             }
+
 
             showSettingForm(data){
                 let _this = this;
@@ -1206,7 +1253,8 @@
                     todate : todate,
                     managementnum : SelecteItem[0].managementnum,
                     accountid : SelecteItem[0].accountid,
-                    bankname : SelecteItem[0].bankname
+                    bankname : SelecteItem[0].bankname,
+                    spjangcd : getSpjangcdFromSession()
                 }
 
                 let fnSuccess = function(res){

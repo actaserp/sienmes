@@ -81,7 +81,10 @@ public class TransactionInputService {
 
         String sql = """
                 SELECT to_char(to_date(trdate, 'YYYYMMDD'), 'YYYY-MM-DD') as trade_date
+                ,to_char(to_timestamp(trdt, 'YYYYMMDDHH24MISS'), 'HH24:MI') as transactionHour
+                ,b.ioflag as inoutFlag
                 ,ioid as id
+                ,b.trid as transactionTypeId
                 ,accin as input_money
                 ,accout as output_money
                 ,feeamt as commission
@@ -91,9 +94,14 @@ public class TransactionInputService {
                 ,banknm as bankname
                 ,accnum as account
                 ,s."Value" as depositAndWithdrawalType
+                ,s."Code" as iotype
                 ,c."Name" as "clientName"
                 ,c.id as cltcd
+                ,b.eumnum as bill
+                ,b.etcremark as etc
                 ,b.memo as memo
+                ,b.accid as accountId
+                ,b.eumtodt as expiration
                 FROM public.tb_banktransit b
                 left join tb_trade t on t.trid = b.trid
                 left join sys_code s on s."Code" = b.iotype
@@ -151,10 +159,11 @@ public class TransactionInputService {
 
         String accountNumber = dto.getAccountNumber();
 
-        EncryptionUtil encryption = new EncryptionUtil();
-
         byte[] key = EncryptionKeyProvider.getKey();
-        String encrypt = encryption.encrypt(accountNumber, key);
+
+
+
+        String encrypt = EncryptionUtil.encrypt(accountNumber, key);
         dto.setAccountNumber(encrypt);
 
         TB_BANKTRANSIT banktransit = BankTransitDto.toEntity(dto);

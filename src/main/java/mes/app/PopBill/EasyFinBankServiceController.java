@@ -11,9 +11,12 @@ package mes.app.PopBill;
 import com.popbill.api.*;
 import com.popbill.api.easyfin.*;
 import lombok.extern.slf4j.Slf4j;
+import mes.Encryption.EncryptionKeyProvider;
+import mes.Encryption.EncryptionUtil;
 import mes.app.PopBill.dto.EasyFinBankAccountFormDto;
 import mes.app.PopBill.enums.BankJobState;
 import mes.app.PopBill.service.EasyFinBankCustomService;
+import mes.app.util.UtilClass;
 import mes.domain.entity.TB_ACCOUNT;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.TB_ACCOUNTRepository;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.util.*;
 
 @Slf4j
@@ -118,10 +122,11 @@ public class EasyFinBankServiceController {
 
     @RequestMapping(value = "requestJob", method = RequestMethod.POST)
     public AjaxResult requestJob(@RequestParam String frdate,
-                             @RequestParam String todate,
-                             @RequestParam String managementnum,
+                                 @RequestParam String todate,
+                                 @RequestParam String managementnum,
                                  @RequestParam Integer accountid,
-                                 @RequestParam String bankname) {
+                                 @RequestParam String spjangcd,
+                                 @RequestParam String bankname, HttpSession session) {
         /**
          * 계좌 거래내역을 확인하기 위해 팝빌에 수집요청을 합니다. (조회기간 단위 : 최대 1개월)
          * - 조회일로부터 최대 3개월 이전 내역까지 조회할 수 있습니다.
@@ -142,11 +147,18 @@ public class EasyFinBankServiceController {
         }else{
             frdate = frdate.replace("-", "");
             todate = todate.replaceAll("-", "");
-            accountnumber = accountnumber.replaceAll("-", "");
+
+
+            try {
+                accountnumber = EncryptionUtil.decrypt(accountnumber, EncryptionKeyProvider.getKey());
+            } catch (Exception e) {
+                log.error("계좌번호 복호화 관련하여 실패함, 에러내용 : {}", e.getMessage());
+                throw new RuntimeException("계좌번호 복호화 중 오류 발생", e);
+            }
         }
 
         try {
-            String CorpNum = "1778602466";
+            String CorpNum = UtilClass.getsaupnumInfoFromSession(spjangcd, session);
             String jobID = easyFinBankService.requestJob(CorpNum, managementnum, accountnumber, frdate, todate);
 
             String returnResult = waitForJobComplete(CorpNum, jobID);
@@ -167,9 +179,8 @@ public class EasyFinBankServiceController {
             List<Map<String, Object>> mapList = easyFinBankCustomService.convertToMapList(list);
 
             //비동기로 DB에 내역 저장
+
             easyFinBankCustomService.saveBankDataAsync(list, jobID, accountnumber, accountid, bankname);
-
-
 
             System.out.println(mapList);
 

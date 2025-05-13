@@ -27,6 +27,7 @@ public class ComboService {
 		this._dicFunc_.put("area", this.area);
 		this._dicFunc_.put("bom_version", this.bom_version);
 		this._dicFunc_.put("bank", this.bank);
+		this._dicFunc_.put("bankid", this.bankid);
 
 		this._dicFunc_.put("ccp_proc", this.ccp_proc);
 		this._dicFunc_.put("check_master", this.check_master);
@@ -124,6 +125,19 @@ public class ComboService {
 
 	ComboDataFunction bank = (String banknm, String bankcd, String bankid) -> { //확인
 		String sql = "select bankpopcd as value, bankpopnm as text from tb_xbank where 1=1";
+		/*if (StringUtils.hasText(cond1)) {
+			sql += "and \"Material_id\" = :cond1 ";
+		}*/
+		sql += " order by \"bankid\" ";
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		/*dicParam.addValue("cond1", cond1);
+		dicParam.addValue("cond2", cond2);
+		dicParam.addValue("cond3", cond3);*/
+		return this.sqlRunner.getRows(sql, dicParam);
+	};
+
+	ComboDataFunction bankid = (String banknm, String bankcd, String bankid) -> { //확인
+		String sql = "select bankid as value, banknm as text from tb_xbank where 1=1";
 		/*if (StringUtils.hasText(cond1)) {
 			sql += "and \"Material_id\" = :cond1 ";
 		}*/

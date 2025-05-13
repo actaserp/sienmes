@@ -17,6 +17,8 @@ public class BankTransitTransactionalService {
     @Transactional
     public void saveBankDataTransactional(List<TB_BANKTRANSIT> list){
         tbBanktransitRepository.saveAll(list);
+
+        throw new RuntimeException("강제 예외 발생");
     }
 
     public List<TB_BANKTRANSIT> getSavedBankTransitList(List<String> tids){
