@@ -30,75 +30,124 @@ public class AccountsReceivableListServie {
     String formattedStart = startDate.format(dbFormatter);
     String formattedEnd = endDate.format(dbFormatter);
 
-    YearMonth prevMonth = YearMonth.from(startDate).minusMonths(1);
-    String prevYm = prevMonth.format(DateTimeFormatter.ofPattern("yyyyMM"));
+    YearMonth baseYm = YearMonth.from(startDate);  // 기준월 (예: 2025-01)
+    String baseYmStr = baseYm.format(DateTimeFormatter.ofPattern("yyyyMM"));
 
-    paramMap.addValue("prevYm", prevYm);
     paramMap.addValue("start", formattedStart);
     paramMap.addValue("end", formattedEnd);
-    paramMap.addValue("company", company);
+    paramMap.addValue("baseYm", baseYmStr);
     paramMap.addValue("spjangcd", spjangcd);
 
-    String sql= """
-        WITH LASTTbl as (
-             select
-             cltcd,
-             max(yyyymm) as yyyymm 
-             from tb_yearamt
-             where yyyymm < :prevYm and ioflag = '0' 
-             and spjangcd = :spjangcd
-             group by cltcd
-         )
-         SELECT
-             m.id AS cltcd,
-             m."Name" as clt_name,
-             COALESCE(y.yearamt, 0) AS receivables,
-             COALESCE(s.TOTALAMT, 0) AS sales,
-             COALESCE(b.ACCIN, 0) AS "AmountDeposited",
-             COALESCE(y.yearamt, 0) + COALESCE(s.TOTALAMT, 0) - COALESCE(b.ACCIN, 0) AS balance
-         FROM COMPANY M
-         LEFT JOIN (
-             SELECT y.cltcd, SUM(y.yearamt) AS yearamt  
-             FROM tb_yearamt y
-             JOIN LASTTbl h ON y.cltcd = h.cltcd AND y.yyyymm = h.yyyymm AND y.ioflag = '0'
-              WHERE y.spjangcd = :spjangcd
-             GROUP BY y.cltcd
-         ) y ON m.id = y.cltcd
-         LEFT JOIN (
-             SELECT cltcd, SUM(totalamt) AS sales_amt
-             FROM tb_salesment
-             WHERE misdate BETWEEN :start AND :end
-              AND spjangcd = :spjangcd
-             GROUP BY cltcd
-         ) jan_s ON m.id = jan_s.cltcd
-         LEFT JOIN (
-             SELECT cltcd, SUM(TOTALAMT) AS TOTALAMT
-             FROM tb_salesment
-             WHERE misdate BETWEEN :start AND :end
-              AND spjangcd = :spjangcd
-             GROUP BY cltcd
-         ) s ON m.id = s.cltcd
-         LEFT JOIN (
-             SELECT cltcd, SUM(ACCIN) AS ACCIN  
-             FROM tb_banktransit
-             WHERE TRDATE BETWEEN :start AND :end
-              AND spjangcd = :spjangcd
-              AND ioflag ='0'
-             GROUP BY cltcd
-         ) b ON m.id = b.cltcd
-         WHERE COALESCE(y.yearamt, 0) + COALESCE(s.TOTALAMT, 0) - COALESCE(b.ACCIN, 0) <> 0
-        """;
     if (company != null) {
-      sql += " AND m.id = :company ";
       paramMap.addValue("company", company);
     }
 
-    List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
+    StringBuilder sql = new StringBuilder();
+
+    sql.append("""
+        WITH lastym AS (
+            SELECT cltcd, MAX(yyyymm) AS yyyymm
+            FROM tb_yearamt
+            WHERE yyyymm < :baseYm
+              AND ioflag = '0'
+              AND spjangcd = :spjangcd
+            GROUP BY cltcd
+        ),
+        last_amt AS (
+            SELECT y.cltcd, y.yearamt, y.yyyymm
+            FROM tb_yearamt y
+            JOIN lastym m ON y.cltcd = m.cltcd AND y.yyyymm = m.yyyymm
+            WHERE y.ioflag = '0'
+              AND y.spjangcd = :spjangcd
+        ),
+        post_close_txns AS (
+            SELECT
+                c.id AS cltcd,
+                SUM(COALESCE(s.totalamt, 0)) AS extra_sales,
+                SUM(COALESCE(b.accin, 0)) AS extra_accin
+            FROM company c
+            LEFT JOIN tb_salesment s ON c.id = s.cltcd
+                AND s.misdate BETWEEN 
+                    TO_CHAR((SELECT TO_DATE(MAX(yyyymm), 'YYYYMM') + interval '1 month' FROM last_amt), 'YYYYMMDD')
+                    AND TO_CHAR(TO_DATE(:baseYm, 'YYYYMM') - interval '1 day', 'YYYYMMDD')
+                AND s.spjangcd = :spjangcd
+            LEFT JOIN tb_banktransit b ON c.id = b.cltcd
+                AND b.trdate BETWEEN 
+                    TO_CHAR((SELECT TO_DATE(MAX(yyyymm), 'YYYYMM') + interval '1 month' FROM last_amt), 'YYYYMMDD')
+                    AND TO_CHAR(TO_DATE(:baseYm, 'YYYYMM') - interval '1 day', 'YYYYMMDD')
+                AND b.ioflag = '0'
+                AND b.spjangcd = :spjangcd
+            GROUP BY c.id
+        ),
+        uncalculated_txns AS (
+            SELECT
+                c.id AS cltcd,
+                SUM(COALESCE(s.totalamt, 0)) AS total_sales,
+                SUM(COALESCE(b.accin, 0)) AS total_accin
+            FROM company c
+            LEFT JOIN tb_salesment s ON c.id = s.cltcd
+                AND s.misdate < TO_CHAR(TO_DATE(:baseYm, 'YYYYMM'), 'YYYYMMDD')
+                AND s.spjangcd = :spjangcd
+            LEFT JOIN tb_banktransit b ON c.id = b.cltcd
+                AND b.trdate < TO_CHAR(TO_DATE(:baseYm, 'YYYYMM'), 'YYYYMMDD')
+                AND b.ioflag = '0'
+                AND b.spjangcd = :spjangcd
+            WHERE NOT EXISTS (
+                SELECT 1 FROM last_amt y WHERE y.cltcd = c.id
+            )
+            GROUP BY c.id
+        ),
+        final_prev_amt AS (
+            SELECT
+                y.cltcd,
+                y.yearamt + COALESCE(p.extra_sales, 0) - COALESCE(p.extra_accin, 0) AS prev_amt
+            FROM last_amt y
+            LEFT JOIN post_close_txns p ON y.cltcd = p.cltcd
+            UNION
+            SELECT
+                u.cltcd,
+                COALESCE(u.total_sales, 0) - COALESCE(u.total_accin, 0)
+            FROM uncalculated_txns u
+        ),
+        sales_amt AS (
+            SELECT cltcd, SUM(totalamt) AS sales
+            FROM tb_salesment
+            WHERE misdate BETWEEN :start AND :end
+              AND spjangcd = :spjangcd
+            GROUP BY cltcd
+        ),
+        accin_amt AS (
+            SELECT cltcd, SUM(accin) AS accin
+            FROM tb_banktransit
+            WHERE trdate BETWEEN :start AND :end
+              AND ioflag = '0'
+              AND spjangcd = :spjangcd
+            GROUP BY cltcd
+        )
+        SELECT
+            m.id AS cltcd,
+            m."Name" AS clt_name,
+            COALESCE(f.prev_amt, 0) AS receivables,
+            COALESCE(s.sales, 0) AS sales,
+            COALESCE(b.accin, 0) AS "AmountDeposited",
+            COALESCE(f.prev_amt, 0) + COALESCE(s.sales, 0) - COALESCE(b.accin, 0) AS balance
+        FROM company m
+        LEFT JOIN final_prev_amt f ON m.id = f.cltcd
+        LEFT JOIN sales_amt s ON m.id = s.cltcd
+        LEFT JOIN accin_amt b ON m.id = b.cltcd
+        WHERE COALESCE(f.prev_amt, 0) + COALESCE(s.sales, 0) - COALESCE(b.accin, 0) <> 0
+    """);
+
+    if (company != null) {
+      sql.append(" AND m.id = :company");
+    }
+
+    sql.append(" ORDER BY m.\"Name\"");
 //    log.info("미수금 집계 read SQL: {}", sql);
 //    log.info("SQL Parameters: {}", paramMap.getValues());
-    return items;
-
+    return this.sqlRunner.getRows(sql.toString(), paramMap);
   }
+
 
   //미수금 현황 상세
   public List<Map<String, Object>> getDetailList(String start_date, String end_date, String company, String spjangcd) {
@@ -238,6 +287,7 @@ public class AccountsReceivableListServie {
             x.comp_name,
             x.date,
             x.summary,
+            x.amount,
             COALESCE(x.amount, x.totalamt, x.accin) AS total_amount,
             SUM(
               COALESCE(x.amount, 0) + COALESCE(x.totalamt, 0) - COALESCE(x.accin, 0)

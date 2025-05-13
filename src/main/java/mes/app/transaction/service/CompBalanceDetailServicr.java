@@ -94,7 +94,7 @@ public class CompBalanceDetailServicr {
                 c."Name" AS comp_name,
                 TO_DATE(:baseDate, 'YYYYMMDD') AS date,
                 '전잔액' AS summary,
-                COALESCE(h.yearamt, 0) + COALESCE(p.totsale, 0) - COALESCE(q.totaccout, 0) AS amount,
+                COALESCE(h.yearamt, 0) AS amount,
                 NULL::text AS itemnm,
                 NULL::text AS misgubun,
                 NULL::text AS iotype,

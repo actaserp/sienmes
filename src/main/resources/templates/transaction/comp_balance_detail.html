@@ -109,6 +109,13 @@
                 e.cell.style.color = '#444';
               }
             }
+            if (e.panel.cellType === wijmo.grid.CellType.Cell && col.binding === 'balance') {
+              if (item?.summary === '전잔액') {
+                e.cell.textContent = wijmo.Globalize.format(item.amount, 'n0');
+                e.cell.style.fontWeight = 'bold';
+                e.cell.style.color = '#333';
+              }
+            }
           },
           columns: [
             {binding:'comp_name', header: '거래처명', width: 150, align: 'center'},
