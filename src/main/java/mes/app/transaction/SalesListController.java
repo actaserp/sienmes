@@ -1,7 +1,9 @@
 package mes.app.transaction;
 
 
+import lombok.extern.slf4j.Slf4j;
 import mes.app.transaction.service.SalesListService;
+import mes.app.util.UtilClass;
 import mes.domain.model.AjaxResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@Slf4j
 @RequestMapping("/api/sales/list")
 public class SalesListController {
 
@@ -81,6 +84,13 @@ public class SalesListController {
         paramSet.put("misgubun", sale_type2);
 
         List<Map<String, Object>> list = salesListService.getList2(paramSet);
+
+        try{
+            UtilClass.decryptEachItem(list, "ivercorpnum", 4);
+        }catch (Exception e){
+            log.error("복호화 중 오류 발생 - class 위치 {}, {}", this.getClass().getSimpleName(), e.getMessage());
+        }
+
         Map<String, Object> StatisticsCalculatorList = salesListService.StatisticsCalculator(list);
 
         result.data = Map.of("list", list, "Statistics", StatisticsCalculatorList);

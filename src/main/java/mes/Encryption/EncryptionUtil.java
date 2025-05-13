@@ -11,7 +11,7 @@ import java.util.Base64;
 public class EncryptionUtil {
 
     //암호화
-    public String encrypt(String plainText, byte[] keyBytes) throws Exception {
+    public static String encrypt(String plainText, byte[] keyBytes) throws Exception {
         Cipher cipher = Cipher.getInstance("AES");
         SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
@@ -19,7 +19,7 @@ public class EncryptionUtil {
     }
 
     //복호화
-    public String decrypt(String encryptedText, byte[] keyBytes) throws Exception {
+    public static String decrypt(String encryptedText, byte[] keyBytes) throws Exception {
         Cipher cipher = Cipher.getInstance("AES");
         SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
         cipher.init(Cipher.DECRYPT_MODE, keySpec);
