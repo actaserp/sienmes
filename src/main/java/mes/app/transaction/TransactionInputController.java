@@ -46,7 +46,7 @@ public class TransactionInputController {
 
     }
 
-    @DecryptField(column = "account", mask = 4)
+    @DecryptField(columns = {"account"}, masks = 4)
     @GetMapping("/history")
     public AjaxResult TransactionHistory(@RequestParam String searchfrdate,
                                          @RequestParam String searchtodate,
@@ -67,9 +67,8 @@ public class TransactionInputController {
             parsedCompanyId = UtilClass.parseInteger(cboCompanyHidden);
         }
 
-        List<Map<String, Object>> transaction_history = transactionInputService.getTransactionHistory(searchfrdate, searchtodate, tradetype, parsedAccountId, parsedCompanyId);
+        result.data = transactionInputService.getTransactionHistory(searchfrdate, searchtodate, tradetype, parsedAccountId, parsedCompanyId);
 
-        result.data = transaction_history;
         return result;
     }
 

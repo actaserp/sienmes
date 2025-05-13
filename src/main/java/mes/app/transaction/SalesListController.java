@@ -59,7 +59,7 @@ public class SalesListController {
         return result;
     }
 
-    @DecryptField(column = "ivercorpnum", mask = 3)
+    @DecryptField(columns = {"ivercorpnum"}, masks = 3)
     @GetMapping("/search2")
     public AjaxResult searchList2(
             @RequestParam String spjangcd,
