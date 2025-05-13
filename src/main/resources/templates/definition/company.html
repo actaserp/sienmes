@@ -1249,6 +1249,8 @@
                     data.comp_code2 = data.comp_code2.replace(/-/g, '');
                 }
 
+                data.relyn = $('#relyn').is(':checked') ? "1" : "0";
+
                 if (!data.name) {
                     Alert.alert('', '업체명을 입력해주세요.');
                     return;
@@ -1265,7 +1267,6 @@
                     _this.searchMainData1();
                 };
                 AjaxUtil.postAsyncData(this.url + '/save', data, fnSuccess);
-
 
             }
 

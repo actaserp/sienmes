@@ -106,20 +106,10 @@
                         </li>
 
                         <li>
-                            <button type="button" class="btn-excellt btn-default" id="btnMagamCancel"
+                            <button type="button" class="btn-delete btn-default" id="btnMagamCancel"
                                     style="width: 115px; height: 36px; display: none;">마감취소</button>
                         </li>
 
-                        <li>
-                            <button type="button" class="btn-delete btn-danger " id="btnDel"
-                                    style=" width: 115px; height: 36px;"><i
-                                    class="fas fa-trash"></i>삭제</button>
-                        </li>
-                        <li>
-                            <button type="button" class="btn-excellt btn-default" id="btnSave"
-                                    style="width: 115px; height: 36px;"><i
-                                    class="fas fa-save"></i>저장</button>
-                        </li>
                     </ul>
                 </div>
             </div> <!--//section-top end -->
@@ -159,7 +149,7 @@
                         }
                     },
                     columns: [
-                        {binding: 'cltcd', header: '거래처ID', width: 100, align: 'center'},
+                        {binding: 'id', header: '거래처ID', width: 100, align: 'center'},
                         {binding: 'company_name', header: '거래처명', width: 270, align: 'center'},
                         {binding: 'ioflag', header: '매출/매입구분', width: 120, align: 'center'},
                         {binding: 'yyyymm', header: '마감년월', width: 130, align: 'center'},
@@ -195,7 +185,6 @@
                     if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
                         let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
                         console.log(selectedRowData); // 선택된 데이터 출력
-
 
                         // 마감 여부에 따라 버튼 표시 상태 조절
                         if (selectedRowData.endyn === true) {
@@ -261,43 +250,14 @@
                 let url = '/api/definition/yearamt';
 
                 let result = AjaxUtil.getSyncData(url + '/read',param);
-                console.log(result.data);
+
                 if (result.data != null) {
                     result.data.forEach(item => {
-                        item.endyn = (item.endyn === 'Y'); // true or false로 변환
+                        item.endyn = (item.endyn == 'Y');
                     });
-
+                    console.log(result.data);
                     _this.viewData.sourceCollection = result.data;
                 }
-
-            }
-
-            saveData() {
-                let _this = this;
-                let url = '/api/definition/yearamt/save';
-
-                // 선택된 행들 가져오기
-                let selectedItems = _this.grid.rows
-                    .filter(row => row.isSelected)  // Selector에서 체크된 행
-                    .map(row => row.dataItem);
-
-                // 유효성 체크
-                if (selectedItems.length === 0) {
-                    Alert.alert('', '선택된 행이 없습니다.');
-                    return;
-                }
-
-                // 서버로 전송할 데이터
-                let data = {
-                    list: selectedItems
-                };
-
-                console.log(data);
-                let fnSuccess = function (res) {
-                    Alert.alert('', '저장되었습니다');
-                    _this.searchMainData(); // 저장 후 갱신
-                };
-                AjaxUtil.postJsonData(url, data, fnSuccess);
 
             }
 
@@ -355,45 +315,12 @@
                 console.log(data);
 
                 let fnSuccess = function (res) {
-                    Alert.alert('', '마감되었습니다');
+                    Alert.alert('', '취소되었습니다');
                     _this.searchMainData(); // 저장 후 갱신
                 };
                 AjaxUtil.postJsonData(url, data, fnSuccess);
             }
 
-
-            deleteData() {
-                let _this = this;
-
-                let url = '/api/definition/yearamt/magamCancel';
-
-                // 선택된 행들 가져오기
-                let selectedItems = _this.grid.rows
-                    .filter(row => row.isSelected)  // Selector에서 체크된 행
-                    .map(row => row.dataItem);
-
-                // 유효성 체크
-                if (selectedItems.length === 0) {
-                    Alert.alert('', '선택된 행이 없습니다.');
-                    return;
-                }
-
-                // 서버로 전송할 데이터
-                let data = {
-                    list: selectedItems
-                };
-
-                let fnSuccess = function (res) {
-                    if (res.success) {
-                        Alert.alert('', '삭제되었습니다'); // Notification
-                        _this.searchMainData();
-                    } else {
-                        Alert.alert('', res.message);
-                    }
-                };
-
-                AjaxUtil.postAsyncData(url, data, fnSuccess);
-            }
 
         }
 

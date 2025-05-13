@@ -105,7 +105,7 @@ public class CompanyController {
 			@RequestParam("last_trading_day") String lastTradingDay,
 			@RequestParam("receivable_amount") String receivableAmount,     
 			@RequestParam("unpaid_amount") String unpaidAmount,             
-			@RequestParam("credit_limit_amount") String creditLimitAmount,
+			/*@RequestParam("credit_limit_amount") String creditLimitAmount,*/
 			@RequestParam("tranding_bank") String trandingBank,
 			@RequestParam("account_holder") String accountHolder,
 			@RequestParam("account_number") String accountNumber,
@@ -151,7 +151,7 @@ public class CompanyController {
 		company.setLastTradingDay(!StringUtils.isEmpty(lastTradingDay) ?Date.valueOf(lastTradingDay) : null);
 		company.setReceivableAmount(!StringUtils.isEmpty(receivableAmount) ? Float.valueOf(receivableAmount) : null);
 		company.setUnpaidAmount(!StringUtils.isEmpty(unpaidAmount) ? Float.valueOf(unpaidAmount) : null);
-		company.setCreditLimitAmount(!StringUtils.isEmpty(creditLimitAmount) ? Float.valueOf(creditLimitAmount) : null);
+		/*company.setCreditLimitAmount(!StringUtils.isEmpty(creditLimitAmount) ? Float.valueOf(creditLimitAmount) : null);*/
 		company.setTrandingBank(trandingBank);
 		company.setAccountHolder(accountHolder);
 		company.setAccountNumber(accountNumber);
