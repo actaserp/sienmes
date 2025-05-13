@@ -26,7 +26,7 @@ public class TB_ACCOUNT {
 
     private String accname; // 걔좌별칭
 
-    private String mijamt; // 지급수수료
+    private Integer mijamt; // 지급수수료
 
     private String refcd; //팝빌 참고코드
 

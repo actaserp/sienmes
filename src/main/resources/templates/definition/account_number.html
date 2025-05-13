@@ -122,14 +122,14 @@
                                 <label for=""><span class="eq">*</span>은행명</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <select type="text" id="bankname" name="bankname"
+                                <select type="text" id="bankname" name="bankname" disabled
                                         style="width: 100%;"></select>
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                 <label for="accnum"><span class="eq">*</span>계좌번호</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <input type="text" id="accnum" name="accnum"
+                                <input type="text" id="accnum" name="accnum" disabled
                                        style="width: 100%;">
                             </td>
 
@@ -137,7 +137,7 @@
                                 <label><span class="eq">*</span>계좌명칭</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <input type="text" id="accname" name="accname"
+                                <input type="text" id="accname" name="accname" disabled
                                        style="width: 100%;">
                             </td>
                             <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
@@ -368,10 +368,15 @@
             });
         }
 
-        function deleteMaterialGroup() {
-            let url = '/api/definition/material_group/delete';
+        function deleteAccount() {
+            let url = '/api/definition/account/delete';
             let id = $('#materialGroupForm').find('#id').val();
             let data = {'id': id};
+
+            if(id === null || id === ''){
+                Alert.alert('', '삭제할 계좌를 선택해주세요.');
+                return;
+            }
 
             Alert.confirm('', '삭제하시겠습니까?', function () {
                 let fnSuccess = function (result) {
@@ -440,7 +445,7 @@
 
             // 삭제버튼
             $('#btnDel').click(function (e) {
-                deleteMaterialGroup();
+                deleteAccount();
             });
 
         });

@@ -23,8 +23,8 @@ public class TransactionInputController {
 
     @Autowired
     TransactionInputService transactionInputService;
-    
 
+    @DecryptField(columns = {"accountnumber"}, masks = 4)
     @GetMapping("/registerAccount")
     public AjaxResult registerAccount(@RequestParam String spjangcd){
 
@@ -38,9 +38,7 @@ public class TransactionInputController {
             spjangcd = String.valueOf(spjang.get("spjangcd"));
         }*/
 
-        List<Map<String, Object>> accountList = transactionInputService.getAccountList(spjangcd);
-
-        result.data = accountList;
+        result.data = transactionInputService.getAccountList(spjangcd);
 
         return  result;
 

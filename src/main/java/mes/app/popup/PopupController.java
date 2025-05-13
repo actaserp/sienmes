@@ -2,6 +2,7 @@ package mes.app.popup;
 
 
 import lombok.extern.slf4j.Slf4j;
+import mes.app.aop.DecryptField;
 import mes.domain.model.AjaxResult;
 import mes.domain.services.DateUtil;
 import mes.domain.services.SqlRunner;
@@ -414,6 +415,7 @@ public class PopupController {
 		return result;
 	}
 
+	@DecryptField(columns = "accountNumber" , masks = 3)
 	@GetMapping("/search_Account")
 	public AjaxResult getSearchAccount(@RequestParam(value = "BankName")String bankName,
 																		 @RequestParam(value = "accountNumber") String accountNumber) {
@@ -427,9 +429,9 @@ public class PopupController {
 				ta.accid,
 				tx.banknm as "BankName",
 				ta.bankid as "bankId",
-				left(ta.accnum, length(ta.accnum) - 4) || '****' as "accountNumber",
+				ta.accnum as "accountNumber",
 				ta.accname as "accountName",
-				CASE 
+				CASE
 					WHEN ta.popsort = '1' THEN '개인'
 					WHEN ta.popsort = '0' THEN '법인'
 					END AS "accountType"

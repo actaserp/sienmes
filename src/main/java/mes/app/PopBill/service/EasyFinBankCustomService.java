@@ -3,6 +3,7 @@ package mes.app.PopBill.service;
 
 import com.popbill.api.easyfin.EasyFinBankSearchDetail;
 import lombok.extern.slf4j.Slf4j;
+import mes.Encryption.EncryptionKeyProvider;
 import mes.Encryption.EncryptionUtil;
 import mes.app.PopBill.dto.EasyFinBankAccountFormDto;
 import mes.app.transaction.service.TransactionInputService;
@@ -53,7 +54,7 @@ public class EasyFinBankCustomService {
      *
      * **/
     @Async
-    public void saveBankDataAsync(List<EasyFinBankSearchDetail> list, String jobID, String accountNumber, Integer accountid, String bankname){
+    public void saveBankDataAsync(List<EasyFinBankSearchDetail> list, String jobID, String  accountNumber, Integer accountid, String bankname){
 
 
         List<String> tidList = getTidList(list);
@@ -79,6 +80,7 @@ public class EasyFinBankCustomService {
 
                 Integer accIn = UtilClass.parseInteger(map.getAccIn());
                 String inoutFlag = (accIn == 0) ? "1" : "0";
+                String EncryptedAccountNum = EncryptionUtil.encrypt(accountNumber);
 
                 entity.setTid(tid);
                 entity.setTrdate( map.getTrdate());

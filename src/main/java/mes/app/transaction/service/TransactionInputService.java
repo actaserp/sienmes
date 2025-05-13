@@ -47,7 +47,7 @@ public class TransactionInputService {
                  a.accid as accountid,
                  b.banknm as bankname,
                  b.bankpopcd as managementnum,
-                 left(accnum, length(accnum) - 4) || '****' as accountNumber,
+                 accnum as accountNumber,
                  accname as accountName,
                  onlineid as onlineBankId,
                  left(onlinepw, length(onlinepw) - 3) || '***' as onlineBankPw,
