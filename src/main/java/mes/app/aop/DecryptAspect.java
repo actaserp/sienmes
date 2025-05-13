@@ -1,4 +1,4 @@
-package mes.Encryption.aop;
+package mes.app.aop;
 
 import lombok.extern.slf4j.Slf4j;
 import mes.app.util.UtilClass;
