@@ -66,5 +66,11 @@ public class ShipmentHead extends AbstractAuditModel{
 	
 	@Column(name = "\"ShipTime\"")
 	Time shipTime;
+
+	@Column(name = "\"misdate\"")
+	String misdate; // 세금계산서 발행 pk1
+
+	@Column(name = "\"misnum\"")
+	String misnum; // 세금계산서 발행 pk2
 	
 }

@@ -359,6 +359,7 @@ public class PopupController {
             from company
             WHERE ("CompanyType" = 'sale'
             OR "CompanyType" = 'sale-purchase')
+            and "relyn" = '0'
 			""";
 
 		if (compCode != null && !compCode.isEmpty()) {
@@ -375,6 +376,8 @@ public class PopupController {
 			sql += " AND \"BusinessNumber\" ILIKE :business_number ";
 			paramMap.addValue("business_number", "%" + business_number + "%");
 		}
+
+		sql += " ORDER BY \"Name\" ASC ";
 
 		result.data = this.sqlRunner.getRows(sql, paramMap);
 

@@ -139,6 +139,29 @@ public class UtilClass {
         }
     }
 
+    public static void decryptItem(Map<String, Object> map, String col, int maskLength) throws IOException {
+        byte[] key = EncryptionKeyProvider.getKey();
+
+        Object encryptedValue = map.get(col);
+        String parsedEncrypt = encryptedValue != null ? encryptedValue.toString() : "";
+
+        if (!parsedEncrypt.isEmpty()) {
+            try {
+                // 복호화
+                String decrypted = EncryptionUtil.decrypt(parsedEncrypt, key);
+
+                // 마스킹
+                String masked = applyMasking(decrypted, maskLength);
+
+                // 결과 반영
+                map.put(col, masked);
+            } catch (Exception e) {
+                // 복호화 불가 → 그대로 유지
+            }
+        }
+    }
+
+
     /**
      * 문자열의 끝에서부터 지정된 길이만큼 마스킹 처리하는 메서드
      *

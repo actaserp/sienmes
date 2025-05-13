@@ -1,10 +1,12 @@
 package mes.app.transaction.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.popbill.api.*;
 import com.popbill.api.taxinvoice.Taxinvoice;
 import com.popbill.api.taxinvoice.TaxinvoiceDetail;
+import mes.app.util.UtilClass;
 import mes.domain.entity.*;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.CompanyRepository;
@@ -12,13 +14,20 @@ import mes.domain.repository.TB_SalesDetailRepository;
 import mes.domain.repository.TB_SalesmentRepository;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -49,6 +58,14 @@ public class SalesInvoiceService {
 	@Autowired
 	private TaxinvoiceService taxinvoiceService;
 
+	@Value("${invoice.api.key}")
+	private String invoiceeCheckApiKey;
+
+    @Autowired
+    private RestTemplate restTemplate;
+    @Autowired
+    private ObjectMapper jacksonObjectMapper;
+
 	public List<Map<String, Object>> getList(String invoice_kind, Integer cboStatecode, Integer cboCompany, Timestamp start, Timestamp end) {
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
@@ -75,9 +92,7 @@ public class SalesInvoiceService {
 			   m.misgubun,
 			   sale_type_code."Value" AS misgubun_name,  -- fn_code_name 제거
 			   m.cltcd,
-			   SUBSTRING(m.ivercorpnum FROM 1 FOR 3) || '-' ||
-			   SUBSTRING(m.ivercorpnum FROM 4 FOR 2) || '-' ||
-			   SUBSTRING(m.ivercorpnum FROM 6 FOR 5) AS ivercorpnum,
+			   m.ivercorpnum,
 			   m.ivercorpnm,
 			   m.totalamt,
 			   m.supplycost,
@@ -136,7 +151,7 @@ public class SalesInvoiceService {
 			m.ivercorpnm, m.totalamt, m.supplycost, m.taxtotal, m.statecode,
 			state_code."Value", m.statedt, m.iverceonm, m.iveremail,
 			m.iveraddr, m.taxtype, ds.first_itemnm, ds.item_count
-        order by m.misdate desc
+        ORDER BY m.misdate DESC, m.misnum DESC
         """;
 
 		return this.sqlRunner.getRows(sql, dicParam);
@@ -202,6 +217,7 @@ public class SalesInvoiceService {
 		AjaxResult result = new AjaxResult();
 		// 1. 기본 키 생성
 		String misdate = sanitizeNumericString(form.get("writeDate"));
+		String bemisdate = (String) form.get("mowriteDate");
 		String misnum = (String) form.get("misnum");
 
 		boolean isUpdate = misnum != null && !misnum.trim().isEmpty();
@@ -253,6 +269,7 @@ public class SalesInvoiceService {
 		salesment.setIvertel(sanitizeNumericString(form.get("InvoiceeTEL1"))); // 담당자 연락처
 		salesment.setIveremail((String)form.get("InvoiceeEmail1")); // 이메일
 
+		salesment.setMgtkey(misdate + "-" + misnum);
 		salesment.setSupplycost(parseIntSafe(form.get("SupplyCostTotal"))); // 총 공급가액
 		salesment.setTaxtotal(parseIntSafe(form.get("TaxTotal"))); // 총 세액
 		salesment.setRemark1((String) form.get("Remark1")); // 비고1
@@ -277,7 +294,12 @@ public class SalesInvoiceService {
 		salesment.setStatedt(statedt);
 
 		if (isUpdate) {
-			tb_salesDetailRepository.deleteByMisdateAndMisnum(misdate, misnum);
+			if (!misdate.equals(bemisdate)) {
+				tb_salesDetailRepository.deleteByMisdateAndMisnum(bemisdate, misnum); // 기존 PK로 삭제
+				tb_salesmentRepository.deleteById(new TB_SalesmentId(bemisdate, misnum));
+			} else {
+				tb_salesDetailRepository.deleteByMisdateAndMisnum(misdate, misnum);   // 현재 PK로 삭제
+			}
 		}
 
 		salesment.setSpjangcd((String) form.get("spjangcd"));
@@ -297,7 +319,7 @@ public class SalesInvoiceService {
 			detail.setMaterialId(parseInt(form.get(prefix + ".ItemId")));
 			detail.setItemnm(itemName);
 			detail.setSpec((String) form.get(prefix + ".Spec"));
-			detail.setQty(parseInt(form.get(prefix + ".Qty")));
+			detail.setQty(parseMoney(form.get(prefix + ".Qty")));
 			detail.setUnitcost(parseMoney(form.get(prefix + ".UnitCost")));
 			detail.setSupplycost(parseMoney(form.get(prefix + ".SupplyCost")));
 			detail.setTaxtotal(parseMoney(form.get(prefix + ".Tax")));
@@ -324,6 +346,80 @@ public class SalesInvoiceService {
 
 		return result;
 	}
+
+	// 단건 사업자 검증
+	public JsonNode validateSingleBusiness(String businessNumber) {
+		try {
+			String cleanBno = businessNumber.replaceAll("-", "");
+
+			String url = "https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=" + invoiceeCheckApiKey + "&returnType=JSON";
+			URI uri = URI.create(url);
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			String jsonBody = jacksonObjectMapper.writeValueAsString(Map.of("b_no", List.of(cleanBno)));
+
+			HttpEntity<String> request = new HttpEntity<>(jsonBody, headers);
+
+			ResponseEntity<String> response = restTemplate.postForEntity(uri, request, String.class);
+
+			if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+				JsonNode json = jacksonObjectMapper.readTree(response.getBody());
+				JsonNode dataNode = json.path("data");
+				if (dataNode.isArray() && dataNode.size() > 0) {
+					return dataNode.get(0); // 단건이므로 첫 번째 요소만 반환
+				} else {
+					throw new RuntimeException("사업자 정보가 없습니다.");
+				}
+			} else {
+				throw new RuntimeException("사업자 진위 확인 실패 - 응답 없음");
+			}
+		} catch (Exception e) {
+			System.out.println("=== 사업자 진위확인 API 예외 발생 ===");
+			System.out.println("에러 메시지     : " + e.getMessage());
+			e.printStackTrace();
+			throw new RuntimeException("사업자 진위 확인 중 오류: " + e.getMessage(), e);
+		}
+	}
+
+	// 다건 사업자 검증
+	public List<JsonNode> validateMultipleBusinesses(List<String> businessNumbers) {
+		try {
+			List<String> cleanList = businessNumbers.stream()
+					.map(bno -> bno.replaceAll("-", ""))
+					.toList();
+
+			String url = "https://api.odcloud.kr/api/nts-businessman/v1/validate?serviceKey=" +
+					URLEncoder.encode(invoiceeCheckApiKey, StandardCharsets.UTF_8);
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			Map<String, Object> body = Map.of("b_no", cleanList);
+			HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+			ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+			if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+				JsonNode json = jacksonObjectMapper.readTree(response.getBody());
+				JsonNode dataNode = json.path("data");
+				if (dataNode.isArray()) {
+					List<JsonNode> results = new ArrayList<>();
+					dataNode.forEach(results::add);
+					return results;
+				} else {
+					throw new RuntimeException("응답 데이터가 배열이 아닙니다.");
+				}
+			} else {
+				throw new RuntimeException("사업자 진위 확인 실패 - 응답 없음");
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("사업자 진위 확인 중 오류: " + e.getMessage(), e);
+		}
+	}
+
+
 
 
 	public List<Map<String, Object>> getShipmentHeadList(String dateFrom, String dateTo) {
@@ -359,7 +455,7 @@ public class SalesInvoiceService {
 		return items;
 	}
 
-	public Map<String, Object> getInvoiceDetail(String misdate, String misnum) {
+	public Map<String, Object> getInvoiceDetail(String misdate, String misnum) throws IOException {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("misdate", misdate);
 		paramMap.addValue("misnum", misnum);
@@ -368,6 +464,7 @@ public class SalesInvoiceService {
 		SELECT\s
 			m.misdate,
 			TO_CHAR(TO_DATE(m.misdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS "writeDate",
+			m.misdate AS "mowriteDate",
 			m.misnum,
 			m.issuetype AS "IssueType",
 			m.taxtype AS "TaxType",
@@ -435,6 +532,8 @@ public class SalesInvoiceService {
 
 		Map<String, Object> master = this.sqlRunner.getRow(sql, paramMap);
 		List<Map<String, Object>> detailList = this.sqlRunner.getRows(detailSql, paramMap);
+
+		UtilClass.decryptItem(master, "InvoiceeCorpNum", 0);
 
 		master.put("detailList", detailList);
 		return master;
@@ -609,7 +708,8 @@ public class SalesInvoiceService {
 		invoice.setInvoicerContactName(sm.getIcerpernm());
 		invoice.setInvoicerEmail(sm.getIceremail());
 		invoice.setInvoicerTEL(sm.getIcertel());
-		invoice.setInvoicerMgtKey(sm.getId().getMisdate() + "-" + sm.getId().getMisnum());
+//		invoice.setInvoicerMgtKey(sm.getId().getMisdate() + "-" + sm.getId().getMisnum());
+		invoice.setInvoicerMgtKey(sm.getMgtkey());
 
 		// 공급받는자 정보 설정
 		invoice.setInvoiceeType(sm.getInvoiceetype());

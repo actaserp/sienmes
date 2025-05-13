@@ -1,6 +1,8 @@
 package mes.app.transaction;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.popbill.api.*;
+import mes.app.aop.DecryptField;
 import mes.app.transaction.service.SalesInvoiceService;
 import mes.domain.entity.*;
 import mes.domain.model.AjaxResult;
@@ -8,10 +10,12 @@ import mes.domain.repository.CompanyRepository;
 import mes.domain.repository.TB_SalesDetailRepository;
 import mes.domain.repository.TB_SalesmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +27,8 @@ public class SalesInvoiceController {
 	
 	@Autowired
 	private SalesInvoiceService salesInvoiceService;
+    @Autowired
+    private CompanyRepository companyRepository;
 
 	@GetMapping("/shipment_head_list")
 	public AjaxResult getShipmentHeadList(
@@ -52,6 +58,47 @@ public class SalesInvoiceController {
 	}
 
 	// 공급받는자 저장
+	@PostMapping("/invoicee_check")
+	public AjaxResult invoiceeCheck(
+			@RequestParam("b_no") String bno,
+			@RequestParam("compid") Integer compid,
+			Authentication auth) {
+
+		AjaxResult result = new AjaxResult();
+
+		try {
+			JsonNode data = salesInvoiceService.validateSingleBusiness(bno);
+
+			String statusCode = data.path("b_stt_cd").asText();
+			String statusText = data.path("b_stt").asText();
+			String taxTypeText = data.path("tax_type").asText();
+
+			if ("01".equals(statusCode)) {
+				result.success = true;
+				result.data = data; // 단건 결과 JSON 문자열로 반환
+			} else {
+				Company company = companyRepository.getCompanyById(compid);
+				company.setRelyn("1");
+				companyRepository.save(company);
+
+				if (statusText == null || statusText.isBlank()) {
+					result.success = false;
+					result.message = taxTypeText + "\n거래중지 처리되었습니다.";
+				} else {
+					result.success = false;
+					result.message = "사업자 상태: " + statusText + " 거래중지 처리되었습니다.";
+				}
+			}
+
+		} catch (Exception e) {
+			result.success = false;
+			result.message = "사업자 진위 확인 실패: " + e.getMessage();
+		}
+
+		return result;
+	}
+
+	// 공급받는자 저장
 	@PostMapping("/invoicee_save")
 	public AjaxResult invoiceeSave(
 			@RequestParam Map<String, String> paramMap,
@@ -61,9 +108,10 @@ public class SalesInvoiceController {
 		return salesInvoiceService.saveInvoicee(paramMap, user);
 	}
 
-
+	// 검색
+	@DecryptField(columns = {"ivercorpnum"}, masks = 3)
 	@GetMapping("/read")
-	public AjaxResult getSujuList(
+	public AjaxResult getInvoiceList(
 			@RequestParam(value="invoice_kind", required=false) String invoice_kind,
 			@RequestParam(value="start", required=false) String start_date,
 			@RequestParam(value="end", required=false) String end_date,
@@ -85,6 +133,7 @@ public class SalesInvoiceController {
 		return result;
 	}
 
+	// 세금계산서 저장
 	@PostMapping("/invoice_save")
 	public AjaxResult saveInvoice(@RequestBody Map<String, Object> form) {
 
@@ -101,7 +150,7 @@ public class SalesInvoiceController {
 	public AjaxResult getInvoiceDetail(
 			@RequestParam("misdate") String misdate,
 			@RequestParam("misnum") String misnum,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws IOException {
 		misdate = misdate.replaceAll("-", "");
 
 		Map<String, Object> item = this.salesInvoiceService.getInvoiceDetail(misdate, misnum);

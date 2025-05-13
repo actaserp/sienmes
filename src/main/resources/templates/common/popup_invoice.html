@@ -719,6 +719,7 @@
                                         </tr>
                                         <tr>
                                             <td class="al_c noborder_l gray_border_t" colspan="11"><input type="date" id="writeDate" name="writeDate" class="in_txt numeric al_c dp-applied" maxlength="10" style="min-width: 114px; background: none; padding: 0px 0px 0px 8px;"></td>
+                                            <input type="hidden" id="mowriteDate" name="mowriteDate">
                                             <td class="al_l pet0 pdl_3 gray_border_t gray_border_l" colspan="47"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="SupplyCostTotal" name="SupplyCostTotal" ></td>
                                             <td class="al_l pet1 pdl_3 gray_border_t gray_border_l tax-related" colspan="42"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="TaxTotal" name="TaxTotal" ></td>
                                         </tr>
@@ -941,12 +942,17 @@
 
         $(document).on('change', 'input[name="InvoiceeType"]', function () {
             const taxType = $(this).val();
+            const $corpNum = $('#InvoiceeCorpNum');
 
             if (taxType === '개인'){
                 $('#InvoiceeCorpNum')
                     .removeAttr('readonly')
-                    .css('width', '100%')
-                    .val('');
+                    .css('width', '100%');
+
+                if (!window.__skipCorpNumReset) {
+                    $corpNum.val('');
+                }
+
                 $('#btnSelectInvoicee').hide();
                 $('#InvoiceeTaxRegID').attr('readonly', true);
                 $('#InvoiceeCEOName').attr('readonly', true);
@@ -974,8 +980,11 @@
             } else if (taxType === '사업자') {
                 $('#InvoiceeCorpNum')
                     .css('width', '80%')
-                    .removeAttr('readonly')
-                    .val('');
+                    .removeAttr('readonly');
+
+                if (!window.__skipCorpNumReset) {
+                    $corpNum.val('');
+                }
                 $('#btnSelectInvoicee').show();
                 $('#InvoiceeTaxRegID').removeAttr('readonly');
                 $('#InvoiceeCEOName').removeAttr('readonly');
@@ -986,6 +995,7 @@
                     .css('width', '80%');
                 $('#saveInvoicee').show();
             }
+            window.__skipCorpNumReset = false;
         });
 
         $(document).on('change', 'input[name="WriteType"]', function () {
@@ -1352,6 +1362,16 @@
             } else if (value.length > 5) {
                 return value.slice(0, 3) + '-' + value.slice(3, 5) + '-' + value.slice(5);
             }
+            return value;
+        }
+
+        function formatMaskedRRN(value) {
+            value = value.replace(/[^0-9*]/g, '');
+
+            if (value.length >= 7) {
+                return value.replace(/^(\d{6})(\d+)/, '$1-$2');
+            }
+
             return value;
         }
 
