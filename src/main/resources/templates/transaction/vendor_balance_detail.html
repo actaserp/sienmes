@@ -97,14 +97,25 @@
           showMarquee: true,
           isReadOnly: true,
           formatItem: (sender, e) => {
+            const col = sender.columns[e.col];
+            const item = sender.rows[e.row]?.dataItem;
             if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
               e.cell.style.textAlign = 'center';
+            }
+            // ✅ 날짜 셀 커스터마이징
+            if (e.panel.cellType === wijmo.grid.CellType.Cell && col.binding === 'date') {
+              if (item?.summary === '전잔액') {
+                e.cell.textContent = '전잔액';  // 날짜 대신 전잔액 표시
+                e.cell.style.textAlign = 'center';
+                e.cell.style.fontWeight = 'bold';
+                e.cell.style.color = '#444';
+              }
             }
           },
           columns: [
             {binding: 'comp_name', header: '거래처명', width: 200, align: 'center'},
             {binding: 'date', header: '일자', width: 100, align: 'center'},
-            {binding: 'amount', header: '매입금액', width: 130, align: 'right'},
+            {binding: 'totalamt', header: '매입금액', width: 130, align: 'right'},
             {binding: 'accout', header: '지급액', width: 130, align: 'right'},
             {binding: 'balance', header: '잔액', width: 130, align: 'right'},
             {binding: 'itemnm', header: '품목', width: 100, align: 'center'},
@@ -131,9 +142,9 @@
           const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
 
           footer.dataItem = {
+            comp_name: "합계",
             totalamt: getSum('totalamt'),
             accout: getSum('accout'),
-            balance: getSum('balance'),
           };
         });
 

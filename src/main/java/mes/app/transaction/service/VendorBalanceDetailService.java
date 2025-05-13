@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -20,12 +21,12 @@ public class VendorBalanceDetailService {
   SqlRunner sqlRunner;
 
   // 지급현황 리스트 조회
-  /*public List<Map<String, Object>> getPaymentList(String date_from, String date_to, Integer companyCode, String spjangcd) {
+ /* public List<Map<String, Object>> getPaymentList(String date_from, String date_to, Integer company, String spjangcd) {
 
     MapSqlParameterSource dicParam = new MapSqlParameterSource();
     dicParam.addValue("date_from", date_from);
     dicParam.addValue("date_to", date_to);
-    dicParam.addValue("companyCode", companyCode);
+    dicParam.addValue("companyCode", company);
     dicParam.addValue("spjangcd", spjangcd);
 
     String sql = """
@@ -98,7 +99,7 @@ public class VendorBalanceDetailService {
     return items;
   }*/
 
-  public List<Map<String, Object>> getPaymentList(Timestamp start, Timestamp end, String company, String spjangcd) {
+  public List<Map<String, Object>> getPaymentList(String start, String end, String company, String spjangcd) {
 
     if (company == null || company.trim().isEmpty()) {
       //log.warn("⚠️ 거래처 코드가 비어 있습니다. 빈 리스트를 반환합니다.");
@@ -106,139 +107,151 @@ public class VendorBalanceDetailService {
     }
 
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
-    paramMap.addValue("start", start);
-    paramMap.addValue("end", end);
     paramMap.addValue("company", Integer.parseInt(company));
     paramMap.addValue("spjangcd", spjangcd);
+    DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    DateTimeFormatter dbFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
+    LocalDate startDate = LocalDate.parse(start, inputFormatter);
+    LocalDate endDate = LocalDate.parse(end, inputFormatter);
 
-    // Timestamp → LocalDate
-    LocalDate startDate = start.toLocalDateTime().toLocalDate();
+    // SQL용 날짜 포맷
+    String formattedStart = startDate.format(dbFormatter);
+    String formattedEnd = endDate.format(dbFormatter);
 
-    // 전월 구하기
-    LocalDate prevMonth = startDate.minusMonths(1);
-
-    // yyyymm
+    // 전월 기준 계산
+    YearMonth prevMonth = YearMonth.from(startDate).minusMonths(1);
     String prevYm = prevMonth.format(DateTimeFormatter.ofPattern("yyyyMM"));
+    String baseDate = prevMonth.atDay(1).format(dbFormatter);
 
-    // 기준일 (예: 20250301)
-    String baseDate = prevMonth.withDayOfMonth(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-
-    // SQL 파라미터 등록
+    // 파라미터 등록
+    paramMap.addValue("start", formattedStart);
+    paramMap.addValue("end", formattedEnd);
     paramMap.addValue("prevYm", prevYm);
     paramMap.addValue("baseDate", baseDate);
 
 
     String sql = """
-        WITH lasttbl AS (
-                    SELECT cltcd, yearamt, MAX(yyyymm) AS yyyymm
+        WITH lastym AS (
+                    SELECT cltcd, MAX(yyyymm) AS yyyymm
                     FROM tb_yearamt
                     WHERE yyyymm < :prevYm
                       AND ioflag = '1'
                       AND cltcd = :company
                       AND spjangcd = :spjangcd
-                    GROUP BY cltcd, yearamt
-                ),        
-                invoice_data as (
-                	select  
-                	ti.cltcd,
-                	ti.totalamt
-                	from tb_invoicement ti -- 매입 내역 관리
-                	left join tb_invoicdetail tid on ti.misdate = tid.misdate and ti.misnum = tid.misnum
-                ),        
-                incomtbl AS (
-                    SELECT s.cltcd, SUM(s.accout) AS totaccout
+                    GROUP BY cltcd
+                ),
+                lasttbl AS (
+                    SELECT y.cltcd, y.yearamt, y.yyyymm, y.spjangcd
+                    FROM tb_yearamt y
+                    JOIN lastym m ON y.cltcd = m.cltcd AND y.yyyymm = m.yyyymm
+                    WHERE y.ioflag = '1'
+                      AND y.spjangcd = :spjangcd
+                ),
+                incomtbl AS ( --매입
+                    SELECT s.cltcd, SUM(s.totalamt) AS totsale, s.spjangcd
+                    FROM tb_invoicement s
+                    WHERE s.misdate BETWEEN :start AND :end
+                      AND s.cltcd = :company
+                      AND s.spjangcd = :spjangcd
+                    GROUP BY s.cltcd, s.spjangcd
+                ),
+                saletbl AS ( -- 지급액
+                    SELECT s.cltcd, SUM(s.accout) AS totaccout, s.spjangcd
                     FROM tb_banktransit s
                     WHERE s.trdate BETWEEN :start AND :end
                       AND s.cltcd = :company
                       AND s.spjangcd = :spjangcd
-                    GROUP BY s.cltcd
+                     and s.ioflag = '1'
+                    GROUP BY s.cltcd, s.spjangcd
                 ),
                 union_data_raw AS (
                     -- 전잔액
                     SELECT
-        			    y.id,                                    
-        			    y."Name" AS comp_name,                 
-        			    TO_DATE(:baseDate, 'YYYYMMDD') AS date,
-        			    '전잔액' AS summary,                  
-        			    (SUM(h.yearamt) + SUM(P.totalamt) - SUM(Q.totaccout))::numeric AS amount,
-        			    NULL::text AS itemnm,                 
-        			    NULL::numeric AS misgubun,              
-        			    NULL::text AS iotype,                
-        			    NULL::text AS banknm,                  
-        			    NULL::text AS accnum,                 
-        			    NULL::text AS eumnum,                  
-        			    NULL::text AS eumtodt,                  
-        			    NULL::text AS tradenm,                 
-        			    NULL::numeric AS accin,               
-        			    NULL::numeric AS accout,             
-        			    NULL::text AS memo,                  
-        			    NULL::text AS remark1,
-        			    0 AS remaksseq                     
-                    FROM company y
-                    JOIN lasttbl h ON y.id = h.cltcd
-                    JOIN invoice_data P ON y.id = P.cltcd
-                    JOIN incomtbl Q ON y.id = Q.cltcd
-                    GROUP BY y.id, y."Name"
+                        c.id,
+                        c."Name" AS comp_name,
+                        TO_DATE(:baseDate, 'YYYYMMDD') AS date,
+                        '전잔액' AS summary,
+                        COALESCE(h.yearamt, 0) + COALESCE(q.totsale, 0) - COALESCE(p.totaccout, 0) AS amount,
+                        NULL::text AS itemnm,
+                        NULL::text AS misgubun,
+                        NULL::text AS iotype,
+                        NULL::text AS banknm,
+                        NULL::text AS accnum,
+                        NULL::text AS eumnum,
+                        NULL::text AS eumtodt,
+                        NULL::text AS tradenm,
+                        NULL::numeric AS accout,               \s
+                        NULL::numeric AS totalamt,
+                        NULL::text AS memo,
+                        NULL::text AS remark1,
+                        0 AS remaksseq
+                    FROM company c
+                    LEFT JOIN lasttbl h ON c.id = h.cltcd AND c.spjangcd = h.spjangcd
+                    LEFT JOIN saletbl p ON c.id = p.cltcd AND c.spjangcd = p.spjangcd
+                    LEFT JOIN incomtbl q ON c.id = q.cltcd AND c.spjangcd = q.spjangcd
+                    WHERE c.id = :company AND c.spjangcd = :spjangcd
                     UNION ALL
                     -- 매입
-        				SELECT
-        			    s.cltcd,                                 
-        			    c."Name" AS comp_name,                
-        			    TO_DATE(s.misdate, 'YYYYMMDD'),       
-        			    '매출',                                
-        			    s.totalamt AS amount,                 
-        			    CONCAT(
-        			        MAX(CASE WHEN d.misseq::int = 1 THEN d.itemnm END),
-        			        CASE WHEN COUNT(DISTINCT d.itemnm) > 1 THEN ' 외 ' || (COUNT(DISTINCT d.itemnm) - 1) || '건' ELSE '' END
-        			    ) AS itemnm,                           
-        			    s.misgubun,                            
-        			    NULL::text AS iotype,                 
-        			    NULL::text AS banknm,               
-        			    NULL::text AS accnum,               
-        			    NULL::text AS eumnum,              
-        			    NULL::text AS eumtodt,                
-        			    NULL::text AS tradenm,               
-        			    NULL::numeric AS accin,            
-        			    NULL::numeric AS accout,             
-        			    NULL::text AS memo,                   
-        			    NULL::text AS remark1,
-        			    1 AS remaksseq                   
-        				FROM tb_invoicement s
-        				LEFT JOIN tb_invoicdetail d ON s.misdate = d.misdate AND s.misnum = d.misnum
-        				JOIN company c ON c.id = s.cltcd AND c.spjangcd = s.spjangcd
-        				WHERE s.misdate BETWEEN :start AND :end
-        				  AND s.spjangcd = :spjangcd
-        				  AND s.cltcd = :company
-        				GROUP BY s.cltcd, c."Name", s.misdate, s.totalamt, s.misgubun
+                    SELECT
+                        s.cltcd,
+                        c."Name" AS comp_name,
+                        TO_DATE(s.misdate, 'YYYYMMDD'),
+                        '매입',
+                        NULL::numeric AS amount,
+                        CONCAT(
+                            MAX(CASE WHEN d.misseq::int = 1 THEN d.itemnm END),
+                            CASE WHEN COUNT(DISTINCT d.itemnm) > 1 THEN ' 외 ' || (COUNT(DISTINCT d.itemnm) - 1) || '건' ELSE '' END
+                        ) AS itemnm,
+                        sc."Value" AS misgubun,
+                        NULL::text AS iotype,
+                        NULL::text AS banknm,
+                        NULL::text AS accnum,
+                        NULL::text AS eumnum,
+                        NULL::text AS eumtodt,
+                        NULL::text AS tradenm,
+                        NULL::numeric AS accout,              \s
+                        s.totalamt AS totalamt,
+                        NULL::text AS memo,
+                        s.remark1,
+                        1 AS remaksseq
+                    FROM tb_invoicement s
+                    LEFT JOIN tb_invoicdetail d ON s.misdate = d.misdate AND s.misnum = d.misnum AND s.spjangcd = d.spjangcd
+                   LEFT JOIN sys_code sc ON sc."Code" = s.misgubun::text
+                    JOIN company c ON c.id = s.cltcd AND c.spjangcd = s.spjangcd
+                    WHERE s.misdate BETWEEN :start AND :end
+                      AND s.spjangcd = :spjangcd
+                      AND s.cltcd = :company
+                    GROUP BY s.cltcd, c."Name", s.misdate, s.totalamt, s.misgubun, sc."Value", s.remark1
                     UNION ALL
-                    -- 지급
-                   SELECT
-        		    b.cltcd,                                 
-        		    c."Name" AS comp_name,               
-        		    TO_DATE(b.trdate, 'YYYYMMDD'),        
-        		    '지급액',                             
-        		    NULL::numeric AS amount,             
-        		    NULL::text AS itemnm,                 
-        		    NULL::numeric AS misgubun,             
-        		    sc."Value" AS iotype,               
-        		    b.banknm,                            
-        		    b.accnum,                              
-        		    b.eumnum,                               
-        		    TO_CHAR(TO_DATE(NULLIF(b.eumtodt, ''), 'YYYYMMDD'), 'YYYY-MM-DD') AS eumtodt,  
-        		    tt.tradenm,                           
-        		    b.accin,                   
-        		    b.accout,                     
-        		    b.memo,                               
-        		    b.remark1,
-        		    2 AS remaksseq                  
+                    -- 지급액
+                    SELECT
+                        b.cltcd,
+                        c."Name" AS comp_name,
+                        TO_DATE(b.trdate, 'YYYYMMDD'),
+                        '지급액',
+                        NULL::numeric AS amount,
+                        NULL::text AS itemnm,
+                        NULL::text AS misgubun,
+                        sc."Value" AS iotype,
+                        b.banknm,
+                        b.accnum,
+                        b.eumnum,
+                        TO_CHAR(TO_DATE(NULLIF(b.eumtodt, ''), 'YYYYMMDD'), 'YYYY-MM-DD'),
+                        tt.tradenm,
+                        b.accout,
+                        NULL::numeric AS totalamt,
+                        b.memo,
+                        b.remark1,
+                        2 AS remaksseq
                     FROM tb_banktransit b
                     JOIN company c ON c.id = b.cltcd AND c.spjangcd = b.spjangcd
                     LEFT JOIN sys_code sc ON sc."Code" = b.iotype
                     LEFT JOIN tb_trade tt ON tt.trid = b.trid AND tt.spjangcd = b.spjangcd
-                    WHERE TO_DATE(b.trdate, 'YYYYMMDD') BETWEEN :start AND :end
+                     WHERE TO_DATE(b.trdate, 'YYYYMMDD') BETWEEN TO_DATE(:start, 'YYYYMMDD') AND TO_DATE(:end, 'YYYYMMDD')\s
                       AND b.cltcd = :company
                       AND b.spjangcd = :spjangcd
+                      and b.ioflag = '1'
                 ),
                 union_data AS (
                     SELECT *,
@@ -251,6 +264,15 @@ public class VendorBalanceDetailService {
                     x.date,
                     x.summary,
                     x.amount,
+                    x.accout,
+                    x.totalamt,
+                    SUM(
+                COALESCE(x.amount, 0) + COALESCE(x.totalamt, 0) - COALESCE(x.accout, 0)
+            ) OVER (
+                PARTITION BY x.id
+                ORDER BY x.date, x.remaksseq, x.itemnm
+                ROWS UNBOUNDED PRECEDING
+            ) AS balance,
                     x.itemnm,
                     x.misgubun,
                     x.iotype,
@@ -259,20 +281,8 @@ public class VendorBalanceDetailService {
                     x.eumnum,
                     x.eumtodt,
                     x.tradenm,
-                    x.accin,
-                    x.accout,
-                    x.remark1,
                     x.memo,
-                    SUM(
-                         CASE
-                             WHEN x.summary = '지급액' THEN -1 * COALESCE(x.accout, 0)
-                             ELSE 0
-                         END
-                     ) OVER (
-                         PARTITION BY x.id
-                         ORDER BY x.date, x.remaksseq
-                         ROWS UNBOUNDED PRECEDING
-                     ) AS balance
+                    x.remark1
                 FROM union_data x
                 ORDER BY x.id, x.date, x.remaksseq
         """;

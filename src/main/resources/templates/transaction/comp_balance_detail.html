@@ -92,8 +92,22 @@
           showMarquee: true,
           isReadOnly: true,
           formatItem: (sender, e) => {
+            const col = sender.columns[e.col];
+            const item = sender.rows[e.row]?.dataItem;
+
+            // 헤더 중앙 정렬
             if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
               e.cell.style.textAlign = 'center';
+            }
+
+            // ✅ 날짜 셀 커스터마이징
+            if (e.panel.cellType === wijmo.grid.CellType.Cell && col.binding === 'date') {
+              if (item?.summary === '전잔액') {
+                e.cell.textContent = '전잔액';  // 날짜 대신 전잔액 표시
+                e.cell.style.textAlign = 'center';
+                e.cell.style.fontWeight = 'bold';
+                e.cell.style.color = '#444';
+              }
             }
           },
           columns: [

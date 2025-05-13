@@ -84,6 +84,7 @@ public class CompBalanceDetailServicr {
             WHERE s.trdate BETWEEN :start AND :end
               AND s.cltcd = :company
               AND s.spjangcd = :spjangcd
+              and s.ioflag = '0'
             GROUP BY s.cltcd, s.spjangcd
         ),
         union_data_raw AS (
@@ -211,7 +212,7 @@ public class CompBalanceDetailServicr {
 //    log.info("거래처별잔액명세서(입금) read SQL: {}", sql);
 //    log.info("SQL Parameters: {}", paramMap.getValues());
 
-  /*  byte[] keyBytes = getKeyFromFile();
+/*    byte[] keyBytes = getKeyFromFile();
     EncryptionUtil util = new EncryptionUtil();
 
     for (Map<String, Object> row : items) {
@@ -229,6 +230,5 @@ public class CompBalanceDetailServicr {
     }*/
     return items;
   }
-
 
 }
