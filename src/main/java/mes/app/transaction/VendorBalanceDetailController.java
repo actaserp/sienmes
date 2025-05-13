@@ -1,6 +1,7 @@
 package mes.app.transaction;
 
 import lombok.extern.slf4j.Slf4j;
+import mes.app.aop.DecryptField;
 import mes.app.transaction.service.VendorBalanceDetailService;
 import mes.domain.model.AjaxResult;
 import mes.domain.services.SqlRunner;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Timestamp;
 
 @Slf4j
 @RestController
@@ -24,6 +24,7 @@ public class VendorBalanceDetailController {
     VendorBalanceDetailService vendorBalanceDetailService;
 
     // 거래처별 잔액 명세(출금) 리스트 조회
+    @DecryptField(columns  = {"accnum"}, masks = 4)
     @GetMapping("/read")
     public AjaxResult getEquipmentRunChart(
             @RequestParam(value="srchStartDt", required=false) String start,

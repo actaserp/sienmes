@@ -1,6 +1,7 @@
 package mes.app.transaction;
 
 import lombok.extern.slf4j.Slf4j;
+import mes.app.aop.DecryptField;
 import mes.app.transaction.service.DepositListService;
 import mes.domain.model.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ public class DepositListController {
   DepositListService depositListService;
 
   // 입금현황조회
+  @DecryptField(columns  = {"accnum"}, masks = 4)
   @GetMapping("/read")
   public AjaxResult getDepositList(
       @RequestParam(value="cboDepositType", required=false) String depositType,

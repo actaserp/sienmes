@@ -211,23 +211,6 @@ public class CompBalanceDetailServicr {
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
 //    log.info("거래처별잔액명세서(입금) read SQL: {}", sql);
 //    log.info("SQL Parameters: {}", paramMap.getValues());
-
-/*    byte[] keyBytes = getKeyFromFile();
-    EncryptionUtil util = new EncryptionUtil();
-
-    for (Map<String, Object> row : items) {
-      Object accnumEnc = row.get("accnum");
-      if (accnumEnc instanceof String encValue && !encValue.isBlank()) {
-        try {
-          String decrypted = util.decrypt(encValue, keyBytes);
-          String masked = decrypted.replaceAll("(?<=^.{4}).", "*");
-          row.put("accnum", masked);
-        } catch (Exception e) {
-          log.warn("계좌번호 복호화 실패", e);
-          row.put("accnum", "****");
-        }
-      }
-    }*/
     return items;
   }
 

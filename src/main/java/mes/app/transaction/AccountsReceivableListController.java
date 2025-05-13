@@ -1,6 +1,7 @@
 package mes.app.transaction;
 
 import lombok.extern.slf4j.Slf4j;
+import mes.app.aop.DecryptField;
 import mes.app.transaction.service.AccountsReceivableListServie;
 import mes.domain.model.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -42,21 +42,17 @@ public class AccountsReceivableListController {
 
 
   // 미수금 현황 상세
+  @DecryptField(columns  = {"accnum"}, masks = 4)
   @GetMapping("/DetailList")
   public AjaxResult getDetailList(
       @RequestParam(value="srchStartDt", required=false) String start_date,
       @RequestParam(value="srchEndDt", required=false) String end_date,
       @RequestParam(value = "code", required=false) String company,
+      @RequestParam(value = "spjangcd") String spjangcd,
       HttpServletRequest request) {
-    log.info("미수금 현황 상세 read ---  :start:{}, end:{} ,company:{} ", start_date, end_date, company);
+    log.info("미수금 현황 상세 read ---  :start:{}, end:{} ,company:{},spjangcd:{} ", start_date, end_date, company,spjangcd);
 
-    start_date = start_date + " 00:00:00";
-    end_date = end_date + " 23:59:59";
-
-    Timestamp start = Timestamp.valueOf(start_date);
-    Timestamp end = Timestamp.valueOf(end_date);
-
-    List<Map<String, Object>> items = this.accountsReceivableListServie.getDetailList(start, end, company);
+    List<Map<String, Object>> items = this.accountsReceivableListServie.getDetailList(start_date, end_date, company,spjangcd);
 
     AjaxResult result = new AjaxResult();
     result.data = items;

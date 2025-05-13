@@ -1,6 +1,7 @@
 package mes.app.transaction;
 
 import lombok.extern.slf4j.Slf4j;
+import mes.app.aop.DecryptField;
 import mes.app.transaction.service.CompBalanceDetailServicr;
 import mes.domain.model.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +23,7 @@ public class CompBalanceDetailController {
   CompBalanceDetailServicr compBalanceDetailServicr;
 
   // 거래처잔액 명세(입금 관리)
+  @DecryptField(columns  = {"accnum"}, masks = 4)
   @GetMapping("/read")
   public AjaxResult getList(
       @RequestParam(value="srchStartDt", required=false) String start,

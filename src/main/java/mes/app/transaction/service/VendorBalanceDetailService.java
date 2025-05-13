@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -19,85 +18,6 @@ import java.util.Map;
 public class VendorBalanceDetailService {
   @Autowired
   SqlRunner sqlRunner;
-
-  // 지급현황 리스트 조회
- /* public List<Map<String, Object>> getPaymentList(String date_from, String date_to, Integer company, String spjangcd) {
-
-    MapSqlParameterSource dicParam = new MapSqlParameterSource();
-    dicParam.addValue("date_from", date_from);
-    dicParam.addValue("date_to", date_to);
-    dicParam.addValue("companyCode", company);
-    dicParam.addValue("spjangcd", spjangcd);
-
-    String sql = """
-              WITH detail_summary AS (
-                        SELECT 
-                            d.misdate,
-                            d.misnum,
-                            MIN(d.itemnm) AS 대표항목,
-                            COUNT(*) - 1 AS 기타건수
-                        FROM tb_invoicdetail d
-                        GROUP BY d.misdate, d.misnum
-                    ), invoice_data AS (
-                        SELECT
-                            i.cltcd,
-                            i.misdate,
-                            i.totalamt,
-                            ds.대표항목,
-                            CASE
-                                WHEN ds.기타건수 > 0 THEN ds.대표항목 || ' 외 ' || ds.기타건수 || '건'
-                                ELSE ds.대표항목
-                            END AS item_summary
-                        FROM tb_invoicement i
-                        LEFT JOIN detail_summary ds
-                            ON i.misdate = ds.misdate AND i.misnum = ds.misnum
-                    ), bank_data AS (
-                     SELECT
-                         b.cltcd,
-                         b.accout,
-                         b.balance,
-                         sc."Value" as iotype,
-                         b.accnum ,
-                         b.remark1,
-                         b.eumnum,
-                        CASE 
-                          WHEN b.eumtodt IS NULL OR b.eumtodt = '' THEN NULL
-                          ELSE TO_CHAR(TO_DATE(b.eumtodt, 'YYYYMMDD'), 'YYYY-MM-DD')
-                        END AS eumtodt,
-                         COALESCE(NULLIF(TRIM(b.banknm), ''), b.eumnum) AS bank_info,
-                         b.eumtodt AS todate,
-                         tt.tradenm as trid
-                     FROM tb_banktransit b
-                     left join  sys_code sc on sc."Code" = b.iotype
-                     left join tb_trade tt on b.trid = tt.trid and b.spjangcd = tt.spjangcd
-                     )
-                    SELECT 
-                         c."Name",
-                         i.misdate ,
-                         i.totalamt ,
-                         i.item_summary,
-                         bd.accout ,
-                         bd.accnum,
-                         bd.balance,
-                         bd.iotype,
-                         bd.bank_info,
-                         bd.todate,
-                         bd.remark1,
-                         bd.trid,
-                         bd.eumnum,
-                         bd.eumtodt
-                    FROM company c
-                    LEFT JOIN invoice_data i ON c.id = i.cltcd 
-                    LEFT JOIN bank_data bd ON c.id = bd.cltcd 
-        """;
-    sql += " WHERE c.id = :companyCode ";
-
-    sql += " ORDER BY c.\"Name\", i.misdate NULLS LAST, bd.todate NULLS LAST";
-    List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
-    log.info("거래처별잔액명세서(출금) read SQL: {}", sql);
-    log.info("SQL Parameters: {}", dicParam.getValues());
-    return items;
-  }*/
 
   public List<Map<String, Object>> getPaymentList(String start, String end, String company, String spjangcd) {
 
@@ -181,7 +101,7 @@ public class VendorBalanceDetailService {
                         NULL::text AS eumnum,
                         NULL::text AS eumtodt,
                         NULL::text AS tradenm,
-                        NULL::numeric AS accout,               \s
+                        NULL::numeric AS accout,         
                         NULL::numeric AS totalamt,
                         NULL::text AS memo,
                         NULL::text AS remark1,
@@ -210,7 +130,7 @@ public class VendorBalanceDetailService {
                         NULL::text AS eumnum,
                         NULL::text AS eumtodt,
                         NULL::text AS tradenm,
-                        NULL::numeric AS accout,              \s
+                        NULL::numeric AS accout,  
                         s.totalamt AS totalamt,
                         NULL::text AS memo,
                         s.remark1,
@@ -248,7 +168,7 @@ public class VendorBalanceDetailService {
                     JOIN company c ON c.id = b.cltcd AND c.spjangcd = b.spjangcd
                     LEFT JOIN sys_code sc ON sc."Code" = b.iotype
                     LEFT JOIN tb_trade tt ON tt.trid = b.trid AND tt.spjangcd = b.spjangcd
-                     WHERE TO_DATE(b.trdate, 'YYYYMMDD') BETWEEN TO_DATE(:start, 'YYYYMMDD') AND TO_DATE(:end, 'YYYYMMDD')\s
+                     WHERE TO_DATE(b.trdate, 'YYYYMMDD') BETWEEN TO_DATE(:start, 'YYYYMMDD') AND TO_DATE(:end, 'YYYYMMDD') 
                       AND b.cltcd = :company
                       AND b.spjangcd = :spjangcd
                       and b.ioflag = '1'

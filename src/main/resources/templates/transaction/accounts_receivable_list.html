@@ -117,7 +117,7 @@
           },
           columns: [
             {binding: 'cltcd', header: '코드', width: 100, align: 'center'},
-            {binding: 'cltName', header: '거래처명', width: 130, align: 'right'},
+            {binding: 'clt_name', header: '거래처명', width: 130, align: 'center'},
             {binding: 'receivables', header: '전잔액', width: 200, align: 'right'},
             {binding: 'sales', header: '매출액', width: 200, align: 'right'},
             {binding: 'AmountDeposited', header: '입금액', width: 200, align: 'right'},
@@ -130,9 +130,18 @@
         this.grid.downloadFileName = '미수금 집계 현황';
         this.grid.hostElement.addEventListener('dblclick', function (e) {
           let selectedItem = _this.grid.selectedItems[0];
-          if (!selectedItem) return;
 
-          let code = selectedItem.code; // 선택된 거래처 코드
+          if (!selectedItem) {
+            console.warn('선택된 항목이 없습니다.');
+            return;
+          }
+
+          const code = selectedItem.code || selectedItem.cltcd;
+          const name = selectedItem.clt_name || selectedItem.cltName;
+
+          // ✅ input에 값 설정
+          document.getElementById('cboCompanyHidden').value = code;
+          document.getElementById('cboCompany').value = name;
 
           // 상세 데이터 다시 조회
           _this.loadDetailData(code);
@@ -155,7 +164,6 @@
             receivables: getSum('receivables'),
             sales: getSum('sales'),
             AmountDeposited: getSum('AmountDeposited'),
-            balance: getSum('balance'),
           };
         });
 
@@ -166,24 +174,36 @@
           showMarquee: true,
           isReadOnly: true,
           formatItem: (sender, e) => {
+            const col = sender.columns[e.col];
+            const item = sender.rows[e.row]?.dataItem;
+
             if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
               e.cell.style.textAlign = 'center';
             }
+            if (e.panel.cellType === wijmo.grid.CellType.Cell && col.binding === 'date') {
+              if (item?.summary === '전잔액') {
+                e.cell.textContent = '전잔액';  // 날짜 대신 전잔액 표시
+                e.cell.style.textAlign = 'center';
+                e.cell.style.fontWeight = 'bold';
+                e.cell.style.color = '#444';
+              }
+            }
           },
           columns: [
-            {binding: 'BaljuTotalPrice', header: '거래처명', width: 150, align: 'left'},
-            {binding: 'BaljuPrice', header: '일자', width: 100, align: 'center'},
-            {binding: 'BaljuVat', header: '구분', width: 100, align: 'center'},
-            {binding: 'StateName', header: '금액', width: 150, align: 'right'},
-            {binding: 'StateName2', header: '잔액', width: 150, align: 'right'},
-            {binding: 'SujuQty3', header: '품목', width: 120, align: 'center'},
-            {binding: 'SujuQty2', header: '입급형태', width: 100, align: 'center'},
-            {binding: 'SujuQty3', header: '은행', width: 120, align: 'center'},
-            {binding: 'ShipmentStateName', header: '계좌', width: 180, align: 'center'},
-            {binding: 'SujuQty3', header: '어음번호', width: 150, align: 'center'},
-            {binding: 'ShipmentStateName', header: '만기일', width: 120, align: 'center'},
-            {binding: 'DueDate', header: '거래구분', width: 120, align: 'center'},
-            {binding: 'Description', header: '메모', width: 200, align: 'center'}
+            {binding: 'comp_name', header: '거래처명', width: 150, align: 'center'},
+            {binding: 'date', header: '일자', width: 100, align: 'center'},
+            {binding: 'summary', header: '구분', width: 100, align: 'center'},
+            {binding: 'total_amount', header: '금액', width: 150, align: 'right'},
+            {binding: 'balance', header: '잔액', width: 150, align: 'right'},
+            {binding: 'itemnm', header: '품목', width: 120, align: 'center'},
+            {binding: 'iotype', header: '입급형태', width: 100, align: 'center'},
+            {binding: 'banknm', header: '은행', width: 120, align: 'center'},
+            {binding: 'accnum', header: '계좌', width: 180, align: 'center'},
+            {binding: 'eumnum', header: '어음번호', width: 150, align: 'center'},
+            {binding: 'eumtodt', header: '만기일', width: 120, align: 'center'},
+            {binding: 'tradenm', header: '거래구분', width: 120, align: 'center'},
+            {binding: 'remark1', header: '적요', width: 200, align: 'center'},
+            {binding: 'memo', header: '메모', width: 200, align: 'center'}
           ],
           itemsSource: this.viewData, // 데이터를 설정할 배열
         });
@@ -202,55 +222,52 @@
           const SalesTotal = this.grid3.columnFooters.rows[0];
           const DepositTotal = this.grid3.columnFooters.rows[1];
 
-          const getSumByCondition = (field, conditionField, conditionValue) => {
-            return rows
-              .filter(r => r.dataItem[conditionField] === conditionValue) // 조건 필터
-              .map(r => +r.dataItem[field] || 0) // 해당 필드 숫자로 변환
-              .reduce((a, b) => a + b, 0); // 합산
-          };
-          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+          const getSumBySummary = (field, summaryType) =>
+            rows
+              .filter(r => r.dataItem.summary === summaryType)
+              .map(r => +r.dataItem[field] || 0)
+              .reduce((a, b) => a + b, 0);
 
+          // 매출 합계
           SalesTotal.dataItem = {
-            BaljuTotalPrice: '합계',
-            BaljuVat: '매출계',
-            // StateName: getSumByCondition('StateName', 'BaljuVat', '매출'),
-            // StateName2: getSumByCondition('StateName2', 'BaljuVat', '매출'),
+            comp_name: '합계',
+            summary: '매출계',
+            total_amount: getSumBySummary('total_amount', '매출')
           };
 
+          // 입금 합계
           DepositTotal.dataItem = {
-            BaljuVat: '입금계',
-            // StateName: getSumByCondition('StateName', 'BaljuVat', '입금'),
-            // StateName2: getSumByCondition('StateName2', 'BaljuVat', '입금'),
+            summary: '입금계',
+            total_amount: getSumBySummary('total_amount', '입금')
           };
-
         });
-
       }
 
       searchMainData() {
         let _this = this;
         let url = '/api/transaction/AccRList'
         let param = {
-          'srchStartDt' : $("#srchStartDt").val(),
-          'srchEndDt' : $("#srchEndDt").val(),
-          'cboCompany' : $("#cboCompanyHidden").val(),
+          'srchStartDt': $("#srchStartDt").val(),
+          'srchEndDt': $("#srchEndDt").val(),
+          'cboCompany': $("#cboCompanyHidden").val(),
           spjangcd: this.spjangcd.val()
         }
         // 집계 데이터 조회
-        AjaxUtil.getAsyncData(url+'/TotalList', param, function (result) {
+        AjaxUtil.getAsyncData(url + '/TotalList', param, function (result) {
           if (result != null && result.data) {
             _this.grid.itemsSource = result.data; // 집계 grid에 바인딩
           }
         });
       }
+
       loadDetailData(code) {
         let _this = this;
         let url = '/api/transaction/AccRList/DetailList';
         let param = {
-          'srchStartDt' : $("#srchStartDt").val(),
-          'srchEndDt' : $("#srchEndDt").val(),
-          'cboCompany' : $("#cboCompanyHidden").val(),
-          'code' : code , // 🔥 여기 코드 필터
+          'srchStartDt': $("#srchStartDt").val(),
+          'srchEndDt': $("#srchEndDt").val(),
+          'cboCompany': $("#cboCompanyHidden").val(),
+          'code': code, // 🔥 여기 코드 필터
           spjangcd: this.spjangcd.val()
         };
 
@@ -262,10 +279,12 @@
           }
         });
       }
+
       switchToDetailTab() {
         $('a[href="#tabs_sales_details"]').click();
       }
     }
+
     let page = null;
 
     $(document).ready(function (e) {
@@ -284,28 +303,39 @@
       $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(monthStart));
       $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(today));
 
-
       page.searchMainData();
 
       // 검색
       $('#btnSearch').click(function (e) {
-        if ($('#cboCompanyHidden').val() === '' && $('#cboCompany').val() !== '') {
+        const companyCode = $('#cboCompanyHidden').val();
+
+        if (companyCode === '' && $('#cboCompany').val() !== '') {
           Alert.alert('', '업체명은 업체검색 버튼을 통해서 \n 검색해주세요');
           return;
         }
+        // 집계 조회
         page.searchMainData();
+        //상세 데이터도 같이 조회
+        if (companyCode !== '') {
+          page.loadDetailData(companyCode);
+        } else {
+          // 회사 선택 안 된 경우 상세 그리드 초기화
+          page.grid3.itemsSource = [];
+        }
       });
-
       $('#btnGridSetting').click(function (e) {
         let _this = this;
         let fix_cols = page.grid_config.frozenColumnIndex;
-        page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
+        page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, {
+          'order_fix': false,
+          'fix_cols': fix_cols
+        });
       });
       $('#btnCompanySearch').click(function () {
         let poppage = new PopCompComponent();
         let $poppage = $(poppage);
         let searchcallback = function (items) {
-          console.log('items : ',items);
+          console.log('items : ', items);
           document.getElementById('cboCompany').value = items.compname;
           document.getElementById('cboCompanyHidden').value = items.id;
         };
