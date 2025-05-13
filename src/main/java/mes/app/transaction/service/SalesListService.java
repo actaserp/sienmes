@@ -155,6 +155,8 @@ public class SalesListService {
             Object cnt = item.get("cnt");
             Object supply = item.get("supplycost");
             Object tax = item.get("taxtotal");
+            //Object tax = item.get("taxtotal");
+
 
             int parsedCnt = cnt != null ? UtilClass.parseInteger(cnt) : 0;
             int parsedSupply = supply != null ? UtilClass.parseInteger(supply) : 0;
@@ -163,6 +165,8 @@ public class SalesListService {
             cntSum += parsedCnt;
             supplySum += parsedSupply;
             taxSum += parsedTax;
+
+            //if()
 
         }
 

@@ -1,6 +1,10 @@
 package mes.app.util;
 
+import mes.Encryption.EncryptionKeyProvider;
+import mes.Encryption.EncryptionUtil;
+
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -106,4 +110,47 @@ public class UtilClass {
         return obj == null ? "" : obj.toString().trim();
     }
 
+    /**
+     * 요소를 순회하며 지정된 컬럼의 암호화된 값들을 복호화한 뒤 일부 자릿수를 마스킹 처리해 덮어씌우는 메서드
+     *
+     * @param list         암호화된 값을 가진 Map 객체들의 리스트
+     * @param col          복호화 및 마스킹할 컬럼 이름
+     * @param maskLength   복호화 후 마스킹할 길이 (끝에서 몇 자리 마스킹할지 지정)
+     * @throws Exception   복호화 도중 예외 발생 시
+     */
+    public static void decryptEachItem(List<Map<String, Object>> list, String col, int maskLength) throws IOException {
+        byte[] key = EncryptionKeyProvider.getKey();
+
+        for (int i = 0; i < list.size(); i++) {
+            Map<String, Object> item = list.get(i);
+            Object encrypt = item.get(col);
+            String parsedEncrypt = encrypt != null ? encrypt.toString() : "";
+
+            if (!parsedEncrypt.isEmpty()) {
+                try {
+                    // 복호화 시도
+                    String decrypted = EncryptionUtil.decrypt(parsedEncrypt, key);
+                    String masked = applyMasking(decrypted, maskLength);
+                    item.put(col, masked);
+                } catch (Exception e) {
+                    // 복호화 불가능한 값이므로 평문으로 간주, 그대로 유지
+                }
+            }
+        }
+    }
+
+    /**
+     * 문자열의 끝에서부터 지정된 길이만큼 마스킹 처리하는 메서드
+     *
+     * @param input       원본 문자열
+     * @param maskLength  마스킹할 길이
+     * @return 마스킹된 문자열
+     */
+    private static String applyMasking(String input, int maskLength) {
+        if (input == null || input.length() <= maskLength) {
+            return "*".repeat(Math.max(0, input.length())); // 전체 마스킹
+        }
+        int visibleLength = input.length() - maskLength;
+        return input.substring(0, visibleLength) + "*".repeat(maskLength);
+    }
 }
