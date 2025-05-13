@@ -934,8 +934,6 @@
                 $('input[id$=".Tax"]').removeAttr('readonly');
                 $('#WriteType1').prop('checked', true);
                 updateTaxLayout('과세');
-            } else if (taxType === '개인'){
-                $('#InvoiceeCorpNum').attr('readonly', true);
             }
 
             recalculateTaxesIfNeeded();
@@ -946,8 +944,9 @@
 
             if (taxType === '개인'){
                 $('#InvoiceeCorpNum')
-                    .attr('readonly', true)
-                    .css('width', '100%');
+                    .removeAttr('readonly')
+                    .css('width', '100%')
+                    .val('');
                 $('#btnSelectInvoicee').hide();
                 $('#InvoiceeTaxRegID').attr('readonly', true);
                 $('#InvoiceeCEOName').attr('readonly', true);
@@ -960,7 +959,8 @@
             } else if (taxType === '외국인') {
                 $('#InvoiceeCorpNum')
                     .attr('readonly', true)
-                    .css('width', '100%');
+                    .css('width', '100%')
+                    .val("999999-9999999");
                 $('#btnSelectInvoicee').hide();
                 $('#InvoiceeTaxRegID').attr('readonly', true);
                 $('#InvoiceeCEOName').attr('readonly', true);
@@ -974,7 +974,8 @@
             } else if (taxType === '사업자') {
                 $('#InvoiceeCorpNum')
                     .css('width', '80%')
-                    .removeAttr('readonly');
+                    .removeAttr('readonly')
+                    .val('');
                 $('#btnSelectInvoicee').show();
                 $('#InvoiceeTaxRegID').removeAttr('readonly');
                 $('#InvoiceeCEOName').removeAttr('readonly');
@@ -1327,6 +1328,22 @@
 
 
 
+        // 사업자번호 또는 주민등록번호 입력 시 자동 포맷 적용
+        $(document).on('input', '#InvoicerCorpNum, #InvoiceeCorpNum', function () {
+            const isInvoicee = $(this).attr('id') === 'InvoiceeCorpNum';
+            const invoiceeType = $('input[name="InvoiceeType"]:checked').val(); // 라디오 버튼일 경우
+
+            let rawValue = $(this).val();
+
+            if (isInvoicee && (invoiceeType === '개인' || invoiceeType === '외국인')) {
+                $(this).attr('maxlength', 14); // 주민등록번호는 총 14자리 (하이픈 포함)
+                $(this).val(formatRRN(rawValue));
+            } else {
+                $(this).attr('maxlength', 12); // 사업자번호 최대 길이 (하이픈 포함)
+                $(this).val(formatBizNum(rawValue));
+            }
+        });
+
         // 사업자등록번호 포맷팅 (###-##-#####)
         function formatBizNum(value) {
             value = value.replace(/[^0-9]/g, '').slice(0, 10);
@@ -1338,10 +1355,15 @@
             return value;
         }
 
-        // 사업자번호 입력 시 자동 포맷 적용
-        $(document).on('input', '#InvoicerCorpNum, #InvoiceeCorpNum', function () {
-            $(this).val(formatBizNum($(this).val()));
-        });
+        // 주민등록번호 포맷팅 (######-#######)
+        function formatRRN(value) {
+            value = value.replace(/[^0-9]/g, '').slice(0, 13);
+            if (value.length > 6) {
+                return value.slice(0, 6) + '-' + value.slice(6);
+            }
+            return value;
+        }
+
 
         // 전화번호 포맷팅 (지역번호 감지)
         function formatPhoneNumber(value) {
