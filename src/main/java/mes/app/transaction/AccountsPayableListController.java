@@ -1,6 +1,7 @@
 package mes.app.transaction;
 
 import lombok.extern.slf4j.Slf4j;
+import mes.app.aop.DecryptField;
 import mes.app.transaction.service.AccountsPayableListService;
 import mes.domain.model.AjaxResult;
 import mes.domain.services.SqlRunner;
@@ -38,11 +39,12 @@ public class AccountsPayableListController {
     }
 
     // 미지급현황 상세 리스트 조회
-    @GetMapping("/detail")
+    @DecryptField(columns  = {"accnum"}, masks = 4)
+    @GetMapping("/DetailList")
     public AjaxResult getEquipmentRunChartDetail(
             @RequestParam(value="srchStartDt", required=false) String start,
             @RequestParam(value="srchEndDt", required=false) String end,
-            @RequestParam(value="companyCode", required=false) Integer company,
+            @RequestParam(value = "code", required=false) String company,
             @RequestParam(value = "spjangcd") String spjangcd,
             HttpServletRequest request) {
         AjaxResult result = new AjaxResult();

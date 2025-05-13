@@ -1,6 +1,7 @@
 package mes.app.transaction;
 
 import lombok.extern.slf4j.Slf4j;
+import mes.app.aop.DecryptField;
 import mes.app.transaction.service.PaymentListService;
 import mes.domain.model.AjaxResult;
 import mes.domain.services.SqlRunner;
@@ -26,6 +27,7 @@ public class PaymentListController {
     PaymentListService paymentListService;
 
     // 지급현황 리스트 조회
+    @DecryptField(columns  = {"accnum"}, masks = 4)
     @GetMapping("/read")
     public AjaxResult getEquipmentRunChart(
         @RequestParam(value="cboDepositType", required=false) String depositType,

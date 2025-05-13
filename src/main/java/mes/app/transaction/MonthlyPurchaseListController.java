@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/transaction/monthly_purchase_list")
@@ -20,17 +22,46 @@ public class MonthlyPurchaseListController {
     @Autowired
     MonthlyPurchaseListService monthlyPurchaseListService;
 
-    // 지급현황 리스트 조회
-    @GetMapping("/read")
-    public AjaxResult getEquipmentRunChart(
-            @RequestParam(value="cboYear", required=false) String cboYear,
-            @RequestParam(value="cboCompany", required=false) Integer cboCompany,
-            @RequestParam(value = "spjangcd") String spjangcd,
-            HttpServletRequest request) {
+    @GetMapping("/PurchaseDetails")
+    public AjaxResult getMonthlyPurchaseList(
+        @RequestParam(value="cboYear",required=false) String cboYear,
+        @RequestParam(value="cboCompany",required=false) Integer cboCompany,
+        @RequestParam(value = "spjangcd") String spjangcd
+    ) {
+        //log.info("월별 매입현황(매입)read : cboYear:{}, cboCompany:{} , spjangcd:{}", cboYear, cboCompany,spjangcd);
+        List<Map<String,Object>> items = this.monthlyPurchaseListService.getMonthDepositList(cboYear,cboCompany, spjangcd);
+
         AjaxResult result = new AjaxResult();
-
-        result.data = monthlyPurchaseListService.getPurchaseList(cboYear, cboCompany, spjangcd);
-
+        result.data = items;
         return result;
     }
+
+    @GetMapping("/ProvisionRead")
+    public AjaxResult getMonthDepositList(
+        @RequestParam(value="cboYear",required=false) String cboYear,
+        @RequestParam(value="cboCompany",required=false) Integer cboCompany,
+        @RequestParam(value = "spjangcd") String spjangcd
+    ) {
+        //log.info("월별 매입현황(지급) read : cboYear:{}, cboCompany:{} , spjangcd:{} ", cboYear, cboCompany, spjangcd);
+        List<Map<String,Object>> items = this.monthlyPurchaseListService.getProvisionList(cboYear,cboCompany, spjangcd);
+
+        AjaxResult result = new AjaxResult();
+        result.data = items;
+        return result;
+    }
+
+    @GetMapping("/PaymentRead")
+    public AjaxResult getMonthReceivableList(
+        @RequestParam(value="cboYear",required=false) String cboYear,
+        @RequestParam(value="cboCompany",required=false) Integer cboCompany,
+        @RequestParam(value = "spjangcd") String spjangcd
+    ) {
+        //log.info("월별 매입현황(미지급금) read : cboYear:{}, cboCompany:{} , spjangcd:{} ", cboYear, cboCompany,spjangcd);
+        List<Map<String,Object>> items = this.monthlyPurchaseListService.getPaymentList(cboYear,cboCompany, spjangcd);
+
+        AjaxResult result = new AjaxResult();
+        result.data = items;
+        return result;
+    }
+
 }

@@ -51,10 +51,11 @@ public class MonthlySalesListController {
   @GetMapping("/ReceivableRead")
   public AjaxResult getMonthReceivableList(
       @RequestParam(value="cboYear",required=false) String cboYear,
-      @RequestParam(value="cboCompany",required=false) Integer cboCompany
+      @RequestParam(value="cboCompany",required=false) Integer cboCompany,
+      @RequestParam(value = "spjangcd") String spjangcd
   ) {
-   //log.info("월별 매출현황(미수금) read : cboYear:{}, cboCompany:{} ", cboYear, cboCompany);
-    List<Map<String,Object>> items = this.monthlySalesListService.getMonthReceivableList(cboYear,cboCompany);
+   //log.info("월별 매출현황(미수금) read : cboYear:{}, cboCompany:{} , spjangcd:{} ", cboYear, cboCompany,spjangcd);
+    List<Map<String,Object>> items = this.monthlySalesListService.getMonthReceivableList(cboYear,cboCompany, spjangcd);
 
     AjaxResult result = new AjaxResult();
     result.data = items;

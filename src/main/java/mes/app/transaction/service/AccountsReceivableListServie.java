@@ -83,6 +83,7 @@ public class AccountsReceivableListServie {
              FROM tb_banktransit
              WHERE TRDATE BETWEEN :start AND :end
               AND spjangcd = :spjangcd
+              AND ioflag ='0'
              GROUP BY cltcd
          ) b ON m.id = b.cltcd
          WHERE COALESCE(y.yearamt, 0) + COALESCE(s.TOTALAMT, 0) - COALESCE(b.ACCIN, 0) <> 0

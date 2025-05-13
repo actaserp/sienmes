@@ -50,7 +50,7 @@ public class AccountsReceivableListController {
       @RequestParam(value = "code", required=false) String company,
       @RequestParam(value = "spjangcd") String spjangcd,
       HttpServletRequest request) {
-    log.info("미수금 현황 상세 read ---  :start:{}, end:{} ,company:{},spjangcd:{} ", start_date, end_date, company,spjangcd);
+    //log.info("미수금 현황 상세 read ---  :start:{}, end:{} ,company:{},spjangcd:{} ", start_date, end_date, company,spjangcd);
 
     List<Map<String, Object>> items = this.accountsReceivableListServie.getDetailList(start_date, end_date, company,spjangcd);
 

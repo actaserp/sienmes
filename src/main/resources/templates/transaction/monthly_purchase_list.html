@@ -111,7 +111,7 @@
                     return {
                         binding: `mon_${month}`,
                         header: `${month}월`,
-                        width: 80,
+                        width: 100,
                         align: 'right',
                         allowSorting: false,
                         format: 'n0',
@@ -133,12 +133,12 @@
                         }
                     },
                     columns: [
-                        { binding: 'Name', header: '거래처명', width: 170, align: 'center', allowMerging: true },
-                        { binding: 'misgubun', header: '구분', width: 70, align: 'center', allowMerging: true },
-                        { binding: 'icerdeptnm', header: '부서', width: 130, align: 'left', allowMerging: true },
-                        { binding: 'icerpernm', header: '담당자', width: 100, align: 'center', allowSorting: false },
-                        ...monthColumns,  // ✅ 여기에서 월별 컬럼을 삽입
-                        { binding: 'total', header: '합계', width: 200, align: 'center', allowSorting: false }
+                        { binding: 'comp_name', header: '거래처명', width: 250, align: 'center', allowMerging: false },
+                        { binding: 'misgubun', header: '매출구분', width: 90, align: 'center', allowMerging: false },
+                        { binding: 'iverdeptnm', header: '부서', width: 90, align: 'center', allowMerging: false },
+                        { binding: 'iverpernm', header: '담당자', width: 100, align: 'center', allowSorting: false },
+                        ...monthColumns,  //여기에서 월별 컬럼을 삽입
+                        { binding: 'total_sum', header: '합계', width: 120, align: 'right', allowSorting: false },
                     ],
                     itemsSource: this.viewData,
                 });
@@ -148,7 +148,7 @@
 
 
                 this.grid3 = new wijmo.grid.FlexGrid('#deposit-grid', {
-                    frozenColumns: 4,
+                    frozenColumns: 1,
                     frozenRows: 0,
                     allowSorting: wijmo.grid.AllowSorting.MultiColumn,
                     selectionMode: wijmo.grid.SelectionMode.Row,
@@ -162,20 +162,20 @@
                         }
                     },
                     columns: [
-                        { binding: 'Name', header: '거래처명', width: 170, align: 'center', allowMerging: true },
-                        { binding: 'mat_code', header: '구분', width: 70, align: 'center', allowMerging: true },
-                        { binding: 'mat_name', header: '부서', width: 130, align: 'left', allowMerging: true },
-                        { binding: 'unit_name', header: '담당자', width: 100, align: 'center', allowSorting: false },
+                        { binding: 'comp_name', header: '거래처명', width: 250, align: 'center', allowMerging: true },
+                        /*{ binding: 'deposit_type', header: '입금형태', width: 90, align: 'center', allowMerging: true },
+                        { binding: 'icerdeptnm', header: '부서', width: 130, align: 'center', allowMerging: true },
+                        { binding: 'icerceonm', header: '담당자', width: 100, align: 'center', allowSorting: false },*/
                         ...monthColumns,
-                        { binding: 'total', header: '합계', width: 200, align: 'center', allowSorting: false },
+                        { binding: 'total_sum', header: '합계', width: 120, align: 'right', allowSorting: false },
                     ],
                     itemsSource: this.viewData,
                 });
 
+
                 this.grid3.rowHeaders.columns.splice(0, 1);
                 new FlexGridContextMenu(this.grid3);
                 this.grid3.downloadFileName = '월별 매입 현황(지급)';
-
 
                 this.grid4 = new wijmo.grid.FlexGrid('#accounts_receivable-grid', {
                     frozenColumns: 4,
@@ -192,12 +192,11 @@
                         }
                     },
                     columns: [
-                        { binding: 'mat_grp_name', header: '거래처명', width: 170, align: 'center', allowMerging: true },
-                        { binding: 'mat_code', header: '구분', width: 70, align: 'center', allowMerging: true },
-                        { binding: 'mat_name', header: '부서', width: 130, align: 'left', allowMerging: true },
-                        { binding: 'unit_name', header: '담당자', width: 100, align: 'center', allowSorting: false },
+                        { binding: 'comp_name', header: '거래처명', width: 170, align: 'center', allowMerging: true },
+                        /* { binding: 'misgubun', header: '매출구분', width: 100, align: 'center', allowMerging: true },
+                         { binding: 'icerdeptnm', header: '부서', width: 130, align: 'center', allowMerging: true },
+                         { binding: 'icerceonm', header: '담당자', width: 100, align: 'center', allowSorting: false },*/
                         ...monthColumns,
-                        { binding: 'total', header: '합계', width: 200, align: 'center', allowSorting: false }
                     ],
                     itemsSource: this.viewData,
                 });
@@ -209,18 +208,30 @@
 
             searchMainData() {
                 let _this = this;
-                let url = '/api/transaction/monthly_purchase_list/read'
+                let url = '/api/transaction/monthly_purchase_list'
                 let data = {
                     'cboYear': $("#cboYear").val(),
                     'cboCompany': $("#cboCompanyHidden").val(),
                     spjangcd: this.spjangcd.val()
                 }
-                let fnsuccess = function (result) {
+                //매입 내역
+                AjaxUtil.getAsyncData(url+'/PurchaseDetails', data, function (result) {
                     if (result != null) {
-                        _this.viewData.sourceCollection = result.data;
+                        _this.grid.itemsSource = result.data;
                     }
-                };
-                AjaxUtil.getAsyncData(url, data, fnsuccess);
+                });
+                // 지급 내역
+                AjaxUtil.getAsyncData(url+'/ProvisionRead' , data, function (result) {
+                    if (result != null) {
+                        _this.grid3.itemsSource = result.data;
+                    }
+                });
+                // 미지급금 내역
+                AjaxUtil.getAsyncData(url+'/PaymentRead' , data, function (result) {
+                    if (result != null) {
+                        _this.grid4.itemsSource = result.data;
+                    }
+                });
             }
         }
         let page = null;

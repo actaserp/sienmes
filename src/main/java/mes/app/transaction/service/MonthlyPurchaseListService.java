@@ -15,174 +15,250 @@ public class MonthlyPurchaseListService {
     @Autowired
     SqlRunner sqlRunner;
 
-    /*// 월별 매입 현황 리스트 조회
-    public List<Map<String, Object>> getPurchaseList(String cboYear, Integer cboCompany) {
-        MapSqlParameterSource paramMap = new MapSqlParameterSource();
-        paramMap.addValue("cboYear", cboYear);
-        paramMap.addValue("cboCompany", cboCompany);
+  public List<Map<String, Object>> getMonthDepositList(String cboYear, Integer cboCompany, String spjangcd) {
+    MapSqlParameterSource paramMap = new MapSqlParameterSource();
+    paramMap.addValue("cboYear", cboYear);
+    paramMap.addValue("cboCompany", cboCompany);
+    paramMap.addValue("spjangcd", spjangcd);
 
-        String data_column = "";
+    String data_year = cboYear;
+    paramMap.addValue("date_form", data_year + "0101");
+    paramMap.addValue("date_to", data_year + "1231");
 
-        String data_year = cboYear;
+    StringBuilder sql = new StringBuilder();
 
-        paramMap.addValue("date_from",data_year+"-01-01" );
-        paramMap.addValue("date_to",data_year+"-12-31" );
-
-        data_column = "A.defect_money";
-
-        String sql = """
-				with A as 
-	            (
-                    select
-                        i.cltcd
-                        , c."Name"
-                        , i.icerdeptnm
-                        , i.misgubun
-                        , i.icerpernm
-                        , EXTRACT(MONTH FROM TO_DATE(i.misdate, 'YYYYMMDD')) AS data_month
-                         , sum(i.totalamt) as defect_money
-                        from tb_invoicement i
-                        left join company c on i.cltcd = c.id
-                        where TO_DATE(i.misdate, 'YYYYMMDD') between cast(:date_form as date) and cast(:date_to as date)
-				""";
-
-        if(cboCompany != null) {
-            sql += """
-					and c."Code" = :cboCompany
-					""";
-        }
-        sql += """
-                group by i.cltcd, c."Name", i.icerdeptnm, i.misgubun , i.icerpernm,
-                    EXTRACT(MONTH FROM TO_DATE(i.misdate, 'YYYYMMDD'))
-                    )
-                select A."Name", A.icerdeptnm, A.misgubun, A.icerpernm
-                , sum(defect_money) as year_defect_money
-				""";
-
-        for(int i=1; i<13; i++) {
-            sql += ", round(min(case when A.data_month = "+i+" then "+data_column+" ::decimal end),3)::float as mon_"+i+"  ";
-        }
-
-
-
-        sql += """ 
-				from A 
-				group by A."Name", A.icerdeptnm, A.misgubun, A.icerpernm
-				""";
-
-//        sql += """
-//				order by A.mat_type_name, A.mat_grp_name, A.mat_name
-//				""";
-
-      log.info("월별 매출현황 (입금) SQL: {}", sql);
-      log.info("SQL Parameters: {}", paramMap.getValues());
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-        return items;
-    }*/
-    // 월별 매입 현황 리스트 조회
-    public List<Map<String, Object>> getPurchaseList(String cboYear, Integer cboCompany, String spjangcd) {
-      MapSqlParameterSource paramMap = new MapSqlParameterSource();
-      paramMap.addValue("cboYear", cboYear);
-      paramMap.addValue("cboCompany", cboCompany);
-      paramMap.addValue("spjangcd", spjangcd);
-
-      String data_column = "A.defect_money";
-      String data_year = cboYear;
-
-      // 날짜 파라미터 설정 (주의: SQL에서는 :date_from, :date_to 사용)
-      paramMap.addValue("date_from", data_year + "-01-01");
-      paramMap.addValue("date_to", data_year + "-12-31");
-
-      // SQL 시작
-      StringBuilder sql = new StringBuilder();
-      sql.append("""
-        WITH A AS (
+    // CTE: parsed_sales
+    sql.append("""
+        WITH parsed_sales AS (
             SELECT
-                i.cltcd,
-                c."Name",
-                i.icerdeptnm,
-                i.misgubun,
-                i.icerpernm,
-                EXTRACT(MONTH FROM TO_DATE(i.misdate, 'YYYYMMDD')) AS data_month,
-                SUM(i.totalamt) AS defect_money
-            FROM tb_invoicement i
-            LEFT JOIN company c ON i.cltcd = c.id and i.spjangcd = c.spjangcd
-            WHERE TO_DATE(i.misdate, 'YYYYMMDD') BETWEEN CAST(:date_from AS date) AND CAST(:date_to AS date)
-            and i.spjangcd = :spjangcd
+                ts.*,
+                TO_CHAR(TO_DATE(ts.misdate, 'YYYYMMDD'), 'MM') AS sales_month
+            FROM tb_invoicement ts
+            WHERE ts.misdate BETWEEN :date_form AND :date_to 
+            and ts.spjangcd = :spjangcd
         """);
+// and ts.spjangcd = :spjangcd
+    // 회사 필터 조건을 CTE 내부에 삽입
+    if (cboCompany != null) {
+      sql.append(" AND ts.cltcd = :cboCompany");
+    }
 
-      // 회사 조건이 있을 경우 필터 추가
-      if (cboCompany != null) {
-        sql.append(" AND c.\"Code\" = :cboCompany\n");
-      }
+    sql.append(")\n");
 
-      // CTE 그룹핑 종료
-      sql.append("""
-            GROUP BY i.cltcd, c."Name", i.icerdeptnm, i.misgubun, i.icerpernm,
-                     EXTRACT(MONTH FROM TO_DATE(i.misdate, 'YYYYMMDD'))
-        )
+    // SELECT 본문
+    sql.append("""
         SELECT
-            A."Name",
-            A.icerdeptnm,
-            A.misgubun,
-            A.icerpernm,
-            SUM(defect_money) AS year_defect_money
+            c."Name" AS comp_name,
+            sc."Value" AS misgubun,
+            ps.iverpernm,
+            ps.iverdeptnm
         """);
 
-      // 월별 컬럼 동적 생성 (mon_1 ~ mon_12)
-      for (int i = 1; i <= 12; i++) {
-        sql.append(", ROUND(MIN(CASE WHEN A.data_month = ").append(i)
-            .append(" THEN ").append(data_column)
-            .append("::DECIMAL END), 3)::FLOAT AS mon_").append(i).append("\n");
-      }
+    // 월별 합계 컬럼 추가 (mon_1 ~ mon_12)
+    for (int i = 1; i <= 12; i++) {
+      String month = String.format("%02d", i);
+      sql.append(",\n  SUM(CASE WHEN sales_month = '").append(month)
+          .append("' THEN COALESCE(ps.totalamt, 0) ELSE 0 END) AS mon_")
+          .append(i);
+    }
 
-      // GROUP BY 절 마무리
-      sql.append("""
-        FROM A
-        GROUP BY A."Name", A.icerdeptnm, A.misgubun, A.icerpernm
+    // 총합계 컬럼
+    sql.append(",\n  SUM(COALESCE(ps.totalamt, 0)) AS total_sum\n");
+
+    // FROM, JOIN, GROUP BY, ORDER BY 절
+    sql.append("""
+        FROM parsed_sales ps
+        LEFT JOIN company c ON c.id = ps.cltcd
+        LEFT JOIN sys_code sc ON sc."Code" = ps.misgubun::text
+        GROUP BY c."Name", sc."Value", ps.iverpernm, ps.iverdeptnm
+        ORDER BY c."Name", ps.iverpernm, ps.iverdeptnm
         """);
 
-//      log.info("월별 매출현황 (입금) SQL: {}", sql);
-//      log.info("SQL Parameters: {}", paramMap.getValues());
+    // 로그 출력
+//    log.info("월별 매입현황 SQL: {}", sql);
+//    log.info("SQL Parameters: {}", paramMap.getValues());
 
-      return this.sqlRunner.getRows(sql.toString(), paramMap);
+    // 실행 및 반환
+    List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), paramMap);
+    return items;
+  }
+
+  public List<Map<String, Object>> getProvisionList(String cboYear, Integer cboCompany, String spjangcd) {
+    MapSqlParameterSource paramMap = new MapSqlParameterSource();
+    paramMap.addValue("cboYear", cboYear);
+    paramMap.addValue("cboCompany", cboCompany);
+    paramMap.addValue("spjangcd", spjangcd);
+
+    String data_year = cboYear;
+    paramMap.addValue("date_form", data_year + "0101");
+    paramMap.addValue("date_to", data_year + "1231");
+
+    StringBuilder sql = new StringBuilder();
+
+    // CTE: parsed_deposit
+    sql.append("""
+        WITH parsed_deposit AS (
+            SELECT
+                tb.*,
+                TO_CHAR(TO_DATE(tb.trdate, 'YYYYMMDD'), 'MM') AS deposit_month
+            FROM tb_banktransit tb
+            WHERE tb.ioflag = '1'
+              AND tb.trdate BETWEEN :date_form AND :date_to
+              AND tb.spjangcd =:spjangcd
+        """);
+
+    // 회사 필터 조건을 CTE 내부에 삽입
+    if (cboCompany != null) {
+      sql.append(" AND tb.cltcd = :cboCompany");
     }
 
+    sql.append(")\n");
 
-  // 지급
-    public List<Map<String, Object>> getAccoutList(String cboYear, Integer cboCompany) {
+    // SELECT 본문 시작
+    sql.append("""
+        SELECT
+            c."Name" AS comp_name
+        """);
 
-        MapSqlParameterSource dicParam = new MapSqlParameterSource();
-
-        dicParam.addValue("cboYear", cboYear);
-        dicParam.addValue("cboCompany", cboCompany);
-
-        String sql = """
-                
-        		""";
-
-
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
-
-        return items;
+    // 월별 합계 컬럼 (mon_1 ~ mon_12)
+    for (int i = 1; i <= 12; i++) {
+      String month = String.format("%02d", i);
+      sql.append(",\n  SUM(CASE WHEN deposit_month = '").append(month)
+          .append("' THEN COALESCE(pd.accout, 0) ELSE 0 END) AS mon_").append(i);
     }
-    // 미지급
-    public List<Map<String, Object>> getunAccoutList(String cboYear, Integer cboCompany) {
 
-        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+    // 총합 컬럼
+    sql.append(",\n  SUM(COALESCE(pd.accout, 0)) AS total_sum\n");
 
-        dicParam.addValue("cboYear", cboYear);
-        dicParam.addValue("cboCompany", cboCompany);
+    // FROM, JOIN, GROUP BY, ORDER BY
+    sql.append("""
+        FROM parsed_deposit pd
+        LEFT JOIN company c ON c.id = pd.cltcd
+        GROUP BY c."Name"
+        ORDER BY c."Name"
+        """);
 
-        String sql = """
-                
-        		""";
+//    log.info("월별 지급현황 SQL: {}", sql);
+//    log.info("SQL Parameters: {}", paramMap.getValues());
 
+    List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), paramMap);
+    return items;
+  }
 
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+  //미지급금
+  public List<Map<String, Object>> getPaymentList(String cboYear, Integer cboCompany, String spjangcd) {
+    MapSqlParameterSource paramMap = new MapSqlParameterSource();
+    paramMap.addValue("cboYear", cboYear);
+    paramMap.addValue("cboCompany", cboCompany);
+    paramMap.addValue("spjangcd", spjangcd);
 
-        return items;
+    String dateFrom = cboYear + "0101";
+    String dateTo = cboYear + "1231";
+    String prevYm = String.valueOf(Integer.parseInt(cboYear) - 1) + "12";
+
+    paramMap.addValue("date_form", dateFrom);
+    paramMap.addValue("date_to", dateTo);
+    paramMap.addValue("prevYm", prevYm);
+
+    StringBuilder sql = new StringBuilder();
+
+    sql.append("""
+        WITH LASTTbl AS (
+            SELECT cltcd, MAX(yyyymm) AS yyyymm
+            FROM tb_yearamt
+            WHERE yyyymm < :prevYm
+              AND ioflag = '1'
+              AND spjangcd = :spjangcd
+            GROUP BY cltcd
+        ),
+        last_amt AS (
+            SELECT y.cltcd, y.yearamt
+            FROM tb_yearamt y
+            JOIN LASTTbl l ON y.cltcd = l.cltcd AND y.yyyymm = l.yyyymm
+            WHERE y.ioflag = '1'
+              AND y.spjangcd = :spjangcd
+        ),
+        parsed_sales AS (
+            SELECT
+                s.cltcd,
+                TO_CHAR(TO_DATE(s.misdate, 'YYYYMMDD'), 'MM') AS sale_month,
+                SUM(s.totalamt) AS sale_amt
+            FROM tb_invoicement s
+            WHERE s.misdate BETWEEN :date_form AND :date_to
+              AND s.spjangcd = :spjangcd
+    """);
+
+    if (cboCompany != null) {
+      sql.append(" AND s.cltcd = :cboCompany ");
     }
+
+    sql.append("""
+            GROUP BY s.cltcd, TO_CHAR(TO_DATE(s.misdate, 'YYYYMMDD'), 'MM')
+        ),
+        parsed_deposit AS (
+            SELECT
+                b.cltcd,
+                TO_CHAR(TO_DATE(b.trdate, 'YYYYMMDD'), 'MM') AS deposit_month,
+                SUM(b.accout) AS accout_amt
+            FROM tb_banktransit b
+            WHERE b.trdate BETWEEN :date_form AND :date_to
+              AND b.ioflag = '1'
+              AND b.spjangcd = :spjangcd
+    """);
+
+    if (cboCompany != null) {
+      sql.append(" AND b.cltcd = :cboCompany ");
+    }
+
+    sql.append("""
+            GROUP BY b.cltcd, TO_CHAR(TO_DATE(b.trdate, 'YYYYMMDD'), 'MM')
+        ),
+        base AS (
+            SELECT DISTINCT cltcd FROM parsed_sales
+            UNION
+            SELECT DISTINCT cltcd FROM parsed_deposit
+        ),
+        final_data AS (
+            SELECT
+                b.cltcd,
+                c."Name" AS comp_name,
+                m.month,
+                COALESCE(s.sale_amt, 0) AS sale_amt,
+                COALESCE(d.accout_amt, 0) AS accout_amt,
+                CASE
+                    WHEN m.month = '01' THEN COALESCE(la.yearamt, 0) + COALESCE(s.sale_amt, 0) - COALESCE(d.accout_amt, 0)
+                    ELSE COALESCE(s.sale_amt, 0) - COALESCE(d.accout_amt, 0)
+                END AS remain_amt
+            FROM base b
+            CROSS JOIN (
+                SELECT TO_CHAR(GENERATE_SERIES(1,12), 'FM00') AS month
+            ) m
+            LEFT JOIN company c ON c.id = b.cltcd
+            LEFT JOIN parsed_sales s ON s.cltcd = b.cltcd AND s.sale_month = m.month
+            LEFT JOIN parsed_deposit d ON d.cltcd = b.cltcd AND d.deposit_month = m.month
+            LEFT JOIN last_amt la ON la.cltcd = b.cltcd
+        )
+        SELECT 
+            comp_name
+    """);
+
+    for (int i = 1; i <= 12; i++) {
+      String month = String.format("%02d", i);
+      sql.append(",\n  SUM(CASE WHEN month = '").append(month).append("' THEN remain_amt ELSE 0 END) AS mon_").append(i);
+    }
+
+    sql.append("""
+        , SUM(remain_amt) AS total_sum
+        FROM final_data
+        GROUP BY comp_name
+        ORDER BY comp_name
+    """);
+
+//    log.info("미지급금 월별 현황 SQL: {}", sql);
+//    log.info("SQL Parameters: {}", paramMap.getValues());
+
+    return this.sqlRunner.getRows(sql.toString(), paramMap);
+  }
 
 }
 
