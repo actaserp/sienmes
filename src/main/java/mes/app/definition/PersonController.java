@@ -67,6 +67,8 @@ public class PersonController {
 			@RequestParam(value="ShiftCode", required=false) String shiftCode,
 			@RequestParam(value="WorkCenter_id", required=false) Integer workCenterId,
 			@RequestParam(value="WorkHour", required=false) Float workHour,
+			@RequestParam(value="work_division", required=false) String work_division,
+
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -105,6 +107,7 @@ public class PersonController {
 		person.setWorkCenterId(workCenterId);
 		person.setWorkHour(workHour);
 		person.set_audit(user);
+		person.setPersonGroupId(Integer.valueOf(work_division));
 		
 		person = this.personRepository.save(person);
 		

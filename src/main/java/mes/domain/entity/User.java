@@ -65,6 +65,13 @@ public class User implements Serializable {
 
 	@Column(name = "spjangcd")
 	String spjangcd;
+
+	@Column(name = "personid")
+	Integer personid;
+
+	@Column(name = "tel")
+	String tel;
+
 	
 	@JsonManagedReference
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

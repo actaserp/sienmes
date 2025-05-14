@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -44,8 +45,10 @@ public class UserController {
 	
 	@Autowired
 	SqlRunner sqlRunner;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-	
+
 	// 사용자 리스트 조회
 	@GetMapping("/read")
 	public AjaxResult getUserList(
@@ -107,6 +110,8 @@ public class UserController {
 			@RequestParam(value="UserGroup_id", required = false) Integer UserGroup_id,
 			@RequestParam(value="lang_code", required = false) String lang_code,
 			@RequestParam(value="is_active", required = false) Boolean is_active,
+			@RequestParam(value="personid", required = false) String personid,
+			@RequestParam(value="tel", required = false) String tel,
 			HttpServletRequest request,
 			Authentication auth
 			) {
@@ -144,29 +149,50 @@ public class UserController {
 		        	INSERT INTO user_profile 
 		        	("_created", "_creater_id", "User_id", "lang_code", "Name", "Factory_id" , "Depart_id", "UserGroup_id" ) 
 		        	VALUES (now(), :loginUser, :User_id, :lang_code, :name, :Factory_id, :Depart_id, :UserGroup_id )
-		        """;	
-		// 기존 user 수정일 경우
+		        """;
+			// 기존 user 수정일 경우
 		} else {
 			user = this.userRepository.getUserById(id);
-			
-			if (login_id.equals(user.getUsername())==false && username_chk == false) {
+
+			if (!login_id.equals(user.getUsername()) && !username_chk) {
 				result.success = false;
-				result.message="중복된 사번이 존재합니다.";
+				result.message = "중복된 사번이 존재합니다.";
 				return result;
 			}
 
-			sql = """
-					update user_profile set
-					     	"lang_code" = :lang_code, "Name" = :name
-					     	, "Factory_id" = :Factory_id, "Depart_id"= :Depart_id, "UserGroup_id" = :UserGroup_id
-					where "User_id" = :User_id
-		        """;
+			// user_profile 존재 여부 확인
+			int count = jdbcTemplate.queryForObject(
+					"SELECT COUNT(*) FROM user_profile WHERE \"User_id\" = ?", Integer.class, id
+			);
 
+			if (count == 0) {
+				// user_profile에 없으면 insert 수행
+				sql = """
+			INSERT INTO user_profile 
+			("_created", "_creater_id", "User_id", "lang_code", "Name", "Factory_id", "Depart_id", "UserGroup_id") 
+			VALUES (now(), :loginUser, :User_id, :lang_code, :name, :Factory_id, :Depart_id, :UserGroup_id )
+		""";
+				dicParam.addValue("loginUser", loginUser.getId());
+			} else {
+				// user_profile에 있으면 update
+				sql = """
+			UPDATE user_profile SET
+			"lang_code" = :lang_code,
+			"Name" = :name,
+			"Factory_id" = :Factory_id,
+			"Depart_id" = :Depart_id,
+			"UserGroup_id" = :UserGroup_id
+			WHERE "User_id" = :User_id
+		""";
+			}
 		}
 
-        user.setUsername(login_id);
+
+		user.setUsername(login_id);
         user.setFirst_name(Name);
         user.setEmail(email);
+		user.setTel(tel);
+		user.setPersonid(Integer.valueOf(personid));
         user.setDate_joined(today);
         user.setActive(is_active);
         
@@ -273,4 +299,22 @@ public class UserController {
         
         return result;
 	}
+
+
+	@GetMapping("/getPerson")
+	public AjaxResult getAccSearchList(
+			@RequestParam(value="searchCode", required=false) String code,
+			@RequestParam(value="searchName", required=false) String name
+	) {
+
+		AjaxResult result = new AjaxResult();
+		List<Map<String, Object>> items = this.userService.getPSearchitem(code,name);
+
+		result.data = items;
+		return result;
+	}
+
+
+
+
 }

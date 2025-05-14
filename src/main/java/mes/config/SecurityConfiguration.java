@@ -42,8 +42,8 @@ public class SecurityConfiguration {
         //http.csrf().disable();
         http.csrf().ignoringAntMatchers("/api/files/upload/**");
         
-        http.authorizeRequests().mvcMatchers("/login","/logout" ,"/useridchk/**").permitAll()
-        .mvcMatchers("/authentication/**").permitAll()
+        http.authorizeRequests().mvcMatchers("/login","/logout" ,"/useridchk/**","/user-auth/save").permitAll()
+        .mvcMatchers("/authentication/**","/user-auth/**").permitAll()
         .mvcMatchers("/setup").hasAuthority("admin")		// hasRole -> hasAuthority로 수정
         .anyRequest().authenticated();
 

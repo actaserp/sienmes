@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,6 +34,11 @@ public class CustomAuthenticationManager implements AuthenticationManager{
 	    	 User user = optUser.get();
 	    	 boolean valid = Pbkdf2Sha256.verification(password, user.getPassword());
 	    	 if (valid) {
+
+				 if (user.getUserProfile() == null) {
+					 throw new InsufficientAuthenticationException("UserProfile is null");
+				 }
+
 	    		 // 그룹을  array 에 추가한다
 	    		 UserGroup group = user.getUserProfile().getUserGroup();
 	    		 SimpleGrantedAuthority authority = new SimpleGrantedAuthority(group.getCode());

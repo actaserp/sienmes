@@ -12,7 +12,7 @@
         <!-- Page Title -->
         <div class="page-title-wrap">
             <div class="left">
-                <h2>작업자 정보</h2>
+                <h2>직원 정보</h2>
                 <a title="북마크" class="bookmark toggle">
                     내메뉴
                 </a>
@@ -20,7 +20,7 @@
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
                 <li>기준정보</li>
-                <li>작업자정보</li>
+                <li>직원정보</li>
             </ul>
         </div>
 
@@ -166,8 +166,12 @@
                             <td>
                                 <select style="width: 100%;" id="Depart_id" name="Depart_id"></select>
                             </td>
-                            <th></th>
-                            <td></td>
+                            <th>
+                                <label for="work_division"><span class="eq">*</span>근무구분</label>
+                            </th>
+                            <td>
+                                <select style="width: 100%;" id="work_division" name="work_division"></select>
+                            </td>
                         </tr>
 
 
@@ -210,6 +214,7 @@
             {binding: 'person_name', header: '이름', width: 100, align: 'center',},
             {binding: 'work_hour', header: '기본 근무시간', width: 120, align: 'center'},
             {binding: 'shift_name', header: '현 근무조', width: 120, align: 'center'},
+            {binding: 'person_group_id', header: '근무구분', width: 120, align: 'center'},
             {binding: 'dept_name', header: '부서', width: 120, align: 'center'},
             {binding: 'factory_name', header: '공장', width: 120, align: 'center'},
             {binding: 'description', header: '비고', width: 250, align: 'center'},
@@ -267,11 +272,19 @@
                     let selectElement = document.getElementById(selectId);
                     if (selectElement) {
                         for (let option of selectElement.options) {
-                            option.selected = option.text === valueToMatch;
+                            if (selectId === 'work_division') {
+                                // 'work_division'은 value로 비교
+                                option.selected = option.value == valueToMatch;
+                            } else {
+                                // 나머지는 text로 비교
+                                option.selected = option.text === valueToMatch;
+                            }
                         }
                     }
                 }
 
+
+                setSelectValue('work_division', selectedItem.person_group_id);
                 setSelectValue('ShiftCode', selectedItem.shift_name);
                 setSelectValue('Depart_id', selectedItem.dept_name);
                 setSelectValue('WorkCenter_id', selectedItem.workcenter_name);
@@ -346,6 +359,7 @@
                 workcenter_name: item.workcenter_name,
                 person_code: item.person_code,
                 person_name: item.person_name,
+                person_group_id: item.person_group_id,
                 work_hour: item.work_hour,
                 shift_name: item.shift_name,
                 dept_name: item.dept_name,
@@ -451,6 +465,25 @@
             AjaxUtil.postAsyncData(url + '/delete', data, fnSuccess);
         }
 
+        // ShiftCode가 변경될 때 work_division 자동 설정
+        $('#ShiftCode').on('change', function () {
+            const shiftText = $('#ShiftCode option:selected').text();
+            let targetWorkDivision = '기타근무'; // 기본값
+
+            if (shiftText.includes('주간조')) {
+                targetWorkDivision = '주간근무';
+            } else if (shiftText.includes('야간조')) {
+                targetWorkDivision = '야간근무';
+            }
+
+            // work_division의 text와 비교하여 자동 선택
+            $('#work_division option').each(function () {
+                if ($(this).text() === targetWorkDivision) {
+                    $(this).prop('selected', true);
+                }
+            });
+        });
+
 
         $(document.body).ready(function (e) {
             setButtonState();
@@ -459,6 +492,9 @@
             AjaxUtil.fillSelectOptions($('#Factory_id'), 'factory', '', false);
             AjaxUtil.fillSelectOptions($('#ShiftCode'), 'shift', 'choose', false);
             AjaxUtil.fillSelectOptions($('#Depart_id'), 'depart', 'choose', false);
+
+            /* AjaxUtil.fillSelectOptions($('#work_division'), 'system_code', 'choose','work_division');*/
+            AjaxUtil.fillSelectOptions($('#work_division'), 'system_code', 'choose', '', 'work_division');
 
             // 엔터키 검색
             $('#txtName').on('keypress', function (e) {

@@ -27,10 +27,13 @@ public class UserService {
         
         String sql = """
 			select au.id
+			  , au.first_name
               , up."Name"
               , au.username as login_id
               , up."UserGroup_id"
               , au.email
+              , au.tel
+              , au.personid
               , ug."Name" as group_name
               , up."Factory_id"
               , f."Name" as factory_name
@@ -39,7 +42,7 @@ public class UserService {
               , up.lang_code
               , au.is_active
               , to_char(au.date_joined ,'yyyy-mm-dd hh24:mi') as date_joined
-            from auth_user au 
+            from auth_user au
             left join user_profile up on up."User_id" = au.id
             left join user_group ug on ug.id = up."UserGroup_id"
             left join factory f on f.id = up."Factory_id"
@@ -151,4 +154,30 @@ public class UserService {
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		return items;
 	}
+
+
+
+	public List<Map<String, Object>> getPSearchitem(String code, String name) {
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("code", code);
+		dicParam.addValue("name", name);
+
+		String sql = """
+                 select
+                 p.id as id
+                 , p."Name" as name
+                 , d."Name" as dept_name
+                 , d.id as dept_id
+                 from person p
+                 left join depart d on d.id = p."Depart_id"
+                where
+                  p.id::text like concat('%', :code, '%')
+                AND p."Name" like concat('%',:name,'%')
+                order by p.id
+                """;
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+		return items;
+	}
+
 }

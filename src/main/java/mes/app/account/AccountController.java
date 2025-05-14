@@ -2,24 +2,28 @@ package mes.app.account;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.sql.Timestamp;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
 
+import mes.app.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +52,9 @@ public class AccountController {
 	
 	@Autowired
 	SqlRunner sqlRunner;
+
+	@Autowired
+	MailService emailService;
 
 	private final ConcurrentHashMap<String, String> tokenStore = new ConcurrentHashMap<>();
 	private final ConcurrentHashMap<String, Long> tokenExpiry = new ConcurrentHashMap<>();
@@ -128,6 +135,11 @@ public class AccountController {
 
 		try{
 			auth = (CustomAuthenticationToken)authManager.authenticate(authReq);
+
+
+		} catch (InsufficientAuthenticationException e) {
+			data.put("code", "null");
+			return result;
 		}catch (AuthenticationException e){
 			//e.printStackTrace();
 			data.put("code", "NOUSER");
@@ -137,6 +149,7 @@ public class AccountController {
 
 		if(auth!=null) {
 			User user = (User)auth.getPrincipal();
+
 			if (!user.getActive()) {  // user.getActive()가 false인 경우
 				data.put("code", "noactive");
 			} else {
@@ -291,4 +304,165 @@ public class AccountController {
 		}
 		return result;
 	}
+
+
+	@PostMapping("/user-auth/AuthenticationEmail")
+	public AjaxResult PwSearch(@RequestParam(value = "usernm", required = false) final String usernm,
+							   @RequestParam("mail") final String mail,
+							   @RequestParam("content") final String content,
+							   @RequestParam String type
+	){
+
+		AjaxResult result = new AjaxResult();
+
+		if(type.equals("new")){
+			if(!usernm.isEmpty() && type.equals("new")){
+				sendEmailLogic(mail, usernm, content);
+
+				result.success = true;
+				result.message = "인증 메일이 발송되었습니다.";
+				return result;
+			}
+			return result;
+		}else{
+			boolean flag = userRepository.existsByUsernameAndEmail(usernm, mail);
+
+			if(flag) {
+				sendEmailLogic(mail, usernm, content);
+
+				result.success = true;
+				result.message = "인증 메일이 발송되었습니다.";
+			}else {
+				result.success = false;
+				result.message = "해당 사용자가 존재하지 않습니다.";
+			}
+
+			return result;
+		}
+
+
+	}
+
+	private void sendEmailLogic(String mail, String usernm, String content){
+		Random random = new Random();
+		int randomNum = 100000 + random.nextInt(900000); // 100000부터 999999까지의 랜덤 난수 생성
+		String verificationCode = String.valueOf(randomNum); // 정수를 문자열로 변환
+		emailService.sendVerificationEmail(mail, usernm, verificationCode, content);
+
+		tokenStore.put(mail, verificationCode);
+		tokenExpiry.put(mail, System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(3));
+
+	}
+
+
+
+
+	@PostMapping("/user-auth/save")
+	@Transactional
+	public AjaxResult saveUser(
+			@RequestParam(value="idx", required = false) Integer id,
+			@RequestParam(value="name") String Name,		//이름 (user_profile.Name)
+			@RequestParam(value="id") String login_id, //사번 (auth_user.username)
+			@RequestParam(value="email", required = false, defaultValue = "") String email,
+			@RequestParam(value="Factory_id", required = false) Integer Factory_id,
+			@RequestParam(value="Depart_id", required = false) Integer Depart_id,
+			@RequestParam(value="UserGroup_id", required = false) Integer UserGroup_id,
+			@RequestParam(value="lang_code", required = false) String lang_code,
+			@RequestParam(value="is_active", required = false) Boolean is_active,
+			@RequestParam(value="password") String password,
+			@RequestParam(value="tel", required = false) String tel,
+			HttpServletRequest request,
+			Authentication auth
+	) {
+
+		AjaxResult result = new AjaxResult();
+
+		// 기본값 지정
+		if (Factory_id == null) {
+			Factory_id = 1;
+		}
+		if (Depart_id == null) {
+			Depart_id = 1;
+		}
+		if (UserGroup_id == null) {
+			UserGroup_id = 2;
+		}
+
+
+		String sql = null;
+		User user = null;
+
+		Timestamp today = new Timestamp(System.currentTimeMillis());
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		boolean username_chk = this.userRepository.findByUsername(login_id).isEmpty();
+
+		if(is_active == null) {
+			is_active = false;
+		}
+
+
+		// new data일 경우
+		if (id==null) {
+			if (username_chk == false) {
+				result.success = false;
+				result.message="중복된 사번이 존재합니다.";
+				return result;
+			}
+			user = new User();
+			String encodedPassword = Pbkdf2Sha256.encode(password);
+			user.setPassword(encodedPassword);
+			user.setSuperUser(false);
+			user.setLast_name("");
+			user.setIs_staff(false);
+
+			sql = """
+		        	INSERT INTO user_profile 
+		        	("_created", "_creater_id", "User_id", "lang_code", "Name", "Factory_id" , "Depart_id", "UserGroup_id" ) 
+		        	VALUES (now(), :loginUser, :User_id, :lang_code, :name, :Factory_id, :Depart_id, :UserGroup_id )
+		        """;
+		}
+
+		user.setUsername(login_id);
+		user.setFirst_name(Name);
+		user.setEmail(email);
+		user.setTel(tel);
+		user.setDate_joined(today);
+		user.setActive(is_active);
+
+		user = this.userRepository.save(user);
+
+		dicParam.addValue("name", Name);
+		dicParam.addValue("UserGroup_id", UserGroup_id);
+		dicParam.addValue("Factory_id", Factory_id);
+		dicParam.addValue("Depart_id", Depart_id);
+		dicParam.addValue("lang_code", lang_code);
+
+		this.sqlRunner.execute(sql, dicParam);
+
+		result.data = user;
+
+		return result;
+	}
+
+
+	@PostMapping("/user-auth/searchAccount")
+	public AjaxResult IdSearch(@RequestParam("usernm") final String usernm,
+							   @RequestParam("mail") final String mail){
+
+		AjaxResult result = new AjaxResult();
+
+		List<String> user = userRepository.findByFirstNameAndEmailNative(usernm, mail);
+
+		if(!user.isEmpty()){
+			result.success = true;
+			result.data = user;
+		}else {
+			result.success = false;
+			result.message = "해당 사용자가 존재하지 않습니다.";
+		}
+		return result;
+	}
+
+
+
 }

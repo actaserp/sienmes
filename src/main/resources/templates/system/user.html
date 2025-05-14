@@ -20,7 +20,7 @@
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
                 <li>시스템관리</li>
-                <li>사용자</li>
+                <li>사용자관리</li>
             </ul>
         </div>
 
@@ -55,7 +55,7 @@
                     <dl>
                         <dt>
                             <label for="username">
-                                사원번호
+                                ID
                             </label>
                         </dt>
                         <dd>
@@ -91,7 +91,7 @@
             </div> <!--//section-top end -->
             <div class="container-fluid">
                 <p id="selectedItem"></p>
-                <div id="theGrid" style="height: 440px; max-height: 440px;"></div>
+                <div id="theGrid" style="height: 350px; max-height: 350px;"></div>
             </div>
             <div class="btn-wrap">
             </div>
@@ -176,49 +176,52 @@
                                     <tbody>
                                     <tr>
                                         <th>
-                                            <label for="login_id">사번</label>
+                                            <label for="login_id">ID</label>
                                         </th>
                                         <td>
                                             <input type="text" id="login_id" name="login_id" style="width: 100%;">
                                         </td>
+
+                                        <th>
+                                            <label for="personid">사번</label>
+                                        </th>
+                                        <td colspan="3">
+                                            <input type="text" id="personid" name="personid" style="width: 75%;" readonly>
+                                            <a class="btn btn-navy" title="자료가져오기" id="getPersonId">사번찾기</a>
+                                        </td>
+
                                         <th>
                                             <label for="Name">이름</label>
                                         </th>
                                         <td>
                                             <input type="text" id="Name" name="Name" style="width: 100%;">
                                         </td>
-                                        <th>
-                                            <label for="UserGroup_id">사용자그룹</label>
-                                        </th>
-                                        <td>
-                                            <select style="width: 100%;" id="UserGroup_id" name="UserGroup_id"></select>
-                                        </td>
-                                        <th>
-                                            <label for="Factory_id">소속 공장</label>
-                                        </th>
-                                        <td>
-                                            <select style="width: 100%;" id="Factory_id" name="Factory_id"></select>
-                                        </td>
+
+
                                     </tr>
                                     <tr>
+
                                         <th>
-                                            <label for="Depart_id">부서</label>
+                                            <label for="Name">전화번호</label>
                                         </th>
                                         <td>
-                                            <select style="width: 100%;" id="Depart_id" name="Depart_id"></select>
+                                            <input type="text" id="tel" name="tel" style="width: 100%;">
                                         </td>
+
                                         <th>
                                             <label for="email">Email</label>
                                         </th>
                                         <td>
                                             <input type="text" style="width: 100%;" id="email" name="email">
                                         </td>
+
                                         <th>
-                                            <label for="lang_code">언어</label>
+                                            <label for="UserGroup_id">사용자그룹</label>
                                         </th>
                                         <td>
-                                            <select style="width: 100%;" id="lang_code" name="lang_code"></select>
+                                            <select style="width: 100%;" id="UserGroup_id" name="UserGroup_id"></select>
                                         </td>
+
                                         <th>
                                             <label for="is_active">활성화 여부</label>
                                         </th>
@@ -228,6 +231,30 @@
                                             </div>
                                         </td>
 
+                                    </tr>
+
+                                    <tr>
+                                        <th>
+                                            <label for="Factory_id">소속 공장</label>
+                                        </th>
+                                        <td>
+                                            <select style="width: 100%;" id="Factory_id" name="Factory_id"></select>
+                                        </td>
+
+                                        <th>
+                                            <label for="Depart_id">부서</label>
+                                        </th>
+                                        <td>
+                                            <select style="width: 100%;" id="Depart_id" name="Depart_id"></select>
+                                        </td>
+                                        <th>
+                                            <label for="lang_code">언어</label>
+                                        </th>
+                                        <td>
+                                            <select style="width: 100%;" id="lang_code" name="lang_code"></select>
+                                        </td>
+                                        <th></th>
+                                        <td></td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -312,6 +339,58 @@
     </script>
 
 
+    <script type="text/x-tmpl" id="getPersonTemplate">
+        <div class="content_wrap popup">
+            <!--<header>
+                <h4 id="popTitle">
+                {% if (o.id!='') { %}
+                  BOM 수정({%=o.Name%})
+                  {% } else { %}
+                  BOM 등록
+                  {% } %}
+                </h4>
+                <div class="popup_close_box"><button class="btn_popup_close" id="modal-close-x"><i class="fas fa-times"></i></button></div>
+            </header>-->
+
+        <div class="table-wrap">
+                <table class="write-table">
+                    <caption>주문등록 테이블</caption>
+                    <tbody>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="searchCode">사번</label>
+                            </th>
+                            <td style="width:50px;">
+                                <input id="searchCode" name="searchCode" type="text" style="width:180px;" />
+                            </td>
+
+                            <th style="text-align: center">
+                                <label for="searchName">사원명</label>
+                            </th>
+                            <td style="width:50px;">
+                                 <input id="searchName" name="searchName" type="text"  style="width:180px;"/>
+                            </td>
+                            <td colspan="2" style="text-align: center;">
+                                <button type="button" class="btn-default" id="btnSubjectSearch" title="조회"><i class="fas fa-search"></i>검색</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="grid_box" style="margin-top: 10px;">
+                    <div id="person-grid" style="height: 300px; max-height: 300px;"></div>
+                </div>
+        </div>
+
+        <div class="popup-button">
+          <button type="button" class="btn-popup" id="btnAccountSave"><span data-labelCd="선택">선택</span></button>
+          <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+        </div>
+</div>
+    </script>
+
+
+
 </th:block>
 
 <th:block layout:fragment="scripts">
@@ -328,8 +407,11 @@
 
         let columns = [
             {binding: 'id', header: 'id', width: 100, align: 'center', visible: false},
-            {binding: 'login_id', header: '사원번호', width: 100, align: 'center'},
-            {binding: 'Name', header: '이름', width: 160, align: 'center'},
+            {binding: 'login_id', header: 'ID', width: 120, align: 'center'},
+            {binding: 'personid', header: '사번', width: 100, align: 'center'},
+            {binding: 'first_name', header: '이름', width: 120, align: 'center'},
+            {binding: 'tel', header: '전화번호', width: 180, align: 'center'},
+            {binding: 'email', header: '이메일', width: 180, align: 'center'},
             {binding: 'group_name', header: '사용자그룹', width: 120, align: 'center'},
             {binding: 'factory_name', header: '소속공장', width: 150, align: 'center'},
             {binding: 'dept_name', header: '부서', width: 150, align: 'center'},
@@ -345,8 +427,7 @@
                     {key: false, value: 'false'}
                 ], 'key', 'value') // true/false 값을 매핑
             },
-            {binding: 'date_joined', header: '생성일', width: 200, align: 'center'},
-            {binding: '', header: '', width: "*", align: 'center'},
+            {binding: 'date_joined', header: '생성일', width: '*', align: 'center'},
         ];
         /*header: '<span class="editable_clr">소속 여부</span>',*/
 
@@ -407,12 +488,15 @@
 
             theGrid.hostElement.addEventListener('dblclick', function (e) {
                 let selectedItem = theGrid.selectedItems[0];
-                /*console.log('확인', selectedItem);*/
+                console.log('확인', selectedItem);
 
                 document.getElementById('id').value = selectedItem.id;
                 document.getElementById('login_id').value = selectedItem.login_id;
-                document.getElementById('Name').value = selectedItem.Name;
+                document.getElementById('Name').value = selectedItem.first_name;
+                document.getElementById('email').value = selectedItem.email;
+                document.getElementById('tel').value = selectedItem.tel;
                 document.getElementById('Depart_id').value = selectedItem.dept_name;
+                document.getElementById('personid').value = selectedItem.personid;
                 document.getElementById('is_active').checked = selectedItem.is_active === true; // 체크박스 상태 설정
 
 
@@ -425,7 +509,14 @@
                     }
                 }
 
-                setSelectValue('UserGroup_id', selectedItem.group_name);
+                if (selectedItem.group_name) {
+                    setSelectValue('UserGroup_id', selectedItem.group_name);
+                } else {
+                    setSelectValue('UserGroup_id', '사용자');
+                }
+
+                /*2*/
+
                 setSelectValue('Factory_id', selectedItem.factory_name);
                 setSelectValue('Depart_id', selectedItem.dept_name);
                 setSelectValue('lang_code', selectedItem.login_id);
@@ -519,14 +610,16 @@
             let menulogData = data.map(item => ({
                 id: item.id,
                 login_id: item.login_id,
-                Name: item.Name,
+                personid: item.personid,
+                first_name: item.first_name,
                 group_name: item.group_name,
+                email: item.email,
+                tel: item.tel,
                 factory_name: item.factory_name,
                 dept_name: item.dept_name,
                 lang_code: item.lang_code,
                 is_active: item.is_active,
                 date_joined: item.date_joined,
-
             }));
 
             if (typeof theGrid === 'undefined' || typeof viewdata === 'undefined') {
@@ -557,6 +650,8 @@
             let url = '/api/system/user/save';
 //데이터입력체크루틴 누락
             let data = FormUtil.extractForm($('#userForm'));
+
+            data.is_active = $('#is_active').is(':checked');
 
             if (!data.login_id) {
                 Alert.alert('', '사번을 입력해 주세요');
@@ -816,6 +911,102 @@
         }
 
 
+
+        function showGetPerson() {
+            let _this = this;
+            let viewdata4;
+            let theGrid4;
+            let selectedItem = null;
+
+            let content = tmpl('getPersonTemplate', {});
+            let $content = $(content);
+
+            let popContainer = new PopupDraggable('사번찾기');
+            popContainer.open({ width: 800, height: 500, $content });
+
+            let $searchName = $content.find('#searchName');
+            let $searchCode = $content.find('#searchCode');
+            let $btnSearch = $content.find('#btnSubjectSearch');
+
+            // 사번 조회 함수
+            function fetchPersonList() {
+                let searchCode = $searchCode.val();
+                let searchName = $searchName.val();
+
+                $.ajax({
+                    url: '/api/system/user/getPerson',
+                    type: 'GET',
+                    data: {
+                        searchCode: searchCode,
+                        searchName: searchName
+                    },
+                    async: false,
+                    success: function (res) {
+                        let data2 = res.data || [];
+
+                        viewdata4 = new wijmo.collections.CollectionView(data2);
+
+                        if (theGrid4) {
+                            theGrid4.itemsSource = viewdata4;
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error('Error fetching person data:', textStatus, errorThrown);
+                    }
+                });
+            }
+
+            // 그리드 먼저 생성
+            theGrid4 = new wijmo.grid.FlexGrid('#person-grid', {
+                autoGenerateColumns: false,
+                showMarquee: true,
+                columns: [
+                    { binding: 'id', header: '사번', width: 100, align: 'center' },
+                    { binding: 'name', header: '이름', width: 150, align: 'center' },
+                    { binding: 'dept_name', header: '부서', width: 150, align: 'center' },
+                    { binding: 'dept_id', header: '부서id', width: 150, align: 'center', visible:false},
+                    { binding: '', header: '', width: '*', align: 'center' },
+                ],
+                isReadOnly: true,
+                itemsSource: null
+            });
+
+            theGrid4.rowHeaders.columns.splice(0, 1);
+
+
+            fetchPersonList();
+
+
+            $btnSearch.click(() => {
+                fetchPersonList();
+            });
+
+
+            $searchCode.add($searchName).on('keydown', function (e) {
+                if (e.keyCode === 13) {
+                    fetchPersonList();
+                }
+            });
+
+            theGrid4.selectionChanged.addHandler((s, e) => {
+                selectedItem = s.collectionView.currentItem;
+            });
+
+            $content.find('#btnAccountSave').click(() => {
+                if (selectedItem) {
+                    $('#personid').val(selectedItem.id);
+                    $('#Depart_id').val(selectedItem.dept_id);
+                    popContainer.close();
+                } else {
+                    Alert.alert('', '사번을 선택해주세요.');
+                }
+            });
+        }
+
+
+
+        /*this.close();*/
+
         //let items = [];
         // $.each(_this.userGroupGrid.list, function (idx, item) {
 
@@ -923,6 +1114,10 @@
                     return false;
                 }
                 saveUserGroup(pk)
+            });
+
+            $('#getPersonId').click(function (e) {
+                showGetPerson();
             });
 
         });

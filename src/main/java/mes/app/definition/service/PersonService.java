@@ -35,6 +35,7 @@ public class PersonService {
 	            , sh."Name" as shift_name
 	            , d."Name" as dept_name
 	            , f."Name" as factory_name
+	            , p."PersonGroup_id" as person_group_id
 		        FROM person p
 		        left join work_center wc on p."WorkCenter_id" = wc.id
 		        left join Factory f on p."Factory_id" = f.id
@@ -45,7 +46,7 @@ public class PersonService {
         if (StringUtils.isEmpty(workerName)==false) sql +=" and upper(p.\"Name\") like concat('%%',upper(:workerName),'%%') ";
         if (StringUtils.isEmpty(workcenterId)==false) sql +=" and p.\"WorkCenter_id\" = cast(:workcenterId as Integer) ";
         
-        sql += " order by p.\"Name\" ";
+        sql += " order by p.id ";
         
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
         

@@ -252,13 +252,13 @@
         <div class="popup-overlay"  id="popup1"></div>
         <div class="popup-wrapper" id="wrapper1" style="width: 1100px">
             <div class="popup-title">
-                <h3>사용자권한신청</h3>
+                <h3>사용자이용신청</h3>
                 <a onclick="RegisterUserClose()" title="팝업닫기" class="btn-popup-close">
                     <img src="/images/icon/btn-popup-close.svg" alt="닫기">
                 </a>
             </div>
             <div class="popup-contents">
-                <!--<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />-->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <form id="bomForm">
                     <div class="table-wrap">
                         <table class="write-table">
@@ -269,6 +269,7 @@
                                 <col class="wp20">
                                 <col class="wp30">
                             </colgroup>
+                            <input type="hidden" id="idx" name="idx"/>
                             <tbody>
                             <tr>
                                 <th>
@@ -307,24 +308,24 @@
                                         성명
                                     </label>
                                 </th>
-                                <td colspan="3">
+                                <td >
                                     <div class="input-clear">
                                         <input type="text" id="name" name="name">
                                     </div>
                                 </td>
-                            </tr>
-                            <tr>
                                 <th>
                                     <label>
-                                        핸드폰
+                                        전화번호
                                     </label>
                                 </th>
-                                <td colspan="3">
+                                <td>
                                     <div class="input-clear">
                                         <input type="text" id="tel" name="tel">
                                     </div>
                                 </td>
                             </tr>
+
+
                             <tr>
                                 <th>
                                     <label>
@@ -334,12 +335,12 @@
                                 <td colspan="3">
                                     <div class="input-clear">
                                         <input type="text" id="email" name="email">
-                                        <button type="button" style="margin: 0 0 0 5px;width: 14.5%;background: white;color: #03428E;border: 1px solid #03428E;" id="BtnAuthenticationRegister">코드발급</button>
+                                       <!-- <button type="button" style="margin: 0 0 0 5px;width: 14.5%;background: white;color: #03428E;border: 1px solid #03428E;" id="BtnAuthenticationRegister">코드발급</button>-->
                                     </div>
 
                                 </td>
                             </tr>
-                            <tr>
+                            <!--<tr>
                                 <th>
                                     <label>
                                         인증코드
@@ -356,41 +357,7 @@
                                         <span id="timer2" style="width: 10%;  text-align: right; color: red;"></span>
                                     </div>
                                 </td>
-                            </tr>
-
-<!--                            <tr>-->
-<!--                                <th>-->
-<!--                                    <label>-->
-<!--                                        발전시설-->
-<!--                                    </label>-->
-<!--                                </th>-->
-<!--                                <td colspan="3">-->
-<!--                                    <div class="fl-ac">-->
-<!--                                        <select class="wp25 mg-r5" id="firstSelect" name="spworkcd" onchange="updateNextSelect(this)">-->
-<!--                                            <option></option>-->
-<!--                                        </select>-->
-<!--                                        <select class="wp25 mg-r5" id="secondSelect" name="spcompcd" onchange="updateNextSelect2(this)">-->
-<!--                                            <option></option>-->
-<!--                                        </select>-->
-<!--                                        <select class="wp25 mg-r5" id="thirdSelect" name="spplancd">-->
-<!--                                            <option></option>-->
-<!--                                        </select>-->
-<!--                                        <button type="button" onclick="addselectField(this)" class="btn" id="z" style="width: 145px">발전시설 추가</button>-->
-<!--                                    </div>-->
-<!--                                </td>-->
-<!--                            </tr>-->
-<!--                            <tr>-->
-<!--                                <th>-->
-<!--                                    <label for="">-->
-<!--                                        신청사유-->
-<!--                                    </label>-->
-<!--                                </th>-->
-<!--                                <td colspan="3">-->
-<!--                                    <div class="input-clear">-->
-<!--                                        <input type="text" id="reason" name="reason" class="wp100">-->
-<!--                                    </div>-->
-<!--                                </td>-->
-<!--                            </tr>-->
+                            </tr>-->
                             </tbody>
                         </table>
                     </div>
@@ -399,7 +366,7 @@
             </div>
             <div class="popup-button">
                 <button class="btn-popup-close" onclick="RegisterUserClose()">취소</button>
-                <button class="btn-navy" id="btnSaveAuth">권한신청</button>
+                <button class="btn-navy" id="btnSaveAuth">이용신청</button>
             </div>
         </div>
     </div> <!-- //dashboard-layout-popup end -->
@@ -538,109 +505,6 @@
     //##############################################  아이디 찾기 모달 끝
 
 
-    <!-- 발전시설 추가 버튼 이벤트-->
-    // function addselectField(button) {
-    //     // 새로운 td 요소를 생성합니다.
-    //     var newTd = document.createElement('div');
-    //     newTd.className = 'fl-ac new-fl-ac';
-    //
-    //     if(!window.cloneCounter){
-    //         window.cloneCounter = 1;
-    //     } else {
-    //         window.cloneCounter++;
-    //     }
-    //
-    //     // 새로운 input 요소를 생성합니다.
-    //     var originalSelect1 = document.getElementById('firstSelect');
-    //     var newInput = originalSelect1.cloneNode(true);
-    //     newInput.name = 'spworkcd';
-    //     newInput.id = originalSelect1.id + window.cloneCounter;
-    //     // newInput.className = 'wp100';
-    //     newInput.type = 'select';
-    //     newInput.width = 180;
-    //
-    //     var originalSelect2 = document.getElementById('secondSelect');
-    //     var newInput2 = originalSelect2.cloneNode(true);
-    //     newInput2.name = 'spcompcd';
-    //     // newInput2.className = 'wp100';
-    //     newInput2.type = 'select';
-    //     newInput2.id = originalSelect2.id + window.cloneCounter;
-    //     newInput2.width = 180;
-    //
-    //     var originalSelect3 = document.getElementById('thirdSelect');
-    //     var newInput3 = originalSelect3.cloneNode(true);
-    //     newInput3.name = 'spplancd';
-    //     // newInput2.className = 'wp100';
-    //     newInput3.type = 'select';
-    //     newInput3.id = originalSelect3.id + window.cloneCounter;
-    //     newInput3.width = 180;
-    //
-    //     // 삭제 버튼을 생성합니다.
-    //     var deleteButton = document.createElement('button');
-    //     deleteButton.textContent = '발전시설 삭제';
-    //     deleteButton.onclick = function() {
-    //         deleteSelectField(newInput); // 삭제 버튼을 클릭하면 해당 입력 필드를 삭제하는 함수 호출
-    //         deleteSelectField(newInput2);
-    //         deleteSelectField(newInput3);
-    //     };
-    //     deleteButton.style.marginLeft = '8px';
-    //     deleteButton.style.color = 'red';
-    //     deleteButton.style.marginTop = '5px';
-    //     // 새로운 td에 input 요소와 삭제 버튼을 추가합니다.
-    //     newTd.appendChild(newInput);
-    //     newTd.appendChild(newInput2);
-    //     newTd.appendChild(newInput3);
-    //     newTd.appendChild(deleteButton);
-    //
-    //     // 클릭된 버튼의 부모 td 요소를 찾습니다.
-    //     var parentTd = button.parentElement;
-    //
-    //     // 부모 td 요소 다음에 새로운 td 요소를 추가합니다.
-    //     parentTd.parentElement.insertBefore(newTd, parentTd.nextSibling);
-    // }
-
-    // function deleteSelectField(inputField) {
-    //     // 입력 필드의 부모 요소(td)를 찾아서 삭제합니다.
-    //     var tdToDelete = inputField.parentElement;
-    //     tdToDelete.parentElement.removeChild(tdToDelete);
-    // }
-
-
-    // function updateNextSelect(param) {
-    //     let code = param.value;
-    //
-    //     // param의 다음 형제 요소를 찾습니다.
-    //     let nextSelect = $(param).next('select');
-    //
-    //     if (nextSelect.length) {
-    //
-    //         $.ajax({
-    //             url: '/user-codes/code_spcompcd',
-    //             type: 'GET',
-    //             data: { code: code },
-    //             success: function(data) {
-    //                 nextSelect.empty();
-    //                 nextSelect.append('<option value="">선택하세요</option>');
-    //                 data.forEach(function(item) {
-    //                     nextSelect.append('<option value="' + item.dtlcd + '">' + item.spcompnm + '</option>');
-    //                 });
-    //             },
-    //             error: function(xhr, status, error) {
-    //                 // 통신 실패 시 처리
-    //
-    //
-    //                 // 선택 옵션을 비우거나 기본 옵션을 설정할 수 있습니다.
-    //                 nextSelect.empty();
-    //                 nextSelect.append('<option value=""></option>');
-    //             }
-    //         });
-    //     } else {
-    //         console.error('다음 select 요소를 찾을 수 없습니다.');
-    //     }
-    // }
-
-
-
     const requiredFields = [
         // { id: 'agency', name: '소속사' },
         // { id: 'agencyDepartment', name: '소속부서' },
@@ -732,27 +596,6 @@
     }
 
 
-    function initializeSelect({
-                                  url,               // API 엔드포인트 URL
-                                  params = {},       // 요청 매개변수 (기본값은 빈 객체)
-                                  elementId,         // 셀렉트 요소의 ID
-                                  defaultOption = "선택하세요",  // 기본 옵션 텍스트
-                                  valueField = "code",    // 데이터의 값 필드 이름
-                                  textField = "value"     // 데이터의 표시 필드 이름
-                              }) {
-        $.get(url, params, function(data){
-            let selectElement = $(`#${elementId}`);
-            selectElement.empty();
-            selectElement.append(`<option value="">${defaultOption}</option>`);
-            data.forEach(function(item) {
-                selectElement.append(`<option value="${item[valueField]}">${item[textField]}</option>`);
-            });
-        });
-    }
-
-
-
-
     var userinfo = {
         username: '',
         login_id: '',
@@ -802,7 +645,13 @@
         return emailPattern.test(emailVal);
     }
 
+
+
     $(document).ready(function () {
+        let _csrf = document.getElementsByName('_csrf');
+        let _CsrfValue = _csrf[0].value;
+        let csrfToken = $("[name=_csrf]").val();
+
 
         let activeTimerInterval; // 전역 변수로 interval ID를 저장
 
@@ -840,18 +689,9 @@
         }
 
 
-        // const selectConfigurations = [
-        //     {  url: '/user-codes/parent',params: { parentId: 154 },elementId: 'agency', valueField: "id"},
-        //     {  url: '/user-codes/parent',params: { parentId: 110 },elementId: 'firstSelect', valueField: "code"},
-        //     /*{  url: '/user-auth/type',params: {},elementId: 'authType',valueField: "code",textField: 'name'}*/
-        // ];
-        // selectConfigurations.forEach(config => initializeSelect(config));
-
         let emailAuthCode = false;
         let emailAuthCode_pw = false;
 
-        let _csrf = document.getElementsByName('_csrf');
-        let _CsrfValue = _csrf[0].value;
 
         let btnAuthentication = $('#Authentication');
         btnAuthentication.click(function (e){
@@ -1099,30 +939,8 @@
 
         })
 
-        //권한신청 버튼 클릭
-        let btnRegistersend = $('#btnSaveAuth');
 
-        btnRegistersend.click(function (e) {
-
-            const authCode = $('#AuthenticationCodeRegister').val().trim();
-            if (!authCode) {
-                Alert.alert('', '인증코드를 입력해주세요.');
-                $('#AuthenticationCodeRegister').focus();
-                return;
-            }
-
-            /*let authType = document.getElementById('authType');
-            let authTypeText = authType.options[authType.selectedIndex].text;*/
-
-            if (!validateFields()) {
-                return false;
-            }
-
-            if(!emailAuthCode){
-                Alert.alert('', '코드가 인증되지 않았습니다.');
-                return;
-            }
-
+        $('#btnSaveAuth').click(function (e) {
 
             const emailInput = document.getElementById('email');
             const emailValue = emailInput.value.trim();
@@ -1139,69 +957,23 @@
                 return;
             }
 
-            function extractSelectValues(selectName) {
-                let inputs = document.querySelectorAll(`select[name="${selectName}"]`);
-                return Array.from(inputs).map(input => input.value).join(',');
-            }
-
-            function extractSelectTexts(selectName) {
-                let inputs = document.querySelectorAll(`select[name="${selectName}"]`);
-                return Array.from(inputs).map(input => input.options[input.selectedIndex].text).join(',');
-            }
-
-            // let spworkcdString = extractSelectValues('spworkcd');
-            // let spcompcdString = extractSelectValues('spcompcd');
-            // let spplancdString = extractSelectValues('spplancd');
-
-            // let firstText  = extractSelectTexts('spworkcd');
-            // let secondText = extractSelectTexts('spcompcd');
-            // let thirdText  = extractSelectTexts('spplancd');
-            // let agencynm = extractSelectTexts('agency');
-
             let data = FormUtil.extractForm($('#bomForm'));
 
-            // data.spworkcd = spworkcdString;
-            // data.spcompcd = spcompcdString;
-            // data.spplancd = spplancdString;
-
-            data.firstText = firstText;
-            data.secondText = secondText;
-            data.thirdText = thirdText;
-            //data.authTypeText = authTypeText;
-            // data.agencynm = agencynm;
-
-            data.AuthenticationCode = $('#AuthenticationCodeRegister').val().trim();
-
-
-            let fnSuccess = function (res) {
-                if(res.success){
-                    Alert.alert('', res.message);
+            $.ajax({
+                url: '/user-auth/save',
+                method: 'POST',
+                data: data,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function (response) {
                     $("#modal-close-button").trigger('click');
-
-                    emailAuthCode = false;
-
-                    for(let i=0; i < clearFieldList.length; i++){
-                        clearForm(clearFieldList[i]);
-                    }
-                    let idfield = document.getElementById('id')
-                    idfield.removeAttribute('readonly')
-
-                    //추가된 발전지역 요소들 삭제
-                    const elements = document.getElementsByClassName('new-fl-ac');
-                    const elementsArray = Array.from(elements);
-
-                    elementsArray.forEach(element => {
-                        element.remove();
-                    });
-                    //끝
-
                     RegisterUserClose();
-                }else if (!res.success){
-                    Alert.alert('', res.message);
+                    Alert.alert('', '이용신청이 완료되었습니다.');
+                },
+                error: function (error) {
+                    Alert.alert('', '에러가 발생하였습니다.');
                 }
-            };
-            AjaxUtil.postAsyncData("/Register/save", data, fnSuccess, function(res){
-                Alert.alert('', '에러가 발생하였습니다.');
             });
 
 
@@ -1298,6 +1070,8 @@
                     Alert.alert('', '승인되지 않은 사용자입니다.', clearFields);
                 } else if (code == 'noactive') {
                     Alert.alert('', '사용 불가능한 사용자입니다.', clearFields);
+                }else if (code == 'null') {
+                    Alert.alert('', '이용절차 확인중인 사용자입니다.', clearFields);
                 }
                 else {
                     if (code == 'OK') {
@@ -1338,6 +1112,8 @@
             });
         }
         $('#loginFrm').validate({ submitHandler: submitHandler });
+
+
     });
 
 
