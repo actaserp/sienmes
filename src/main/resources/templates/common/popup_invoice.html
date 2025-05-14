@@ -944,6 +944,7 @@
             const $corpNum = $('#InvoiceeCorpNum');
 
             if (taxType === '개인'){
+                clearInvoiceeFields();
                 $('#InvoiceeCorpNum')
                     .removeAttr('readonly')
                     .css('width', '100%');
@@ -969,6 +970,7 @@
                 });
 
             } else if (taxType === '외국인') {
+                clearInvoiceeFields();
                 $('#InvoiceeCorpNum')
                     .attr('readonly', true)
                     .css('width', '100%')
@@ -990,6 +992,7 @@
                     $('#InvoiceeContactName1').val(name);
                 });
             } else if (taxType === '사업자') {
+                clearInvoiceeFields();
                 $('#InvoiceeCorpNum')
                     .css('width', '80%')
                     .removeAttr('readonly');
@@ -1009,6 +1012,19 @@
             }
             window.__skipCorpNumReset = false;
         });
+
+        function clearInvoiceeFields() {
+            if (!window.__skipInvoiceeFieldReset) {
+                const fields = [
+                    'InvoiceeID', 'InvoiceeCorpNum', 'InvoiceeTaxRegID',
+                    'InvoiceeCorpName', 'InvoiceeCEOName', 'InvoiceeAddr',
+                    'InvoiceeBizType', 'InvoiceeBizClass', 'InvoiceeContactName1',
+                    'InvoiceeTEL1', 'InvoiceeEmail1'
+                ];
+                fields.forEach(id => $('#' + id).val(''));
+            }
+
+        }
 
         $(document).on('change', 'input[name="WriteType"]', function () {
             const taxType = $(this).val();

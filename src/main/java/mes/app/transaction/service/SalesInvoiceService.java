@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.popbill.api.*;
+import com.popbill.api.taxinvoice.MgtKeyType;
 import com.popbill.api.taxinvoice.Taxinvoice;
 import com.popbill.api.taxinvoice.TaxinvoiceDetail;
 import mes.Encryption.EncryptionUtil;
@@ -21,6 +22,7 @@ import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -72,7 +74,7 @@ public class SalesInvoiceService {
 	@Autowired
 	private ShipmentHeadRepository shipmentHeadRepository;
 
-	public List<Map<String, Object>> getList(String invoice_kind, Integer cboStatecode, Integer cboCompany, Timestamp start, Timestamp end) {
+	public List<Map<String, Object>> getList(String invoice_kind, Integer cboStatecode, Integer cboCompany, Timestamp start, Timestamp end, String spjangcd) {
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("invoice_kind", invoice_kind);
@@ -80,6 +82,7 @@ public class SalesInvoiceService {
 		dicParam.addValue("cboCompany", cboCompany);
 		dicParam.addValue("start", start);
 		dicParam.addValue("end", end);
+		dicParam.addValue("spjangcd", spjangcd);
 
 		String sql = """
 			WITH detail_summary AS (
@@ -132,6 +135,7 @@ public class SalesInvoiceService {
 			   AND state_code."Code" = m.statecode::text
 		   
 		   WHERE 1 = 1
+		   and m.spjangcd = :spjangcd 
         """; // 조건은 아래에서 붙임
 
 		if (invoice_kind != null && !invoice_kind.isEmpty()) {
@@ -163,14 +167,14 @@ public class SalesInvoiceService {
 	}
 
 	@Transactional
-	public AjaxResult saveInvoicee(Map<String, String> paramMap, User user) {
+	public AjaxResult saveInvoicee(Map<String, Object> paramMap, User user) {
 		AjaxResult result = new AjaxResult();
 
-		String idStr = paramMap.get("InvoiceeID");
+		String idStr = (String) paramMap.get("InvoiceeID");
 		Integer id = (idStr != null && !idStr.isEmpty()) ? Integer.parseInt(idStr) : null;
 
-		String name = paramMap.get("InvoiceeCorpName");
-		String businessNumber = paramMap.get("InvoiceeCorpNum");
+		String name = (String) paramMap.get("InvoiceeCorpName");
+		String businessNumber =(String) paramMap.get("InvoiceeCorpNum");
 
 		boolean nameExists = (id != null)
 				? companyRepository.existsByNameAndIdNot(name, id)
@@ -195,21 +199,26 @@ public class SalesInvoiceService {
 		Company company = (id != null) ? companyRepository.getCompanyById(id) : new Company();
 
 		company.setBusinessNumber(businessNumber);
-		company.setAddress(paramMap.get("InvoiceeAddr"));
-		company.setBusinessItem(paramMap.get("InvoiceeBizClass"));
-		company.setBusinessType(paramMap.get("InvoiceeBizType"));
-		company.setCEOName(paramMap.get("InvoiceeCEOName"));
-		company.setAccountManager(paramMap.get("InvoiceeContactName1"));
+		company.setAddress((String) paramMap.get("InvoiceeAddr"));
+		company.setBusinessItem((String) paramMap.get("InvoiceeBizClass"));
+		company.setBusinessType((String) paramMap.get("InvoiceeBizType"));
+		company.setCEOName((String) paramMap.get("InvoiceeCEOName"));
+		company.setAccountManager((String) paramMap.get("InvoiceeContactName1"));
 		company.setName(name);
-		company.setEmail(paramMap.get("InvoiceeEmail1"));
-		company.setAccountManagerPhone(paramMap.get("InvoiceeTEL1"));
+		company.setEmail((String) paramMap.get("InvoiceeEmail1"));
+		company.setAccountManagerPhone((String) paramMap.get("InvoiceeTEL1"));
 		company.setCompanyType("sale");
 		company.set_audit(user);
 		company.setRelyn("0");
-		company.setSpjangcd(paramMap.get("spjangcd"));
-
+		company.setSpjangcd((String) paramMap.get("spjangcd"));
 
 		company = companyRepository.save(company);
+
+		if (company.getCode() == null || company.getCode().isEmpty()) {
+			company.setCode("Corp-" + company.getId());
+			company = companyRepository.save(company);
+		}
+
 		result.data = company;
 		result.success = true;
 
@@ -220,8 +229,8 @@ public class SalesInvoiceService {
 	public AjaxResult saveInvoice(@RequestBody Map<String, Object> form) {
 
 		AjaxResult result = new AjaxResult();
+
 		// 1. 기본 키 생성
-		;
 		Integer misnum = parseInt(form.get("misnum"));
 		boolean isUpdate = misnum != null ;
 
@@ -282,8 +291,9 @@ public class SalesInvoiceService {
 		salesment.setIvertel(sanitizeNumericString(form.get("InvoiceeTEL1"))); // 담당자 연락처
 		salesment.setIveremail((String)form.get("InvoiceeEmail1")); // 이메일
 		String misdate = sanitizeNumericString(form.get("writeDate"));
+		salesment = tb_salesmentRepository.save(salesment);
 
-		salesment.setMgtkey("TAX-" + misdate + "-" +  misnum);
+		salesment.setMgtkey("TAX-" + misdate + "-" +  salesment.getMisnum());
 		salesment.setMisdate(misdate);
 		salesment.setSupplycost(parseIntSafe(form.get("SupplyCostTotal"))); // 총 공급가액
 		salesment.setTaxtotal(parseIntSafe(form.get("TaxTotal"))); // 총 세액
@@ -412,7 +422,12 @@ public class SalesInvoiceService {
 				JsonNode json = jacksonObjectMapper.readTree(response.getBody());
 				JsonNode dataNode = json.path("data");
 				if (dataNode.isArray() && dataNode.size() > 0) {
-					return dataNode.get(0); // 단건이므로 첫 번째 요소만 반환
+					JsonNode item = dataNode.get(0);
+					String state = item.path("b_stt_cd").asText(); // "01": 정상
+					if (!"01".equals(state)) {
+						return null; // 휴업, 폐업 등 처리
+					}
+					return item;
 				} else {
 					throw new RuntimeException("사업자 정보가 없습니다.");
 				}
@@ -621,7 +636,6 @@ public class SalesInvoiceService {
 		return item;
 	}
 
-	@Transactional
 	public AjaxResult issueInvoice(List<Map<String, String>> issueList) {
 		AjaxResult result = new AjaxResult();
 
@@ -635,7 +649,7 @@ public class SalesInvoiceService {
 				.map(item -> Integer.parseInt(item.get("misnum")))
 				.toList();
 
-		List<TB_Salesment> salesList = tb_salesmentRepository.findAllById(idList);
+		List<TB_Salesment> salesList = tb_salesmentRepository.findAllByMisnumIn(idList);
 		if (salesList.isEmpty()) {
 			result.success = false;
 			result.message = "해당 세금계산서를 찾을 수 없습니다.";
@@ -644,24 +658,46 @@ public class SalesInvoiceService {
 
 		// 발행 처리
 		AjaxResult issueResult = callPopbillIssue(salesList);
+
+		System.out.println("callPopbillIssue result:");
+		System.out.println("  success: " + issueResult.success);
+		System.out.println("  message: " + issueResult.message);
+		System.out.println("  data: " + issueResult.data);
+
 		result.success = issueResult.success;
 		result.message = issueResult.message;
 		return result;
 	}
 
-
-	// 팝빌 처리
 	private AjaxResult callPopbillIssue(List<TB_Salesment> salesList) {
-		// 단건
-		if (salesList.size() == 1) {
-			return callSingleIssue(salesList.get(0));
-		} else {
-			// 벌크(다건)
-			return callBulkIssue(salesList);
+		AjaxResult result = new AjaxResult();
+		List<String> successList = new ArrayList<>();
+		List<String> failList = new ArrayList<>();
+
+		for (TB_Salesment sales : salesList) {
+
+			AjaxResult singleResult = callSingleIssue(sales); // 별도 트랜잭션
+			if (singleResult.success) {
+				successList.add("상호: " + sales.getIvercorpnm());
+			} else {
+				failList.add("상호: " + sales.getIvercorpnm() + " (" + singleResult.message + ")");
+			}
 		}
+
+		if (failList.isEmpty()) {
+			result.success = true;
+			result.message = "총 " + salesList.size() + "건이 성공적으로 발행되었습니다.";
+		} else {
+			result.success = false;
+			result.message = "일부 발행 실패: " + failList.size() + "건\n" + String.join("\n", failList);
+		}
+
+		return result;
 	}
 
-	private AjaxResult callSingleIssue(TB_Salesment sm) {
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+    public AjaxResult callSingleIssue(TB_Salesment sm) {
 		AjaxResult result = new AjaxResult();
 
 		try {
@@ -683,9 +719,16 @@ public class SalesInvoiceService {
 			System.out.println(taxinvoice);
 
 			// 발행 요청
-			taxinvoiceService.registIssue(mgtKey, taxinvoice, false, "", false, "", "", "");
+			IssueResponse response = taxinvoiceService.registIssue(mgtKey, taxinvoice, false, "", false, "", "", "");
+			System.out.println("팝빌 발행 결과 ==================");
+			System.out.println("code: " + response.getCode());
+			System.out.println("message: " + response.getMessage());
+			System.out.println("invoiceNum: " + response.getNtsConfirmNum());
 
-			sm.setStatecode(200); // 즉시 발행 완료
+			LocalDateTime now = LocalDateTime.now();
+			String statedt = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+			sm.setStatecode(300); // 즉시 발행 완료
+			sm.setStatedt(statedt);
 			tb_salesmentRepository.save(sm);
 
 			result.success = true;
@@ -698,48 +741,10 @@ public class SalesInvoiceService {
 		return result;
 	}
 
-	// 다중
-	private AjaxResult callBulkIssue(List<TB_Salesment> salesList) {
-		AjaxResult result = new AjaxResult();
-
-		try {
-			List<Taxinvoice> invoiceList = new ArrayList<>();
-			String submitId = "BULK_" + System.currentTimeMillis();
-
-			for (TB_Salesment sm : salesList) {
-				Taxinvoice taxinvoice = makeTaxInvoiceObject(sm);
-
-				// 각 세금계산서에 고유 관리키 지정
-				String mgtKey = sm.getIcercorpnum();
-				taxinvoice.setInvoicerMgtKey(mgtKey);
-				sm.setMgtkey(mgtKey);
-				invoiceList.add(taxinvoice);
-			}
-
-			BulkResponse response = taxinvoiceService.bulkSubmit(
-					salesList.get(0).getIcercorpnum(),
-					submitId,
-					invoiceList,
-					false, null
-			);
-
-			for (TB_Salesment sm : salesList) {
-				sm.setStatecode(201); // 예: 발행 요청 상태
-			}
-			tb_salesmentRepository.saveAll(salesList);
-
-			result.success = true;
-			result.message = "벌크 세금계산서 발행 요청이 완료되었습니다.";
-		} catch (PopbillException e) {
-			result.success = false;
-			result.message = "팝빌 벌크 발행 실패: " + e.getMessage();
-		}
-
-		return result;
-	}
-
-
 	private Taxinvoice makeTaxInvoiceObject(TB_Salesment sm) {
+		// LazyInitializationException 방지
+		sm.getDetails().size();
+
 		Taxinvoice invoice = new Taxinvoice();
 
 		// 공급자 정보
@@ -768,7 +773,20 @@ public class SalesInvoiceService {
 
 		// 공급받는자 정보 설정
 		invoice.setInvoiceeType(sm.getInvoiceetype());
-		invoice.setInvoiceeCorpNum(sm.getIvercorpnum());
+
+		String invoicerCorpNum = sm.getIvercorpnum();
+		if ("개인".equals(sm.getInvoiceetype())) {
+			try {
+				Map<String, Object> tempMap = new HashMap<>();
+				tempMap.put("ivercorpnum", invoicerCorpNum);
+				UtilClass.decryptItem(tempMap, "ivercorpnum", 0); // 마스킹 없이 복호화
+				invoicerCorpNum = (String) tempMap.get("ivercorpnum");
+			} catch (IOException e) {
+				System.err.println("주민번호 복호화 실패: " + e.getMessage());
+			}
+		}
+
+		invoice.setInvoiceeCorpNum(invoicerCorpNum);
 		invoice.setInvoiceeCorpName(sm.getIvercorpnm());
 		invoice.setInvoiceeCEOName(sm.getIverceonm());
 		invoice.setInvoiceeAddr(sm.getIveraddr());
@@ -866,6 +884,70 @@ public class SalesInvoiceService {
 		return (numStr == null || numStr.isEmpty()) ? null : Integer.parseInt(numStr);
 	}
 
+	@Transactional
+	public AjaxResult cancelIssue(List<Map<String, String>> cancelList) {
+		AjaxResult result = new AjaxResult();
+
+		if (cancelList == null || cancelList.isEmpty()) {
+			result.success = false;
+			result.message = "취소할 데이터가 없습니다.";
+			return result;
+		}
+
+		List<String> successList = new ArrayList<>();
+		List<String> failList = new ArrayList<>();
+
+		for (Map<String, String> item : cancelList) {
+			try {
+				Integer misnum = Integer.parseInt(item.get("misnum"));
+				TB_Salesment sm = tb_salesmentRepository.findById(misnum).orElse(null);
+				if (sm == null) {
+					failList.add("misnum: " + misnum + " (해당 내역 없음)");
+					continue;
+				}
+
+				String corpNum = sm.getIcercorpnum();
+				String mgtKey = sm.getMgtkey();
+
+				Response response = taxinvoiceService.cancelIssue(
+						corpNum,
+						MgtKeyType.SELL,
+						mgtKey,
+						"",
+						""
+				);
+
+				System.out.println("팝빌 발행 취소 결과 === misnum: " + misnum);
+				System.out.println("code: " + response.getCode());
+				System.out.println("message: " + response.getMessage());
+
+				if (response.getCode() == 1) {
+					sm.setStatecode(600); // 발행 취소
+					LocalDateTime now = LocalDateTime.now();
+					String statedt = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+					sm.setStatedt(statedt);
+					tb_salesmentRepository.save(sm);
+					successList.add("상호: " + sm.getIvercorpnm());
+				} else {
+					failList.add("상호: " + sm.getIvercorpnm() + " (" + response.getMessage() + ")");
+				}
+
+			} catch (Exception e) {
+				failList.add("처리 중 오류 발생 (" + e.getMessage() + ")");
+				e.printStackTrace();
+			}
+		}
+
+		if (failList.isEmpty()) {
+			result.success = true;
+			result.message = "총 " + successList.size() + "건의 발행이 취소되었습니다.";
+		} else {
+			result.success = false;
+			result.message = "일부 발행 취소 실패: " + failList.size() + "건\n" + String.join("\n", failList);
+		}
+
+		return result;
+	}
 
 
 

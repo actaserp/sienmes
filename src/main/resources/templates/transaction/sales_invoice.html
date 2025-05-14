@@ -7,6 +7,12 @@
             transform: translateY(-50%);
             white-space: pre-wrap;
         }
+
+        a[aria-disabled="true"] {
+            pointer-events: none;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -66,7 +72,8 @@
                             </label>
                         </dt>
                         <dd>
-                            <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭하여 검색" style="width: 180px;">
+                            <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭하여 검색"
+                                   style="width: 180px;">
                             <input type="hidden" id="cboCompanyHidden">
                         </dd>
                     </dl>
@@ -151,7 +158,8 @@
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <input style="text-align: right;max-width: 200px;" class="form-control2" id="totalAmount" name="totalAmount" readonly>
+                                <input style="text-align: right;max-width: 200px;" class="form-control2"
+                                       id="totalAmount" name="totalAmount" readonly>
                             </div>
                         </dd>
                     </dl>
@@ -163,7 +171,8 @@
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <input style="text-align: right;max-width: 200px;" class="form-control2" id="totalSupPrice" name="totalSupPrice" readonly>
+                                <input style="text-align: right;max-width: 200px;" class="form-control2"
+                                       id="totalSupPrice" name="totalSupPrice" readonly>
                             </div>
                         </dd>
                     </dl>
@@ -175,7 +184,8 @@
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <input style="text-align: right;max-width: 200px;" class="form-control2" id="totalTax" name="totalTax" readonly>
+                                <input style="text-align: right;max-width: 200px;" class="form-control2" id="totalTax"
+                                       name="totalTax" readonly>
                             </div>
                         </dd>
                     </dl>
@@ -195,23 +205,18 @@
                             </a>
                         </li>
                         <li>
-                            <a class="btn btn-edit" title="수정" id="btnIssue" >
+                            <a class="btn btn-edit" title="발행" id="btnIssue">
                                 발행
                             </a>
                         </li>
-                        <li style="display: none;">
-                            <a class="btn btn-edit" title="수정" id="btnIssueCancel">
+                        <li>
+                            <a class="btn btn-edit" title="발행 취소" id="btnIssueCancel">
                                 발행 취소
                             </a>
                         </li>
                         <li>
-                            <a class="btn" title="재전송" id="btnReIssue">
+                            <a class="btn" title="재전송" id="btnReMassage">
                                 재전송
-                            </a>
-                        </li>
-                        <li style="display: none;">
-                            <a class="btn" title="역발행/재전송" id="btnModifyInvoice">
-                                수정 세금계산서 발행
                             </a>
                         </li>
                     </ul>
@@ -321,6 +326,7 @@
                         {binding: 'totalamt', header: '합계금액', width: 110, align: 'right', format: 'n0'},
                         {binding: 'supplycost', header: '공급가액', width: 110, align: 'right', format: 'n0'},
                         {binding: 'taxtotal', header: '세액', width: 100, align: 'right', format: 'n0'},
+                        {binding: 'statecode', visible: false},
                         {binding: 'statecode_name', header: '상태', width: 80, align: 'center'},
                         {binding: 'taxtype', header: '구분', width: 80, align: 'center'},
                         {binding: 'misgubun_name', header: '매출구분', width: 80, align: 'center'},
@@ -335,7 +341,103 @@
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '매출 계산서 내역';
 
+                this.grid.selectionChanged.addHandler(function (s, e) {
+                    let statecode = null;
+                    let disableAll = false;
 
+                    const selectedItems = _this.grid.rows
+                        .filter(row => row.isSelected)
+                        .map(row => row.dataItem);
+
+                    if (selectedItems.length === 1) {
+                        statecode = selectedItems[0].statecode;
+                    } else if (selectedItems.length > 1) {
+                        const uniqueStatecodes = [...new Set(selectedItems.map(item => item.statecode))];
+
+                        const allInReissueGroup = selectedItems.every(item =>
+                            [300, 301, 302, 303, 304].includes(item.statecode)
+                        );
+
+                        if (uniqueStatecodes.length === 1) {
+                            // 모두 동일
+                            statecode = uniqueStatecodes[0];
+                            if (statecode === 300) {
+                                statecode = 'MULTI_300';
+                            }
+                        } else if (allInReissueGroup) {
+                            // 서로 다르지만 전부 재전송 허용 그룹이면 → 재전송만 허용
+                            statecode = 'MULTI_REISSUE';
+                        } else {
+                            disableAll = true;
+                        }
+                    } else {
+                        const row = s.selection.row;
+                        if (row >= 0) {
+                            statecode = s.rows[row].dataItem.statecode;
+                        }
+                    }
+
+                    if (disableAll) {
+                        updateButtonDisable(null);
+                    } else {
+                        updateButtonDisable(statecode, selectedItems.length > 1);
+                    }
+                });
+
+
+                // 버튼 비활성화
+                function updateButtonDisable(statecode, isMultiSelected = false) {
+                    const allButtons = ['btnDelete', 'btnEdit', 'btnIssue', 'btnIssueCancel', 'btnReMassage'];
+
+                    allButtons.forEach(id => {
+                        const btn = document.getElementById(id);
+                        if (btn) {
+                            btn.setAttribute('aria-disabled', 'true');
+                        }
+                    });
+
+                    if (statecode == null) return;
+
+                    const enableButtons = [];
+
+                    if (isMultiSelected) {
+                        if (statecode === 100) {
+                            enableButtons.push('btnDelete', 'btnIssue');
+                        } else if (statecode === 'MULTI_REISSUE') {
+                            enableButtons.push('btnReMassage');
+                        } else if (statecode === 'MULTI_300') {
+                            enableButtons.push('btnIssueCancel', 'btnReMassage');
+                        } else if ([300, 301, 302, 303, 304].includes(statecode)) {
+                            enableButtons.push('btnReMassage'); // fallback
+                        }
+                    } else {
+                        switch (statecode) {
+                            case 100:
+                                enableButtons.push('btnDelete', 'btnEdit', 'btnIssue');
+                                break;
+                            case 300:
+                                enableButtons.push('btnIssueCancel', 'btnReMassage');
+                                break;
+                            case 301:
+                            case 302:
+                            case 303:
+                                enableButtons.push('btnReMassage');
+                                break;
+                            case 304:
+                                enableButtons.push('btnEdit', 'btnReMassage');
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    enableButtons.forEach(id => {
+                        const btn = document.getElementById(id);
+                        if (btn) {
+                            btn.setAttribute('aria-disabled', 'false');
+                        }
+                    });
+                }
 
                 // 하단 합계 행 추가
                 this.grid.columnFooters.rows.push(new wijmo.grid.GroupRow());
@@ -439,9 +541,69 @@
 
                 });
 
+                // 발행 취소 버튼
+                $('#btnIssueCancel').click(function (e) {
+                    const items = _this.grid.rows
+                        .filter(row => row.isSelected)
+                        .map(row => row.dataItem);
+
+                    if (items.length === 0) {
+                        Alert.alert('', '발행 취소할 항목을 선택해주세요.');
+                        return;
+                    }
+
+                    Alert.confirm('', '선택한 항목을 발행 취소하시겠습니까?', function () {
+                        const issueList = items.map(item => ({
+                            misnum: item.misnum
+                        }));
+
+                        let url = _this.url + '/cancel_issue';
+                        AjaxUtil.postJsonData(url, issueList, function (res) {
+                            if (res.success) {
+                                Alert.alert('', res.message || '발행이 취소되었습니다.', function () {
+                                    console.log('res.success', res);
+                                    _this.searchMainData();
+                                });
+                            } else {
+                                Alert.alert('', res.message || '발행 중 오류가 발생했습니다.');
+                            }
+                        });
+                    });
+
+                });
+
+                // 재전송 버튼
+                $('#btnReMassage').click(function (e) {
+                    const items = _this.grid.rows
+                        .filter(row => row.isSelected)
+                        .map(row => row.dataItem);
+
+                    if (items.length === 0) {
+                        Alert.alert('', '이메일을 재전송 할 항목을 선택해주세요.');
+                        return;
+                    }
+
+                    const issueList = items.map(item => ({
+                        misnum: item.misnum
+                    }));
+
+                    let url = _this.url + '/invoice_issue';
+                    AjaxUtil.postJsonData(url, issueList, function (res) {
+                        if (res.success) {
+                            Alert.alert('', res.message || '재전송 되었습니다.', function () {
+                                console.log('res.success', res);
+                                _this.searchMainData();
+                            });
+                        } else {
+                            Alert.alert('', res.message || '발행 중 오류가 발생했습니다.');
+                        }
+                    });
+
+                });
+
             }
 
-            modify(selectedItem){
+            modify(selectedItem) {
                 let _this = this;
 
                 let selectedItems = selectedItem;
@@ -510,13 +672,24 @@
 
             }
 
-            shipmentheadids  = [];
+            shipmentheadids = [];
+
             // 계산서 등록 팝업
             showInvoiceForm(data) {
                 console.log('showInvoiceForm', data);
                 let _this = this;
                 let content = tmpl('popup_invoiceTemplate', data);
                 let $content = $(content);
+
+                setTimeout(() => {
+                    const code = data.StateCode;
+                    console.log('code', code);
+                    if (code === 100 || code === undefined || code === null) {
+                        $content.find('#btnInvoiceSave').show();
+                    } else {
+                        $content.find('#btnInvoiceSave').hide();
+                    }
+                }, 0);
 
                 let modalContainer = null;
                 let $taxForm = $content.find('#taxForm');
@@ -527,7 +700,7 @@
                 if (data.mode === 'new') {
                     modalContainer = new PopupDraggable('등록');
 
-                    let purposeType = AjaxUtil.getSyncData('/api/definition/code/getvalue', { code: 'PurposeType' });
+                    let purposeType = AjaxUtil.getSyncData('/api/definition/code/getvalue', {code: 'PurposeType'});
 
                     if (purposeType.data.Value === '영수') {
                         $content.find('#PurposeType1').prop('checked', true);
@@ -582,6 +755,7 @@
                         FormUtil.BindInvoiceDataForm(data, $content.find('#taxForm'));
 
                         window.__skipCorpNumReset = true;
+                        window.__skipInvoiceeFieldReset = true;
 
                         $content.find('input[name="InvoiceeType"]:checked').trigger('change');
 
@@ -596,6 +770,7 @@
 
                         $content.find('#InvoiceeCorpNum').trigger('input');
                         $content.find('#btnInvoiceSave span').text('수정');
+                        window.__skipInvoiceeFieldReset = false;
                     }, 0);
 
                 }
@@ -639,6 +814,7 @@
                                     $content.find('#InvoiceeTEL1').val(items.invoiceetel1).trigger('input');
                                     $content.find('#InvoiceeEmail1').val(items.invoiceeemail1);
                                     oldBusinessNumber = items.business_number;
+                                    $content.find('#InvoiceeCorpNum').prop('readonly', true);
 
                                 } else {
                                     Alert.alert('', result.message);
@@ -809,6 +985,13 @@
 
 
                     Alert.confirm('', '저장하시겠습니까?', function () {
+                        // InvoiceeID 값이 없으면
+                        // /invoicee_check 로 InvoiceeCorpNum 을 b_no로 보내서 확인하고
+                        // 실패하면 alert 띄워서 return
+                        // 성공하면 /check_comp 에 InvoiceeCorpNum 보내서 company 테이블에 존재하는지 확인
+                        // 있으면 해당 id 를 InvoiceeID 에 set 해주고 없으면  /invoicee_save 로 data 파라미터로 넘겨서 보내
+
+
                         let url = _this.url + '/invoice_save';
 
                         let fnSaveSuccess = function (result) {
@@ -914,7 +1097,8 @@
                     'cboStatecode': cboStatecode,
                     'start': start,
                     'end': end,
-                    'action': 'read'
+                    'action': 'read',
+                    'spjangcd': sessionStorage.getItem('spjangcd'),
                 };
 
 
@@ -1140,7 +1324,7 @@
                     // Ajax 요청을 Promise로 감싸기
                     const getMaterial = (material_id) => {
                         return new Promise(resolve => {
-                            AjaxUtil.getAsyncData(_this.url + '/get_material', { material_id }, result => {
+                            AjaxUtil.getAsyncData(_this.url + '/get_material', {material_id}, result => {
                                 resolve(result?.data || null);
                             });
                         });
@@ -1148,7 +1332,7 @@
 
                     const getCompany = (id) => {
                         return new Promise(resolve => {
-                            AjaxUtil.getAsyncData('/api/popup/get_Comp', { id }, result => {
+                            AjaxUtil.getAsyncData('/api/popup/get_Comp', {id}, result => {
                                 resolve(result?.data?.[0] || null);
                             });
                         });

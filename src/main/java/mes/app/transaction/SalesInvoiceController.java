@@ -89,11 +89,11 @@ public class SalesInvoiceController {
 		return result;
 	}
 
-	// 공급받는자 저장
+	// 공급받는자 휴폐업 조회
 	@PostMapping("/invoicee_check")
 	public AjaxResult invoiceeCheck(
-			@RequestParam("b_no") String bno,
-			@RequestParam("compid") Integer compid,
+			@RequestParam("b_no") String bno, // 사업자 번호
+			@RequestParam("compid") Integer compid, // company id
 			Authentication auth) {
 
 		AjaxResult result = new AjaxResult();
@@ -133,7 +133,7 @@ public class SalesInvoiceController {
 	// 공급받는자 저장
 	@PostMapping("/invoicee_save")
 	public AjaxResult invoiceeSave(
-			@RequestParam Map<String, String> paramMap,
+			@RequestParam Map<String, Object> paramMap,
 			Authentication auth) {
 
 		User user = (User) auth.getPrincipal();
@@ -141,7 +141,7 @@ public class SalesInvoiceController {
 	}
 
 	// 검색
-	@DecryptField(columns = {"ivercorpnum"}, masks = 3)
+	@DecryptField(columns = {"ivercorpnum"}, masks = 6)
 	@GetMapping("/read")
 	public AjaxResult getInvoiceList(
 			@RequestParam(value="invoice_kind", required=false) String invoice_kind,
@@ -149,6 +149,7 @@ public class SalesInvoiceController {
 			@RequestParam(value="end", required=false) String end_date,
 			@RequestParam(value="cboCompany", required=false) Integer cboCompany,
 			@RequestParam(value="cboStatecode", required=false) Integer cboStatecode,
+			@RequestParam(value="spjangcd", required=false) String spjangcd,
 			HttpServletRequest request) {
 
 		start_date = start_date + " 00:00:00";
@@ -157,7 +158,7 @@ public class SalesInvoiceController {
 		Timestamp start = Timestamp.valueOf(start_date);
 		Timestamp end = Timestamp.valueOf(end_date);
 
-		List<Map<String, Object>> items = this.salesInvoiceService.getList(invoice_kind, cboStatecode, cboCompany, start, end);
+		List<Map<String, Object>> items = this.salesInvoiceService.getList(invoice_kind, cboStatecode, cboCompany, start, end, spjangcd);
 
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -167,7 +168,38 @@ public class SalesInvoiceController {
 
 	// 세금계산서 저장
 	@PostMapping("/invoice_save")
-	public AjaxResult saveInvoice(@RequestBody Map<String, Object> form) {
+	public AjaxResult saveInvoice(@RequestBody Map<String, Object> form
+	, Authentication auth) {
+		User user = (User) auth.getPrincipal();
+		AjaxResult result = new AjaxResult();
+		String invoiceeType = (String) form.get("InvoiceeType");
+
+		if ("사업자".equals(invoiceeType)) {
+
+			// 1. InvoiceeID 없는 경우 → 사업자번호로 조회
+			String corpNum = (String) form.get("InvoiceeCorpNum");
+
+			// 2. 사업자번호 유효성 체크
+			if (salesInvoiceService.validateSingleBusiness(corpNum) == null) {
+				result.success = false;
+				result.message = "휴/폐업 사업자번호입니다.\n공급받는자 등록번호를 확인해주세요.";
+				return result;
+			}
+
+			// 3. company 테이블에 존재 확인
+			Optional<Company> comp = companyRepository.findByBusinessNumber(corpNum);
+			if (comp.isPresent()) {
+				form.put("InvoiceeID", comp.get().getId());
+			} else {
+				// 4. 없으면 신규 등록
+				AjaxResult compResult = salesInvoiceService.saveInvoicee(form, user);
+				if (!compResult.success) {
+					return compResult; // 에러 바로 리턴
+				}
+				Company newComp = (Company) compResult.data;
+				form.put("InvoiceeID", newComp.getId());
+			}
+		}
 
         return salesInvoiceService.saveInvoice(form);
 	}
@@ -197,6 +229,10 @@ public class SalesInvoiceController {
 		return salesInvoiceService.deleteSalesment(deleteList);
 	}
 
+	@PostMapping("/cancel_issue")
+	public AjaxResult cancelIssue(@RequestBody List<Map<String, String>> cancelList) {
 
+		return salesInvoiceService.cancelIssue(cancelList);
+	}
 
 }
