@@ -15,12 +15,13 @@ public class BaljuOrderListService {
   @Autowired
   SqlRunner sqlRunner;
 
-  public List<Map<String, Object>> getList(String cboYear, Integer cboCompany, Integer cboMatGrp, String cboDataDiv) {
+  public List<Map<String, Object>> getList(String cboYear, Integer cboCompany, Integer cboMatGrp, String cboDataDiv, String spjangcd) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
     paramMap.addValue("cboYear", cboYear);
     paramMap.addValue("cboCompany", cboCompany);
     paramMap.addValue("cboMatGrp", cboMatGrp);
     paramMap.addValue("cboDataDiv", cboDataDiv);
+    paramMap.addValue("spjangcd", spjangcd);
 
     String data_column = "";
 
@@ -47,8 +48,9 @@ public class BaljuOrderListService {
 
     sql +="""
 	            from balju b
-                inner join material m on m.id = b."Material_id"
+                inner join material m on m.id = b."Material_id" and m.spjangcd = b.spjangcd
 	            where b."JumunDate" between cast(:date_form as date) and cast(:date_to as date)
+	             and b.spjangcd = :spjangcd
 				""";
     if(cboCompany != null) {
       sql += """
@@ -68,7 +70,7 @@ public class BaljuOrderListService {
 	            select 1 as grp_idx, mg."Name" as mat_grp_name, m."Code" as mat_code, m."Name" as mat_name, A.mat_pk
                 , u."Name" as unit_name
 	            , A.company_name
-			    , sum(A.qty_sum) as year_qty_sum	        
+			    , sum(A.qty_sum) as year_qty_sum	 
 			    , sum(A.money_sum) as year_money_sum
 				""";
 
@@ -78,9 +80,9 @@ public class BaljuOrderListService {
 
     sql+="""
 				from A 
-        inner join material m on m.id = A.mat_pk
-        left join unit u on u.id = m."Unit_id"
-        left join mat_grp mg on mg.id = m."MaterialGroup_id"
+        inner join material m on m.id = A.mat_pk 
+        left join unit u on u.id = m."Unit_id" and u.spjangcd = m.spjangcd
+        left join mat_grp mg on mg.id = m."MaterialGroup_id" and mg.spjangcd = m.spjangcd
         group by mg."Name", m."Code", m."Name", A.mat_pk, u."Name", A.company_name
         --order by m."Code", m."Name", A.company_name
         union all 
@@ -99,8 +101,8 @@ public class BaljuOrderListService {
     sql += """
 				from A 
         inner join material m on m.id = A.mat_pk
-        left join unit u on u.id = m."Unit_id"
-        left join mat_grp mg on mg.id = m."MaterialGroup_id"
+        left join unit u on u.id = m."Unit_id" and u.spjangcd = m.spjangcd
+        left join mat_grp mg on mg.id = m."MaterialGroup_id" and mg.spjangcd = m.spjangcd
         group by mg."Name", m."Code", m."Name", A.mat_pk, u."Name"
         order by mat_code, mat_name, grp_idx, company_name
 				""";

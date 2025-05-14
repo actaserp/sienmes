@@ -37,6 +37,7 @@
             <dd>
               <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
+              <input type="hidden" id="spjangcdHidden">
               &nbsp;
               <a class="btn btn-delete" title="검색" id="btnCompanySearch">
                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
@@ -102,6 +103,7 @@
         this.grid = null;
         this.$btnEdit = $('#btnEdit');
         this.$btnAddNew = $('#btnAddNew');
+        this.spjangcd = $('#spjangcdHidden');
         this.viewData = new wijmo.collections.CollectionView();
         this.init();
       }
@@ -229,7 +231,8 @@
           'cboYear': $("#cboYear").val(),
           'cboCompany': $("#cboCompanyHidden").val(),
           'cboMatGrp': $("#cboMatGrp").val(),
-          'cboDataDiv': $("#cboDataDiv").val()
+          'cboDataDiv': $("#cboDataDiv").val(),
+          spjangcd: this.spjangcd.val()  //사업장 코드
         }
         let fnsuccess = function (result) {
           if (result != null) {
@@ -242,7 +245,10 @@
     let page = null;
 
     $(document).ready(function (e) {
-
+      const spjangcd = sessionStorage.getItem('spjangcd');
+      if (spjangcd) {
+        $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
+      }
       page = new BaljuOrderListPage();
 
       AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '', 'sale');

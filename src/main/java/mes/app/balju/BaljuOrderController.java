@@ -34,15 +34,17 @@ public class BaljuOrderController {
       @RequestParam(value="date_kind", required=false) String date_kind,
       @RequestParam(value="start", required=false) String start_date,
       @RequestParam(value="end", required=false) String end_date,
+      @RequestParam(value ="spjangcd") String spjangcd,
       HttpServletRequest request) {
-    //log.info("발주 read--- date_kind:{}, start_date:{},end_date:{} ",date_kind,start_date , end_date);
+    //log.info("발주 read--- date_kind:{}, start_date:{},end_date:{} , spjangcd:{} "
+    // ,date_kind,start_date , end_date, spjangcd);
     start_date = start_date + " 00:00:00";
     end_date = end_date + " 23:59:59";
 
     Timestamp start = Timestamp.valueOf(start_date);
     Timestamp end = Timestamp.valueOf(end_date);
 
-    List<Map<String, Object>> items = this.baljuOrderService.getBaljuList(date_kind, start, end);
+    List<Map<String, Object>> items = this.baljuOrderService.getBaljuList(date_kind, start, end, spjangcd);
 
     AjaxResult result = new AjaxResult();
     result.data = items;
@@ -68,11 +70,12 @@ public class BaljuOrderController {
       @RequestParam(value = "BaljuVat")Double BaljuVat,     //부과세
       @RequestParam(value = "invatyn") String isVat,
       @RequestParam(value = "BaljuTotalPrice") Double totalAmount,
+      @RequestParam(value = "spjangcd") String spjangcd,
       HttpServletRequest request,
       Authentication auth	) {
     /*log.info("발주 등록 요청: id={}, sujuQty={}, companyId={}, companyName={}, description={}, dueDate={}, jumunDate={}, materialId={}, 3" +
-            "availableStock={}, sujuType={}, BaljuUnitPrice={} , BaljuPrice={}, BaljuVat={} , isVat={}",
-        id, sujuQty, companyId, companyName, description, dueDate, jumunDate, materialId, availableStock, sujuType, BaljuUnitPrice, BaljuPrice, BaljuVat,isVat);*/
+            "availableStock={}, sujuType={}, BaljuUnitPrice={} , BaljuPrice={}, BaljuVat={} , isVat={}, spjangcd = {}",
+        id, sujuQty, companyId, companyName, description, dueDate, jumunDate, materialId, availableStock, sujuType, BaljuUnitPrice, BaljuPrice, BaljuVat,isVat,spjangcd );*/
     User user = (User)auth.getPrincipal();
 
     Balju balju = null;
@@ -109,6 +112,7 @@ public class BaljuOrderController {
     balju.setVat(BaljuVat);
     balju.set_audit(user);
     balju.setInVatYN(isVatYn);
+    balju.setSpjangcd(spjangcd);
     balju.setTotalAmount(totalAmount);
 
     balju = this.bujuRepository.save(balju);

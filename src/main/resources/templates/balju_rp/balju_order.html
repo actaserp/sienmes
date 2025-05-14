@@ -20,6 +20,7 @@
     <section class="section">
       <div class="section-top">
         <div class="search-wrap">
+          <input type="hidden" id="spjangcdHidden" name="spjangcd"/>
           <dl>
             <dt>
               <label for="cboDateKind">
@@ -105,6 +106,7 @@
             <table class="write-table">
                 <caption>주문등록 테이블</caption>
                 <input type="hidden" id="id" name="id">
+                <input type="hidden" id="spjangcdHidden" name="spjangcd"/>
                 <tbody>
                     <tr>
                         <th style="text-align: center">
@@ -400,6 +402,7 @@
         this.grid = null;
         this.$btnEdit = $('#btnEdit');
         this.$btnAddNew = $('#btnAddNew');
+        this.spjangcd = $('#spjangcdHidden');
         this.viewData = new wijmo.collections.CollectionView();
         this.init();
       }
@@ -461,7 +464,8 @@
             mode: 'new',
             JumunDate: nowDate,
             DueDate: dueDate,
-            State: 'draft'
+            State: 'draft',
+            spjangcd: _this.spjangcd.val()
           };
           _this.showBaljuForm(defaultData);
         });
@@ -564,6 +568,7 @@
         let $BaljuTotalPrice = $content.find('#BaljuTotalPri');
         let $vatCheck = $content.find('#VatIncluded');
 
+        $content.find('#spjangcdHidden').val(data.spjangcd || '');
 
         if (data.mode === 'new') {
           $btnProductSearch.removeAttr('disabled');
@@ -574,7 +579,6 @@
           calculateFromTotalPrice();
           calculateFromSupplyPrice();
         });
-
 
         $btnProductSearch.click(function (e) {
           let pop = new PopMatComponent();
@@ -778,6 +782,7 @@
               data.BaljuVat = (data.BaljuVat === '면세') ? '0' : data.BaljuVat.replace(/,/g, '');
               // data.BaljuVat = data.BaljuVat.replace(/,/g, '');
               data.BaljuTotalPrice = data.BaljuTotalPrice.replace(/,/g, '');
+              data.spjangcd = $('#spjangcdHidden').val();
 
               console.log("📤 전송될 발주 데이터:", data);
 
@@ -803,7 +808,8 @@
                 UnitPrice: currentUnitPrice,
                 ApplyStartDate: applyStartDate,  // ✅ 수정된 값 사용!
                 type: '01',
-                ChangerName: userinfo.username
+                ChangerName: userinfo.username,
+                spjangcd: _this.spjangcd.val()
               };
 
               AjaxUtil.postAsyncData('/api/definition/material/savePrice', priceData, function (res) {
@@ -838,11 +844,6 @@
         AjaxUtil.postAsyncData(url, data, fnsuccess);
       }
 
-      // exportExcel() {
-      //     var targetview = this.grid;
-      //     targetview.exportExcel('발주내역.xls');
-      // }
-
       searchMainData() {
         let _this = this;
         let date_kind = $('#cboDateKind').val();  //발주구분
@@ -854,7 +855,8 @@
           'date_kind': date_kind,
           'start': start,
           'end': end,
-          'action': 'read'
+          'action': 'read',
+          spjangcd: this.spjangcd.val()
         };
 
         let fnsuccess = function (result) {
@@ -870,6 +872,11 @@
     var picker = new ax5.ui.picker();
 
     $(document).ready(function (e) {
+
+      const spjangcd = sessionStorage.getItem('spjangcd');
+      if (spjangcd) {
+        $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
+      }
 
       page = new SujuUploadPage();
 

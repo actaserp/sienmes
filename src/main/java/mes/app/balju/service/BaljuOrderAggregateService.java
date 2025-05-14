@@ -15,14 +15,14 @@ public class BaljuOrderAggregateService {
   @Autowired
   SqlRunner sqlRunner;
 
-  public List<Map<String, Object>> getList(String srchStartDt, String srchEndDt, Integer cboCompany, Integer cboMatGrp, String cBaljuState) {
+  public List<Map<String, Object>> getList(String srchStartDt, String srchEndDt, Integer cboCompany, Integer cboMatGrp, String cBaljuState, String spjangcd) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
     paramMap.addValue("srchStartDt", srchStartDt);
     paramMap.addValue("srchEndDt", srchEndDt);
     paramMap.addValue("cboCompany", cboCompany);
     paramMap.addValue("cboMatGrp", cboMatGrp);
     paramMap.addValue("cBaljuState", cBaljuState);
-
+    paramMap.addValue("spjangcd", spjangcd);
 
     String sql = """
          with A as (
@@ -33,9 +33,10 @@ public class BaljuOrderAggregateService {
              sum(b."Price" + coalesce(b."Vat", 0)) as amount_sum,
              sum(b."Vat") as vat_sum
              from balju b
-                inner join material m on m.id = b."Material_id"
+                inner join material m on m.id = b."Material_id" and m.spjangcd = b.spjangcd
              where b."JumunDate" between cast(:srchStartDt as date) 
              and cast(:srchEndDt as date) 
+             and b.spjangcd = :spjangcd
         """;
 
     if (cboCompany != null) {
@@ -69,8 +70,8 @@ public class BaljuOrderAggregateService {
                  A.price_sum
              from A 
              inner join material m on m.id = A.mat_pk
-                left join mat_grp mg on mg.id = m."MaterialGroup_id"
-                left join unit u on u.id = m."Unit_id"
+                left join mat_grp mg on mg.id = m."MaterialGroup_id" and mg.spjangcd = m.spjangcd
+                left join unit u on u.id = m."Unit_id" and u.spjangcd = m.spjangcd
         """;
 
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);

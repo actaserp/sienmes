@@ -20,12 +20,13 @@ public class BaljuOrderService {
   @Autowired
   SqlRunner sqlRunner;
 
-  public List<Map<String, Object>> getBaljuList(String date_kind, Timestamp start, Timestamp end) {
+  public List<Map<String, Object>> getBaljuList(String date_kind, Timestamp start, Timestamp end, String spjangcd) {
 
     MapSqlParameterSource dicParam = new MapSqlParameterSource();
     dicParam.addValue("date_kind", date_kind);
     dicParam.addValue("start", start);
     dicParam.addValue("end", end);
+    dicParam.addValue("spjangcd", spjangcd);
 
     String sql = """
         select b.id
@@ -62,11 +63,11 @@ public class BaljuOrderService {
           , to_char(b."_created", 'yyyy-mm-dd') as create_date
           , case b."PlanTableName" when 'prod_week_term' then '주간계획' when 'bundle_head' then '임의계획' else b."PlanTableName" end as plan_state
           from balju b
-          inner join material m on m.id = b."Material_id"
-          inner join mat_grp mg on mg.id = m."MaterialGroup_id"
-          left join unit u on m."Unit_id" = u.id
-          left join company c on c.id= b."Company_id"
-          left join store_house sh ON sh.id::varchar = b."ShipmentState"
+          inner join material m on m.id = b."Material_id" and m.spjangcd = b.spjangcd
+          inner join mat_grp mg on mg.id = m."MaterialGroup_id" and mg.spjangcd = b.spjangcd
+          left join unit u on m."Unit_id" = u.id and u.spjangcd = b.spjangcd
+          left join company c on c.id= b."Company_id" and c.spjangcd = b.spjangcd
+          left join store_house sh ON sh.id::varchar = b."ShipmentState" and sh.spjangcd = b.spjangcd
           where 1 = 1
 			""";
 
@@ -84,10 +85,10 @@ public class BaljuOrderService {
         group by
           b.id, b."JumunNumber", b."Material_id", mg."Name", mg.id,
           mg."MaterialType", m.id, m."Code", m."Name", u."Name",
-          b."SujuQty", b."SujuQty2", b."JumunDate", b."DueDate", b."CompanyName",\s
+          b."SujuQty", b."SujuQty2", b."JumunDate", b."DueDate", b."CompanyName", 
           b."Company_id", b."SujuType", b."ProductionPlanDate", b."ShipmentPlanDate",
-          b."Description", b."AvailableStock", b."ReservationStock",\s
-          b."State", sh."Name", b."UnitPrice", b."Vat", b."Price",\s
+          b."Description", b."AvailableStock", b."ReservationStock", 
+          b."State", sh."Name", b."UnitPrice", b."Vat", b."Price", 
           b."_created", b."PlanTableName"
         """;
     sql += """
@@ -107,6 +108,7 @@ public class BaljuOrderService {
 
     String sql = """
 			select b.id
+			      , b.spjangcd
             , b."JumunNumber"
             , b."Material_id" as "Material_id"
             , mg."Name" as "MaterialGroupName"
@@ -138,13 +140,13 @@ public class BaljuOrderService {
             , fn_code_name('balju_state', b."State") as "StateName"
             , to_char(b."_created", 'yyyy-mm-dd') as create_date
             from balju b
-            inner join material m on m.id = b."Material_id"
-            inner join mat_grp mg on mg.id = m."MaterialGroup_id"
-            left join unit u on m."Unit_id" = u.id
-            left join company c on c.id= b."Company_id"
+            inner join material m on m.id = b."Material_id" and m.spjangcd = b.spjangcd
+            inner join mat_grp mg on mg.id = m."MaterialGroup_id" and mg.spjangcd = b.spjangcd
+            left join unit u on m."Unit_id" = u.id and u.spjangcd = b.spjangcd
+            left join company c on c.id= b."Company_id" and c.spjangcd = b.spjangcd
             where b.id = :id
             group by
-             b.id, b."JumunNumber", b."Material_id", mg."Name", mg.id,
+             b.id,b.spjangcd, b."JumunNumber", b."Material_id", mg."Name", mg.id,
              mg."MaterialType", m.id, m."Code", m."Name", u."Name",
              b."SujuQty", b."SujuQty2", b."JumunDate", b."DueDate", b."CompanyName",
              b."Company_id", b."SujuType", b."ProductionPlanDate", b."ShipmentPlanDate",

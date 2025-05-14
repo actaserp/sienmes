@@ -25,10 +25,12 @@ public class BaljuOrderListController {
       @RequestParam(value="cboYear",required=false) String cboYear,
       @RequestParam(value="cboCompany",required=false) Integer cboCompany,
       @RequestParam(value="cboMatGrp",required=false) Integer cboMatGrp,
-      @RequestParam(value="cboDataDiv",required=false) String cboDataDiv
+      @RequestParam(value="cboDataDiv",required=false) String cboDataDiv,
+      @RequestParam(value = "spjangcd") String spjangcd
   ) {
-//    log.info("월별 발주량 read : cboYear:{}, cboCompany:{}, cboMatGrp:{}, cboDataDiv:{} ", cboYear, cboCompany, cboMatGrp, cboDataDiv);
-    List<Map<String,Object>> items = this.baljuOrderListService.getList(cboYear,cboCompany,cboMatGrp,cboDataDiv);
+//    log.info("월별 발주량 read : cboYear:{}, cboCompany:{}, cboMatGrp:{}, cboDataDiv:{}, spjangcd:{} ",
+//    cboYear, cboCompany, cboMatGrp, cboDataDiv, spjangcd);
+    List<Map<String,Object>> items = this.baljuOrderListService.getList(cboYear,cboCompany,cboMatGrp,cboDataDiv, spjangcd);
 
     AjaxResult result = new AjaxResult();
     result.data = items;

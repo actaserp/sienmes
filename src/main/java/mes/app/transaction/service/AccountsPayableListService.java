@@ -32,14 +32,17 @@ public class AccountsPayableListService {
     String formattedStart = startDate.format(dbFormatter);
     String formattedEnd = endDate.format(dbFormatter);
 
-    YearMonth prevMonth = YearMonth.from(startDate).minusMonths(1);
-    String prevYm = prevMonth.format(DateTimeFormatter.ofPattern("yyyyMM"));
+    YearMonth baseYm = YearMonth.from(startDate);  // 기준월 (예: 2025-01)
+    String baseYmStr = baseYm.format(DateTimeFormatter.ofPattern("yyyyMM"));
 
-    paramMap.addValue("prevYm", prevYm);
     paramMap.addValue("start", formattedStart);
     paramMap.addValue("end", formattedEnd);
-    paramMap.addValue("company", company);
+    paramMap.addValue("baseYm", baseYmStr);
     paramMap.addValue("spjangcd", spjangcd);
+
+    if (company != null) {
+      paramMap.addValue("company", company);
+    }
 
     String sql= """
         WITH lastym AS (

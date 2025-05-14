@@ -26,10 +26,11 @@ public class BaljuOrderAggregateController {
       @RequestParam(value="srchEndDt",required=false) String srchEndDt,
       @RequestParam(value="cboCompany",required=false) Integer cboCompany,
       @RequestParam(value="cboMatGrp",required=false) Integer cboMatGrp,
-      @RequestParam(value = "cBaljuState", required = false) String cBaljuState
+      @RequestParam(value = "cBaljuState", required = false) String cBaljuState,
+      @RequestParam(value = "spjangcd") String spjangcd
   ) {
 
-    List<Map<String,Object>> items = this.baljuOrderAggregateService.getList(srchStartDt,srchEndDt,cboCompany,cboMatGrp,cBaljuState);
+    List<Map<String,Object>> items = this.baljuOrderAggregateService.getList(srchStartDt,srchEndDt,cboCompany,cboMatGrp,cBaljuState, spjangcd);
 
 
     AjaxResult result = new AjaxResult();

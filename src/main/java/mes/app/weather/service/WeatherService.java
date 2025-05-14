@@ -41,6 +41,8 @@ public class WeatherService {
 	@Value("${Geocoder.Key}")
 	private String geocoderKey;
 
+	@Autowired
+	TB_xusersService xusersService;
 
 /*	❍단기예보
 - Base_time : 0200, 0500, 0800, 1100, 1400, 1700, 2000, 2300 (1일 8회)
@@ -72,16 +74,13 @@ public class WeatherService {
 	}
 
 	// getWeatherData 메서드 내에서 fetchWeatherData 호출 시 latitude와 longitude를 인자로 전달
-	public ResponseEntity<?> getWeatherData(){
+	public ResponseEntity<?> getWeatherData(String userId){
 
-	/*	// 사용자 주소를 가져오기
-		String address = tbXClientService.getUserAddress(userId);
-//		System.out.println("조회된 사용자 주소: " + address);
+		// 사용자 주소를 가져오기(사업장 주소 사용)
+			String address = xusersService.getUserAddress(userId);
 		if (address == null || address.isEmpty()) {
 			return ResponseEntity.badRequest().body("주소가 유효하지 않습니다.");
-		}*/
-		// 사용자 주소를 가져오기
-		String address = "서울시 금천구 벚꽃로 286";
+		}
 
 		LocalDateTime now = LocalDateTime.now();
 		String date = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -236,8 +235,15 @@ public class WeatherService {
 	}
 
 	private ResponseEntity<?> combineData(ResponseEntity<?> weatherData, ResponseEntity<?> forecastData, String address) {
-		Map<String, String> weatherResult = (Map<String, String>) weatherData.getBody();
-		Map<String, String> forecastResult = (Map<String, String>) forecastData.getBody();
+		Object body1 = weatherData.getBody();
+		Object body2 = forecastData.getBody();
+
+		if (!(body1 instanceof Map) || !(body2 instanceof Map)) {
+			return ResponseEntity.badRequest().body("날씨 데이터 파싱 실패 또는 응답 오류 발생");
+		}
+
+		Map<String, String> weatherResult = (Map<String, String>) body1;
+		Map<String, String> forecastResult = (Map<String, String>) body2;
 
 		// 예보 데이터와 실황 데이터를 병합
 		forecastResult.forEach((key, value) -> {
@@ -249,12 +255,10 @@ public class WeatherService {
 				weatherResult.put(key, value);
 			}
 		});
-		// 주소 추가
+
 		weatherResult.put("address", address);
-		//System.out.println("최종 응답 데이터: " + weatherResult);
 		return ResponseEntity.ok(weatherResult);
 	}
-
 
 	// 좌표를 얻기 위한 메서드
 	private double[] getCoordinates(String address, String apikey) {
