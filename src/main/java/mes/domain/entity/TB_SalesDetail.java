@@ -19,6 +19,7 @@ public class TB_SalesDetail {
     @EmbeddedId
     private TB_SalesDetailId id;
 
+    private String misdate;
     private String itemnm;
     private String spec;
 
@@ -40,7 +41,6 @@ public class TB_SalesDetail {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
-            @JoinColumn(name = "misdate", referencedColumnName = "misdate", insertable = false, updatable = false),
             @JoinColumn(name = "misnum", referencedColumnName = "misnum", insertable = false, updatable = false)
     })
     private TB_Salesment salesment;

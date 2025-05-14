@@ -7,6 +7,7 @@ import mes.app.transaction.service.SalesInvoiceService;
 import mes.domain.entity.*;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.CompanyRepository;
+import mes.domain.repository.MaterialRepository;
 import mes.domain.repository.TB_SalesDetailRepository;
 import mes.domain.repository.TB_SalesmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/tran/tran")
@@ -29,6 +31,8 @@ public class SalesInvoiceController {
 	private SalesInvoiceService salesInvoiceService;
     @Autowired
     private CompanyRepository companyRepository;
+    @Autowired
+    private MaterialRepository materialRepository;
 
 	@GetMapping("/shipment_head_list")
 	public AjaxResult getShipmentHeadList(
@@ -42,6 +46,34 @@ public class SalesInvoiceController {
 		result.data = items;
 		
 		return result;
+	}
+
+	@GetMapping("/get_material")
+	public AjaxResult getMaterialName(
+			@RequestParam("material_id") Integer id
+	) {
+
+		Material item = materialRepository.getMaterialById(id);
+
+		String spec = Stream.of(
+						item.getWidth() != null ? "폭:" + formatNumber(item.getWidth()) : null,
+						item.getLength() != null ? "길이:" + formatNumber(item.getLength()) : null,
+						item.getHeight() != null ? "높이:" + formatNumber(item.getHeight()) : null,
+						item.getThickness() != null ? "두께:" + formatNumber(item.getThickness()) : null
+				).filter(Objects::nonNull)
+				.collect(Collectors.joining(" × "));
+
+		Map<String, Object> data = new HashMap<>();
+		data.put("material_name", item.getName());
+		data.put("spec", spec);
+
+		AjaxResult result = new AjaxResult();
+		result.data = data;
+		return result;
+	}
+
+	private String formatNumber(Number number) {
+		return new DecimalFormat("###,###.##").format(number);
 	}
 
 	@GetMapping("/invoicer_read")
@@ -148,12 +180,10 @@ public class SalesInvoiceController {
 
 	@GetMapping("/invoice_detail")
 	public AjaxResult getInvoiceDetail(
-			@RequestParam("misdate") String misdate,
-			@RequestParam("misnum") String misnum,
+			@RequestParam("misnum") Integer misnum,
 			HttpServletRequest request) throws IOException {
-		misdate = misdate.replaceAll("-", "");
 
-		Map<String, Object> item = this.salesInvoiceService.getInvoiceDetail(misdate, misnum);
+		Map<String, Object> item = this.salesInvoiceService.getInvoiceDetail(misnum);
 
 		AjaxResult result = new AjaxResult();
 		result.data = item;

@@ -18,9 +18,11 @@ import java.util.List;
 @Table(name = "tb_salesment")
 public class TB_Salesment {
 
-    @EmbeddedId
-    private TB_SalesmentId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer misnum;;
 
+    private String misdate;
     private String snddate;
     private Integer cltcd;
     private String issuetype;

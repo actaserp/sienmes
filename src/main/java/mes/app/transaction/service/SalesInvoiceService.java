@@ -6,10 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.popbill.api.*;
 import com.popbill.api.taxinvoice.Taxinvoice;
 import com.popbill.api.taxinvoice.TaxinvoiceDetail;
+import mes.Encryption.EncryptionUtil;
 import mes.app.util.UtilClass;
 import mes.domain.entity.*;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.CompanyRepository;
+import mes.domain.repository.ShipmentHeadRepository;
 import mes.domain.repository.TB_SalesDetailRepository;
 import mes.domain.repository.TB_SalesmentRepository;
 import mes.domain.services.SqlRunner;
@@ -63,8 +65,12 @@ public class SalesInvoiceService {
 
     @Autowired
     private RestTemplate restTemplate;
+
     @Autowired
     private ObjectMapper jacksonObjectMapper;
+
+	@Autowired
+	private ShipmentHeadRepository shipmentHeadRepository;
 
 	public List<Map<String, Object>> getList(String invoice_kind, Integer cboStatecode, Integer cboCompany, Timestamp start, Timestamp end) {
 
@@ -77,14 +83,13 @@ public class SalesInvoiceService {
 
 		String sql = """
 			WITH detail_summary AS (
-			   SELECT\s
-				   misdate,
-				   misnum,
-				   MIN(itemnm) AS first_itemnm,
-				   COUNT(itemnm) AS item_count
-			   FROM tb_salesdetail
-			   GROUP BY misdate, misnum
-		   )
+				SELECT DISTINCT ON (misnum)
+					misnum,
+					itemnm AS first_itemnm,
+					COUNT(*) OVER (PARTITION BY misnum) AS item_count
+				FROM tb_salesdetail
+				ORDER BY misnum, misseq
+			)
 		   
 		   SELECT
 			   TO_CHAR(TO_DATE(m.misdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS misdate,
@@ -113,10 +118,10 @@ public class SalesInvoiceService {
 		   FROM tb_salesment m
 		   
 		   LEFT JOIN tb_salesdetail d
-			   ON m.misdate = d.misdate AND m.misnum = d.misnum
+			   ON m.misnum = d.misnum
 		   
 		   LEFT JOIN detail_summary ds
-			   ON m.misdate = ds.misdate AND m.misnum = ds.misnum
+			   ON m.misnum = ds.misnum
 		   
 		   LEFT JOIN sys_code sale_type_code
 			   ON sale_type_code."CodeType" = 'sale_type'
@@ -216,21 +221,15 @@ public class SalesInvoiceService {
 
 		AjaxResult result = new AjaxResult();
 		// 1. 기본 키 생성
-		String misdate = sanitizeNumericString(form.get("writeDate"));
-		String bemisdate = (String) form.get("mowriteDate");
-		String misnum = (String) form.get("misnum");
-
-		boolean isUpdate = misnum != null && !misnum.trim().isEmpty();
-
-		// 신규일 경우 새 번호 생성
-		if (!isUpdate) {
-			misnum = generateMisnum(misdate);
-		}
-
-		TB_SalesmentId id = new TB_SalesmentId(misdate, misnum);
+		;
+		Integer misnum = parseInt(form.get("misnum"));
+		boolean isUpdate = misnum != null ;
 
 		TB_Salesment salesment = new TB_Salesment();
-		salesment.setId(id);
+
+		if (isUpdate) {
+			salesment.setMisnum(misnum); // 기존 데이터 수정
+		}
 
 		LocalDateTime now = LocalDateTime.now();
 		String statedt = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
@@ -238,7 +237,10 @@ public class SalesInvoiceService {
 		// 2. 필드 매핑
 		salesment.setIssuetype((String) form.get("IssueType")); // 발행형태
 		salesment.setTaxtype((String) form.get("TaxType")); // 과세형태
-		salesment.setInvoiceetype((String) form.get("InvoiceeType")); // 거래처 유형
+
+		String invoiceeType = (String) form.get("InvoiceeType");
+		salesment.setInvoiceetype(invoiceeType); // 거래처 유형
+
 		salesment.setMisgubun(form.get("sale_type").toString()); // 매출구분
 		salesment.setKwon(parseInt(form.get("Kwon"))); // 권
 		salesment.setHo(parseInt(form.get("Ho"))); // 호
@@ -258,7 +260,18 @@ public class SalesInvoiceService {
 
 		// 공급받는자
 		salesment.setCltcd(parseInt(form.get("InvoiceeID")));
-		salesment.setIvercorpnum(sanitizeNumericString(form.get("InvoiceeCorpNum"))); // 사업자번호
+		String corpNum = sanitizeNumericString(form.get("InvoiceeCorpNum"));
+
+		if ("개인".equals(invoiceeType)) {
+			try {
+				corpNum = EncryptionUtil.encrypt(corpNum); // 암호화된 값으로 교체
+			} catch (Exception e) {
+				throw new RuntimeException("암호화 실패", e);
+			}
+		}
+		// 등록번호
+		salesment.setIvercorpnum(corpNum);
+
 		salesment.setIverregid((String)form.get("InvoiceeTaxRegID")); // 종사업장
 		salesment.setIvercorpnm((String)form.get("InvoiceeCorpName")); // 사업장
 		salesment.setIverceonm((String)form.get("InvoiceeCEOName")); // 대표자명
@@ -268,8 +281,10 @@ public class SalesInvoiceService {
 		salesment.setIverpernm((String) form.get("InvoiceeContactName1")); // 담당자명
 		salesment.setIvertel(sanitizeNumericString(form.get("InvoiceeTEL1"))); // 담당자 연락처
 		salesment.setIveremail((String)form.get("InvoiceeEmail1")); // 이메일
+		String misdate = sanitizeNumericString(form.get("writeDate"));
 
-		salesment.setMgtkey(misdate + "-" + misnum);
+		salesment.setMgtkey("TAX-" + misdate + "-" +  misnum);
+		salesment.setMisdate(misdate);
 		salesment.setSupplycost(parseIntSafe(form.get("SupplyCostTotal"))); // 총 공급가액
 		salesment.setTaxtotal(parseIntSafe(form.get("TaxTotal"))); // 총 세액
 		salesment.setRemark1((String) form.get("Remark1")); // 비고1
@@ -294,30 +309,35 @@ public class SalesInvoiceService {
 		salesment.setStatedt(statedt);
 
 		if (isUpdate) {
-			if (!misdate.equals(bemisdate)) {
-				tb_salesDetailRepository.deleteByMisdateAndMisnum(bemisdate, misnum); // 기존 PK로 삭제
-				tb_salesmentRepository.deleteById(new TB_SalesmentId(bemisdate, misnum));
-			} else {
-				tb_salesDetailRepository.deleteByMisdateAndMisnum(misdate, misnum);   // 현재 PK로 삭제
-			}
+			tb_salesDetailRepository.deleteByMisnum(misnum);   // 현재 PK로 삭제
 		}
 
 		salesment.setSpjangcd((String) form.get("spjangcd"));
-		int serialIndex = 1;
+		TB_Salesment saved = tb_salesmentRepository.save(salesment);
+
 		// 3. 상세 목록 매핑
+		int serialIndex = 1;
 		List<TB_SalesDetail> details = new ArrayList<>();
-		for (int i = 0; i < 99; i++) {
+
+		int i = 0;
+		while (true) {
 			String prefix = "detailList[" + i + "]";
 			String itemName = (String) form.get(prefix + ".ItemName");
 
-			if (itemName == null || itemName.trim().isEmpty()) continue;
+			if (itemName == null) break; // 더 이상 항목 없음
+
+			if (itemName.trim().isEmpty()) {
+				i++;
+				continue;
+			}
 
 			String serialNum = String.valueOf(serialIndex++);
 
 			TB_SalesDetail detail = new TB_SalesDetail();
-			detail.setId(new TB_SalesDetailId(misdate, misnum, serialNum));
+			detail.setId(new TB_SalesDetailId(saved.getMisnum(), serialNum));
 			detail.setMaterialId(parseInt(form.get(prefix + ".ItemId")));
 			detail.setItemnm(itemName);
+			detail.setMisdate(misdate);
 			detail.setSpec((String) form.get(prefix + ".Spec"));
 			detail.setQty(parseMoney(form.get(prefix + ".Qty")));
 			detail.setUnitcost(parseMoney(form.get(prefix + ".UnitCost")));
@@ -325,6 +345,7 @@ public class SalesInvoiceService {
 			detail.setTaxtotal(parseMoney(form.get(prefix + ".Tax")));
 			detail.setRemark((String) form.get(prefix + ".Remark"));
 			detail.setSpjangcd((String) form.get("spjangcd"));
+
 			String purchaseDT = (String) form.get(prefix + ".PurchaseDT");
 			if (purchaseDT != null && purchaseDT.length() == 4) {
 				String fullPurchaseDT = misdate.substring(0, 4) + purchaseDT;
@@ -332,15 +353,38 @@ public class SalesInvoiceService {
 			} else {
 				detail.setPurchasedt(null);
 			}
-			detail.setSalesment(salesment); // 양방향 설정
 
+			detail.setSalesment(saved);
 			details.add(detail);
+
+			i++;
 		}
 
-		salesment.setDetails(details);
+		saved.getDetails().clear();
+		saved.getDetails().addAll(details);
 
-		// 4. 저장
-		tb_salesmentRepository.save(salesment); // cascade = ALL 이면 detail도 함께 저장됨
+		tb_salesmentRepository.save(saved);
+
+
+		// 5. shipment_head 업데이트
+		Object shipIdsObj = form.get("shipids");
+		System.out.println("shipIdsObj: " + shipIdsObj);
+		if (shipIdsObj != null) {
+			String shipIdsStr = shipIdsObj.toString(); // "165,162,164"
+			List<Integer> shipIds = Arrays.stream(shipIdsStr.split(","))
+					.map(String::trim)
+					.filter(s -> !s.isEmpty())
+					.map(Integer::parseInt)
+					.toList();
+
+			// shipment_head 엔티티들 조회 후 misnum 설정
+			List<ShipmentHead> shipments = shipmentHeadRepository.findAllById(shipIds);
+			for (ShipmentHead shipment : shipments) {
+				shipment.setMisnum(salesment.getMisnum()); // misnum은 auto-generated 이거나 업데이트 대상
+			}
+
+			shipmentHeadRepository.saveAll(shipments);
+		}
 
 		result.success = true;
 
@@ -419,9 +463,6 @@ public class SalesInvoiceService {
 		}
 	}
 
-
-
-
 	public List<Map<String, Object>> getShipmentHeadList(String dateFrom, String dateTo) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
@@ -429,35 +470,49 @@ public class SalesInvoiceService {
 		paramMap.addValue("dateTo", dateTo);
 		
 		String sql = """
-				select sh.id
-		        , sh."Company_id" as company_id
-                , c."Name" as company_name
-		        , sh."ShipDate" as ship_date
-		        , sh."TotalQty" as total_qty
-	            , sh."TotalPrice" as total_price
-	            , sh."TotalVat" as total_vat
-	            , sh."TotalPrice" + sh."TotalVat" as total_amount
-	            , sh."Description" as description
-                , sh."State" as state
-                , fn_code_name('shipment_state', sh."State") as state_name
-                , to_char(coalesce(sh."OrderDate",sh."_created") ,'yyyy-mm-dd') as order_date
-                , sh."StatementIssuedYN" as issue_yn
-                , sh."StatementNumber" as stmt_number 
-                , sh."IssueDate" as issue_date
-                from shipment_head sh 
-                join company c on c.id = sh."Company_id"   
-                where sh."ShipDate"  between cast(:dateFrom as date) and cast(:dateTo as date)
-                and sh."State" = 'shipped'
-		 		order by sh."ShipDate" desc
+			WITH material_summary AS (
+				SELECT\s
+					s."ShipmentHead_id",
+					STRING_AGG(s."Material_id"::text, ',' ORDER BY s."Material_id") AS material_ids
+				FROM shipment s
+				GROUP BY s."ShipmentHead_id"
+			)
+			
+			SELECT
+				sh.id,
+				sh."Company_id" AS company_id,
+				c."Name" AS company_name,
+				sh."ShipDate" AS ship_date,
+				sh."TotalQty" AS total_qty,
+				sh."TotalPrice" AS total_price,
+				sh."TotalVat" AS total_vat,
+				sh."TotalPrice" + sh."TotalVat" AS total_amount,
+				sh."Description" AS description,
+				sh."State" AS state,
+				fn_code_name('shipment_state', sh."State") AS state_name,
+				TO_CHAR(COALESCE(sh."OrderDate", sh."_created"), 'yyyy-mm-dd') AS order_date,
+				sh."StatementIssuedYN" AS issue_yn,
+				sh."StatementNumber" AS stmt_number,
+				sh."IssueDate" AS issue_date,
+				ms.material_ids
+			FROM shipment_head sh
+			JOIN company c
+				ON c.id = sh."Company_id"
+			LEFT JOIN material_summary ms
+				ON ms."ShipmentHead_id" = sh.id
+			WHERE sh."ShipDate" BETWEEN CAST(:dateFrom AS DATE) AND CAST(:dateTo AS DATE)
+			  AND sh."State" = 'shipped'
+			  AND sh."misnum" IS NULL
+			ORDER BY sh."ShipDate" DESC;
+			
 		 		""";
         List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
 		
 		return items;
 	}
 
-	public Map<String, Object> getInvoiceDetail(String misdate, String misnum) throws IOException {
+	public Map<String, Object> getInvoiceDetail(Integer misnum) throws IOException {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
-		paramMap.addValue("misdate", misdate);
 		paramMap.addValue("misnum", misnum);
 
 		String sql = """ 
@@ -510,7 +565,7 @@ public class SalesInvoiceService {
 			m.purposetype AS "PurposeType",
 			m.statecode AS "StateCode"
 		FROM tb_salesment m
-		WHERE m.misdate = :misdate AND m.misnum = :misnum
+		WHERE m.misnum = :misnum
 		""";
 
 		String detailSql = """ 
@@ -526,7 +581,7 @@ public class SalesInvoiceService {
 			 SUBSTRING(d.purchasedt FROM 5 FOR 4) AS "PurchaseDT",
 			 d.misseq AS "SerialNum"
 		 FROM tb_salesdetail d
-		 WHERE d.misdate = :misdate AND d.misnum = :misnum
+		 WHERE d.misnum = :misnum
 		 ORDER BY d.misseq
 		""";
 
@@ -576,8 +631,8 @@ public class SalesInvoiceService {
 			return result;
 		}
 
-		List<TB_SalesmentId> idList = issueList.stream()
-				.map(item -> new TB_SalesmentId(item.get("misdate"), item.get("misnum")))
+		List<Integer> idList = issueList.stream()
+				.map(item -> Integer.parseInt(item.get("misnum")))
 				.toList();
 
 		List<TB_Salesment> salesList = tb_salesmentRepository.findAllById(idList);
@@ -688,7 +743,7 @@ public class SalesInvoiceService {
 		Taxinvoice invoice = new Taxinvoice();
 
 		// 공급자 정보
-		invoice.setWriteDate(sm.getId().getMisdate()); // 작성일자 (yyyymmdd)
+		invoice.setWriteDate(sm.getMisdate()); // 작성일자 (yyyymmdd)
 		invoice.setIssueType(sm.getIssuetype());       // 발행형태 - 정발행, 역발행 등
 		invoice.setTaxType(sm.getTaxtype());           // 과세형태 - 과세, 영세, 면세
 		invoice.setPurposeType(sm.getPurposetype());   // 영수/청구 구분
@@ -759,52 +814,37 @@ public class SalesInvoiceService {
 			return result;
 		}
 
-		List<TB_SalesmentId> idList = deleteList.stream()
-				.map(item -> new TB_SalesmentId(item.get("misdate"), item.get("misnum")))
+		List<Integer> idList = deleteList.stream()
+				.map(item -> Integer.parseInt(item.get("misnum")))
 				.toList();
 
-		deleteBySalesdetailIds(idList);
-		tb_salesmentRepository.deleteAllById(idList);
+		// 1. 관련된 shipment_head의 misnum 컬럼을 null로 변경
+		List<ShipmentHead> relatedShipments = shipmentHeadRepository.findByMisnumIn(idList);
+		for (ShipmentHead shipment : relatedShipments) {
+			shipment.setMisnum(null);
+		}
+		shipmentHeadRepository.saveAll(relatedShipments);
 
+		// 2. salesdetail 삭제
+		deleteBySalesdetailIds(idList);
+
+		// 3. salesment 삭제
+		tb_salesmentRepository.deleteAllById(idList);
 
 		result.success = true;
 		return result;
 	}
 
-	public void deleteBySalesdetailIds(List<TB_SalesmentId> idList) {
+	public void deleteBySalesdetailIds(List<Integer> idList) {
 		if (idList == null || idList.isEmpty()) return;
 
-		StringBuilder sql = new StringBuilder("DELETE FROM tb_salesdetail WHERE (misdate, misnum) IN (");
-		List<Object> params = new ArrayList<>();
+		String placeholders = idList.stream()
+				.map(id -> "?")
+				.collect(Collectors.joining(", "));
 
-		for (int i = 0; i < idList.size(); i++) {
-			sql.append("(?, ?)");
-			if (i < idList.size() - 1) sql.append(", ");
-			params.add(idList.get(i).getMisdate());
-			params.add(idList.get(i).getMisnum());
-		}
-
-		sql.append(")");
-		jdbcTemplate.update(sql.toString(), params.toArray());
+		String sql = "DELETE FROM tb_salesdetail WHERE misnum IN (" + placeholders + ")";
+		jdbcTemplate.update(sql, idList.toArray());
 	}
-
-	public String generateMisnum(String misdate) {
-		// 가장 큰 misnum 조회
-		Optional<String> maxMisnumOpt = tb_salesmentRepository.findMaxMisnumByMisdate(misdate);
-
-		int nextNum = 1; // 기본값
-
-		if (maxMisnumOpt.isPresent()) {
-			try {
-				nextNum = Integer.parseInt(maxMisnumOpt.get()) + 1;
-			} catch (NumberFormatException e) {
-				// 로그 찍고 기본값 유지
-			}
-		}
-
-		return String.format("%04d", nextNum); // "0001", "0002" 형식
-	}
-
 
 	private Integer parseInt(Object obj) {
 		if (obj == null || obj.toString().trim().isEmpty()) return null;

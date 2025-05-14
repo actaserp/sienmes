@@ -14,7 +14,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class TB_SalesDetailId implements Serializable {
 
-    private String misdate;
-    private String misnum;
+    private Integer misnum;
     private String misseq;
 }

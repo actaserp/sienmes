@@ -390,8 +390,7 @@
 
                     Alert.confirm('', '선택한 항목을 삭제하시겠습니까?', function () {
                         const deleteList = items.map(item => ({
-                            misnum: item.misnum,
-                            misdate: item.misdate.replace(/-/g, '')  // '2025-04-30' → '20250430'
+                            misnum: item.misnum
                         }));
 
                         let url = _this.url + '/invoice_delete';
@@ -422,8 +421,7 @@
 
                     Alert.confirm('', '선택한 항목을 발행하시겠습니까?', function () {
                         const issueList = items.map(item => ({
-                            misnum: item.misnum,
-                            misdate: item.misdate.replace(/-/g, '')
+                            misnum: item.misnum
                         }));
 
                         let url = _this.url + '/invoice_issue';
@@ -451,7 +449,6 @@
                 if (selectedItems.length === 1) {
 
                     let data = {
-                        misdate: selectedItems[0].misdate,
                         misnum: selectedItems[0].misnum,
                         action: 'detail'
                     };
@@ -513,8 +510,10 @@
 
             }
 
+            shipmentheadids  = [];
             // 계산서 등록 팝업
             showInvoiceForm(data) {
+                console.log('showInvoiceForm', data);
                 let _this = this;
                 let content = tmpl('popup_invoiceTemplate', data);
                 let $content = $(content);
@@ -560,6 +559,23 @@
                     };
                     AjaxUtil.getAsyncData(url, data1, fnSaveSuccess);
 
+                    if (data.invoicee) {
+                        const i = data.invoicee;
+                        $content.find('#InvoiceeID').val(i.id).trigger('change');
+                        $content.find('#InvoiceeCorpNum').val(i.business_number).trigger('input');
+                        $content.find('#InvoiceeTaxRegID').val(i.invoiceetaxregid);
+                        $content.find('#InvoiceeCorpName').val(i.compname);
+                        $content.find('#InvoiceeCEOName').val(i.invoiceeceoname);
+                        $content.find('#InvoiceeAddr').val(i.invoiceeaddr);
+                        $content.find('#InvoiceeBizType').val(i.invoiceebiztype);
+                        $content.find('#InvoiceeBizClass').val(i.invoiceebizclass);
+                        $content.find('#InvoiceeContactName1').val(i.invoiceecontactname1);
+                        $content.find('#InvoiceeTEL1').val(i.invoiceetel1).trigger('input');
+                        $content.find('#InvoiceeEmail1').val(i.invoiceeemail1);
+                        $content.find('#InvoiceeCorpNum').prop('readonly', true);
+                    }
+
+
                 } else {
                     modalContainer = new PopupDraggable('수정');
                     setTimeout(() => {
@@ -569,16 +585,22 @@
 
                         $content.find('input[name="InvoiceeType"]:checked').trigger('change');
 
-                        $content.find('#InvoiceeCorpNum')
-                            .prop('readonly', true)
-                            .trigger('input');
+                        const invoiceeId = $content.find('#InvoiceeID').val();
+                        const invoiceeType = $content.find('input[name="InvoiceeType"]:checked').val();
 
+                        if (invoiceeId || invoiceeType === '외국인') {
+                            $content.find('#InvoiceeCorpNum').prop('readonly', true);
+                        } else {
+                            $content.find('#InvoiceeCorpNum').prop('readonly', false);
+                        }
 
+                        $content.find('#InvoiceeCorpNum').trigger('input');
                         $content.find('#btnInvoiceSave span').text('수정');
                     }, 0);
 
                 }
                 modalContainer.open({width: 1200, height: 680, $content});
+
                 initializeDetailRows(data.detailList || []);
 
 
@@ -617,7 +639,6 @@
                                     $content.find('#InvoiceeTEL1').val(items.invoiceetel1).trigger('input');
                                     $content.find('#InvoiceeEmail1').val(items.invoiceeemail1);
                                     oldBusinessNumber = items.business_number;
-                                    $('#InvoiceeCorpNum').attr('readonly', true);
 
                                 } else {
                                     Alert.alert('', result.message);
@@ -752,6 +773,14 @@
                     poppage.show(searchcallback);
                 }
 
+                if (data.shipids) {
+                    if (Array.isArray(data.shipids)) {
+                        _this.shipmentheadids = data.shipids.map(id => parseInt(id, 10));
+                    } else if (typeof data.shipids === 'string') {
+                        _this.shipmentheadids = data.shipids.split(',').map(id => parseInt(id.trim(), 10));
+                    }
+                }
+
                 // 계산서 저장 버튼
                 let $btnInvoiceSave = $content.find('#btnInvoiceSave');
 
@@ -774,6 +803,11 @@
                         delete data[`detailList[${i}].PurchaseDT2`];
                     }
 
+                    if (_this.shipmentheadids.length > 0) {
+                        data.shipids = _this.shipmentheadids.join(',');
+                    }
+
+
                     Alert.confirm('', '저장하시겠습니까?', function () {
                         let url = _this.url + '/invoice_save';
 
@@ -781,6 +815,7 @@
                             if (result.success) {
                                 Notify.success("저장되었습니다.");
                                 modalContainer.close();
+                                _this.shipmentheadids = [];
                                 _this.searchMainData();
                             } else {
                                 Alert.alert("", result.message || "저장에 실패했습니다.");
@@ -1066,31 +1101,112 @@
 
                 fnLoadShipList();
 
-                $content.find('#btnShipAction').on('click', function () {
-
-                    let url = _this.url + '/save_balju';
+                $content.find('#btnShipAction').on('click', async function () {
                     let items = _this.shipListGrid.rows
                         .filter(row => row.isSelected)
                         .map(row => row.dataItem);
 
-
-                    if (!items || items.length === 0) {
-                        Alert.alert('', '저장할 항목을 선택하세요.');
+                    if (items.length === 0) {
+                        Alert.alert('', '선택된 리스트가 없습니다.');
                         return;
                     }
 
-                    let fnSuccess = function (res) {
-                        if (!res.success) {
-                            Alert.alert('', res.message);
-                        } else {
-                            Notify.success('저장되었습니다');
-                            // page.searchDataBind();
-                            modalContainer.modal.close();
-                        }
+                    const companyIds = [...new Set(items.map(item => item.company_id))];
+                    if (companyIds.length > 1) {
+                        Alert.alert('', '하나의 업체만 선택해주세요.');
+                        return;
+                    }
+
+                    const allMaterialIds = items
+                        .map(item => item.material_ids || '')
+                        .flatMap(ids => ids.split(',').map(id => id.trim()))
+                        .filter(id => id);
+
+                    const materialCount = allMaterialIds.length;
+                    const shipIds = items.map(item => item.id);
+
+                    const total_price_raw = items.reduce((sum, item) => sum + (item.total_price || 0), 0);
+                    const total_vat_raw = items.reduce((sum, item) => sum + (item.total_vat || 0), 0);
+                    const total_price = total_price_raw.toLocaleString();
+                    const total_vat = total_vat_raw.toLocaleString();
+
+                    let defaultData = {
+                        id: '',
+                        mode: 'new',
+                        shipids: shipIds,
+                        detailList: []
                     };
 
-                    AjaxUtil.postJsonAsyncData(url, items, fnSuccess);
+                    // Ajax 요청을 Promise로 감싸기
+                    const getMaterial = (material_id) => {
+                        return new Promise(resolve => {
+                            AjaxUtil.getAsyncData(_this.url + '/get_material', { material_id }, result => {
+                                resolve(result?.data || null);
+                            });
+                        });
+                    };
+
+                    const getCompany = (id) => {
+                        return new Promise(resolve => {
+                            AjaxUtil.getAsyncData('/api/popup/get_Comp', { id }, result => {
+                                resolve(result?.data?.[0] || null);
+                            });
+                        });
+                    };
+
+                    const material_id = parseInt(allMaterialIds[0], 10);
+
+                    const [materialData, companyData] = await Promise.all([
+                        materialCount >= 1 ? getMaterial(material_id) : Promise.resolve(null),
+                        getCompany(companyIds[0])
+                    ]);
+
+                    // 자재 정보가 있으면 detailList 구성
+                    if (materialData) {
+                        if (materialCount === 1) {
+                            const total_qty = items.reduce((sum, item) => sum + (item.total_qty || 0), 0);
+                            defaultData.detailList = [{
+                                SupplyCost: total_price,
+                                Tax: total_vat,
+                                ItemName: materialData.material_name,
+                                Spec: materialData.spec,
+                                Qty: total_qty
+                            }];
+                        } else {
+                            defaultData.detailList = [{
+                                SupplyCost: total_price,
+                                Tax: total_vat,
+                                ItemName: `${materialData.material_name} 외 ${materialCount - 1}개`
+                            }];
+                        }
+                    } else {
+                        Alert.alert('', '자재 정보가 없습니다.');
+                        return;
+                    }
+
+                    if (!companyData) {
+                        Alert.alert('', '업체 정보를 불러올 수 없습니다.');
+                        return;
+                    }
+
+                    defaultData.invoicee = {
+                        id: companyData.id,
+                        business_number: companyData.business_number,
+                        invoiceetaxregid: companyData.invoiceetaxregid,
+                        compname: companyData.compname,
+                        invoiceeceoname: companyData.invoiceeceoname,
+                        invoiceeaddr: companyData.invoiceeaddr,
+                        invoiceebiztype: companyData.invoiceebiztype,
+                        invoiceebizclass: companyData.invoiceebizclass,
+                        invoiceecontactname1: companyData.invoiceecontactname1,
+                        invoiceetel1: companyData.invoiceetel1,
+                        invoiceeemail1: companyData.invoiceeemail1
+                    };
+
+                    _this.showInvoiceForm(defaultData);
+                    modalContainer.close();
                 });
+
 
             }
 

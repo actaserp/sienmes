@@ -719,7 +719,6 @@
                                         </tr>
                                         <tr>
                                             <td class="al_c noborder_l gray_border_t" colspan="11"><input type="date" id="writeDate" name="writeDate" class="in_txt numeric al_c dp-applied" maxlength="10" style="min-width: 114px; background: none; padding: 0px 0px 0px 8px;"></td>
-                                            <input type="hidden" id="mowriteDate" name="mowriteDate">
                                             <td class="al_l pet0 pdl_3 gray_border_t gray_border_l" colspan="47"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="SupplyCostTotal" name="SupplyCostTotal" ></td>
                                             <td class="al_l pet1 pdl_3 gray_border_t gray_border_l tax-related" colspan="42"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="TaxTotal" name="TaxTotal" ></td>
                                         </tr>
@@ -962,6 +961,13 @@
                 $('#InvoiceeEmail1')
                     .css('width', '100%');
                 $('#saveInvoicee').hide();
+
+                $('#InvoiceeCorpName').off('input._autoFill').on('input._autoFill', function () {
+                    const name = $(this).val();
+                    $('#InvoiceeCEOName').val(name);
+                    $('#InvoiceeContactName1').val(name);
+                });
+
             } else if (taxType === '외국인') {
                 $('#InvoiceeCorpNum')
                     .attr('readonly', true)
@@ -977,6 +983,12 @@
                     .css('width', '100%');
                 $('#saveInvoicee').hide();
                 Alert.alert('', '외국인 등록번호 또는 여권번호를 [비고1]에 입력하여 주시기 바랍니다.');
+
+                $('#InvoiceeCorpName').off('input._autoFill').on('input._autoFill', function () {
+                    const name = $(this).val();
+                    $('#InvoiceeCEOName').val(name);
+                    $('#InvoiceeContactName1').val(name);
+                });
             } else if (taxType === '사업자') {
                 $('#InvoiceeCorpNum')
                     .css('width', '80%')
@@ -1108,7 +1120,7 @@
                     $('#item_' + (i - 1)).after($newRow);
                 }
             }
-
+            updateTotals();
             detailRowCount = rowCount;
         }
 
@@ -1130,6 +1142,7 @@
                 $row.find('input, textarea').each(function () {
                     $(this).val('');
                 });
+                updateTotals();
                 return;
             }
 
@@ -1138,6 +1151,9 @@
 
             // 삭제 후 재정렬
             reindexDetailRows();
+
+            // 계산 다시
+            updateTotals();
         });
 
         // 품목 5번째 행부터 추가
@@ -1216,26 +1232,22 @@
         function updateTotals() {
             let supplyCostSum = 0;
             let taxSum = 0;
-            let index = 0;
 
-            while (true) {
-                let $supplyCost = $('#detailList' + index + '\\.SupplyCost');
-                let $tax = $('#detailList' + index + '\\.Tax');
+            $('input[id$=".SupplyCost"]').each(function () {
+                const val = parseFloat($(this).val().replace(/,/g, '')) || 0;
+                supplyCostSum += val;
+            });
 
-                if ($supplyCost.length === 0 || $tax.length === 0) break;
-
-                let supplyCostVal = parseFloat($supplyCost.val().replace(/,/g, '')) || 0;
-                let taxVal = parseFloat($tax.val().replace(/,/g, '')) || 0;
-
-                supplyCostSum += supplyCostVal;
-                taxSum += taxVal;
-                index++;
-            }
+            $('input[id$=".Tax"]').each(function () {
+                const val = parseFloat($(this).val().replace(/,/g, '')) || 0;
+                taxSum += val;
+            });
 
             $('#SupplyCostTotal').val(supplyCostSum.toLocaleString());
             $('#TaxTotal').val(taxSum.toLocaleString());
             $('#TotalAmount').val((supplyCostSum + taxSum).toLocaleString());
         }
+
 
         function recalculateTaxesForRow($row) {
             const taxMode = $('input[name="TaxType"]:checked').val();       // 과세 / 영세 / 면세
@@ -1427,6 +1439,8 @@
             let formatted = Number(inputVal).toLocaleString('en-US'); // 천 단위 , 추가
             $(this).val(formatted);
         });
+
+
 
 
 

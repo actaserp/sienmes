@@ -385,6 +385,40 @@ public class PopupController {
 		return result;
 	}
 
+	@RequestMapping("/get_Comp")
+	public AjaxResult getSearchComp(
+			@RequestParam(value = "id", required = false) Integer id
+	){
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("id", id);
+		AjaxResult result = new AjaxResult();
+
+		String sql = """
+            select id as id
+            , "Name" as compName
+            , "Code" as compCode
+            , "BusinessNumber" as business_number
+            , "TelNumber" as tel_number
+            , "CEOName" as invoiceeceoname
+            , "Address" as invoiceeaddr
+            , "BusinessType" as invoiceebiztype
+            , "BusinessItem" as invoiceebizclass
+            , "AccountManager" as invoiceecontactname1
+            , "AccountManagerPhone" as invoiceetel1
+            , "Email" as invoiceeemail1
+            from company
+            WHERE ("CompanyType" = 'sale'
+            OR "CompanyType" = 'sale-purchase')
+            and "relyn" = '0'
+            and id = :id
+			""";
+
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+
+		return result;
+	}
+
 	@RequestMapping("/search_Bank")
 	public AjaxResult getSearchBank(
 			@RequestParam(value = "bankCode", required = false) String bankCode,
