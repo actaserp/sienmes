@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/api/commute_current")
 public class CommuteCurrentController {
+    // 출퇴근현황
     @Autowired
     CommuteCurrentService commuteCurrentService;
 

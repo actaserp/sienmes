@@ -92,9 +92,11 @@
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script> <!-- Slide js -->
   <script src="/js/Mobile.js"></script>
   <script src="https://kit.fontawesome.com/84dc79ac13.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
 <body>
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 <div class="mobile-wrapper page-ticket-list"><!-- ★페이지 Class명 -->
   <!-- [모바일] 헤더  -->
   <div class="mobile-layout-header">
@@ -134,13 +136,13 @@
             <input type="hidden" id="postno">
             <!--현재 정보 카드-->
             <!-- 현재 날자 출력 -->
-            <div>
+            <div style="margin-bottom: 10px">
               <div id="searchDate" class="currentData" style="text-align: justify;"></div>
               <div id="userInfo" class="currentData" style="text-align: end">생산부 홍길동 사원</div>
             </div>
             <!-- ip 검색 시간(현재시간) -->
             <div>
-              <span id="searchTime" class="currentData" style="height: 100px; font-size: 40px;"><i class="fa-regular fa-clock fa-2xl" style="color: #ffffff;"></i></span>
+              <span id="searchTime" class="currentData" style="height: 100px; font-size: 40px;"></span>
             </div>
             <!-- 현재ip -->
             <div>
@@ -157,15 +159,25 @@
             </div>
           </div>
 
+          <!-- 근태구분 확인 -->
+          <div id="workcd" style="display: none">
+            <label>근태구분</label>
+            <div>
+              <select id="selectWorkcd">
+                <option>휴가</option>
+              </select>
+            </div>
+          </div>
+
           <!-- 버튼 -->
           <div class="btnArea">
             <div id="inside" style="display: none; gap: 13%; justify-content: center; margin-top: 50px;">
-              <button onclick="" class="office_btn" style=""><i class="fa-solid fa-briefcase fa_xl" style="color: #ffffff;"></i><br>사내출근</button>
-              <button onclick="" class="office_btn" style="background-color: red;"><i class="fa-solid fa-person-walking fa-xl" style="color: #ffffff;"></i><br>사내퇴근</button>
+              <button onclick="submitCommute('inOfficeIn')" class="office_btn" style=""><i class="fa-solid fa-briefcase fa_xl" style="color: #ffffff;"></i><br>사내출근</button>
+              <button onclick="submitCommute('inOfficeOut')" class="office_btn" style="background-color: red;"><i class="fa-solid fa-person-walking fa-xl" style="color: #ffffff;"></i><br>사내퇴근</button>
             </div>
             <div id="outside" style="display: none; gap: 13%; justify-content: center; margin-top: 50px;">
-              <button onclick="" class="office_btn" style=""><i class="fa-solid fa-briefcase fa_xl" style="color: #ffffff;"></i><br>외부출근</button>
-              <button onclick="" class="office_btn" style="background-color: red;"><i class="fa-solid fa-person-walking fa_xl" style="color: #fafafa;"></i><br>외부퇴근</button>
+              <button onclick="submitCommute('outOfficeIn')" class="office_btn" style=""><i class="fa-solid fa-briefcase fa_xl" style="color: #ffffff;"></i><br>외부출근</button>
+              <button onclick="submitCommute('outOfficeOut')" class="office_btn" style="background-color: red;"><i class="fa-solid fa-person-walking fa_xl" style="color: #fafafa;"></i><br>외부퇴근</button>
             </div>
           </div>
         </dl>
@@ -199,28 +211,30 @@
     const weekDay = weekDays[today.getDay()];
     document.getElementById('searchDate').innerText = `${year}.${month}.${date}(${weekDay})`;
   };
-  // 🔄 5초마다 IP 주소 조회
-  setInterval(() => {
+  // 🔄 IP 주소 조회 함수 정의
+  const updateIPAddress = () => {
     fetch('https://api.ipify.org?format=json')
             .then(response => response.json())
             .then(data => {
               // IP 주소를 화면에 업데이트
               document.getElementById('ipAddress').innerText = 'IP : ' + data.ip;
-              if(data.ip === '106.240.249.66') {
-                console.log('사내 IP 확인')
-                document.getElementById('inside').style.display='flex';
-              }else{
-                console.log('외부 IP 확인')
-                document.getElementById('inside').style.display='flex';
+              if (data.ip === '106.240.249.66') {
+                console.log('사내 IP 확인');
+                document.getElementById('inside').style.display = 'flex';
+              } else {
+                console.log('외부 IP 확인');
+                document.getElementById('inside').style.display = 'flex';
+                // 외부 출퇴근시 사유 작성 태그 활성화
+                document.getElementById('')
               }
             })
             .catch(error => {
               console.error("IP 조회 중 에러 발생: ", error);
             });
-  }, 5000); // 5000ms = 5초
-  // 시간 업데이트
-  // 🔄 5초마다 시간 업데이트
-  setInterval(() => {
+  };
+
+  // 🔄 시간 업데이트 함수 정의
+  const updateTime = () => {
     const now = new Date();
 
     // 시간, 분, 초 구하기
@@ -240,7 +254,17 @@
 
     // 화면에 업데이트
     document.getElementById('searchTime').innerText = formattedTime;
-  }, 5000); // 5000ms = 5초
+  };
+
+  // 🔄 페이지 로딩 시 즉시 실행
+  (() => {
+    updateIPAddress();
+    updateTime();
+  })();
+
+  // 🔄 5초마다 IP 주소 조회 및 시간 업데이트
+  setInterval(updateIPAddress, 5000);
+  setInterval(updateTime, 5000);
 
 
   updateDate();
@@ -251,34 +275,126 @@
       let _this = this;
       let url = '/api/mobile_main/read_userInfo'
       let data = {
-        'cboYear': $("#cboYear").val(),
-        'cboCompany': $("#cboCompanyHidden").val()
       }
       let fnsuccess = function (result) {
+        console.log('result : ', result)
         if (result != null) {
-          _this.viewData.sourceCollection = result.data;
+          document.getElementById('userInfo').textContent = result.data.first_name;
+          document.getElementById('officeTime').textContent = result.data.inOfficeTime ? result.data.inOfficeTime : "--:--";
         }
       };
       AjaxUtil.getAsyncData(url, data, fnsuccess);
     }
     searchMainData();
+    AjaxUtil.fillSelectOptions($('#selectWorkcd'), 'workcd', 'choose', false, 'work_division', '');
   })
 
-  // 출근/퇴근 등록
-  function submitCommute(){
-    let _this = this;
-    let url = '/api/mobile_main/read_userInfo'
-    let data = {
-      'cboYear': $("#cboYear").val(),
-      'cboCompany': $("#cboCompanyHidden").val()
-    }
-    let fnsuccess = function (result) {
-      if (result != null) {
-        _this.viewData.sourceCollection = result.data;
+  // 공휴일 확인 api
+  // API 정보
+  const API_KEY = 'bu6q9pRCluI8rJbEWr3Rzw5Dy6yiZC0XMpLyxho278jONlqE5NxPaaVyULwLr3WEYKyWfBOWnHyG2iOxdd4Uxg==';  // 🔥 발급받은 API 키를 여기에 넣으세요
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  let isHoly = 0;
+
+  // API URL 설정
+  const url = `http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getHoliDeInfo?solYear=${year}&solMonth=${month}&ServiceKey=${API_KEY}`;
+  async function checkHoliday() {
+    try {
+      const response = await axios.get(url, {
+        params: {
+          _type: 'json'
+        }
+      });
+
+      const items = response.data.response.body.items.item;
+      const todayString = `${year}${month}${day}`;
+      const isWeekend = today.getDay() === 0 || today.getDay() === 6;
+      const isHoliday = items && items.some(item => item.locdate === todayString);
+      if (isWeekend) {
+        console.log("오늘은 주말입니다.");
+        isHoly = 1;
+      } else if (isHoliday) {
+        console.log("오늘은 공휴일입니다.");
+        isHoly = 1;
+      } else {
+        console.log("오늘은 평일입니다.");
       }
-    };
-    AjaxUtil.getAsyncData(url, data, fnsuccess);
+
+    } catch (error) {
+      console.error("API 호출에 실패했습니다:", error.message);
+    }
   }
+
+
+  // 출근/퇴근 등록(상태값에 따라 로직 변경)
+  function submitCommute(office){
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const date = String(today.getDate()).padStart(2, '0');
+    const weekDay = weekDays[today.getDay()];
+    const weekNum = today.getDay();
+    console.log('office tag : ', office)
+      //출근 버튼클릭
+    if(office.trim() === 'inOfficeIn' || office.trim() === 'outOfficeIn') {
+      if(document.getElementById('officeTime').textContent !== '--:--') {
+        Alert.alert('', '이미출근 하셨습니다.');
+      }else {
+        checkHoliday();
+        let _this = this;
+        let url = '/api/mobile_main/submitCommute'
+        let data = {
+          'weekNum': weekNum,
+          'office': office,
+          'workym': year + month,
+          'workday': date,
+          'isHoly': isHoly,
+          'workcd': document.getElementById('selectWorkcd').value
+
+        }
+        let fnsuccess = function (result) {
+          if (result != null) {
+            if (result.success) {
+              function reloadWindow(){
+                console.log("확인 버튼 클릭됨");
+                window.location.reload(); // ✅ 페이지 새로고침
+              }
+              Alert.alert('', result.message, reloadWindow);
+            } else {
+              Alert.alert('', "출근 등록에 실패하였습니다.");
+            }
+          } else {
+            Alert.alert('', "오류가 발생하였습니다.");
+          }
+        };
+        AjaxUtil.postAsyncData(url, data, fnsuccess);
+      }
+    }else{
+      // 퇴근버튼 클릭
+      if(document.getElementById('officeTime').textContent === '--:--') {
+        Alert.alert('', '출근을 먼저 해주세요');
+      }else{
+        console.log('office tag : ', office)
+        let _this = this;
+        let url = '/api/mobile_main/modifyCommute'
+        let data = {
+          'office': office,
+          'workym': year + month,
+          'workday': date,
+        }
+        let fnsuccess = function (result) {
+          if (result != null) {
+            _this.viewData.sourceCollection = result.data;
+          }
+        };
+        AjaxUtil.postAsyncData(url, data, fnsuccess);
+      }
+    }
+  }
+
+
 
 </script>
 </body>

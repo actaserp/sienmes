@@ -85,6 +85,7 @@ public class ComboService {
 		this._dicFunc_.put("user_group", this.user_group);
 		this._dicFunc_.put("user_profile", this.user_profile);
 		this._dicFunc_.put("workcenter", this.workcenter);
+		this._dicFunc_.put("workcd", this.workcd);
 		this._dicFunc_.put("iotype", this.iotype);
 	}
 
@@ -958,5 +959,15 @@ public class ComboService {
         return this.sqlRunner.getRows(sql, dicParam);		
 	};
 	*/
+
+	ComboDataFunction workcd=(String cond1, String cond2, String cond3)-> {
+		String sql = """
+				select "workcd" as Value , "worknm" as text from tb_pb210
+				""";
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("cond1", cond1);
+		return this.sqlRunner.getRows(sql, dicParam);
+	};
+
 	
 }

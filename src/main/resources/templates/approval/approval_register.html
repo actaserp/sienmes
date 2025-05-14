@@ -9,9 +9,9 @@
     <div class="page-title-wrap">
       <div class="left">
         <h2>결재라인등록</h2>
-        <!--                <a href="#" title="북마크" class="bookmark toggle">-->
-        <!--                    내메뉴-->
-        <!--                </a>-->
+        <a title="북마크" class="bookmark toggle">
+          내 메뉴
+        </a>
       </div>
       <ul class="page-navi">
         <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
@@ -206,7 +206,7 @@
       let data2 = [];
 
       $.ajax({
-        url: '/api/request/request/read',
+        url: '/api/approval/read',
         type: 'GET',
         data: {
           'comcd': $('#comcd').val()
@@ -302,7 +302,7 @@
     // 문서코드 리스트 불러와 comcd(select)속성(option)으로 바인드
     function getComcd() {
       $.ajax({
-        url: '/api/request/request/getComcd',
+        url: '/api/approval/getComcd',
         type: 'GET',
         data: {},
         async: false,
@@ -353,7 +353,7 @@
     // 2️⃣ 결재자 코드 옵션 추가하는 함수
     function bindApproverOptions() {
       $.ajax({
-        url: `/api/request/request/getKcperid`,
+        url: `/api/approval/getKcperid`,
         type: 'GET',
         success: function(response) {
           let approverSelect = document.getElementById("kcperid");
@@ -387,7 +387,7 @@
 
     // 공통코드 리스트 가져오기
     function fetchCommonCodes(parentId, selectElementId) {
-      fetch(`/api/request/request/find_parent_id?id=${parentId}`)
+      fetch(`/api/approval/find_parent_id?id=${parentId}`)
               .then(response => {
                 if (!response.ok) {
                   throw new Error('Network response was not ok ' + response.statusText);
@@ -455,7 +455,7 @@
                 fetchListData2();
               }
             };
-            AjaxUtil.postAsyncData('/api/request/request/delete', deleteNum, fnSuccess);
+            AjaxUtil.postAsyncData('/api/approval/delete', deleteNum, fnSuccess);
           }
         });
         Alert.alert("", "삭제되었습니다.");
@@ -486,7 +486,7 @@
     function getMyInfo(saupnum) {
       return new Promise((resolve, reject) => {
         $.ajax({
-          url: '/api/request/request/getUserInfo',
+          url: '/api/approval/getUserInfo',
           data: {},
           type: 'GET',
           success: function (data) {
@@ -571,7 +571,7 @@
             Alert.alert('', '저장에 실패했습니다.');
           }
         }
-        sendAjaxRequest('/api/request/request/save');
+        sendAjaxRequest('/api/approval/save');
       })
     }
 

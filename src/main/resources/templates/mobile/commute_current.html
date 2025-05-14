@@ -269,6 +269,23 @@
 <script type="text/javascript">
 
   $(document).ready(function () {
+    // 유저정보 확인
+    function searchMainData(){
+      let _this = this;
+      let url = '/api/commute_current/read'
+      let data = {
+      }
+      let fnsuccess = function (result) {
+        console.log('result : ', result)
+        if (result != null) {
+          document.getElementById('userInfo').textContent = result.data.first_name;
+          document.getElementById('officeTime').textContent = result.data.inOfficeTime ? result.data.inOfficeTime : "--:--";
+        }
+      };
+      AjaxUtil.getAsyncData(url, data, fnsuccess);
+    }
+    searchMainData();
+    AjaxUtil.fillSelectOptions($('#selectWorkcd'), 'workcd', 'choose', false, 'work_division', '');
   });
 
 
