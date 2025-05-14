@@ -57,7 +57,7 @@ public class MonthlyPurchaseListController {
         @RequestParam(value = "spjangcd") String spjangcd
     ) {
         //log.info("월별 매입현황(미지급금) read : cboYear:{}, cboCompany:{} , spjangcd:{} ", cboYear, cboCompany,spjangcd);
-        List<Map<String,Object>> items = this.monthlyPurchaseListService.getPaymentList(cboYear,cboCompany, spjangcd);
+        List<Map<String,Object>> items = this.monthlyPurchaseListService.getMonthPayableList(cboYear,cboCompany, spjangcd);
 
         AjaxResult result = new AjaxResult();
         result.data = items;

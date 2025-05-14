@@ -61,8 +61,8 @@
             <div class="tab-wrap">
                 <ul class="tab-links">
                     <li><a href="#tabs_sales" style="border-radius: 6px 0 0 0;">매입</a></li>
-                    <li><a href="#tabs_deposit">지급</a></li>
-                    <li><a href="#tabs_accounts_receivable" style="border-radius: 0 6px 0 0;">미지급</a></li>
+                    <li><a href="#tabs_payment">지급</a></li>
+                    <li><a href="#tabs_accounts_payable" style="border-radius: 0 6px 0 0;">미지급</a></li>
                 </ul>
                 <div>
                     <section class="tab-item" id="tabs_sales" style="border-top-left-radius: 0;">
@@ -70,14 +70,14 @@
                             <div id="theGrid" style="height: 730px;"></div>
                         </div>
                     </section>
-                    <section class="tab-item" id="tabs_deposit" style="border-top-left-radius: 0;">
+                    <section class="tab-item" id="tabs_payment" style="border-top-left-radius: 0;">
                         <div class="container-fluid">
-                            <div id="deposit-grid" style="height: 730px;"></div>
+                            <div id="payment-grid" style="height: 730px;"></div>
                         </div>
                     </section>
-                    <section class="tab-item" id="tabs_accounts_receivable" style="border-top-left-radius: 0;">
+                    <section class="tab-item" id="tabs_accounts_payable" style="border-top-left-radius: 0;">
                         <div class="container-fluid">
-                            <div id="accounts_receivable-grid" style="height: 730px;"></div>
+                            <div id="accounts_payable-grid" style="height: 730px;"></div>
                         </div>
                     </section>
 
@@ -92,7 +92,7 @@
     <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
     <th:block th:replace="/common/popup_company :: popup_company"></th:block>
     <script type="text/javascript">
-        class MonthlySalesListPage {
+        class  MonthlyPurchaseListPage {
             constructor() {
                 this.grid = null;
                 this.grid3 = null;
@@ -111,7 +111,7 @@
                     return {
                         binding: `mon_${month}`,
                         header: `${month}월`,
-                        width: 100,
+                        width: 120,
                         align: 'right',
                         allowSorting: false,
                         format: 'n0',
@@ -145,9 +145,26 @@
                 this.grid.rowHeaders.columns.splice(0, 1);
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '월별 매입 현황(매입)';
+//Footer 패널 사용 설정
+                this.grid.columnFooters.rows.push(new wijmo.grid.Row());
 
+                //Footer 합계 값 설정 (수동)
+                this.grid.loadedRows.addHandler(() => {
+                    const rows = this.grid.rows;
+                    const footerTotal = this.grid.columnFooters.rows[0];
+                    const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+                    // footer에 들어갈 데이터 구성
+                    const footerData = {
+                        comp_name: '합 계', // 첫 컬럼에 텍스트
+                    };
+                    monthColumns.forEach(col => {
+                        footerData[col.binding] = getSum(col.binding);
+                    });
+                    footerData['total_sum'] = getSum('total_sum');
+                    footerTotal.dataItem = footerData;
+                });
 
-                this.grid3 = new wijmo.grid.FlexGrid('#deposit-grid', {
+                this.grid3 = new wijmo.grid.FlexGrid('#payment-grid', {
                     frozenColumns: 1,
                     frozenRows: 0,
                     allowSorting: wijmo.grid.AllowSorting.MultiColumn,
@@ -176,8 +193,25 @@
                 this.grid3.rowHeaders.columns.splice(0, 1);
                 new FlexGridContextMenu(this.grid3);
                 this.grid3.downloadFileName = '월별 매입 현황(지급)';
+                //Footer 패널 사용 설정
+                this.grid3.columnFooters.rows.push(new wijmo.grid.Row());
+                // ✅ Footer 합계 설정
+                this.grid3.loadedRows.addHandler(() => {
+                    const rows = this.grid3.rows;
+                    const footerTotal = this.grid3.columnFooters.rows[0];
+                    const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
 
-                this.grid4 = new wijmo.grid.FlexGrid('#accounts_receivable-grid', {
+                    const footerData = {
+                        comp_name: '합 계',
+                    };
+                    monthColumns.forEach(col => {
+                        footerData[col.binding] = getSum(col.binding);
+                    });
+                    footerData['total_sum'] = getSum('total_sum');
+                    footerTotal.dataItem = footerData;
+                });
+
+                this.grid4 = new wijmo.grid.FlexGrid('#accounts_payable-grid', {
                     frozenColumns: 4,
                     frozenRows: 0,
                     allowSorting: wijmo.grid.AllowSorting.MultiColumn,
@@ -193,6 +227,7 @@
                     },
                     columns: [
                         { binding: 'comp_name', header: '거래처명', width: 170, align: 'center', allowMerging: true },
+                        { binding: 'amount', header: '전잔액', width: 110, align: 'right'},
                         /* { binding: 'misgubun', header: '매출구분', width: 100, align: 'center', allowMerging: true },
                          { binding: 'icerdeptnm', header: '부서', width: 130, align: 'center', allowMerging: true },
                          { binding: 'icerceonm', header: '담당자', width: 100, align: 'center', allowSorting: false },*/
@@ -200,10 +235,26 @@
                     ],
                     itemsSource: this.viewData,
                 });
-
                 this.grid4.rowHeaders.columns.splice(0, 1);
                 new FlexGridContextMenu(this.grid4);
                 this.grid4.downloadFileName = '월별 매입 현황(미지급)';
+                //Footer 패널 사용 설정
+                this.grid4.columnFooters.rows.push(new wijmo.grid.Row());
+                // ✅ Footer 합계 설정
+                this.grid4.loadedRows.addHandler(() => {
+                    const rows = this.grid4.rows;
+                    const footerTotal = this.grid4.columnFooters.rows[0];
+                    const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+
+                    const footerData = {
+                        comp_name: '합 계',
+                    };
+                    monthColumns.forEach(col => {
+                        footerData[col.binding] = getSum(col.binding);
+                    });
+                    footerData['total_sum'] = getSum('total_sum');
+                    footerTotal.dataItem = footerData;
+                });
             }
 
             searchMainData() {
@@ -241,7 +292,7 @@
             if (spjangcd) {
                 $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
             }
-            page = new MonthlySalesListPage();
+            page = new  MonthlyPurchaseListPage();
 
             AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '', 'sale');
             AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);

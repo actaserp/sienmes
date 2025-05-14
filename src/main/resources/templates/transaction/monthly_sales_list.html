@@ -111,7 +111,7 @@
           return {
             binding: `mon_${month}`,
             header: `${month}월`,
-            width: 100,
+            width: 120,
             align: 'right',
             allowSorting: false,
             format: 'n0',
@@ -146,7 +146,24 @@
 
         new FlexGridContextMenu(this.grid);
         this.grid.downloadFileName = '월별 매출 현황(매출)';
+        //Footer 패널 사용 설정
+        this.grid.columnFooters.rows.push(new wijmo.grid.Row());
 
+        //Footer 합계 값 설정 (수동)
+        this.grid.loadedRows.addHandler(() => {
+          const rows = this.grid.rows;
+          const footerTotal = this.grid.columnFooters.rows[0];
+          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+          // footer에 들어갈 데이터 구성
+          const footerData = {
+            comp_name: '합 계', // 첫 컬럼에 텍스트
+          };
+          monthColumns.forEach(col => {
+            footerData[col.binding] = getSum(col.binding);
+          });
+          footerData['total_sum'] = getSum('total_sum');
+          footerTotal.dataItem = footerData;
+        });
 
         this.grid3 = new wijmo.grid.FlexGrid('#deposit-grid', {
           frozenColumns: 1,
@@ -176,7 +193,23 @@
         this.grid3.rowHeaders.columns.splice(0, 1);
         new FlexGridContextMenu(this.grid3);
         this.grid3.downloadFileName = '월별 매출 현황(입금)';
+        //Footer 패널 사용 설정
+        this.grid3.columnFooters.rows.push(new wijmo.grid.Row());
+        // ✅ Footer 합계 설정
+        this.grid3.loadedRows.addHandler(() => {
+          const rows = this.grid3.rows;
+          const footerTotal = this.grid3.columnFooters.rows[0];
+          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
 
+          const footerData = {
+            comp_name: '합 계',
+          };
+          monthColumns.forEach(col => {
+            footerData[col.binding] = getSum(col.binding);
+          });
+          footerData['total_sum'] = getSum('total_sum');
+          footerTotal.dataItem = footerData;
+        });
 
         this.grid4 = new wijmo.grid.FlexGrid('#accounts_receivable-grid', {
           frozenColumns: 4,
@@ -194,7 +227,7 @@
           },
           columns: [
             { binding: 'comp_name', header: '거래처명', width: 170, align: 'center', allowMerging: true },
-            { binding: 'amount', header: '전잔액', width: 170, align: 'center'},
+            { binding: 'amount', header: '전잔액', width: 110, align: 'right'},
            /* { binding: 'misgubun', header: '매출구분', width: 100, align: 'center', allowMerging: true },
             { binding: 'icerdeptnm', header: '부서', width: 130, align: 'center', allowMerging: true },
             { binding: 'icerceonm', header: '담당자', width: 100, align: 'center', allowSorting: false },*/
@@ -206,6 +239,24 @@
         this.grid4.rowHeaders.columns.splice(0, 1);
         new FlexGridContextMenu(this.grid4);
         this.grid4.downloadFileName = '월별 매출 현황(미수금)';
+
+        //Footer 패널 사용 설정
+        this.grid4.columnFooters.rows.push(new wijmo.grid.Row());
+        // ✅ Footer 합계 설정
+        this.grid4.loadedRows.addHandler(() => {
+          const rows = this.grid4.rows;
+          const footerTotal = this.grid4.columnFooters.rows[0];
+          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+
+          const footerData = {
+            comp_name: '합 계',
+          };
+          monthColumns.forEach(col => {
+            footerData[col.binding] = getSum(col.binding);
+          });
+          footerData['total_sum'] = getSum('total_sum');
+          footerTotal.dataItem = footerData;
+        });
       }
 
       searchMainData() {

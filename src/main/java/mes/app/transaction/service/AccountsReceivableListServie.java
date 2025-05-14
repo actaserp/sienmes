@@ -246,7 +246,7 @@ public class AccountsReceivableListServie {
             WHERE s.misdate BETWEEN :start AND :end
               AND s.cltcd = :company
               AND s.spjangcd = :spjangcd
-            GROUP BY s.cltcd, c."Name", s.misdate, s.totalamt, s.misgubun, sc."Value", s.remark1
+            GROUP BY s.cltcd, c."Name", s.misdate,  s.misnum,  s.totalamt, s.misgubun, sc."Value", s.remark1
             UNION ALL
             -- 입금
             SELECT

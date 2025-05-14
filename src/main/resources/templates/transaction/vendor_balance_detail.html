@@ -24,14 +24,9 @@
               거래처
             </dt>
             <dd>
-              <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
+              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭해서 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
               <input type="hidden" id="spjangcdHidden">
-              &nbsp;
-              <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                업체 검색
-              </a>
             </dd>
           </dl>
           <dl>
@@ -77,7 +72,7 @@
   <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
   <th:block th:replace="/common/popup_company :: popup_company"></th:block>
   <script type="text/javascript">
-    class CompBalanceDetailPage {
+    class VendorBalanceDetailPage {
       constructor() {
         this.grid = null;
         this.grid3 = null;
@@ -109,6 +104,13 @@
                 e.cell.style.textAlign = 'center';
                 e.cell.style.fontWeight = 'bold';
                 e.cell.style.color = '#444';
+              }
+            }
+            if (e.panel.cellType === wijmo.grid.CellType.Cell && col.binding === 'balance') {
+              if (item?.summary === '전잔액') {
+                e.cell.textContent = wijmo.Globalize.format(item.amount, 'n0');
+                e.cell.style.fontWeight = 'bold';
+                e.cell.style.color = '#333';
               }
             }
           },
@@ -179,7 +181,7 @@
         $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
       }
 
-      page = new CompBalanceDetailPage();
+      page = new VendorBalanceDetailPage();
 
       $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
       $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
@@ -188,11 +190,12 @@
 
       // 검색
       $('#btnSearch').click(function (e) {
-        if ($('#cboCompanyHidden').val() === '' && $('#cboCompany').val() !== '') {
-          Alert.alert('', '업체명은 업체검색 버튼을 통해서 \n 검색해주세요');
-          return;
+        if ($('#cboCompany').val() !== '' && $('#cboCompanyHidden').val() === '') {
+          // 업체명 텍스트는 썼지만, 업체 검색 버튼 안 눌렀을 때
+          page.searchMainData();
+        } else {
+          page.searchMainData();
         }
-        page.searchMainData();
       });
 
       $('#btnGridSetting').click(function (e) {
@@ -203,13 +206,20 @@
 
       $('#btnCompanySearch').click(function () {
         let poppage = new PopCompComponent();
+        let $poppage = $(poppage);
         let searchcallback = function (items) {
-          console.log('items : ',items);
-          document.getElementById('cboCompany').value = items.compname;
+          //console.log('items : ',items);
+          document.getElementById('btnCompanySearch').value = items.compname;
           document.getElementById('cboCompanyHidden').value = items.id;
         };
 
         poppage.show(searchcallback);
+      });
+      $('#btnCompanySearch').on('input', function () {
+        const val = $(this).val();
+        if (val === '') {
+          $('#cboCompanyHidden').val('');
+        }
       });
       $('#cboCompany').on('input', function () {
         const val = $(this).val();

@@ -146,117 +146,151 @@ public class MonthlyPurchaseListService {
   }
 
   //미지급금
-  public List<Map<String, Object>> getPaymentList(String cboYear, Integer cboCompany, String spjangcd) {
+  // 미지급
+  public List<Map<String, Object>> getMonthPayableList(String cboYear, Integer cboCompany, String spjangcd) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
     paramMap.addValue("cboYear", cboYear);
     paramMap.addValue("cboCompany", cboCompany);
     paramMap.addValue("spjangcd", spjangcd);
 
-    String dateFrom = cboYear + "0101";
-    String dateTo = cboYear + "1231";
-    String prevYm = String.valueOf(Integer.parseInt(cboYear) - 1) + "12";
+    String baseYm = cboYear + "01";
+    String yearStart = cboYear + "0101";
+    String yearEnd = cboYear + "1231";
 
-    paramMap.addValue("date_form", dateFrom);
-    paramMap.addValue("date_to", dateTo);
-    paramMap.addValue("prevYm", prevYm);
+    paramMap.addValue("baseYm", baseYm);
+    paramMap.addValue("yearStart", yearStart);
+    paramMap.addValue("date_form", yearStart);
+    paramMap.addValue("date_to", yearEnd);
+    paramMap.addValue("year", cboYear);
+    paramMap.addValue("prevYear", String.valueOf(Integer.parseInt(cboYear) - 1));
 
     StringBuilder sql = new StringBuilder();
 
     sql.append("""
-        WITH LASTTbl AS (
+        WITH lastym AS (
             SELECT cltcd, MAX(yyyymm) AS yyyymm
             FROM tb_yearamt
-            WHERE yyyymm < :prevYm
+            WHERE yyyymm < :baseYm
               AND ioflag = '1'
               AND spjangcd = :spjangcd
             GROUP BY cltcd
         ),
-        last_amt AS (
-            SELECT y.cltcd, y.yearamt
+        lasttbl AS (
+            SELECT y.cltcd, y.yearamt, y.yyyymm, y.spjangcd
             FROM tb_yearamt y
-            JOIN LASTTbl l ON y.cltcd = l.cltcd AND y.yyyymm = l.yyyymm
+            JOIN lastym m ON y.cltcd = m.cltcd AND y.yyyymm = m.yyyymm
             WHERE y.ioflag = '1'
               AND y.spjangcd = :spjangcd
         ),
-        parsed_sales AS (
-            SELECT
-                s.cltcd,
-                TO_CHAR(TO_DATE(s.misdate, 'YYYYMMDD'), 'MM') AS sale_month,
-                SUM(s.totalamt) AS sale_amt
+        purchasetbl AS (
+            SELECT s.cltcd, SUM(s.totalamt) AS totpurchase, s.spjangcd
             FROM tb_invoicement s
             WHERE s.misdate BETWEEN :date_form AND :date_to
               AND s.spjangcd = :spjangcd
-    """);
-
-    if (cboCompany != null) {
-      sql.append(" AND s.cltcd = :cboCompany ");
-    }
-
-    sql.append("""
-            GROUP BY s.cltcd, TO_CHAR(TO_DATE(s.misdate, 'YYYYMMDD'), 'MM')
+            GROUP BY s.cltcd, s.spjangcd
         ),
-        parsed_deposit AS (
+        paytbl AS (
+            SELECT s.cltcd, SUM(s.accout) AS totpayment, s.spjangcd
+            FROM tb_banktransit s
+            WHERE s.trdate BETWEEN :date_form AND :date_to
+              AND s.spjangcd = :spjangcd
+              AND s.ioflag = '1'
+            GROUP BY s.cltcd, s.spjangcd
+        ),
+        union_data_raw AS (
             SELECT
-                b.cltcd,
-                TO_CHAR(TO_DATE(b.trdate, 'YYYYMMDD'), 'MM') AS deposit_month,
-                SUM(b.accout) AS accout_amt
-            FROM tb_banktransit b
-            WHERE b.trdate BETWEEN :date_form AND :date_to
-              AND b.ioflag = '1'
-              AND b.spjangcd = :spjangcd
-    """);
-
-    if (cboCompany != null) {
-      sql.append(" AND b.cltcd = :cboCompany ");
-    }
-
-    sql.append("""
-            GROUP BY b.cltcd, TO_CHAR(TO_DATE(b.trdate, 'YYYYMMDD'), 'MM')
-        ),
-        base AS (
-            SELECT DISTINCT cltcd FROM parsed_sales
-            UNION
-            SELECT DISTINCT cltcd FROM parsed_deposit
-        ),
-        final_data AS (
+                c.id,
+                c."Name" AS comp_name,
+                TO_DATE(:baseYm || '01', 'YYYYMMDD') AS date,
+                '전잔액' AS summary,
+                COALESCE(h.yearamt, 0) AS amount,
+                NULL::numeric AS accout,
+                NULL::numeric AS totalamt,
+                0 AS remaksseq
+            FROM company c
+            LEFT JOIN lasttbl h ON c.id = h.cltcd AND c.spjangcd = h.spjangcd
+            LEFT JOIN purchasetbl p ON c.id = p.cltcd AND c.spjangcd = p.spjangcd
+            LEFT JOIN paytbl q ON c.id = q.cltcd AND c.spjangcd = q.spjangcd
+            WHERE c.spjangcd = :spjangcd
+            UNION ALL
+            SELECT
+                s.cltcd,
+                c."Name" AS comp_name,
+                TO_DATE(s.misdate, 'YYYYMMDD'),
+                '매입',
+                NULL::numeric AS amount,
+                NULL::numeric AS accout,
+                s.totalamt AS totalamt,
+                1 AS remaksseq
+            FROM tb_invoicement s
+            JOIN company c ON c.id = s.cltcd AND c.spjangcd = s.spjangcd
+            WHERE s.misdate BETWEEN :date_form AND :date_to
+              AND s.spjangcd = :spjangcd
+            UNION ALL
             SELECT
                 b.cltcd,
                 c."Name" AS comp_name,
-                m.month,
-                COALESCE(s.sale_amt, 0) AS sale_amt,
-                COALESCE(d.accout_amt, 0) AS accout_amt,
-                CASE
-                    WHEN m.month = '01' THEN COALESCE(la.yearamt, 0) + COALESCE(s.sale_amt, 0) - COALESCE(d.accout_amt, 0)
-                    ELSE COALESCE(s.sale_amt, 0) - COALESCE(d.accout_amt, 0)
-                END AS remain_amt
-            FROM base b
-            CROSS JOIN (
-                SELECT TO_CHAR(GENERATE_SERIES(1,12), 'FM00') AS month
-            ) m
-            LEFT JOIN company c ON c.id = b.cltcd
-            LEFT JOIN parsed_sales s ON s.cltcd = b.cltcd AND s.sale_month = m.month
-            LEFT JOIN parsed_deposit d ON d.cltcd = b.cltcd AND d.deposit_month = m.month
-            LEFT JOIN last_amt la ON la.cltcd = b.cltcd
-        )
-        SELECT 
-            comp_name
+                TO_DATE(b.trdate, 'YYYYMMDD'),
+                '지급액',
+                NULL::numeric AS amount,
+                b.accout,
+                NULL::numeric AS totalamt,
+                2 AS remaksseq
+            FROM tb_banktransit b
+            JOIN company c ON c.id = b.cltcd AND c.spjangcd = b.spjangcd
+            WHERE TO_DATE(b.trdate, 'YYYYMMDD') BETWEEN TO_DATE(:date_form, 'YYYYMMDD') AND TO_DATE(:date_to, 'YYYYMMDD')
+              AND b.spjangcd = :spjangcd
+              AND b.ioflag = '1'
+        ),
+        union_data AS (
+            SELECT * FROM union_data_raw
+            WHERE 1 = 1
     """);
 
-    for (int i = 1; i <= 12; i++) {
-      String month = String.format("%02d", i);
-      sql.append(",\n  SUM(CASE WHEN month = '").append(month).append("' THEN remain_amt ELSE 0 END) AS mon_").append(i);
+    if (cboCompany != null) {
+      sql.append(" AND id = :cboCompany\n");
     }
 
     sql.append("""
-        , SUM(remain_amt) AS total_sum
-        FROM final_data
-        GROUP BY comp_name
-        ORDER BY comp_name
+        ),
+        running_balance AS (
+            SELECT
+                id,
+                comp_name,
+                amount,
+                TO_CHAR(date, 'YYYY-MM') AS yyyymm,
+                date,
+                summary,
+                SUM(
+                    COALESCE(amount, 0) + COALESCE(totalamt, 0) - COALESCE(accout, 0)
+                ) OVER (
+                    PARTITION BY id
+                    ORDER BY date, remaksseq
+                    ROWS UNBOUNDED PRECEDING
+                ) AS balance
+            FROM union_data
+        )
+        SELECT
+            id AS cltid,
+            comp_name,
+            amount
     """);
 
+    for (int i = 0; i <= 12; i++) {
+      String ym = (i == 0)
+          ? ":prevYear || '-12'"
+          : String.format(":year || '-%02d'", i);
+      sql.append(",\n  MAX(CASE WHEN yyyymm = ").append(ym).append(" THEN balance ELSE 0 END) AS mon_").append(i);
+    }
+
+    sql.append("""
+        FROM running_balance
+        GROUP BY id, comp_name, amount
+        HAVING SUM(balance) <> 0
+        ORDER BY comp_name;
+    """);
 //    log.info("미지급금 월별 현황 SQL: {}", sql);
 //    log.info("SQL Parameters: {}", paramMap.getValues());
-
     return this.sqlRunner.getRows(sql.toString(), paramMap);
   }
 

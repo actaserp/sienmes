@@ -92,7 +92,7 @@ public class VendorBalanceDetailService {
                         c."Name" AS comp_name,
                         TO_DATE(:baseDate, 'YYYYMMDD') AS date,
                         '전잔액' AS summary,
-                        COALESCE(h.yearamt, 0) + COALESCE(q.totsale, 0) - COALESCE(p.totaccout, 0) AS amount,
+                        COALESCE(h.yearamt, 0) AS amount,
                         NULL::text AS itemnm,
                         NULL::text AS misgubun,
                         NULL::text AS iotype,
@@ -187,12 +187,12 @@ public class VendorBalanceDetailService {
                     x.accout,
                     x.totalamt,
                     SUM(
-                COALESCE(x.amount, 0) + COALESCE(x.totalamt, 0) - COALESCE(x.accout, 0)
-            ) OVER (
-                PARTITION BY x.id
-                ORDER BY x.date, x.remaksseq, x.itemnm
-                ROWS UNBOUNDED PRECEDING
-            ) AS balance,
+                    COALESCE(x.amount, 0) + COALESCE(x.totalamt, 0) - COALESCE(x.accout, 0)
+                        ) OVER (
+                        PARTITION BY x.id
+                        ORDER BY x.date, x.remaksseq
+                        ROWS UNBOUNDED PRECEDING
+                    ) AS balance,
                     x.itemnm,
                     x.misgubun,
                     x.iotype,

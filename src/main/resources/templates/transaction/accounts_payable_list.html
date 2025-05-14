@@ -90,7 +90,9 @@
       class production_require {
         constructor() {
           this.grid = null;
+          this.grid3 = null;
           this.spjangcd = $('#spjangcdHidden');
+          this.viewData = new wijmo.collections.CollectionView();
           this.init();
         }
 
@@ -118,8 +120,7 @@
           });
 
           new FlexGridContextMenu(this.grid);
-          this.grid.downloadFileName = '작업 지시 등록 내역';
-
+          this.grid.downloadFileName = '미지급 집계 현황';
           this.grid.hostElement.addEventListener('dblclick', function (e) {
             let selectedItem = _this.grid.selectedItems[0];
 
@@ -141,8 +142,25 @@
             // 탭 전환
             _this.switchToDetailTab();
           });
+          // ✅ Footer 패널 사용 설정
+          this.grid.columnFooters.rows.push(new wijmo.grid.Row());
+          this.grid.bottomLeftCells.setCellData(0, 0, '합 계');
 
-          this.grid2 = new wijmo.grid.FlexGrid('#theGrid3', {
+          // ✅ Footer 합계 값 설정 (수동)
+          this.grid.loadedRows.addHandler(() => {
+            const rows = this.grid.rows;
+            const footerTotal = this.grid.columnFooters.rows[0];
+
+            const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+            footerTotal.dataItem = {
+              clt_name: '합 계',
+              receivables: getSum('receivables'),
+              sales: getSum('sales'),
+              AmountDeposited: getSum('AmountDeposited'),
+            };
+          });
+
+          this.grid3 = new wijmo.grid.FlexGrid('#theGrid3', {
             autoGenerateColumns: false,
             selectionMode: wijmo.grid.SelectionMode.Row,
             headersVisibility: wijmo.grid.HeadersVisibility.Column,
@@ -179,23 +197,23 @@
               {binding: 'tradenm', header: '거래구분', width: 180, align: 'left'},
               {binding: 'remark1', header: '적요', width: 450, align: 'left'},
               {binding: 'memo', header: '메모', width: 200, align: 'center'}
-            ]
+            ],
+            itemsSource: this.viewData,
           });
 
-          new FlexGridContextMenu(this.grid2);
-          this.grid2.downloadFileName = '작업 지시 등록 내역';
-
+          new FlexGridContextMenu(this.grid3);
+          this.grid3.downloadFileName = '미지급 현황 상세';
           // ✅ Footer 패널 사용 설정
-          this.grid2.columnFooters.rows.push(new wijmo.grid.Row());
-          this.grid2.bottomLeftCells.setCellData(0, 0, '매입계');
-          this.grid2.columnFooters.rows.push(new wijmo.grid.Row());
-          this.grid2.bottomLeftCells.setCellData(0, 0, '지급계');
+          this.grid3.columnFooters.rows.push(new wijmo.grid.Row());
+          this.grid3.bottomLeftCells.setCellData(0, 0, '매입계');
+          this.grid3.columnFooters.rows.push(new wijmo.grid.Row());
+          this.grid3.bottomLeftCells.setCellData(0, 0, '지급계');
 
           // ✅ Footer 합계 값 설정 (수동)
-          this.grid2.loadedRows.addHandler(() => {
-            const rows = this.grid2.rows;
-            const SalesTotal = this.grid2.columnFooters.rows[0];
-            const DepositTotal = this.grid2.columnFooters.rows[1];
+          this.grid3.loadedRows.addHandler(() => {
+            const rows = this.grid3.rows;
+            const SalesTotal = this.grid3.columnFooters.rows[0];
+            const DepositTotal = this.grid3.columnFooters.rows[1];
 
             const getSumBySummary = (field, summaryType) =>
               rows
@@ -203,14 +221,14 @@
                 .map(r => +r.dataItem[field] || 0)
                 .reduce((a, b) => a + b, 0);
 
-            // 매출 합계
+            // 매입 합계
             SalesTotal.dataItem = {
               comp_name: '합계',
               summary: '매입계',
               total_amount: getSumBySummary('total_amount', '매입')
             };
 
-            // 입금 합계
+            // 지급 합계
             DepositTotal.dataItem = {
               summary: '지급계',
               total_amount: getSumBySummary('total_amount', '지급')
@@ -248,9 +266,9 @@
 
           AjaxUtil.getAsyncData(url, param, function (result) {
             if (result != null && result.data) {
-              _this.grid2.itemsSource = result.data;
+              _this.grid3.itemsSource = result.data;
             } else {
-              _this.grid2.itemsSource = []; // 데이터 없으면 초기화
+              _this.grid3.itemsSource = []; // 데이터 없으면 초기화
             }
           });
         }
@@ -291,7 +309,7 @@
             page.loadDetailData(companyCode);
           } else {
             // 회사 선택 안 된 경우 상세 그리드 초기화
-            page.grid2.itemsSource = [];
+            page.grid3.itemsSource = [];
           }
         });
 
