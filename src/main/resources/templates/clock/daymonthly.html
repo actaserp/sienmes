@@ -51,14 +51,10 @@
 
                             <dl>
                                 <dt>
-                                    <label>근무구분</label>
+                                    <label for="work_division">근무구분</label>
                                 </dt>
                                 <dd>
-                                   <select>
-                                       <option value="0">고정근무</option>
-                                       <option value="1">재량근무</option>
-                                       <option value="2">시차출퇴근</option>
-                                   </select>
+                                    <select style="width: 150px;" id="work_division" name="work_division"></select>
                                 </dd>
                             </dl>
 
@@ -129,14 +125,10 @@
 
                             <dl>
                                 <dt>
-                                    <label>근무구분</label>
+                                    <label for="work_division2">근무구분</label>
                                 </dt>
                                 <dd>
-                                    <select>
-                                        <option value="0">고정근무</option>
-                                        <option value="1">재량근무</option>
-                                        <option value="2">시차출퇴근</option>
-                                    </select>
+                                    <select style="width: 150px;" id="work_division2" name="work_division2"></select>
                                 </dd>
                             </dl>
                         </div>
@@ -203,20 +195,21 @@
                         }
                     },
                     columns: [
-                        {binding: '', header: '마감', width: 70, align: 'center'},
-                        {binding: '', header: '순번', width: 70, align: 'center'},
-                        {binding: '', header: '일자', width: 100, align: 'center' },
-                        {binding: '', header: '사원명', width: 120, align: 'left' },
+                        {binding: 'fixflag', header: '마감', width: 70, align: 'center'},
+                        {binding: 'rownum', header: '순번', width: 70, align: 'center'},
+                        {binding: 'workday', header: '일자', width: 100, align: 'center' },
+                        {binding: 'first_name', header: '사원명', width: 120, align: 'left' },
                         {binding: '', header: '직위', width: 100, align: 'left' },
-                        {binding: '', header: '출근', width: 100, align: 'left' },
-                        {binding: '', header: '퇴근', width: 100, align: 'center'},
-                        {binding: '', header: '구분', width: 100, align: 'center'},
-                        {binding: '', header: '근무시간', width: 100, align: 'center'},
-                        {binding: '', header: '지각', width: '*', align: 'center'},
-                        {binding: '', header: '연장', width: '*', align: 'center'},
-                        {binding: '', header: '야간', width: '*', align: 'center'},
-                        {binding: '', header: '휴가', width: '*', align: 'center'},
-                        {binding: '', header: '결근', width: '*', align: 'center'},
+                        {binding: 'starttime', header: '출근', width: 100, align: 'left' },
+                        {binding: 'endtime', header: '퇴근', width: 100, align: 'center'},
+                        {binding: 'workyn', header: '구분', width: 100, align: 'center'},
+                        {binding: 'worktime', header: '근무시간', width: 100, align: 'center'},
+
+                        {binding: 'jitime', header: '지각', width: '*', align: 'center'},
+                        {binding: 'overtime', header: '연장', width: '*', align: 'center'},
+                        {binding: 'nighttime', header: '야간', width: '*', align: 'center'},
+                        {binding: 'yuntime', header: '휴가', width: '*', align: 'center'},
+                        {binding: 'abtime', header: '결근', width: '*', align: 'center'},
                         {binding: '', header: '특근', width: '*', align: 'center'},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
@@ -282,6 +275,10 @@
                         {binding: 'weekday', header: '요일', width: '*', align: 'center'},
                     ],
                     itemsSource: this.viewData2, // 데이터를 설정할 배열
+                });
+
+                this.grid2.selectionChanged.addHandler(() => {
+                    this.searchMainData();
                 });
 
                 new FlexGridContextMenu(this.grid2);
@@ -386,20 +383,41 @@
 
             searchMainData() {
                 let _this = this;
-                //let txtName = $('#txtName').val();
-                //let url = '/api/definition/area?txtName='+txtName;
-               /* let data = {
-                    'txtName' :$('#txtName').val(),
-                    //'action':'read'
+                let url = '/api/clock/DayMonthly';
+
+                // 선택된 row index
+                let selRow = this.grid2.selection.row;
+
+                // 선택된 date 값 (없으면 오늘 날짜로)
+                let selectedDate = '';
+                if (selRow >= 0) {
+                    selectedDate = this.grid2.getCellData(selRow, this.grid2.columns.getColumn('date').index, false);
+                } else {
+                    // 오늘 날짜 (YYYY-MM-DD)
+                    const today = new Date();
+                    const year = today.getFullYear();
+                    const month = ('0' + (today.getMonth() + 1)).slice(-2);
+                    const day = ('0' + today.getDate()).slice(-2);
+                    selectedDate = `${year}-${month}-${day}`;
                 }
-                let result = AjaxUtil.getSyncData(this.url+'/read', data);
+
+                // 전송할 데이터
+                let data = {
+                    serchday: selectedDate,
+                    work_division: $('#work_division').val()
+                };
+
+                let result = AjaxUtil.getSyncData(url + '/read', data);
                 console.log(result);
 
                 if (result && result.data) {
                     _this.viewData.sourceCollection = result.data;
-                }*/
+                }
+            }
 
-            }//searchMainData
+
+            //searchMainData
+
 
             saveArea() {
                 let _this = this;
@@ -436,6 +454,8 @@
             page = new DayMonthlyPage();
 
             $('#startdate2').val(CommonUtil.getYYYYMMDD().substring(0, 7));
+            AjaxUtil.fillSelectOptions($('#work_division').add('#work_division2'), 'system_code', '', '', 'work_division');
+
 
             page.searchMainData();
 
