@@ -184,8 +184,12 @@
             <dt>조회일자</dt>
             <dd>
               <div style="display: flex; gap: 10px">
-                <div style="width: 100%">
-                  <input type="date" id="SearchKeywords">
+                <div style="width: 45%">
+                  <input type="date" id="searchFromDate">
+                </div>
+                ~
+                <div style="width: 45%">
+                  <input type="date" id="searchToDate">
                 </div>
               </div>
             </dd>
@@ -195,8 +199,8 @@
             <dd>
               <div style="display: flex; gap: 10px">
                 <div style="width: 100%">
-                  <select>
-                    <option>전체</option>
+                  <select id="selectWorkcd">
+                    <option value="">전체</option>
                   </select>
                 </div>
               </div>
@@ -210,40 +214,7 @@
       <!-- 컨텐츠 영역  -->
       <div class="contents-wrap">
         <div id="theGrid">
-          <table>
-            <tr>
-              <th>일자</th>
-              <th>근태</th>
-              <th>출근</th>
-              <th>퇴근</th>
-              <th>근무시간</th>
-              <th>구분</th>
-            </tr>
-            <tr>
-              <td>4.01</td>
-              <td>정상</td>
-              <td>08:55</td>
-              <td>18:25</td>
-              <td>8</td>
-              <td>정상</td>
-            </tr>
-            <tr>
-              <td>4.02</td>
-              <td>정상</td>
-              <td>09:30</td>
-              <td>18:15</td>
-              <td>7.5</td>
-              <td>지각</td>
-            </tr>
-            <tr>
-              <td>4.03</td>
-              <td>출장</td>
-              <td>00:00</td>
-              <td>00:00</td>
-              <td>0</td>
-              <td></td>
-            </tr>
-          </table>
+
         </div>
       </div><!--// contents-wrap end-->
       <div id="addressWrap" class="contents-wrap">
@@ -269,24 +240,72 @@
 <script type="text/javascript">
 
   $(document).ready(function () {
-    // 유저정보 확인
-    function searchMainData(){
-      let _this = this;
-      let url = '/api/commute_current/read'
-      let data = {
-      }
-      let fnsuccess = function (result) {
-        console.log('result : ', result)
-        if (result != null) {
-          document.getElementById('userInfo').textContent = result.data.first_name;
-          document.getElementById('officeTime').textContent = result.data.inOfficeTime ? result.data.inOfficeTime : "--:--";
-        }
-      };
-      AjaxUtil.getAsyncData(url, data, fnsuccess);
-    }
-    searchMainData();
     AjaxUtil.fillSelectOptions($('#selectWorkcd'), 'workcd', 'choose', false, 'work_division', '');
+    searchMainData();
   });
+
+  function searchMainData() {
+    let url = '/api/commute_current/read';
+    let data = {
+      'workcd': document.getElementById('selectWorkcd').value === "" ? null : parseInt(document.getElementById('selectWorkcd').value),
+      'searchFromDate': document.getElementById('searchFromDate').value,
+      'searchToDate': document.getElementById('searchToDate').value
+    };
+    let fnsuccess = function (result) {
+      console.log('result : ', result);
+
+      // ✅ 데이터가 null이 아니면 실행
+      if (result != null && result.data != null) {
+        // 조회된 데이터
+        const items = result.data;
+
+        // ✅ 동적 테이블 생성
+        let tableHtml = `
+          <table>
+              <tr>
+                <th>일자</th>
+                <th>근태</th>
+                <th>출근</th>
+                <th>퇴근</th>
+                <th>근무시간</th>
+                <th>구분</th>
+              </tr>
+                `;
+
+        items.forEach(item => {
+          tableHtml += `
+                    <tr>
+                        <td>${item.workym || ''}</td>
+                        <td>${item.workcd || ''}</td>
+                        <td>${item.starttime || '--:--'}</td>
+                        <td>${item.endtime || '--:--'}</td>
+                        <td>${item.worktime || '0'}</td>
+                        <td>${item.remark || ''}</td>
+                    </tr>
+                `;
+        });
+
+        tableHtml += `
+                </table>
+            `;
+
+        // ✅ 기존 내용 제거하고 새롭게 바인딩
+        const tableBody = document.querySelector('#theGrid');
+        tableBody.innerHTML = tableHtml;
+      } else {
+          const tableBody = document.querySelector('#theGrid');
+          tableBody.innerHTML = `
+          <tr>
+              <td colspan="6" style="text-align: center; padding: 8px;">조회된 데이터가 없습니다.</td>
+          </tr>
+      `;
+      }
+    };
+
+    // ✅ Ajax 요청 실행
+    AjaxUtil.getAsyncData(url, data, fnsuccess);
+  }
+
 
 
 

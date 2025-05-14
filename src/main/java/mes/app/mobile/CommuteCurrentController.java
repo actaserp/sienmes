@@ -2,11 +2,13 @@ package mes.app.mobile;
 
 import mes.app.mobile.Service.CommuteCurrentService;
 import mes.app.mobile.Service.MobileMainService;
+import mes.domain.entity.User;
 import mes.domain.model.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,15 +20,20 @@ public class CommuteCurrentController {
     @Autowired
     CommuteCurrentService commuteCurrentService;
 
-    // 사용자 정보 조회(부서 이름 직급 출근여부)
+    // 사용자 출퇴근 현황 조회
     @GetMapping("/read")
     public AjaxResult getUserInfo(
+            @RequestParam(value="workcd", required = false) Integer workcd,
+            @RequestParam(value="searchFromDate") String searchFromDate,
+            @RequestParam(value="searchToDate") String searchToDate,
             HttpServletRequest request,
             Authentication auth) {
         AjaxResult result = new AjaxResult();
-        String user = auth.getPrincipal().toString();
+        User user = (User)auth.getPrincipal();
+        String username = user.getUsername();
 
-//        result.data = commuteCurrentService.getUserInfo(user);
+
+        result.data = commuteCurrentService.getUserInfo(username, workcd, searchFromDate, searchToDate);
 
         return result;
     }

@@ -326,7 +326,10 @@
       console.error("API 호출에 실패했습니다:", error.message);
     }
   }
-
+  function reloadWindow(){
+    console.log("확인 버튼 클릭됨");
+    window.location.reload(); // ✅ 페이지 새로고침
+  }
 
   // 출근/퇴근 등록(상태값에 따라 로직 변경)
   function submitCommute(office){
@@ -357,10 +360,6 @@
         let fnsuccess = function (result) {
           if (result != null) {
             if (result.success) {
-              function reloadWindow(){
-                console.log("확인 버튼 클릭됨");
-                window.location.reload(); // ✅ 페이지 새로고침
-              }
               Alert.alert('', result.message, reloadWindow);
             } else {
               Alert.alert('', "출근 등록에 실패하였습니다.");
@@ -386,7 +385,7 @@
         }
         let fnsuccess = function (result) {
           if (result != null) {
-            _this.viewData.sourceCollection = result.data;
+            Alert.alert('', result.message);
           }
         };
         AjaxUtil.postAsyncData(url, data, fnsuccess);

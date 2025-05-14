@@ -109,7 +109,6 @@ public class MobileMainController {
 
         tbPb201.setWorknum(weekNum);
         tbPb201.setId(tbPb201Pk);
-        tbPb201.setWorknum(Integer.valueOf(workday)); //요일
         tbPb201.setHoliyn(isHoly);
         tbPb201.setWorkcd(workday);
 
@@ -169,6 +168,10 @@ public class MobileMainController {
         // 정상퇴근(workyn값 지정 / 지각,조퇴 등 해당사항 유무 확인하여 이상없을시 1)
         Optional<TB_PB201> savedTbPb201 = tbPb201Repository.findById(tbPb201Pk);
         TB_PB201 entity = savedTbPb201.get();  // 값이 존재하면 꺼냄
+        if(entity.getEndtime() != null){
+            result.message = "이미 퇴근처리 되었습니다.";
+            return result;
+        }
         log.info("saved 201 data : {}", entity);
         if(entity.getJitime() == 1 ||
                 jotFlag == 1 ||
