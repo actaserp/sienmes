@@ -1,8 +1,8 @@
 <html layout:decorate="~{layout_page}">
 <head>
     <style>
-        .button115px{
-            width: 115px;
+        .button140px{
+            width: 140px;
         }
         .wp100per {
             width: 100% !important;
@@ -205,11 +205,14 @@
     <section class="section">
         <div class="" style="display : block; margin-bottom : 10px;">
             <div class="title-box">
-                    <ul >
+                    <ul>
+                        <span style="float: left;line-height: 3; color: tomato;">온라인 뱅크 계정은 필수가 아닙니다. (국민은행일 경우 인터넷뱅킹 아이디 필수 / 아이엠뱅크, 신한은행, 신협중앙회 일 경우 조회전용 계정 필수)</span>
+                    </ul>
+                    <ul>
                         <li class="right_align rpt"  style="margin: 10px 0px">
-                            <a class="btn btn-excell" title="등록" id="">
+                            <a class="btn btn-excell" title="등록" id="btnSettingSave">
                                 <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                저장
+                                계좌정보 저장
                             </a>
                         </li>
 
@@ -262,11 +265,16 @@
             <section class="tab-item" id="tabs_second" style="border-top-left-radius: 0; padding-top: 15px;">
                 <div>
                             <form id="EasyFinBankAccountForm" autocomplete="off">
-                            <div style="
-    margin-bottom: 10px;
-">
-    <span style="color : tomato;/* margin-bottom: 30px; */">본 계좌등록/수정은 팝빌연동계좌 관련하여 제공되는 기능입니다. 계좌 등록/수정이 아닙니다.</span>
-</div>
+                            <input type='hidden' id='accountid' name='accountid'/>
+                            <input type='hidden' id='pop_yn' name='pop_yn'/>
+                            <div>
+                                <div style='float: right; margin-bottom: 10px'>
+                                    <button class='button140px' type='button' id='registerAccountReset'>초기화</button>
+                                    <button class='button140px' type='button' id='registerAccount'>팝빌연동계좌등록</button>
+                                    <button class='button140px' type='button' id='editAccountPopBill'>팝빌연동계좌정보수정</button>
+                                    <button class='button140px' type='button' id='CanClePopBill'>팝빌연동계좌해지</button>
+                                </div>
+                            </div>
                             <table class="write-table"
                                    style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                                 <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
@@ -311,34 +319,6 @@
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <input type='text'  id='AccountNumber' maxlength='20' name='AccountNumber' class='wp100per'/>
                                     </td>
-                                     <th>
-                                        <button class='button115px' type='button' id='registerAccount'>계좌등록</button>
-                                        <button class='button115px' type='button'>계좌정보수정</button>
-                                    </th>
-                                    <td>
-
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="Process_id" id="BankIdInputLabel"><span class="eq" >*</span>인터넷뱅킹아이디</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;" >
-                                        <input type='text' class='wp100per' id='BankId' name='BankId'   />
-                                    </td>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="Process_id" id="BankPwInputLabel"><span class="eq" >*</span>온라인계정비번</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <div class="pw-wrapper" style="position: relative; width: 100%;">
-                                            <input type="password" class="wp100per pw-input" id="BankPw" name="BankPw" />
-                                            <img class="pw-toggle"
-                                                 src="/images/icon/btn-show.svg"
-                                                 alt="비밀번호 보기"
-                                                 style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                                                        width: 20px; height: 20px; cursor: pointer;" />
-                                        </div>
-                                    </td>
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
                                         <label for="Process_id"><span class="eq">*</span>결제비번</label>
                                     </th>
@@ -352,7 +332,32 @@
                                                         width: 20px; height: 20px; cursor: pointer;" />
                                         </div>
                                     </td>
-
+                                </tr>
+                                <tr>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="Process_id" id="BankIdInputLabel"><span class="eq" >*</span>인터넷뱅킹아이디</label>
+                                    </th>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;" >
+                                        <input type='text' class='wp100per' id='BankId' name='BankId'   />
+                                    </td>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label for="birth"><span>계좌명칭</span></label>
+                                        </th>
+                                    <td>
+                                        <input type='text' placeholder = '' id='AccountAlias' class='wp100per' name='AccountAlias' />
+                                    </td>
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                        <label for="Process_id" id="BankPwInputLabel">정액제해지구분</label>
+                                        <br>
+                                        <span color="tomato" style="color: tomato;font-size: 12px;">(계좌 해지할 경우만 선택)</span>
+                                    </th>
+                                    <td>
+                                        <select id='CloseType' class='wp100per' name='CloseType'>
+                                            <option value=''>선택</option>
+                                            <option value='일반'>일반해지</option>
+                                            <option value='중도'>중도해지</option>
+                                        </select>
+                                    </td>
                                 </tr>
                                 <tr id="identityRow">
                                     <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
@@ -361,6 +366,7 @@
                                     <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
                                         <select style="width: 100%;" id="accountType"
                                                 name="accountType">
+                                               <option value=''>선택</option>
                                                <option value='개인'>개인</option>
                                                <option value='법인'>법인</option>
                                         </select>
@@ -371,10 +377,33 @@
                                         <td style="width: 15%; padding: 5px; border: 1px solid #ddd;" id="identityInputCell">
                                             <input type='text' placeholder = 'YYMMDD' id='birth' class='wp100per' name='identityNumber' />
                                         </td>
-                                    <th>
+
+                                </tr>
+                                <tr>
+
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label><span>조회전용아이디</span></label>
                                     </th>
-                                    <td>
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;" >
+                                        <input type='text' class='wp100per' id='viewid' name='viewid'   />
                                     </td>
+
+                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label><span>조회전용비밀번호</span></label>
+                                    </th>
+
+
+                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                        <div class="pw-wrapper" style="position: relative; width: 100%; margin-top: 10px;">
+                                            <input type="password" class="wp100per pw-input" id="viewpw" name="viewpw" />
+                                            <img class="pw-toggle"
+                                                 src="/images/icon/btn-show.svg"
+                                                 alt="비밀번호 보기"
+                                                 style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                                                        width: 20px; height: 20px; cursor: pointer;" />
+                                        </div>
+                                    </td>
+
                                 </tr>
                                 </tbody>
                             </table>
@@ -569,6 +598,11 @@
             { value : "5",  text : "선수금"},
             { value : "6",  text : "CMS"},
             { value : "7",  text : "기타"},
+        ]
+
+        const accounttype = [
+            { value: "0", text : '법인'},
+            { value: '1', text : '개인'},
         ]
         class TransactionInput {
             constructor() {
@@ -1061,6 +1095,33 @@
                 }
             }
 
+            accountFieldBinding(data){
+                console.log('data', data);
+
+                $('#accountid').val(data.accountid);
+                $('#BankName').val(data.managementnum).prop('disabled', true);
+
+                $('#BankId').val(data.onlinebankid);
+                $('#accountType').val(data.accounttype).prop('disabled', true);
+                $('#accountType').trigger('change');
+
+                $('#AccountNumber').val(data.accountnumber).prop('readonly', true);
+
+                $('#BankPw').val(data.onlinebankpw);
+                $('#PaymentPw').val(data.paymentpw);
+
+                let birth = $('#birth');
+                if(birth) birth.val(data.birth).prop('readonly', true);
+
+                let corp = $('#corpnum');
+                if(corp) corp.val('').prop('readonly', false);
+
+                $('#pop_yn').val(data.popyn).prop('disabled', true);
+                $('#AccountAlias').val(data.accountname);
+                $('#viewid').val(data.viewid);
+                $('#viewpw').val(data.viewpw);
+
+            }
 
             showSettingForm(data){
                 let _this = this;
@@ -1068,7 +1129,7 @@
                 let $content = $(content);
 
                 let modalContainer = new PopupDraggable('설정창');
-                modalContainer.open({width: 1600, height: 650, $content});
+                modalContainer.open({width: 1600, height: 680, $content});
 
 
                 this.setting_grid = new wijmo.grid.FlexGrid('#SettingGrid', {
@@ -1084,14 +1145,29 @@
                         {binding: 'bankname', header: '금융기관명', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'managementnum', header: '관리코드', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'accountnumber', header: '계좌번호', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'accountname', header: '계좌명칭', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'onlinebankid', header: '온라인뱅크아이디', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'onlinebankpw', header: '은행계정비밀번호', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'paymentpw', header: '결제비밀번호', width: '*', align: 'center'},
-                        {binding: 'accounttype', header: '계좌유형', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'birth', header: '생년월일', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'accountname', header: '계좌명칭', width: '*', align: 'center', isReadOnly: false},
+                        {binding: 'onlinebankid', header: '온라인뱅크아이디', width: '*', align: 'center', isReadOnly: false},
+                        {binding: 'viewid', header: '조회전용아이디', width: '*', align: 'center', isReadOnly: false},
+                        {binding: 'viewpw', header: '조회전용비밀번호', width: '*', align: 'center', isReadOnly: false},
+                        {binding: 'paymentpw', header: '결제비밀번호', width: '*', align: 'center', isReadOnly: false},
+                        { binding: 'accounttype', header: '계좌유형', width: '*',
+                            dataMap:  getTradeTypeDataMap(accounttype), align: 'center',
+                            cellTemplate: '${text}'
+                        },
+                        {binding: 'birth', header: '생년월일', width: '*', align: 'center', isReadOnly: false},
                     ],
-                    itemsSource: this.viewData3
+                    itemsSource: this.viewData3,
+                    formatItem: function (s, e) {
+                        if (e.panel === s.columnHeaders) {
+                            const col = s.columns[e.col];
+
+                            // 수정 가능한 컬럼만 색상 지정
+                            const editableBindings = ['accountname', 'viewid', 'viewpw', 'onlinebankid', 'onlinebankpw', 'paymentpw', 'accounttype', 'birth'];
+                            if (editableBindings.includes(col.binding)) {
+                                e.cell.style.color = 'dodgerblue'; // 글씨 잘 보이게
+                            }
+                        }
+                    },
                 })
                 this.setting_grid.loadedRows.addHandler(() => {
                     setTimeout(() => {
@@ -1111,6 +1187,7 @@
                     if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
                         let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
 
+                        _this.accountFieldBinding(selectedRowData);
                     }
                 });
 
@@ -1156,6 +1233,18 @@
                     _this.submitRegistBankAccount();
                 })
 
+                $('#CanClePopBill').click(function(e){
+                    _this.CancelPopBill();
+                })
+
+                $('#editAccountPopBill').click(function(e){
+                    _this.EditPopBill();
+                })
+
+                $('#registerAccountReset').click(function(e){
+                    _this.reset();
+                })
+
                 //계좌내역수집 클릭
                 $('#AccountCollection').click(function(){
                     _this.AccountListCollection();
@@ -1168,17 +1257,6 @@
                 //은행 콤보박스 바인딩
                 AjaxUtil.fillSelectOptions($('#BankName'), 'bank', 'choose', false);
 
-                $('#BankName').on('change', function(){
-                    const selectedType = $(this).val();
-
-                    if(selectedType === '0031' || selectedType === '0088' || selectedType === '0048'){
-                        $('#BankIdInputLabel').text('조회전용아이디');
-                        $('#BankPwInputLabel').text('조회전용비밀번호');
-                    }else{
-                        $('#BankIdInputLabel').text('인터넷뱅킹아이디');
-                        $('#BankPwInputLabel').text('온라인계정비번');
-                    }
-                })
 
                 //계좌유형 선택값에 따라 변경
                 $('#accountType').on('change', function(){
@@ -1208,7 +1286,12 @@
 
                     $input.attr('type', isPassword ? 'text' : 'password');
                     $toggle.attr('src', isPassword ? '/images/icon/btn-hidden.svg' : '/images/icon/btn-show.svg');
-                })
+                });
+
+                $('#btnSettingSave').click(function(){
+                    _this.SettingFormSaveAccount();
+                });
+
             }
 
 
@@ -1231,6 +1314,7 @@
                 Alert.alert('', result.message);
 
             }
+
 
             AccountListCollection(){
                 let _this = this;
@@ -1285,18 +1369,98 @@
 
             }
 
+            EditPopBill(){
+                let _this = this;
+                const flag = $('#pop_yn').val();
 
-            submitRegistBankAccount(){
+                if(flag === 'false' || flag === false){
+                    Alert.alert('', '연동된 계좌가 아닙니다.'); return;
+                }
+
+                console.log('account', $('#accountid').val());
+                if($('#accountid').val() === null || $('#accountid').val() === ''){
+                    Alert.alert('', '수정할 계좌를 선택해주세요.'); return;
+                }
                 let form = FormUtil.extractForm($('#EasyFinBankAccountForm'));
 
+                form.BankName = $('#BankName').val();
+                form.AccountNumber = $('#AccountNumber').val();
+
+                Alert.confirm('', '수정하시겠습니까? 사업자번호와 입력불가능한 필드들은 수정되지 않습니다.',function (){
+
+                    let result = AjaxUtil.getSyncData('/EasyFinBankService/updateBankAccount', form,
+                    function(){
+                        confirmDialog.close();
+                    });
+
+                    ApiSuccessMessage(result);
+                    if(result.success){
+                        _this.searchRegisterAccount();
+                        _this.reset();
+                    }
+                });
+            }
+
+            CancelPopBill(){
+                let _this = this;
+                const flag = $('#pop_yn').val();
+
+                if(flag === 'false' || flag === false){
+                    Alert.alert('', '연동된 계좌가 아닙니다.'); return;
+                }
+
+                let form = FormUtil.extractForm($('#EasyFinBankAccountForm'));
+                form.BankName = $('#BankName').val();
+                form.AccountNumber = $('#AccountNumber').val();
+
+                Alert.confirm('', '일반(일반해지) – 이용중인 정액제 기간 만료 후 해지, 중도(중도해지) – 해지 요청일 기준으로 정지되고 팝빌 담당자가 승인시 해지',
+                    function (){
+                        const requiredFields = {
+                            accountid : '계좌를 선택해주세요.',
+                            BankName: '은행명을 기입해주세요.',
+                            CloseType : '해지구분을 선택하세요'
+                        };
+
+                        for (const key in requiredFields) {
+                            const value = form[key];
+                            if (!value || value.trim() === ''){
+                                Alert.alert('', requiredFields[key]);
+                                return;
+                            }
+                        }
+
+                        let result = AjaxUtil.getSyncData('/EasyFinBankService/closeBankAccount', form, function(){
+                            confirmDialog.close();
+                        });
+                        ApiSuccessMessage(result);
+                        _this.searchRegisterAccount();
+                        _this.reset();
+                    })
+
+            }
+
+
+            submitRegistBankAccount(){
+                let _this = this;
+
+                const flag = $('#pop_yn').val();
+
+                if(flag === 'true' || flag === true){
+                    Alert.alert('', '이미 연동된 계좌입니다.'); return;
+                }
+
+                let form = FormUtil.extractForm($('#EasyFinBankAccountForm'));
+
+                form.BankName = $('#BankName').val();
+                form.AccountNumber = $('#AccountNumber').val();
+                form.accountType = $('#accountType').val();
 
                 const requiredFields = {
-                    AccountNumber: '계좌번호를 기입해주세요.',
                     BankName: '은행명을 기입해주세요.',
-                    PaymentPw: '결제비번을 기입해주세요.',
+                    PaymentPw: '계좌 비밀번호를 기입해주세요.',
                     accountType: '계좌유형을 기입해주세요.',
+                    AccountNumber : '계좌번호를 기입해주세요'
                 };
-
 
                 //유효성 검사
                 for (const key in requiredFields) {
@@ -1326,18 +1490,22 @@
                             return;
                         }
 
+                        const cleanedVal = val.replace(/-/g, ''); // 하이픈 제거
                         const corpNumRegex = /^\d{10}$/;
-                        if (!corpNumRegex.test(val)) {
+
+                        if (!corpNumRegex.test(cleanedVal)) {
                             Alert.alert('', '사업자번호는 숫자 10자리여야 합니다');
                             return;
                         }
                     }
                 }
 
-                let fnSuccess = function (res) {
-                    Alert.alert('', res.message);
+                let result = AjaxUtil.postSyncData('/EasyFinBankService/registBankAccount', form);
+                ApiSuccessMessage(result);
+                if(result.success){
+                    _this.searchRegisterAccount();
+                    _this.reset();
                 }
-                AjaxUtil.postAsyncData('/EasyFinBankService/registBankAccount', form, fnSuccess);
             }
 
 
@@ -1384,6 +1552,46 @@
                 let result = AjaxUtil.postSyncData(_this.url + '/delete', { idList :idList.join(',')});
                 ApiSuccessMessage(result);
                 _this.searchMainData();
+            }
+
+            reset(){
+                $('#EasyFinBankAccountForm')[0].reset();
+                $('#accountid').val('');
+                $('#pop_yn').val('');
+                $('#BankName').prop('disabled', false);
+                $('#accountType').prop('disabled', false);
+                $('#AccountNumber').prop('readonly', false);
+                $('#birth').prop('readonly', false);
+            }
+
+            SettingFormSaveAccount(){
+
+                let _this = this;
+                let dataMap = getTradeTypeDataMap(accounttype);
+
+                Alert.confirm('', '저장하시겠습니까?', function(){
+                    const list = _this.setting_grid.collectionView.sourceCollection.map(item => {
+                        const mapped = {...item};
+
+                        if (typeof mapped.accounttype === 'string'){
+                            const found = dataMap.getDisplayValues().find(text => text === mapped.accounttype);
+
+                            if(found){
+                                mapped.accounttype = dataMap.getKeyValue(found);
+                            }
+                        }
+                        return mapped;
+                    });
+
+                    let result = AjaxUtil.postJsonSyncData(_this.url + '/AccountEdit', list);
+                    ApiSuccessMessage(result);
+                    if(result.success){
+                        _this.searchRegisterAccount();
+                        _this.reset();
+                    }
+                });
+
+                console.log('list', list);
             }
 
         }
@@ -1448,8 +1656,12 @@
             //삭제버튼 클릭
             $('#btnDelete').click(function(){
                 page.deleteTransactionData();
+            });
 
-            })
+            /*$('#editAccountPopBill').click(function(){
+                page.editAccount();
+            })*/
+
 
             page.searchMainData();
         })

@@ -1,24 +1,23 @@
 package mes.app.transaction.service;
 
 
-import mes.Encryption.EncryptionKeyProvider;
 import mes.Encryption.EncryptionUtil;
 import mes.app.util.UtilClass;
 import mes.domain.dto.BankTransitDto;
+import mes.domain.entity.TB_ACCOUNT;
 import mes.domain.entity.TB_BANKTRANSIT;
 import mes.domain.repository.TB_ACCOUNTRepository;
 import mes.domain.repository.TB_BANKTRANSITRepository;
 import mes.domain.services.SqlRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static mes.app.util.UtilClass.getStringSafe;
 
 @Service
 public class TransactionInputService {
@@ -47,17 +46,21 @@ public class TransactionInputService {
                  a.accid as accountid,
                  b.banknm as bankname,
                  b.bankpopcd as managementnum,
+                 b.bankid as bankid,
                  accnum as accountNumber,
                  accname as accountName,
                  onlineid as onlineBankId,
-                 left(onlinepw, length(onlinepw) - 3) || '***' as onlineBankPw,
-                 substring(accpw from 1 for 2) || '**' as paymentPw,
+                 viewid as viewid,
+                 viewpw as viewpw,
+                 accpw as paymentPw,
                  accbirth as birth,
                  case when popyn = '1' then true
                  else false
                  end as popyn,
-                 case when popsort = '1' then '개인'
-                 else '법인'
+                 case
+                     when popsort = '1' then '개인'
+                     when popsort = '0' then '법인'
+                     else null
                  end as accounttype
                  FROM tb_account a
                 left join tb_xbank b on b.bankid = a.bankid
@@ -155,18 +158,24 @@ public class TransactionInputService {
     }
 
     @Transactional
-    public void saveBankTransit(BankTransitDto dto) throws Exception {
-
-        String accountNumber = dto.getAccountNumber();
-
-        byte[] key = EncryptionKeyProvider.getKey();
+    public void saveBankTransit(BankTransitDto dto){
 
 
+        Integer accountId = dto.getAccountId();
+        TB_ACCOUNT acc = accountRepository.findById(accountId).orElseGet(() -> null);
 
-        String encrypt = EncryptionUtil.encrypt(accountNumber, key);
-        dto.setAccountNumber(encrypt);
+        dto.setAccountNumber(acc.getAccnum());
 
-        TB_BANKTRANSIT banktransit = BankTransitDto.toEntity(dto);
+        TB_BANKTRANSIT byId;
+
+        if (dto.getBankTransitId() != null) {
+            byId = tB_BANKTRANSITRepository.findById(dto.getBankTransitId()).orElseGet(TB_BANKTRANSIT::new);
+        } else {
+            byId = new TB_BANKTRANSIT();
+        }
+
+
+        TB_BANKTRANSIT banktransit = BankTransitDto.toEntity(dto, byId);
         tB_BANKTRANSITRepository.save(banktransit);
 
     }
@@ -242,5 +251,38 @@ public class TransactionInputService {
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, parameterSource);
 
         return items;
+    }
+
+    //음... 단건이라서 그냥 루프 돌림. 하지만 등록계좌가 엄청 많아진다면 일괄조회후 캐싱해서 써야겠지?
+    @Transactional
+    public void editAccountList(List<Map<String, Object>> list) throws Exception {
+
+        for(Map<String, Object> item : list){
+            Integer accountid = UtilClass.parseInteger(item.get("accountid"));
+
+            TB_ACCOUNT acc = accountRepository.findById(accountid).orElseGet(null);
+
+            if(acc != null){
+                String accpw = getStringSafe(item.get("paymentpw"));
+                if(!accpw.contains("⋆")){
+                    acc.setAccpw(EncryptionUtil.encrypt(accpw));
+                }
+
+                String viewpw = getStringSafe(item.get("viewpw"));
+                if(!viewpw.contains("⋆")){
+                    acc.setViewpw(EncryptionUtil.encrypt(viewpw));
+                }
+
+                acc.setAccname(getStringSafe(item.get("accountname")));
+                acc.setOnlineid(getStringSafe(item.get("onlinebankid")));
+
+                acc.setPopsort(getStringSafe(item.get("accounttype")));
+                acc.setAccbirth(getStringSafe(item.get("birth")));
+
+                acc.setViewid(getStringSafe(item.get("viewid")));
+                accountRepository.save(acc);
+            }
+        }
+
     }
 }

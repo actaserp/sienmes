@@ -43,6 +43,8 @@ public class RegiAccountService {
                 ,a.mijamt
                 ,a.onlineid
                 ,a.onlinepw
+                ,a.viewid
+                ,a.viewpw
                 ,a.accpw
                 ,case 
                     when a.popyn = '1' then '연동'
@@ -75,7 +77,7 @@ public class RegiAccountService {
     }
 
     @Transactional
-    public void saveAccount(Integer pk, Integer bankname, String accnum ,String accname){
+    public void saveAccount(Integer pk, Integer bankname, String accnum ,String accname, String onlineid, String viewid, String viewpw){
 
         TB_ACCOUNT account;
 
@@ -89,15 +91,21 @@ public class RegiAccountService {
 
         account.setBankid(bankname);
         String EncryptedAccnum = "";
+        String Encryptedviewpw = "";
+
+
         try{
             EncryptedAccnum = EncryptionUtil.encrypt(accnum);
+            Encryptedviewpw = EncryptionUtil.encrypt(viewpw);
         }catch (Exception e){
             log.error("암호화 중 에러 발생 , [발생위치]: {} , [에러내용] : {}" , this.getClass().getSimpleName(), e.getMessage());
             throw new RuntimeException();
         }
 
         account.setAccnum(EncryptedAccnum);
-
+        account.setOnlineid(onlineid);
+        account.setViewid(viewid);
+        account.setViewpw(Encryptedviewpw);
         account.setAccname(accname);
 
 

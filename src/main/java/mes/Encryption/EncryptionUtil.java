@@ -32,4 +32,8 @@ public class EncryptionUtil {
         return encrypt(plainText, keyBytes);
     }
 
+    public static String decrypt(String encryptedText) throws Exception {
+        byte[] keyBytes = EncryptionKeyProvider.getKey();
+        return decrypt(encryptedText, keyBytes);
+    }
 }

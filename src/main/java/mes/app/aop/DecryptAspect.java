@@ -46,13 +46,20 @@ public class DecryptAspect {
         String[] columns = decryptField.columns();
         int[] masks = decryptField.masks();
 
+        boolean hasLogged = false;
+
         for (int i = 0; i < columns.length; i++) {
             String col = columns[i];
-            int mask = (masks.length > i) ? masks[i] : 0; // 마스크 생략 시 기본값 0
+            int mask = (masks.length > i) ? masks[i] : 0;
+
             try {
                 UtilClass.decryptEachItem((List<Map<String, Object>>) list, col, mask);
             } catch (Exception e) {
-                log.error("AOP 복호화 실패 - column: {}, 이유: {}", col, e.getMessage());
+                if (!hasLogged) {
+                    log.error("AOP 복호화 실패 - 예: column={}, 이유: {}", col, e.getMessage());
+                    hasLogged = true;
+                }
+                // 그 외 컬럼 실패는 조용히 무시
             }
         }
     }

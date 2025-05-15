@@ -18,7 +18,7 @@ public class RegiAccountController {
         this.accountService = accountService;
     }
 
-    @DecryptField(columns = {"accnum"}, masks = 0)
+    @DecryptField(columns = {"accnum", "viewid", "viewpw"}, masks = 0)
     @GetMapping("/read")
     public AjaxResult getRegiAccountList(@RequestParam String bankid,
                                          @RequestParam String accountnum,
@@ -38,7 +38,10 @@ public class RegiAccountController {
     public AjaxResult saveAccount(@RequestParam(required = false) String id,
                                          @RequestParam String bankname,
                                          @RequestParam String accnum,
-                                         @RequestParam String accname
+                                         @RequestParam String accname,
+                                         @RequestParam(required = false) String onlineid,
+                                         @RequestParam(required = false) String viewid,
+                                         @RequestParam(required = false) String viewpw
     ){
 
         AjaxResult result = new AjaxResult();
@@ -50,6 +53,7 @@ public class RegiAccountController {
         if(id != null){
             pk = UtilClass.parseInteger(id);
         }
+
         bankid = UtilClass.parseInteger(bankname);
 
         if (!isValidAccountNumber(accnum)) {
@@ -58,7 +62,7 @@ public class RegiAccountController {
             return result;
         }
 
-        accountService.saveAccount(pk, bankid, accnum, accname);
+        accountService.saveAccount(pk, bankid, accnum, accname, onlineid, viewid, viewpw);
 
         result.success = true;
         result.message = "저장되었습니다.";

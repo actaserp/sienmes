@@ -24,19 +24,11 @@ public class TransactionInputController {
     @Autowired
     TransactionInputService transactionInputService;
 
-    @DecryptField(columns = {"accountnumber"}, masks = 4)
+    @DecryptField(columns = {"accountnumber", "paymentpw", "onlinebankpw", "viewpw"}, masks = {4, 2, 2, 2})
     @GetMapping("/registerAccount")
     public AjaxResult registerAccount(@RequestParam String spjangcd){
 
         AjaxResult result = new AjaxResult();
-
- /*       Object spjangList = session.getAttribute("spjangList");
-        Map<String, Object> spjang = UtilClass.getSpjanInfoFromSession(spjancd, session);
-
-        String spjangcd = null;
-        if(spjang != null){
-            spjangcd = String.valueOf(spjang.get("spjangcd"));
-        }*/
 
         result.data = transactionInputService.getAccountList(spjangcd);
 
@@ -93,6 +85,22 @@ public class TransactionInputController {
         }
 
         return  result;
+    }
+
+    @PostMapping("/AccountEdit")
+    public AjaxResult AccountEdit(@RequestBody Object list){
+
+        AjaxResult result = new AjaxResult();
+
+        try {
+            transactionInputService.editAccountList((List<Map<String, Object>>)list);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        result.message = "수정되었습니다.";
+        return  result;
+
     }
 
     @PostMapping("/edit")

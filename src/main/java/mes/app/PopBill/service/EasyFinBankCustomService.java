@@ -5,15 +5,21 @@ import com.popbill.api.easyfin.EasyFinBankSearchDetail;
 import lombok.extern.slf4j.Slf4j;
 import mes.Encryption.EncryptionKeyProvider;
 import mes.Encryption.EncryptionUtil;
+import mes.Exception.EncryptionException;
 import mes.app.PopBill.dto.EasyFinBankAccountFormDto;
 import mes.app.transaction.service.TransactionInputService;
 import mes.app.util.UtilClass;
 import mes.domain.entity.TB_ACCOUNT;
 import mes.domain.entity.TB_BANKTRANSIT;
+import mes.domain.entity.TB_XBANK;
+import mes.domain.enums.AccountType;
+import mes.domain.repository.TB_ACCOUNTRepository;
 import mes.domain.repository.TB_BANKTRANSITRepository;
+import mes.domain.repository.TB_XBANKRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.function.Function;
@@ -33,6 +39,13 @@ public class EasyFinBankCustomService {
 
     @Autowired
     BankTransitTransactionalService bankTransitTransactionalService;
+
+    @Autowired
+    TB_XBANKRepository tb_xbankRepository;
+
+    @Autowired
+    TB_ACCOUNTRepository accountRepository;
+
 
     public void Insert_Tb_Account(EasyFinBankAccountFormDto form){
         TB_ACCOUNT account = new TB_ACCOUNT();
@@ -160,5 +173,42 @@ public class EasyFinBankCustomService {
             }
         }
         return result;
+    }
+
+    @Transactional
+    public void saveRegistAccount(EasyFinBankAccountFormDto form){
+
+        try{
+            TB_XBANK bank = tb_xbankRepository.findByBankPopCd("0004");
+
+            TB_ACCOUNT account = new TB_ACCOUNT();
+            String accountType = form.getAccountType();
+            String accountnum = form.getAccountNumber();
+            String accountPw = form.getPaymentPw();
+            String viewpw = form.getViewpw();
+
+            account.setBankid(bank.getBankId());
+            account.setAccnum(EncryptionUtil.encrypt(accountnum));
+            account.setAccname(form.getAccountAlias());
+            account.setOnlineid(form.getBankId());
+            account.setPopsort(AccountType.fromCode(form.getAccountType()).orElseThrow(
+                    () -> new IllegalArgumentException("올바르지 않은 계좌유형입니다."))
+                    .getValue()
+            );
+            account.setPopyn("1");
+
+            if(accountType.equals(AccountType.PERSON.getCode())) { //개인
+                account.setAccbirth(form.getIdentityNumber());
+            }
+
+            account.setAccpw(EncryptionUtil.encrypt(accountPw));
+            account.setViewid(form.getViewid());
+            account.setViewpw(EncryptionUtil.encrypt(viewpw));
+
+            accountRepository.save(account);
+        }catch(Exception e){
+            log.error("팝빌연동 계좌 등록중 오류 발생", e);
+            throw new EncryptionException("계좌 관련 암호화 중 오류가 발생");
+        }
     }
 }

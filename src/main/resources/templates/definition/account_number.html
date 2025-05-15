@@ -148,6 +148,34 @@
                                        style="width: 100%;" disabled>
                             </td>
                         </tr>
+                        <tr>
+                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                                <label><span class="eq">*</span>인터넷뱅킹아이디</label><br>
+                                <span style="color: tomato">(국민은행인 경우만)</span>
+                            </th>
+                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                <input type="text" id="onlineid" name="onlineid"
+                                       style="width: 100%;" disabled>
+                            </td>
+
+                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                                <label><span class="eq">*</span>조회전용아이디</label><br>
+                                <span style="color: tomato">(아이엠뱅크, 신한은행, 신협중앙회인 경우만)</span>
+                            </th>
+                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                <input type="text" id="viewid" name="viewid"
+                                       style="width: 100%;" disabled>
+                            </td>
+
+                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                                <label><span class="eq">*</span>조회전용비밀번호</label><br>
+                                <span style="color: tomato">(아이엠뱅크, 신한은행, 신협중앙회인 경우만)</span>
+                            </th>
+                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                <input type="text" id="viewpw" name="viewpw"
+                                       style="width: 100%;" disabled>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </form>
@@ -179,9 +207,12 @@
 
         let columns = [
             {binding: 'accid', header: '번호', width: 100, align: 'center'},
-            {binding: 'bankname', header: '은행명', width: 200, align: 'center'},
-            {binding: 'accnum', header: '계좌번호', width: 300, align: 'center'},
-            {binding: 'accname', header: '계좌명칭', width: 300, align: 'center'},
+            {binding: 'bankname', header: '은행명', width: '*', align: 'center'},
+            {binding: 'accnum', header: '계좌번호', width: '*', align: 'center'},
+            {binding: 'accname', header: '계좌명칭', width: '*', align: 'center'},
+            {binding: 'onlineid', header: '인터넷뱅킹아이디', width: 300, align: 'center'},
+            {binding: 'viewid', header: '조회전용아이디', width: 300, align: 'center'},
+            {binding: 'viewpw', header: '조회전용비밀번호', width: 300, align: 'center'},
             {binding: 'popyn', header: '예금연동', width: "*", align: 'center'}
         ];
 
@@ -207,6 +238,9 @@
 
                 document.getElementById('id').value = selectedItem.accid;
                 document.getElementById('accnum').value = selectedItem.accnum;
+                document.getElementById('onlineid').value = selectedItem.onlineid;
+                document.getElementById('viewid').value = selectedItem.viewid;
+                document.getElementById('viewpw').value = selectedItem.viewpw;
 
                 setTimeout(() => {
                     document.getElementById('bankname').value = selectedItem.bankid;
@@ -340,17 +374,25 @@
             let accnum = $('#accnum').val();
             let accname = $('#accname').val();
 
-
-            if (!bankname || !accnum || !accname) {
-                Alert.alert('', '모든 값을 입력해주세요.');
-                return;
+            if(!bankname){
+                Alert.alert('', '은행명을 입력해주세요.'); return;
             }
+            if(!accnum){
+                Alert.alert('', '계좌번호를 입력해주세요.'); return;
+            }
+            if(!accname){
+                Alert.alert('', '계좌명칭을 입력해주세요.'); return;
+            }
+
 
             let data = {
                 id : id,
                 bankname : bankname,
                 accnum : accnum,
-                accname : accname
+                accname : accname,
+                onlineid : $('#onlineid').val(),
+                viewid : $('#viewid').val(),
+                viewpw : $('#viewpw').val()
             }
 
             Alert.confirm('', '저장하시겠습니까?', function () {

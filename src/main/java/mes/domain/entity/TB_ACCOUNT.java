@@ -41,5 +41,7 @@ public class TB_ACCOUNT {
     private String accbirth; // 생년월일
 
     private String popyn; //팝빌연동유무
+    private String viewid; //조회전용아이디
+    private String viewpw; //조회전용비밀번호
 
 }

@@ -69,7 +69,7 @@ public class BankTransitDto {
     @Pattern(regexp = "^[\\d,]+$", message = "숫자와 쉼표만 입력가능합니다.")
     private String money;
 
-    public static TB_BANKTRANSIT toEntity(BankTransitDto dto){
+    public static TB_BANKTRANSIT toEntity(BankTransitDto dto, TB_BANKTRANSIT banktransit){
 
         if(dto == null) return null;
 
@@ -80,38 +80,36 @@ public class BankTransitDto {
             }
         }
 
-        TB_BANKTRANSIT entity = new TB_BANKTRANSIT();
-
         String inoutFlag = dto.getInoutFlag();
-        String accin = null;
-        String accout = null;
+        Integer accin = 0;
+        Integer accout = 0;
         String money = dto.getMoney().replaceAll(",", "");
 
         if(inoutFlag.equals("0")){
-            accin = money;
+            accin = UtilClass.parseInteger(money);
         }else if(inoutFlag.equals("1")){
-            accout = money;
+            accout = UtilClass.parseInteger(money);
         }
 
-        entity.setIoid(dto.getBankTransitId());
-        entity.setIoflag(dto.getInoutFlag());  //입출금구분
-        entity.setTrdate(dto.getTransactionDate().replaceAll("-", ""));
-        entity.setTrdt(UtilClass.combineDateAndHourReturnyyyyMMddHHmmss(dto.getTransactionDate(), dto.getTransactionHour()));
-        entity.setAccin(UtilClass.parseInteger(accin));
-        entity.setAccout(UtilClass.parseInteger(accout));
-        entity.setRemark1(dto.getNote1());
-        entity.setRegdt(UtilClass.combineDateAndHourReturnyyyyMMddHHmmss(dto.getRegidate(), null));
-        entity.setRegpernm(dto.getRegistername());
-        entity.setCltcd(UtilClass.parseInteger(dto.getClientId()));
-        entity.setTrid(UtilClass.parseInteger(dto.getTransactionTypeId()));
-        entity.setIotype(dto.getDepositAndWithdrawalType());
-        entity.setBanknm(dto.getBankName());
-        entity.setAccnum(dto.getAccountNumber().replaceAll("-", ""));
-        entity.setAccid(dto.getAccountId());
-        entity.setEumnum(dto.getBill());
-        entity.setEumtodt(dto.getExpiration());
-        entity.setEtcremark(dto.getEtc());
+        banktransit.setIoid(dto.getBankTransitId());
+        banktransit.setIoflag(dto.getInoutFlag());  //입출금구분
+        banktransit.setTrdate(dto.getTransactionDate().replaceAll("-", ""));
+        banktransit.setTrdt(UtilClass.combineDateAndHourReturnyyyyMMddHHmmss(dto.getTransactionDate(), dto.getTransactionHour()));
+        banktransit.setAccin(accin);
+        banktransit.setAccout(accout);
+        banktransit.setRemark1(dto.getNote1());
+        banktransit.setRegdt(UtilClass.combineDateAndHourReturnyyyyMMddHHmmss(dto.getRegidate(), null));
+        banktransit.setRegpernm(dto.getRegistername());
+        banktransit.setCltcd(UtilClass.parseInteger(dto.getClientId()));
+        banktransit.setTrid(UtilClass.parseInteger(dto.getTransactionTypeId()));
+        banktransit.setIotype(dto.getDepositAndWithdrawalType());
+        banktransit.setBanknm(dto.getBankName());
+        banktransit.setAccnum(dto.getAccountNumber().replaceAll("-", ""));
+        banktransit.setAccid(dto.getAccountId());
+        banktransit.setEumnum(dto.getBill());
+        banktransit.setEumtodt(dto.getExpiration());
+        banktransit.setEtcremark(dto.getEtc());
 
-        return entity;
+        return banktransit;
     }
 }

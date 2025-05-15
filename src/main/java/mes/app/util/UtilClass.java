@@ -2,6 +2,8 @@ package mes.app.util;
 
 import mes.Encryption.EncryptionKeyProvider;
 import mes.Encryption.EncryptionUtil;
+import mes.domain.model.AjaxResult;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.List;
+import java.util.Optional;
 
 public class UtilClass {
 
@@ -171,9 +174,10 @@ public class UtilClass {
      */
     private static String applyMasking(String input, int maskLength) {
         if (input == null || input.length() <= maskLength) {
-            return "*".repeat(Math.max(0, input.length())); // 전체 마스킹
+            return "⋆".repeat(Math.max(0, input.length())); // 전체 마스킹
         }
         int visibleLength = input.length() - maskLength;
-        return input.substring(0, visibleLength) + "*".repeat(maskLength);
+        return input.substring(0, visibleLength) + "⋆".repeat(maskLength);
     }
+
 }
