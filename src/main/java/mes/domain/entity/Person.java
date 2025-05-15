@@ -68,5 +68,8 @@ public class Person extends AbstractAuditModel{
 	
 	@Column(name = "\"SourceTableName\"")
 	String sourceTableName;
+
+	@Column(name = "jik_id")
+	String jik_id;
 	
 }

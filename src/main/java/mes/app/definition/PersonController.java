@@ -68,6 +68,7 @@ public class PersonController {
 			@RequestParam(value="WorkCenter_id", required=false) Integer workCenterId,
 			@RequestParam(value="WorkHour", required=false) Float workHour,
 			@RequestParam(value="work_division", required=false) String work_division,
+			@RequestParam(value="jik_id", required=false) String jik_id,
 
 			HttpServletRequest request,
 			Authentication auth) {
@@ -108,7 +109,9 @@ public class PersonController {
 		person.setWorkHour(workHour);
 		person.set_audit(user);
 		person.setPersonGroupId(Integer.valueOf(work_division));
-		
+		person.setJik_id(jik_id);
+
+
 		person = this.personRepository.save(person);
 		
 		result.data = person;

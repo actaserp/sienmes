@@ -125,7 +125,7 @@
                                 <select id="WorkCenter_id" name="WorkCenter_id" style="width: 100%;"></select>
                             </td>
                             <th>
-                                <label for="Code"><span class="eq">*</span>사번</label>
+                                <label for="Code"><span class="eq">*</span>코드</label>
                             </th>
                             <td>
                                 <input type="text" id="Code" name="Code" style="width: 100%;">
@@ -177,9 +177,18 @@
 
                         <tr>
                             <th>
+                                <label for="jik_id"><span class="eq">*</span>직위</label>
+                            </th>
+                            <td>
+                                <select id="jik_id" name="jik_id" style="width: 100%;"></select>
+                                <!--<textarea id="Description" name="Description"></textarea>-->
+                            </td>
+
+
+                            <th>
                                 <label for="Description">비고</label>
                             </th>
-                            <td colspan="7">
+                            <td colspan="5">
                                 <input type="text" id="Description" name="Description" style="width: 100%;">
                                 <!--<textarea id="Description" name="Description"></textarea>-->
                             </td>
@@ -208,17 +217,17 @@
         var viewdata;
 
         let columns = [
-            {binding: 'id', header: '번호', width: 100, align: 'center'},
+            {binding: 'id', header: '사번', width: 100, align: 'center'},
             {binding: 'workcenter_name', header: '워크센터', width: 150, align: 'center'},
-            {binding: 'person_code', header: '사번', width: 100, align: 'center'},
+            {binding: 'person_code', header: '코드', width: 100, align: 'center'},
             {binding: 'person_name', header: '이름', width: 100, align: 'center',},
+            {binding: 'jik_id', header: '직위', width: 100, align: 'center',},
             {binding: 'work_hour', header: '기본 근무시간', width: 120, align: 'center'},
             {binding: 'shift_name', header: '현 근무조', width: 120, align: 'center'},
-            {binding: 'person_group_id', header: '근무구분', width: 120, align: 'center'},
+            {binding: 'person_group_name', header: '근무구분', width: 120, align: 'center'},
             {binding: 'dept_name', header: '부서', width: 120, align: 'center'},
             {binding: 'factory_name', header: '공장', width: 120, align: 'center'},
-            {binding: 'description', header: '비고', width: 250, align: 'center'},
-            {binding: '', header: '', width: "*", align: 'center'},
+            {binding: 'description', header: '비고', width: '*', align: 'center'},
         ]
 
 
@@ -239,7 +248,20 @@
                 },
                 async: false,
                 success: function (data) {
-                    data2 = data.data;
+                    data2 = data.data.map(item => {
+                        let groupName = '기타근무';
+                        if (item.person_group_id == 1) groupName = '주간근무';
+                        else if (item.person_group_id == 2) groupName = '야간근무';
+
+                        const { person_group_name, ...rest } = item;
+
+                        return {
+                            ...rest,
+                            person_group_name: groupName
+                        };
+                    });
+
+
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.error('Error fetching log_count data:', textStatus, errorThrown);
@@ -260,7 +282,7 @@
             theGrid.hostElement.addEventListener('dblclick', function (e) {
                 let selectedItem = theGrid.selectedItems[0];
                 document.getElementById('id').value = selectedItem.id;
-
+console.log(selectedItem);
 
                 document.getElementById('Code').value = selectedItem.person_code;
                 document.getElementById('Name').value = selectedItem.person_name;
@@ -272,19 +294,19 @@
                     let selectElement = document.getElementById(selectId);
                     if (selectElement) {
                         for (let option of selectElement.options) {
-                            if (selectId === 'work_division') {
+                          /*  if (selectId === 'work_division') {
                                 // 'work_division'은 value로 비교
                                 option.selected = option.value == valueToMatch;
                             } else {
-                                // 나머지는 text로 비교
+                                // 나머지는 text로 비교*/
                                 option.selected = option.text === valueToMatch;
-                            }
+                          /*  }*/
                         }
                     }
                 }
 
 
-                setSelectValue('work_division', selectedItem.person_group_id);
+                setSelectValue('work_division', selectedItem.person_group_name);
                 setSelectValue('ShiftCode', selectedItem.shift_name);
                 setSelectValue('Depart_id', selectedItem.dept_name);
                 setSelectValue('WorkCenter_id', selectedItem.workcenter_name);
@@ -354,18 +376,26 @@
                 return;
             }
 
-            let menulogData = data.map(item => ({
-                id: item.id,
-                workcenter_name: item.workcenter_name,
-                person_code: item.person_code,
-                person_name: item.person_name,
-                person_group_id: item.person_group_id,
-                work_hour: item.work_hour,
-                shift_name: item.shift_name,
-                dept_name: item.dept_name,
-                factory_name: item.factory_name,
-                description: item.description
-            }));
+            let menulogData = data.map(item => {
+                let groupName = '기타근무';
+                if (item.person_group_id == 1) groupName = '주간근무';
+                else if (item.person_group_id == 2) groupName = '야간근무';
+
+                return {
+                    id: item.id,
+                    workcenter_name: item.workcenter_name,
+                    person_code: item.person_code,
+                    person_name: item.person_name,
+                    person_group_name: groupName, // 변환된 이름 사용
+                    jik_id: item.jik_id,
+                    work_hour: item.work_hour,
+                    shift_name: item.shift_name,
+                    dept_name: item.dept_name,
+                    factory_name: item.factory_name,
+                    description: item.description
+                };
+            });
+
 
             if (typeof theGrid === 'undefined' || typeof viewdata === 'undefined') {
                 console.error('theGrid 또는 viewdata가 정의되지 않았습니다.');
@@ -423,6 +453,10 @@
             }else if (!data.Depart_id) {
                 Alert.alert('', '부서를 선택해주세요.');
                 $('#personForm #Depart_id').focus();
+                return false;
+            }else if (!data.jik_id) {
+                Alert.alert('', '직위를 선택해주세요.');
+                $('#personForm #jik_id').focus();
                 return false;
             }
 
@@ -493,8 +527,10 @@
             AjaxUtil.fillSelectOptions($('#ShiftCode'), 'shift', 'choose', false);
             AjaxUtil.fillSelectOptions($('#Depart_id'), 'depart', 'choose', false);
 
-            /* AjaxUtil.fillSelectOptions($('#work_division'), 'system_code', 'choose','work_division');*/
             AjaxUtil.fillSelectOptions($('#work_division'), 'system_code', 'choose', '', 'work_division');
+            AjaxUtil.fillSelectOptions($('#jik_id'), 'system_code', 'choose','', 'jik_type');
+
+
 
             // 엔터키 검색
             $('#txtName').on('keypress', function (e) {

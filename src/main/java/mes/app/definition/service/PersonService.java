@@ -36,11 +36,17 @@ public class PersonService {
 	            , d."Name" as dept_name
 	            , f."Name" as factory_name
 	            , p."PersonGroup_id" as person_group_id
+	            , s."Value" as jik_id
 		        FROM person p
 		        left join work_center wc on p."WorkCenter_id" = wc.id
 		        left join Factory f on p."Factory_id" = f.id
 	            left join shift sh on sh."Code" = p."ShiftCode"
 	            left join depart d on d.id = p."Depart_id"
+	            left join (
+				        SELECT "Code", "Value"
+				        FROM sys_code
+				        WHERE "CodeType" = 'jik_type'
+				) s on s."Code" = p.jik_id
 	            where 1=1
         		""";
         if (StringUtils.isEmpty(workerName)==false) sql +=" and upper(p.\"Name\") like concat('%%',upper(:workerName),'%%') ";

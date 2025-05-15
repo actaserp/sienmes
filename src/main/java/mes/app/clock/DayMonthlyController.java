@@ -2,7 +2,7 @@ package mes.app.clock;
 
 import mes.app.clock.service.DayMonthlyService;
 import mes.domain.model.AjaxResult;
-import mes.domain.repository.TB_Pb201Repository;
+import mes.domain.repository.commute.TB_PB201Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +21,7 @@ public class DayMonthlyController {
     @Autowired
     private DayMonthlyService dayMonthlyService;
     @Autowired
-    private TB_Pb201Repository tpb201Repository;
+    private TB_PB201Repository tbPb201Repository;
 
 
 
