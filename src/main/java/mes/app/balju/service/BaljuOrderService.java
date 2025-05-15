@@ -66,7 +66,7 @@ public class BaljuOrderService {
           inner join material m on m.id = b."Material_id" and m.spjangcd = b.spjangcd
           inner join mat_grp mg on mg.id = m."MaterialGroup_id" and mg.spjangcd = b.spjangcd
           left join unit u on m."Unit_id" = u.id and u.spjangcd = b.spjangcd
-          left join company c on c.id= b."Company_id" and c.spjangcd = b.spjangcd
+          left join company c on c.id= b."Company_id" 
           left join store_house sh ON sh.id::varchar = b."ShipmentState" and sh.spjangcd = b.spjangcd
           where 1 = 1
 			""";
@@ -143,7 +143,7 @@ public class BaljuOrderService {
             inner join material m on m.id = b."Material_id" and m.spjangcd = b.spjangcd
             inner join mat_grp mg on mg.id = m."MaterialGroup_id" and mg.spjangcd = b.spjangcd
             left join unit u on m."Unit_id" = u.id and u.spjangcd = b.spjangcd
-            left join company c on c.id= b."Company_id" and c.spjangcd = b.spjangcd
+            left join company c on c.id= b."Company_id" 
             where b.id = :id
             group by
              b.id,b.spjangcd, b."JumunNumber", b."Material_id", mg."Name", mg.id,

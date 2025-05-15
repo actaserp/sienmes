@@ -50,7 +50,7 @@ public class MonthlySalesListService {
     sql.append("""
         SELECT
             c."Name" AS comp_name,
-            sc."Value" AS misgubun,
+            MAX(sc."Value") AS misgubun,
             ps.iverpernm,
             ps.iverdeptnm
         """);
@@ -71,7 +71,7 @@ public class MonthlySalesListService {
         FROM parsed_sales ps
         LEFT JOIN company c ON c.id = ps.cltcd
         LEFT JOIN sys_code sc ON sc."Code" = ps.misgubun
-        GROUP BY c."Name", sc."Value", ps.iverpernm, ps.iverdeptnm
+        GROUP BY c."Name", ps.iverpernm, ps.iverdeptnm
         ORDER BY c."Name", ps.iverpernm, ps.iverdeptnm
         """);
 
@@ -238,7 +238,7 @@ public class MonthlySalesListService {
                 NULL::numeric AS totalamt,
                 2 AS remaksseq
             FROM tb_banktransit b
-            JOIN company c ON c.id = b.cltcd AND c.spjangcd = b.spjangcd
+            JOIN company c ON c.id = b.cltcd 
             WHERE TO_DATE(b.trdate, 'YYYYMMDD') BETWEEN TO_DATE(:date_form, 'YYYYMMDD') AND TO_DATE(:date_to, 'YYYYMMDD')
               AND b.spjangcd = :spjangcd
               AND b.ioflag = '0'

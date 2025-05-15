@@ -165,7 +165,7 @@ public class VendorBalanceDetailService {
                         b.remark1,
                         2 AS remaksseq
                     FROM tb_banktransit b
-                    JOIN company c ON c.id = b.cltcd AND c.spjangcd = b.spjangcd
+                    JOIN company c ON c.id = b.cltcd 
                     LEFT JOIN sys_code sc ON sc."Code" = b.iotype
                     LEFT JOIN tb_trade tt ON tt.trid = b.trid AND tt.spjangcd = b.spjangcd
                      WHERE TO_DATE(b.trdate, 'YYYYMMDD') BETWEEN TO_DATE(:start, 'YYYYMMDD') AND TO_DATE(:end, 'YYYYMMDD') 

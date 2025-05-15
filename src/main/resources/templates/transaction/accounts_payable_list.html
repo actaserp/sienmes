@@ -24,9 +24,14 @@
               거래처
             </dt>
             <dd>
-              <input type="text" id="cboCompany" name="cboCompany" placeholder="해당 칸을 클릭해서 검색하세요.">
+              <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
               <input type="hidden" id="spjangcdHidden">
+              &nbsp;
+              <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                업체 검색
+              </a>
             </dd>
           </dl>
           <dl>
@@ -50,8 +55,7 @@
             <dt>&nbsp;</dt>
             <dd>
               <li>
-                <a class="btn btn-search" title="검색" id="btnMainSearch">
-                  <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                <a class="btn btn-search" title="검색" id="btnSearch">
                   <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                   검색
                 </a>
@@ -81,16 +85,18 @@
       </div>
     </section>
   </div>
+</th:block>
 
-  <th:block layout:fragment="scripts">
+<th:block layout:fragment="scripts">
     <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
     <th:block th:replace="/common/popup_company :: popup_company"></th:block>
     <script type="text/javascript">
-
       class production_require {
         constructor() {
           this.grid = null;
           this.grid3 = null;
+          this.$btnEdit = $('#btnEdit');
+          this.$btnAddNew = $('#btnAddNew');
           this.spjangcd = $('#spjangcdHidden');
           this.viewData = new wijmo.collections.CollectionView();
           this.init();
@@ -241,8 +247,8 @@
           let cboCompany = $("#cboCompanyHidden").val();
           let url = '/api/transaction/accounts_payable_list'
           let data = {
-            'srchStartDt' : $("#srchStartDt").val(),
-            'srchEndDt' : $("#srchEndDt").val(),
+            'srchStartDt': $("#srchStartDt").val(),
+            'srchEndDt': $("#srchEndDt").val(),
             'companyCode': cboCompany,
             spjangcd: this.spjangcd.val()
           };
@@ -281,27 +287,31 @@
       let page = null;
 
       $(document).ready(function (e) {
-
         const spjangcd = sessionStorage.getItem('spjangcd');
         if (spjangcd) {
           $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
         }
         page = new production_require();
 
-        let srchStartDt = CommonUtil.getYYYYMMDD(-7);
-        let today = CommonUtil.getYYYYMMDD();
+        AjaxUtil.fillSelectOptions($('#cboCompany'), 'company', 'all', '', 'sale');
+        AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);
 
-        $('#srchStartDt').val(srchStartDt);
-        $('#srchEndDt').val(today);
+        let today = new Date();
+        let monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(monthStart));
+        $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(today));
+
+        page.searchMainData();
 
         // 검색
-        $('#btnMainSearch').click(function (e) {
+        $('#btnSearch').click(function (e) {
           const companyCode = $('#cboCompanyHidden').val();
 
-         /* if (companyCode === '' && $('#cboCompany').val() !== '') {
+          if (companyCode === '' && $('#cboCompany').val() !== '') {
             Alert.alert('', '업체명은 업체검색 버튼을 통해서 \n 검색해주세요');
             return;
-          }*/
+          }
           // 집계 조회
           page.searchMainData();
           //상세 데이터도 같이 조회
@@ -312,13 +322,19 @@
             page.grid3.itemsSource = [];
           }
         });
-
-        // 거래처 focus시 거래처 검색 모달
-        $('#cboCompany').click(function () {
+        $('#btnGridSetting').click(function (e) {
+          let _this = this;
+          let fix_cols = page.grid_config.frozenColumnIndex;
+          page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, {
+            'order_fix': false,
+            'fix_cols': fix_cols
+          });
+        });
+        $('#btnCompanySearch').click(function () {
           let poppage = new PopCompComponent();
           let $poppage = $(poppage);
           let searchcallback = function (items) {
-            //console.log('items : ',items);
+            console.log('items : ', items);
             document.getElementById('cboCompany').value = items.compname;
             document.getElementById('cboCompanyHidden').value = items.id;
           };
@@ -326,34 +342,29 @@
           poppage.show(searchcallback);
         });
 
-        // 탭 클릭시 display 조정
-        let target = 'tabs_count';
-        $('.tab-links a').click(function (e) {
-          e.preventDefault(); // 링크 기본 이동 막기
-
-          // 모든 탭 숨김
-          $('.tab-item').css('display', 'none');
-
-          // 현재 선택된 탭 ID 얻기
-          const target = $(this).attr('href'); // → "#tabs_count"
-
-          // 해당 탭만 보이게
-          $(target).css('display', 'flex');
-
-          // 데이터 로드 (id에서 # 제거하고 처리)
-          const cleanTarget = target.replace('#', '');
-          if (cleanTarget === 'tabs_count') {
-            page.searchMainData(cleanTarget);
-          } else if (cleanTarget === 'tabs_portion_detail') {
-            page.searchDetailData(cleanTarget);
+        $('#cboCompany').on('input', function () {
+          const val = $(this).val();
+          if (val === '') {
+            $('#cboCompanyHidden').val('');
           }
-
-          page.current_tab = cleanTarget;
         });
+        // .btn-clear 클릭 후 input 이벤트 강제 발생
+        $(document).on('click', '.btn-clear', function () {
+          const $input = $(this).siblings('input[type="text"]');
+          $input.val('');
+          $input.trigger('input'); // 🔥 input 이벤트 강제 발생
+        });
+        // 초기화 버튼 클릭 이벤트
+        $('#btnClear').click(function () {
 
-        page.searchMainData();
+          document.getElementById('cboCompany').value = '';
+          document.getElementById('cboCompanyHidden').value = '';
+        });
 
       })
     </script>
+
   </th:block>
+
+  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 </html>

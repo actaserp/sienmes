@@ -1,7 +1,6 @@
 package mes.app.transaction.service;
 
 import lombok.extern.slf4j.Slf4j;
-import mes.Encryption.EncryptionUtil;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -140,7 +139,7 @@ public class CompBalanceDetailServicr {
             FROM tb_salesment s
             LEFT JOIN tb_salesdetail d ON s.misdate = d.misdate AND s.misnum = d.misnum AND s.spjangcd = d.spjangcd
             LEFT JOIN sys_code sc ON sc."Code" = s.misgubun
-            JOIN company c ON c.id = s.cltcd AND c.spjangcd = s.spjangcd
+            JOIN company c ON c.id = s.cltcd
             WHERE s.misdate BETWEEN :start AND :end
               AND s.spjangcd = :spjangcd
               AND s.cltcd = :company
@@ -167,7 +166,7 @@ public class CompBalanceDetailServicr {
                 b.remark1,
                 2 AS remaksseq
             FROM tb_banktransit b
-            JOIN company c ON c.id = b.cltcd AND c.spjangcd = b.spjangcd
+            JOIN company c ON c.id = b.cltcd 
             LEFT JOIN sys_code sc ON sc."Code" = b.iotype
             LEFT JOIN tb_trade tt ON tt.trid = b.trid AND tt.spjangcd = b.spjangcd
              WHERE TO_DATE(b.trdate, 'YYYYMMDD') BETWEEN TO_DATE(:start, 'YYYYMMDD') AND TO_DATE(:end, 'YYYYMMDD') 
