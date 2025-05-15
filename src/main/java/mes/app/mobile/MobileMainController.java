@@ -162,7 +162,7 @@ public class MobileMainController {
         // 정상퇴근(workyn값 지정 / 지각,조퇴 등 해당사항 유무 확인하여 이상없을시 1)
         Optional<TB_PB201> savedTbPb201 = tbPb201Repository.findById(tbPb201Pk);
         TB_PB201 entity = savedTbPb201.get();  // 값이 존재하면 꺼냄
-        if(!entity.getEndtime().isEmpty()){
+        if(entity.getEndtime() != null || !entity.getEndtime().isEmpty()){
             result.message = "이미 퇴근처리 되었습니다.";
             return result;
         }
@@ -173,7 +173,7 @@ public class MobileMainController {
             workyn = "0";
         }else{
             workyn = "1";
-            if(entity.getWorkcd().isEmpty()) {
+            if(entity.getWorkcd() == null || entity.getWorkcd().isEmpty()) {
                 workcd = "01";
                 entity.setWorkcd(workcd);
             }

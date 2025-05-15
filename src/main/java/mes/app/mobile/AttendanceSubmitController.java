@@ -53,7 +53,7 @@ public class AttendanceSubmitController {
         return result;
     }
     // 휴가등록 메서드
-    @PostMapping("/submitCommute")
+    @PostMapping("/submitAttendance")
     public AjaxResult submitCommute(
             @RequestParam(value="userId") String userId,
             @RequestParam(value="userName") String userName,
