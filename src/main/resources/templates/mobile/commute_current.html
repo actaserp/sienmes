@@ -207,7 +207,7 @@
             </dd>
           </dl>
           <div class="srch-btn">
-            <button class="btn-dark" onclick="searchdata()">조회</button>
+            <button class="btn-dark" onclick="handleSearch()">조회</button>
           </div>
         </div>
       </div>
@@ -239,8 +239,15 @@
 </script>
 <script type="text/javascript">
 
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const date = String(today.getDate()).padStart(2, '0');
+
   $(document).ready(function () {
     AjaxUtil.fillSelectOptions($('#selectWorkcd'), 'workcd', 'choose', false, 'work_division', '');
+    document.getElementById('searchFromDate').value = `${year}-${month}-01`;
+    document.getElementById('searchToDate').value = `${year}-${month}-${date}`;
     searchMainData();
   });
 
@@ -279,7 +286,7 @@
                         <td>${item.workcd || ''}</td>
                         <td>${item.starttime || '--:--'}</td>
                         <td>${item.endtime || '--:--'}</td>
-                        <td>${item.worktime || '0'}</td>
+                        <td>${item.worktime || '-'}</td>
                         <td>${item.remark || ''}</td>
                     </tr>
                 `;
@@ -301,11 +308,16 @@
       `;
       }
     };
-
-    // ✅ Ajax 요청 실행
     AjaxUtil.getAsyncData(url, data, fnsuccess);
   }
-
+  // 검색버튼 클릭
+  function handleSearch() {
+    searchMainData();
+    const buttons = document.querySelectorAll('.btn-aco');
+    buttons.forEach(button => {
+      button.click();
+    });
+  }
 
 
 

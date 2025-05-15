@@ -19,8 +19,18 @@ public class CommuteCurrentService {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("username", username);
         dicParam.addValue("workcd", workcd);
-        dicParam.addValue("searchFromDate", searchFromDate);
-        dicParam.addValue("searchToDate", searchToDate);
+
+        // 날짜 포맷 처리 (yyyy-MM-dd -> yyyyMM, dd)
+        String fromYearMonth = searchFromDate.replace("-", "").substring(0, 6); //  yyyymm
+        String fromDay = searchFromDate.substring(8, 10); // dd
+
+        String toYearMonth = searchToDate.replace("-", "").substring(0, 6);
+        String toDay = searchToDate.substring(8, 10);
+
+        dicParam.addValue("fromYearMonth", fromYearMonth);
+        dicParam.addValue("fromDay", fromDay);
+        dicParam.addValue("toYearMonth", toYearMonth);
+        dicParam.addValue("toDay", toDay);
 
         String sql = """
                 SELECT
@@ -62,15 +72,24 @@ public class CommuteCurrentService {
               AND a.username = :username
         		""";
 
-        if(workcd != null && !searchToDate.isEmpty()){
+        if(workcd != null){
             sql += " AND t.workcd = :workcd";
         }
-        if(searchFromDate != null && !searchToDate.isEmpty()){
-            sql += " workym >= :searchFromDate";
-        }
-        if(searchToDate != null && !searchToDate.isEmpty()){
-            sql += " workym <= :searchToDate";
-        }
+        // 날짜 조건 추가
+        sql += """
+        AND (
+            (t.workym > :fromYearMonth)
+            OR (
+                t.workym = :fromYearMonth AND t.workday >= :fromDay
+            )
+        )
+        AND (
+            (t.workym < :toYearMonth)
+            OR (
+                t.workym = :toYearMonth AND t.workday <= :toDay
+            )
+        )
+    """;
 
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);

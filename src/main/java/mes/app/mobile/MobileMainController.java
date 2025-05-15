@@ -47,10 +47,11 @@ public class MobileMainController {
         String username = user.getUsername();
 
         Map<String, Object> userInfo = mobileMainService.getUserInfo(username);
+        Map<String, Object> timeInfo = mobileMainService.getInOfficeTime(username);
         Map<String, Object> resultData = new HashMap<>();
         resultData.put("first_name", (String)userInfo.get("first_name"));
-        if(userInfo != null) {
-            resultData.put("inOfficeTime", (String) userInfo.get("starttime"));
+        if(timeInfo != null) {
+            resultData.put("inOfficeTime", (String) timeInfo.get("starttime"));
         }
 
         result.data = resultData;
@@ -110,7 +111,6 @@ public class MobileMainController {
         tbPb201.setWorknum(weekNum);
         tbPb201.setId(tbPb201Pk);
         tbPb201.setHoliyn(isHoly);
-        tbPb201.setWorkcd(workday);
 
         tbPb201.setStarttime(formattedCurrentTime);
         tbPb201.setJitime(Integer.parseInt(jitFlag));

@@ -32,7 +32,6 @@ public class CommuteCurrentController {
         User user = (User)auth.getPrincipal();
         String username = user.getUsername();
 
-
         result.data = commuteCurrentService.getUserInfo(username, workcd, searchFromDate, searchToDate);
 
         return result;

@@ -28,6 +28,8 @@ public class MobileMainService {
                 LEFT JOIN tb_pb201 t
                 ON t.personid = a.personid
                 WHERE a.username = :username
+                ORDER BY t.starttime DESC
+                LIMIT 1
         		""";
 
 
@@ -65,8 +67,10 @@ public class MobileMainService {
 
         String sql = """
                 SELECT starttime
-                FROM tb_pb201
-                WHERE username = :username
+                FROM auth_user a
+                LEFT JOIN tb_pb201 t
+                ON t.personid = a.personid
+                WHERE a.username = :username
                 AND LPAD(EXTRACT(DAY FROM CURRENT_DATE)::TEXT, 2, '0') = workday;
         		""";
 

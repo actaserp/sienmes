@@ -205,7 +205,7 @@
                         </dd>
                     </dl>
                     <div class="srch-btn">
-                        <button class="btn-dark" onclick="searchdata()">조회</button>
+                        <button class="btn-dark" onclick="handleSearch()">조회</button>
                     </div>
                 </div>
             </div>
@@ -310,15 +310,122 @@
 </script>
 <script type="text/javascript">
 
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const date = String(today.getDate()).padStart(2, '0');
+
     $(document).ready(function () {
+        AjaxUtil.fillSelectOptions($('#selectWorkcd'), 'workcd', 'choose', false, 'work_division', '');
+        document.getElementById('searchFromDate').value = `${year}-${month}-01`;
+        document.getElementById('searchToDate').value = `${year}-${month}-${date}`;
+        searchMainData();
     });
 
-    function modifyData(){
+    function searchMainData() {
+        let url = '/api/commute_current/read';
+        let data = {
+            'workcd': document.getElementById('selectWorkcd').value === "" ? null : parseInt(document.getElementById('selectWorkcd').value),
+            'searchFromDate': document.getElementById('searchFromDate').value,
+            'searchToDate': document.getElementById('searchToDate').value
+        };
+        let fnsuccess = function (result) {
+            console.log('result : ', result);
 
+            // ✅ 데이터가 null이 아니면 실행
+            if (result != null && result.data != null) {
+                // 조회된 데이터
+                const items = result.data;
+
+                // ✅ 동적 테이블 생성
+                let tableHtml = `
+          <table>
+                        <tr>
+                            <th>
+                                입사일
+                            </th>
+                            <td>
+
+                            </td>
+                        </tr>
+                        <br>
+                        <tr>
+                            <th>
+                                이월
+                            </th>
+                            <td>
+
+                            </td>
+                            <th>
+                                생성
+                            </th>
+                            <td>
+
+                            </td>
+                            <th>
+                                사용
+                            </th>
+                            <td>
+
+                            </td>
+                            <th>
+                                잔여
+                            </th>
+                            <td>
+
+                            </td>
+                        </tr>
+                        <br>
+                        <tr>
+                            <th>신청일</th>
+                            <th>구분</th>
+                            <th>연차</th>
+                            <th>시작일</th>
+                            <th>종료일</th>
+                            <th>기간</th>
+                            <th>사유</th>
+                        </tr>
+                `;
+
+                items.forEach(item => {
+                    tableHtml += `
+                    <tr>
+                        <td>${item.workym || ''}</td>
+                        <td>${item.workcd || ''}</td>
+                        <td>${item.starttime || '--:--'}</td>
+                        <td>${item.endtime || '--:--'}</td>
+                        <td>${item.worktime || '-'}</td>
+                        <td>${item.remark || ''}</td>
+                    </tr>
+                `;
+                });
+
+                tableHtml += `
+                </table>
+            `;
+
+                // ✅ 기존 내용 제거하고 새롭게 바인딩
+                const tableBody = document.querySelector('#theGrid');
+                tableBody.innerHTML = tableHtml;
+            } else {
+                const tableBody = document.querySelector('#theGrid');
+                tableBody.innerHTML = `
+          <tr>
+              <td colspan="6" style="text-align: center; padding: 8px;">조회된 데이터가 없습니다.</td>
+          </tr>
+      `;
+            }
+        };
+        AjaxUtil.getAsyncData(url, data, fnsuccess);
     }
-
-
-
+    // 검색버튼 클릭
+    function handleSearch() {
+        searchMainData();
+        const buttons = document.querySelectorAll('.btn-aco');
+        buttons.forEach(button => {
+            button.click();
+        });
+    }
 </script>
 </body>
 </html>
