@@ -9,7 +9,8 @@ public enum BankJobState {
     WAIT("1", "대기"),
     PROGRESS("2", "진행"),
     COMPLETE("3", "완료"),
-    TIMEOUT("4", "시간초과");
+    TIMEOUT("4", "시간초과"),
+    ERROR("5", "에러발생");
 
     private final String Code;
     private final String desc;
