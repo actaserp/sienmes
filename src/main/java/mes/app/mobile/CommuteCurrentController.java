@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/commute_current")
@@ -32,7 +34,17 @@ public class CommuteCurrentController {
         User user = (User)auth.getPrincipal();
         String username = user.getUsername();
 
-        result.data = commuteCurrentService.getUserInfo(username, workcd, searchFromDate, searchToDate);
+        List<Map<String, Object>> data = commuteCurrentService.getUserInfo(username, workcd, searchFromDate, searchToDate);
+        for(Map<String, Object>dataDetail : data) {
+            String workym = (String) dataDetail.get("workym"); // YYYYMM
+            String workday = (String) dataDetail.get("workday"); // DD
+
+            if (workym != null && workday != null && workym.length() == 6 && workday.length() == 2) {
+                String formattedDate = workym.substring(0, 4) + "." + workym.substring(4) + "." + workday;
+                dataDetail.put("workym", formattedDate);
+            }
+        }
+        result.data = data;
 
         return result;
     }

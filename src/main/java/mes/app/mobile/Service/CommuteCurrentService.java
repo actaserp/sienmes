@@ -41,6 +41,7 @@ public class CommuteCurrentService {
                 t.holiyn,
                 t.workyn,
                 t.workcd,
+                td.worknm,
                 t.starttime,
                 t.endtime,
                 t.worktime,
@@ -68,6 +69,7 @@ public class CommuteCurrentService {
             LEFT JOIN auth_user a ON a.personid = t.personid
             LEFT JOIN person p ON p.id = a.personid
             LEFT JOIN sys_code s ON s."Code" = p."PersonGroup_id"::text
+            LEFT JOIN tb_pb210 td ON t.workcd = td.workcd
             WHERE 1=1
               AND a.username = :username
         		""";
