@@ -10,10 +10,11 @@
   <link rel="icon" type="image/png" href="/images/logo/actas_log_a.png">
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+  <link rel="stylesheet" href="/resource/ax5ui/ax5ui.all.css" />
   <link rel="stylesheet" href="/assets_mobile/css/import.css"/>
   <!--    <link rel="stylesheet" href="/css/login_mes.css" />-->
-  <link rel="stylesheet" href="/resource/ax5ui/ax5ui.all.css" />
-  <title>ACTAS MES</title>
+  <script src="/assets_mobile/js/ui.js"></script> <!-- Common js -->
+  <title>ACTAS ERP</title>
 </head>
 <style>
   /* 공통 Modal 스타일 */
@@ -154,17 +155,6 @@
     }
   }
 
-  .ax5-ui-dialog{
-    min-width: 400px;
-    min-height: 204px;
-  }
-
-  .ax5-ui-dialog .ax-dialog-body{
-    min-width: 400px;
-    min-height: 204px;
-    padding: 50px 0 40px 0;
-  }
-
   .ax5-ui-dialog .ax-dialog-body .ax-dialog-msg{
     padding-bottom: 20px;
   }
@@ -219,21 +209,21 @@
             <label for="login_chk">아이디 저장</label>
           </div>
           <div style="display: flex">
-          <button type="submit" class="btn-login" id="productionManage" style="width: 45%;">생산관리</button>
+          <button type="button" class="btn-login" id="productionManage" style="width: 45%;">생산관리</button>
           <button type="submit" class="btn-login" id="AttendanceManage" style="width: 45%; margin-left:auto; background-color: #da5959">근태관리</button>
           <!--                        <button type="button" class="btn-login" id="testBtn">test</button>-->
           </div>
-          <ul class="btn-login-etc">
-            <li>
-              <a class="btn btn-popup-open" data-popup="popup1" title="사용자신청" onclick="RegisterUser()">등록확인</a>
-            </li>
+<!--          <ul class="btn-login-etc">-->
 <!--            <li>-->
-<!--              <a href="#" class="btn btn-popup-open" data-popup="popup2" title="아이디 찾기" onclick="openModal()">아이디 찾기</a>-->
+<!--              <a class="btn btn-popup-open" data-popup="popup1" title="사용자신청" onclick="RegisterUser()">등록확인</a>-->
 <!--            </li>-->
-            <li>
-              <a href="#" class="btn" title="비밀번호 찾기" onclick="openPwModal()">비밀번호 찾기</a>
-            </li>
-          </ul>
+<!--&lt;!&ndash;            <li>&ndash;&gt;-->
+<!--&lt;!&ndash;              <a href="#" class="btn btn-popup-open" data-popup="popup2" title="아이디 찾기" onclick="openModal()">아이디 찾기</a>&ndash;&gt;-->
+<!--&lt;!&ndash;            </li>&ndash;&gt;-->
+<!--            <li>-->
+<!--              <a href="#" class="btn" title="비밀번호 찾기" onclick="openPwModal()">비밀번호 찾기</a>-->
+<!--            </li>-->
+<!--          </ul>-->
         </div>
       </form>
     </div>
@@ -1358,6 +1348,26 @@
   //             console.error('Error:', error);
   //         });
   // });
+
+  document.getElementById('productionManage').addEventListener('click', function() {
+    console.log("🔄 생산관리 버튼이 클릭되었습니다!");
+
+    // 여기에 원하는 로직을 작성합니다.
+    // 예시: 페이지 이동
+    // window.location.href = '/production/manage';
+
+    // 예시: Ajax 호출
+    // const data = { action: "manageProduction" };
+    // AjaxUtil.postAsyncData("/api/production/manage", data, function(response) {
+    //   if (response.success) {
+    //     Alert.alert('', "생산 관리가 정상적으로 처리되었습니다.");
+    //   } else {
+    //     Alert.alert('', "오류가 발생했습니다. 관리자에게 문의하세요.");
+    //   }
+    // });
+    Alert.alert('', "해당 기능은 \n 준비중입니다.");
+  });
+
 </script>
 
 </body>

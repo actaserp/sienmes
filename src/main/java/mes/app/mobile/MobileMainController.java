@@ -78,16 +78,12 @@ public class MobileMainController {
         User user = (User)auth.getPrincipal();
         String username = user.getUsername();
         String spjangcd = user.getSpjangcd();
-        // 테스트용 spjangcd / ZZ
-        spjangcd = "ZZ";
         // 직원코드 조회 및 근무구분 조회
         Map<String, Object> personInfo = mobileMainService.getPersonId(username);
         String perId = personInfo.get("personid").toString();
         String workType = String.format("%02d", Integer.parseInt(personInfo.get("PersonGroup_id").toString()));
         // 지각여부 확인 (근태설정 비교(jitime(지각)값 설정)) sttime 00:00
         LocalDateTime inOfficeTime = LocalDateTime.now();
-        // 테스트 시간(8:59)
-//        LocalDateTime inOfficeTime = LocalDateTime.of(2025, 5, 15, 8, 59);  // 2025년 5월 15일 08:59
         String sttime = (String) mobileMainService.getWorkTime(workType).get("sttime");
         // inOfficeTime에서 시간만 추출 지각 비교
         LocalTime sttimeParsed = LocalTime.parse(sttime, timeFormatter);
@@ -141,8 +137,6 @@ public class MobileMainController {
         User user = (User)auth.getPrincipal();
         String username = user.getUsername();
         String spjangcd = user.getSpjangcd();
-        // 테스트용 spjangcd / ZZ
-        spjangcd = "ZZ";
         String workyn;
         // 직원코드 조회 및 근무구분 조회
         Map<String, Object> personInfo = mobileMainService.getPersonId(username);
@@ -179,6 +173,9 @@ public class MobileMainController {
             workyn = "0";
         }else{
             workyn = "1";
+            if(entity.getWorkcd() == null) {
+                workcd = "01";
+            }
         }
         // 사내 / 외부 퇴근 확인
         String inFlag = "";

@@ -27,14 +27,14 @@ public class ApprovalController {
     @Autowired
     private ApprovalService approvalService;
 
-    @Autowired
-    private E063Repository e063Repository;
-
-    @Autowired
-    private E064Repository e064Repository;
-
-    @Autowired
-    private E080Repository e080Repository;
+//    @Autowired
+//    private E063Repository e063Repository;
+//
+//    @Autowired
+//    private E064Repository e064Repository;
+//
+//    @Autowired
+//    private E080Repository e080Repository;
 
     @Autowired
     Settings settings;
@@ -114,13 +114,13 @@ public class ApprovalController {
         // 064table PK - custcd,spjangcd,perid,papercd,no
         TB_E064_PK e064PK = new TB_E064_PK();
         e064PK.setPapercd(params.get("papercd"));
-        e064PK.setCustcd((String) userInfo.get("custcd"));
-        e064PK.setPerid(params.get("perid"));
+//        e064PK.setCustcd((String) userInfo.get("custcd"));
+//        e064PK.setPerid(params.get("perid"));
         e064PK.setNo(params.get("no"));
         e064PK.setSpjangcd((String) userInfo.get("spjangcd"));
 
         try {
-            e064Repository.deleteById(e064PK);
+//            e064Repository.deleteById(e064PK);
             result.success = true;
             result.message = "삭제하였습니다.";
         }
@@ -160,8 +160,8 @@ public class ApprovalController {
 
 
         // 064테이블 선언
-        bodypk.setCustcd((String) userInfo.get("custcd"));
-        bodypk.setPerid(params.get("perid"));
+//        bodypk.setCustcd((String) userInfo.get("custcd"));
+//        bodypk.setPerid(params.get("perid"));
         bodypk.setSpjangcd((String) userInfo.get("spjangcd"));
         if (params.get("no") == null || Objects.equals(params.get("no"), "")) {
             bodypk.setNo(getNextNoForKey((String) userInfo.get("custcd"),
@@ -174,16 +174,16 @@ public class ApprovalController {
         bodypk.setPapercd(params.get("papercd"));
 
         body.setId(bodypk);
-        body.setInperid(username);
-        body.setGubun(params.get("gubun"));
-        body.setKcchk("1");
-        body.setKcperid(params.get("kcperid"));
+//        body.setInperid(username);
+//        body.setGubun(params.get("gubun"));
+//        body.setKcchk("1");
+//        body.setKcperid(params.get("kcperid"));
         body.setSeq(params.get("seq"));
         body.setIndate(indate);
         // 데이터 insert
         try {
-            e063Repository.save(head);
-            e064Repository.save(body);
+//            e063Repository.save(head);
+//            e064Repository.save(body);
 
             result.success = true;
             result.message = "저장을 성공했습니다.";
@@ -196,9 +196,10 @@ public class ApprovalController {
     // 064 테이블 no 컬럼 Max값 +1
     public String getNextNoForKey(String custcd, String spjangcd, String perid, String papercd) {
         // 현재 max(no) 조회
-        String maxNo = e064Repository.findMaxNo(custcd, spjangcd, perid, papercd);
-        int next = maxNo != null ? Integer.parseInt(maxNo) + 1 : 1;
-        return String.valueOf(next); // 예: 001, 002
+//        String maxNo = e064Repository.findMaxNo(custcd, spjangcd, perid, papercd);
+//        int next = maxNo != null ? Integer.parseInt(maxNo) + 1 : 1;
+//        return String.valueOf(next); // 예: 001, 002
+        return "";
     }
 
 }

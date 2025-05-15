@@ -14,18 +14,15 @@ import java.io.Serializable;
 @EqualsAndHashCode
 public class TB_E064_PK implements Serializable {
 
-    @Column(length = 8, nullable = false)
-    private String custcd;
-
-    @Column(length = 2, nullable = false)
+    @Column(name = "spjangcd", length = 2)
     private String spjangcd;
 
-    @Column(length = 10, nullable = false)
-    private String perid;
-
-    @Column(length = 10, nullable = false)
+    @Column(name = "papercd", length = 2)
     private String papercd;
 
-    @Column(length = 3, nullable = false)
+    @Column(name = "personid")
+    private Integer personid;
+
+    @Column(name = "no", length = 3)
     private String no;
 }
