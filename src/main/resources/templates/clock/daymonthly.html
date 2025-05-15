@@ -177,6 +177,7 @@
                 this.grid = null;
                 this.grid2 = null;
                 this.grid3 = null;
+                this.workList = [];
                 this.init();
             }
 
@@ -216,7 +217,15 @@
                         {binding: 'jik_id', header: '직위', width: 100, align: 'center' },
                         {binding: 'starttime', header: '출근', width: 100, align: 'center' },
                         {binding: 'endtime', header: '퇴근', width: 100, align: 'center'},
-                        {binding: 'workyn', header: '구분', width: 100, align: 'center'},
+                        /*{binding: 'worknm', header: '구분', width: 100, align: 'center'},*/
+                        {
+                            binding: 'worknm',
+                            header: '구분',
+                            width: 150,
+                            align: 'center',
+                            dataMap: null,
+                            cellTemplate: '${text}'
+                        },
                         {binding: 'nomaltime', header: '근무시간', width: 100, align: 'center'},
                         {binding: 'worktime', header: '총근무시간', width: 100, align: 'center'},
                         {binding: 'jitime', header: '지각', width: '*', align: 'center'},
@@ -228,6 +237,7 @@
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
+                this.getWorkList();
 
                 // 셀 편집 방지
                 this.grid.beginningEdit.addHandler((s, e) => {
@@ -417,7 +427,8 @@
                 // 전송할 데이터
                 let data = {
                     serchday: selectedDate,
-                    work_division: $('#work_division').val()
+                    work_division: $('#work_division').val(),
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 };
 
                 let result = AjaxUtil.getSyncData(url + '/read', data);
@@ -437,6 +448,37 @@
                     });
                 }
             }
+
+            getWorkList() {
+                const _this = this;
+                let csrfToken = $("[name=_csrf]").val();
+
+                let data = {
+                    spjangcd: sessionStorage.getItem('spjangcd')
+                };
+
+                $.ajax({
+                    url: '/api/clock/DayMonthly/workcdList',
+                    type: 'POST',
+                    data: data,
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        _this.workList = response.data;
+
+                        let worknmColumn = _this.grid.columns.find(col => col.binding === 'worknm');
+                        if (worknmColumn) {
+                            worknmColumn.dataMap = getTradeTypeDataMap(_this.workList);
+                            _this.grid.refresh(true);
+                        }
+                    },
+                    error: function(err) {
+                        console.error("workcdList 가져오기 실패:", err);
+                    }
+                });
+            }
+
 
 
             //searchMainData
@@ -478,6 +520,10 @@
 
 
         }
+        function getTradeTypeDataMap(list){
+            return new wijmo.grid.DataMap(list, 'workcd', 'worknm');
+        }
+
 
         let page = null;
 

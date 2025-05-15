@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ public class DayMonthlyService {
     @Autowired
     SqlRunner sqlRunner;
 
-    public List<Map<String, Object>> getDayList(String work_division, String serchday) {
+    public List<Map<String, Object>> getDayList(String work_division, String serchday, String spjangcd) {
         MapSqlParameterSource paramMap = new MapSqlParameterSource();
 
         // serchday이 20250514 형식으로 들어와서 202505 / 14 으로 형식 분리
@@ -32,6 +33,7 @@ public class DayMonthlyService {
 
         paramMap.addValue("workym", workym);
         paramMap.addValue("workday", workday);
+        paramMap.addValue("spjangcd", spjangcd);
 
         String sql = """
             SELECT
@@ -67,7 +69,8 @@ public class DayMonthlyService {
                 t.fixflag,
                 a.first_name,
                 g."Value" AS group_name,
-                s."Value" as jik_id
+                s."Value" as jik_id,
+                tp210.worknm as worknm
             FROM tb_pb201 t
             LEFT JOIN auth_user a ON a.personid = t.personid
             LEFT JOIN person p ON p.id = a.personid
@@ -77,9 +80,11 @@ public class DayMonthlyService {
                  FROM sys_code
                  WHERE "CodeType" = 'jik_type'
              ) s ON s."Code" = p.jik_id
+             LEFT JOIN tb_pb210 tp210 ON tp210.workcd = t.workcd
             WHERE t.workym = :workym
               AND t.workday = :workday
               AND p."PersonGroup_id" = :work_division
+              AND t.spjangcd =:spjangcd
         """;
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
@@ -87,7 +92,31 @@ public class DayMonthlyService {
     }
 
 
+    public List<Map<String, String>> workcdList(String spjangcd) {
 
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        dicParam.addValue("spjangcd", spjangcd);
+
+
+        String sql = """
+                SELECT worknm, workcd
+                FROM tb_pb210
+                where spjangcd = :spjangcd
+            """;
+        // SQL 실행
+        List<Map<String, Object>> rows = this.sqlRunner.getRows(sql, dicParam);
+
+        List<Map<String, String>> result = rows.stream()
+                .map(row -> {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("worknm", (String) row.get("worknm"));
+                    map.put("workcd", (String) row.get("workcd"));
+                    return map;
+                })
+                .toList();
+
+        return result;
+    }
 
 
 

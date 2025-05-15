@@ -17,13 +17,14 @@ public class UserService {
 	SqlRunner sqlRunner;
 	
 	// 사용자 리스트 조회
-	public List<Map<String, Object>> getUserList(boolean superUser, Integer group, String keyword, String username, Integer departId){
+	public List<Map<String, Object>> getUserList(boolean superUser, Integer group, String keyword, String username, Integer departId, String spjangcd){
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("group", group);
         dicParam.addValue("keyword", keyword);
         dicParam.addValue("username", username);
         dicParam.addValue("departId", departId);
+		dicParam.addValue("spjangcd", spjangcd);
         
         String sql = """
 			select au.id
@@ -43,11 +44,12 @@ public class UserService {
               , au.is_active
               , to_char(au.date_joined ,'yyyy-mm-dd hh24:mi') as date_joined
             from auth_user au
-            left join user_profile up on up."User_id" = au.id
-            left join user_group ug on ug.id = up."UserGroup_id"
-            left join factory f on f.id = up."Factory_id"
-            left join depart d on d.id = up."Depart_id"
+            left join user_profile up on up."User_id" = au.id and up.spjangcd = au.spjangcd
+            left join user_group ug on ug.id = up."UserGroup_id" and ug.spjangcd = up.spjangcd
+            left join factory f on f.id = up."Factory_id" and f.spjangcd = up.spjangcd
+            left join depart d on d.id = up."Depart_id" and d.spjangcd = up.spjangcd
             where is_superuser = false
+            AND au.spjangcd = :spjangcd
 		    """;
         
         if (superUser != true) {

@@ -371,6 +371,7 @@ public class AccountController {
 			@RequestParam(value="is_active", required = false) Boolean is_active,
 			@RequestParam(value="password") String password,
 			@RequestParam(value="tel", required = false) String tel,
+			@RequestParam(value="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth
 	) {
@@ -428,6 +429,8 @@ public class AccountController {
 		user.setTel(tel);
 		user.setDate_joined(today);
 		user.setActive(is_active);
+		user.setSpjangcd(spjangcd);
+
 
 		user = this.userRepository.save(user);
 
@@ -462,6 +465,23 @@ public class AccountController {
 		}
 		return result;
 	}
+
+
+
+	@PostMapping("/user-auth/getspjangcd")
+	public AjaxResult getspjangcd(){
+
+		AjaxResult result = new AjaxResult();
+
+		List<Map<String, String>> list = accountService.findspjangcd();
+
+		result.data = list;
+		return result;
+	}
+
+
+
+
 
 
 

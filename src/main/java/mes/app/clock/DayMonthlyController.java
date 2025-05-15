@@ -33,6 +33,7 @@ public class DayMonthlyController {
     public AjaxResult getDayList(
             @RequestParam(value="work_division", required=false) String work_division,
             @RequestParam(value="serchday", required=false) String serchday,
+            @RequestParam(value ="spjangcd") String spjangcd,
             HttpServletRequest request,
             Authentication auth) {
 
@@ -42,7 +43,7 @@ public class DayMonthlyController {
             serchday = serchday.replaceAll("-", "");
         }
 
-        List<Map<String, Object>> items = this.dayMonthlyService.getDayList(work_division, serchday);
+        List<Map<String, Object>> items = this.dayMonthlyService.getDayList(work_division, serchday,spjangcd);
         result.data = items;
         return result;
     }
@@ -72,6 +73,7 @@ public class DayMonthlyController {
             String workym = (String) item.get("workym");
             String workday = (String) item.get("workday");
             Integer personid = ((Number) item.get("personid")).intValue();
+            String workcd = (String) item.get("worknm");
 
             String starttimeStr = (String) item.get("starttime"); // "09:30"
             String endtimeStr = (String) item.get("endtime");
@@ -91,8 +93,7 @@ public class DayMonthlyController {
             if (optional.isPresent()) {
                 TB_PB201 tbpb201 = optional.get();
                 tbpb201.setFixflag("1");
-                tbpb201List.add(tbpb201);
-
+                tbpb201.setWorkcd(workcd);
 
                 if (starttimeStr != null && !starttimeStr.trim().isEmpty()) {
                     // "HH:mm" 형식인지 간단한 유효성 검사
@@ -205,7 +206,7 @@ public class DayMonthlyController {
                         return result;
                     }
                 }
-
+                tbpb201List.add(tbpb201);
             }
         }
 
@@ -217,6 +218,17 @@ public class DayMonthlyController {
         return result;
     }
 
+
+    @PostMapping("workcdList")
+    public AjaxResult getspjangcd(@RequestParam(value ="spjangcd") String spjangcd){
+
+        AjaxResult result = new AjaxResult();
+
+        List<Map<String, String>> list = dayMonthlyService.workcdList(spjangcd);
+
+        result.data = list;
+        return result;
+    }
 
 
 }

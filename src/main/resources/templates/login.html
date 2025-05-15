@@ -332,14 +332,27 @@
                                         이메일
                                     </label>
                                 </th>
-                                <td colspan="3">
+                                <td >
                                     <div class="input-clear">
                                         <input type="text" id="email" name="email">
                                        <!-- <button type="button" style="margin: 0 0 0 5px;width: 14.5%;background: white;color: #03428E;border: 1px solid #03428E;" id="BtnAuthenticationRegister">코드발급</button>-->
                                     </div>
 
                                 </td>
+
+                                <th>
+                                    <label>
+                                        사업장
+                                    </label>
+                                </th>
+                                <td >
+                                    <div class="input-clear">
+                                        <select id="spjangcd" name="spjangcd"></select>
+                                    </div>
+                                </td>
                             </tr>
+
+
                             <!--<tr>
                                 <th>
                                     <label>
@@ -479,8 +492,6 @@
     function hideLoader() {
         document.getElementById('loader2').style.display = 'none';
     }
-
-
 
 
     function openPwModal() {
@@ -654,6 +665,37 @@
 
 
         let activeTimerInterval; // 전역 변수로 interval ID를 저장
+
+
+        function getspjangcd() {
+            $.ajax({
+                url: '/user-auth/getspjangcd',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function (response) {
+                    console.log(response.data);
+                    let select = $('#spjangcd');
+                    select.empty(); // 기존 옵션 제거
+
+                    // 선택 안 했을 때 기본 안내 옵션 추가 (선택사항)
+                    select.append('<option value="">-- 선택하세요 --</option>');
+
+                    // 받아온 데이터로 옵션 추가
+                    response.data.forEach(function(item) {
+                        let option = $('<option></option>')
+                            .val(item.spjangcd)
+                            .text(item.spjangnm);
+                        select.append(option);
+                    });
+                },
+                error: function (error) {
+                    Alert.alert('', '에러가 발생하였습니다.');
+                }
+            });
+        }
+        getspjangcd();
 
         function startTimer(duration, ele) {
             // 기존 타이머가 있으면 제거
@@ -958,6 +1000,15 @@
             }
 
             let data = FormUtil.extractForm($('#bomForm'));
+
+
+            let spjangcd = $('#spjangcd').val();
+            if (!spjangcd) {
+                Alert.alert('', '사업장을 선택해주세요.');
+                return;
+            }
+            data.spjangcd = spjangcd;
+
 
             $.ajax({
                 url: '/user-auth/save',

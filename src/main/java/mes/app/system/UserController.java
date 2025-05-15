@@ -56,6 +56,7 @@ public class UserController {
 			@RequestParam(value="keyword", required=false) String keyword,
 			@RequestParam(value="depart_id", required=false) Integer departId,
 			@RequestParam(value="username", required=false) String username,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -68,7 +69,7 @@ public class UserController {
 			superUser = user.getUserProfile().getUserGroup().getCode().equals("dev");
 		}
 		
-		List<Map<String, Object>> items = this.userService.getUserList(superUser, group, keyword, username, departId);
+		List<Map<String, Object>> items = this.userService.getUserList(superUser, group, keyword, username, departId,spjangcd);
 		
 		result.data = items;
 		return result;

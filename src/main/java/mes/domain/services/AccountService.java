@@ -2,6 +2,9 @@ package mes.domain.services;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,4 +65,31 @@ public class AccountService {
 		
 	    this.sqlRunner.execute(sql, paramMap);
 	}
+
+
+	 public List<Map<String, String>> findspjangcd() {
+
+		 MapSqlParameterSource dicParam = new MapSqlParameterSource();
+
+		 String sql = """
+                SELECT spjangcd, spjangnm
+                FROM tb_xa012
+            """;
+		 // SQL 실행
+		 List<Map<String, Object>> rows = this.sqlRunner.getRows(sql, dicParam);
+
+		 List<Map<String, String>> result = rows.stream()
+				 .map(row -> {
+					 Map<String, String> map = new HashMap<>();
+					 map.put("spjangcd", (String) row.get("spjangcd"));
+					 map.put("spjangnm", (String) row.get("spjangnm"));
+					 return map;
+				 })
+				 .toList();
+
+		 return result;
+	 }
+
+
+
 }
