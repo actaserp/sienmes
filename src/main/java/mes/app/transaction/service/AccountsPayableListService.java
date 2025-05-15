@@ -241,7 +241,7 @@ public class AccountsPayableListService {
              FROM tb_invoicement s
              LEFT JOIN tb_invoicdetail d ON s.misdate = d.misdate AND s.misnum = d.misnum AND s.spjangcd = d.spjangcd
              LEFT JOIN sys_code sc ON sc."Code" = s.misgubun::text
-             JOIN company c ON c.id = s.cltcd AND c.spjangcd = s.spjangcd
+             JOIN company c ON c.id = s.cltcd 
              WHERE s.misdate BETWEEN :start AND :end
                AND s.cltcd = :company
                AND s.spjangcd = :spjangcd
@@ -268,7 +268,7 @@ public class AccountsPayableListService {
                  b.remark1,
                  1 AS remaksseq
              FROM tb_banktransit b
-             JOIN company c ON c.id = b.cltcd AND c.spjangcd = b.spjangcd
+             JOIN company c ON c.id = b.cltcd 
              LEFT JOIN sys_code sc ON sc."Code" = b.iotype
              LEFT JOIN tb_trade tt ON tt.trid = b.trid AND tt.spjangcd = b.spjangcd
              WHERE TO_DATE(b.trdate, 'YYYYMMDD') BETWEEN TO_DATE(:start, 'YYYYMMDD') AND TO_DATE(:end, 'YYYYMMDD') 

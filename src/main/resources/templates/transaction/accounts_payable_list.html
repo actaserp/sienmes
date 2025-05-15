@@ -24,7 +24,7 @@
               거래처
             </dt>
             <dd>
-              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭해서 검색하세요.">
+              <input type="text" id="cboCompany" name="cboCompany" placeholder="해당 칸을 클릭해서 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
               <input type="hidden" id="spjangcdHidden">
             </dd>
@@ -99,11 +99,11 @@
         init() {
           let _this = this;
           this.grid = new wijmo.grid.FlexGrid('#theGrid1', {
-            autoGenerateColumns: false,
             selectionMode: wijmo.grid.SelectionMode.Row,
             headersVisibility: wijmo.grid.HeadersVisibility.Column,
-            isReadOnly: false,
+            autoGenerateColumns: false,
             showMarquee: true,
+            isReadOnly: true,
             formatItem: (sender, e) => {
               if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                 e.cell.style.textAlign = 'center';
@@ -112,9 +112,9 @@
             columns: [
               {binding: 'cltcd', header: '코드', width: 130, align: 'center'},
               {binding: 'clt_name', header: '거래처명', width: 320, align: 'center'},
-              {binding: 'receivables', header: '전잔액', width: 220, align: 'center'},
-              {binding: 'sales', header: '매입액', width: 200, align: 'center'},
-              {binding: 'AmountDeposited', header: '지급액', width: 200, align: 'left'},
+              {binding: 'payable', header: '전잔액', width: 220, align: 'right'},
+              {binding: 'purchase', header: '매입액', width: 200, align: 'right'},
+              {binding: 'AmountPaid', header: '지급액', width: 200, align: 'left'},
               {binding: 'balance', header: '잔액', width: 210, align: 'left'}
             ]
           });
@@ -154,9 +154,9 @@
             const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
             footerTotal.dataItem = {
               clt_name: '합 계',
-              receivables: getSum('receivables'),
-              sales: getSum('sales'),
-              AmountDeposited: getSum('AmountDeposited'),
+              payable: getSum('payable'),
+              purchase: getSum('purchase'),
+              AmountPaid: getSum('AmountPaid'),
             };
           });
 
@@ -298,10 +298,10 @@
         $('#btnMainSearch').click(function (e) {
           const companyCode = $('#cboCompanyHidden').val();
 
-          if (companyCode === '' && $('#cboCompany').val() !== '') {
+         /* if (companyCode === '' && $('#cboCompany').val() !== '') {
             Alert.alert('', '업체명은 업체검색 버튼을 통해서 \n 검색해주세요');
             return;
-          }
+          }*/
           // 집계 조회
           page.searchMainData();
           //상세 데이터도 같이 조회
@@ -314,12 +314,12 @@
         });
 
         // 거래처 focus시 거래처 검색 모달
-        $('#btnCompanySearch').click(function () {
+        $('#cboCompany').click(function () {
           let poppage = new PopCompComponent();
           let $poppage = $(poppage);
           let searchcallback = function (items) {
             //console.log('items : ',items);
-            document.getElementById('btnCompanySearch').value = items.compname;
+            document.getElementById('cboCompany').value = items.compname;
             document.getElementById('cboCompanyHidden').value = items.id;
           };
 

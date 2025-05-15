@@ -254,27 +254,34 @@ public class MonthlySalesListService {
 
     sql.append("""
             ),
-        running_balance AS (
-            SELECT
-                id,
-                comp_name,
-                amount,
-                TO_CHAR(date, 'YYYY-MM') AS yyyymm,
-                date,
-                summary,
-                SUM(
-                    COALESCE(amount, 0) + COALESCE(totalamt, 0) - COALESCE(accin, 0)
-                ) OVER (
-                    PARTITION BY id
-                    ORDER BY date, remaksseq
-                    ROWS UNBOUNDED PRECEDING
-                ) AS balance
-            FROM union_data
-        )
-        SELECT
-            id AS cltid,
-            comp_name,
-            amount
+       running_balance AS (
+             SELECT
+               id,
+               comp_name,
+               amount,
+               TO_CHAR(date, 'YYYY-MM') AS yyyymm,
+               date,
+               summary,
+               SUM(
+                 COALESCE(amount, 0) + COALESCE(totalamt, 0) - COALESCE(accin, 0)
+               ) OVER (
+                 PARTITION BY id
+                 ORDER BY date,
+                   CASE summary
+                     WHEN '전잔액' THEN 0
+                     WHEN '입금액' THEN 1
+                     WHEN '입금' THEN 1
+                     WHEN '매출' THEN 2
+                     ELSE 3
+                   END
+                 ROWS UNBOUNDED PRECEDING
+               ) AS balance
+             FROM union_data
+           )
+               SELECT
+                   id AS cltid,
+                   comp_name,
+                   amount
     """);
 
     for (int i = 0; i <= 12; i++) {

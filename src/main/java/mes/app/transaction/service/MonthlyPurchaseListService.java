@@ -145,7 +145,6 @@ public class MonthlyPurchaseListService {
     return items;
   }
 
-  //미지급금
   // 미지급
   public List<Map<String, Object>> getMonthPayableList(String cboYear, Integer cboCompany, String spjangcd) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
@@ -199,7 +198,7 @@ public class MonthlyPurchaseListService {
         ),
         union_data_raw AS (
             SELECT
-                c.id,
+                c.id AS id,
                 c."Name" AS comp_name,
                 TO_DATE(:baseYm || '01', 'YYYYMMDD') AS date,
                 '전잔액' AS summary,
@@ -214,7 +213,7 @@ public class MonthlyPurchaseListService {
             WHERE c.spjangcd = :spjangcd
             UNION ALL
             SELECT
-                s.cltcd,
+                s.cltcd AS id,
                 c."Name" AS comp_name,
                 TO_DATE(s.misdate, 'YYYYMMDD'),
                 '매입',
@@ -228,7 +227,7 @@ public class MonthlyPurchaseListService {
               AND s.spjangcd = :spjangcd
             UNION ALL
             SELECT
-                b.cltcd,
+                b.cltcd AS id,
                 c."Name" AS comp_name,
                 TO_DATE(b.trdate, 'YYYYMMDD'),
                 '지급액',
@@ -262,13 +261,20 @@ public class MonthlyPurchaseListService {
                 date,
                 summary,
                 SUM(
-                    COALESCE(amount, 0) + COALESCE(totalamt, 0) - COALESCE(accout, 0)
-                ) OVER (
-                    PARTITION BY id
-                    ORDER BY date, remaksseq
-                    ROWS UNBOUNDED PRECEDING
-                ) AS balance
-            FROM union_data
+               COALESCE(amount, 0) + COALESCE(totalamt, 0) - COALESCE(accout, 0)
+             ) OVER (
+               PARTITION BY id
+               ORDER BY date,
+                 CASE summary
+                   WHEN '전잔액' THEN 0
+                   WHEN '지급액' THEN 1
+                   WHEN '지급' THEN 1
+                   WHEN '매입' THEN 2
+                   ELSE 3
+                 END
+               ROWS UNBOUNDED PRECEDING
+             ) AS balance
+             FROM union_data
         )
         SELECT
             id AS cltid,
