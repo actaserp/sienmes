@@ -4,6 +4,10 @@
         .wj-header {
             text-align: center !important;
         }
+
+        .wj-cell.no-uncheck input[type=checkbox] {
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -167,7 +171,6 @@
     <script type="text/javascript">
         class DayMonthlyPage {
             constructor() {
-                this.url = '/api/definition/area';
                 this.viewData = new wijmo.collections.CollectionView();
                 this.viewData2 = new wijmo.collections.CollectionView();
                 this.viewData3 = new wijmo.collections.CollectionView();
@@ -185,49 +188,74 @@
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
                     showMarquee: true,
-                    isReadOnly: true,
+                    isReadOnly: false,
                     frozenColumns: 9,
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell &&
+                            sender.columns[e.col].binding === 'fixflag') {
+                            e.cell.textContent = '';
+                        }
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell &&
+                            sender.columns[e.col].binding === 'fixflag') {
+                            const fixflag = sender.getCellData(e.row, 'fixflag', false);
+                            if (fixflag === '1') {
+                                e.cell.style.pointerEvents = 'none'; // 클릭 자체 방지
+                                e.cell.style.opacity = '0.6'; // 시각적 표시
+                            }
+                        }
                     },
                     columns: [
                         {binding: 'fixflag', header: '마감', width: 70, align: 'center'},
-                        {binding: 'rownum', header: '순번', width: 70, align: 'center'},
-                        {binding: 'workday', header: '일자', width: 100, align: 'center' },
-                        {binding: 'first_name', header: '사원명', width: 120, align: 'left' },
-                        {binding: '', header: '직위', width: 100, align: 'left' },
-                        {binding: 'starttime', header: '출근', width: 100, align: 'left' },
+                        {binding: 'row_num', header: '순번', width: 70, align: 'center'},
+                        {binding: 'workymd', header: '일자', width: 100, align: 'center' },
+                        {binding: 'first_name', header: '사원명', width: 120, align: 'center' },
+                        {binding: 'jik_id', header: '직위', width: 100, align: 'center' },
+                        {binding: 'starttime', header: '출근', width: 100, align: 'center' },
                         {binding: 'endtime', header: '퇴근', width: 100, align: 'center'},
                         {binding: 'workyn', header: '구분', width: 100, align: 'center'},
-                        {binding: 'worktime', header: '근무시간', width: 100, align: 'center'},
-
+                        {binding: 'nomaltime', header: '근무시간', width: 100, align: 'center'},
+                        {binding: 'worktime', header: '총근무시간', width: 100, align: 'center'},
                         {binding: 'jitime', header: '지각', width: '*', align: 'center'},
                         {binding: 'overtime', header: '연장', width: '*', align: 'center'},
                         {binding: 'nighttime', header: '야간', width: '*', align: 'center'},
                         {binding: 'yuntime', header: '휴가', width: '*', align: 'center'},
                         {binding: 'abtime', header: '결근', width: '*', align: 'center'},
-                        {binding: '', header: '특근', width: '*', align: 'center'},
+                        {binding: 'holitime', header: '특근', width: '*', align: 'center'},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
 
-                let selector = new wijmo.grid.selector.Selector(this.grid, {
-                    itemChecked: (e, ctx) => {
-                        SelectItem = this.grid.rows.filter(r => r.isSelected);
+                // 셀 편집 방지
+                this.grid.beginningEdit.addHandler((s, e) => {
+                    const fixflag = s.getCellData(e.row, 'fixflag', false);
 
+                    if (fixflag === '1') {
+                        e.cancel = true;
                     }
                 });
 
-                /*this.grid.hostElement.addEventListener('dblclick', (e) => {
-                    let hitTest = this.grid.hitTest(e);
-                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
-                        let row = hitTest.row;
-                        let selectedItem = this.grid.rows[row].dataItem;
-                        _this.showDetail(selectedItem.id)
+
+
+                let selector = new wijmo.grid.selector.Selector(this.grid, {
+                    itemChecked: (s, e) => {
+                        // 방어: e.row 유효성 검사
+                        if (e.row == null || e.row < 0 || e.row >= this.grid.rows.length) return;
+
+                        // fixflag 값 가져오기
+                        const fixflag = this.grid.getCellData(e.row, 'fixflag', false);
+
+                        if (fixflag === '1') {
+                            // 체크 해제 막기: 강제로 다시 선택 상태로 복원
+                            setTimeout(() => {
+                                this.grid.rows[e.row].isSelected = true;
+                            }, 0);
+                        }
                     }
-                });*/
+                });
 
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '일별근태현황';
@@ -366,19 +394,6 @@
             }
 
 
-            showDetail(idx) {
-                let param = { 'id': idx };
-
-                let result = AjaxUtil.getSyncData(this.url+'/detail', param);
-                if (result.success) {
-                    FormUtil.BindDataForm(result.data, $('#basicForm'));
-                    //$('#description').text(result.description);
-                }
-
-                //page.setButtonDisable(false, false, false);
-                page.setButtonState();
-            }
-
             searchMainData() {
                 let _this = this;
                 let url = '/api/clock/DayMonthly';
@@ -406,10 +421,20 @@
                 };
 
                 let result = AjaxUtil.getSyncData(url + '/read', data);
-                console.log(result);
 
                 if (result && result.data) {
+                    console.log(result.data);
                     _this.viewData.sourceCollection = result.data;
+
+
+                    // fixflag 값이 "1"인 row는 체크된 상태로 만들기
+                    setTimeout(() => {
+                        _this.grid.rows.forEach((row, idx) => {
+                            if (_this.grid.getCellData(idx, 'fixflag', false) === '1') {
+                                row.isSelected = true;
+                            }
+                        });
+                    });
                 }
             }
 
@@ -417,18 +442,28 @@
             //searchMainData
 
 
-            saveArea() {
+            saveday() {
                 let _this = this;
-                let url = '/api/definition/area/save';
-                //데이터입력체크루틴 누락
+                let url = '/api/clock/DayMonthly/save';
 
-                //let data = $('#basicForm').serialize();
-                let data = FormUtil.extractForm($('#basicForm'));
-                if (!data.name) {
-                    Alert.alert('', '에어리어 이름을 입력해주세요.');
-                    $('#basicForm #name').focus();
+
+                // 선택된 행들 가져오기
+                let selectedItems = _this.grid.rows
+                    .filter(row => row.isSelected)  // Selector에서 체크된 행
+                    .map(row => row.dataItem);
+
+                // 유효성 체크
+                if (selectedItems.length === 0) {
+                    Alert.alert('', '선택된 행이 없습니다.');
                     return;
                 }
+
+                // 서버로 전송할 데이터
+                let data = {
+                    list: selectedItems
+                };
+
+                console.log(data);
 
                 let fnSuccess = function (res) {
                     if (res.success) {
@@ -438,7 +473,7 @@
                         Alert.alert('', res.message);
                     }
                 };
-                AjaxUtil.postAsyncData(url, data, fnSuccess);
+                AjaxUtil.postJsonData(url, data, fnSuccess);
             }
 
 
@@ -459,6 +494,14 @@
 
             $('#btnSearch').click(function (ex) {
                 page.searchMainData();
+            });
+
+            $('#btnSave').click(function (e) {
+                Alert.confirm('',
+                    "저장하시겠습니까?",
+                    function () { page.saveday() },
+                    function () { }
+                );
             });
 
         });
