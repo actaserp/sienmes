@@ -13,6 +13,35 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+        @media print {
+            body * {
+                visibility: hidden !important;
+                height: 0 !important;
+                overflow: hidden !important;
+            }
+
+            .ax5modal.primary, .ax5modal.primary * {
+                visibility: visible !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            .ax5modal.primary {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                background: white !important;
+                box-shadow: none !important;
+            }
+
+            #btnInvoiceSave, #btnInvoiceCancel {
+                display: none !important;
+            }
+        }
+
+
+
     </style>
 </head>
 
@@ -126,7 +155,7 @@
                 <div class="button-wrap">
                     <ul>
                         <li>
-                            <a class="btn" title="거래명세서 출력" id="btnPrint">
+                            <a class="btn" title="거래명세서 출력" id="btnWritePrint">
                                 거래명세서 출력
                             </a>
                         </li>
@@ -215,7 +244,7 @@
                             </a>
                         </li>
                         <li>
-                            <a class="btn" title="재전송" id="btnReMassage">
+                            <a class="btn" title="재전송" id="btnReMessage">
                                 재전송
                             </a>
                         </li>
@@ -387,7 +416,7 @@
 
                 // 버튼 비활성화
                 function updateButtonDisable(statecode, isMultiSelected = false) {
-                    const allButtons = ['btnDelete', 'btnEdit', 'btnIssue', 'btnIssueCancel', 'btnReMassage'];
+                    const allButtons = ['btnDelete', 'btnEdit', 'btnIssue', 'btnIssueCancel', 'btnReMessage'];
 
                     allButtons.forEach(id => {
                         const btn = document.getElementById(id);
@@ -404,11 +433,11 @@
                         if (statecode === 100) {
                             enableButtons.push('btnDelete', 'btnIssue');
                         } else if (statecode === 'MULTI_REISSUE') {
-                            enableButtons.push('btnReMassage');
+                            enableButtons.push('btnReMaesage');
                         } else if (statecode === 'MULTI_300') {
-                            enableButtons.push('btnIssueCancel', 'btnReMassage');
+                            enableButtons.push('btnIssueCancel', 'btnReMessage');
                         } else if ([300, 301, 302, 303, 304].includes(statecode)) {
-                            enableButtons.push('btnReMassage'); // fallback
+                            enableButtons.push('btnReMessage'); // fallback
                         }
                     } else {
                         switch (statecode) {
@@ -416,15 +445,15 @@
                                 enableButtons.push('btnDelete', 'btnEdit', 'btnIssue');
                                 break;
                             case 300:
-                                enableButtons.push('btnIssueCancel', 'btnReMassage');
+                                enableButtons.push('btnIssueCancel', 'btnReMessage');
                                 break;
                             case 301:
                             case 302:
                             case 303:
-                                enableButtons.push('btnReMassage');
+                                enableButtons.push('btnReMessage');
                                 break;
                             case 304:
-                                enableButtons.push('btnEdit', 'btnReMassage');
+                                enableButtons.push('btnEdit', 'btnReMessage');
                                 break;
                             default:
                                 break;
@@ -471,6 +500,32 @@
                     };
                     _this.showInvoiceForm(defaultData);
                 });
+
+                // 거래명세서 출력
+                $('#btnWritePrint').click(function (e) {
+                    const items = _this.grid.rows
+                        .filter(row => row.isSelected)
+                        .map(row => row.dataItem);
+
+                    if (items.length === 0) {
+                        Alert.alert('', '발행할 항목을 선택해주세요.');
+                        return;
+                    }
+
+                    const data = {
+                        misnum: items[0].misnum,
+                    };
+
+                    AjaxUtil.getAsyncData(_this.url + '/invoice_detail', data, function (result) {
+
+                        _this.showPrintForm(result.data); // 모달 띄움
+
+                    });
+
+
+                });
+
+
 
                 // 수정 클릭
                 this.$btnEdit.click(function (e) {
@@ -573,7 +628,7 @@
                 });
 
                 // 재전송 버튼
-                $('#btnReMassage').click(function (e) {
+                $('#btnReMessage').click(function (e) {
                     const items = _this.grid.rows
                         .filter(row => row.isSelected)
                         .map(row => row.dataItem);
@@ -587,7 +642,7 @@
                         misnum: item.misnum
                     }));
 
-                    let url = _this.url + '/invoice_issue';
+                    let url = _this.url + '/re_message';
                     AjaxUtil.postJsonData(url, issueList, function (res) {
                         if (res.success) {
                             Alert.alert('', res.message || '재전송 되었습니다.', function () {
@@ -671,6 +726,127 @@
                 }
 
             }
+
+            showPrintForm(data) {
+                let _this = this;
+                let content = tmpl('popup_invoiceTemplate', data);
+                let $content = $(content);
+
+                // 버튼 등 숨김 처리
+                $content.find('#btnInvoiceSave').hide();
+                $content.find('#modal-close-button').hide();
+                $content.find('#WriteTypeList').hide();
+                $content.find('#addRemark').hide();
+                $content.find('#removeRemark2').hide();
+                $content.find('#removeRemark3').hide();
+                $content.find('#removeRemark3').hide();
+                $content.find('#btnAddFiveDetails').hide();
+                $content.find('[id^="btnDelItem_"]').hide();
+                $content.find('[id^="btnViewItem_"]').hide();
+                $content.find('#saveInvoicee').hide();
+                $content.find('#btnAddFiveDetails').hide();
+
+                // ✅ header를 제거
+                const modal = new PopupDraggable('');
+                const modalInstance = modal.open({
+                    width: 1200,
+                    height: 680,
+                    $content: $content
+                });
+
+                // ✅ 모달을 화면에 보이지 않게 숨김
+                modalInstance.$["root"].css({
+                    position: 'absolute',
+                    left: '-9999px',
+                    top: '0',
+                    visibility: 'hidden'
+                });
+                const landscapeStyle = `
+                    <style id="print-orientation-style">
+                        @page {
+                            size: A4 landscape;
+                            margin: 10mm;
+                        }
+                        @media print {
+                            #taxForm {
+                                width: 90% !important;
+                                margin: 0 auto !important;
+                                font-size: 13px !important
+                            }
+                            #taxForm * {
+                                font-size: 13px !important;
+                            }
+                            input[type="radio"] {
+                               vertical-align: middle !important;
+                                transform: translateY(-8px); /*  더 확실히 이동됨 */
+                                margin-right: 4px !important;
+                                padding: 0 !important;
+                            }
+                            #taxForm input,
+                            #taxForm textarea{
+                                border: 0 !important;
+                                outline: none !important;
+                            }
+                            #writeDate {
+                                padding: 0 0 0 -5px;
+                                margin: 0;
+                            }
+                            #sale_type {
+                                display: none !important;
+                            }
+                            #sale_type_print {
+                                border: 0 !important;
+                                background: none !important;
+                                font-size: 13px !important;
+                            }
+                            #btnSelectInvoicee {
+                                display: none !important;
+                            }
+                            #btnSelectInvoicee {
+                                display: none !important;
+                            }
+                            #btnSelectInvoicee {
+                                display: none !important;
+                            }
+
+                            #saveInvoicee {
+                                display: none !important;
+                            }
+                        }
+                    </style>
+                `;
+                if (!document.querySelector('#print-orientation-style')) {
+                    document.head.insertAdjacentHTML('beforeend', landscapeStyle);
+                }
+
+                setTimeout(() => {
+                    FormUtil.BindInvoiceDataForm(data, $content.find('#taxForm'));
+                    window.__skipCorpNumReset = true;
+                    window.__skipInvoiceeFieldReset = true;
+
+                    $content.find('input[name="InvoiceeType"]:checked').trigger('change');
+
+                    let $saleType = $content.find('#sale_type');
+
+                    AjaxUtil.fillSelectOptions($saleType, 'system_code', 'choose', false, 'sale_type', function () {
+                        const selectedText = $saleType.find('option:selected').text();
+                        $content.find('#sale_type_print').val(selectedText);
+                    });
+
+
+                    $content.find('#taxName').text('거래명세서');
+
+                    $content.find('#InvoiceeCorpNum').trigger('input');
+                    window.__skipInvoiceeFieldReset = false;
+
+                    // 출력 실행
+                    setTimeout(() => {
+                        window.print();
+                        modal.close();
+                    }, 300);
+                }, 0);
+            }
+
 
             shipmentheadids = [];
 
@@ -771,6 +947,7 @@
                         $content.find('#InvoiceeCorpNum').trigger('input');
                         $content.find('#btnInvoiceSave span').text('수정');
                         window.__skipInvoiceeFieldReset = false;
+
                     }, 0);
 
                 }

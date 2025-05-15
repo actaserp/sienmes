@@ -723,12 +723,13 @@ public class SalesInvoiceService {
 			System.out.println("팝빌 발행 결과 ==================");
 			System.out.println("code: " + response.getCode());
 			System.out.println("message: " + response.getMessage());
-			System.out.println("invoiceNum: " + response.getNtsConfirmNum());
+			System.out.println("ntsConfirmNum: " + response.getNtsConfirmNum());
 
 			LocalDateTime now = LocalDateTime.now();
 			String statedt = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 			sm.setStatecode(300); // 즉시 발행 완료
 			sm.setStatedt(statedt);
+			sm.setNtscfnum(response.getNtsConfirmNum());
 			tb_salesmentRepository.save(sm);
 
 			result.success = true;
@@ -944,6 +945,67 @@ public class SalesInvoiceService {
 		} else {
 			result.success = false;
 			result.message = "일부 발행 취소 실패: " + failList.size() + "건\n" + String.join("\n", failList);
+		}
+
+		return result;
+	}
+
+	@Transactional
+	public AjaxResult reMessage(List<Map<String, String>> invoiceList) {
+		AjaxResult result = new AjaxResult();
+
+		if (invoiceList == null || invoiceList.isEmpty()) {
+			result.success = false;
+			result.message = "재전송 할 데이터가 없습니다.";
+			return result;
+		}
+
+		List<String> successList = new ArrayList<>();
+		List<String> failList = new ArrayList<>();
+
+		for (Map<String, String> item : invoiceList) {
+			try {
+				Integer misnum = Integer.parseInt(item.get("misnum"));
+				TB_Salesment sm = tb_salesmentRepository.findById(misnum).orElse(null);
+				if (sm == null) {
+					failList.add("misnum: " + misnum + " (해당 내역 없음)");
+					continue;
+				}
+
+				String corpNum = sm.getIcercorpnum();
+				String mgtKey = sm.getMgtkey();
+				String iverEmail = sm.getIveremail();
+
+				Response response = taxinvoiceService.sendEmail(
+						corpNum,
+						MgtKeyType.SELL,
+						mgtKey,
+						iverEmail,
+						""
+				);
+
+				System.out.println("팝빌 재전송 결과 === misnum: " + misnum);
+				System.out.println("code: " + response.getCode());
+				System.out.println("message: " + response.getMessage());
+
+				if (response.getCode() == 1) {
+					successList.add("상호: " + sm.getIvercorpnm());
+				} else {
+					failList.add("상호: " + sm.getIvercorpnm() + " (" + response.getMessage() + ")");
+				}
+
+			} catch (Exception e) {
+				failList.add("처리 중 오류 발생 (" + e.getMessage() + ")");
+				e.printStackTrace();
+			}
+		}
+
+		if (failList.isEmpty()) {
+			result.success = true;
+			result.message = "총 " + successList.size() + "건이 재전송되었습니다.";
+		} else {
+			result.success = false;
+			result.message = "일부 재전송 실패: " + failList.size() + "건\n" + String.join("\n", failList);
 		}
 
 		return result;

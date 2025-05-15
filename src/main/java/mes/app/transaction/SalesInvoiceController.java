@@ -235,4 +235,10 @@ public class SalesInvoiceController {
 		return salesInvoiceService.cancelIssue(cancelList);
 	}
 
+	@PostMapping("/re_message")
+	public AjaxResult reMessage(@RequestBody List<Map<String, String>> invoiceList) {
+
+		return salesInvoiceService.reMessage(invoiceList);
+	}
+
 }
