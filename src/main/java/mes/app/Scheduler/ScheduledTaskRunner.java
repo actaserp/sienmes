@@ -20,9 +20,13 @@ public class ScheduledTaskRunner {
     private final AccountSyncService accountSyncService;
     private final InvoiceSyncService invoiceSyncService;
 
-    @Scheduled(cron = "0 */30 * * * *")
+    @Scheduled(cron = "0 0 * * * *")
+    //@Scheduled(cron = "0 */30 * * * *") //30분주기
     public void runScheduledTasks() {
-        schedulerExecutor.execute(() -> safeRun(accountSyncService::run, "계좌수집"));
+
+        log.info("[스케줄러 시작] 계좌수집/세금계산서 작업 시작 - Thread: {}", Thread.currentThread().getName());
+
+        //schedulerExecutor.execute(() -> safeRun(accountSyncService::run, "계좌수집"));
         schedulerExecutor.execute(() -> safeRun(invoiceSyncService::run, "세금계산서"));
 
     }

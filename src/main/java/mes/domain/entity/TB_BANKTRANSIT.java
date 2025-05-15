@@ -14,7 +14,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tb_banktransit")
-public class TB_BANKTRANSIT {
+public class TB_BANKTRANSIT extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -95,4 +95,6 @@ public class TB_BANKTRANSIT {
 
     @Column(length = 8)
     private String acccd; //계정코드
+
+
 }

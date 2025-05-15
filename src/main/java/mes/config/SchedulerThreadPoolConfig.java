@@ -14,7 +14,7 @@ public class SchedulerThreadPoolConfig {
     public Executor schedulerExecutor(){
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(8);
+        executor.setMaxPoolSize(6);
         executor.setThreadNamePrefix("scheduler");
         executor.initialize();
 

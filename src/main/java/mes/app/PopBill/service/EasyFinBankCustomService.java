@@ -130,7 +130,7 @@ public class EasyFinBankCustomService {
 
 
 
-    public void saveBankDataSync(List<EasyFinBankSearchDetail> list, String jobID, String  accountNumber, Integer accountid, String bankname){
+    public void saveBankDataSync(List<EasyFinBankSearchDetail> list, String jobID, String  accountNumber, Integer accountid, String bankname, String spjangcd){
 
 
         List<String> tidList = getTidList(list);
@@ -177,6 +177,7 @@ public class EasyFinBankCustomService {
 
                 entity.setAccid(accountid);
                 entity.setBanknm(bankname);
+                entity.setSpjangcd(spjangcd);
 
                 if(remark != null && cltCdRelationRemarkList.containsKey(remark)){
                     entity.setCltcd(cltCdRelationRemarkList.get(remark));

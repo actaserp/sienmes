@@ -34,7 +34,10 @@ public class AccountSyncService {
     private final EasyFinBankService easyFinBankService;
     private final EasyFinBankCustomService easyFinBankCustomService;
 
+    @Deprecated
     public void run() {
+
+        log.info("[{}] 시작 - Thread: {}", "계좌수집", Thread.currentThread().getName());
 
         LocalDateTime startTime = LocalDateTime.now();
 
@@ -68,7 +71,7 @@ public class AccountSyncService {
 
                 List<EasyFinBankSearchDetail> list = searchResult.getList();
                 //동기로 DB에 저장
-                easyFinBankCustomService.saveBankDataSync(list, jobId, params.get("AccountNumber"), accountId, params.get("BankCode"));
+                easyFinBankCustomService.saveBankDataSync(list, jobId, params.get("AccountNumber"), accountId, params.get("BankName"), params.get("spjangcd"));
 
             } catch (Exception e) {
                 log.error("계좌 복호화 또는 수집 중 예외 발생: {}, 계좌번호: {}", e.getMessage(), account.get("AccountNumber"));
@@ -85,7 +88,9 @@ public class AccountSyncService {
             SELECT a.accid AS "AccountId",
                    b.saupnum AS "CorpNum",
                    c.bankpopcd AS "BankCode",
-                   a.accnum   AS "AccountNumber"
+                   c.banknm AS "BankName",
+                   a.accnum   AS "AccountNumber",
+                   a.spjangcd AS "spjangcd"
               FROM tb_account a
               LEFT JOIN tb_xa012 b ON b.spjangcd = a.spjangcd
               LEFT JOIN tb_xbank c ON a.bankid = c.bankid
