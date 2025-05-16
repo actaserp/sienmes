@@ -50,6 +50,8 @@ public class MobileMainController {
         Map<String, Object> timeInfo = mobileMainService.getInOfficeTime(username);
         Map<String, Object> resultData = new HashMap<>();
         resultData.put("first_name", (String)userInfo.get("first_name"));
+        resultData.put("Name", (String)userInfo.get("Name"));
+        resultData.put("jik_id", (String)userInfo.get("jik_id"));
         if(timeInfo != null) {
             resultData.put("inOfficeTime", (String) timeInfo.get("starttime"));
         }

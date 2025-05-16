@@ -2,6 +2,7 @@ package mes.app.mobile;
 
 import mes.app.mobile.Service.AttendanceStatisticsService;
 import mes.app.mobile.Service.MobileMainService;
+import mes.domain.entity.User;
 import mes.domain.model.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -23,9 +24,11 @@ public class AttendanceStatisticsController {
             HttpServletRequest request,
             Authentication auth) {
         AjaxResult result = new AjaxResult();
-        String user = auth.getPrincipal().toString();
+        User user = (User) auth.getPrincipal();
+        String username = user.getUsername();
 
-        result.data = attendanceStatisticsService.getUserInfo(user);
+
+        result.data = attendanceStatisticsService.getUserInfo(username);
 
         return result;
     }

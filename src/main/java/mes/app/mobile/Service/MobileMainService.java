@@ -22,14 +22,22 @@ public class MobileMainService {
 
         String sql = """
                 SELECT
-                    a.first_name,
-                    t.starttime
-                FROM auth_user a
-                LEFT JOIN tb_pb201 t
-                ON t.personid = a.personid
-                WHERE a.username = :username
-                ORDER BY t.starttime DESC
-                LIMIT 1
+                          a.first_name,
+                          t.starttime,
+                          d."Name",
+                          s."Value" as jik_id
+                      FROM auth_user a
+                      LEFT JOIN tb_pb201 t ON t.personid = a.personid
+                      left join person p on p.id = a.personid
+                      LEFT JOIN depart d ON p."Depart_id" = d.id
+                      left join (
+                            SELECT "Code", "Value"
+                            FROM sys_code
+                            WHERE "CodeType" = 'jik_type'
+                    ) s on s."Code" = p.jik_id
+                      WHERE a.username = :username
+                      ORDER BY t.starttime DESC
+                      LIMIT 1
         		""";
 
 

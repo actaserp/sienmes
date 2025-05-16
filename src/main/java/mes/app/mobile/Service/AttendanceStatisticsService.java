@@ -13,7 +13,7 @@ public class AttendanceStatisticsService {
     @Autowired
     SqlRunner sqlRunner;
 
-    // 사용자 정보 조회
+    // 휴가통계 조회
     public List<Map<String, Object>> getUserInfo(String user) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
