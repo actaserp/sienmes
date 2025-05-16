@@ -46,7 +46,7 @@ public class PaymentListService {
            tb.memo
            from tb_banktransit tb
            left join company c on c.id = tb.cltcd  and tb.spjangcd =  c.spjangcd 
-           left join  sys_code sc on sc."Code" = tb.iotype
+           left join  sys_code sc on sc."Code" = tb.iotype and "CodeType" ='deposit_type'
            left join tb_trade tt on tb.trid = tt.trid and tb.spjangcd = tt.spjangcd
            WHERE tb.ioflag = '1'
            -- and tb.spjangcd =:spjangcd
