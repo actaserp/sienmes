@@ -574,7 +574,8 @@
                     'group': group,
                     'keyword': keyword,
                     'depart_id': depart_id,
-                    'username': username
+                    'username': username,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
                 success: function (result) {
@@ -653,6 +654,8 @@
             let data = FormUtil.extractForm($('#userForm'));
 
             data.is_active = $('#is_active').is(':checked');
+            data.spjangcd = sessionStorage.getItem('spjangcd');
+
 
             if (!data.login_id) {
                 Alert.alert('', '사번을 입력해 주세요');

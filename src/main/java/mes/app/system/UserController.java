@@ -113,6 +113,7 @@ public class UserController {
 			@RequestParam(value="is_active", required = false) Boolean is_active,
 			@RequestParam(value="personid", required = false) String personid,
 			@RequestParam(value="tel", required = false) String tel,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth
 			) {
@@ -189,6 +190,7 @@ public class UserController {
 		}
 
 
+		user.setSpjangcd(spjangcd);
 		user.setUsername(login_id);
         user.setFirst_name(Name);
         user.setEmail(email);
