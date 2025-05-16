@@ -46,7 +46,7 @@ public class DepositListService {
            tb.memo
            from tb_banktransit tb
            left join company c on c.id = tb.cltcd and tb.spjangcd =  c.spjangcd 
-           left join  sys_code sc on sc."Code" = tb.iotype
+           left join  sys_code sc on sc."Code" = tb.iotype and "CodeType" ='deposit_type'
            left join tb_trade tt on tb.trid = tt.trid and tt.spjangcd = tb.spjangcd
            WHERE tb.ioflag = '0'
            AND TO_DATE(tb.trdate, 'YYYYMMDD') BETWEEN :start AND :end
