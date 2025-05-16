@@ -14,4 +14,6 @@ public interface SysCodeRepository extends JpaRepository<SystemCode, Integer>{
 
 	SystemCode findByCodeTypeAndCode(String string, String string2);
 
+	SystemCode findByCodeType(String type);
+
 }

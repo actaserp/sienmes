@@ -17,5 +17,5 @@ public interface TB_SalesmentRepository extends JpaRepository<TB_Salesment, Inte
     @EntityGraph(attributePaths = "details")
     List<TB_Salesment> findAllByMisnumIn(List<Integer> misnums);
 
-
+    Optional<TB_Salesment> findByMgtkeyAndNtscfnum(String mgtkey, String ntscfnum);
 }

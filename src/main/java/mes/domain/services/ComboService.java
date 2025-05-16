@@ -66,6 +66,7 @@ public class ComboService {
 		this._dicFunc_.put("person", this.person);
 		this._dicFunc_.put("routing", this.routing);
 		this._dicFunc_.put("shift", this.shift);
+		this._dicFunc_.put("issuediv", this.issuediv);
 		this._dicFunc_.put("stop_cause", this.stop_cause); // 확인필요
 		this._dicFunc_.put("store_house", this.store_house);
 		this._dicFunc_.put("store_house_semi_material", this.store_house_semi_material);
@@ -558,6 +559,15 @@ public class ComboService {
         dicParam.addValue("cond2", cond2);
         dicParam.addValue("cond3", cond3);
         return this.sqlRunner.getRows(sql, dicParam);
+	};
+
+	ComboDataFunction issuediv=(String cond1, String cond2, String cond3)-> {
+		String sql = "select \"Code\" as Value, \"Value\" as text from sys_code where 1=1 and \"CodeType\" = 'issue_div' order by \"Code\" ";
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("cond1", cond1);
+		dicParam.addValue("cond2", cond2);
+		dicParam.addValue("cond3", cond3);
+		return this.sqlRunner.getRows(sql, dicParam);
 	};
 	
 	ComboDataFunction stop_cause=(String cond1, String cond2, String cond3)-> { // 확인필요

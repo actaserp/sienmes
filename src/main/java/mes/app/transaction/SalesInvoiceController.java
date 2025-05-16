@@ -204,6 +204,14 @@ public class SalesInvoiceController {
         return salesInvoiceService.saveInvoice(form);
 	}
 
+	@PostMapping("/invoice_update")
+	public AjaxResult updateInvoice(@RequestParam(value="misnum") Integer misnum,
+									@RequestParam(value="issuediv") String issuediv,
+									Authentication auth) {
+
+		return salesInvoiceService.updateinvoice(misnum, issuediv);
+	}
+
 	@PostMapping("/invoice_issue")
 	public AjaxResult issueInvoice(@RequestBody List<Map<String, String>> issueList) {
 
@@ -239,6 +247,12 @@ public class SalesInvoiceController {
 	public AjaxResult reMessage(@RequestBody List<Map<String, String>> invoiceList) {
 
 		return salesInvoiceService.reMessage(invoiceList);
+	}
+
+	@PostMapping("/issue_delete")
+	public AjaxResult deleteInvoice(@RequestBody List<Map<String, String>> delList) {
+
+		return salesInvoiceService.deleteInvoice(delList);
 	}
 
 }

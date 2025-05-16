@@ -11,10 +11,7 @@ import mes.Encryption.EncryptionUtil;
 import mes.app.util.UtilClass;
 import mes.domain.entity.*;
 import mes.domain.model.AjaxResult;
-import mes.domain.repository.CompanyRepository;
-import mes.domain.repository.ShipmentHeadRepository;
-import mes.domain.repository.TB_SalesDetailRepository;
-import mes.domain.repository.TB_SalesmentRepository;
+import mes.domain.repository.*;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,6 +71,9 @@ public class SalesInvoiceService {
 	@Autowired
 	private ShipmentHeadRepository shipmentHeadRepository;
 
+    @Autowired
+    private SysCodeRepository sysCodeRepository;
+
 	public List<Map<String, Object>> getList(String invoice_kind, Integer cboStatecode, Integer cboCompany, Timestamp start, Timestamp end, String spjangcd) {
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
@@ -106,12 +106,14 @@ public class SalesInvoiceService {
 			   m.supplycost,
 			   m.taxtotal,
 			   m.statecode,
-			   state_code."Value" AS statecode_name, -- fn_code_name 제거
+			   state_code."Value" AS statecode_name,
 			   TO_CHAR(TO_TIMESTAMP(m.statedt, 'YYYYMMDDHH24MISS'), 'YYYY-MM-DD HH24:MI:SS') AS statedt_formatted,
 			   m.iverceonm,
 			   m.iveremail,
 			   m.iveraddr,
 			   m.taxtype,
+			   issue_div."Value" AS issuediv_name,
+			   m.issuediv,
 			   CASE
 				   WHEN ds.item_count > 1 THEN ds.first_itemnm || ' 외 ' || (ds.item_count - 1) || '개'
 				   WHEN ds.item_count = 1 THEN ds.first_itemnm
@@ -129,6 +131,10 @@ public class SalesInvoiceService {
 		   LEFT JOIN sys_code sale_type_code
 			   ON sale_type_code."CodeType" = 'sale_type'
 			   AND sale_type_code."Code" = m.misgubun
+			   
+		   LEFT JOIN sys_code issue_div
+			   ON issue_div."CodeType" = 'issue_div'
+			   AND issue_div."Code" = m.issuediv
 		   
 		   LEFT JOIN sys_code state_code
 			   ON state_code."CodeType" = 'state_code_pb'
@@ -159,7 +165,7 @@ public class SalesInvoiceService {
 			m.misdate, m.misnum, m.misgubun, sale_type_code."Value", m.cltcd, m.ivercorpnum,
 			m.ivercorpnm, m.totalamt, m.supplycost, m.taxtotal, m.statecode,
 			state_code."Value", m.statedt, m.iverceonm, m.iveremail,
-			m.iveraddr, m.taxtype, ds.first_itemnm, ds.item_count
+			m.iveraddr, m.taxtype, ds.first_itemnm, ds.item_count, issue_div."Value", m.issuediv
         ORDER BY m.misdate DESC, m.misnum DESC
         """;
 
@@ -317,6 +323,14 @@ public class SalesInvoiceService {
 		salesment.setPurposetype((String) form.get("PurposeType"));
 		salesment.setStatecode(100);
 		salesment.setStatedt(statedt);
+
+		// 디폴트 발행 구분 저장
+		SystemCode sys = sysCodeRepository.findByCodeType("issue_div_default");
+		if (sys != null) {
+			salesment.setIssuediv(sys.getCode());
+		} else{
+			salesment.setIssuediv("nextday");
+		}
 
 		if (isUpdate) {
 			tb_salesDetailRepository.deleteByMisnum(misnum);   // 현재 PK로 삭제
@@ -578,8 +592,20 @@ public class SalesInvoiceService {
 			m.note AS "Note",
 			m.credit AS "Credit",
 			m.purposetype AS "PurposeType",
-			m.statecode AS "StateCode"
+			m.statecode AS "StateCode",
+			sc1."Value" AS statecode_name,
+			sc2."Description" AS ntscode_des
+				 			
 		FROM tb_salesment m
+		
+		LEFT JOIN sys_code sc1
+			ON sc1."CodeType" = 'state_code_pb'
+			AND sc1."Code" = m.statecode::text
+		  
+		LEFT JOIN sys_code sc2
+			ON sc2."CodeType" = 'nts_code'
+			AND sc2."Code" = m.ntscode::text
+			   
 		WHERE m.misnum = :misnum
 		""";
 
@@ -659,11 +685,6 @@ public class SalesInvoiceService {
 		// 발행 처리
 		AjaxResult issueResult = callPopbillIssue(salesList);
 
-		System.out.println("callPopbillIssue result:");
-		System.out.println("  success: " + issueResult.success);
-		System.out.println("  message: " + issueResult.message);
-		System.out.println("  data: " + issueResult.data);
-
 		result.success = issueResult.success;
 		result.message = issueResult.message;
 		return result;
@@ -703,7 +724,6 @@ public class SalesInvoiceService {
 		try {
 			Taxinvoice taxinvoice = makeTaxInvoiceObject(sm);
 
-
 			try {
 				ObjectMapper mapper = new ObjectMapper();
 				System.out.println("=== 팝빌 요청 세금계산서 JSON ===");
@@ -712,10 +732,8 @@ public class SalesInvoiceService {
 				System.err.println("JSON 출력 실패: " + e.getMessage());
 			}
 
-
 			// 고유 관리번호 필수
 			String mgtKey = sm.getIcercorpnum();
-
 			System.out.println(taxinvoice);
 
 			// 발행 요청
@@ -731,6 +749,20 @@ public class SalesInvoiceService {
 			sm.setStatedt(statedt);
 			sm.setNtscfnum(response.getNtsConfirmNum());
 			tb_salesmentRepository.save(sm);
+
+			if ("issuenow".equalsIgnoreCase(sm.getIssuediv())) {
+				try {
+					Response ntsResponse = taxinvoiceService.sendToNTS(
+							sm.getIcercorpnum(),
+							MgtKeyType.SELL,
+							sm.getMgtkey(), // mgtKey
+							"" // UserID
+					);
+					System.out.println("국세청 전송 요청 완료: " + ntsResponse.getMessage());
+				} catch (PopbillException ex) {
+					System.err.println("국세청 전송 요청 실패: " + ex.getMessage());
+				}
+			}
 
 			result.success = true;
 			result.message = "세금계산서가 발행되었습니다.";
@@ -951,6 +983,30 @@ public class SalesInvoiceService {
 	}
 
 	@Transactional
+	public AjaxResult updateinvoice(Integer misnum, String issuediv) {
+		AjaxResult result = new AjaxResult();
+
+		TB_Salesment sm = tb_salesmentRepository.findById(misnum).orElse(null);
+		if (sm == null) {
+			result.success = false;
+			result.message = "해당 데이터가 존재하지 않습니다.";
+			return result;
+		}
+
+		sm.setIssuediv(issuediv);
+
+		if ("other".equals(issuediv) || "reverse".equals(issuediv)) {
+			sm.setStatecode(null);
+		} else {
+			sm.setStatecode(100);
+		}
+
+		tb_salesmentRepository.save(sm);
+
+		return result;
+	}
+
+	@Transactional
 	public AjaxResult reMessage(List<Map<String, String>> invoiceList) {
 		AjaxResult result = new AjaxResult();
 
@@ -1011,6 +1067,61 @@ public class SalesInvoiceService {
 		return result;
 	}
 
+	@Transactional
+	public AjaxResult deleteInvoice(List<Map<String, String>> delList) {
+		AjaxResult result = new AjaxResult();
+
+		if (delList == null || delList.isEmpty()) {
+			result.success = false;
+			result.message = "재전송 할 데이터가 없습니다.";
+			return result;
+		}
+
+		List<String> successList = new ArrayList<>();
+		List<String> failList = new ArrayList<>();
+		List<Integer> successMisnums = new ArrayList<>();
+
+		for (Map<String, String> item : delList) {
+			try {
+				Integer misnum = Integer.parseInt(item.get("misnum"));
+				TB_Salesment sm = tb_salesmentRepository.findById(misnum).orElse(null);
+				if (sm == null) {
+					failList.add("misnum: " + misnum + " (해당 내역 없음)");
+					continue;
+				}
+
+				String corpNum = sm.getIcercorpnum();
+				String mgtKey = sm.getMgtkey();
+
+				Response response = taxinvoiceService.delete(
+						corpNum,
+						MgtKeyType.SELL,
+						mgtKey,
+						""
+				);
+
+				if (response.getCode() == 1) {
+					successList.add("상호: " + sm.getIvercorpnm());
+					successMisnums.add(misnum);
+				} else {
+					failList.add("상호: " + sm.getIvercorpnm() + " (" + response.getMessage() + ")");
+				}
+
+			} catch (Exception e) {
+				failList.add("처리 중 오류 발생 (" + e.getMessage() + ")");
+				e.printStackTrace();
+			}
+		}
+
+		result.success = failList.isEmpty();
+		result.message = result.success
+				? "총 " + successList.size() + "건이 삭제되었습니다."
+				: "일부 삭제 실패: " + failList.size() + "건\n" + String.join("\n", failList);
+
+		result.data = Map.of("successMisnums", successMisnums);
+
+		return result;
+	}
 
 
 }

@@ -41,8 +41,9 @@ public class SecurityConfiguration {
         http.headers().frameOptions().sameOrigin(); 
         //http.csrf().disable();
         http.csrf().ignoringAntMatchers("/api/files/upload/**");
+        http.csrf().ignoringAntMatchers("/popbill/webhook");
         
-        http.authorizeRequests().mvcMatchers("/login","/logout" ,"/useridchk/**","/user-auth/save").permitAll()
+        http.authorizeRequests().mvcMatchers("/login","/logout" ,"/useridchk/**","/user-auth/save", "/popbill/webhook").permitAll()
         .mvcMatchers("/authentication/**","/user-auth/**").permitAll()
         .mvcMatchers("/setup").hasAuthority("admin")		// hasRole -> hasAuthority로 수정
         .anyRequest().authenticated();
