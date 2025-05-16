@@ -184,11 +184,17 @@
                                 <!--<textarea id="Description" name="Description"></textarea>-->
                             </td>
 
+                            <th>
+                                <label for="rtdate"><span class="eq">*</span>입사일</label>
+                            </th>
+                            <td>
+                                <input type="date" id="rtdate" name="rtdate" style="width: 100%">
+                            </td>
 
                             <th>
                                 <label for="Description">비고</label>
                             </th>
-                            <td colspan="5">
+                            <td colspan="3">
                                 <input type="text" id="Description" name="Description" style="width: 100%;">
                                 <!--<textarea id="Description" name="Description"></textarea>-->
                             </td>
@@ -227,6 +233,7 @@
             {binding: 'person_group_name', header: '근무구분', width: 120, align: 'center'},
             {binding: 'dept_name', header: '부서', width: 120, align: 'center'},
             {binding: 'factory_name', header: '공장', width: 120, align: 'center'},
+            {binding: 'rtdate', header: '입사일', width: 120, align: 'center'},
             {binding: 'description', header: '비고', width: '*', align: 'center'},
         ]
 
@@ -244,7 +251,8 @@
                 type: 'GET',
                 data: {
                     'worker_name': worker_name,
-                    'workcenter_id': workcenter_id
+                    'workcenter_id': workcenter_id,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
                 success: function (data) {
@@ -253,11 +261,18 @@
                         if (item.person_group_id == 1) groupName = '주간근무';
                         else if (item.person_group_id == 2) groupName = '야간근무';
 
-                        const { person_group_name, ...rest } = item;
+                        // 날짜 변환
+                        let formattedRtdate = '';
+                        if (item.rtdate && item.rtdate.length === 8) {
+                            formattedRtdate = `${item.rtdate.substring(0, 4)}-${item.rtdate.substring(4, 6)}-${item.rtdate.substring(6, 8)}`;
+                        }
+
+                        const { person_group_name, rtdate, ...rest } = item;
 
                         return {
                             ...rest,
-                            person_group_name: groupName
+                            person_group_name: groupName,
+                            rtdate: formattedRtdate // 포맷된 날짜를 사용
                         };
                     });
 
@@ -288,7 +303,7 @@ console.log(selectedItem);
                 document.getElementById('Name').value = selectedItem.person_name;
                 document.getElementById('WorkHour').value = selectedItem.work_hour;
                 document.getElementById('Description').value = selectedItem.description; // 체크박스 상태 설정
-
+                document.getElementById('rtdate').value = selectedItem.rtdate;
 
                 function setSelectValue(selectId, valueToMatch) {
                     let selectElement = document.getElementById(selectId);
@@ -308,6 +323,7 @@ console.log(selectedItem);
 
                 setSelectValue('work_division', selectedItem.person_group_name);
                 setSelectValue('ShiftCode', selectedItem.shift_name);
+                setSelectValue('jik_id', selectedItem.jik_id);
                 setSelectValue('Depart_id', selectedItem.dept_name);
                 setSelectValue('WorkCenter_id', selectedItem.workcenter_name);
                 setSelectValue('Factory_id', selectedItem.factory_name);
@@ -342,7 +358,8 @@ console.log(selectedItem);
                 type: 'GET',
                 data: {
                     'worker_name': worker_name,
-                    'workcenter_id': workcenter_id
+                    'workcenter_id': workcenter_id,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
                 success: function (result) {
@@ -392,6 +409,7 @@ console.log(selectedItem);
                     shift_name: item.shift_name,
                     dept_name: item.dept_name,
                     factory_name: item.factory_name,
+                    rtdate: item.rtdate,
                     description: item.description
                 };
             });
@@ -428,6 +446,8 @@ console.log(selectedItem);
             let url = '/api/definition/person';
 
             let data = FormUtil.extractForm($('#personForm'));
+
+            data.spjangcd = sessionStorage.getItem('spjangcd');
 
             // 필수입력 check routine
             if (!data.Code) {

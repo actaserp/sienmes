@@ -4,6 +4,9 @@
         .wj-header {
             text-align: center !important;
         }
+         #getPersonId {
+             color: white !important;
+         }
     </style>
 </head>
 
@@ -186,7 +189,8 @@
                                             <label for="personid">사번</label>
                                         </th>
                                         <td colspan="3">
-                                            <input type="text" id="personid" name="personid" style="width: 75%;" readonly>
+                                            <input type="text" id="personid" name="personid" style="width: 35%;" readonly>
+                                            <input type="text" id="personname" name="personname" style="width: 35%;" readonly>
                                             <a class="btn btn-navy" title="자료가져오기" id="getPersonId">사번찾기</a>
                                         </td>
 
@@ -253,8 +257,10 @@
                                         <td>
                                             <select style="width: 100%;" id="lang_code" name="lang_code"></select>
                                         </td>
-                                        <th></th>
-                                        <td></td>
+                                        <th><label for="spjangcd">사업장</label></th>
+                                        <td>
+                                            <select style="width: 100%;" id="spjangcd" name="spjangcd"></select>
+                                        </td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -404,6 +410,7 @@
         var viewdata;
         var theGrid2;
         var viewdata2;
+        let csrfToken = $("[name=_csrf]").val();
 
         let columns = [
             {binding: 'id', header: 'id', width: 100, align: 'center', visible: false},
@@ -498,6 +505,7 @@
                 document.getElementById('tel').value = selectedItem.tel;
                 document.getElementById('Depart_id').value = selectedItem.dept_name;
                 document.getElementById('personid').value = selectedItem.personid;
+                document.getElementById('personname').value = selectedItem.first_name;
                 document.getElementById('is_active').checked = selectedItem.is_active === true; // 체크박스 상태 설정
 
 
@@ -515,12 +523,23 @@
                 } else {
                     setSelectValue('UserGroup_id', '사용자');
                 }
-
-                /*2*/
-
                 setSelectValue('Factory_id', selectedItem.factory_name);
                 setSelectValue('Depart_id', selectedItem.dept_name);
                 setSelectValue('lang_code', selectedItem.login_id);
+
+                function setSelectValueByValue(selectId, valueToMatch) {
+                    let selectElement = document.getElementById(selectId);
+                    if (selectElement) {
+                        for (let option of selectElement.options) {
+                            option.selected = option.value === valueToMatch;
+                        }
+                    }
+                }
+
+                if (selectedItem.spjangcd) {
+                    setSelectValueByValue('spjangcd', selectedItem.spjangcd);
+                }
+
 
                 setButtonState();
                 user_group_grid(selectedItem.id);
@@ -528,6 +547,7 @@
 
             theGrid.rowHeaders.columns.splice(0, 1);
             user_group_grid();
+            getspjangcd();
         }
 
 
@@ -650,11 +670,16 @@
 
         function saveUser() {
             let url = '/api/system/user/save';
-//데이터입력체크루틴 누락
+            //데이터입력체크루틴 누락
             let data = FormUtil.extractForm($('#userForm'));
 
             data.is_active = $('#is_active').is(':checked');
-            data.spjangcd = sessionStorage.getItem('spjangcd');
+            let spjangcd = $('#spjangcd').val();
+            if (!spjangcd) {
+                Alert.alert('', '사업장을 선택해주세요.');
+                return;
+            }
+            data.spjangcd = spjangcd;
 
 
             if (!data.login_id) {
@@ -1000,6 +1025,7 @@
                 if (selectedItem) {
                     $('#personid').val(selectedItem.id);
                     $('#Depart_id').val(selectedItem.dept_id);
+                    $('#personname').val(selectedItem.name);
                     popContainer.close();
                 } else {
                     Alert.alert('', '사번을 선택해주세요.');
@@ -1007,7 +1033,35 @@
             });
         }
 
+        function getspjangcd() {
 
+            $.ajax({
+                url: '/api/system/user/getspjangcd',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function (response) {
+                    console.log(response.data);
+                    let select = $('#spjangcd');
+                    select.empty(); // 기존 옵션 제거
+
+                    // 선택 안 했을 때 기본 안내 옵션 추가 (선택사항)
+                    select.append('<option value="">-- 선택하세요 --</option>');
+
+                    // 받아온 데이터로 옵션 추가
+                    response.data.forEach(function(item) {
+                        let option = $('<option></option>')
+                            .val(item.spjangcd)
+                            .text(item.spjangnm);
+                        select.append(option);
+                    });
+                },
+                error: function (error) {
+                    Alert.alert('', '에러가 발생하였습니다.');
+                }
+            });
+        }
 
         /*this.close();*/
 

@@ -148,9 +148,9 @@ public class UserController {
 			dicParam.addValue("loginUser", loginUser.getId());
 			
 			sql = """
-		        	INSERT INTO user_profile 
-		        	("_created", "_creater_id", "User_id", "lang_code", "Name", "Factory_id" , "Depart_id", "UserGroup_id" ) 
-		        	VALUES (now(), :loginUser, :User_id, :lang_code, :name, :Factory_id, :Depart_id, :UserGroup_id )
+		        	INSERT INTO user_profile
+		        	("_created", "_creater_id", "User_id", "lang_code", "Name", "Factory_id" , "Depart_id", "UserGroup_id", "spjangcd" ) 
+		        	VALUES (now(), :loginUser, :User_id, :lang_code, :name, :Factory_id, :Depart_id, :UserGroup_id ,:spjangcd)
 		        """;
 			// 기존 user 수정일 경우
 		} else {
@@ -164,15 +164,17 @@ public class UserController {
 
 			// user_profile 존재 여부 확인
 			int count = jdbcTemplate.queryForObject(
-					"SELECT COUNT(*) FROM user_profile WHERE \"User_id\" = ?", Integer.class, id
+					"SELECT COUNT(*) FROM user_profile WHERE \"User_id\" = ? AND TRIM(LOWER(spjangcd)) = TRIM(LOWER(?))",
+					Integer.class,
+					id, spjangcd
 			);
 
 			if (count == 0) {
 				// user_profile에 없으면 insert 수행
 				sql = """
 			INSERT INTO user_profile 
-			("_created", "_creater_id", "User_id", "lang_code", "Name", "Factory_id", "Depart_id", "UserGroup_id") 
-			VALUES (now(), :loginUser, :User_id, :lang_code, :name, :Factory_id, :Depart_id, :UserGroup_id )
+			("_created", "_creater_id", "User_id", "lang_code", "Name", "Factory_id", "Depart_id", "UserGroup_id", "spjangcd") 
+			VALUES (now(), :loginUser, :User_id, :lang_code, :name, :Factory_id, :Depart_id, :UserGroup_id, :spjangcd )
 		""";
 				dicParam.addValue("loginUser", loginUser.getId());
 			} else {
@@ -185,6 +187,7 @@ public class UserController {
 			"Depart_id" = :Depart_id,
 			"UserGroup_id" = :UserGroup_id
 			WHERE "User_id" = :User_id
+			AND "spjangcd" = :spjangcd
 		""";
 			}
 		}
@@ -207,7 +210,8 @@ public class UserController {
 		dicParam.addValue("Depart_id", Depart_id);
 		dicParam.addValue("lang_code", lang_code);
         dicParam.addValue("User_id", user.getId());
-        
+		dicParam.addValue("spjangcd", spjangcd);
+
         this.sqlRunner.execute(sql, dicParam);
 		
 		result.data = user;
@@ -314,6 +318,18 @@ public class UserController {
 		List<Map<String, Object>> items = this.userService.getPSearchitem(code,name);
 
 		result.data = items;
+		return result;
+	}
+
+
+	@PostMapping("/getspjangcd")
+	public AjaxResult getspjangcd(){
+
+		AjaxResult result = new AjaxResult();
+
+		List<Map<String, String>> list = userService.findspjangcd();
+
+		result.data = list;
 		return result;
 	}
 

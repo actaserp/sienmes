@@ -821,6 +821,17 @@
         select.name = 'spjangcd';
         select.classList.add('select-no-border');
 
+        // 디폴트로 선택할 spjangcd 값
+        let defaultSpjangcd = null;
+
+        if (!savedSpjangcd && spjangList.length >= 2) {
+            const zzItem = spjangList.find(item => item.spjangcd === 'ZZ');
+            if (zzItem) {
+                defaultSpjangcd = 'ZZ';
+                sessionStorage.setItem('spjangcd', 'ZZ');
+            }
+        }
+
         spjangList.forEach((item, index) => {
             const option = document.createElement('option');
             option.value = item.spjangcd;
@@ -828,11 +839,11 @@
 
             if (savedSpjangcd) {
                 option.selected = (item.spjangcd === savedSpjangcd);
-            } else {
-                if (index === 0) {
-                    option.selected = true;
-                    sessionStorage.setItem('spjangcd', item.spjangcd); // 첫 항목 저장
-                }
+            } else if (defaultSpjangcd) {
+                option.selected = (item.spjangcd === defaultSpjangcd);
+            } else if (index === 0) {
+                option.selected = true;
+                sessionStorage.setItem('spjangcd', item.spjangcd); // 첫 항목 저장
             }
 
             select.appendChild(option);
@@ -845,6 +856,7 @@
 
         wrapper.appendChild(select);
     });
+
 </script>
 
 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>

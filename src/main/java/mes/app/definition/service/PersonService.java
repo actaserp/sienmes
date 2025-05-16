@@ -16,11 +16,12 @@ public class PersonService {
 	@Autowired
 	SqlRunner sqlRunner;
 	
-	public List<Map<String, Object>> getPersonList(String workerName, String workcenterId) {
+	public List<Map<String, Object>> getPersonList(String workerName, String workcenterId,String spjangcd) {
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();        
         dicParam.addValue("workerName", workerName);
         dicParam.addValue("workcenterId", workcenterId);
+		dicParam.addValue("spjangcd", spjangcd);
         
         String sql = """
         		SELECT p.id
@@ -37,6 +38,7 @@ public class PersonService {
 	            , f."Name" as factory_name
 	            , p."PersonGroup_id" as person_group_id
 	            , s."Value" as jik_id
+	            , p.rtdate as rtdate
 		        FROM person p
 		        left join work_center wc on p."WorkCenter_id" = wc.id
 		        left join Factory f on p."Factory_id" = f.id
@@ -48,6 +50,7 @@ public class PersonService {
 				        WHERE "CodeType" = 'jik_type'
 				) s on s."Code" = p.jik_id
 	            where 1=1
+	            AND p.spjangcd = :spjangcd
         		""";
         if (StringUtils.isEmpty(workerName)==false) sql +=" and upper(p.\"Name\") like concat('%%',upper(:workerName),'%%') ";
         if (StringUtils.isEmpty(workcenterId)==false) sql +=" and p.\"WorkCenter_id\" = cast(:workcenterId as Integer) ";

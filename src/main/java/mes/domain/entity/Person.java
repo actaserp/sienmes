@@ -71,5 +71,11 @@ public class Person extends AbstractAuditModel{
 
 	@Column(name = "jik_id")
 	String jik_id;
+
+	@Column(name = "spjangcd")
+	String spjangcd;
+
+	@Column(name = "rtdate")
+	String rtdate;
 	
 }

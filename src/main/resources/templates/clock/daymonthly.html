@@ -290,21 +290,26 @@
 
                         if (e.panel.cellType === wijmo.grid.CellType.Cell) {
                             const col = sender.columns[e.col];
+                            const item = sender.rows[e.row].dataItem;
+
                             if (col.binding === 'weekday') {
                                 const weekday = sender.getCellData(e.row, e.col, false);
 
-                                // 일단 색 초기화
-                                e.cell.style.color = ''; // 이전 스타일 초기화
+                                e.cell.style.color = ''; // 초기화
 
-                                // 요일에 따라 색상 설정
                                 if (weekday === '일') {
                                     e.cell.style.color = 'red';
                                 } else if (weekday === '토') {
                                     e.cell.style.color = 'blue';
                                 }
                             }
-                        }
 
+                            // 오늘 날짜이면 강조
+                            if (item.isToday) {
+                                e.cell.style.fontWeight = 'bold';
+                                e.cell.style.color = 'gold';  // 노란색 텍스트
+                            }
+                        }
                     },
                     columns: [
                         {binding: 'date', header: '일자', width: '*', align: 'center'},
@@ -385,6 +390,10 @@
                 const dateList = [];
                 const lastDate = new Date(year, month, 0).getDate(); // 말일
 
+                const today = new Date();
+                const todayStr = `${today.getFullYear()}-${('0' + (today.getMonth() + 1)).slice(-2)}-${('0' + today.getDate()).slice(-2)}`;
+
+
                 for (let day = 1; day <= lastDate; day++) {
                     const date = new Date(year, month - 1, day);
 
@@ -397,7 +406,8 @@
                     const weekDay = ['일', '월', '화', '수', '목', '금', '토'][date.getDay()];
                     dateList.push({
                         date: dateStr,
-                        weekday: weekDay
+                        weekday: weekDay,
+                        isToday: dateStr === todayStr ? true : false  // 오늘 날짜인지 여부
                     });
                 }
                 return dateList;

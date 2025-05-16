@@ -1,5 +1,6 @@
 package mes.app.system.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +44,7 @@ public class UserService {
               , up.lang_code
               , au.is_active
               , to_char(au.date_joined ,'yyyy-mm-dd hh24:mi') as date_joined
+              , au.spjangcd as spjangcd
             from auth_user au
             left join user_profile up on up."User_id" = au.id and up.spjangcd = au.spjangcd
             left join user_group ug on ug.id = up."UserGroup_id" and ug.spjangcd = up.spjangcd
@@ -180,6 +182,29 @@ public class UserService {
 
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		return items;
+	}
+
+	public List<Map<String, String>> findspjangcd() {
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+
+		String sql = """
+                SELECT spjangcd, spjangnm
+                FROM tb_xa012
+            """;
+		// SQL 실행
+		List<Map<String, Object>> rows = this.sqlRunner.getRows(sql, dicParam);
+
+		List<Map<String, String>> result = rows.stream()
+				.map(row -> {
+					Map<String, String> map = new HashMap<>();
+					map.put("spjangcd", (String) row.get("spjangcd"));
+					map.put("spjangnm", (String) row.get("spjangnm"));
+					return map;
+				})
+				.toList();
+
+		return result;
 	}
 
 }

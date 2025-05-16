@@ -33,9 +33,10 @@ public class PersonController {
 	public AjaxResult getPersonList(
 			@RequestParam("worker_name") String workerName,
 			@RequestParam("workcenter_id") String workcenterId,
+			@RequestParam(value ="spjangcd") String spjangcd,
     		HttpServletRequest request) {
        
-        List<Map<String, Object>> items = this.personService.getPersonList(workerName,workcenterId);      
+        List<Map<String, Object>> items = this.personService.getPersonList(workerName,workcenterId,spjangcd);
                		
         AjaxResult result = new AjaxResult();
         result.data = items;        				
@@ -69,7 +70,8 @@ public class PersonController {
 			@RequestParam(value="WorkHour", required=false) Float workHour,
 			@RequestParam(value="work_division", required=false) String work_division,
 			@RequestParam(value="jik_id", required=false) String jik_id,
-
+			@RequestParam(value ="spjangcd") String spjangcd,
+			@RequestParam(value ="rtdate", required=false) String rtdate,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -98,7 +100,12 @@ public class PersonController {
 			result.message="중복된 사번이 존재합니다.";
 			return result;
 		}
-		
+
+		if (rtdate != null && !rtdate.isEmpty()) {
+			rtdate = rtdate.replaceAll("-", "");  // "2024-06-24" → "20240624"
+			person.setRtdate(rtdate);
+		}
+		person.setSpjangcd(spjangcd);
 		person.setCode(code);
 		person.setName(name);
 		person.setDepartId(departId);
