@@ -10,6 +10,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import mes.domain.services.LogWriter;
@@ -85,5 +86,20 @@ public class SqlRunQueryImpl implements SqlRunner {
     	T rr= this.jdbcTemplate.queryForObject(sql, dicParam, mapper); 
     	return rr;    	
     }
+
+	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
+		int[] result = new int[0];
+
+		try {
+			result = this.jdbcTemplate.batchUpdate(sql, batchArgs);
+		} catch (DataAccessException de) {
+			System.out.println(de);
+		} catch (Exception e) {
+			logWriter.addDbLog("error", "SqlRunQueryImpl.batchUpdate", e);
+		}
+
+		return result;
+	}
+
     
 }

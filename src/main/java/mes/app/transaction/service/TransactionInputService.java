@@ -209,11 +209,13 @@ public class TransactionInputService {
                 Object cltcd = item.get("cltcd");
                 Object tradeType = item.get("trade_type");
                 Object memo = item.get("memo");
+                Object commission = item.get("commission");
 
                 entity.setRemark1(remark != null ? remark.toString() : null);
                 entity.setCltcd(cltcd != null ? UtilClass.parseInteger(cltcd) : null);
                 entity.setTrid(UtilClass.parseInteger(tradeType));
-                entity.setMemo(memo != null ? memo.toString() : null);
+                entity.setMemo(UtilClass.getStringSafe(memo));
+                entity.setFeeamt(UtilClass.parseInteger(commission));
             }
         }
         System.out.println(entityMap);

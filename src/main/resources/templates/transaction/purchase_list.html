@@ -286,7 +286,7 @@
                             </tr>
                             </tbody>
                         </table>
-                        <div id="theGrid_saleList2" style="height: 350px;"></div>
+                        <div id="theGrid_purchaseList2" style="height: 350px;"></div>
                     </section>
 
                     <!--<section class="section">
@@ -310,6 +310,8 @@
     <th:block th:replace="/common/popup_company :: popup_company"></th:block>
     <th:block th:replace="/shipment/trade_stmt/trade_stmt_tmpl :: printTemplate"></th:block>
     <script type="text/javascript">
+
+        let purchase_type = [];
 
         const salesData = [
             { 일련번호: 1, 사업자등록번호: '-', 상호: '홀운동기룡하이빌', 매수: 1, 공급가액: 56000, 세액: 5600 },
@@ -468,22 +470,30 @@
             constructor() {
                 this.grid1 = null;
                 this.grid2 = null;
+                this.url = '/api/purchase/list';
 
-                this.init();
                 this.viewData = new wijmo.collections.CollectionView();
                 this.viewData2 = new wijmo.collections.CollectionView();
+
+                $('#searchfrdate, #searchfrdate2').val(getNowDateMinus7());
+                $('#searchtodate, #searchtodate2').val(getNowDate());
+                purchase_type = AjaxUtil.fillSelectOptions($('#sale_type'), 'system_code', 'choose', false, 'sale_type');
+                selectBoxBinding('sale_type2', sales_type);
+
+                this.init();
             }
 
             init() {
                 let _this = this;
 
-                const cv = new wijmo.collections.CollectionView(mockData);
-                cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription('매출일자', function (item, prop) {
+                const cv = _this.viewData;
+
+                cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription('misdate', function (item, prop) {
                     return item[prop].substring(0, 7); // '2025-04'
                 }));
 
                 // 3. FlexGrid 생성
-                    this.grid1 = new wijmo.grid.FlexGrid('#theGrid_saleList', {
+                    this.grid1 = new wijmo.grid.FlexGrid('#theGrid_purchaseList', {
                     autoGenerateColumns: false,
                     showMarquee: true,
                     allowSorting: 'MultiColumn',
@@ -492,38 +502,92 @@
                     itemsSource: cv,
                     groupHeaderFormat: '{value}월 매출 - 총 {count}건',
                     columns: [
-                        { binding: '매출일자', header: '매출일자', align: 'center', width: '*' },
-                        { binding: '매출구분', header: '매출구분', align: 'center', width: '*' },
-                        { binding: '거래처코드', header: '거래처코드', align: 'right', width: '*'},
-                        { binding: '거래처명', header: '거래처명', align: 'right', width: '*' },
+                        { binding: 'misdate', header: '작성일자', align: 'center', width: '*' },
+                        { binding: 'misgubun', header: '매입구분', align: 'center', width: '*' },
+                        { binding: 'companycode', header: '거래처코드', align: 'right', width: '*'},
+                        { binding: 'companyname', header: '거래처명', align: 'right', width: '*' },
                         { binding: '발송EMAIL', header: '발송EMAIL', align: 'right', width: '*' },
-                        { binding: '품명', header: '품명', align: 'left', width: 150 },
-                        { binding: '규격', header: '규격', align: 'center', width: 100 },
-                        { binding: '공급가', header: '공급가', align: 'right', width: 120, aggregate: 'Sum' },
-                        { binding: '부가세', header: '부가세', align: 'right', width: 120, aggregate: 'Sum' },
-                        { binding: '합계', header: '합계', align: 'right', width: 120, aggregate: 'Sum' },
-                        { binding: '수정사유', header: '수정사유', align: 'center', width: 100 },
-                        { binding: '발행상태', header: '발행상태', align: 'center', width: 100 }
+                        { binding: 'itemnm', header: '품명', align: 'left', width: 150 },
+                        { binding: 'spec', header: '규격', align: 'center', width: 100 },
+                        { binding: 'supplycost', header: '공급가', align: 'right', width: 120, aggregate: 'Sum' },
+                        { binding: 'taxtotal', header: '부가세', align: 'right', width: 120, aggregate: 'Sum' },
+                        { binding: 'totalamt', header: '합계', align: 'right', width: 120, aggregate: 'Sum' },
+                        { binding: 'modifycd', header: '수정사유', align: 'center', width: 100 },
+                        { binding: 'stateLabel', header: '발행상태', align: 'center', width: 100 }
                     ]
                 });
+                this.grid1.rowHeaders.columns.splice(0, 1);
+                new FlexGridContextMenu(this.grid1);
+                this.grid1.downloadFileName = '매입현황';
 
+                this.grid1.allowMerging = wijmo.grid.AllowMerging.All;
+                this.grid1.columns[0].allowMerging = true;
+                this.grid1.columns[1].allowMerging = true;
 
-                this.grid2 = new wijmo.grid.FlexGrid('#theGrid_saleList2', {
+                const cv2 = _this.viewData2;
+                cv2.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription('ivercorpnum', function(item, prop){
+                    return item[prop];
+                }));
+
+                this.grid2 = new wijmo.grid.FlexGrid('#theGrid_purchaseList2', {
                     autoGenerateColumns: false,
                     showMarquee: true,
                     allowSorting: 'MultiColumn',
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     isReadOnly: true,
-                    itemsSource: salesData,
+                    groupHeaderFormat: '사업자 번호: {value} 총 {count} 건',
+                    itemsSource: cv2,
                     columns: [
-                        { binding: '일련번호', header: '일련번호', align: 'center', width: '*' },
-                        { binding: '사업자등록번호', header: '사업자등록번호', align: 'center', width: '*' },
-                        { binding: '상호', header: '상호 (법인명)', align: 'left', width: '*'},
-                        { binding: '매수', header: '매수', align: 'right', width: '*' },
-                        { binding: '공급가액', header: '공급가액', align: 'right', width: '*' },
-                        { binding: '세액', header: '세액', align: 'right', width: 150 },
+                        { binding: 'ivercorpnum', header: '사업자등록번호', align: 'center', width: '*' },
+                        { binding: 'ivercorpnm', header: '상호', align: 'left', width: '*'},
+                        { binding: 'cnt', header: '매수', align: 'right', width: '*' },
+                        { binding: 'supplycost', header: '공급가액', align: 'right', width: '*', aggregate: 'Sum' },
+                        { binding: 'taxtotal', header: '세액', align: 'right', width: 150, aggregate: 'Sum' },
                     ]
                 });
+                this.grid2.rowHeaders.columns.splice(0, 1);
+            }
+
+            searchMain(){
+                let _this = this;
+
+                let data = {
+                    searchfrdate: $('#searchfrdate').val(),
+                    searchtodate: $('#searchtodate').val(),
+                    cltcd: $('#cboCompany').val().trim() === '' ? '' : $('#cboCompanyHidden').val(),
+                    purchase_type: $('#purchase_type').val(),
+                    taxtype: $('input[name=taxtype]:checked').val(),
+                    spjangcd: getSpjangcdFromSession(),
+                }
+
+                let result = AjaxUtil.getSyncData(_this.url + '/search', data);
+
+                if(result != null){
+                    _this.viewData.sourceCollection = result.data;
+                }
+            }
+
+            searchMain2(type){
+                let _this = this;
+
+                if(type==='load' && LoadingFlag) return;
+
+                let data = {
+                    searchfrdate2: $('#searchfrdate2').val(),
+                    searchtodate2: $('#searchtodate2').val(),
+                    cltcd2: $('#cboCompany2').val().trim() === '' ? '' : $('#cboCompanyHidden2').val(),
+                    purchase2: $('#purchase_type2').val(),
+                    taxtype2: $('input[name=taxtype2]:checked').val(),
+                    spjangcd: getSpjangcdFromSession(),
+                }
+
+                let result = AjaxUtil.getSyncData(_this.url + '/search2', data);
+
+                if(result != null) {
+                    _this.viewData2.sourceCollection = result.data['list'];
+                    _this.bindingStatisticsField(result.data['Statistics']);
+                    LoadingFlag = true; //서브탭 클릭할때마다 서치 방지
+                }
 
             }
         }

@@ -32,6 +32,7 @@ public class BankTransitDto {
     private Integer depositAmount; // 입금액
     private Integer withdrawalAmount; // 출금액
     private Integer balanceAmount; // 잔액
+    private String commission; // 수수료
     private String note1; // 적요1
     private String note2; // 적요2
     private String note3; // 적요3
@@ -61,7 +62,6 @@ public class BankTransitDto {
 
     private String expiration; // 전자어음 만기일
 
-    private Integer feeAmount; // 수수료 금액
     private String feeFlag; // 수수료 여부
     private String accountCode; // 계정 코드
 
@@ -84,6 +84,8 @@ public class BankTransitDto {
         Integer accin = 0;
         Integer accout = 0;
         String money = dto.getMoney().replaceAll(",", "");
+        String commission = dto.getCommission().replaceAll(",", "");
+
 
         if(inoutFlag.equals("0")){
             accin = UtilClass.parseInteger(money);
@@ -104,6 +106,7 @@ public class BankTransitDto {
         banktransit.setTrid(UtilClass.parseInteger(dto.getTransactionTypeId()));
         banktransit.setIotype(dto.getDepositAndWithdrawalType());
         banktransit.setBanknm(dto.getBankName());
+        banktransit.setFeeamt(UtilClass.parseInteger(commission));
         banktransit.setAccnum(dto.getAccountNumber().replaceAll("-", ""));
         banktransit.setAccid(dto.getAccountId());
         banktransit.setEumnum(dto.getBill());

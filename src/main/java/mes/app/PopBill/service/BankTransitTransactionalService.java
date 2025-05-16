@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import mes.domain.entity.TB_BANKTRANSIT;
 import mes.domain.repository.TB_BANKTRANSITRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -16,9 +17,7 @@ public class BankTransitTransactionalService {
 
     @Transactional
     public void saveBankDataTransactional(List<TB_BANKTRANSIT> list){
-
         tbBanktransitRepository.saveAll(list);
-
     }
 
     public List<TB_BANKTRANSIT> getSavedBankTransitList(List<String> tids){

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 public interface SqlRunner {
 
@@ -17,4 +18,6 @@ public interface SqlRunner {
 	public int queryForCount(String sql,  MapSqlParameterSource mapParam);
 	
 	public <T> T queryForObject(String sql,  MapSqlParameterSource mapParam, RowMapper<T> mapper);
+
+	public int[]  batchUpdate(String sql,  SqlParameterSource[] batchArgs);
 }

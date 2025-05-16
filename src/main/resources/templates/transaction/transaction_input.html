@@ -469,11 +469,17 @@
                         <th style="text-align: center">
                             <label for="">은행</label>
                         </th>
-                        <td colspan="3">
+                        <td>
                             <input id="bankcode_popup" name="bankcode_popup" type="hidden">
                             <input class="form-control2" type="text" id="bankName" name="bankName"
                              readonly/>
 
+                        </td>
+                        <th style="text-align: center">
+                            <label>수수료</label>
+                        </th>
+                        <td>
+                           <input class="form-control2 tar" type="text" id="commission" name="commission">
                         </td>
                     </tr>
                     <tr>
@@ -645,7 +651,7 @@
                         { binding: 'trade_date', header: '일자', width: '*', align: 'center', isReadOnly : true },
                         { binding: 'input_money', header: '입금금액', width: '*', format: 'n0', aggregate: 'Sum', align: 'right', isReadOnly : true },
                         { binding: 'output_money',  header: ' 출금금액', width: '*', format: 'n0', aggregate: 'Sum', align: 'right', isReadOnly : true},
-                        { binding: 'commission',header: ' 수수료', width: '*', format: 'n0', align: 'right', isReadOnly : true},
+                        { binding: 'commission',header: ' 수수료(500원)', width: '*', format: 'n0', dataType: 'Number', align: 'right', isReadOnly : false},
                         { binding: 'remark',  header: ' 적요', width: 150, align: 'right'},
                         { binding: 'code', header: '거래처코드', width: 150, align: 'center' },
                         { binding: 'cltcd', header: '거래처아이디', visible: false, width: 150, align: 'center' },
@@ -677,7 +683,7 @@
                             const col = s.columns[e.col];
 
                             // 수정 가능한 컬럼만 색상 지정
-                            const editableBindings = ['remark', 'code', 'trade_type'];
+                            const editableBindings = ['remark', 'code', 'trade_type', 'commission'];
                             if (editableBindings.includes(col.binding)) {
                                 e.cell.style.color = 'dodgerblue'; // 글씨 잘 보이게
                             }
@@ -1046,12 +1052,9 @@
                 })*/
 
                 //숫자만 입력
-                $('#money').on('input', function(){
-                    let val = $(this).val();
-                    val = val.replace(/[^0-9]/g, '');
-                    val = val.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                    $(this).val(val);
-                });
+                $('#money').on('input', formatToCommaNumberInput);
+
+                $('#commission').on('input', formatToCommaNumberInput);
 
                 $('#inoutFlag').on('change', function(){
                     const selectedType = $(this).val();
@@ -1077,6 +1080,7 @@
                     $('#CompanyName_Popup').val(item.clientName);
                     $('#bankName').val(item.bankname);
                     $('#accountNumber').val(item.account);
+                    $('#commission').val(item.commission);
 
                     let money = item.input_money || item.output_money || 0;
                     $('#money').val(money);

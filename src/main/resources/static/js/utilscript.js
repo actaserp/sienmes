@@ -155,3 +155,11 @@ function formatMoney(val){
     return num.toLocaleString('en-US')
 }
 
+//input필드 중 숫자만 입력되게
+function formatToCommaNumberInput(e) {
+    let val = e.target.value;
+    val = val.replace(/[^0-9]/g, '');                         // 숫자만 남기기
+    val = val.replace(/\B(?=(\d{3})+(?!\d))/g, ",");          // 천단위 콤마
+    e.target.value = val;
+}
+

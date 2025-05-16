@@ -34,7 +34,7 @@ public class AccountSyncService {
     private final EasyFinBankService easyFinBankService;
     private final EasyFinBankCustomService easyFinBankCustomService;
 
-    @Deprecated
+
     public void run() {
 
         log.info("[{}] 시작 - Thread: {}", "계좌수집", Thread.currentThread().getName());

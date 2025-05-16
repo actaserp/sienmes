@@ -16,11 +16,18 @@ import mes.domain.enums.AccountType;
 import mes.domain.repository.TB_ACCOUNTRepository;
 import mes.domain.repository.TB_BANKTRANSITRepository;
 import mes.domain.repository.TB_XBANKRepository;
+import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,6 +45,9 @@ public class EasyFinBankCustomService {
     private com.popbill.api.EasyFinBankService easyFinBankService;
 
     @Autowired
+    SqlRunner sqlRunner;
+
+    @Autowired
     BankTransitTransactionalService bankTransitTransactionalService;
 
     @Autowired
@@ -45,6 +55,9 @@ public class EasyFinBankCustomService {
 
     @Autowired
     TB_ACCOUNTRepository accountRepository;
+
+    @PersistenceContext
+    EntityManager entityManager;
 
 
     public void Insert_Tb_Account(EasyFinBankAccountFormDto form){
@@ -129,67 +142,108 @@ public class EasyFinBankCustomService {
     }
 
 
-
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveBankDataSync(List<EasyFinBankSearchDetail> list, String jobID, String  accountNumber, Integer accountid, String bankname, String spjangcd){
 
 
-        List<String> tidList = getTidList(list);
+        //List<String> tidList = getTidList(list);
         Map<String, Integer> cltCdRelationRemarkList =
                 convertToRemarkCltcdMap(transactionInputService.getCltCdRelationRemarkList());
 
 
-        Map<String, TB_BANKTRANSIT> existing = tB_BANKTRANSITRepository.findByTidIn(tidList)
-                .stream()
-                .collect(Collectors.toMap(TB_BANKTRANSIT::getTid, Function.identity()));
-        try{
-            List<TB_BANKTRANSIT> tb_banktransitList = new ArrayList<>();
+        //Map<String, TB_BANKTRANSIT> existing = tB_BANKTRANSITRepository.findByTidIn(tidList)
+        //        .stream()
+        //        .collect(Collectors.toMap(TB_BANKTRANSIT::getTid, Function.identity()));
 
-            for(EasyFinBankSearchDetail  map : list){
-                TB_BANKTRANSIT entity = new TB_BANKTRANSIT();
+        final int CHUNK_SIZE = 200;
 
-                String tid = map.getTid();
-                String remark = map.getRemark1();
+            List<SqlParameterSource> batchParams = new ArrayList<>();
+            String sql = """
+                        INSERT INTO TB_BANKTRANSIT (
+                            tid, trdate, trserial, trdt, accin, accout, balance,
+                            remark1, remark2, remark3, remark4, regdt, jobid, memo,
+                            ioflag, accnum, accid, banknm, spjangcd, cltcd
+                        ) VALUES (
+                            :tid, :trdate, :trserial, :trdt, :accin, :accout, :balance,
+                            :remark1, :remark2, :remark3, :remark4, :regdt, :jobid, :memo,
+                            :ioflag, :accnum, :accid, :banknm, :spjangcd, :cltcd
+                        )
+                        ON CONFLICT (tid) DO NOTHING
+                        """;
+            List<TB_BANKTRANSIT> buffer = new ArrayList<>();
 
-                if(existing.containsKey(tid)){
+
+                for(EasyFinBankSearchDetail  map : list){
+
+                    try{
+                        String tid = map.getTid();
+                        String remark = map.getRemark1();
+
+                /*if(existing.containsKey(tid)){
                     continue;
+                }*/
+
+                        Integer accIn = UtilClass.parseInteger(map.getAccIn());
+                        String inoutFlag = (accIn == 0) ? "1" : "0";
+                        String EncryptedAccountNum = EncryptionUtil.encrypt(accountNumber);
+
+                        MapSqlParameterSource param = new MapSqlParameterSource()
+                                .addValue("tid", tid)
+                                .addValue("trdate", map.getTrdate())
+                                .addValue("trserial", UtilClass.parseInteger(map.getTrserial()))
+                                .addValue("trdt", map.getTrdt())
+                                .addValue("accin", accIn)
+                                .addValue("accout", UtilClass.parseInteger(map.getAccOut()))
+                                .addValue("balance", UtilClass.parseInteger(map.getBalance()))
+                                .addValue("remark1", map.getRemark1())
+                                .addValue("remark2", map.getRemark2())
+                                .addValue("remark3", map.getRemark3())
+                                .addValue("remark4", map.getRemark4())
+                                .addValue("regdt", map.getRegDT())
+                                .addValue("jobid", jobID)
+                                .addValue("memo", map.getMemo())
+                                .addValue("ioflag", inoutFlag)
+                                .addValue("accnum", EncryptedAccountNum)
+                                .addValue("accid", accountid)
+                                .addValue("banknm", bankname)
+                                .addValue("spjangcd", spjangcd)
+                                .addValue("cltcd", cltCdRelationRemarkList.getOrDefault(map.getRemark1(), null));
+
+                        batchParams.add(param);
+
+                        if (batchParams.size() >= CHUNK_SIZE) {
+                            try {
+                                log.info("[쿼리 실행 - {}건] : {}", batchParams.size(), sql);
+                                for (SqlParameterSource param12 : batchParams) {
+                                    if (param12 instanceof MapSqlParameterSource m) {
+                                        log.debug("  > 파라미터: {}", m.getValues());
+                                    }
+                                }
+                                sqlRunner.batchUpdate(sql, batchParams.toArray(new SqlParameterSource[0]));
+                            } catch (Exception e) {
+                                log.warn("배치 저장 중 일부 오류 발생 (무시됨): {}", e.getMessage());
+                            }
+                            batchParams.clear();
+                        }
+                    }catch(Exception e){
+                        log.warn("단일 데이터 변환/저장 중 오류 발생 (무시됨): {}", e.getMessage());
+                    }
                 }
 
-                Integer accIn = UtilClass.parseInteger(map.getAccIn());
-                String inoutFlag = (accIn == 0) ? "1" : "0";
-                String EncryptedAccountNum = EncryptionUtil.encrypt(accountNumber);
-
-                entity.setTid(tid);
-                entity.setTrdate( map.getTrdate());
-                entity.setTrserial(UtilClass.parseInteger(map.getTrserial()));
-                entity.setTrdt(map.getTrdt());
-                entity.setAccin(accIn);
-                entity.setAccout(UtilClass.parseInteger(map.getAccOut()));
-                entity.setBalance(UtilClass.parseInteger(map.getBalance()));
-                entity.setRemark1(map.getRemark1());
-                entity.setRemark2(map.getRemark2());
-                entity.setRemark3(map.getRemark3());
-                entity.setRemark4(map.getRemark4());
-                entity.setRegdt( map.getRegDT());
-                entity.setJobid(jobID);
-                entity.setMemo(map.getMemo());
-                entity.setIoflag(inoutFlag);
-                entity.setAccnum(EncryptionUtil.encrypt(accountNumber));
-
-                entity.setAccid(accountid);
-                entity.setBanknm(bankname);
-                entity.setSpjangcd(spjangcd);
-
-                if(remark != null && cltCdRelationRemarkList.containsKey(remark)){
-                    entity.setCltcd(cltCdRelationRemarkList.get(remark));
+                if (!batchParams.isEmpty()) {
+                    try {
+                        log.info("[쿼리 실행 - {}건] : {}", batchParams.size(), sql);
+                        for (SqlParameterSource param12 : batchParams) {
+                            if (param12 instanceof MapSqlParameterSource m) {
+                                log.debug("  > 파라미터: {}", m.getValues());
+                            }
+                        }
+                        sqlRunner.batchUpdate(sql, batchParams.toArray(new SqlParameterSource[0]));
+                    } catch (Exception e) {
+                        log.warn("마지막 배치 저장 중 일부 오류 발생 (무시됨): {}", e.getMessage());
+                    }
                 }
-                tb_banktransitList.add(entity);
 
-            }
-            bankTransitTransactionalService.saveBankDataTransactional(tb_banktransitList);
-        }catch(Exception e){
-            log.error("동기 저장 중 예외 발생, {}" ,e.getMessage());
-            throw new RuntimeException("동기 저장 실패", e);
-        }
     }
 
     public List<String> getTidList(List<EasyFinBankSearchDetail> list){
