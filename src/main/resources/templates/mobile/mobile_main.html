@@ -18,7 +18,7 @@
     justify-content: center;
     align-items: center;
     color: white;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     position: relative;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     text-align: center;
@@ -28,8 +28,8 @@
 
   .office-card{
     text-align: center;
-    padding: 15px;
-    margin-bottom: 20px;
+    padding: 10px;
+    margin-bottom: 5px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
@@ -38,8 +38,9 @@
 
   .btnArea{
     position: fixed;
-    bottom: 20px;    /* 화면 아래에서 20px */
+    bottom: 0px;
     width: 93%;
+    height: 180px;
   }
 
   .office_btn {
@@ -68,6 +69,11 @@
     aspect-ratio: 1 / 1;
     padding-top: 2%;
     margin-right: 10%;
+  }
+
+  #selectWorkcd {
+    max-height: 150px; /* 최대 150px까지만 보여줌 */
+    overflow-y: auto;  /* 스크롤 가능하게 설정 */
   }
 </style>
 <head>
@@ -127,7 +133,7 @@
     <!--- (레이아웃) Contents 영역 -->
     <div class="layout-contents" >
       <!-- 검색 영역  -->
-      <div class="search-wrap">
+      <div class="search-wrap" style="margin-bottom: 10px">
 
       </div>
       <!-- 컨텐츠 영역  -->
@@ -225,8 +231,11 @@
               if (data.ip === '106.240.249.66') {
                 console.log('사내 IP 확인');
                 document.getElementById('inside').style.display = 'flex';
+                document.getElementById('outside').style.display = 'none';
+                document.getElementById('workcd').style.display = 'none';
               } else {
                 console.log('외부 IP 확인');
+                document.getElementById('inside').style.display = 'none';
                 document.getElementById('outside').style.display = 'flex';
                 // 외부 출퇴근시 사유 작성 태그 활성화
                 document.getElementById('workcd').style.display = 'block';
@@ -377,7 +386,7 @@
     }else{
       // 퇴근버튼 클릭
       if(document.getElementById('officeTime').textContent === '--:--') {
-        Alert.alert('', '출근을 먼저 해주세요');
+        Alert.alert('', '출근기록이 없습니다.');
       }else{
         console.log('office tag : ', office)
         let _this = this;
