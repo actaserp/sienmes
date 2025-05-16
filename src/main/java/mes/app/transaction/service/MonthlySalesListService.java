@@ -202,7 +202,7 @@ public class MonthlySalesListService {
             SELECT
                 c.id,
                 c."Name" AS comp_name,
-                TO_DATE(:baseYm || '01', 'YYYYMMDD') AS date,
+                TO_DATE(:prevYear || '1231', 'YYYYMMDD') AS date,
                 '전잔액' AS summary,
                 COALESCE(h.yearamt, 0) AS amount,
                 NULL::numeric AS accin,
