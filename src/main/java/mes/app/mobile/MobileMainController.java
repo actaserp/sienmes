@@ -54,6 +54,7 @@ public class MobileMainController {
         resultData.put("jik_id", (String)userInfo.get("jik_id"));
         if(timeInfo != null) {
             resultData.put("inOfficeTime", (String) timeInfo.get("starttime"));
+            resultData.put("workcd", (String) timeInfo.get("workcd"));
         }
 
         result.data = resultData;

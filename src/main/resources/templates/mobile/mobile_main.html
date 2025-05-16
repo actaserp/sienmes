@@ -223,28 +223,48 @@
   };
   // 🔄 IP 주소 조회 함수 정의
   const updateIPAddress = () => {
-    fetch('https://api.ipify.org?format=json')
-            .then(response => response.json())
+    const cacheBuster = `?timestamp=${new Date().getTime()}`;
+    fetch(`https://api.ipify.org${cacheBuster}`)
+            .then(response => response.text()) // ✅ text로 받아서 확인
             .then(data => {
-              // IP 주소를 화면에 업데이트
-              document.getElementById('ipAddress').innerText = 'IP : ' + data.ip;
-              if (data.ip === '106.240.249.66') {
-                console.log('사내 IP 확인');
-                document.getElementById('inside').style.display = 'flex';
-                document.getElementById('outside').style.display = 'none';
-                document.getElementById('workcd').style.display = 'none';
+              console.log("응답 데이터 확인:", data); // 🔍 응답 내용을 직접 출력
+
+              // ✅ JSON인지 아닌지 검사
+              if (data.includes('{')) {
+                const jsonData = JSON.parse(data);
+                document.getElementById('ipAddress').innerText = 'IP : ' + jsonData.ip;
+                handleIPDisplay(jsonData.ip);
               } else {
-                console.log('외부 IP 확인');
-                document.getElementById('inside').style.display = 'none';
-                document.getElementById('outside').style.display = 'flex';
-                // 외부 출퇴근시 사유 작성 태그 활성화
-                document.getElementById('workcd').style.display = 'block';
+                document.getElementById('ipAddress').innerText = 'IP : ' + data.trim();
+                handleIPDisplay(data.trim());
               }
             })
             .catch(error => {
-              console.error("IP 조회 중 에러 발생: ", error);
+              console.error("IP 조회 중 에러 발생: ", error.message);
             });
   };
+
+  // 🔄 IP에 따른 화면 전환 처리 함수
+  const handleIPDisplay = (ip) => {
+    if (ip === '106.240.249.66') {
+      console.log('사내 IP 확인');
+      document.getElementById('inside').style.display = 'flex';
+      document.getElementById('outside').style.display = 'none';
+      document.getElementById('workcd').style.display = 'none';
+    } else {
+      console.log('외부 IP 확인');
+      document.getElementById('inside').style.display = 'none';
+      document.getElementById('outside').style.display = 'flex';
+      document.getElementById('workcd').style.display = 'block';
+    }
+  };
+
+
+  // 네트워크 상태 변경을 감지
+  window.addEventListener('online', () => {
+    console.log("📡 네트워크가 다시 연결되었습니다. IP를 갱신합니다.");
+    updateIPAddress();
+  });
 
   // 🔄 시간 업데이트 함수 정의
   const updateTime = () => {
@@ -294,6 +314,15 @@
         if (result != null) {
           document.getElementById('userInfo').textContent = result.data.Name +" "+ result.data.first_name +" "+ result.data.jik_id;
           document.getElementById('officeTime').textContent = result.data.inOfficeTime ? result.data.inOfficeTime : "--:--";
+          // 근태구분값 바인드
+          const selectElement = document.getElementById('selectWorkcd');
+          const options = selectElement.options;
+          for (let i = 0; i < options.length; i++) {
+            if (options[i].value === result.data.workcd) {
+              selectElement.value = options[i].value;
+              break;
+            }
+          }
         }
       };
       AjaxUtil.getAsyncData(url, data, fnsuccess);
@@ -355,6 +384,12 @@
     console.log('office tag : ', office)
       //출근 버튼클릭
     if(office.trim() === 'inOfficeIn' || office.trim() === 'outOfficeIn') {
+      if(office.trim() === 'outOfficeIn'){
+        if (document.getElementById('selectWorkcd').value === "") {
+          Alert.alert('', '근태구분을 선택하여주십시오');
+          return;
+        }
+      }
       if(document.getElementById('officeTime').textContent !== '--:--') {
         Alert.alert('', '이미출근 하셨습니다.');
       }else {
@@ -384,6 +419,12 @@
         AjaxUtil.postAsyncData(url, data, fnsuccess);
       }
     }else{
+      if(office.trim() === 'outOfficeOut'){
+        if (document.getElementById('selectWorkcd').value === "") {
+          Alert.alert('', '근태구분을 선택하여주십시오');
+          return;
+        }
+      }
       // 퇴근버튼 클릭
       if(document.getElementById('officeTime').textContent === '--:--') {
         Alert.alert('', '출근기록이 없습니다.');

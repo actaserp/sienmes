@@ -74,7 +74,8 @@ public class MobileMainService {
         dicParam.addValue("username", username);
 
         String sql = """
-                SELECT starttime
+                SELECT starttime,
+                workcd
                 FROM auth_user a
                 LEFT JOIN tb_pb201 t
                 ON t.personid = a.personid
