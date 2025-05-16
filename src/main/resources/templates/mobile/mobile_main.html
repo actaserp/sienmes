@@ -218,14 +218,14 @@
             .then(data => {
               // IP 주소를 화면에 업데이트
               document.getElementById('ipAddress').innerText = 'IP : ' + data.ip;
-              if (data.ip === '106.240.249.66') {
+              if (data.ip === '106.240.249.6') {
                 console.log('사내 IP 확인');
                 document.getElementById('inside').style.display = 'flex';
               } else {
                 console.log('외부 IP 확인');
-                document.getElementById('inside').style.display = 'flex';
+                document.getElementById('outside').style.display = 'flex';
                 // 외부 출퇴근시 사유 작성 태그 활성화
-                document.getElementById('')
+                document.getElementById('workcd').style.display = 'block';
               }
             })
             .catch(error => {
