@@ -238,6 +238,7 @@
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
+
                 this.getWorkList();
 
                 // 셀 편집 방지
@@ -319,12 +320,43 @@
                     itemsSource: this.viewData2, // 데이터를 설정할 배열
                 });
 
-                this.grid2.selectionChanged.addHandler(() => {
-                    this.searchMainData();
+                /*// 데이터 로드 후 초기 선택 상태 해제
+                this.grid2.loadedRows.addHandler(() => {
+                    setTimeout(() => {
+                        this.grid2.select(-1, -1); // 선택 상태 초기화
+                    }, 0); // 비동기로 처리하여 초기 선택 해제
                 });
+                let isInitialLoad = true; // 초기 상태 플래그
+
+                this.grid2.selectionChanged.addHandler((s, e) => {
+                    if (isInitialLoad) {
+                        isInitialLoad = false; // 초기 로드 이후 플래그 해제
+                        return;
+                    }
+
+                    let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
+                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
+                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
+                        /!*console.log(selectedRowData);*!/
+                    }
+                });*/
+
+                // selectionChanged 이벤트 일단 해제
+                const selectionHandler = () => {
+                    this.searchMainData();
+                };
+
+                this.grid2.selectionChanged.addHandler(selectionHandler);
 
                 new FlexGridContextMenu(this.grid2);
                 this.grid2.downloadFileName = '일/월별근태현황';
+
+// grid 초기화 후 selection 강제 해제 (선택되지 않도록)
+                setTimeout(() => {
+                    this.grid2.select(-1, -1); // 선택 해제
+                    this.searchMainData();    // 명시적으로 오늘 날짜로 실행
+                });
+
 
                 // startdate 변경 시 grid 갱신
                 $('#startdate').on('change', function () {
