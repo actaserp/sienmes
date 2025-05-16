@@ -42,13 +42,17 @@ public class AttendanceCurrentService {
 
         String sql = """
                 SELECT t.reqdate,
+                    t.id,
                     t.workcd,
                     i.worknm,
                     t.yearflag,
                     t.frdate,
+                    t.sttime,
+                    t.edtime,
                     t.todate,
                     t.daynum,
-                    t.remark
+                    t.remark,
+                    t.appgubun
                 FROM tb_pb204 t
                 LEFT JOIN tb_pb210 i ON t.workcd = i.workcd 
                 WHERE personid = :personid

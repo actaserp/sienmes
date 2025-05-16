@@ -33,6 +33,35 @@
         white-space: nowrap; /* 테이블이 자동으로 줄 바꿈되지 않도록 설정 */
     }
 
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        display: none;
+    }
+
+    .modal {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 95%;
+        z-index: 1001;
+    }
+
+    .modal input, .modal select {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 5px;
+    }
+
 </style>
 <head>
     <meta charset="UTF-8">
@@ -62,6 +91,7 @@
 </head>
 
 <body>
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 <div class="mobile-wrapper page-ticket-list"><!-- ★페이지 Class명 -->
     <!-- [모바일] 헤더  -->
     <div class="mobile-layout-header">
@@ -133,11 +163,54 @@
 
                 </div>
                 <div class="srch-btn">
-                    <button class="btn-dark" href="/mobile/attendance_modify" onclick="modifyData()">수정</button>
                 </div>
             </div><!--// contents-wrap end-->
         </div> <!--//layout-contents end -->
+        <!-- 수정 모달 -->
+        <!-- 수정 모달 오버레이 및 창 -->
+        <div id="vacationEditModal" class="modal-overlay">
+            <div class="modal">
+                <h3>휴가 정보 수정</h3>
+                <input type="hidden" id="vacId">
+                <br>
+                <div class="form-group" >
+                    <label for="editAttKind">근태항목:</label>
+                    <div style="display: flex; gap: 10%">
+                        <select id="editAttKind" style="width: 70%">
+                            <option>휴가</option>
+                        </select>
+                        <label style="display: flex; align-items: center">
+                            <input type="checkbox" style="margin: 0" id="isAnnual" disabled>
+                            &nbsp;&nbsp;연차</label>
+                    </div>
+                </div>
 
+                <div class="form-group">
+                    <label for="editStartDateTime">시작일:</label>
+                    <input type="datetime-local" id="editStartDateTime">
+                </div>
+
+                <div class="form-group">
+                    <label for="editEndDateTime">종료일:</label>
+                    <input type="datetime-local" id="editEndDateTime">
+                </div>
+
+                <div class="form-group">
+                    <label for="editUseDate">사용일수:</label>
+                    <input type="number" id="editUseDate" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="editRemark">사유:</label>
+                    <input type="text" id="editRemark">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="submitEditVacation()">저장하기</button>
+                    <button onclick="closeEditModal()">닫기</button>
+                </div>
+            </div>
+        </div>
     </div> <!-- //mobile-layout-contents end-->
 </div> <!-- //page-wrapper end-->
 <script th:inline="javascript">
@@ -162,6 +235,10 @@
 
     $(document).ready(function () {
         AjaxUtil.fillSelectOptions($('#selectWorkcd'), 'workcd', 'choose', false, 'work_division', '');
+        AjaxUtil.fillSelectOptions($('#editAttKind'), 'workcd', 'choose', false, 'work_division', '');
+        // 이벤트 리스너 등록
+        document.getElementById('editStartDateTime').addEventListener('change', calculateUseDays);
+        document.getElementById('editEndDateTime').addEventListener('change', calculateUseDays);
         searchMainData();
     });
 
@@ -172,10 +249,24 @@
             'searchYear': document.getElementById('searchYear').value,
         };
         let fnsuccess = function (result) {
-            console.log('result : ', result);
-
-            // ✅ 데이터가 null이 아니면 실행
             if (result != null && result.data != null) {
+                if(result.data.annInfo == null){
+                    result.data.annInfo = {
+                        rtdate: "",
+                        ewolnum: "",
+                        holinum: "",
+                        daynum: "",
+                        restnum: ""
+                    };
+                }
+                // 현재 휴가정보 데이터 개수 확인
+                const currentLength = result.data.vacInfo.length;
+                if (currentLength < 8) {
+                    const itemsToAdd = 8 - currentLength;
+                    for (let i = 0; i < itemsToAdd; i++) {
+                        result.data.vacInfo.push({});
+                    }
+                }
                 // 조회된 연차정보
                 const annInfo = result.data.annInfo;
                 // 조회된 데이터(휴가정보)
@@ -186,8 +277,11 @@
           <table>
                         <tr>
                             <th>입사일</th>
-                            <td>
+                            <td colspan="7">
                                 ${annInfo.rtdate || ''}
+                            </td>
+                            <td>
+
                             </td>
                         </tr>
                         <br>
@@ -208,6 +302,7 @@
                             <td>
                                 ${annInfo.restnum || ''}
                             </td>
+                            <td></td>
                         </tr>
                         <br>
                         <tr>
@@ -218,6 +313,8 @@
                             <th>종료일</th>
                             <th>기간</th>
                             <th>사유</th>
+                            <th>시작시각</th>
+                            <th>종료시각</th>
                         </tr>
                 `;
 
@@ -227,10 +324,15 @@
                         <td>${vacInfo.reqdate || ''}</td>
                         <td>${vacInfo.worknm || ''}</td>
                         <td>${vacInfo.yearflag || ''}</td>
-                        <td>${vacInfo.frdate || '--:--'}</td>
-                        <td>${vacInfo.todate || '-'}</td>
+                        <td>${vacInfo.frdate || ''}</td>
+                        <td>${vacInfo.todate || ''}</td>
                         <td>${vacInfo.daynum || ''}</td>
                         <td>${vacInfo.remark || ''}</td>
+                        <td>${vacInfo.sttime || ''}</td>
+                        <td>${vacInfo.edtime || ''}</td>
+                        <td style="display: none;">${vacInfo.workcd || ''}</td>
+                        <td style="display: none;">${vacInfo.id || ''}</td>
+                        <td style="display: none;">${vacInfo.appgubun || ''}</td>
                     </tr>
                 `;
                 });
@@ -261,6 +363,120 @@
             button.click();
         });
     }
+    // 휴가정보 테이블 클릭 이벤트 추가
+    document.querySelector('#theGrid').addEventListener('click', function (e) {
+        const targetRow = e.target.closest('tr');
+        if (!targetRow) return;
+        const cells = targetRow.querySelectorAll('td');
+        const gubunValue = cells[11].innerText;
+        const isEmptyRow = Array.from(cells).every(cell => cell.innerText.trim() === "");
+        if (isEmptyRow) return;
+        if (gubunValue !== '101'){
+            Alert.alert('',  '해당 항목은 결재처리되었습니다.')
+            return
+        }
+        openEditModal(targetRow);
+    });
+    function openEditModal(targetRow) {
+        const cells = targetRow.querySelectorAll('td');
+        // 모달에 값 채우기
+        const textValue = cells[9].innerText;
+
+        // 모든 option 요소를 순회
+        const selectElement = document.getElementById('editAttKind');
+        const options = selectElement.options;
+
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].value === textValue) {
+                selectElement.value = options[i].value;
+                break;
+            }
+        }
+        // ✅ 날짜와 시간 조합해서 datetime-local 형식으로 변환
+        const startDate = cells[3].innerText.split('.'); // yyyy.mm.dd → ['yyyy', 'mm', 'dd']
+        const startTime = cells[7].innerText; // hh:mm
+
+        const endDate = cells[4].innerText.split('.');
+        const endTime = cells[8].innerText;
+
+        // ✅ datetime-local 형식으로 변환
+        const formattedStartDateTime = `${startDate[0]}-${startDate[1]}-${startDate[2]}T${startTime}`;
+        const formattedEndDateTime = `${endDate[0]}-${endDate[1]}-${endDate[2]}T${endTime}`;
+        document.getElementById('editStartDateTime').value = formattedStartDateTime;
+        document.getElementById('editEndDateTime').value = formattedEndDateTime;
+        document.getElementById('editUseDate').value = cells[5].innerText;
+        document.getElementById('editRemark').value = cells[6].innerText;
+        document.getElementById('vacId').value = cells[10].innerText;
+
+        // 모달 열기
+        document.getElementById('vacationEditModal').style.display = 'block';
+    }
+
+    // ✅ 모달 닫기
+    function closeEditModal() {
+        document.getElementById('vacationEditModal').style.display = 'none';
+    }
+
+    // 모달 데이터 저장(휴가데이터 수정)
+    function submitEditVacation() {
+        let url = '/api/attendance_current/updateAttendance';
+        let data = {
+            'vacId': document.getElementById('vacId').value,
+            'attKind': document.getElementById('editAttKind').value,
+            'useDate': document.getElementById('editUseDate').value,
+            'remark': document.getElementById('editRemark').value,
+            'startDateTime': document.getElementById('editStartDateTime').value,
+            'endDateTime': document.getElementById('editEndDateTime').value
+        };
+
+        let fnsuccess = function (result) {
+            if (result != null) {
+                if (result.success) {
+                    Alert.alert('', result.message, reloadWindow);
+                } else {
+                    Alert.alert('',"휴가 수정에 실패하였습니다.");
+                }
+            } else {
+                Alert.alert('',"오류가 발생하였습니다.");
+            }
+        };
+
+        AjaxUtil.postAsyncData(url, data, fnsuccess);
+    }
+
+    // 날짜와 시간 차이 계산 함수
+    function calculateUseDays() {
+        const startDateTime = document.getElementById('editStartDateTime').value;
+        const endDateTime = document.getElementById('editEndDateTime').value;
+        const useDateInput = document.getElementById('editUseDate');
+
+        console.log('날자계산 메서드 동작')
+        if (startDateTime && endDateTime) {
+            const start = new Date(startDateTime);
+            const end = new Date(endDateTime);
+
+            // 시간 차이를 밀리초(ms)로 계산
+            const timeDiff = end.getTime() - start.getTime();
+
+            // 시간(시간 단위)
+            const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+            // 일수로 변환 (소수점 2자리까지 표현)
+            const dayDiff = (hoursDiff / 24).toFixed(2);
+
+            // 음수인 경우 0으로 설정
+            if (dayDiff > 0) {
+                useDateInput.value = dayDiff;
+            } else {
+                useDateInput.value = '0.00';
+            }
+        }
+    }
+    function reloadWindow(){
+        console.log("확인 버튼 클릭됨");
+        window.location.reload(); // ✅ 페이지 새로고침
+    }
+
 </script>
 </body>
 </html>

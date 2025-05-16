@@ -196,9 +196,9 @@
                   <select style="width: 70%" id="attKind">
                     <option>휴가</option>
                   </select>
-<!--                  <label style="display: flex; align-items: center">-->
-<!--                    <input type="checkbox" style="margin: 0" id="isAnnual">-->
-<!--                    &nbsp;&nbsp;연차</label>-->
+                  <label style="display: flex; align-items: center">
+                    <input type="checkbox" style="margin: 0" id="isAnnual" disabled>
+                    &nbsp;&nbsp;연차</label>
               </div>
             </dd>
             <dt>기간</dt>
@@ -320,7 +320,9 @@
     let fnsuccess = function (result) {
       if (result != null) {
         if (result.success) {
-          Alert.alert('', result.message);
+          Alert.alert('', result.message, function() {
+            window.location.href = '/mobile/attendance_current';
+          });
         } else {
           Alert.alert('', "휴가 등록에 실패하였습니다.");
         }
