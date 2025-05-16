@@ -161,10 +161,11 @@ public class UserService {
 
 
 
-	public List<Map<String, Object>> getPSearchitem(String code, String name) {
+	public List<Map<String, Object>> getPSearchitem(String code, String name, String spjangcd) {
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("code", code);
 		dicParam.addValue("name", name);
+		dicParam.addValue("spjangcd", spjangcd);
 
 		String sql = """
                  select
@@ -177,6 +178,7 @@ public class UserService {
                 where
                   p.id::text like concat('%', :code, '%')
                 AND p."Name" like concat('%',:name,'%')
+                AND p.spjangcd = :spjangcd
                 order by p.id
                 """;
 

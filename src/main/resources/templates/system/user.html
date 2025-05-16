@@ -496,7 +496,7 @@
 
             theGrid.hostElement.addEventListener('dblclick', function (e) {
                 let selectedItem = theGrid.selectedItems[0];
-                console.log('확인', selectedItem);
+                /*console.log('확인', selectedItem);*/
 
                 document.getElementById('id').value = selectedItem.id;
                 document.getElementById('login_id').value = selectedItem.login_id;
@@ -967,7 +967,8 @@
                     type: 'GET',
                     data: {
                         searchCode: searchCode,
-                        searchName: searchName
+                        searchName: searchName,
+                        spjangcd: sessionStorage.getItem('spjangcd'),
                     },
                     async: false,
                     success: function (res) {
@@ -1031,6 +1032,19 @@
                     Alert.alert('', '사번을 선택해주세요.');
                 }
             });
+
+            theGrid4.hostElement.addEventListener('dblclick', function (e) {
+                let items = theGrid4.selectedItems;
+                if (items.length === 0) {
+                    return false;
+                }
+                const selectedItem = items[0];
+                $('#personid').val(selectedItem.id);
+                $('#Depart_id').val(selectedItem.dept_id);
+                $('#personname').val(selectedItem.name);
+                popContainer.close();
+            });
+
         }
 
         function getspjangcd() {

@@ -26,10 +26,10 @@ public class DayMonthlyService {
             workday = serchday.substring(6, 8);
         }
 
-        Integer divisionInt = (work_division != null && !work_division.isEmpty())
-                ? Integer.parseInt(work_division)
-                : null;
-        paramMap.addValue("work_division", divisionInt);
+        // 빈 문자열 허용을 위해 String 그대로 사용
+        String divisionStr = (work_division != null) ? work_division : "";
+        paramMap.addValue("work_division", divisionStr);
+
 
         paramMap.addValue("workym", workym);
         paramMap.addValue("workday", workday);
@@ -74,7 +74,11 @@ public class DayMonthlyService {
             FROM tb_pb201 t
             LEFT JOIN auth_user a ON a.personid = t.personid
             LEFT JOIN person p ON p.id = a.personid
-           LEFT JOIN sys_code g ON g."Code" = p."PersonGroup_id"::text
+           LEFT JOIN (
+              SELECT "Code", "Value"
+              FROM sys_code
+               WHERE "CodeType" = 'work_division'
+           ) g ON g."Code" = LPAD(p."PersonGroup_id"::text, 2, '0')
              LEFT JOIN (
                  SELECT "Code", "Value"
                  FROM sys_code
@@ -83,7 +87,10 @@ public class DayMonthlyService {
              LEFT JOIN tb_pb210 tp210 ON tp210.workcd = t.workcd
             WHERE t.workym = :workym
               AND t.workday = :workday
-              AND p."PersonGroup_id" = :work_division
+              AND (
+               :work_division = '' OR
+               LPAD(p."PersonGroup_id"::text, 2, '0') = :work_division
+                )
               AND t.spjangcd =:spjangcd
         """;
 

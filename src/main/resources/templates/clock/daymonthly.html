@@ -211,9 +211,9 @@
                     },
                     columns: [
                         {binding: 'fixflag', header: '마감', width: 70, align: 'center'},
-                        {binding: 'row_num', header: '순번', width: 70, align: 'center'},
+                        {binding: 'row_num', header: '순번', width: 60, align: 'center'},
                         {binding: 'workymd', header: '일자', width: 100, align: 'center' },
-                        {binding: 'first_name', header: '사원명', width: 120, align: 'center' },
+                        {binding: 'first_name', header: '사원명', width: 100, align: 'center' },
                         {binding: 'jik_id', header: '직위', width: 100, align: 'center' },
                         {binding: 'starttime', header: '출근', width: 100, align: 'center' },
                         {binding: 'endtime', header: '퇴근', width: 100, align: 'center'},
@@ -221,11 +221,12 @@
                         {
                             binding: 'worknm',
                             header: '구분',
-                            width: 150,
+                            width: 100,
                             align: 'center',
                             dataMap: null,
                             cellTemplate: '${text}'
                         },
+                        {binding: 'group_name', header: '근무구분', width: 100, align: 'center'},
                         {binding: 'nomaltime', header: '근무시간', width: 100, align: 'center'},
                         {binding: 'worktime', header: '총근무시간', width: 100, align: 'center'},
                         {binding: 'jitime', header: '지각', width: '*', align: 'center'},
@@ -307,7 +308,7 @@
                             // 오늘 날짜이면 강조
                             if (item.isToday) {
                                 e.cell.style.fontWeight = 'bold';
-                                e.cell.style.color = 'gold';  // 노란색 텍스트
+                                e.cell.style.color = 'Orange';
                             }
                         }
                     },
@@ -444,7 +445,7 @@
                 let result = AjaxUtil.getSyncData(url + '/read', data);
 
                 if (result && result.data) {
-                    console.log(result.data);
+                    /*console.log(result.data);*/
                     _this.viewData.sourceCollection = result.data;
 
 
@@ -515,7 +516,7 @@
                     list: selectedItems
                 };
 
-                console.log(data);
+                /*console.log(data);*/
 
                 let fnSuccess = function (res) {
                     if (res.success) {
@@ -543,7 +544,7 @@
             page = new DayMonthlyPage();
 
             $('#startdate2').val(CommonUtil.getYYYYMMDD().substring(0, 7));
-            AjaxUtil.fillSelectOptions($('#work_division').add('#work_division2'), 'system_code', '', '', 'work_division');
+            AjaxUtil.fillSelectOptions($('#work_division').add('#work_division2'), 'system_code', 'choose', '', 'work_division');
             AjaxUtil.fillSelectOptions($('#person_name'), 'person', 'choose', false);
 
             page.searchMainData();
@@ -558,6 +559,12 @@
                     function () { page.saveday() },
                     function () { }
                 );
+            });
+
+
+            $('#work_division').change(function () {
+                // 값이 변경되었을 때 searchData 함수를 호출
+                page.searchMainData();
             });
 
         });

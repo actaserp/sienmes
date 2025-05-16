@@ -311,11 +311,12 @@ public class UserController {
 	@GetMapping("/getPerson")
 	public AjaxResult getAccSearchList(
 			@RequestParam(value="searchCode", required=false) String code,
-			@RequestParam(value="searchName", required=false) String name
+			@RequestParam(value="searchName", required=false) String name,
+			@RequestParam(value ="spjangcd") String spjangcd
 	) {
 
 		AjaxResult result = new AjaxResult();
-		List<Map<String, Object>> items = this.userService.getPSearchitem(code,name);
+		List<Map<String, Object>> items = this.userService.getPSearchitem(code,name,spjangcd);
 
 		result.data = items;
 		return result;
