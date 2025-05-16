@@ -221,15 +221,13 @@
     const weekDay = weekDays[today.getDay()];
     document.getElementById('searchDate').innerText = `${year}.${month}.${date}(${weekDay})`;
   };
-  // 🔄 IP 주소 조회 함수 정의
-  const updateIPAddress = () => {
-    const cacheBuster = `?timestamp=${new Date().getTime()}`;
-    fetch(`https://api.ipify.org${cacheBuster}`)
-            .then(response => response.text()) // ✅ text로 받아서 확인
-            .then(data => {
-              console.log("응답 데이터 확인:", data); // 🔍 응답 내용을 직접 출력
 
-              // ✅ JSON인지 아닌지 검사
+  const updateIPAddress = () => {
+    const cacheBuster = `?format=json&cb=${Date.now()}`;
+    fetch(`https://api.ipify.org${cacheBuster}`)
+            .then(response => response.text())
+            .then(data => {
+              console.log("응답 데이터 확인:", data);
               if (data.includes('{')) {
                 const jsonData = JSON.parse(data);
                 document.getElementById('ipAddress').innerText = 'IP : ' + jsonData.ip;
@@ -244,7 +242,6 @@
             });
   };
 
-  // 🔄 IP에 따른 화면 전환 처리 함수
   const handleIPDisplay = (ip) => {
     if (ip === '106.240.249.66') {
       console.log('사내 IP 확인');
@@ -259,46 +256,40 @@
     }
   };
 
-
-  // 네트워크 상태 변경을 감지
+  // 네트워크 연결 상태 변경 감지
   window.addEventListener('online', () => {
     console.log("📡 네트워크가 다시 연결되었습니다. IP를 갱신합니다.");
     updateIPAddress();
   });
 
-  // 🔄 시간 업데이트 함수 정의
+  // 네트워크 타입 변경 감지 (LTE → Wi-Fi 등)
+  if (navigator.connection) {
+    navigator.connection.addEventListener('change', () => {
+      console.log('📶 네트워크 타입 변경 감지됨:', navigator.connection.effectiveType);
+      setTimeout(() => {
+        updateIPAddress();
+      }, 2000); // 네트워크 안정화 대기
+    });
+  }
+
   const updateTime = () => {
     const now = new Date();
-
-    // 시간, 분, 초 구하기
     let hours = now.getHours();
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    // AM/PM 설정
     const ampm = hours >= 12 ? 'PM' : 'AM';
-
-    // 12시간 형식으로 변경
-    hours = hours % 12;
-    hours = hours ? hours : 12; // 0시를 12시로 변경
-
-    // 시간 포맷 설정
+    hours = hours % 12 || 12;
     const formattedTime = `${hours}:${minutes}:${seconds} ${ampm}`;
-
-    // 화면에 업데이트
     document.getElementById('searchTime').innerText = formattedTime;
   };
 
-  // 🔄 페이지 로딩 시 즉시 실행
   (() => {
     updateIPAddress();
     updateTime();
   })();
 
-  // 🔄 5초마다 IP 주소 조회 및 시간 업데이트
   setInterval(updateIPAddress, 5000);
   setInterval(updateTime, 5000);
-
 
   updateDate();
 
