@@ -44,6 +44,7 @@ public class BankTransitDto {
     private Integer clientId; // 거래처 ID
     private Integer transactionTypeId; // 거래구분 ID
     private String depositAndWithdrawalType; // 입출금 형태
+    private String spjangcd; // 사업장
 
     private String bankName; // 은행명
 
@@ -112,6 +113,7 @@ public class BankTransitDto {
         banktransit.setEumnum(dto.getBill());
         banktransit.setEumtodt(dto.getExpiration());
         banktransit.setEtcremark(dto.getEtc());
+        banktransit.setSpjangcd(dto.getSpjangcd());
 
         return banktransit;
     }
