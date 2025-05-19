@@ -131,5 +131,64 @@ public class DayMonthlyService {
     }
 
 
+    public List<Map<String, Object>> getMonthlyList(String person_name, String startdate, String spjangcd,String depart) {
+        MapSqlParameterSource paramMap = new MapSqlParameterSource();
+
+        String departStr = (depart != null) ? depart : "";
+        paramMap.addValue("depart_id", departStr);
+
+        String personStr = (person_name!= null) ? person_name : "";
+        paramMap.addValue("person_name", personStr);
+
+
+        paramMap.addValue("startdate", startdate);
+        paramMap.addValue("spjangcd", spjangcd);
+
+        String sql = """
+            SELECT
+                t.workym
+                ,COUNT(*) AS workcount
+                ,t.personid
+                ,SUM(t.worktime) as worktime
+                ,SUM(t.nomaltime) as nomaltime
+                ,SUM(t.overtime) as overtime
+                ,SUM(t.nighttime) as nighttime
+                ,SUM(t.holitime) as holitime
+                ,SUM(t.jitime) as jitime
+                ,SUM(t.jotime) as jotime
+                ,SUM(t.yuntime) as yuntime
+                ,SUM(t.abtime) as abtime
+                ,SUM(t.bantime) as bantime
+                ,t.fixflag
+                ,g."Value" AS group_name
+                ,s."Value" as jik_id
+                ,p."Name" as first_name
+            FROM tb_pb201 t
+            LEFT JOIN person p ON p.id = t.personid
+           LEFT JOIN (
+              SELECT "Code", "Value"
+              FROM sys_code
+               WHERE "CodeType" = 'work_division'
+           ) g ON g."Code" = LPAD(p."PersonGroup_id"::text, 2, '0')
+             LEFT JOIN (
+                 SELECT "Code", "Value"
+                 FROM sys_code
+                 WHERE "CodeType" = 'jik_type'
+             ) s ON s."Code" = p.jik_id
+            WHERE
+                (:person_name = '' OR t.personid::text = :person_name)
+                AND (
+               :depart_id = '' OR
+               LPAD(p."Depart_id"::text, 2, '0') = :depart_id
+                )
+              AND t.spjangcd =:spjangcd
+              AND t.workym = :startdate
+              GROUP BY t.personid, t.workym, t.fixflag, g."Value",s."Value",p."Name"
+              ORDER BY t.personid
+        """;
+
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
+        return items;
+    }
 
 }
