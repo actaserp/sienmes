@@ -180,7 +180,6 @@
       if (spjangcd) {
         $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
       }
-
       page = new VendorBalanceDetailPage();
 
       $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
@@ -191,7 +190,12 @@
       // 검색
       $('#btnSearch').click(function (e) {
         if ($('#cboCompany').val() !== '' && $('#cboCompanyHidden').val() === '') {
-          // 업체명 텍스트는 썼지만, 업체 검색 버튼 안 눌렀을 때
+          const companyCode = $('#cboCompanyHidden').val();
+
+          if (companyCode === '' && $('#cboCompany').val() !== '') {
+            Alert.alert('', '업체를 먼저 선택한 후 검색해 주세요.');
+            return;
+          }
           page.searchMainData();
         } else {
           page.searchMainData();

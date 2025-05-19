@@ -142,7 +142,7 @@ public class VendorBalanceDetailService {
                     WHERE s.misdate BETWEEN :start AND :end
                       AND s.spjangcd = :spjangcd
                       AND s.cltcd = :company
-                    GROUP BY s.cltcd, c."Name", s.misdate, s.totalamt, s.misgubun, sc."Value", s.remark1
+                    GROUP BY s.cltcd, c."Name", s.misdate, s.misnum, s.totalamt, s.misgubun, sc."Value", s.remark1
                     UNION ALL
                     -- 지급액
                     SELECT
