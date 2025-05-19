@@ -250,7 +250,7 @@
   const date = String(today.getDate()).padStart(2, '0');
 
   $(document).ready(function () {
-    AjaxUtil.fillSelectOptions($('#selectWorkcd'), 'workcd', 'choose', false, 'work_division', '');
+    AjaxUtil.fillSelectOptions($('#selectWorkcd'), 'workcd', 'all', false, 'work_division', '');
     document.getElementById('searchFromDate').value = `${year}-${month}-01`;
     document.getElementById('searchToDate').value = `${year}-${month}-${date}`;
     searchMainData();
@@ -259,7 +259,7 @@
   function searchMainData() {
     let url = '/api/commute_current/read';
     let data = {
-      'workcd': document.getElementById('selectWorkcd').value === "" ? null : parseInt(document.getElementById('selectWorkcd').value),
+      'workcd': document.getElementById('selectWorkcd').value,
       'searchFromDate': document.getElementById('searchFromDate').value,
       'searchToDate': document.getElementById('searchToDate').value
     };

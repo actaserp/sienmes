@@ -14,7 +14,7 @@ public class CommuteCurrentService {
     SqlRunner sqlRunner;
 
     // 차트 데이터 조회
-    public List<Map<String, Object>> getUserInfo(String username, Integer workcd, String searchFromDate, String searchToDate) {
+    public List<Map<String, Object>> getUserInfo(String username, String workcd, String searchFromDate, String searchToDate) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("username", username);
@@ -74,7 +74,7 @@ public class CommuteCurrentService {
               AND a.username = :username
         		""";
 
-        if(workcd != null){
+        if(workcd != null && !workcd.isEmpty()){
             sql += " AND t.workcd = :workcd";
         }
         // 날짜 조건 추가
@@ -92,6 +92,11 @@ public class CommuteCurrentService {
             )
         )
     """;
+
+        sql += """
+               ORDER BY t.workym DESC, t.workday DESC
+               """;
+
 
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);

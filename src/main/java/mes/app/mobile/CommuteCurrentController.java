@@ -25,7 +25,7 @@ public class CommuteCurrentController {
     // 사용자 출퇴근 현황 조회
     @GetMapping("/read")
     public AjaxResult getUserInfo(
-            @RequestParam(value="workcd", required = false) Integer workcd,
+            @RequestParam(value="workcd", required = false) String workcd,
             @RequestParam(value="searchFromDate") String searchFromDate,
             @RequestParam(value="searchToDate") String searchToDate,
             HttpServletRequest request,

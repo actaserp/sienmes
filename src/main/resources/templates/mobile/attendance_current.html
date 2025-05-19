@@ -234,7 +234,7 @@
     const date = String(today.getDate()).padStart(2, '0');
 
     $(document).ready(function () {
-        AjaxUtil.fillSelectOptions($('#selectWorkcd'), 'workcd', 'choose', false, 'work_division', '');
+        AjaxUtil.fillSelectOptions($('#selectWorkcd'), 'workcd', 'all', false, 'work_division', '');
         AjaxUtil.fillSelectOptions($('#editAttKind'), 'workcd', 'choose', false, 'work_division', '');
         // 이벤트 리스너 등록
         document.getElementById('editStartDateTime').addEventListener('change', calculateUseDays);
@@ -245,7 +245,7 @@
     function searchMainData() {
         let url = '/api/attendance_current/read';
         let data = {
-            'workcd': document.getElementById('selectWorkcd').value === "" ? null : parseInt(document.getElementById('selectWorkcd').value),
+            'workcd': document.getElementById('selectWorkcd').value,
             'searchYear': document.getElementById('searchYear').value,
         };
         let fnsuccess = function (result) {
@@ -277,7 +277,7 @@
           <table>
                         <tr>
                             <th>입사일</th>
-                            <td colspan="7">
+                            <td colspan="7" style="text-align: left">
                                 ${annInfo.rtdate || ''}
                             </td>
                             <td>

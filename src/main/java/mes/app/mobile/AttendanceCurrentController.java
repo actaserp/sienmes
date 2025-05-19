@@ -31,7 +31,7 @@ public class AttendanceCurrentController {
     // 개인별 휴가 현황 조회
     @GetMapping("/read")
     public AjaxResult getUserInfo(
-            @RequestParam(value="workcd", required = false) Integer workcd,
+            @RequestParam(value="workcd", required = false) String workcd,
             @RequestParam(value="searchYear") String searchYear,
             HttpServletRequest request,
             Authentication auth) {

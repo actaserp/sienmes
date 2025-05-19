@@ -35,10 +35,12 @@ public class AttendanceCurrentService {
         return item;
     }
     // 사용자 휴가정보 조회
-    public List<Map<String, Object>> getVacInfo(Integer workcd, String searchYear, int personId) {
+    public List<Map<String, Object>> getVacInfo(String workcd, String searchYear, int personId) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("personid", personId);
+        dicParam.addValue("workcd", workcd);
+        dicParam.addValue("searchYear", searchYear);
 
         String sql = """
                 SELECT t.reqdate,
@@ -57,14 +59,15 @@ public class AttendanceCurrentService {
                 LEFT JOIN tb_pb210 i ON t.workcd = i.workcd 
                 WHERE personid = :personid
         		""";
-        if(workcd != null){
+        if(workcd != null && !workcd.isEmpty()){
             dicParam.addValue("workcd", workcd);
-            sql += " AND workcd = :workcd";
+            sql += " AND t.workcd = :workcd";
         }
-        if(searchYear != null && !searchYear.isEmpty()){
+        if (searchYear != null && !searchYear.isEmpty()) {
             dicParam.addValue("searchYear", searchYear);
-            sql += " AND EXTRACT(YEAR FROM TO_DATE(reqdate, 'YYYYMMDD'))::text = :searchYear";
+            sql += " AND LEFT(t.reqdate, 4) = :searchYear";
         }
+        sql += " ORDER BY t.reqdate DESC";
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 
