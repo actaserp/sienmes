@@ -3,10 +3,10 @@ package mes.app.PopBill.service;
 
 import com.popbill.api.easyfin.EasyFinBankSearchDetail;
 import lombok.extern.slf4j.Slf4j;
-import mes.Encryption.EncryptionKeyProvider;
 import mes.Encryption.EncryptionUtil;
 import mes.Exception.EncryptionException;
 import mes.app.PopBill.dto.EasyFinBankAccountFormDto;
+import mes.sse.SseController;
 import mes.app.transaction.service.TransactionInputService;
 import mes.app.util.UtilClass;
 import mes.domain.entity.TB_ACCOUNT;
@@ -18,7 +18,6 @@ import mes.domain.repository.TB_BANKTRANSITRepository;
 import mes.domain.repository.TB_XBANKRepository;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.scheduling.annotation.Async;
@@ -26,8 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -56,8 +53,8 @@ public class EasyFinBankCustomService {
     @Autowired
     TB_ACCOUNTRepository accountRepository;
 
-    @PersistenceContext
-    EntityManager entityManager;
+    @Autowired
+    SseController sseController;
 
 
     public void Insert_Tb_Account(EasyFinBankAccountFormDto form){
@@ -214,12 +211,11 @@ public class EasyFinBankCustomService {
                         if (batchParams.size() >= CHUNK_SIZE) {
                             try {
                                 log.info("[쿼리 실행 - {}건] : {}", batchParams.size(), sql);
-                                for (SqlParameterSource param12 : batchParams) {
-                                    if (param12 instanceof MapSqlParameterSource m) {
-                                        log.debug("  > 파라미터: {}", m.getValues());
-                                    }
-                                }
+
                                 sqlRunner.batchUpdate(sql, batchParams.toArray(new SqlParameterSource[0]));
+
+                                sseController.SendingToClientMessage(spjangcd, accountNumber);
+
                             } catch (Exception e) {
                                 log.warn("배치 저장 중 일부 오류 발생 (무시됨): {}", e.getMessage());
                             }
@@ -233,12 +229,10 @@ public class EasyFinBankCustomService {
                 if (!batchParams.isEmpty()) {
                     try {
                         log.info("[쿼리 실행 - {}건] : {}", batchParams.size(), sql);
-                        for (SqlParameterSource param12 : batchParams) {
-                            if (param12 instanceof MapSqlParameterSource m) {
-                                log.debug("  > 파라미터: {}", m.getValues());
-                            }
-                        }
+
                         sqlRunner.batchUpdate(sql, batchParams.toArray(new SqlParameterSource[0]));
+
+                        sseController.SendingToClientMessage(spjangcd, accountNumber);
                     } catch (Exception e) {
                         log.warn("마지막 배치 저장 중 일부 오류 발생 (무시됨): {}", e.getMessage());
                     }

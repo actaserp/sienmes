@@ -6,12 +6,12 @@ import com.popbill.api.PopbillException;
 import com.popbill.api.easyfin.EasyFinBankJobState;
 import com.popbill.api.easyfin.EasyFinBankSearchDetail;
 import com.popbill.api.easyfin.EasyFinBankSearchResult;
-import jdk.jshell.execution.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mes.Encryption.EncryptionUtil;
 import mes.app.PopBill.enums.BankJobState;
 import mes.app.PopBill.service.EasyFinBankCustomService;
+import mes.sse.SseController;
 import mes.app.util.UtilClass;
 import mes.domain.model.AjaxResult;
 import mes.domain.services.SqlRunner;
@@ -30,6 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AccountSyncService {
 
+    private final SseController sseController;
     private final SqlRunner sqlRunner;
     private final EasyFinBankService easyFinBankService;
     private final EasyFinBankCustomService easyFinBankCustomService;

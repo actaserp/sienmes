@@ -747,13 +747,38 @@
     // 날씨 정보
     fetchWeatherData();
 
-    /*const spjangcd = sessionStorage.getItem("spjangcd");
 
-    const eventSource = new EventSource("/sse/subscribe?"  + spjangcd);
+    function sseConnect(){
 
-    eventSource.onmessage = function (){
-        console.log("🔔 알림 수신:", event.data);
-    }*/
+        const spjangcd = sessionStorage.getItem("spjangcd");
+
+        const eventSource = new EventSource("/sse/subscribe?spjangcd="  + spjangcd);
+
+        eventSource.onmessage = function (e){
+
+            if(e.data){
+                console.log('e', e.data);
+                Notify.success(e.data);
+
+            }
+
+        }
+
+        eventSource.onerror = function() {
+            console.log("재연결 시도 중...");
+        };
+
+        /*eventSource.onerror = function(err) {
+            console.log('SSE 오류 발생, 재연결 시도 중...', err);
+            eventSource.close();
+            setTimeout(sseConnect, 3000);
+        };*/
+
+        window.addEventListener("beforeunload", () => {
+            eventSource.close();
+        });
+    }
+
 
     // 날씨 정보를 서버에서 가져오는 함수
     function fetchWeatherData() {
@@ -863,6 +888,8 @@
         });
 
         wrapper.appendChild(select);
+
+        sseConnect();
     });
 
 </script>
