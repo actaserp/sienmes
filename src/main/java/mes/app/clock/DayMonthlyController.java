@@ -33,6 +33,7 @@ public class DayMonthlyController {
     public AjaxResult getDayList(
             @RequestParam(value="work_division", required=false) String work_division,
             @RequestParam(value="serchday", required=false) String serchday,
+            @RequestParam(value="depart", required=false) String depart,
             @RequestParam(value ="spjangcd") String spjangcd,
             HttpServletRequest request,
             Authentication auth) {
@@ -43,7 +44,7 @@ public class DayMonthlyController {
             serchday = serchday.replaceAll("-", "");
         }
 
-        List<Map<String, Object>> items = this.dayMonthlyService.getDayList(work_division, serchday,spjangcd);
+        List<Map<String, Object>> items = this.dayMonthlyService.getDayList(work_division, serchday,spjangcd,depart);
         result.data = items;
         return result;
     }

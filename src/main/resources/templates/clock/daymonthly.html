@@ -62,6 +62,16 @@
                                 </dd>
                             </dl>
 
+
+                            <dl>
+                                <dt>
+                                    <label for="depart">부서</label>
+                                </dt>
+                                <dd>
+                                    <select style="width: 150px;" id="depart" name="depart"></select>
+                                </dd>
+                            </dl>
+
                             <!--<dl>
                                 <dt><span class="eq"></span></dt>
                                 <dd>
@@ -127,12 +137,13 @@
 
                             <dl>
                                 <dt>
-                                    <label for="work_division2">근무구분</label>
+                                    <label for="depart2">부서</label>
                                 </dt>
                                 <dd>
-                                    <select style="width: 150px;" id="work_division2" name="work_division2"></select>
+                                    <select style="width: 150px;" id="depart2" name="depart2"></select>
                                 </dd>
                             </dl>
+
                         </div>
                         <div class="button-wrap">
                             <ul>
@@ -200,6 +211,7 @@
                             sender.columns[e.col].binding === 'fixflag') {
                             e.cell.textContent = '';
                         }
+
                         if (e.panel.cellType === wijmo.grid.CellType.Cell &&
                             sender.columns[e.col].binding === 'fixflag') {
                             const fixflag = sender.getCellData(e.row, 'fixflag', false);
@@ -294,10 +306,11 @@
                             const col = sender.columns[e.col];
                             const item = sender.rows[e.row].dataItem;
 
+                            e.cell.style.color = '';
+                            e.cell.style.fontWeight = 'normal';
+
                             if (col.binding === 'weekday') {
                                 const weekday = sender.getCellData(e.row, e.col, false);
-
-                                e.cell.style.color = ''; // 초기화
 
                                 if (weekday === '일') {
                                     e.cell.style.color = 'red';
@@ -471,6 +484,7 @@
                 let data = {
                     serchday: selectedDate,
                     work_division: $('#work_division').val(),
+                    depart:$('#depart').val(),
                     spjangcd: sessionStorage.getItem('spjangcd'),
                 };
 
@@ -576,8 +590,9 @@
             page = new DayMonthlyPage();
 
             $('#startdate2').val(CommonUtil.getYYYYMMDD().substring(0, 7));
-            AjaxUtil.fillSelectOptions($('#work_division').add('#work_division2'), 'system_code', 'choose', '', 'work_division');
+            AjaxUtil.fillSelectOptions($('#work_division'), 'system_code', 'choose', '', 'work_division');
             AjaxUtil.fillSelectOptions($('#person_name'), 'person', 'choose', false);
+            AjaxUtil.fillSelectOptions($('#depart').add('#depart2'), 'depart', 'choose', false);
 
             page.searchMainData();
 
@@ -594,7 +609,7 @@
             });
 
 
-            $('#work_division').change(function () {
+            $('#work_division, #depart').change(function () {
                 // 값이 변경되었을 때 searchData 함수를 호출
                 page.searchMainData();
             });

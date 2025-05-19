@@ -15,7 +15,7 @@ public class DayMonthlyService {
     @Autowired
     SqlRunner sqlRunner;
 
-    public List<Map<String, Object>> getDayList(String work_division, String serchday, String spjangcd) {
+    public List<Map<String, Object>> getDayList(String work_division, String serchday, String spjangcd,String depart) {
         MapSqlParameterSource paramMap = new MapSqlParameterSource();
 
         // serchday이 20250514 형식으로 들어와서 202505 / 14 으로 형식 분리
@@ -30,6 +30,8 @@ public class DayMonthlyService {
         String divisionStr = (work_division != null) ? work_division : "";
         paramMap.addValue("work_division", divisionStr);
 
+        String departStr = (depart != null) ? depart : "";
+        paramMap.addValue("depart_id", departStr);
 
         paramMap.addValue("workym", workym);
         paramMap.addValue("workday", workday);
@@ -67,13 +69,12 @@ public class DayMonthlyService {
                 t.adttime07,
                 t.remark,
                 t.fixflag,
-                a.first_name,
                 g."Value" AS group_name,
                 s."Value" as jik_id,
-                tp210.worknm as worknm
+                tp210.worknm as worknm,
+                p."Name" as first_name
             FROM tb_pb201 t
-            LEFT JOIN auth_user a ON a.personid = t.personid
-            LEFT JOIN person p ON p.id = a.personid
+            LEFT JOIN person p ON p.id = t.personid
            LEFT JOIN (
               SELECT "Code", "Value"
               FROM sys_code
@@ -90,6 +91,10 @@ public class DayMonthlyService {
               AND (
                :work_division = '' OR
                LPAD(p."PersonGroup_id"::text, 2, '0') = :work_division
+                )
+                AND (
+               :depart_id = '' OR
+               LPAD(p."Depart_id"::text, 2, '0') = :depart_id
                 )
               AND t.spjangcd =:spjangcd
         """;

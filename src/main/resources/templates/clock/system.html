@@ -31,16 +31,16 @@
                 <div class="button-wrap">
                     <ul>
                         <li>
-                            <button type="button" class="btn-excell" id="btnNew" name="btnNew"
+                            <button type="button" class="btn-excell" id="btnSave" name="btnSave"
                                     style="height: 36px; width:115px;">
-                                <i class="fas fa-plus"></i>신규등록
+                                <i class="fas fa-plus"></i>저장
                             </button>
                         </li>
                     </ul>
                 </div>
             </div>
 
-            <div class="table-wrap" style=" overflow-x: auto;">
+            <div class="table-wrap" style="overflow-x: auto;">
                 <form id="unitForm">
                     <table>
                         <caption style="text-align: left; margin-bottom: 8px;">등록테이블</caption>
@@ -52,174 +52,103 @@
                             <col class="wp15">
                             <col class="wp18">
                         </colgroup>
-                        <input type="hidden" id="id" name="id"/>
-                        <thead>
-                            <tr>
-                                <th colspan="6">
-                                    주간
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th>
-                                    <label for="name">출근시간</label>
-                                </th>
-                                <td>
-                                    <input type="time" id="name" name="name" style="width: 100%;" value="09:00">
-                                </td>
 
-                                <th>
-                                    <label for="">연장시작</label>
-                                </th>
-                                <td >
-                                    <input type="time" id="" name="" style="width: 100%;" value="18:00">
-                                </td>
-
-                                <th>
-                                    <label for="">야간시작</label>
-                                </th>
-                                <td >
-                                    <input type="time" id="" name="" style="width: 100%;" value="20:00">
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>
-                                    <label for="name">퇴근시간</label>
-                                </th>
-                                <td>
-                                    <input type="time" id="name" name="name" style="width: 100%;" value="18:00">
-                                </td>
-
-                                <th>
-                                    <label for="">연장종료</label>
-                                </th>
-                                <td >
-                                    <input type="time" id="" name="" style="width: 100%;" value="20:00">
-                                </td>
-
-                                <th>
-                                    <label for="">야간종료</label>
-                                </th>
-                                <td >
-                                    <input type="time" id="" name="" style="width: 100%;" value="22:00">
-                                </td>
-                            </tr>
-                        </tbody>
-
+                        <!-- 주간 -->
                         <thead>
                         <tr>
-                            <th colspan="6">
-                                야간
-                            </th>
+                            <th colspan="6">주간</th>
                         </tr>
                         </thead>
                         <tbody>
+                        <input type="hidden" name="data[0].flag" value="01">
                         <tr>
-                            <th>
-                                <label for="name">출근시간</label>
-                            </th>
-                            <td>
-                                <input type="time" id="name" name="name" style="width: 100%;" value="18:00">
-                            </td>
+                            <th><label for="sttime0">출근시간</label></th>
+                            <td><input type="time" id="sttime0" name="data[0].sttime" style="width: 100%;" value="09:00"></td>
 
-                            <th>
-                                <label for="">연장시작</label>
-                            </th>
-                            <td >
-                                <input type="time" id="" name="" style="width: 100%;" value="00:00">
-                            </td>
+                            <th><label for="ovsttime0">연장시작</label></th>
+                            <td><input type="time" id="ovsttime0" name="data[0].ovsttime" style="width: 100%;" value="18:00"></td>
 
-                            <th>
-                                <label for="">야간시작</label>
-                            </th>
-                            <td >
-                                <input type="time" id="" name="" style="width: 100%;" value="22:00">
-                            </td>
+                            <th><label for="ngsttime0">야간시작</label></th>
+                            <td><input type="time" id="ngsttime0" name="data[0].ngsttime" style="width: 100%;" value="20:00"></td>
                         </tr>
 
                         <tr>
-                            <th>
-                                <label for="name">퇴근시간</label>
-                            </th>
-                            <td>
-                                <input type="time" id="name" name="name" style="width: 100%;" value="22:00">
-                            </td>
+                            <th><label for="endtime0">퇴근시간</label></th>
+                            <td><input type="time" id="endtime0" name="data[0].endtime" style="width: 100%;" value="18:00"></td>
 
-                            <th>
-                                <label for="">연장종료</label>
-                            </th>
-                            <td >
-                                <input type="time" id="" name="" style="width: 100%;" value="00:00">
-                            </td>
+                            <th><label for="ovedtime0">연장종료</label></th>
+                            <td><input type="time" id="ovedtime0" name="data[0].ovedtime" style="width: 100%;" value="20:00"></td>
 
-                            <th>
-                                <label for="">야간종료</label>
-                            </th>
-                            <td >
-                                <input type="time" id="" name="" style="width: 100%;" value="04:00">
-                            </td>
+                            <th><label for="ngedtime0">야간종료</label></th>
+                            <td><input type="time" id="ngedtime0" name="data[0].ngedtime" style="width: 100%;" value="22:00"></td>
                         </tr>
                         </tbody>
 
+                        <!-- 야간 -->
                         <thead>
                         <tr>
-                            <th colspan="6">
-                                기타
-                            </th>
+                            <th colspan="6">야간</th>
                         </tr>
                         </thead>
                         <tbody>
+                        <input type="hidden" name="data[1].flag" value="02">
                         <tr>
-                            <th>
-                                <label for="name">출근시간</label>
-                            </th>
-                            <td>
-                                <input type="time" id="name" name="name" style="width: 100%;" value="00:00">
-                            </td>
+                            <th><label for="sttime1">출근시간</label></th>
+                            <td><input type="time" id="sttime1" name="data[1].sttime" style="width: 100%;" value="18:00"></td>
 
-                            <th>
-                                <label for="">연장시작</label>
-                            </th>
-                            <td >
-                                <input type="time" id="" name="" style="width: 100%;" value="00:00">
-                            </td>
+                            <th><label for="ovsttime1">연장시작</label></th>
+                            <td><input type="time" id="ovsttime1" name="data[1].ovsttime" style="width: 100%;" value="00:00"></td>
 
-                            <th>
-                                <label for="">야간시작</label>
-                            </th>
-                            <td >
-                                <input type="time" id="" name="" style="width: 100%;" value="00:00">
-                            </td>
+                            <th><label for="ngsttime1">야간시작</label></th>
+                            <td><input type="time" id="ngsttime1" name="data[1].ngsttime" style="width: 100%;" value="22:00"></td>
                         </tr>
 
                         <tr>
-                            <th>
-                                <label for="name">퇴근시간</label>
-                            </th>
-                            <td>
-                                <input type="time" id="name" name="name" style="width: 100%;" value="00:00">
-                            </td>
+                            <th><label for="endtime1">퇴근시간</label></th>
+                            <td><input type="time" id="endtime1" name="data[1].endtime" style="width: 100%;" value="22:00"></td>
 
-                            <th>
-                                <label for="">연장종료</label>
-                            </th>
-                            <td >
-                                <input type="time" id="" name="" style="width: 100%;" value="00:00">
-                            </td>
+                            <th><label for="ovedtime1">연장종료</label></th>
+                            <td><input type="time" id="ovedtime1" name="data[1].ovedtime" style="width: 100%;" value="00:00"></td>
 
-                            <th>
-                                <label for="">야간종료</label>
-                            </th>
-                            <td >
-                                <input type="time" id="" name="" style="width: 100%;" value="00:00">
-                            </td>
+                            <th><label for="ngedtime1">야간종료</label></th>
+                            <td><input type="time" id="ngedtime1" name="data[1].ngedtime" style="width: 100%;" value="04:00"></td>
+                        </tr>
+                        </tbody>
+
+                        <!-- 기타 -->
+                        <thead>
+                        <tr>
+                            <th colspan="6">기타</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <input type="hidden" name="data[2].flag" value="03">
+                        <tr>
+                            <th><label for="sttime2">출근시간</label></th>
+                            <td><input type="time" id="sttime2" name="data[2].sttime" style="width: 100%;" value="00:00"></td>
+
+                            <th><label for="ovsttime2">연장시작</label></th>
+                            <td><input type="time" id="ovsttime2" name="data[2].ovsttime" style="width: 100%;" value="00:00"></td>
+
+                            <th><label for="ngsttime2">야간시작</label></th>
+                            <td><input type="time" id="ngsttime2" name="data[2].ngsttime" style="width: 100%;" value="00:00"></td>
+                        </tr>
+
+                        <tr>
+                            <th><label for="endtime2">퇴근시간</label></th>
+                            <td><input type="time" id="endtime2" name="data[2].endtime" style="width: 100%;" value="00:00"></td>
+
+                            <th><label for="ovedtime2">연장종료</label></th>
+                            <td><input type="time" id="ovedtime2" name="data[2].ovedtime" style="width: 100%;" value="00:00"></td>
+
+                            <th><label for="ngedtime2">야간종료</label></th>
+                            <td><input type="time" id="ngedtime2" name="data[2].ngedtime" style="width: 100%;" value="00:00"></td>
                         </tr>
                         </tbody>
                     </table>
                 </form>
             </div>
+
             <!--//tab-wrap end-->
         </section>
 
@@ -232,20 +161,20 @@
                 <div class="button-wrap">
                     <ul>
                         <li>
-                            <a class="btn btn-excell" title="저장" id="btnSave2">
-                                <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
-                                신규
+                            <a class="btn btn-excell" id="btnNew" title="신규등록" >
+                                <img src="/images/icon/ico-plus.svg" alt="신규등록 아이콘">
+                                신규등록
                             </a>
                         </li>
                         <li>
-                            <a class="btn btn-excell" title="근태내역가져오기" id="btnSave3">
-                                <img src="/images/icon/ico-edit.svg" alt="근태내역가져오기 아이콘">
+                            <a class="btn btn-excell" title="삭제" id="btnDel">
+                                <img src="/images/icon/ico-edit.svg" alt="삭제 아이콘">
                                 삭제
                             </a>
                         </li>
                         <li>
-                            <a class="btn btn-excell" title="잔여일재계산" id="btnSave4">
-                                <img src="/images/icon/ico-edit.svg" alt="잔여일재계산 아이콘">
+                            <a class="btn btn-excell" title="저장" id="btnSave2">
+                                <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
                                 저장
                             </a>
                         </li>
@@ -254,42 +183,60 @@
             </div>
 
             <div class="row">
-                <div class="wp40">
+                <div class="wp50">
                     <div class="container-fluid col">
                         <p id="selectedItem"></p>
-                        <div id="subject-grid" style="height: 200px; max-height:200px;"></div>
+                        <div id="pb210-grid" style="height: 200px; max-height:200px;"></div>
                     </div>
                 </div>
 
-                <div class="col wp30" style="margin-left: 500px;">
+                <div class="col wp30" style="margin-left: 100px;">
                     <div class="section">
-                        <form id="companyPriceForm">
+                        <form id="systemForm">
                             <table class="write-table">
                                 <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
-                                <input type="text" id="price_id" name="price_id" hidden/>
                                 <tbody>
                                 <tr>
                                     <th>
-                                        <label for="name">구분</label>
+                                        <label for="workcd">구분코드</label>
                                     </th>
                                     <td>
-                                        <input type="text" id="" name="" style="width: 100%;">
+                                        <input type="text" id="workcd" name="workcd" style="width: 100%;">
+                                    </td>
+
+                                    <th>
+                                        <label for="worknm">구분명칭</label>
+                                    </th>
+                                    <td>
+                                        <input type="text" id="worknm" name="worknm" style="width: 100%;">
                                     </td>
                                 </tr>
+
                                 <tr>
                                     <th>
-                                        <label for="">연차</label>
+                                        <label for="yearflag">연차</label>
                                     </th>
-                                    <td>
-                                        <input type="checkbox" id="" name="" style="width: 100%;">
+                                    <td style=" text-align: center; vertical-align: middle;">
+                                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                                            <input type="checkbox" id="yearflag" name="yearflag" value="1" >
+                                        </div>
                                     </td>
-                                </tr>
-                                <tr>
+
                                     <th>
-                                        <label for="">비고</label>
+                                        <label for="usenum">적용일수</label>
                                     </th>
                                     <td>
-                                        <input type="text" id="" name="" style="width: 100%;">
+                                        <input type="text" id="usenum" name="usenum" style="width: 100%;">
+                                    </td>
+
+                                </tr>
+
+                                <tr>
+                                    <th>
+                                        <label for="remark">비고</label>
+                                    </th>
+                                    <td colspan="3">
+                                        <input type="text" id="remark" name="remark" style="width: 100%;">
                                     </td>
                                 </tr>
                                 </tbody>
@@ -309,8 +256,8 @@
 </th:block>
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-    <script type="text/javascript">
-        class YearlyPage {
+    <script th:inline="none">
+        class SystemPage {
             constructor() {
                 this.url = '/api/definition/area';
                 this.viewData = new wijmo.collections.CollectionView();
@@ -321,7 +268,7 @@
             init() {
                 let _this = this;
 
-                this.grid = new wijmo.grid.FlexGrid('#subject-grid', {
+                this.grid = new wijmo.grid.FlexGrid('#pb210-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
@@ -332,76 +279,192 @@
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+
+                        // yearflag 값에 따라 체크 표시 설정
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            let col = sender.columns[e.col];
+                            if (col.binding === 'yearflag') {
+                                let value = sender.getCellData(e.row, e.col, false);
+                                e.cell.innerHTML = value === '1'
+                                    ? '<span style="color: black;">✔</span>'
+                                    : '';
+                                e.cell.style.textAlign = 'center';
+                            }
+                        }
                     },
                     columns: [
-                        {binding: '', header: '연차', width: 100, align: 'center'},
-                        {binding: '', header: '구분', width: 120, align: 'center'},
-                        {binding: '', header: '비고', width: '*', align: 'center'},
+                        {binding: 'yearflag', header: '연차', width: 100, align: 'center'},
+                        {binding: 'workcd', header: '구분코드', width: 120, align: 'center'},
+                        {binding: 'worknm', header: '구분명칭', width: 120, align: 'center'},
+                        {binding: 'usenum', header: '적용일수', width: 120, align: 'center'},
+                        {binding: 'remark', header: '비고', width: '*', align: 'left'},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
 
-                /*this.grid.hostElement.addEventListener('dblclick', (e) => {
+                this.grid.hostElement.addEventListener('dblclick', (e) => {
                     let hitTest = this.grid.hitTest(e);
                     if (hitTest.cellType === wijmo.grid.CellType.Cell) {
                         let row = hitTest.row;
                         let selectedItem = this.grid.rows[row].dataItem;
-                        _this.showDetail(selectedItem.id)
+                        _this.showDetail(selectedItem.workcd)
                     }
-                });*/
+                });
 
                 new FlexGridContextMenu(this.grid);
-                this.grid.downloadFileName = '사원별근태현황';
+                this.grid.downloadFileName = '근태항목설정';
 
             }
 
+            searchMainData2() {
+                let url = '/api/clock/System/tiemread';
+
+                let data = {
+                    spjangcd: sessionStorage.getItem('spjangcd')
+                };
+
+                let result = AjaxUtil.getSyncData(url, data);
+
+                if (result && result.data) {
+                    /*console.log(result);*/
+                    const timeDataList = result.data; // [{flag: "01", sttime: "...", ...}, {...}]
+
+                    timeDataList.forEach((item, index) => {
+                        // 필드 이름 배열
+                        const fields = ['sttime', 'endtime', 'ovsttime', 'ovedtime', 'ngsttime', 'ngedtime'];
+
+                        fields.forEach(field => {
+                            const input = document.querySelector(`input[name="data[${index}].${field}"]`);
+                            if (input && item[field]) {
+                                input.value = item[field];
+                            }
+                        });
+
+                        // flag 값도 hidden 필드에 적용 (필요시)
+                        const flagInput = document.querySelector(`input[name="data[${index}].flag"]`);
+                        if (flagInput && item.flag) {
+                            flagInput.value = item.flag;
+                        }
+                    });
+                }
+            }
+
+
+            savetime() {
+                let _this = this;
+                let url = '/api/clock/System/savetime';
+
+                // 폼 데이터 수동 파싱
+                let formData = $('#unitForm').serializeArray();
+                let result = {
+                    data: [],
+                    spjangcd: sessionStorage.getItem('spjangcd')
+                };
+
+                formData.forEach(item => {
+                    let match = item.name.match(/^data\[(\d+)]\.(\w+)$/);
+                    if (match) {
+                        let index = parseInt(match[1]);
+                        let key = match[2];
+
+                        if (!result.data[index]) {
+                            result.data[index] = {};
+                        }
+                        result.data[index][key] = item.value;
+                    } else {
+                        result[item.name] = item.value;
+                    }
+                });
+
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('', '저장되었습니다');
+                        _this.searchMainData2()
+                    } else {
+                        Alert.alert('', res.message);
+                    }
+                };
+
+                AjaxUtil.postJsonData(url, result, fnSuccess);
+            }
+
+
 
             showDetail(idx) {
-                let param = {'id': idx};
+                let param = {
+                    'workcd': idx,
+                    spjangcd: sessionStorage.getItem('spjangcd')
+                };
+                let url = '/api/clock/System'
 
-                let result = AjaxUtil.getSyncData(this.url + '/detail', param);
+                let result = AjaxUtil.getSyncData(url + '/detail', param);
                 if (result.success) {
-                    FormUtil.BindDataForm(result.data, $('#basicForm'));
+                    FormUtil.BindDataForm(result.data, $('#systemForm'));
                     //$('#description').text(result.description);
                 }
 
                 //page.setButtonDisable(false, false, false);
-                page.setButtonState();
             }
 
             searchMainData() {
                 let _this = this;
-                //let txtName = $('#txtName').val();
-                //let url = '/api/definition/area?txtName='+txtName;
-                /* let data = {
-                     'txtName' :$('#txtName').val(),
-                     //'action':'read'
+
+                let url = '/api/clock/System/read'
+
+                 let data = {
+                     spjangcd: sessionStorage.getItem('spjangcd')
                  }
-                 let result = AjaxUtil.getSyncData(this.url+'/read', data);
-                 console.log(result);
+
+                 let result = AjaxUtil.getSyncData(url, data);
 
                  if (result && result.data) {
                      _this.viewData.sourceCollection = result.data;
-                 }*/
+                 }
+
+                this.searchMainData2()
 
             }//searchMainData
 
-            saveArea() {
+            saveSystem() {
                 let _this = this;
-                let url = '/api/definition/area/save';
+                let url = '/api/clock/System/save';
                 //데이터입력체크루틴 누락
 
                 //let data = $('#basicForm').serialize();
-                let data = FormUtil.extractForm($('#basicForm'));
-                if (!data.name) {
-                    Alert.alert('', '에어리어 이름을 입력해주세요.');
-                    $('#basicForm #name').focus();
+                let data = FormUtil.extractForm($('#systemForm'));
+                data.spjangcd = sessionStorage.getItem('spjangcd')
+
+                if (!data.workcd) {
+                    Alert.alert('', '구분코드을 입력해주세요.');
+                    $('#systemForm #workcd').focus();
                     return;
                 }
 
                 let fnSuccess = function (res) {
                     if (res.success) {
                         Alert.alert('', '저장되었습니다'); // Notification
+                        $('#systemForm')[0].reset();
+                        _this.searchMainData();
+                    } else if (!res.success) {
+                        Alert.alert('', res.message);
+                    }
+                };
+                AjaxUtil.postAsyncData(url, data, fnSuccess);
+            }
+
+
+            deletetime() {
+                let _this = this;
+                let url = '/api/clock/System/delete';
+
+                //let data = $('#basicForm').serialize();
+                let data = FormUtil.extractForm($('#systemForm'));
+                data.spjangcd = sessionStorage.getItem('spjangcd')
+
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('', '삭제되었습니다'); // Notification
+                        $('#systemForm')[0].reset();
                         _this.searchMainData();
                     } else if (!res.success) {
                         Alert.alert('', res.message);
@@ -418,7 +481,7 @@
         $(document).ready(function (e) {
             //yullinAuth.inspection();
             yullinAuth.removeWriteButton();
-            page = new YearlyPage();
+            page = new SystemPage();
             page.searchMainData();
 
             const now = new Date();
@@ -432,6 +495,41 @@
 
             $('#btnSearch').click(function (ex) {
                 page.searchMainData();
+            });
+
+            $('#btnSave').click(function (e) {
+                Alert.confirm('',
+                    '저장하시겠습니까?',
+                    function () {
+                        page.savetime();
+                    },
+                    function () {
+                    }
+                );
+            });
+
+            $('#btnNew').click(function (e) {
+                $('#systemForm')[0].reset();
+            });
+
+            // 삭제버튼
+            $('#btnDel').click(function (e) {
+                Alert.confirm('',
+                    '삭제하시겠습니까?',
+                    function () { page.deletetime() },
+                    function () { }
+                );
+            });
+
+            $('#btnSave2').click(function (e) {
+                Alert.confirm('',
+                    '저장하시겠습니까?',
+                    function () {
+                        page.saveSystem();
+                    },
+                    function () {
+                    }
+                );
             });
 
         });
