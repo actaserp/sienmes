@@ -2,6 +2,7 @@ package mes.app.clock.service;
 
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,9 @@ public class DayMonthlyService {
 
     @Autowired
     SqlRunner sqlRunner;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public List<Map<String, Object>> getDayList(String work_division, String serchday, String spjangcd,String depart) {
         MapSqlParameterSource paramMap = new MapSqlParameterSource();
@@ -131,7 +135,62 @@ public class DayMonthlyService {
     }
 
 
-    public List<Map<String, Object>> getMonthlyList(String person_name, String startdate, String spjangcd,String depart) {
+    /*월정산 save*/
+    public int insertWorkSummary(String spjangcd, String workym) {
+        String sql = """
+        INSERT INTO tb_pb203 (
+            workym,
+            workday,
+            personid,
+            fixflag,
+            worktime,
+            nomaltime,
+            overtime,
+            nighttime,
+            holitime,
+            jitime,
+            jotime,
+            yuntime,
+            abtime,
+            bantime,
+            spjangcd
+        )
+        SELECT
+            ? AS workym,
+            COUNT(*) AS workday,
+            t.personid,
+            0 AS fixflag,
+            SUM(t.worktime),
+            SUM(t.nomaltime),
+            SUM(t.overtime),
+            SUM(t.nighttime),
+            SUM(t.holitime),
+            SUM(t.jitime),
+            SUM(t.jotime),
+            SUM(t.yuntime),
+            SUM(t.abtime),
+            SUM(t.bantime),
+            t.spjangcd
+        FROM tb_pb201 t
+        WHERE t.spjangcd = ?
+          AND t.workym = ?
+          AND NOT EXISTS (
+              SELECT 1
+              FROM tb_pb203 p
+              WHERE p.spjangcd = t.spjangcd
+                AND p.workym = t.workym
+                AND p.personid = t.personid
+          )
+        GROUP BY t.personid, t.workym, t.spjangcd
+        """;
+
+        return jdbcTemplate.update(sql, workym, spjangcd, workym);
+    }
+
+
+
+/*read*/
+    public List<Map<String, Object>> getMonthlyReadList(String person_name, String startdate, String spjangcd,String depart) {
         MapSqlParameterSource paramMap = new MapSqlParameterSource();
 
         String departStr = (depart != null) ? depart : "";
@@ -146,31 +205,25 @@ public class DayMonthlyService {
 
         String sql = """
             SELECT
-                t.workym
-                ,COUNT(*) AS workcount
-                ,t.personid
-                ,SUM(t.worktime) as worktime
-                ,SUM(t.nomaltime) as nomaltime
-                ,SUM(t.overtime) as overtime
-                ,SUM(t.nighttime) as nighttime
-                ,SUM(t.holitime) as holitime
-                ,SUM(t.jitime) as jitime
-                ,SUM(t.jotime) as jotime
-                ,SUM(t.yuntime) as yuntime
-                ,SUM(t.abtime) as abtime
-                ,SUM(t.bantime) as bantime
-                ,tb203.fixflag as fixflag
-                ,g."Value" AS group_name
-                ,s."Value" as jik_id
-                ,p."Name" as first_name
-            FROM tb_pb201 t
+            t.workym
+            ,t.personid
+            ,t.workday
+            ,t.worktime
+            ,t.nomaltime
+            ,t.overtime
+            ,t.nighttime
+            ,t.holitime
+            ,t.jitime
+            ,t.jotime
+            ,t.yuntime
+            ,t.abtime
+            ,t.bantime
+            ,t.fixflag
+            ,s."Value" as jik_id
+            ,p."Name" as first_name
+            ,t.spjangcd as spjangcd
+            FROM tb_pb203 t
             LEFT JOIN person p ON p.id = t.personid
-            LEFT JOIN tb_pb203 tb203 ON tb203.personid = t.personid
-           LEFT JOIN (
-              SELECT "Code", "Value"
-              FROM sys_code
-               WHERE "CodeType" = 'work_division'
-           ) g ON g."Code" = LPAD(p."PersonGroup_id"::text, 2, '0')
              LEFT JOIN (
                  SELECT "Code", "Value"
                  FROM sys_code
@@ -184,8 +237,6 @@ public class DayMonthlyService {
                 )
               AND t.spjangcd =:spjangcd
               AND t.workym = :startdate
-              GROUP BY t.personid, t.workym, t.fixflag, g."Value",s."Value",p."Name",tb203.fixflag
-              ORDER BY t.personid
         """;
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);

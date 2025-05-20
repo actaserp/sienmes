@@ -166,6 +166,13 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a class="btn btn-excell" title="월정산" id="btncancel" style="display: none;">
+                                        <img src="/images/icon/ico-edit.svg" alt="월정산취소 아이콘">
+                                        월정산취소
+                                    </a>
+                                </li>
+
+                                <li>
                                     <a class="btn btn-excell" title="저장" id="btnSave3">
                                         <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
                                         저장
@@ -275,27 +282,35 @@
                 });
 
 
-
                 let selector = new wijmo.grid.selector.Selector(this.grid, {
                     itemChecked: (s, e) => {
-                        // 방어: e.row 유효성 검사
-                        if (e.row == null || e.row < 0 || e.row >= this.grid.rows.length) return;
+                        if (e.row === null) {  // 헤더 클릭 처리
+                            allSelected = !allSelected;
+                            this.grid.rows.forEach((row, idx) => {
+                                const fixflag = this.grid.getCellData(idx, 'fixflag', false);
+                                row.isSelected = allSelected && (fixflag !== '1');
+                            });
+                            return;
+                        }
 
-                        // fixflag 값 가져오기
-                        const fixflag = this.grid.getCellData(e.row, 'fixflag', false);
+                        if (typeof e.row !== 'number' || e.row < 0 || e.row >= this.grid.rows.length) {
+                            return;
+                        }
+                        const rowIndex = e.row;
+
+                        const fixflag = this.grid.getCellData(rowIndex, 'fixflag', false);
 
                         if (fixflag === '1') {
-                            // 체크 해제 막기: 강제로 다시 선택 상태로 복원
                             setTimeout(() => {
                                 this.grid.rows[e.row].isSelected = true;
                             }, 0);
                         }
                     }
+
                 });
 
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '일별근태현황';
-
 
 
                 const todayYM = CommonUtil.getYYYYMMDD().substring(0, 7);
@@ -401,7 +416,7 @@
                         {binding: 'fixflag', header: '마감', width: 70, align: 'center'},
                         {binding: 'first_name', header: '사원명', width: 120, align: 'center' },
                         {binding: 'jik_id', header: '직위', width: 120, align: 'center' },
-                        {binding: 'workcount', header: '근무일수', width: 120, align: 'center'},
+                        {binding: 'workday', header: '근무일수', width: 120, align: 'center'},
                         {binding: 'nomaltime', header: '정상근무시간', width: 120, align: 'center'},
                         {binding: 'worktime', header: '총근무시간', width: 120, align: 'center'},
                         {binding: 'jitime', header: '지각', width: '*', align: 'center'},
@@ -424,21 +439,62 @@
                 });
 
 
+                let allSelected = false;
+
                 let selector2 = new wijmo.grid.selector.Selector(this.grid3, {
                     itemChecked: (s, e) => {
-                        // 방어: e.row 유효성 검사
-                        if (e.row == null || e.row < 0 || e.row >= this.grid3.rows.length) return;
+                        if (e.row === null) {
+                            // 전체 선택 토글
+                            allSelected = !allSelected;
+                            this.grid3.rows.forEach((row, idx) => {
+                                const fixflag = this.grid3.getCellData(idx, 'fixflag', false);
+                                row.isSelected = allSelected && (fixflag != '1');
+                            });
+                        }
 
-                        // fixflag 값 가져오기
-                        const fixflag = this.grid3.getCellData(e.row, 'fixflag', false);
+                        // 개별 행 선택 처리
+                        const selectedRows = this.grid3.rows.filter(row => row.isSelected);
 
-                        if (fixflag === '1') {
-                            // 체크 해제 막기: 강제로 다시 선택 상태로 복원
-                            setTimeout(() => {
-                                this.grid3.rows[e.row].isSelected = true;
-                            }, 0);
+                        // 선택된 행 중 하나라도 fixflag === 0 또는 '0'이면 월정산취소 버튼 보여주기
+                        const hasUnfixed = selectedRows.some(row => {
+                            const flag = row.dataItem.fixflag;
+                            return flag === 0 || flag === '0';
+                        });
+
+                        /*console.log("선택된 행:", selectedRows.map(r => r.dataItem));*/
+
+
+                        if (hasUnfixed) {
+                            document.getElementById("btnSave2").style.display = "none";
+                            document.getElementById("btncancel").style.display = "";
+                        } else {
+                            document.getElementById("btnSave2").style.display = "";
+                            document.getElementById("btncancel").style.display = "none";
                         }
                     }
+
+
+                });
+
+                this.grid3.loadedRows.addHandler(() => {
+                    setTimeout(() => {
+                        this.grid.select(-1, -1); // 선택 상태 초기화
+                    }, 0); // 비동기로 처리하여 초기 선택 해제
+                });
+
+                let isInitialLoad = true; // 초기 상태 플래그
+                this.grid3.selectionChanged.addHandler((s, e) => {
+                    if (isInitialLoad) {
+                        isInitialLoad = false; // 초기 로드 이후 플래그 해제
+                        return;
+                    }
+
+                    /*let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
+                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
+                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
+                        console.log(selectedRowData); // 선택된 데이터 출력
+
+                    }*/
                 });
 
 
@@ -448,7 +504,6 @@
             }
 
             /*일별 근태현황 기능*/
-
             // 월별 일자/요일 생성 함수
             getMonthDates(ym) {
                 const [year, month] = ym.split('-').map(Number);
@@ -622,39 +677,36 @@
 
             saveMonthly() {
                 let _this = this;
-                let url = '/api/clock/DayMonthly/Monthlysave';
-
-
-                // 선택된 행들 가져오기
-                let selectedItems = _this.grid3.rows
-                    .filter(row => row.isSelected)  // Selector에서 체크된 행
-                    .map(row => row.dataItem);
-
-                // 유효성 체크
-                if (selectedItems.length === 0) {
-                    Alert.alert('', '선택된 행이 없습니다.');
-                    return;
-                }
+                let url = '/api/clock/DayMonthly/getMonthlyList';
 
                 // 서버로 전송할 데이터
                 let data = {
-                    list: selectedItems,
+                    startdate: $('#startdate2').val(),
                     spjangcd: sessionStorage.getItem('spjangcd')
                 };
 
                 /*console.log(data);*/
 
-                let fnSuccess = function (res) {
-                    if (res.success) {
-                        Alert.alert('','저장되었습니다'); // Notification
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/clock/DayMonthly/getMonthlyList',
+                    data: {
+                        startdate: $('#startdate2').val(),
+                        spjangcd: sessionStorage.getItem('spjangcd')
+                    },
+                    dataType: 'json',
+                    success: function (res) {
+                        /*console.log("서버 응답:", res);*/
+                        Alert.alert('', '저장되었습니다');
                         _this.searchMainData2();
-                    }  else if (!res.success) {
-                        Alert.alert('', res.message);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("에러:", status, error);
+                        console.error("응답:", xhr.responseText);
                     }
-                };
-                AjaxUtil.postJsonData(url, data, fnSuccess);
-            }
+                });
 
+            }
 
             saveMonthlyMagam() {
                 let _this = this;
@@ -675,14 +727,45 @@
                 // 서버로 전송할 데이터
                 let data = {
                     list: selectedItems,
-                    spjangcd: sessionStorage.getItem('spjangcd')
                 };
-
-                /*console.log(data);*/
 
                 let fnSuccess = function (res) {
                     if (res.success) {
                         Alert.alert('','저장되었습니다'); // Notification
+                        _this.searchMainData2();
+                    }  else if (!res.success) {
+                        Alert.alert('', res.message);
+                    }
+                };
+                AjaxUtil.postJsonData(url, data, fnSuccess);
+            }
+
+            cancelMonthly(){
+                let _this = this;
+                let url = '/api/clock/DayMonthly/delete';
+
+
+                // 선택된 행들 가져오기
+                let selectedItems = _this.grid3.rows
+                    .filter(row => row.isSelected)  // Selector에서 체크된 행
+                    .map(row => row.dataItem);
+
+                // 유효성 체크
+                if (selectedItems.length === 0) {
+                    Alert.alert('', '선택된 행이 없습니다.');
+                    return;
+                }
+
+                // 서버로 전송할 데이터
+                let data = {
+                    list: selectedItems
+                };
+
+                console.log(data);
+
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('','취소되었습니다'); // Notification
                         _this.searchMainData2();
                     }  else if (!res.success) {
                         Alert.alert('', res.message);
@@ -733,6 +816,18 @@
                     function () { }
                 );
             });
+
+            $('#btncancel').click(function (e) {
+                Alert.confirm('',
+                    "취소하시겠습니까?",
+                    function () { page.cancelMonthly() },
+                    function () { }
+                );
+            });
+
+
+
+
 
             $('#btnSave3').click(function (e) {
                 Alert.confirm(
