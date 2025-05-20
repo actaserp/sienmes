@@ -4,48 +4,51 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
+@Entity
+@Table(name = "tb_e080") // DB 테이블명과 매핑
 @Setter
 @Getter
-@Entity
 @NoArgsConstructor
-@Table(name = "tb_e080")
 public class TB_E080 {
 
     @EmbeddedId
     private TB_E080_PK id;
 
-    @Column(name = "flag", length = 1)
+    @Column(length = 1)
     private String flag;
 
-    @Column(name = "repodate", length = 8)
+    @Column(length = 8)
     private String repodate;
 
-    @Column(name = "papercd", length = 3)
+    @Column(length = 3)
     private String papercd;
 
-    @Column(name = "repoperid")
+    @Column
     private Integer repoperid;
 
-    @Column(name = "title", length = 50)
+    @Column(length = 50)
     private String title;
 
-    @Column(name = "appgubun", length = 3)
+    @Column(length = 3)
     private String appgubun;
 
-    @Column(name = "inperid")
+    @Column
     private Integer inperid;
 
-    @Column(name = "indate", length = 8)
+    @Column(length = 8)
     private String indate;
 
-    @Column(name = "adflag", length = 1)
+    @Column(length = 1)
     private String adflag;
 
-    @Column(name = "prtflag", length = 30)
+    @Column(length = 30)
     private String prtflag;
 
-    @Column(name = "gubun", length = 2)
+    @Column(length = 2)
     private String gubun;
 }

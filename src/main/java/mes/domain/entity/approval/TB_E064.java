@@ -4,37 +4,40 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
+@Entity
+@Table(name = "tb_e064") // DB 테이블명과 매핑
 @Setter
 @Getter
-@Entity
 @NoArgsConstructor
-@Table(name = "tb_e064")
 public class TB_E064 {
 
     @EmbeddedId
     private TB_E064_PK id;
 
-    @Column(name = "seq", length = 3)
+    @Column(length = 3)
     private String seq;
 
-    @Column(name = "kcpersonid")
+    @Column
     private Integer kcpersonid;
 
-    @Column(name = "gubun", length = 2)
+    @Column(length = 2)
     private String gubun;
 
-    @Column(name = "remark", length = 30)
+    @Column(length = 30)
     private String remark;
 
-    @Column(name = "kcchk", length = 1)
+    @Column(length = 1)
     private String kcchk;
 
-    @Column(name = "inperid")
+    @Column
     private Integer inperid;
 
-    @Column(name = "indate", length = 8)
+    @Column(length = 8)
     private String indate;
+
 }

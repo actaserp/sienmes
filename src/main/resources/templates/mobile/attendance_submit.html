@@ -190,10 +190,10 @@
                 </div>
               </div>
             </dd>
-            <dt>근태항목</dt>
+            <dt>휴가항목</dt>
             <dd>
               <div style="display: flex; gap: 10%">
-                  <select style="width: 70%" id="attKind">
+                  <select style="width: 70%" id="attKind" onchange="bindPeriod();">
                     <option>휴가</option>
                   </select>
                   <label style="display: flex; align-items: center">
@@ -340,6 +340,10 @@
     const useDateInput = document.getElementById('useDate');
 
     console.log('날자계산 메서드 동작')
+    if (useDateInput.getAttribute('data-fixed') === 'true') {
+      console.log('useDate는 고정값 상태입니다. 계산하지 않음.');
+      return;
+    }
     if (startDateTime && endDateTime) {
       const start = new Date(startDateTime);
       const end = new Date(endDateTime);
@@ -360,6 +364,29 @@
         useDateInput.value = '0.00';
       }
     }
+  }
+  function bindPeriod() {
+    let _this = this;
+    let url = '/api/attendance_submit/bindPeriod'
+    let data = {
+      'attKind': document.getElementById('attKind').value,
+    }
+    let fnsuccess = function (result) {
+      if (result != null) {
+        console.log("result : ", result);
+        let usenum = parseFloat(result.data.usenum);
+        if (usenum > 0 && usenum < 1) {
+          const useDateInput = document.getElementById('useDate');
+          useDateInput.value = usenum.toFixed(2);
+          useDateInput.setAttribute('data-fixed', 'true'); // 🔒 잠금 표시
+        } else {
+          document.getElementById('useDate').removeAttribute('data-fixed');
+        }
+      } else {
+        Alert.alert('', "오류가 발생하였습니다.");
+      }
+    };
+    AjaxUtil.getAsyncData(url, data, fnsuccess);
   }
 </script>
 </body>

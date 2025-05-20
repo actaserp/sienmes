@@ -64,7 +64,14 @@ public class CommuteCurrentService {
                 t.remark,
                 t.fixflag,
                 a.first_name,
-                s."Value" as group_name
+                s."Value" as group_name,
+                TRIM(BOTH ', ' FROM (
+                  CASE WHEN t.jitime = 1 THEN '지각, ' ELSE '' END ||
+                  CASE WHEN t.jotime = 1 THEN '조퇴, ' ELSE '' END ||
+                  CASE WHEN t.yuntime = 1 THEN '연차, ' ELSE '' END ||
+                  CASE WHEN t.abtime = 1 THEN '결근, ' ELSE '' END ||
+                  CASE WHEN t.bantime = 1 THEN '반차, ' ELSE '' END
+                )) AS status_text
             FROM tb_pb201 t
             LEFT JOIN auth_user a ON a.personid = t.personid
             LEFT JOIN person p ON p.id = a.personid

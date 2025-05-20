@@ -61,4 +61,24 @@ public class AttendanceSubmitService {
 
         return items;
     }
+    // 휴가항목 선택시 근태설정 고정값있는지 확인
+    public Map<String, Object> getPeriod (String attKind) {
+
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        dicParam.addValue("attKind", attKind);
+
+        String sql = """
+                SELECT
+                      yearflag,
+                      usenum
+                  FROM tb_pb210
+                  WHERE workcd = :attKind
+        		""";
+
+
+        Map<String, Object> item = this.sqlRunner.getRow(sql, dicParam);
+
+        return item;
+    }
+
 }

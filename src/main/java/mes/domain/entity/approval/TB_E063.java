@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "TB_E063")
+@Table(name = "tb_e063") // DB 테이블명
 @Setter
 @Getter
 @NoArgsConstructor
@@ -19,12 +19,7 @@ public class TB_E063 {
     @EmbeddedId
     private TB_E063_PK id;
 
-    @Column(length = 100)
+    @Column(length = 50) // DB에 정의된 remark의 길이는 50
     private String remark;
 
-    @Column(length = 10)
-    private String inperid;
-
-    @Column(length = 8, updatable = false)
-    private String indate;
 }

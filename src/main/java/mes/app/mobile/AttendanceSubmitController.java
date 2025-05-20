@@ -42,6 +42,7 @@ public class AttendanceSubmitController {
     public AjaxResult getUserInfo(
             HttpServletRequest request,
             Authentication auth) {
+
         AjaxResult result = new AjaxResult();
         User user = (User)auth.getPrincipal();
         String username = user.getUsername();
@@ -138,7 +139,17 @@ public class AttendanceSubmitController {
         }
         return result;
     }
+    // 휴가구분 선택(근태설정에서 설정값있다면 적용)
+    @GetMapping("/bindPeriod")
+    public AjaxResult bindPeriod (@RequestParam Map<String, String> params,
+                                   HttpServletRequest request) {
+        AjaxResult result = new AjaxResult();
+        String attKind = params.get("attKind");
+        Map<String, Object> attInfo = attendanceSubmitService.getPeriod(attKind);
 
+        result.data = attInfo;
+        return result;
+    }
     // 날자 시간 분리 메서드
     private Map<String, String> extractDateTimeParts(String dateTime) {
         Map<String, String> dateTimeParts = new HashMap<>();
@@ -154,4 +165,5 @@ public class AttendanceSubmitController {
 
         return dateTimeParts;
     }
+
 }

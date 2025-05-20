@@ -17,19 +17,59 @@ public class ApprovalService {
     SqlRunner sqlRunner;
 
     //결재라인등록 그리드 리스트 불러오기
-    public List<Map<String, Object>> getCheckPaymentList(String perid, String comcd) {
+    public List<Map<String, Object>> getCheckPaymentList(int personid, String papercd, String spjangcd) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
-        dicParam.addValue("perid", perid);
-        dicParam.addValue("papercd", comcd);
 
         String sql = """
                 select
-                e.*
+                e.*,
+                p."Name",
+                s."Value" as gubunnm
                 from TB_E064 e
-                WHERE e.perid = :perid
-                    AND e.papercd = :papercd
-                order by e.seq ASC
+                LEFT JOIN person p ON e.kcpersonid = p.id
+                LEFT JOIN sys_code s ON e.gubun = s."Code"
+                WHERE 1=1
+                AND s."CodeType" = 'approval_status'
                 """;
+        if(personid != 0) {
+            dicParam.addValue("personid", personid);
+            sql += " AND e.personid = :personid";
+        }
+        if(papercd != null && !papercd.isEmpty()) {
+            dicParam.addValue("papercd", papercd);
+            sql += " AND e.papercd = :papercd";
+        }
+        if(spjangcd != null && !spjangcd.isEmpty()) {
+            dicParam.addValue("spjangcd", spjangcd);
+            sql += " AND e.spjangcd = :spjangcd";
+        }
+        sql += " order by e.seq ASC";
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+        return items;
+    }
+
+    //결재라인등록 사원 그리드 리스트 불러오기
+    public List<Map<String, Object>> getListPapercd(String papercd, String spjangcd) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+
+        String sql = """
+                select
+                e.*,
+                s."Value" as papernm,
+                p."Name"
+                from TB_E063 e
+                LEFT JOIN sys_code s ON e.papercd = s."Code"
+                LEFT JOIN person p ON e.personid = p.id
+                WHERE 1=1
+                AND s."CodeType" = 'appr_doc'
+                """;
+            dicParam.addValue("papercd", papercd);
+            sql += " AND e.papercd = :papercd";
+        if(spjangcd != null && !spjangcd.isEmpty()) {
+            dicParam.addValue("spjangcd", spjangcd);
+            sql += " AND e.spjangcd = :spjangcd";
+        }
+        sql += " order by e.papercd ASC";
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
         return items;
     }
@@ -93,14 +133,10 @@ public class ApprovalService {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
         String sql = """
-                select xc.custcd,
-                       xc.cltcd,
-                       xc.cltnm,
-                       xc.saupnum,
-                       au.spjangcd
-                FROM TB_XCLIENT xc
-                left join auth_user au on au."username" = xc.saupnum
-                WHERE xc.saupnum = :username
+                select personid,
+                       firstname
+                FROM auth_user
+                WHERE username = :username
                 """;
         dicParam.addValue("username", username);
         Map<String, Object> userInfo = this.sqlRunner.getRow(sql, dicParam);

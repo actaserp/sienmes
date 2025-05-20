@@ -10,8 +10,10 @@ import mes.domain.model.AjaxResult;
 import mes.domain.repository.commute.TB_PB201Repository;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -71,12 +73,16 @@ public class MobileMainController {
             @RequestParam(value="workday", required=false) String workday,
             @RequestParam(value="isHoly", required=false) String isHoly,
             @RequestParam(value="workcd", required=false) String workcd,
+            @RequestParam(value="latitude", required=false) String latitude,
+            @RequestParam(value="longitude", required=false) String longitude,
             HttpServletRequest request,
             Authentication auth) {
         AjaxResult result = new AjaxResult();
         // 일근태 테이블 초기화
         TB_PB201 tbPb201 = new TB_PB201();
         TB_PB201_PK tbPb201Pk = new TB_PB201_PK();
+
+        System.out.println("GPS latitude(위도): " + latitude + ", logitude(경도): " + longitude);
 
         User user = (User)auth.getPrincipal();
         String username = user.getUsername();
@@ -256,6 +262,47 @@ public class MobileMainController {
         }
         return result;
     }
+
+    // 좌표 -> 주소 변환 메서드
+    @PostMapping("/switchAddress")
+    public AjaxResult switchAddress(@RequestParam("lat") String lat,
+                                    @RequestParam("lon") String lon) {
+        AjaxResult result = new AjaxResult();
+
+        try {
+            String apiKey = "672F3CC6-711E-3390-87DC-77190302557E";
+            String apiUrl = "https://api.vworld.kr/req/address?service=address&request=getAddress" +
+                    "&key=" + apiKey +
+                    "&format=json&type=both&crs=epsg:4326&point=" + lon + "," + lat;
+
+
+            RestTemplate restTemplate = new RestTemplate();
+            String response = restTemplate.getForObject(apiUrl, String.class);
+
+            JSONObject json = new JSONObject(response);
+            JSONObject responseObj = json.getJSONObject("response");
+
+            if (responseObj.has("result") && responseObj.getJSONArray("result").length() > 0) {
+                String address = responseObj.getJSONArray("result")
+                        .getJSONObject(0)
+                        .getString("text");
+
+                result.success=true;
+                result.message="주소 변환 성공";
+                result.data = address;
+            } else {
+                result.success=false;
+                result.message="주소를 찾을 수 없습니다.";
+            }
+
+        } catch (Exception e) {
+            result.success=false;
+            result.message="API 호출 오류: " + e.getMessage();
+        }
+
+        return result;
+    }
+
 
     // 시간대별 근무시간 계산 메서드 (휴식 시간 제외)
     public static BigDecimal calculateTimeOverlap(LocalTime start, LocalTime end, LocalTime rangeStart, LocalTime rangeEnd, LocalTime restStart, LocalTime restEnd) {
