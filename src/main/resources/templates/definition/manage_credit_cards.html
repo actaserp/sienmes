@@ -1,0 +1,400 @@
+<html layout:decorate="~{layout_page}">
+<th:block layout:fragment="content">
+
+  <div class="layout-contents">
+    <div class="page-title-wrap">
+      <div class="left">
+        <h2>신용카드 등록</h2>
+        <a title="북마크" class="bookmark toggle">
+          내 메뉴
+        </a>
+      </div>
+      <ul class="page-navi">
+        <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+        <li>입금관리</li>
+        <li>입금 현황</li>
+      </ul>
+    </div>
+    <section class="section">
+      <div class="section-top">
+        <input type="hidden" id="spjangcdHidden">
+        <div class="search-wrap">
+          <dl>
+            <dt>
+              조회기간<span class="eq">*</span>
+            </dt>
+            <dd>
+              <ul class="date-box">
+                <li>
+                  <input type="date" id="srchStartDt" name="srchStartDt">
+                  <label for="srchStartDt" class="hide">시작일</label>
+                </li>
+                <li>
+                  <input type="date" id="srchEndDt" name="srchEndDt">
+                  <label for="srchEndDt" class="hide">종료일</label>
+                </li>
+              </ul>
+            </dd>
+          </dl>
+          <dl>
+            <dt>
+              <label for="txtDescription">
+                카드명
+              </label>
+            </dt>
+            <dd>
+              <div class="srch-box">
+                <input class="form-control2" type="text" id="txtDescription" name="txtDescription" placeholder="카드명" style="width:200px"/>
+              </div>
+            </dd>
+          </dl>
+          <dl>
+            <dt>&nbsp;</dt>
+            <dd>
+              <li>
+                <a class="btn btn-delete" title="검색" id="btnSearch">
+                  <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                  검색
+                </a>
+              </li>
+            </dd>
+          </dl>
+        </div>
+        <div class="button-wrap" style="border-top:none; text-align: right; !important;">
+          <ul>
+            <li>
+              <a class="btn btn-excell" title="신규등록" id="Newbtn">
+                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                신규등록
+              </a>
+            </li>
+            <li>
+              <a class="btn btn-edit" id="btnSave" title="저장">
+                <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
+                저장
+              </a>
+            </li>
+            <li>
+              <a class="btn btn-delete" title="삭제" id="btnDelete">
+                <img src="/images/icon/ico-delete.svg" alt="엑셀 아이콘">
+                삭제
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="container-fluid">
+        <div class="row">
+          <div class="wp40">
+            <div class="container-fluid col">
+              <p id="selectedItem"></p>
+              <div id="theGrid"></div>
+            </div>
+          </div>
+          <div class="col 60">
+            <div class="section">
+              <form id="CategoryForm">
+                <!-- Hidden Fields -->
+                <input class="form-control2" type="text" id="id" name="id" hidden />
+                <!-- Table Wrap -->
+                <div class="table-wrap">
+                  <table class="view-table" id="selectedData">
+                    <caption>신용카드 등록 테이블/caption>
+                    <colgroup>
+                      <col class="wp20">
+                      <col class="wauto">
+                      <col class="wp20">
+                      <col class="wp50">
+                    </colgroup>
+                    <tbody>
+                    <tr>
+                      <th>
+                        <label for="cardType">카드구분</label>
+                      </th>
+                      <td colspan="3">
+                        <label>
+                          <input type="radio" id="cardTypeCorp" name="cardType" value="CORP"/>
+                          법인
+                        </label>
+                        <label style="margin-left: 20px;">
+                          <input type="radio" id="cardTypePersonal" name="cardType" value="PERS" />
+                          개인
+                        </label>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <label for="">카드번호</label>
+                      </th>
+                      <td>
+                        <input type="text" id="" name="" class="wp100" placeholder="카드번호" />
+                      </td>
+                      <th>
+                        <label for="">카드사</label>
+                      </th>
+                      <td>
+                        <input type="hidden" id="" name="" />
+                        <input type="text" id="" name="" class="wp100" placeholder="카드사 이름"/>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><label for="">성명</label></th>
+                      <td>
+                        <input type="text" id="subScore" name="subScore" class="wp100" placeholder="성명"/>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><label for="regAsName">발급일자</label></th>
+                      <td>
+                        <input type="text" id="regAsName" name="regAsName" class="wp100" placeholder="발급일자"/>
+                      </td>
+                      <th><label for="">만기일자</label></th>
+                      <td>
+                        <input type="text" id="" name="" class="wp100" placeholder="만기일자" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><label for="">결제 계좌</label></th>
+                      <td>
+                        <input type="text" id="" name="" class="wp100" style="width: 300px !important" placeholder="결제 계좌" />
+                      </td>
+                      <th><label for="">결제 은행</label></th>
+                      <td >
+                        <input type="hidden" id="" name="" placeholder="은행 코드"/>
+                        <input type="text" id="" name="senScore" class="wp100" placeholder="은행이름" oninput="inputNumber(this)" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><label for="">결제 일자</label></th>
+                      <td>
+                        <input type="text" id="" name="" class="wp100" placeholder="결제 일자" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><label for="">사용여부</label></th>
+                      <td>
+                        <label><input type="radio" id="useYnYes" name="useYn" value="Y" /> 사용</label>
+                        <label style="margin-left: 20px;"><input type="radio" id="useYnNo" name="useYn" value="N" /> 미사용</label>
+                      </td>
+                      <th><label for="">카드거래연동</label></th>
+                      <td >
+                        <input type="checkbox" id="" name="" class="wp100" style="display: flex; justify-content: center; align-items: center; " />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><label for="">정지일자</label></th>
+                      <td colspan="3">
+                        <input type="text" id="" name="" class="wp100" placeholder="정지일자" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><label for="">제출자와의 관계</label></th>
+                      <td colspan="3">
+                        <input type="text" id="" name="" class="wp100" placeholder="제출자와의 관계" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><label for="">홈페이지 아이디</label></th>
+                      <td>
+                        <input type="text" id="" name="" class="wp100" placeholder="홈페이지 아이디" />
+                      </td>
+                      <th><label for="">홈페이지 비밀번호</label></th>
+                      <td>
+                        <input type="text" id="" name="" class="wp100" placeholder="홈페이지 비밀번호" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><label for="">바로빌카드 코드</label></th>
+                      <td>
+                        <input type="text" id="" name="" class="wp100" placeholder="비고" />
+                      </td>
+                      <th><label for="">바로빌 아이디</label></th>
+                      <td>
+                        <input type="text" id="" name="" class="wp100" placeholder="바로빌 아이디" />
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</th:block>
+
+<th:block layout:fragment="scripts">
+  <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
+  <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
+  <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+  <th:block th:replace="/common/popup_account :: popup_account" />
+
+  <script type="text/javascript">
+    class ManageCreditCardsPage {
+      constructor() {
+        this.grid = null;
+        this.$btnEdit = $('#btnEdit');
+        this.$Newbtn = $('#Newbtn'); //신규등록
+        this.$btnSave = $('#btnSave'); //저장
+        this.$btnDelete = $('#btnDelete'); //삭제
+        this.viewData = new wijmo.collections.CollectionView();
+        this.spjangcd = $('#spjangcdHidden'); //사업장
+        this.init();
+      }
+
+      init() {
+        let _this = this;
+        this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+          selectionMode: wijmo.grid.SelectionMode.Row,
+          headersVisibility: wijmo.grid.HeadersVisibility.Column,
+          autoGenerateColumns: false,
+          showMarquee: true,
+          isReadOnly: true,
+          formatItem: (sender, e) => {
+            if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+              e.cell.style.textAlign = 'center';
+            }
+          },
+          columns: [
+            {binding: 'trdate', header: '카드번호', width: 250, align: 'center'},
+            {binding: 'ioid', header: '카드명', width: 210, align: 'center' },
+            {binding: 'CompanyName', header: '성명', width: '*', align: 'center'}
+          ],
+          itemsSource: this.viewData, // 데이터를 설정할 배열
+        });
+
+        new FlexGridContextMenu(this.grid);
+        this.grid.downloadFileName = '신용카드등록';
+
+        // 엔터키 검색
+        $('#txtDescription, #txtEumnum').on('keypress', function (e) {
+          if (e.keyCode === 13) {
+            _this.searchMainData();
+          }
+        });
+      }
+
+      searchMainData() {
+        let _this = this;
+        // let url = '/api/transaction/manageCreditCard/read'
+        let url = '/api/transaction/DepositList/read'
+
+        let data = {
+          'srchStartDt' : $("#srchStartDt").val(),
+          'srchEndDt' : $("#srchEndDt").val(),
+          'AccountName' : $("#cboBankId").val(), //계좌명(accid로 검색)
+          'cboDepositType' : $('#cboDepositType').val(),  //입금형태
+          'cboCompany': $("#cboCompanyHidden").val(),
+          'txtDescription' : $("#txtDescription").val(),
+          'txtEumnum' :$('#txtEumnum').val(),
+          spjangcd: this.spjangcd.val()  //사업장 코드
+        }
+        let fnsuccess = function(result) {
+          if (result != null) {
+            _this.viewData = new wijmo.collections.CollectionView(result.data);
+            _this.grid.itemsSource = _this.viewData;
+          }
+        };
+
+        AjaxUtil.getAsyncData(url, data, fnsuccess);
+      }
+    }
+    let page = null;
+
+    $(document).ready(function (e) {
+
+      const spjangcd = sessionStorage.getItem('spjangcd');
+      if (spjangcd) {
+        $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
+      }
+
+      page = new ManageCreditCardsPage();
+
+      AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);
+      AjaxUtil.fillSelectOptions($('#cboDepositType'), 'system_code', 'all', false, 'deposit_type', '');
+
+      let today = new Date();
+      let monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+      $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(monthStart));
+      $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(today));
+
+      page.searchMainData();
+
+      // 검색
+      $('#btnSearch').click(function (e) {
+        if ($('#cboCompany').val() !== '' && $('#cboCompanyHidden').val() === '') {
+          // 업체명 텍스트는 썼지만, 업체 검색 버튼 안 눌렀을 때
+          page.searchMainData();
+        } else {
+          page.searchMainData();
+        }
+      });
+
+
+      $('#btnGridSetting').click(function (e) {
+        let _this = this;
+        let fix_cols = page.grid_config.frozenColumnIndex;
+        page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
+      });
+
+      $('#btnCompanySearch').click(function () {
+        let poppage = new PopCompComponent();
+        let $poppage = $(poppage);
+        let searchcallback = function (items) {
+          //console.log('items : ',items);
+          document.getElementById('btnCompanySearch').value = items.compname;
+          document.getElementById('cboCompanyHidden').value = items.id;
+        };
+
+        poppage.show(searchcallback);
+      });
+
+      $('#btnCompanySearch').on('input', function () {
+        const val = $(this).val();
+        if (val === '') {
+          $('#cboCompanyHidden').val('');
+        }
+      });
+
+      //계좌 팝업
+      $('#btnAccountName').click(function () {
+        let poppage = new PopAccountComponent();
+        let searchcallback = function (items) {
+          //console.log('btnAccountName items : ', items);
+          document.getElementById('btnAccountName').value = items.accountName;
+          document.getElementById('cboBankId').value = items.accid;
+        };
+        poppage.show(searchcallback);
+      });
+
+      $('#btnAccountName').on('input', function () {
+        const val = $(this).val();
+        if (val === '') {
+          $('#cboBankId').val('');
+        }
+      });
+
+      // .btn-clear 클릭 후 input 이벤트 강제 발생
+      $(document).on('click', '.btn-clear', function () {
+        const $input = $(this).siblings('input[type="text"]');
+        $input.val('');
+        $input.trigger('input'); // 🔥 input 이벤트 강제 발생
+      });
+      // 초기화 버튼 클릭 이벤트
+      $('#btnClear').click(function () {
+
+        document.getElementById('cboCompany').value = '';
+        document.getElementById('cboCompanyHidden').value = '';
+      });
+
+    })
+  </script>
+
+</th:block>
+
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+</html>
