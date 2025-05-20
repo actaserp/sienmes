@@ -233,125 +233,128 @@ let uploadedFiles = [];
 let deletedFiles = [];
 const MAX_FILE_SIZE = 1 * 1024 * 1024 * 1024; // 1GB in bytes
 /* 파일업로드 */
-$(document).ready(function () {
 
-    function initializeUploadComponent(component) {
 
-        const $fileInput = $(component).find('.fileInput');
-        const $fileList = $(component).find('.filelist');
-        const $fileCountTitle = $(component).find('.upload-filelist .title h5');
+function initializeUploadComponent(component) {
 
-        $fileInput.on('change', function (event) {
-            // handleFileSelect(event.target.files);
-            // 파일 선택 후 파일 입력 요소 초기화
-            // resetFileInput($fileInput);
+    const $fileInput = $(component).find('.fileInput');
+    const $fileList = $(component).find('.filelist');
+    const $fileCountTitle = $(component).find('.upload-filelist .title h5');
 
-            const files = event.target.files;
+    $fileInput.on('change', function (event) {
+        // handleFileSelect(event.target.files);
+        // 파일 선택 후 파일 입력 요소 초기화
+        // resetFileInput($fileInput);
 
-            // 특정 모달에서만 파일이 두 개 이상 선택되었는지 확인
-            if ($('#single-file-upload-page').length > 0 && (files.length > 1 || uploadedFiles.length > 0)) {
-                Alert.alert('', '파일은 한 개만 첨부할 수 있습니다.');
+        const files = event.target.files;
+
+        // 특정 모달에서만 파일이 두 개 이상 선택되었는지 확인
+        if ($('#single-file-upload-page').length > 0 && (files.length > 1 || uploadedFiles.length > 0)) {
+            Alert.alert('', '파일은 한 개만 첨부할 수 있습니다.');
+            resetFileInput($fileInput);
+            return;
+        }
+
+        handleFileSelect(files);
+    });
+
+    $(component).find('.upload-filebox').on('dragover', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $(this).addClass('dragging');
+    });
+
+    $(component).find('.upload-filebox').on('dragleave', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $(this).removeClass('dragging');
+    });
+
+    $(component).find('.upload-filebox').on('drop', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $(this).removeClass('dragging');
+        // handleFileSelect(event.originalEvent.dataTransfer.files);
+
+        const files = event.originalEvent.dataTransfer.files;
+
+        // 특정 페이지에서만 드래그 앤 드롭으로 추가된 파일들이 두 개 이상인지 확인
+        if ($('#single-file-upload-page').length > 0 && (files.length > 1 || uploadedFiles.length > 0)) {
+            Alert.alert('', '파일은 한 개만 첨부할 수 있습니다.');
+            resetFileInput($fileInput);
+            return;
+        }
+
+        handleFileSelect(files);
+        // 드래그 앤 드롭 후 파일 입력 요소 초기화
+        resetFileInput($fileInput);
+    });
+
+    function handleFileSelect(files) {
+        $.each(files, function (index, file) {
+            if (file.size > MAX_FILE_SIZE) {
+                Alert.alert('', '파일 크기는 1GB를 초과할 수 없습니다.');
                 resetFileInput($fileInput);
-                return;
+            } else if(!uploadedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                uploadedFiles.push(file);
+                const fileSize = (file.size / 1024).toFixed(2) + ' KiB';
+                const li = $('<li>').html(`
+                <p>${file.name} <span>(${fileSize})</span></p>
+                <a href="#" title="삭제" class="btn-file-delete">
+                    <img src="/images/icon/ico-filedelete.svg" alt="삭제아이콘">
+                </a>
+            `);
+                $fileList.append(li);
             }
-
-            handleFileSelect(files);
         });
-
-        $(component).find('.upload-filebox').on('dragover', function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            $(this).addClass('dragging');
-        });
-
-        $(component).find('.upload-filebox').on('dragleave', function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            $(this).removeClass('dragging');
-        });
-
-        $(component).find('.upload-filebox').on('drop', function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            $(this).removeClass('dragging');
-            // handleFileSelect(event.originalEvent.dataTransfer.files);
-
-            const files = event.originalEvent.dataTransfer.files;
-
-            // 특정 페이지에서만 드래그 앤 드롭으로 추가된 파일들이 두 개 이상인지 확인
-            if ($('#single-file-upload-page').length > 0 && (files.length > 1 || uploadedFiles.length > 0)) {
-                Alert.alert('', '파일은 한 개만 첨부할 수 있습니다.');
-                resetFileInput($fileInput);
-                return;
-            }
-
-            handleFileSelect(files);
-            // 드래그 앤 드롭 후 파일 입력 요소 초기화
-            resetFileInput($fileInput);
-        });
-
-        function handleFileSelect(files) {
-            $.each(files, function (index, file) {
-                if (file.size > MAX_FILE_SIZE) {
-                    Alert.alert('', '파일 크기는 1GB를 초과할 수 없습니다.');
-                    resetFileInput($fileInput);
-                } else if(!uploadedFiles.some(f => f.name === file.name && f.size === file.size)) {
-                    uploadedFiles.push(file);
-                    const fileSize = (file.size / 1024).toFixed(2) + ' KiB';
-                    const li = $('<li>').html(`
-                    <p>${file.name} <span>(${fileSize})</span></p>
-                    <a href="#" title="삭제" class="btn-file-delete">
-                        <img src="/images/icon/ico-filedelete.svg" alt="삭제아이콘">
-                    </a>
-                `);
-                    $fileList.append(li);
-                }
-            });
-            updateFileCount();
-        }
-
-        $(component).on('click', '.btn-file-delete', function (event) {
-            event.preventDefault();
-            const li = $(this).closest('li');
-            const fileName = li.find('p').text().split(' (')[0];
-
-            // 파일 이름과 일치하지 않는 파일들로 필터링하여 uploadedFiles 업데이트
-            const removedFile = uploadedFiles.find(file => file.name === fileName);
-            uploadedFiles = uploadedFiles.filter(file => file.name !== fileName);
-
-            // 삭제된 파일을 deletedFiles에 추가
-            if (removedFile) {
-                deletedFiles.push(removedFile);
-            }
-            li.remove();
-            updateFileCount();
-
-            // 파일 선택 후 파일 입력 요소 초기화
-            resetFileInput($fileInput);
-        });
-
-        $(component).find('.btn-file-deleteall').on('click', function (event) {
-            event.preventDefault();
-            // 모든 업로드된 파일을 삭제된 파일 리스트에 추가
-            deletedFiles = deletedFiles.concat(uploadedFiles);
-
-            $fileList.empty();
-            uploadedFiles = [];
-            updateFileCount();
-            resetFileInput($fileInput);
-        });
-
-        function updateFileCount() {
-            const fileCount = uploadedFiles.length;
-            $fileCountTitle.text(`Files (${fileCount})`);
-            $('.btn-file span').text(`(${fileCount})`);
-        }
-
-        function resetFileInput($input) {
-            $input.val('');
-        }
+        updateFileCount();
     }
 
+    $(component).on('click', '.btn-file-delete', function (event) {
+        event.preventDefault();
+        const li = $(this).closest('li');
+        const fileName = li.find('p').text().split(' (')[0];
+
+        // 파일 이름과 일치하지 않는 파일들로 필터링하여 uploadedFiles 업데이트
+        const removedFile = uploadedFiles.find(file => file.name === fileName);
+        uploadedFiles = uploadedFiles.filter(file => file.name !== fileName);
+
+        // 삭제된 파일을 deletedFiles에 추가
+        if (removedFile) {
+            deletedFiles.push(removedFile);
+        }
+        li.remove();
+        updateFileCount();
+
+        // 파일 선택 후 파일 입력 요소 초기화
+        resetFileInput($fileInput);
+    });
+
+    $(component).find('.btn-file-deleteall').on('click', function (event) {
+        event.preventDefault();
+        // 모든 업로드된 파일을 삭제된 파일 리스트에 추가
+        deletedFiles = deletedFiles.concat(uploadedFiles);
+
+        $fileList.empty();
+        uploadedFiles = [];
+        updateFileCount();
+        resetFileInput($fileInput);
+    });
+
+    function updateFileCount() {
+        const fileCount = uploadedFiles.length;
+        $fileCountTitle.text(`Files (${fileCount})`);
+        $('.btn-file span').text(`(${fileCount})`);
+    }
+
+    function resetFileInput($input) {
+        $input.val('');
+    }
+}
+
+window.initializeUploadComponent = initializeUploadComponent;
+
+$(document).ready(function () {
     $('.upload-component').each(function () {
         initializeUploadComponent(this);
     });

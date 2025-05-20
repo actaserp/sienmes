@@ -133,4 +133,7 @@ public class Company extends AbstractAuditModel {
 
 	@Column(name="spjangcd")
 	String spjangcd;
+
+	@Column(name="\"invoiceEmail\"")
+	String invoiceEmail;
 }

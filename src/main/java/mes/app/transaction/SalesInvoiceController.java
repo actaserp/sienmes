@@ -10,15 +10,25 @@ import mes.domain.repository.CompanyRepository;
 import mes.domain.repository.MaterialRepository;
 import mes.domain.repository.TB_SalesDetailRepository;
 import mes.domain.repository.TB_SalesmentRepository;
+import mes.domain.services.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -253,6 +263,15 @@ public class SalesInvoiceController {
 	public AjaxResult deleteInvoice(@RequestBody List<Map<String, String>> delList) {
 
 		return salesInvoiceService.deleteInvoice(delList);
+	}
+
+	@PostMapping("/upload_save")
+	public AjaxResult saveInvoiceBulkData(
+			@RequestParam(value="upload_file") MultipartFile upload_file,
+			String spjangcd, Authentication auth) throws FileNotFoundException, IOException  {
+
+		User user = (User) auth.getPrincipal();
+		return salesInvoiceService.saveInvoiceBulkData(upload_file, spjangcd, user);
 	}
 
 }

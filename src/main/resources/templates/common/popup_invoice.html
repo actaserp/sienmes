@@ -765,14 +765,14 @@
                                         <tr>
                                             <th class="gray_bg al_c noborder_l" colspan="11"><span class="bold">작성방법</span></th>
                                             <td class="gray_bg gray_border_l" colspan="89">
-                                                <span><input checked="checked" class="rad" id="WriteType1" name="WriteType" tabindex="38" type="radio" value="직접입력"><label class="for" for="WriteType1">직접입력</label></span>
+                                                <span><input checked="checked" class="rad" id="WriteType1" name="WriteType" tabindex="38" type="radio" value="부가세 별도"><label class="for" for="WriteType1">부가세 별도</label></span>
                                                 <span class="mgl">
-                                                    <input class="rad" id="WriteType2" name="WriteType" tabindex="29" type="radio" value="단가 부가세포함">
-                                                    <label class="for" for="WriteType2" id="WCostVAT">단가 부가세포함</label></span>
+                                                    <input class="rad" id="WriteType2" name="WriteType" tabindex="29" type="radio" value="부가세 포함">
+                                                    <label class="for" for="WriteType2" id="WCostVAT">부가세 포함</label></span>
 
                                                 <span class="mgl sm" id="lblWriteType">
                                                     <input class="rad" id="WriteType4" name="WriteType" tabindex="40" type="radio" value="합계금액"><label class="for" for="WriteType4">합계금액</label>
-                                                    <button class="btn_white_gradient mgl_2" id="totalAmountAct" type="button">계산</button>
+                                                    <!--<button class="btn_white_gradient mgl_2" id="totalAmountAct" type="button">계산</button>-->
                                                 </span>
 
                                             </td>
@@ -936,8 +936,8 @@
                 updateTaxLayout('면세'); // 세액 숨기고 colspan 수정
             } else if (taxType === '과세'){
                 $('#taxName').text('세금계산서');
-                $('#WCostVAT').text('단가 부가세포함');
-                $('#WriteType2').val('단가 부가세포함');
+                $('#WCostVAT').text('부가세 포함');
+                $('#WriteType2').val('부가세 포함');
                 $('#lblWriteType').show();
                 $('input[id$=".Tax"]').removeAttr('readonly');
                 $('#WriteType1').prop('checked', true);
@@ -1037,9 +1037,9 @@
         $(document).on('change', 'input[name="WriteType"]', function () {
             const taxType = $(this).val();
 
-            if (taxType === '직접입력') {
+            if (taxType === '부가세 별도') {
                 $('#taxList').find('input[id$="SupplyCost"], input[id$="Tax"]').prop('readonly', false);
-            } else if (taxType === '단가 부가세포함') {
+            } else if (taxType === '부가세 포함') {
                 $('#taxList').find('input[id$="SupplyCost"], input[id$="Tax"]').prop('readonly', true);
             } else if (taxType === '합계금액'){
                 $('#taxList').find('input[id$="SupplyCost"], input[id$="Tax"]').prop('readonly', false);
@@ -1284,23 +1284,28 @@
 
             let qty = parseFloat($qty.val().replace(/,/g, '').trim()) || 0;
             let unitCost = parseFloat($unitCost.val().replace(/,/g, '').trim()) || 0;
-            let supplyCost = parseFloat($supplyCost.val().replace(/,/g, '').trim()) || 0;
-
-            // 1. 수량 또는 단가가 바뀐 경우 → 공급가 재계산
-            const isQtyOrUnitChanged = $(event.target).is($qty) || $(event.target).is($unitCost);
-            if (isQtyOrUnitChanged && qty > 0 && unitCost > 0) {
-                supplyCost = qty * unitCost;
-                $supplyCost.val(supplyCost.toLocaleString());
-            }
-
-            // 2. 세액 계산
+            let supplyCost = 0;
             let tax = 0;
-            if (taxMode === '과세') {
-                tax = Math.floor(supplyCost * 0.1);
-            }
 
-            $tax.val(tax.toLocaleString());
+            const isQtyOrUnitChanged = $(event.target).is($qty) || $(event.target).is($unitCost);
+
+            if (isQtyOrUnitChanged && qty > 0 && unitCost > 0) {
+                if (writeType === '부가세 포함' && taxMode === '과세') {
+                    const unitSupply = unitCost / 1.1;
+                    const unitTax = unitCost - unitSupply;
+                    supplyCost = Math.floor(unitSupply * qty);
+                    tax = Math.floor(unitTax * qty);
+                } else {
+                    // 일반 과세 or 영세, 면세
+                    supplyCost = qty * unitCost;
+                    tax = (taxMode === '과세') ? Math.floor(supplyCost * 0.1) : 0;
+                }
+
+                $supplyCost.val(supplyCost.toLocaleString());
+                $tax.val(tax.toLocaleString());
+            }
         }
+
 
         function recalculateTaxesIfNeeded() {
             const taxType = $('input[name="TaxType"]:checked').val();
