@@ -14,7 +14,7 @@ import java.io.Serializable;
 public class Tb_pb203Id implements Serializable {
 
     private String spjangcd;
-    private String workcd;
+    private String workym;
     private Integer personid;
 
 

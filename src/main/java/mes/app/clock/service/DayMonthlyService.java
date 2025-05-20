@@ -159,12 +159,13 @@ public class DayMonthlyService {
                 ,SUM(t.yuntime) as yuntime
                 ,SUM(t.abtime) as abtime
                 ,SUM(t.bantime) as bantime
-                ,t.fixflag
+                ,tb203.fixflag as fixflag
                 ,g."Value" AS group_name
                 ,s."Value" as jik_id
                 ,p."Name" as first_name
             FROM tb_pb201 t
             LEFT JOIN person p ON p.id = t.personid
+            LEFT JOIN tb_pb203 tb203 ON tb203.personid = t.personid
            LEFT JOIN (
               SELECT "Code", "Value"
               FROM sys_code
@@ -183,7 +184,7 @@ public class DayMonthlyService {
                 )
               AND t.spjangcd =:spjangcd
               AND t.workym = :startdate
-              GROUP BY t.personid, t.workym, t.fixflag, g."Value",s."Value",p."Name"
+              GROUP BY t.personid, t.workym, t.fixflag, g."Value",s."Value",p."Name",tb203.fixflag
               ORDER BY t.personid
         """;
 
