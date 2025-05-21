@@ -1,17 +1,15 @@
 package mes.domain.entity.commute;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Embeddable
-@Getter
-@Setter
-@EqualsAndHashCode
 public class TB_PB201_PK implements Serializable {
     @Column(name = "spjangcd", length = 2)
     private String spjangcd;
@@ -24,4 +22,6 @@ public class TB_PB201_PK implements Serializable {
 
     @Column(name = "personid")
     private Integer personid;
+
+
 }

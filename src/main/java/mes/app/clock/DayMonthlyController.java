@@ -6,6 +6,7 @@ import mes.domain.entity.Tb_pb203Id;
 import mes.domain.entity.User;
 import mes.domain.entity.Yearamt;
 import mes.domain.entity.commute.TB_PB201;
+import mes.domain.entity.commute.TB_PB201_PK;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.Tb_pb203Repository;
 import mes.domain.repository.commute.TB_PB201Repository;
@@ -225,6 +226,41 @@ public class DayMonthlyController {
     }
 
 
+
+    @PostMapping("/MagamCancel")
+    @Transactional
+    public AjaxResult DayMagamCancel(
+            @RequestBody Map<String, Object> requestData,
+            HttpServletRequest request,
+            Authentication auth) {
+
+        AjaxResult result = new AjaxResult();
+        User user = (User) auth.getPrincipal();
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) requestData.get("list");
+
+        for (Map<String, Object> item : dataList) {
+            String workym = (String) item.get("workym"); // 년월
+            String spjangcd = (String) item.get("spjangcd"); // 사업장코드
+            String workday = (String) item.get("workday");
+            Integer personid = ((Number) item.get("personid")).intValue(); // 사번
+
+            TB_PB201_PK id = new TB_PB201_PK(spjangcd, workym, workday, personid);
+
+            Optional<TB_PB201> optional = tbPb201Repository.findById(id);
+            if (optional.isPresent()) {
+                TB_PB201 entity = optional.get();
+                entity.setFixflag("0"); // fixflag를 "0"으로 설정
+                tbPb201Repository.save(entity); // 변경사항 저장
+            }
+        }
+
+        result.success = true;
+        return result;
+    }
+
+
+
+
     @PostMapping("workcdList")
     public AjaxResult getspjangcd(@RequestParam(value ="spjangcd") String spjangcd){
 
@@ -274,15 +310,21 @@ public class DayMonthlyController {
 
         int insertCount = this.dayMonthlyService.insertWorkSummary(spjangcd, startdate);
 
-        // 단일 Map으로 구성하여 data에 할당
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("insertCount", insertCount);
 
         result.data = responseData;
-        result.success = true;
-        return result;
 
+        if (insertCount == 0) {
+            result.success = false;
+            result.message = "일별마감 데이터가 없습니다.";
+        } else {
+            result.success = true;
+        }
+
+        return result;
     }
+
 
     @PostMapping("/MonthlysaveMagam")
     @Transactional
@@ -487,6 +529,36 @@ public class DayMonthlyController {
         }
 
         result.success=true;
+        return result;
+    }
+
+    @PostMapping("/MonthlyCancelMagam")
+    @Transactional
+    public AjaxResult CancelMonthlyList(
+            @RequestBody Map<String, Object> requestData,
+            HttpServletRequest request,
+            Authentication auth) {
+
+        AjaxResult result = new AjaxResult();
+        User user = (User) auth.getPrincipal();
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) requestData.get("list");
+
+        for (Map<String, Object> item : dataList) {
+            String workym = (String) item.get("workym"); // 년월
+            String spjangcd = (String) item.get("spjangcd"); // 사업장코드
+            Integer personid = ((Number) item.get("personid")).intValue(); // 사번
+
+            Tb_pb203Id id = new Tb_pb203Id(spjangcd, workym, personid);
+
+            Optional<Tb_pb203> optional = tb_pb203Repository.findById(id);
+            if (optional.isPresent()) {
+                Tb_pb203 entity = optional.get();
+                entity.setFixflag("0"); // fixflag를 "0"으로 설정
+                tb_pb203Repository.save(entity); // 변경사항 저장
+            }
+        }
+
+        result.success = true;
         return result;
     }
 

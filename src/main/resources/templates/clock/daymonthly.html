@@ -87,9 +87,15 @@
                         <div class="button-wrap">
                             <ul>
                                 <li>
-                                    <a class="btn btn-excell" title="저장" id="btnSave">
-                                        <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
-                                        저장
+                                    <a class="btn btn-excell" title="마감" id="btnSave">
+                                        <img src="/images/icon/ico-edit.svg" alt="마감 아이콘">
+                                        마감
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="btn btn-excell" title="마감취소" id="btncancel3">
+                                        <img src="/images/icon/ico-edit.svg" alt="마감취소 아이콘">
+                                        마감취소
                                     </a>
                                 </li>
                             </ul>
@@ -166,16 +172,22 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="btn btn-excell" title="월정산" id="btncancel" style="display: none;">
+                                    <a class="btn btn-excell" title="월정산취소" id="btncancel" style="display: none;">
                                         <img src="/images/icon/ico-edit.svg" alt="월정산취소 아이콘">
                                         월정산취소
                                     </a>
                                 </li>
 
                                 <li>
-                                    <a class="btn btn-excell" title="저장" id="btnSave3">
+                                    <a class="btn btn-excell" title="마감" id="btnSave3">
+                                        <img src="/images/icon/ico-edit.svg" alt="마감 아이콘">
+                                        마감
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="btn btn-excell" title="마감취소" id="btncancel2" style="display: none;">
                                         <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
-                                        저장
+                                        마감취소
                                     </a>
                                 </li>
                             </ul>
@@ -216,7 +228,7 @@
 
                 this.grid = new wijmo.grid.FlexGrid('#day-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
                     autoGenerateColumns: false,
                     showMarquee: true,
                     isReadOnly: false,
@@ -241,7 +253,7 @@
                         }
                     },
                     columns: [
-                        {binding: 'fixflag', header: '마감', width: 70, align: 'center'},
+                        {binding: 'fixflag',header: '마감', width: 70, align: 'center',visible: false},
                         {binding: 'row_num', header: '순번', width: 60, align: 'center'},
                         {binding: 'workymd', header: '일자', width: 100, align: 'center' },
                         {binding: 'first_name', header: '사원명', width: 100, align: 'center' },
@@ -281,33 +293,18 @@
                     }
                 });
 
-
                 let selector = new wijmo.grid.selector.Selector(this.grid, {
                     itemChecked: (s, e) => {
-                        if (e.row === null) {  // 헤더 클릭 처리
-                            allSelected = !allSelected;
-                            this.grid.rows.forEach((row, idx) => {
-                                const fixflag = this.grid.getCellData(idx, 'fixflag', false);
-                                row.isSelected = allSelected && (fixflag !== '1');
-                            });
-                            return;
-                        }
-
-                        if (typeof e.row !== 'number' || e.row < 0 || e.row >= this.grid.rows.length) {
-                            return;
-                        }
-                        const rowIndex = e.row;
-
-                        const fixflag = this.grid.getCellData(rowIndex, 'fixflag', false);
-
-                        if (fixflag === '1') {
-                            setTimeout(() => {
-                                this.grid.rows[e.row].isSelected = true;
-                            }, 0);
-                        }
+                        let SelectItem = this.grid.rows.filter(r => r.isSelected);
                     }
-
                 });
+
+                this.grid.loadedRows.addHandler(() => {
+                    setTimeout(() => {
+                        this.grid.select(-1, -1); // 선택 상태 초기화
+                    }, 0); // 비동기로 처리하여 초기 선택 해제
+                });
+
 
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '일별근태현황';
@@ -389,7 +386,7 @@
 
                 this.grid3 = new wijmo.grid.FlexGrid('#monthly-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
                     autoGenerateColumns: false,
                     showMarquee: true,
                     isReadOnly: false,
@@ -397,23 +394,9 @@
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
-
-                        if (e.panel.cellType === wijmo.grid.CellType.Cell &&
-                            sender.columns[e.col].binding === 'fixflag') {
-                            e.cell.textContent = '';
-                        }
-
-                        if (e.panel.cellType === wijmo.grid.CellType.Cell &&
-                            sender.columns[e.col].binding === 'fixflag') {
-                            const fixflag = sender.getCellData(e.row, 'fixflag', false);
-                            if (fixflag === '1') {
-                                e.cell.style.pointerEvents = 'none'; // 클릭 자체 방지
-                                e.cell.style.opacity = '0.6'; // 시각적 표시
-                            }
-                        }
                     },
                     columns: [
-                        {binding: 'fixflag', header: '마감', width: 70, align: 'center'},
+                        {binding: 'fixflag',header: '마감', width: 70, align: 'center',visible: false},
                         {binding: 'first_name', header: '사원명', width: 120, align: 'center' },
                         {binding: 'jik_id', header: '직위', width: 120, align: 'center' },
                         {binding: 'workday', header: '근무일수', width: 120, align: 'center'},
@@ -439,41 +422,10 @@
                 });
 
 
-                let allSelected = false;
-
                 let selector2 = new wijmo.grid.selector.Selector(this.grid3, {
                     itemChecked: (s, e) => {
-                        if (e.row === null) {
-                            // 전체 선택 토글
-                            allSelected = !allSelected;
-                            this.grid3.rows.forEach((row, idx) => {
-                                const fixflag = this.grid3.getCellData(idx, 'fixflag', false);
-                                row.isSelected = allSelected && (fixflag != '1');
-                            });
-                        }
-
-                        // 개별 행 선택 처리
-                        const selectedRows = this.grid3.rows.filter(row => row.isSelected);
-
-                        // 선택된 행 중 하나라도 fixflag === 0 또는 '0'이면 월정산취소 버튼 보여주기
-                        const hasUnfixed = selectedRows.some(row => {
-                            const flag = row.dataItem.fixflag;
-                            return flag === 0 || flag === '0';
-                        });
-
-                        /*console.log("선택된 행:", selectedRows.map(r => r.dataItem));*/
-
-
-                        if (hasUnfixed) {
-                            document.getElementById("btnSave2").style.display = "none";
-                            document.getElementById("btncancel").style.display = "";
-                        } else {
-                            document.getElementById("btnSave2").style.display = "";
-                            document.getElementById("btncancel").style.display = "none";
-                        }
+                       let SelectItem = this.grid3.rows.filter(r => r.isSelected);
                     }
-
-
                 });
 
                 this.grid3.loadedRows.addHandler(() => {
@@ -569,14 +521,26 @@
                     _this.viewData.sourceCollection = result.data;
 
 
-                    // fixflag 값이 "1"인 row는 체크된 상태로 만들기
                     setTimeout(() => {
+                        let hasFixedRow = false;
+
                         _this.grid.rows.forEach((row, idx) => {
                             if (_this.grid.getCellData(idx, 'fixflag', false) === '1') {
-                                row.isSelected = true;
+                                row.isSelected = true; // 선택 (체크박스 자동 연동)
+                                hasFixedRow = true;    // 플래그 설정
                             }
                         });
+
+                        // fixflag === '1' 인 행이 있으면 버튼 상태 변경
+                        if (hasFixedRow) {
+                            $('#btncancel3').show();
+                            $('#btnSave').hide();
+                        } else {
+                            $('#btncancel3').hide();
+                            $('#btnSave').show();
+                        }
                     });
+
                 }
                 _this.searchMainData2()
             }//searchMainData
@@ -644,6 +608,41 @@
                 AjaxUtil.postJsonData(url, data, fnSuccess);
             }
 
+            /*마감취소*/
+            Monthlycancel() {
+                let _this = this;
+                let url = '/api/clock/DayMonthly/MagamCancel';
+// 선택된 행들 가져오기
+                let selectedItems = _this.grid.rows
+                    .filter(row => row.isSelected)  // Selector에서 체크된 행
+                    .map(row => row.dataItem);
+
+                // 유효성 체크
+                if (selectedItems.length === 0) {
+                    Alert.alert('', '선택된 행이 없습니다.');
+                    return;
+                }
+
+                // 서버로 전송할 데이터
+                let data = {
+                    list: selectedItems,
+                };
+
+                /*console.log(data);*/
+
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('','취소되었습니다'); // Notification
+                        _this.searchMainData();
+                    }  else if (!res.success) {
+                        Alert.alert('', res.message);
+                    }
+                };
+                AjaxUtil.postJsonData(url, data, fnSuccess);
+            }
+
+
+
             /*월별 근태현황 기능*/
             searchMainData2(){
                 let _this = this;
@@ -664,28 +663,49 @@
                     _this.viewData3.sourceCollection = result.data;
 
 
-                    // fixflag 값이 "1"인 row는 체크된 상태로 만들기
-                    setTimeout(() => {
-                        _this.grid3.rows.forEach((row, idx) => {
-                            if (_this.grid3.getCellData(idx, 'fixflag', false) === '1') {
-                                row.isSelected = true;
+                    if (result.data.length > 0) {
+                        $('#btncancel').show();     // 월정산취소 버튼 표시
+                        $('#btnSave2').hide();      // 월정산 버튼 숨기기
+                    } else {
+                        $('#btncancel').hide();     // 월정산취소 버튼 숨기기
+                        $('#btnSave2').show();      // 월정산 버튼 표시
+                    }
+
+
+                    if (!_this.selector2) {
+                        _this.selector2 = new wijmo.grid.selector.Selector(_this.grid3, {
+                            itemChecked: (s, e) => {
+                                let SelectItem = _this.grid3.rows.filter(r => r.isSelected);
                             }
                         });
+                    }
+
+                    setTimeout(() => {
+                        let hasFixedRow = false;
+
+                        _this.grid3.rows.forEach((row, idx) => {
+                            if (_this.grid3.getCellData(idx, 'fixflag', false) === '1') {
+                                row.isSelected = true; // 선택 (체크박스 자동 연동)
+                                hasFixedRow = true;    // 플래그 설정
+                            }
+                        });
+
+                        // fixflag === '1' 인 행이 있으면 버튼 상태 변경
+                        if (hasFixedRow) {
+                            $('#btncancel2').show();
+                            $('#btnSave3').hide();
+                        } else {
+                            $('#btncancel2').hide();
+                            $('#btnSave3').show();
+                        }
                     });
+
+
                 }
             }
-
+/*월정산*/
             saveMonthly() {
                 let _this = this;
-                let url = '/api/clock/DayMonthly/getMonthlyList';
-
-                // 서버로 전송할 데이터
-                let data = {
-                    startdate: $('#startdate2').val(),
-                    spjangcd: sessionStorage.getItem('spjangcd')
-                };
-
-                /*console.log(data);*/
 
                 $.ajax({
                     type: 'GET',
@@ -696,18 +716,27 @@
                     },
                     dataType: 'json',
                     success: function (res) {
-                        /*console.log("서버 응답:", res);*/
-                        Alert.alert('', '저장되었습니다');
-                        _this.searchMainData2();
+                        if (res.success) {
+                            Alert.alert('', '저장되었습니다');
+
+                            $('#btnSave2').hide();     // 월정산 버튼 숨기기
+                            $('#btncancel').show();    // 월정산취소 버튼 표시
+
+                            _this.searchMainData2();
+                        } else {
+                            Alert.alert('', res.message || '처리 중 오류가 발생했습니다.');
+                        }
                     },
                     error: function (xhr, status, error) {
                         console.error("에러:", status, error);
                         console.error("응답:", xhr.responseText);
+                        Alert.alert('', '서버와의 통신 중 오류가 발생했습니다.');
                     }
                 });
-
             }
 
+
+            /*마감*/
             saveMonthlyMagam() {
                 let _this = this;
                 let url = '/api/clock/DayMonthly/MonthlysaveMagam';
@@ -740,12 +769,45 @@
                 AjaxUtil.postJsonData(url, data, fnSuccess);
             }
 
-            cancelMonthly(){
+/*월정산취소*/
+            cancelMonthly() {
                 let _this = this;
                 let url = '/api/clock/DayMonthly/delete';
 
+                let allItems = _this.grid3.rows.map(row => row.dataItem);
 
-                // 선택된 행들 가져오기
+                // 유효성 체크
+                if (allItems.length === 0) {
+                    Alert.alert('', '데이터가 없습니다.');
+                    return;
+                }
+
+                // 서버로 보낼 데이터 구성
+                let data = {
+                    list: allItems
+                };
+
+                console.log(data);
+
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('', '취소되었습니다'); // Notification
+                        _this.searchMainData2();
+
+                        $('#btncancel').hide();    // 월정산취소 숨기기
+                        $('#btnSave2').show();     // 월정산 다시 보이기
+                    } else {
+                        Alert.alert('', res.message);
+                    }
+                };
+
+                AjaxUtil.postJsonData(url, data, fnSuccess);
+            }
+
+            cancelMonthlyMagam() {
+                let _this = this;
+                let url = '/api/clock/DayMonthly/MonthlyCancelMagam';
+// 선택된 행들 가져오기
                 let selectedItems = _this.grid3.rows
                     .filter(row => row.isSelected)  // Selector에서 체크된 행
                     .map(row => row.dataItem);
@@ -758,10 +820,9 @@
 
                 // 서버로 전송할 데이터
                 let data = {
-                    list: selectedItems
+                    list: selectedItems,
                 };
 
-                console.log(data);
 
                 let fnSuccess = function (res) {
                     if (res.success) {
@@ -803,7 +864,7 @@
 
             $('#btnSave').click(function (e) {
                 Alert.confirm('',
-                    "저장하시겠습니까?",
+                    "마감하시겠습니까?<br><span style='color:#0048ff;'>마감 이후엔 수정이 불가능 합니다.</span>",
                     function () { page.saveday() },
                     function () { }
                 );
@@ -826,17 +887,34 @@
             });
 
 
-
-
-
             $('#btnSave3').click(function (e) {
                 Alert.confirm(
                     '',
-                    "저장하시겠습니까?<br><span style='color:red;'>저장 이후엔 수정이 불가능 합니다.</span>",
+                    "마감하시겠습니까?<br><span style='color:#0048ff;'>마감 이후엔 수정이 불가능 합니다.</span>",
                     function () { page.saveMonthlyMagam() },
                     function () { }
                 );
             });
+
+            $('#btncancel2').click(function (e) {
+                Alert.confirm(
+                    '',
+                    "마감취소하시겠습니까?",
+                    function () { page.cancelMonthlyMagam() },
+                    function () { }
+                );
+            });
+
+            $('#btncancel3').click(function (e) {
+                Alert.confirm(
+                    '',
+                    "마감취소하시겠습니까?",
+                    function () { page.Monthlycancel() },
+                    function () { }
+                );
+            });
+
+
 
 
             $('#work_division, #depart').change(function () {

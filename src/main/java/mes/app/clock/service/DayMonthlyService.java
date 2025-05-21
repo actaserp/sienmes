@@ -76,7 +76,8 @@ public class DayMonthlyService {
                 g."Value" AS group_name,
                 s."Value" as jik_id,
                 tp210.worknm as worknm,
-                p."Name" as first_name
+                p."Name" as first_name,
+                t.spjangcd as spjangcd
             FROM tb_pb201 t
             LEFT JOIN person p ON p.id = t.personid
            LEFT JOIN (
@@ -174,13 +175,7 @@ public class DayMonthlyService {
         FROM tb_pb201 t
         WHERE t.spjangcd = ?
           AND t.workym = ?
-          AND NOT EXISTS (
-              SELECT 1
-              FROM tb_pb203 p
-              WHERE p.spjangcd = t.spjangcd
-                AND p.workym = t.workym
-                AND p.personid = t.personid
-          )
+          AND t.fixflag ='1'
         GROUP BY t.personid, t.workym, t.spjangcd
         """;
 
