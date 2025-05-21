@@ -96,23 +96,19 @@
                     <dl>
                         <dt>
                             <label for="cboInvoice">
-                                검색 구분<span class="eq"></span>
+                                매출 구분<span class="eq"></span>
                             </label>
                         </dt>
                         <dd>
                             <div class="srch-box">
-                                <select id="cboInvoice" name="cboInvoice">
-                                    <option value="" selected>전체</option>
-                                    <option value="과세">세금계산서</option>
-                                    <option value="영세">영세율 세금계산서</option>
-                                    <option value="면세">계산서</option>
+                                <select id="cboInvoice" name="cboInvoice" style="width: 140px;">
                                 </select>
                             </div>
                         </dd>
                     </dl>
                     <dl>
                         <dt>
-                            <label for="cboInvoice">
+                            <label for="cboStatecode">
                                 상태<span class="eq"></span>
                             </label>
                         </dt>
@@ -129,8 +125,8 @@
                             </label>
                         </dt>
                         <dd>
-                            <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭하여 검색"
-                                   style="width: 180px;">
+                            <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="클릭하여 검색"
+                                   style="width: 140px;">
                             <input type="hidden" id="cboCompanyHidden">
                         </dd>
                     </dl>
@@ -151,7 +147,7 @@
                     <!--                    </dl>-->
                     <dl>
                         <dt>
-                            조회기간<span class="eq">*</span>
+                            조회기간
                         </dt>
                         <dd>
                             <ul class="date-box">
@@ -173,8 +169,7 @@
                             <li>
                                 <a class="btn btn-delete" title="검색" id="btnSearch">
                                     <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    검색
+                                    <img src="/images/icon/btn-srch.svg" style="margin-right:0;" alt="검색 아이콘">
                                 </a>
                             </li>
                         </dd>
@@ -182,6 +177,11 @@
                 </div>
                 <div class="button-wrap">
                     <ul>
+                        <li>
+                            <a class="btn btn-edit" title="발행" id="btnIssue">
+                                발행
+                            </a>
+                        </li>
                         <li>
                             <a class="btn" title="거래명세서 출력" id="btnWritePrint">
                                 거래명세서 출력
@@ -202,85 +202,86 @@
                                 매출 등록
                             </a>
                         </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="section-top">
-                <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            <label for="totalAmount">
-                                총 합계금액
-                            </label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <input style="text-align: right;max-width: 200px;" class="form-control2"
-                                       id="totalAmount" name="totalAmount" readonly>
-                            </div>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>
-                            <label for="totalSupPrice">
-                                총 공급가액
-                            </label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <input style="text-align: right;max-width: 200px;" class="form-control2"
-                                       id="totalSupPrice" name="totalSupPrice" readonly>
-                            </div>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>
-                            <label for="totalTax">
-                                총 세액
-                            </label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <input style="text-align: right;max-width: 200px;" class="form-control2" id="totalTax"
-                                       name="totalTax" readonly>
-                            </div>
-                        </dd>
-                    </dl>
-                </div>
-                <div class="button-wrap">
-                    <ul>
                         <li>
-                            <a class="btn btn-delete" title="삭제" id="btnDelete">
-                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                삭제
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-edit" title="수정" id="btnEdit">
-                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
-                                수정
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-edit" title="발행" id="btnIssue">
-                                발행
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-edit" title="발행 취소" id="btnIssueCancel">
-                                발행 취소
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn" title="재전송" id="btnReMessage">
-                                재전송
+                            <a class="btn" title="매출 복사" id="btnCopy">
+                                매출 복사
                             </a>
                         </li>
                     </ul>
                 </div>
             </div>
+<!--            <div class="section-top">-->
+<!--                <div class="search-wrap">-->
+<!--                    <dl>-->
+<!--                        <dt>-->
+<!--                            <label for="totalAmount">-->
+<!--                                총 합계금액-->
+<!--                            </label>-->
+<!--                        </dt>-->
+<!--                        <dd>-->
+<!--                            <div class="srch-box">-->
+<!--                                <input style="text-align: right;max-width: 200px;" class="form-control2"-->
+<!--                                       id="totalAmount" name="totalAmount" readonly>-->
+<!--                            </div>-->
+<!--                        </dd>-->
+<!--                    </dl>-->
+<!--                    <dl>-->
+<!--                        <dt>-->
+<!--                            <label for="totalSupPrice">-->
+<!--                                총 공급가액-->
+<!--                            </label>-->
+<!--                        </dt>-->
+<!--                        <dd>-->
+<!--                            <div class="srch-box">-->
+<!--                                <input style="text-align: right;max-width: 200px;" class="form-control2"-->
+<!--                                       id="totalSupPrice" name="totalSupPrice" readonly>-->
+<!--                            </div>-->
+<!--                        </dd>-->
+<!--                    </dl>-->
+<!--                    <dl>-->
+<!--                        <dt>-->
+<!--                            <label for="totalTax">-->
+<!--                                총 세액-->
+<!--                            </label>-->
+<!--                        </dt>-->
+<!--                        <dd>-->
+<!--                            <div class="srch-box">-->
+<!--                                <input style="text-align: right;max-width: 200px;" class="form-control2" id="totalTax"-->
+<!--                                       name="totalTax" readonly>-->
+<!--                            </div>-->
+<!--                        </dd>-->
+<!--                    </dl>-->
+<!--                </div>-->
+<!--                <div class="button-wrap">-->
+<!--                    <ul>-->
+<!--                        <li>-->
+<!--                            <a class="btn btn-delete" title="삭제" id="btnDelete">-->
+<!--                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">-->
+<!--                                삭제-->
+<!--                            </a>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <a class="btn btn-edit" title="수정" id="btnEdit">-->
+<!--                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">-->
+<!--                                수정-->
+<!--                            </a>-->
+<!--                        </li>-->
+
+<!--                        <li>-->
+<!--                            <a class="btn btn-edit" title="발행 취소" id="btnIssueCancel">-->
+<!--                                발행 취소-->
+<!--                            </a>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <a class="btn" title="재전송" id="btnReMessage">-->
+<!--                                재전송-->
+<!--                            </a>-->
+<!--                        </li>-->
+<!--                    </ul>-->
+<!--                </div>-->
+<!--            </div>-->
             <div class="container-fluid">
-                <div id="theGrid" style="height: 660px;"></div>
+                <div id="theGrid" style="height: 740px;"></div>
             </div>
         </section>
     </div>
@@ -439,8 +440,6 @@
                 </form>
             </div>
 
-            </section>
-
             <div class="popup-button">
                 <button type="button" class="btn-popup y_write_auth" id="btn_excel_save" >저장</button>
                 <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
@@ -462,7 +461,7 @@
             constructor() {
                 this.url = '/api/tran/tran';
                 this.grid = null;
-                this.$btnEdit = $('#btnEdit');
+                // this.$btnEdit = $('#btnEdit');
                 this.$btnAddNewRegular = $('#btnAddNewRegular');
                 this.viewData = new wijmo.collections.CollectionView();
                 this.init();
@@ -505,7 +504,7 @@
                             const col = sender.columns[e.col];
                             const row = sender.rows[e.row];
 
-                            if (col.binding === 'issuediv' && row.dataItem.statecode !== 100) {
+                            if (col.binding === 'issuediv' && row.dataItem.statecode !== 100 && row.dataItem.statecode !== 999) {
                                 // select 요소 비활성화
                                 let select = e.cell.querySelector('select');
                                 if (select) {
@@ -569,7 +568,7 @@
                     const col = s.columns[e.col];
                     const row = s.rows[e.row];
 
-                    if (col.binding === 'issuediv' && row.dataItem.statecode !== 100 && row.dataItem.statecode !== 0) {
+                    if (col.binding === 'issuediv' && row.dataItem.statecode !== 100 && row.dataItem.statecode !== 999) {
                         e.cancel = true; // 편집 시작 자체를 막는다
                         Notify.error('상태 수정이 불가능합니다.');
                     }
@@ -591,7 +590,6 @@
                         AjaxUtil.postAsyncData(_this.url + '/invoice_update', data, function (res) {
                             if (res.success) {
                                 Notify.success('저장되었습니다.');
-                                _this.searchMainData();
                             } else {
                                 Notify.error(res.message || '저장 중 오류가 발생했습니다.');
                             }
@@ -609,26 +607,30 @@
 
                     if (selectedItems.length === 1) {
                         statecode = selectedItems[0].statecode;
-                    } else if (selectedItems.length > 1) {
-                        const uniqueStatecodes = [...new Set(selectedItems.map(item => item.statecode))];
-
-                        const allInReissueGroup = selectedItems.every(item =>
-                            [300, 301, 302, 303, 304].includes(item.statecode)
-                        );
-
-                        if (uniqueStatecodes.length === 1) {
-                            // 모두 동일
-                            statecode = uniqueStatecodes[0];
-                            if (statecode === 300) {
-                                statecode = 'MULTI_300';
-                            }
-                        } else if (allInReissueGroup) {
-                            // 서로 다르지만 전부 재전송 허용 그룹이면 → 재전송만 허용
-                            statecode = 'MULTI_REISSUE';
-                        } else {
-                            disableAll = true;
-                        }
-                    } else {
+                    }
+                    // else if (selectedItems.length > 1) {
+                    //     const uniqueStatecodes = [...new Set(selectedItems.map(item => item.statecode))];
+                    //
+                    //     const allInReissueGroup = selectedItems.every(item =>
+                    //         [300, 301, 302, 303, 304].includes(item.statecode)
+                    //     );
+                    //
+                    //     if (uniqueStatecodes.length === 1) {
+                    //         // 모두 동일
+                    //         statecode = uniqueStatecodes[0];
+                    //         if (statecode === 300) {
+                    //             statecode = 'MULTI_300';
+                    //         }
+                    //     }
+                    //     else if (allInReissueGroup) {
+                    //         // 서로 다르지만 전부 재전송 허용 그룹이면 → 재전송만 허용
+                    //         statecode = 'MULTI_REISSUE';
+                    //     }
+                    //     else {
+                    //         disableAll = true;
+                    //     }
+                    // }
+                    else {
                         const row = s.selection.row;
                         if (row >= 0) {
                             statecode = s.rows[row].dataItem.statecode;
@@ -645,7 +647,8 @@
 
                 // 버튼 비활성화
                 function updateButtonDisable(statecode, isMultiSelected = false) {
-                    const allButtons = ['btnDelete', 'btnEdit', 'btnIssue', 'btnIssueCancel', 'btnReMessage'];
+                    // const allButtons = ['btnDelete', 'btnEdit', 'btnIssue', 'btnIssueCancel', 'btnReMessage'];
+                    const allButtons = ['btnIssue'];
 
                     allButtons.forEach(id => {
                         const btn = document.getElementById(id);
@@ -660,33 +663,35 @@
 
                     if (isMultiSelected) {
                         if (statecode === 100) {
-                            enableButtons.push('btnDelete', 'btnIssue');
-                        } else if (statecode === 'MULTI_REISSUE') {
-                            enableButtons.push('btnReMaesage');
-                        } else if (statecode === 'MULTI_300') {
-                            enableButtons.push('btnIssueCancel', 'btnReMessage');
-                        } else if ([300, 301, 302, 303, 304].includes(statecode)) {
-                            enableButtons.push('btnReMessage'); // fallback
+                            // enableButtons.push('btnDelete', 'btnIssue');
+                            enableButtons.push('btnIssue');
+                        // } else if (statecode === 'MULTI_REISSUE') {
+                        //     enableButtons.push('btnReMaesage');
+                        // } else if (statecode === 'MULTI_300') {
+                        //     enableButtons.push('btnIssueCancel', 'btnReMessage');
+                        // } else if ([300, 301, 302, 303, 304].includes(statecode)) {
+                        //     enableButtons.push('btnReMessage'); // fallback
                         }
                     } else {
                         switch (statecode) {
                             case 100:
-                                enableButtons.push('btnDelete', 'btnEdit', 'btnIssue');
+                                // enableButtons.push('btnDelete', 'btnEdit', 'btnIssue');
+                                enableButtons.push('btnIssue');
                                 break;
-                            case 300:
-                                enableButtons.push('btnIssueCancel', 'btnReMessage');
-                                break;
-                            case 301:
-                            case 302:
-                            case 303:
-                                enableButtons.push('btnReMessage');
-                                break;
-                            case 304:
-                                enableButtons.push('btnEdit', 'btnReMessage');
-                                break;
-                            case 600:
-                                enableButtons.push('btnDelete');
-                                break;
+                            // case 300:
+                            //     enableButtons.push('btnIssueCancel', 'btnReMessage');
+                            //     break;
+                            // case 301:
+                            // case 302:
+                            // case 303:
+                            //     enableButtons.push('btnReMessage');
+                            //     break;
+                            // case 304:
+                            //     enableButtons.push('btnEdit', 'btnReMessage');
+                            //     break;
+                            // case 600:
+                            //     enableButtons.push('btnDelete');
+                            //     break;
                             default:
                                 break;
                         }
@@ -756,45 +761,43 @@
                 });
 
                 // 수정 클릭
-                this.$btnEdit.click(function (e) {
-
-                    let item = _this.grid.selectedItems;
-                    console.log('$btnEdit item', item);
-                    if (item[0].statecode === 304) {
-                        console.log('item.statecode', item.statecode);
-                        let content = tmpl('modifyReasonModal', {});
-                        let $content = $(content);
-                        let modalContainer = new PopupDraggable('수정사유 선택 ');
-                        modalContainer.open({width: 615, height: 450, $content});
-
-                        $content.find('#btnSelectModifyReason').click(function () {
-                            const selectedReason = $content.find('input[name="modifyReason"]:checked').val();
-                            if (!selectedReason) {
-                                Alert.alert('알림', '수정 사유를 선택해주세요.');
-                                return;
-                            }
-
-                            console.log('선택된 수정사유:', selectedReason);
-                            $content.close(); // 선택 후 모달 닫기
-                            // 이후 로직 수행
-                            _this.modify(item);
-                        });
-
-                    } else {
-                        _this.modify(item);
-                    }
-
-
-                });
+                // this.$btnEdit.click(function (e) {
+                //
+                //     let item = _this.grid.selectedItems;
+                //     console.log('$btnEdit item', item);
+                //     if (item[0].statecode === 304) {
+                //         console.log('item.statecode', item.statecode);
+                //         let content = tmpl('modifyReasonModal', {});
+                //         let $content = $(content);
+                //         let modalContainer = new PopupDraggable('수정사유 선택 ');
+                //         modalContainer.open({width: 615, height: 450, $content});
+                //
+                //         $content.find('#btnSelectModifyReason').click(function () {
+                //             const selectedReason = $content.find('input[name="modifyReason"]:checked').val();
+                //             if (!selectedReason) {
+                //                 Alert.alert('알림', '수정 사유를 선택해주세요.');
+                //                 return;
+                //             }
+                //
+                //             console.log('선택된 수정사유:', selectedReason);
+                //             $content.close(); // 선택 후 모달 닫기
+                //             // 이후 로직 수행
+                //             _this.modify(item);
+                //         });
+                //
+                //     } else {
+                //         _this.modify(item);
+                //     }
+                // });
 
                 // 삭제 버튼
-                $('#btnDelete').click(function (e) {
-                    const items = _this.grid.rows
-                        .filter(row => row.isSelected)
-                        .map(row => row.dataItem);
-
-                    _this.deleteinvoice(items);
-                });
+                // $('#btnDelete').click(function (e) {
+                //     const items = _this.grid.rows
+                //         .filter(row => row.isSelected)
+                //         .map(row => row.dataItem);
+                //
+                //     _this.deleteinvoice(items);
+                // });
 
                 // 발행 버튼
                 $('#btnIssue').click(function (e) {
@@ -828,74 +831,70 @@
                 });
 
                 // 발행 취소 버튼
-                $('#btnIssueCancel').click(function (e) {
-                    const items = _this.grid.rows
-                        .filter(row => row.isSelected)
-                        .map(row => row.dataItem);
-
-                    if (items.length === 0) {
-                        Alert.alert('', '발행 취소할 항목을 선택해주세요.');
-                        return;
-                    }
-
-                    Alert.confirm('', '선택한 항목을 발행 취소하시겠습니까?', function () {
-                        const issueList = items.map(item => ({
-                            misnum: item.misnum
-                        }));
-
-                        let url = _this.url + '/cancel_issue';
-                        AjaxUtil.postJsonData(url, issueList, function (res) {
-                            if (res.success) {
-                                Alert.alert('', res.message || '발행이 취소되었습니다.', function () {
-                                    console.log('res.success', res);
-                                    _this.searchMainData();
-                                });
-                            } else {
-                                Alert.alert('', res.message || '발행 중 오류가 발생했습니다.');
-                            }
-                        });
-                    });
-
-                });
+                // $('#btnIssueCancel').click(function (e) {
+                //     const items = _this.grid.rows
+                //         .filter(row => row.isSelected)
+                //         .map(row => row.dataItem);
+                //
+                //     if (items.length === 0) {
+                //         Alert.alert('', '발행 취소할 항목을 선택해주세요.');
+                //         return;
+                //     }
+                //
+                //     Alert.confirm('', '선택한 항목을 발행 취소하시겠습니까?', function () {
+                //         const issueList = items.map(item => ({
+                //             misnum: item.misnum
+                //         }));
+                //
+                //         let url = _this.url + '/cancel_issue';
+                //         AjaxUtil.postJsonData(url, issueList, function (res) {
+                //             if (res.success) {
+                //                 Alert.alert('', res.message || '발행이 취소되었습니다.', function () {
+                //                     console.log('res.success', res);
+                //                     _this.searchMainData();
+                //                 });
+                //             } else {
+                //                 Alert.alert('', res.message || '발행 중 오류가 발생했습니다.');
+                //             }
+                //         });
+                //     });
+                //
+                // });
 
                 // 재전송 버튼
-                $('#btnReMessage').click(function (e) {
-                    const items = _this.grid.rows
-                        .filter(row => row.isSelected)
-                        .map(row => row.dataItem);
-
-                    if (items.length === 0) {
-                        Alert.alert('', '이메일을 재전송 할 항목을 선택해주세요.');
-                        return;
-                    }
-
-                    const issueList = items.map(item => ({
-                        misnum: item.misnum
-                    }));
-
-                    let url = _this.url + '/re_message';
-                    AjaxUtil.postJsonData(url, issueList, function (res) {
-                        if (res.success) {
-                            Alert.alert('', res.message || '재전송 되었습니다.', function () {
-                                console.log('res.success', res);
-                                _this.searchMainData();
-                            });
-                        } else {
-                            Alert.alert('', res.message || '발행 중 오류가 발생했습니다.');
-                        }
-                    });
-
-                });
+                // $('#btnReMessage').click(function (e) {
+                //     const items = _this.grid.rows
+                //         .filter(row => row.isSelected)
+                //         .map(row => row.dataItem);
+                //
+                //     if (items.length === 0) {
+                //         Alert.alert('', '이메일을 재전송 할 항목을 선택해주세요.');
+                //         return;
+                //     }
+                //
+                //     const issueList = items.map(item => ({
+                //         misnum: item.misnum
+                //     }));
+                //
+                //     let url = _this.url + '/re_message';
+                //     AjaxUtil.postJsonData(url, issueList, function (res) {
+                //         if (res.success) {
+                //             Alert.alert('', res.message || '재전송 되었습니다.', function () {
+                //                 console.log('res.success', res);
+                //                 _this.searchMainData();
+                //             });
+                //         } else {
+                //             Alert.alert('', res.message || '발행 중 오류가 발생했습니다.');
+                //         }
+                //     });
+                //
+                // });
 
             }
 
             deleteinvoice(items, skipConfirm = false, onComplete = null) {
                 let _this = this;
 
-                if (items.length === 0) {
-                    Alert.alert('', '삭제할 항목을 선택해주세요.');
-                    return;
-                }
 
                 const runDelete = function () {
                     const allDeleteList = items.map(item => ({misnum: item.misnum}));
@@ -1117,7 +1116,7 @@
                 $content.find('#saveInvoicee').hide();
                 $content.find('#btnAddFiveDetails').hide();
 
-                // ✅ header를 제거
+                // header를 제거
                 const modal = new PopupDraggable('');
                 const modalInstance = modal.open({
                     width: 1200,
@@ -1125,7 +1124,7 @@
                     $content: $content
                 });
 
-                // ✅ 모달을 화면에 보이지 않게 숨김
+                // 모달을 화면에 보이지 않게 숨김
                 modalInstance.$["root"].css({
                     position: 'absolute',
                     left: '-9999px',
@@ -1221,7 +1220,7 @@
 
             shipmentheadids = [];
 
-            // 계산서 등록 팝업
+            // 등록 팝업
             showInvoiceForm(data) {
                 console.log('showInvoiceForm', data);
                 let _this = this;
@@ -1232,10 +1231,33 @@
                 setTimeout(() => {
                     code = data.StateCode;
                     console.log('code', code);
-                    if (code === 100 || code === undefined || code === null) {
-                        $content.find('#btnInvoiceSave').show();
-                    } else {
+
+                    // 상태 코드별 버튼 표시
+                    if (code === undefined || code === null || code === 100 || code === 999) {
+                        $content.find('#btnInvoiceSave').show(); // 저장 버튼
+                    }
+
+                    if (code === 305 || code === 600) {
+                        $content.find('#btnReSave').show(); // 실패 후 다시 저장 버튼
                         $content.find('#btnInvoiceSave').hide();
+                    }
+
+                    if (code === 600) {
+                        $content.find('#btnDelete').show(); // 삭제 버튼
+                    }
+
+                    if (code === 300) {
+                        $content.find('#btnIssueCancel').show(); // 발행취소 버튼
+                        $content.find('#btnReMessage').show();   // 재전송 버튼
+                    }
+
+                    if ([301, 302, 303].includes(code)) {
+                        $content.find('#btnReMessage').show();   // 기타 전송 상태 재전송 버튼
+                    }
+
+                    if (code === 304) {
+                        $content.find('#btnReMessage').show();
+                        $content.find('#btnInvoiceSave').show(); // 수정 후 저장 허용
                     }
                 }, 0);
 
@@ -1298,7 +1320,7 @@
 
 
                 } else {
-                    modalContainer = new PopupDraggable('수정');
+                    modalContainer = new PopupDraggable('상세보기');
                     setTimeout(() => {
 
                         const stateName = data.statecode_name;
@@ -1313,12 +1335,6 @@
                             $content.find('#ntscode_des').text(ntscodeDes);     // 값
                         }
 
-                        // 305 또는 600 상태면 수정 후 재저장 버튼 표시
-                        if (code === 305 || code === 600) {
-                            $content.find('#btnReSave').show();
-                        } else {
-                            $content.find('#btnReSave').hide();
-                        }
 
                         FormUtil.BindInvoiceDataForm(data, $content.find('#taxForm'));
 
@@ -1349,7 +1365,38 @@
                 initializeDetailRows(data.detailList || []);
 
 
+                $content.find('#btnInvoiceNew').click(function () {
+                    const $form = $content.find('#taxForm');
+
+                    const excludeIds = ['ChargeDirection', 'IssueType']; // 초기화하지 않을 id들
+
+                    $form.find('input, select, textarea').each(function () {
+                        const id = $(this).attr('id');
+
+                        if (excludeIds.includes(id)) return; // 예외 처리
+
+                        if ($(this).is(':checkbox') || $(this).is(':radio')) {
+
+                        } else {
+                            $(this).val('');
+                        }
+                    });
+                    // 날짜 필드는 오늘로 설정 (예: #writeDate)
+                    const today = CommonUtil.getYYYYMMDD();
+                    $content.find('#writeDate').val(today);
+
+                    // 버튼 상태 조정
+                    $content.find('#btnInvoiceSave').show();
+                    $content.find('#btnReSave').hide();
+                    $content.find('#btnDelete').hide();
+                    $content.find('#btnIssueCancel').hide();
+                    $content.find('#btnReMessage').hide();
+
+                    $content.find('#btnInvoiceSave span').text('저장');
+                });
+
                 let oldBusinessNumber = null;
+
                 // 선택 버튼(거래처 조회)
                 $content.find('#btnSelectInvoicee').click(function () {
                     let poppage = new PopCompComponent();
@@ -1357,6 +1404,15 @@
                     let searchcallback = function (items) {
                         const businessNumber = items.business_number.replace(/-/g, '');
                         const compid = items.id;
+
+                        // 거래처유형 확인 (사업자 / 개인 / 외국인)
+                        const invoiceeType = $content.find('input[name="InvoiceeType"]:checked').val();
+
+                        // 사업자가 아닌 경우 API 호출 없이 기본 값만 채우기 또는 무시
+                        if (invoiceeType !== '사업자') {
+                            console.log('사업자 유형이 아니므로 API 호출 생략');
+                            return;
+                        }
 
                         let data = {
                             b_no: businessNumber,
@@ -1603,6 +1659,56 @@
                     }
 
                 }
+
+                // 삭제 버튼
+                let $btnDelete = $content.find('#btnDelete');
+                $btnDelete.click(function (e) {
+                    const misnum = $content.find('#misnum').val(); // 모달 내의 현재 문서 ID
+                    if (!misnum) {
+                        Alert.alert('', '삭제할 문서가 없습니다.');
+                        return;
+                    }
+
+                    const item = {
+                        misnum: misnum,
+                        statecode: code // 앞서 showInvoiceForm에서 설정한 상태코드
+                    };
+
+                    _this.deleteinvoice([item]);
+                });
+
+                // 계산서 저장 버튼
+                let $btnEdit = $content.find('#btnEdit');
+                // 수정 클릭
+                $btnEdit.click(function (e) {
+
+                    let item = _this.grid.selectedItems;
+                    console.log('$btnEdit item', item);
+                    if (code === 304) {
+                        console.log('item.statecode', item.statecode);
+                        let content = tmpl('modifyReasonModal', {});
+                        let $content = $(content);
+                        let modalContainer = new PopupDraggable('수정사유 선택 ');
+                        modalContainer.open({width: 615, height: 450, $content});
+
+                        $content.find('#btnSelectModifyReason').click(function () {
+                            const selectedReason = $content.find('input[name="modifyReason"]:checked').val();
+                            if (!selectedReason) {
+                                Alert.alert('알림', '수정 사유를 선택해주세요.');
+                                return;
+                            }
+
+                            console.log('선택된 수정사유:', selectedReason);
+                            $content.close(); // 선택 후 모달 닫기
+                            // 이후 로직 수행
+                            _this.modify(item);
+                        });
+
+                    } else {
+                        _this.modify(item);
+                    }
+                });
+
 
                 // let data = FormUtil.extractForm($taxForm);
 
@@ -1980,6 +2086,7 @@
             page = new SalesInvoicePage();
 
             AjaxUtil.fillSelectOptions($('#cboStatecode'), 'system_code', 'all', '', 'state_code_pb');
+            AjaxUtil.fillSelectOptions($('#cboInvoice'), 'system_code', 'all', '', 'sale_type');
 
             $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
             $('#srchEndDt').val(CommonUtil.getYYYYMMDD());

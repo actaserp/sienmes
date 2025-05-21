@@ -163,7 +163,7 @@ public class SalesInvoiceService {
                      """; // 조건은 아래에서 붙임
 
         if (invoice_kind != null && !invoice_kind.isEmpty()) {
-            sql += " and m.taxtype = :invoice_kind ";
+            sql += " and m.misgubun = :invoice_kind ";
         }
 
         if (cboStatecode != null) {
@@ -1026,7 +1026,7 @@ public class SalesInvoiceService {
         sm.setIssuediv(issuediv);
 
         if ("other".equals(issuediv) || "reverse".equals(issuediv)) {
-            sm.setStatecode(null);
+            sm.setStatecode(999);
         } else {
             sm.setStatecode(100);
         }

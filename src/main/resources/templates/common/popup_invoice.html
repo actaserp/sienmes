@@ -877,8 +877,12 @@
 
 
             <div class="popup-button">
+                <button type="button" class="btn-popup" id="btnInvoiceNew" ><span data-commonCd="신규">신규</span></button>
                 <button type="button" class="btn-popup" id="btnInvoiceSave" ><span data-commonCd="저장">저장</span></button>
-                <button type="button" class="btn-popup" id="btnReSave" style="display:none;"><span data-commonCd="수정 후 저장">수정 후 저장</span></button>
+                <button type="button" class="btn-popup" id="btnReSave" style="display:none;"><span data-commonCd="다시 저장">다시 저장</span></button> <!-- 상태가 실패 했을때 다시 저장하는 저장 -->
+                <button type="button" class="btn-popup" id="btnDelete" style="display:none;"><span data-commonCd="삭제">삭제</span></button>
+                <button type="button" class="btn-popup" id="btnIssueCancel" style="display:none;"><span data-commonCd="발행 취소">발행 취소</span></button>
+                <button type="button" class="btn-popup" id="btnReMessage" style="display:none;"><span data-commonCd="재전송">재전송</span></button>
                 <button type="button" class="btn-popup" id="modal-close-button"><span data-commonCd="닫기">닫기</span></button>
             </div>
 
@@ -953,23 +957,23 @@
 
             if (taxType === '개인'){
                 clearInvoiceeFields();
-                $('#InvoiceeCorpNum')
-                    .removeAttr('readonly')
-                    .css('width', '100%');
+                // $('#InvoiceeCorpNum')
+                //     .removeAttr('readonly')
+                //     .css('width', '100%');
 
                 if (!window.__skipCorpNumReset) {
                     $corpNum.val('');
                 }
 
-                $('#btnSelectInvoicee').hide();
+                // $('#btnSelectInvoicee').hide();
                 $('#InvoiceeTaxRegID').attr('readonly', true);
-                $('#InvoiceeCEOName').attr('readonly', true);
+                // $('#InvoiceeCEOName').attr('readonly', true);
                 $('#InvoiceeBizType').attr('readonly', true);
                 $('#InvoiceeBizClass').attr('readonly', true);
-                $('#InvoiceeContactName1').attr('readonly', true);
-                $('#InvoiceeEmail1')
-                    .css('width', '100%');
-                $('#saveInvoicee').hide();
+                // $('#InvoiceeContactName1').attr('readonly', true);
+                // $('#InvoiceeEmail1')
+                //     .css('width', '100%');
+                // $('#saveInvoicee').hide();
 
                 $('#InvoiceeCorpName').off('input._autoFill').on('input._autoFill', function () {
                     const name = $(this).val();
