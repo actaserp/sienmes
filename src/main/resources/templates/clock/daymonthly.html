@@ -237,20 +237,6 @@
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
-
-                        if (e.panel.cellType === wijmo.grid.CellType.Cell &&
-                            sender.columns[e.col].binding === 'fixflag') {
-                            e.cell.textContent = '';
-                        }
-
-                        if (e.panel.cellType === wijmo.grid.CellType.Cell &&
-                            sender.columns[e.col].binding === 'fixflag') {
-                            const fixflag = sender.getCellData(e.row, 'fixflag', false);
-                            if (fixflag === '1') {
-                                e.cell.style.pointerEvents = 'none'; // 클릭 자체 방지
-                                e.cell.style.opacity = '0.6'; // 시각적 표시
-                            }
-                        }
                     },
                     columns: [
                         {binding: 'fixflag',header: '마감', width: 70, align: 'center',visible: false},

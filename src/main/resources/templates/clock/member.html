@@ -29,7 +29,7 @@
                 <div class="search-wrap">
                     <dl>
                         <dt>
-                            <label>기간</label>
+                            <label>신청일</label>
                         </dt>
                         <dd>
                             <ul class="date-box">
@@ -50,9 +50,7 @@
                             <label>사원명</label>
                         </dt>
                         <dd>
-                            <select>
-                                <option value="">전체</option>
-                            </select>
+                            <select style="width: 150px;" id="person_name" name="person_name"></select>
                         </dd>
                     </dl>
 
@@ -73,7 +71,13 @@
                         <li>
                             <a class="btn btn-excell" title="저장" id="btnSave">
                                 <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
-                                저장
+                                확인
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn btn-excell" title="취소" id="btncancel" style="display: none;">
+                                <img src="/images/icon/ico-edit.svg" alt="취소 아이콘">
+                                확인취소
                             </a>
                         </li>
                     </ul>
@@ -111,95 +115,130 @@
 
                 this.grid = new wijmo.grid.FlexGrid('#member-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
-                    headersVisibility: wijmo.grid.HeadersVisibility.Column,
+                    headersVisibility: wijmo.grid.HeadersVisibility.All,
                     autoGenerateColumns: false,
                     showMarquee: true,
-                    isReadOnly: true,
+                    isReadOnly: false,
                     frozenColumns: 9,
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+
+                        // 날짜 포맷 처리
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            let col = sender.columns[e.col];
+                            let val = e.panel.getCellData(e.row, e.col, false);
+
+                            // 날짜 컬럼 포맷 적용
+                            if (['reqdate', 'frdate', 'todate'].includes(col.binding) && val && val.length === 8) {
+                                let formatted = val.substring(0, 4) + '-' + val.substring(4, 6) + '-' + val.substring(6, 8);
+                                e.cell.textContent = formatted;
+                            }
+                        }
                     },
                     columns: [
-                        {binding: 'comfirm', header: '확인', width: 100, align: 'center'},
-                        {binding: 'name', header: '사원명', width: 120, align: 'center'},
+                        {binding: 'first_name', header: '사원명', width: 120, align: 'center'},
                         {binding: 'jik_id', header: '직위', width: 100, align: 'center'},
                         {binding: 'reqdate', header: '신청일', width: 140, align: 'center'},
                         {binding: 'frdate', header: '시작일', width: 140, align: 'center'},
                         {binding: 'todate', header: '종료일', width: 140, align: 'center'},
-                        {binding: 'yearflag', header: '구분', width: 120, align: 'center'},
+                        {binding: 'worknm', header: '구분', width: 120, align: 'center'},
                         {binding: 'daynum', header: '기간', width: 100, align: 'center'},
                         {binding: 'fixflag', header: '연차', width: 100, align: 'center'},
-                        {binding: 'remark', header: '사유', width: '*', align: 'center'},
+                        {binding: 'remark', header: '사유', width: '*', align: 'left'},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
 
                 let selector = new wijmo.grid.selector.Selector(this.grid, {
-                    itemChecked: (e, ctx) => {
-                        SelectItem = this.grid.rows.filter(r => r.isSelected);
-
+                    itemChecked: (s, e) => {
+                        let SelectItem = this.grid.rows.filter(r => r.isSelected);
                     }
                 });
 
-                /*this.grid.hostElement.addEventListener('dblclick', (e) => {
-                    let hitTest = this.grid.hitTest(e);
-                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
-                        let row = hitTest.row;
-                        let selectedItem = this.grid.rows[row].dataItem;
-                        _this.showDetail(selectedItem.id)
+                this.grid.beginningEdit.addHandler((s, e) => {
+                    const fixflag = s.getCellData(e.row, 'fixflag', false);
+
+                    if (fixflag === '1') {
+                        e.cancel = true;
                     }
-                });*/
+                });
+
+                this.grid.loadedRows.addHandler(() => {
+                    setTimeout(() => {
+                        this.grid.select(-1, -1); // 선택 상태 초기화
+                    }, 0); // 비동기로 처리하여 초기 선택 해제
+                });
 
                 new FlexGridContextMenu(this.grid);
-                this.grid.downloadFileName = '사원별근태현황';
+                this.grid.downloadFileName = '사원별휴가현황';
 
-            }
-
-
-            showDetail(idx) {
-                let param = {'id': idx};
-
-                let result = AjaxUtil.getSyncData(this.url + '/detail', param);
-                if (result.success) {
-                    FormUtil.BindDataForm(result.data, $('#basicForm'));
-                    //$('#description').text(result.description);
-                }
-
-                //page.setButtonDisable(false, false, false);
-                page.setButtonState();
             }
 
             searchMainData() {
                 let _this = this;
-                //let txtName = $('#txtName').val();
-                //let url = '/api/definition/area?txtName='+txtName;
-                /* let data = {
-                     'txtName' :$('#txtName').val(),
-                     //'action':'read'
+
+                let url = '/api/clock/member/read'
+                 let data = {
+                     'start_date' :$('#start_date').val(),
+                     'end_date' :$('#end_date').val(),
+                     'person_name' :$('#person_name').val(),
+                     spjangcd: sessionStorage.getItem('spjangcd'),
                  }
-                 let result = AjaxUtil.getSyncData(this.url+'/read', data);
-                 console.log(result);
+                 let result = AjaxUtil.getSyncData(url, data);
+                 /*console.log(result);*/
 
                  if (result && result.data) {
                      _this.viewData.sourceCollection = result.data;
-                 }*/
+
+
+                     setTimeout(() => {
+                         let hasFixedRow = false;
+
+                         _this.grid.rows.forEach((row, idx) => {
+                             if (_this.grid.getCellData(idx, 'fixflag', false) === '1') {
+                                 row.isSelected = true; // 선택 (체크박스 자동 연동)
+                                 hasFixedRow = true;    // 플래그 설정
+                             }
+                         });
+
+                         // fixflag === '1' 인 행이 있으면 버튼 상태 변경
+                         if (hasFixedRow) {
+                             $('#btncancel').show();
+                             $('#btnSave').hide();
+                         } else {
+                             $('#btncancel').hide();
+                             $('#btnSave').show();
+                         }
+                     });
+
+
+
+                 }
 
             }//searchMainData
 
-            saveArea() {
+            saveMember() {
                 let _this = this;
-                let url = '/api/definition/area/save';
-                //데이터입력체크루틴 누락
+                let url = '/api/clock/member/save';
 
-                //let data = $('#basicForm').serialize();
-                let data = FormUtil.extractForm($('#basicForm'));
-                if (!data.name) {
-                    Alert.alert('', '에어리어 이름을 입력해주세요.');
-                    $('#basicForm #name').focus();
+                // 선택된 행들 가져오기
+                let selectedItems = _this.grid.rows
+                    .filter(row => row.isSelected)  // Selector에서 체크된 행
+                    .map(row => row.dataItem);
+
+                // 유효성 체크
+                if (selectedItems.length === 0) {
+                    Alert.alert('', '선택된 행이 없습니다.');
                     return;
                 }
+
+                // 서버로 전송할 데이터
+                let data = {
+                    list: selectedItems,
+                    spjangcd: sessionStorage.getItem('spjangcd')
+                };
 
                 let fnSuccess = function (res) {
                     if (res.success) {
@@ -209,7 +248,39 @@
                         Alert.alert('', res.message);
                     }
                 };
-                AjaxUtil.postAsyncData(url, data, fnSuccess);
+                AjaxUtil.postJsonData(url, data, fnSuccess);
+            }
+
+            cancel(){
+                let _this = this;
+                let url = '/api/clock/member/Cancel';
+
+                // 선택된 행들 가져오기
+                let selectedItems = _this.grid.rows
+                    .filter(row => row.isSelected)  // Selector에서 체크된 행
+                    .map(row => row.dataItem);
+
+                // 유효성 체크
+                if (selectedItems.length === 0) {
+                    Alert.alert('', '선택된 행이 없습니다.');
+                    return;
+                }
+
+                // 서버로 전송할 데이터
+                let data = {
+                    list: selectedItems
+                };
+
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('', '취소되었습니다'); // Notification
+                        _this.searchMainData();
+                    } else if (!res.success) {
+                        Alert.alert('', res.message);
+                    }
+                };
+                AjaxUtil.postJsonData(url, data, fnSuccess);
+
             }
 
 
@@ -221,8 +292,8 @@
             //yullinAuth.inspection();
             yullinAuth.removeWriteButton();
             page = new MemberPage();
-            page.searchMainData();
 
+            AjaxUtil.fillSelectOptions($('#person_name'), 'person', 'choose', false);
             const now = new Date();
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -236,6 +307,24 @@
                 page.searchMainData();
             });
 
+            $('#btnSave').click(function (e) {
+                Alert.confirm('',
+                    "저장하시겠습니까?",
+                    function () { page.saveMember() },
+                    function () { }
+                );
+            });
+
+
+            $('#btncancel').click(function (e) {
+                Alert.confirm('',
+                    "취소하시겠습니까?",
+                    function () { page.cancel() },
+                    function () { }
+                );
+            });
+
+            page.searchMainData();
         });
     </script>
 
