@@ -177,7 +177,7 @@
                 <option>휴가</option>
               </select>
             </div>
-            <div style="font-size: small; color: red;">
+            <div style="font-size: small; color: red;" id="gpsInfo">
               * 외부 출/퇴근시 GPS정보 허용이 필요합니다.
             </div>
           </div>
@@ -249,7 +249,7 @@
   };
 
   const handleIPDisplay = (ip) => {
-    if (ip === '106.240.249.6') {
+    if (ip === '106.240.249.66') {
       console.log('사내 IP 확인');
       document.getElementById('inside').style.display = 'flex';
       document.getElementById('outside').style.display = 'none';
@@ -475,6 +475,7 @@
     }
     let fnsuccess = function (result) {
       console.log("주소 : " , result.data)
+      document.getElementById('gpsInfo').innerText = result.data
     };
     AjaxUtil.postAsyncData(url, data, fnsuccess);
   }
