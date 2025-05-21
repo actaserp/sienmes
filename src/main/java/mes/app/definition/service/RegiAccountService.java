@@ -2,6 +2,7 @@ package mes.app.definition.service;
 
 import lombok.extern.slf4j.Slf4j;
 import mes.Encryption.EncryptionUtil;
+import mes.domain.dto.AccountDto;
 import mes.domain.entity.TB_ACCOUNT;
 import mes.domain.repository.TB_ACCOUNTRepository;
 import mes.domain.services.SqlRunner;
@@ -37,15 +38,17 @@ public class RegiAccountService {
         String sql = """
                 select 
                  a.accid
-                ,a.bankid as bankid
-                ,a.accnum
-                ,a.accname
-                ,a.mijamt
-                ,a.onlineid
+                ,a.bankid
+                ,a.accnum as "accountNumber"
+                ,a.accname as "accountName"
+                ,a.mijamt 
+                ,a.onlineid 
                 ,a.onlinepw
-                ,a.viewid
+                ,a.viewid 
                 ,a.viewpw
-                ,a.accpw
+                ,a.popsort as "accountType"
+                ,a.accpw as "accountPassword"
+                ,a.mijamt
                 ,case 
                     when a.popyn = '1' then '연동'
                     else '미연동'
@@ -77,36 +80,38 @@ public class RegiAccountService {
     }
 
     @Transactional
-    public void saveAccount(Integer pk, Integer bankname, String accnum ,String accname, String onlineid, String viewid, String viewpw){
+    public void saveAccount(AccountDto dto){
 
         TB_ACCOUNT account;
-
-        if (pk != null) {
-            account = accountRepository.findById(pk).orElseGet(TB_ACCOUNT::new);
+        Integer id = dto.getId();
+        if (id != null) {
+            account = accountRepository.findById(id).orElseGet(TB_ACCOUNT::new);
         } else {
             account = new TB_ACCOUNT(); // 새로 생성
         }
 
-        account.setAccid(pk);
+        account.setAccid(id);
 
-        account.setBankid(bankname);
+        account.setBankid(dto.getBankid());
         String EncryptedAccnum = "";
         String Encryptedviewpw = "";
 
 
         try{
-            EncryptedAccnum = EncryptionUtil.encrypt(accnum);
-            Encryptedviewpw = EncryptionUtil.encrypt(viewpw);
+            EncryptedAccnum = EncryptionUtil.encrypt(dto.getAccountNumber());
+            Encryptedviewpw = EncryptionUtil.encrypt(dto.getViewpw());
         }catch (Exception e){
             log.error("암호화 중 에러 발생 , [발생위치]: {} , [에러내용] : {}" , this.getClass().getSimpleName(), e.getMessage());
             throw new RuntimeException();
         }
 
         account.setAccnum(EncryptedAccnum);
-        account.setOnlineid(onlineid);
-        account.setViewid(viewid);
+        account.setOnlineid(dto.getOnlineid());
+        account.setViewid(dto.getViewid());
         account.setViewpw(Encryptedviewpw);
-        account.setAccname(accname);
+        account.setAccname(dto.getAccountName());
+        account.setPopsort(dto.getAccountType());
+        account.setMijamt(dto.getMijamt());
 
 
         accountRepository.save(account);

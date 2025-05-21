@@ -52,7 +52,7 @@ public class SalesListController {
 
         List<Map<String, Object>> list = salesListService.getList(paramSet);
 
-        salesListService.bindEnumLabels(list);
+        //salesListService.bindEnumLabels(list);
 
         result.data = list;
 

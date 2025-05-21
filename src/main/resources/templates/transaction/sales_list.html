@@ -150,17 +150,13 @@
 
                                 </div>
                             </div>
+                            <div class="grid_box" id="divList">
+
+                                <div id="theGrid_saleList" style="height: 500px;"></div>
+                            </div>
                         </section>
 
 
-
-                    <section class="section">
-
-                        <div class="grid_box" id="divList">
-
-                            <div id="theGrid_saleList" style="height: 350px;"></div>
-                        </div>
-                    </section>
                 </section>
 
                 <section class="tab-item" id="tab2">
@@ -252,7 +248,7 @@
 
                                 </div>
                             </div>
-                            <table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; text-align: center; font-family: sans-serif;">
+                            <!--<table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; text-align: center; font-family: sans-serif;">
                                 <thead>
                                 <tr>
                                     <th>구분</th>
@@ -285,8 +281,8 @@
                                     <td id="PersonTaxSum"></td>
                                 </tr>
                                 </tbody>
-                            </table>
-                            <div id="theGrid_saleList2" style="height: 350px;"></div>
+                            </table>-->
+                            <div id="theGrid_saleList2" style="height: 500px;"></div>
                         </section>
 
                     <!--<section class="section">
@@ -351,18 +347,15 @@
                     isReadOnly: true,
                     groupHeaderFormat: '{value}월 매출 - 총 {count}건',
                     columns: [
-                        { binding: 'misdate', header: '계산서작성일자', align: 'center', width: 150 },
-                        { binding: 'misgubun', header: '매출구분', align: 'center', width: '*' },
-                        { binding: 'companycode', header: '거래처코드', align: 'left', width: '*'},
-                        { binding: 'companyname', header: '거래처명', align: 'left', width: 200 },
-                        { binding: 'iveremail', header: '발송EMAIL', align: 'left', width: 150 },
+                        { binding: 'misdate', header: '매출일자', align: 'center', width: 150 },
+                        { binding: 'misgubun', header: '매출구분', align: 'center', width: 120 },
+                        { binding: 'companycode', header: '거래처코드', align: 'left', width: 120},
+                        { binding: 'companyname', header: '거래처명', align: 'left', width: '*' },
                         { binding: 'itemnm', header: '품명', align: 'left', width: 150 },
                         { binding: 'spec', header: '규격', align: 'center', width: 150 },
                         { binding: 'supplycost', header: '공급가', align: 'right', width: 120, aggregate: 'Sum' },
                         { binding: 'taxtotal', header: '부가세', align: 'right', width: 120, aggregate: 'Sum' },
                         { binding: 'totalamt', header: '합계', align: 'right', width: 120, aggregate: 'Sum' },
-                        { binding: 'modifycd', header: '수정사유', align: 'center', width: 100 },
-                        { binding: 'stateLabel', header: '발행상태', align: 'center', width: 100 }
                     ],
                     itemsSource: cv,
 
@@ -376,10 +369,7 @@
                 this.grid1.columns[1].allowMerging = true;
 
 
-                const cv2 = _this.viewData2;
-                cv2.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription('ivercorpnum', function(item, prop){
-                    return item[prop];
-                }));
+
 
                 this.grid2 = new wijmo.grid.FlexGrid('#theGrid_saleList2', {
                     autoGenerateColumns: false,
@@ -387,12 +377,11 @@
                     allowSorting: 'MultiColumn',
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     isReadOnly: true,
-                    groupHeaderFormat: '사업자 번호: {value} 총 {count} 건',
-                    itemsSource: cv2,
+                    itemsSource: _this.viewData2,
                     columns: [
                         { binding: 'ivercorpnum', header: '사업자등록번호', align: 'center', width: '*' },
                         { binding: 'ivercorpnm', header: '상호', align: 'left', width: '*'},
-                        { binding: 'cnt', header: '매수', align: 'right', width: '*' },
+                        { binding: 'cnt', header: '매수', align: 'right', width: '*', aggregate: 'Sum' },
                         { binding: 'supplycost', header: '공급가액', align: 'right', width: '*', aggregate: 'Sum' },
                         { binding: 'taxtotal', header: '세액', align: 'right', width: 150, aggregate: 'Sum' },
                     ]
@@ -400,9 +389,19 @@
 
                 this.grid2.rowHeaders.columns.splice(0, 1);
 
+
+                // 1. footer에 GroupRow 추가
+                this.grid2.columnFooters.rows.push(new wijmo.grid.GroupRow());
+
+                // 2. trade_date 컬럼 인덱스 찾기
+                const tradeDateColIndex = this.grid2.columns.findIndex(c => c.binding === 'ivercorpnum');
+
+                // 3. 푸터에 'Σ' 찍기
+                this.grid2.columnFooters.setCellData(0, tradeDateColIndex, '합계');
+
             }
 
-            bindingStatisticsField(statistics){
+            /*bindingStatisticsField(statistics){
                 $('#cltCnt').text(statistics['cltCnt']);
                 $('#cnt').text(statistics['cnt']);
                 $('#supplySum').text(formatMoney(statistics['supplySum']));
@@ -418,7 +417,7 @@
                 $('#PersonSupplySum').text(formatMoney(statistics['PersonSupplySum']));
                 $('#PersonTaxSum').text(formatMoney(statistics['PersonTaxSum']));
 
-            }
+            }*/
 
             searchMain(){
                 let _this = this;
@@ -457,7 +456,7 @@
 
                 if(result != null) {
                     _this.viewData2.sourceCollection = result.data['list'];
-                    _this.bindingStatisticsField(result.data['Statistics']);
+                    //_this.bindingStatisticsField(result.data['Statistics']);
                     LoadingFlag = true; //서브탭 클릭할때마다 서치 방지
                 }
 

@@ -118,6 +118,7 @@ public class EasyFinBankCustomService {
                 entity.setRemark4(map.getRemark4());
                 entity.setRegdt( map.getRegDT());
                 entity.setJobid(jobID);
+                entity.setIotype("0");
                 entity.setMemo(map.getMemo());
                 entity.setIoflag(inoutFlag);
                 entity.setAccnum(EncryptionUtil.encrypt(accountNumber));

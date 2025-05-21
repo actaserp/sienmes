@@ -55,7 +55,7 @@
             </ul>
         </div>
         <form id="searchForm" autocomplete="off">
-            <section class="section">
+            <section class="section" style="padding-top: 10px; padding-bottom: 0px;">
                 <div class="section-top">
                     <div class="search-wrap">
                         <dl>
@@ -158,7 +158,7 @@
                         <li class="right_align rpt"  style="margin-right: 5px">
                             <a class="btn btn-delete" title="수정" id="btnBulkEdit">
                                 <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
-                                일괄수정
+                                저장
                             </a>
                         </li>
                         <li class="right_align rpt"  style="margin-right: 5px">
@@ -182,20 +182,13 @@
                     </ul>
                     <!--<button type="button" class="btn-default" id="btnStatementExcel" title="거래명세서 출력2"><i class="fas fa-print"></i></button>-->
                 </div>
-                <div id="theGrid_TransactionHistory" style="height: 350px;"></div>
+                <div id="theGrid_TransactionHistory" style="height: 650px;"></div>
                 <div id="memo-popup" style="display: none; position: absolute; z-index: 9999;">
                     <textarea id="memo-textarea" style="width: 300px; height: 100px;"></textarea>
                 </div>
             </div>
         </section>
 
-        <section>
-            <div class="grid_box">
-                <div class="title_box">
-                </div>
-                <div id="DetailGrid" style="height: 350px;"></div>
-            </div>
-        </section>
     </div>
 
 
@@ -422,6 +415,26 @@
 </div>
     </script>
 
+    <script type="text/x-tmpl" id="detailTemplate">
+        <div class="content_wrap popup">
+
+    <section class="section">
+        <div class="grid_box">
+                <div class="title_box">
+                </div>
+                <div id="DetailGrid" style="height: 400px;"></div>
+        </div>
+    </section>
+
+        <!--
+        <div class="popup-button">
+            <button type="button" class="btn-popup" id="btnCompSelect" ><span data-commonCd="출하목록반영">출하목록반영</span></button>
+            <button type="button" class="btn-popup" id="btn-search-close"><span data-commonCd="닫기">닫기</span></button>
+        </div>
+        -->
+</div>
+    </script>
+
 
 
     <script type="text/x-tmpl" id="AddNewDataPopup">
@@ -459,7 +472,7 @@
                             <input class="form-control2" type="text" id="CompanyName_Popup" name="CompanyName_Popup"
                              placeholder="검색버튼을 클릭하여 거래처를 검색하세요" readonly/>
                             &nbsp;
-                            <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                            <a class="btn btn-delete" title="검색" id="btnCompanySearch" style='width: 120px'>
                                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                 거래처 검색
                             </a>
@@ -491,7 +504,7 @@
                                    placeholder="검색버튼을 클릭하여 계좌를 검색하세요" readonly>
                             <input type="hidden" id="accountId" name="accountId">
                             &nbsp;
-                            <a class="btn btn-delete" title="검색" id="btnAccountSearch">
+                            <a class="btn btn-delete" title="검색" id="btnAccountSearch" style='width: 120px'>
                                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                 계좌 검색
                             </a>
@@ -553,7 +566,15 @@
                             <label for="description">적요</label>
                         </th>
                         <td colspan="3">
-                            <textarea id="note1" name="note1"></textarea>
+                            <textarea id="note1" name="note1" style='height: 70px'></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: center">
+                            <label for="description">메모</label>
+                        </th>
+                        <td colspan="3">
+                            <textarea id="memo" name="memo" style='height: 70px'></textarea>
                         </td>
                     </tr>
                     <tr>
@@ -576,6 +597,7 @@
         </div>
 
         <div class="popup-button">
+                <button type="button" class="btn-popup y_write_auth" id="btnPopReset">신규</button>
                 <button type="button" class="btn-popup y_write_auth" id="btnPopSave">저장</button>
                 <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
         </div>
@@ -591,8 +613,6 @@
     <th:block th:replace="/common/popup_company :: popup_company"></th:block>
     <th:block th:replace="/shipment/trade_stmt/trade_stmt_tmpl :: printTemplate"></th:block>
     <script type="text/javascript">
-
-        let SelectedItems = [];
         let tradetypeList;
 
         const iotype = [
@@ -648,86 +668,135 @@
                     isReadOnly: false,
                     columns: [
                         { binding: 'id', header: '아이디', width: '*', visible: false, align: 'center', isReadOnly : true },
-                        { binding: 'trade_date', header: '일자', width: '*', align: 'center', isReadOnly : true },
-                        { binding: 'input_money', header: '입금금액', width: '*', format: 'n0', aggregate: 'Sum', align: 'right', isReadOnly : true },
-                        { binding: 'output_money',  header: ' 출금금액', width: '*', format: 'n0', aggregate: 'Sum', align: 'right', isReadOnly : true},
-                        { binding: 'commission',header: ' 수수료(500원)', width: '*', format: 'n0', dataType: 'Number', align: 'right', isReadOnly : false},
+                        { binding: 'trade_date', header: '일자', width: 100, align: 'center', isReadOnly : true },
+                        { binding: 'inoutFlag', header: '입출구분', width: 80, align: 'center', isReadOnly : true },
+                        { binding: 'input_money', header: '입금액', width: 100, format: 'n0', aggregate: 'Sum', align: 'right', isReadOnly : true },
+                        { binding: 'output_money',  header: ' 출금액', width: 100, format: 'n0', aggregate: 'Sum', align: 'right', isReadOnly : true},
+                        { binding: 'feeamt',header: ' 수수료', width: 80, format: 'n0', visible: false, align: 'center', isReadOnly : true},
+                        { binding: 'mijamt',header: ' 수수료', width: 80, format: 'n0', visible: false, align: 'center', isReadOnly : true},
+                        { binding: 'commission',header: ' 수수료', width: 80, format: 'n0', dataType: 'Boolean', align: 'center', isReadOnly : false},
                         { binding: 'remark',  header: ' 적요', width: 150, align: 'right'},
-                        { binding: 'code', header: '거래처코드', width: 150, align: 'center' },
-                        { binding: 'cltcd', header: '거래처아이디', visible: false, width: 150, align: 'center' },
-                        { binding: 'clientName',   header: '거래처명', width: 150, align: 'center', isReadOnly : true },
-                        { binding: 'trade_type', header: '거래구분', width: 150, dataMap: getTradeTypeDataMap(tradetypeList), align: 'center',
+                        { binding: 'code', header: '거래처코드', width: 120, align: 'center' },
+                        { binding: 'cltcd', header: '거래처아이디', visible: false, align: 'center' },
+                        { binding: 'clientName',   header: '거래처명', width: 140, align: 'center', isReadOnly : true },
+                        {
+                            binding: 'trade_type',
+                            header: '거래구분',
+                            width: 120,
+                            dataMap: new wijmo.grid.DataMap(tradetypeList, 'value', 'text'), // 전체 목록
+                            align: 'center',
                             cellTemplate: '${text}'
                         },
                         {
                             header: '메모',
-                            width: 100,
+                            width: 80,
                             isReadOnly: true,
                             binding: 'memo',
                             cellTemplate: `<div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                                                 <button class="memo-btn" style="padding: 4px 8px; width: 50px; font-size: 12px;">메모</button>
                                            </div>`
                         },
-                        { binding: 'bankname', header: '은행', width: '*', align: 'center' , isReadOnly : true},
-                        { binding: 'account', header: '계좌', width: 150, align: 'center' , isReadOnly : true},
-                        { binding: 'depositandwithdrawaltype', header: '입금형태', width: 120, align: 'center',
+                        { binding: 'memo', header: '메모내용', width: '*', align: 'center' , isReadOnly : true},
+                        { binding: 'depositandwithdrawaltype', header: '입금형태', width: 100, align: 'center',
                             /*dataMap : getTradeTypeDataMap(iotype),
                             cellTemplate: '${text}',
                             align: 'center' */
                             isReadOnly : true
                         },
+                        { binding: 'button',
+                          header: '상세보기',
+                            width: '*',
+                            align: 'center',
+                            cellTemplate: `<div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                                                <button class="detail-btn" style="padding: 4px 8px; width: 50px; font-size: 12px;">상세보기</button>
+                                           </div>`,
+                            isReadOnly : true},
+                        { binding: 'bankname', header: '은행', width: '*', align: 'center' , isReadOnly : true},
+                        { binding: 'account', header: '계좌', width: 150, align: 'center' , isReadOnly : true},
+
                     ],
                     itemsSource: this.viewData,
                     formatItem: function (s, e) {
-                        if (e.panel === s.columnHeaders) {
-                            const col = s.columns[e.col];
+                        const panel = e.panel;
+                        const col = s.columns[e.col];
+                        const item = s.rows[e.row].dataItem;
 
-                            // 수정 가능한 컬럼만 색상 지정
+                        // 컬럼 헤더일 경우
+                        if (panel === s.columnHeaders) {
                             const editableBindings = ['remark', 'code', 'trade_type', 'commission'];
                             if (editableBindings.includes(col.binding)) {
-                                e.cell.style.color = 'dodgerblue'; // 글씨 잘 보이게
-                            }
-                        }
-
-                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
-                            e.cell.style.textAlign = 'center'; // 헤더 텍스트 가운데 정렬
-                        }
-
-                        if (e.panel === s.cells) {
-                            const col = s.columns[e.col];
-                            const item = s.rows[e.row].dataItem;
-
-                            if (col.binding === 'input_money') {
                                 e.cell.style.color = 'dodgerblue';
-                                e.cell.style.fontWeight = 'bold';
                             }
-                            if (col.binding === 'output_money') {
-                                e.cell.style.color = 'red';
-                                e.cell.style.fontWeight = 'bold';
+                            e.cell.style.textAlign = 'center';
+                            return;
+                        }
+
+                        // 일반 셀일 경우
+                        if (panel !== s.cells) return;
+
+
+
+                        // 금액 관련 컬러 강조
+                        if (col.binding === 'input_money') {
+                            e.cell.style.color = 'dodgerblue';
+                            e.cell.style.fontWeight = 'bold';
+                            return;
+                        }
+
+                        if (col.binding === 'output_money') {
+                            e.cell.style.color = 'red';
+                            e.cell.style.fontWeight = 'bold';
+                            return;
+                        }
+
+                        // 메모 버튼 텍스트 조건 설정
+                        if (col.binding === 'memo') {
+                            const button = e.cell.querySelector('.memo-btn');
+                            const memoText = item.memo?.trim();
+
+                            if (button) {
+                                const hasMemo = memoText && memoText !== '';
+                                button.textContent = hasMemo ? '메모보기' : '메모적기';
+                                button.style.color = hasMemo ? 'dodgerblue' : 'black';
                             }
+                            return;
+                        }
 
-                            // code 컬럼에 커스텀 버튼 삽입
-                            if (col.binding === 'code') {
-                                const rowIndex = e.row;
-
-                                if(item.code === null){
-                                    e.cell.innerHTML = `
+                        // code 컬럼에 버튼 삽입
+                        if (col.binding === 'code') {
+                            const rowIndex = e.row;
+                            if (item.code === null) {
+                                e.cell.innerHTML = `
                                 <div class="wijmo-cltcd-div" data-row="${rowIndex}">
                                     <input type="text" value="text" style="width: 100%; display: none; border: none !important; text-align: center; background-color: white;" readonly/>
                                     <button class="btn-code-action" style="display: block">거래처 검색</button>
-                                </div>
-    `;
-                                }else{
-
-                                    e.cell.innerHTML = `
-                                    <div class="wijmo-cltcd-div" data-row="${rowIndex}">
-                                        <input type="text" value="${item.code}" style="width: 100%; border: none !important; text-align: center; background-color: white;" readonly/>
-                                    </div>
-                                    `
-                                }
+                                </div>`;
+                            } else {
+                                e.cell.innerHTML = `
+                                <div class="wijmo-cltcd-div" data-row="${rowIndex}">
+                                    <input type="text" value="${item.code}" style="width: 100%; border: none !important; text-align: center; background-color: white;" readonly/>
+                                </div>`;
                             }
+                            return;
                         }
-                    },
+                    }
+                });
+                this.theGrid_TransactionHistory.hostElement.addEventListener('dblclick', function (e) {
+                    const flex = _this.theGrid_TransactionHistory;
+                    const hitTest = flex.hitTest(e);
+
+                    if (!hitTest || hitTest.cellType !== wijmo.grid.CellType.Cell) return;
+
+                    const rowIndex = hitTest.row;
+                    const colIndex = hitTest.col;
+                    const col = flex.columns[colIndex];
+                    const rowData = flex.rows[rowIndex].dataItem;
+
+                    // 메모 컬럼은 무시
+                    if (col && col.binding === 'memo' || col.binding === 'remark' || col.binding === 'trade_type') return;
+
+                    // 선택된 행 데이터 감싸서 전달
+                    _this.DetailGridForm(rowData);
                 });
 
 
@@ -750,35 +819,55 @@
                 // 선택 변경 이벤트
                 this.theGrid_TransactionHistory.selectionChanged.addHandler((s, e) => {
                     if (isInitialLoad) {
-                        isInitialLoad = false; // 초기 로드 이후 플래그 해제
-                        this.theGrid_TransactionHistory.select(-1, -1); // 선택 상태 해제
+                        isInitialLoad = false;
+                        this.theGrid_TransactionHistory.select(-1, -1); // 초기 선택 해제
                         return;
                     }
 
                     const selected = s.selection;
-                    const selectedRowIndex = selected.row; // 선택된 행의 인덱스
-                    const selectedConIndex = selected.col;
+                    const selectedRowIndex = selected.row;
+                    const selectedColIndex = selected.col;
 
-                    const col = s.columns[selectedConIndex];
-                    if(col && col.binding === 'memo'){
-                        return;
-                    }
+                    const col = s.columns[selectedColIndex];
+                    const row = s.rows[selectedRowIndex];
+                    const rowData = row?.dataItem;
 
-                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
-                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
+                    if (!rowData || !col) return;
 
-                        _this.searchDetail(selectedRowData.cltcd);
+                    // 거래구분 컬럼을 클릭했을 때만 처리
+                    if (col.binding === 'trade_type') {
+                        const inoutFlag = rowData.inoutFlag === '입금' ? '0' : '1';
+
+                        const conversionTradeTypeList = tradetypeList.map(item => ({
+                            text : item.text,
+                            value : item.text,
+                            ioflag : item.ioflag
+                        }));
+
+                        if (inoutFlag !== undefined && inoutFlag !== null) {
+
+                            const filtered = conversionTradeTypeList.filter(item =>
+                                item.value === '' || item.ioflag === String(inoutFlag)
+                            );
+                            console.log('inoutFlag',inoutFlag);
+                            console.log('fil',filtered);
+                            col.dataMap = new wijmo.grid.DataMap(filtered, 'value', 'text');
+                            col.cellTemplate = '${text}'
+                            // 현재 셀 리렌더링
+                            //s.invalidate(); // 또는 s.refresh();
+                        }
                     }
                 });
 
                 //this.loading = false;
                 new FlexGridContextMenu(this.theGrid_TransactionHistory);
                 this.theGrid_TransactionHistory.downloadFileName = '출하지시 목록';
-                let selector = new wijmo.grid.selector.Selector(this.theGrid_TransactionHistory, {
+                /*let selector = new wijmo.grid.selector.Selector(this.theGrid_TransactionHistory, {
                     itemChecked: (e, ctx) => {
                         SelectedItems = this.theGrid_TransactionHistory.rows.filter(r => r.isSelected);
                     }
-                })
+                })*/
+                this.theGrid_TransactionHistory.rowHeaders.columns.splice(0, 1);
 
                 $(document).on('click', '.wijmo-cltcd-div', function () {
                     const $container = $(this); // 현재 클릭한 div
@@ -824,57 +913,15 @@
 
                 ////////////////////////////////////////////////////
 
-                this.grid2 = new wijmo.grid.FlexGrid('#DetailGrid', {
-                    autoGenerateColumns: false,
-                    showMarquee: true,
-                    allowSorting: 'MultiColumn',
-                    selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
-                    allowMerging: wijmo.grid.AllowMerging.All,
-                    isReadOnly: true,
-                    columns: [
-                        { binding: 'clientName', header: '거래처명', width: '*', align: 'center', isReadOnly: true, allowMerging: true },
-                        { binding: 'trade_date', header: '일자', width: 150, align: 'center', isReadOnly: true },
-                        { binding: 'trade_type', header: '거래구분', width: 120, align: 'center', isReadOnly: true },
-                        { binding: 'ioflag', header: '구분', width: 120, align: 'center', isReadOnly: true },
-                        { binding: 'computed_amount', header: '금액', width: 150, align: 'right', isReadOnly: true },
-                        { binding: 'balance', header: '잔액', width: 120, align: 'right', isReadOnly: true },
-                        { binding: 'depositandwithdrawaltype', header: '입금형태', width: 100, align: 'center', isReadOnly: true},
 
-                    ],
-                    itemsSource: this.viewData2,
-                    formatItem: function (s, e) {
-                        if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
-                            e.cell.style.textAlign = 'center'; // 헤더 텍스트 가운데 정렬
-                            const column = s.columns[e.col];
-                            if (column.binding === 'unit_price') {
-                                e.cell.style.color = 'rgb(85, 103, 255)'; // 텍스트 색상 설정
-                                e.cell.style.fontWeight = 'bold'; // 텍스트 굵게
-                            }
-                        }
-                    },
-
-                });
-                //맨 앞에 헤더부분 없애기
-                this.grid2.rowHeaders.columns.splice(0, 1);
-                // 데이터 로드 후 초기 선택 상태 해제
-
-                this.grid2.selectionChanged.addHandler((s, e) => {
-
-                    let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
-                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
-                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
-
-                    }
-                });
-                new FlexGridContextMenu(this.grid2);
-                this.grid2.downloadFileName = '출하 내역';
 
                 this.$btnSetting.click(function(){
                     let defaultData = {}; _this.showSettingForm(defaultData);
                 });
 
                 this.$btnEdit.click(function(){
-                    let defaultData = { SelectedItems }; _this.showAddNewDataForm(defaultData, 'edit');
+
+                    _this.showAddNewDataForm(_this.theGrid_TransactionHistory.selectedItems, 'edit');
                 });
 
                 this.$btnAddNew.click(function(){
@@ -909,6 +956,23 @@
                             this.theGrid_TransactionHistory.invalidate();
                             popup.style.display = 'none';
                         };
+                    }
+
+                    if (e.target && e.target.classList.contains('detail-btn')) {
+                        const flex = _this.theGrid_TransactionHistory;
+
+                        // .wj-cell DOM 요소를 기준으로 hitTest
+                        const cell = e.target.closest('.wj-cell');
+                        if (!cell) return;
+
+                        const hit = flex.hitTest(e); // 마우스 좌표로 위치 추정
+                        if (!hit || hit.cellType !== wijmo.grid.CellType.Cell) return;
+
+                        const row = flex.rows[hit.row];
+                        const rowData = row.dataItem;
+
+                        // 상세보기 실행
+                        _this.showAddNewDataForm([rowData], 'edit');
                     }
                 });
             }
@@ -978,47 +1042,71 @@
 
                 data['accountNameHidden'] = accountName;
                 data['cboCompanyHidden'] = cboCompany;
+                data['spjangcd'] = 'ZZ';
 
                 let result = AjaxUtil.getSyncData(_this.url + '/history', data);
 
                 if(result.data != null){
                     this.viewData.sourceCollection = result.data;
                 }
-                SelectedItems = null;
+
             }
 
             saveNewTransactionData(){
                 let _this = this;
 
                 let data = FormUtil.extractForm($('#SaveForm'));
+                let iotype = $('#depositAndWithdrawalType').val();
+                let accountNum = $('#accountNumber').val();
 
                 const requiredField = {
                     transactionDate : '거래일자',
-                    accountNumber : '계좌번호',
                     money : '금액'
                 }
+
                 const bol = validationCheck(data, requiredField);
                 if(!bol) return;
 
+                if(iotype === '0' || iotype === '4'){
+                    if(accountNum === null || accountNum === ''){
+                        Alert.alert('', '계좌번호를 입력해주세요'); return;
+                    }
+                }
+
+
                 let result = AjaxUtil.postJsonSyncData(_this.url + '/transactionForm', data);
                 ApiSuccessMessage(result);
+                _this.AccountHistorySaveFormReset();
 
-                $('#modal-close-button').click();
                 _this.searchMainData();
+            }
+
+            AccountHistorySaveFormReset(){
+                let _this = this;
+                $('#SaveForm')[0].reset();
+                _this.DateAndHourBinding();
+            }
+
+            DateAndHourBinding(){
+                $('#transactionDate').val(getNowDate());
+                $('#transactionHour').val(getNowTime());
+                $('#regidate').val(getNowDate());
             }
 
             showAddNewDataForm(data, flag){
                 let _this = this;
 
-                const selected = data.SelectedItems;
-
-                if(flag === 'edit' && selected === null){
-                    Alert.alert('', '수정할 데이터를 선택해주세요.'); return false;
-                }else if(flag === 'edit' && selected.length > 1){
-                    Alert.alert('', '단건수정은 하나의 행만 선택해주세요.'); return false;
+                if (flag === 'edit') {
+                    if (!data || data.length < 1) {
+                        Alert.alert('', '수정할 데이터를 선택해주세요.');
+                        return false;
+                    }
+                    if (data.length > 1) {
+                        Alert.alert('', '단건수정은 하나의 행만 선택해주세요.');
+                        return false;
+                    }
+                    data = data[0];
                 }
-
-                console.log('data', data);
 
                 let content = tmpl('AddNewDataPopup', data);
                 let $content = $(content);
@@ -1063,39 +1151,45 @@
 
                 $('#btnPopSave').click(function(){
                     _this.saveNewTransactionData();
-                })
+                });
 
-                $('#transactionDate').val(getNowDate());
-                $('#transactionHour').val(getNowTime());
-                $('#regidate').val(getNowDate());
+                $('#btnPopReset').click(function(){
+                    _this.AccountHistorySaveFormReset();
+                });
+
+                this.DateAndHourBinding();
 
                 if(flag === 'edit'){
+                    console.log('data', data);
 
-                    console.log('edit', selected[0]._data);
-                    const item = selected[0]._data
+                    $('#transactionDate').val(data.trade_date);
+                    $('#transactionHour').val(data.transactionhour);
+                    $('#inoutFlag').val(data.inoutFlag === '입금' ? '0' : '1');
+                    $('#CompanyName_Popup').val(data.clientName);
+                    $('#bankName').val(data.bankname);
+                    $('#accountNumber').val(data.account);
 
-                    $('#transactionDate').val(item.trade_date);
-                    $('#transactionHour').val(item.transactionhour);
-                    $('#inoutFlag').val(item.inoutflag);
-                    $('#CompanyName_Popup').val(item.clientName);
-                    $('#bankName').val(item.bankname);
-                    $('#accountNumber').val(item.account);
-                    $('#commission').val(item.commission);
+                    if(data.feeamt === null || data.feeamt === ''){
+                        $('#commission').val(null);
+                    }else{
+                        $('#commission').val(data.feeamt);
+                    }
 
-                    let money = item.input_money || item.output_money || 0;
+                    let money = data.input_money || data.output_money || 0;
                     $('#money').val(money);
 
                     $('#inoutFlag').trigger('change');
-                    $('#transactionTypeId').val(item.transactiontypeid);
-                    $('#depositAndWithdrawalType').val(item.iotype);
-                    $('#bill').val(item.bill);
-                    $('#etc').val(item.etc);
-                    $('#expiration').val(item.expiration);
-                    $('#note1').val(item.remark);
+                    $('#transactionTypeId').val(data.transactiontypeid);
+                    $('#depositAndWithdrawalType').val(data.iotype);
+                    $('#bill').val(data.bill);
+                    $('#etc').val(data.etc);
+                    $('#expiration').val(data.expiration);
+                    $('#note1').val(data.remark);
+                    $('#memo').val(data.memo);
 
-                    $('#bankTransitId').val(item.id);
-                    $('#clientId').val(item.cltcd);
-                    $('#accountId').val(item.accountid);
+                    $('#bankTransitId').val(data.id);
+                    $('#clientId').val(data.cltcd);
+                    $('#accountId').val(data.accountid);
                 }
             }
 
@@ -1125,6 +1219,71 @@
                 $('#viewid').val(data.viewid);
                 $('#viewpw').val(data.viewpw);
 
+            }
+
+            DetailGridForm(data){
+                console.log('z', data);
+                let _this = this;
+                let content = tmpl('detailTemplate', data);
+                let $content = $(content);
+
+                let modalContainer = new PopupDraggable('거래처별조회');
+                modalContainer.open({width: 1350, height: 470, $content});
+
+                this.grid2 = new wijmo.grid.FlexGrid('#DetailGrid', {
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    allowSorting: 'MultiColumn',
+                    selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
+                    allowMerging: wijmo.grid.AllowMerging.All,
+                    isReadOnly: true,
+                    columns: [
+                        { binding: 'clientName', header: '거래처명', width: 170, align: 'center', isReadOnly: true, allowMerging: true },
+                        { binding: 'trade_date', header: '일자', width: 120, align: 'center', isReadOnly: true },
+                        { binding: 'depositandwithdrawaltype', header: '입금형태', width: 100, align: 'center', isReadOnly: true},
+                        { binding: 'ioflag', header: '입출금구분', width: 120, align: 'center', isReadOnly: true },
+                        { binding: 'input_money', header: '입금액', width: 120, align: 'right', isReadOnly: true },
+                        { binding: 'output_money', header: '출금액', width: 120, align: 'right', isReadOnly: true },
+                        { binding: 'trade_type', header: '거래구분', width: 120, align: 'center', isReadOnly: true },
+                        { binding: 'memo', header: '메모', width: 180, align: 'center', isReadOnly: true },
+                        { binding: 'bankName', header: '은행', width: 120, align: 'center', isReadOnly: true },
+                        { binding: 'accountNumber', header: '계좌', width: 150, align: 'center', isReadOnly: true },
+
+
+                    ],
+                    itemsSource: this.viewData2,
+                    formatItem: function (s, e) {
+
+                        const panel = e.panel;
+                        const col = s.columns[e.col];
+
+                        if (panel === s.columnHeaders) {
+                            e.cell.style.color = 'black';
+                            return;
+                        }
+
+                        if (col.binding === 'input_money') {
+                            e.cell.style.color = 'dodgerblue';
+                            //e.cell.style.fontWeight = 'bold';
+                            return;
+                        }
+
+                        if (col.binding === 'output_money') {
+                            e.cell.style.color = 'red';
+                            //e.cell.style.fontWeight = 'bold';
+                            return;
+                        }
+
+                    },
+
+                });
+                //맨 앞에 헤더부분 없애기
+                this.grid2.rowHeaders.columns.splice(0, 1);
+                // 데이터 로드 후 초기 선택 상태 해제
+                new FlexGridContextMenu(this.grid2);
+                this.grid2.downloadFileName = '출하 내역';
+
+                _this.searchDetail(data.cltcd);
             }
 
             showSettingForm(data){
@@ -1545,17 +1704,22 @@
             //삭제
             deleteTransactionData(){
                 let _this = this;
+                let SelectedItems = _this.theGrid_TransactionHistory.selectedItems;
+                console.log('sele', SelectedItems);
 
-                if(SelectedItems === null || SelectedItems === undefined){
+
+                if(SelectedItems.length < 1){
                     Alert.alert('', '삭제할 행을 선택해주세요.');
                     return;
                 }
 
-                const idList = SelectedItems.map(item => item._data.id);
+                Alert.alert('', '삭제하시겠습니까?', function(){
+                    const idList = SelectedItems.map(item => item.id);
 
-                let result = AjaxUtil.postSyncData(_this.url + '/delete', { idList :idList.join(',')});
-                ApiSuccessMessage(result);
-                _this.searchMainData();
+                    let result = AjaxUtil.postSyncData(_this.url + '/delete', { idList :idList.join(',')});
+                    ApiSuccessMessage(result);
+                    _this.searchMainData();
+                })
             }
 
             reset(){
@@ -1603,6 +1767,7 @@
 
 
         function getTradeTypeDataMap(list){
+            console.log(list);
             return new wijmo.grid.DataMap(list, 'value', 'text');
         }
 

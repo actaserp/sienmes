@@ -48,7 +48,6 @@ public class BankTransitDto {
 
     private String bankName; // 은행명
 
-    @NotBlank(message = "계좌는 필수입니다.")
     private String accountNumber; // 계좌번호
 
     @NotNull(message = "계좌는 필수입니다.")
@@ -113,6 +112,7 @@ public class BankTransitDto {
         banktransit.setEumnum(dto.getBill());
         banktransit.setEumtodt(dto.getExpiration());
         banktransit.setEtcremark(dto.getEtc());
+        banktransit.setMemo(dto.getMemo());
         banktransit.setSpjangcd(dto.getSpjangcd());
 
         return banktransit;

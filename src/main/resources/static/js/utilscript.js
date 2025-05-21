@@ -78,6 +78,8 @@ function validationCheck(FormData, checklist){
     for(let key in checklist){
         const value = FormData[key];
 
+
+
         if(value === null || value === ''){
             const text = checklist[key];
 

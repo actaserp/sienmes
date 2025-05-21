@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import mes.app.aop.DecryptField;
 import mes.app.definition.service.RegiAccountService;
 import mes.app.util.UtilClass;
+import mes.domain.dto.AccountDto;
 import mes.domain.model.AjaxResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class RegiAccountController {
         this.accountService = accountService;
     }
 
-    @DecryptField(columns = {"accnum", "viewid", "viewpw"}, masks = 0)
+    @DecryptField(columns = {"accountNumber", "viewid", "viewpw"}, masks = 0)
     @GetMapping("/read")
     public AjaxResult getRegiAccountList(@RequestParam String bankid,
                                          @RequestParam String accountnum,
@@ -35,34 +36,20 @@ public class RegiAccountController {
     }
 
     @PostMapping("/save")
-    public AjaxResult saveAccount(@RequestParam(required = false) String id,
-                                         @RequestParam String bankname,
-                                         @RequestParam String accnum,
-                                         @RequestParam String accname,
-                                         @RequestParam(required = false) String onlineid,
-                                         @RequestParam(required = false) String viewid,
-                                         @RequestParam(required = false) String viewpw
-    ){
+    public AjaxResult saveAccount(@RequestBody AccountDto accountDto)
+    {
 
         AjaxResult result = new AjaxResult();
 
-        accnum = accnum.replaceAll("[^0-9]", ""); // 하이픈 등 제거
-        Integer pk = null;
-        Integer bankid = null;
-
-        if(id != null){
-            pk = UtilClass.parseInteger(id);
-        }
-
-        bankid = UtilClass.parseInteger(bankname);
-
+        String accnum = accountDto.getAccountNumber().replaceAll("[^0-9]", ""); // 하이픈 등 제거
         if (!isValidAccountNumber(accnum)) {
             result.success = false;
             result.message = "계좌번호 형식이 유효하지 않습니다.";
             return result;
         }
+        accountDto.setAccountNumber(accnum);
 
-        accountService.saveAccount(pk, bankid, accnum, accname, onlineid, viewid, viewpw);
+        accountService.saveAccount(accountDto);
 
         result.success = true;
         result.message = "저장되었습니다.";

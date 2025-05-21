@@ -6,12 +6,14 @@ import mes.app.util.UtilClass;
 import mes.domain.dto.BankTransitDto;
 import mes.domain.entity.TB_ACCOUNT;
 import mes.domain.entity.TB_BANKTRANSIT;
+import mes.domain.model.AjaxResult;
 import mes.domain.repository.TB_ACCOUNTRepository;
 import mes.domain.repository.TB_BANKTRANSITRepository;
 import mes.domain.services.SqlRunner;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.Map;
 import java.util.List;
@@ -85,17 +87,25 @@ public class TransactionInputService {
         String sql = """
                 SELECT to_char(to_date(trdate, 'YYYYMMDD'), 'YYYY-MM-DD') as trade_date
                 ,to_char(to_timestamp(trdt, 'YYYYMMDDHH24MISS'), 'HH24:MI') as transactionHour
-                ,b.ioflag as inoutFlag
+                ,case
+                    when b.ioflag = '0' then '입금'
+                    else '출금'
+                end as "inoutFlag"
                 ,ioid as id
                 ,b.trid as transactionTypeId
                 ,accin as input_money
                 ,accout as output_money
-                ,feeamt as commission
+                ,CASE
+                 WHEN b.feeamt IS NOT NULL THEN true
+                 ELSE false
+                END AS commission
+                ,b.feeamt as feeamt
+                ,d.mijamt as mijamt
                 ,remark1 as remark
                 ,c."Code" as code
                 ,t.tradenm as trade_type
                 ,banknm as bankname
-                ,accnum as account
+                ,b.accnum as account
                 ,s."Value" as depositAndWithdrawalType
                 ,s."Code" as iotype
                 ,c."Name" as "clientName"
@@ -109,6 +119,7 @@ public class TransactionInputService {
                 left join tb_trade t on t.trid = b.trid
                 left join sys_code s on s."Code" = b.iotype
                 left join company c on c.id = b.cltcd
+                left join tb_account d on d.accid = b.accid
                 where trdate between :searchfrdate and :searchtodate
                 """;
 
@@ -187,7 +198,9 @@ public class TransactionInputService {
     }
 
     @Transactional
-    public void editBankTransit(Object list) {
+    public AjaxResult editBankTransit(Object list) {
+
+        AjaxResult result = new AjaxResult();
 
         List<Map<String, Object>> parsedList = (List<Map<String, Object>>) list;
 
@@ -203,22 +216,36 @@ public class TransactionInputService {
             Integer id = (Integer) item.get("id");
             TB_BANKTRANSIT entity = entityMap.get(id);
 
-            if(entity != null){
-
                 Object remark = item.get("remark");
                 Object cltcd = item.get("cltcd");
                 Object tradeType = item.get("trade_type");
                 Object memo = item.get("memo");
-                Object commission = item.get("commission");
+                Boolean commission = (Boolean) item.get("commission");
 
                 entity.setRemark1(remark != null ? remark.toString() : null);
                 entity.setCltcd(cltcd != null ? UtilClass.parseInteger(cltcd) : null);
                 entity.setTrid(UtilClass.parseInteger(tradeType));
                 entity.setMemo(UtilClass.getStringSafe(memo));
-                entity.setFeeamt(UtilClass.parseInteger(commission));
-            }
+
+                if (commission) {
+                    String feemat = UtilClass.getStringSafe(item.get("feemat"));
+                    Integer parseFeeMat = UtilClass.parseInteger(feemat);
+                    Integer mijamt = UtilClass.parseInteger(item.get("mijamt"));
+
+                    if (mijamt == null || mijamt == 0) {
+                        result.success = false;
+                        result.message = "계좌에 설정된 수수료가 없는 항목이 있습니다.";
+                        return result;
+                    }
+
+                    entity.setFeeamt(StringUtils.isEmpty(feemat) ? mijamt : parseFeeMat);
+                } else {
+                    entity.setFeeamt(null);
+                }
         }
-        System.out.println(entityMap);
+        result.success = true;
+        result.message = "수정되었습니다.";
+        return  result;
     }
 
     public List<Map<String, Object>> searchDetail(Integer cltcd, String searchfrdate, String searchtodate) {
@@ -238,8 +265,9 @@ public class TransactionInputService {
                 ,accin as input_money -- 금액
                 ,accout as output_money -- 금액
                 ,b.memo as memo
+                ,b.accnum as "accountNumber"
+                ,b.banknm as "bankName"
                 ,t.tradenm as trade_type
-                ,b.balance
                 ,s."Value" as depositAndWithdrawalType
                 FROM public.tb_banktransit b
                 left join tb_trade t on t.trid = b.trid

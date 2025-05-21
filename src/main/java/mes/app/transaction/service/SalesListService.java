@@ -203,7 +203,7 @@ public class SalesListService {
         return bucket;
     }
 
-    public void bindEnumLabels(List<Map<String, Object>> list){
+    /*public void bindEnumLabels(List<Map<String, Object>> list){
         for(Map<String, Object> row : list){
             Object statecodeObj = row.get("statecode");
             if(statecodeObj != null){
@@ -216,5 +216,5 @@ public class SalesListService {
             }
 
         }
-    }
+    }*/
 }

@@ -538,7 +538,7 @@ public class EasyFinBankServiceController {
             String jobStateCode = jobState.getJobState(); // 1=대기, 2=진행중, 3=완료
             long errorCode = jobState.getErrorCode();
 
-            if(errorCode != 1){
+            if(errorCode != 1 && errorCode != 0){
                 log.info("에러코드 발생 {}" ,errorCode);
                 return "에러발생";
             }

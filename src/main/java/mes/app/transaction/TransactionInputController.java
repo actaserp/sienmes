@@ -41,8 +41,10 @@ public class TransactionInputController {
     public AjaxResult TransactionHistory(@RequestParam String searchfrdate,
                                          @RequestParam String searchtodate,
                                          @RequestParam String tradetype,
+                                         @RequestParam String spjangcd,
                                          @RequestParam(required = false) String accountNameHidden,
                                          @RequestParam(required = false) String cboCompanyHidden){
+
         AjaxResult result = new AjaxResult();
         searchfrdate = searchfrdate.replaceAll("-", "");
         searchtodate = searchtodate.replaceAll("-", "");
@@ -106,15 +108,11 @@ public class TransactionInputController {
     @PostMapping("/edit")
     public AjaxResult transactionEdit(@RequestBody Object list){
 
-        AjaxResult result = new AjaxResult();
-
-        transactionInputService.editBankTransit(list);
-
-        result.message = "수정되었습니다.";
-        return  result;
-
+        AjaxResult result = transactionInputService.editBankTransit(list);
+        return result;
     }
 
+    @DecryptField(columns = "accountNumber", masks = 4)
     @GetMapping("/searchDetail")
     public AjaxResult searchTransactionDetail(@RequestParam String companyId,
                                               @RequestParam String searchfrdate,

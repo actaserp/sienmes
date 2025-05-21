@@ -122,14 +122,14 @@
                                 <label for=""><span class="eq">*</span>은행명</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <select type="text" id="bankname" name="bankname" disabled
+                                <select type="text" id="bankid" name="bankid" disabled
                                         style="width: 100%;"></select>
                             </td>
                             <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="accnum"><span class="eq">*</span>계좌번호</label>
+                                <label for="accountNumber"><span class="eq">*</span>계좌번호</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <input type="text" id="accnum" name="accnum" disabled
+                                <input type="text" id="accountNumber" name="accountNumber" disabled
                                        style="width: 100%;">
                             </td>
 
@@ -137,15 +137,18 @@
                                 <label><span class="eq">*</span>계좌명칭</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <input type="text" id="accname" name="accname" disabled
+                                <input type="text" id="accountName" name="accountName" disabled
                                        style="width: 100%;">
                             </td>
                             <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="popyn"><span class="eq">*</span>예금연동</label>
+                                <label for="accountType">계좌유형</label>
                             </th>
                             <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <input type="checkbox" id="popyn" name="popyn"
-                                       style="width: 100%;" disabled>
+                                <select id="accountType" name="accountType" style="width: 100%;">
+                                    <option value="">선택</option>
+                                    <option value="0">법인</option>
+                                    <option value="1">개인</option>
+                                </select>
                             </td>
                         </tr>
                         <tr>
@@ -175,6 +178,15 @@
                                 <input type="text" id="viewpw" name="viewpw"
                                        style="width: 100%;" disabled>
                             </td>
+
+                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                                <label><span class="eq">*</span>지급수수료</label><br>
+                            </th>
+                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                <input type="text" id="mijamt" name="mijamt"
+                                       style="width: 100%;" disabled>
+                            </td>
+
                         </tr>
                         </tbody>
                     </table>
@@ -208,11 +220,12 @@
         let columns = [
             {binding: 'accid', header: '번호', width: 100, align: 'center'},
             {binding: 'bankname', header: '은행명', width: '*', align: 'center'},
-            {binding: 'accnum', header: '계좌번호', width: '*', align: 'center'},
-            {binding: 'accname', header: '계좌명칭', width: '*', align: 'center'},
-            {binding: 'onlineid', header: '인터넷뱅킹아이디', width: 300, align: 'center'},
-            {binding: 'viewid', header: '조회전용아이디', width: 300, align: 'center'},
-            {binding: 'viewpw', header: '조회전용비밀번호', width: 300, align: 'center'},
+            {binding: 'accountNumber', header: '계좌번호', width: '*', align: 'center'},
+            {binding: 'accountName', header: '계좌명칭', width: '*', align: 'center'},
+            {binding: 'onlineid', header: '인터넷뱅킹아이디', width: 200, align: 'center'},
+            {binding: 'viewid', header: '조회전용아이디', width: 200, align: 'center'},
+            {binding: 'viewpw', header: '조회전용비밀번호', width: 200, align: 'center'},
+            {binding: 'mijamt', header: '지급수수료(원)', width: 150, align: 'center'},
             {binding: 'popyn', header: '예금연동', width: "*", align: 'center'}
         ];
 
@@ -234,25 +247,21 @@
             theGrid.hostElement.addEventListener('dblclick', function (e) {
                 let selectedItem = theGrid.selectedItems[0];
                 console.log('select', selectedItem);
-                selectBoxBinding('bankname' , banknmComboList);
+                selectBoxBinding('bankid' , banknmComboList);
 
                 document.getElementById('id').value = selectedItem.accid;
-                document.getElementById('accnum').value = selectedItem.accnum;
+                document.getElementById('accountNumber').value = selectedItem.accountNumber;
                 document.getElementById('onlineid').value = selectedItem.onlineid;
                 document.getElementById('viewid').value = selectedItem.viewid;
                 document.getElementById('viewpw').value = selectedItem.viewpw;
+                document.getElementById('mijamt').value = selectedItem.mijamt;
+                document.getElementById('accountType').value = selectedItem.accountType;
 
                 setTimeout(() => {
-                    document.getElementById('bankname').value = selectedItem.bankid;
+                    document.getElementById('bankid').value = selectedItem.bankid;
                 }, 0);
 
-                document.getElementById('accname').value = selectedItem.accname;
-
-                if(selectedItem.popyn === '연동'){
-                   $('#popyn').prop('checked', true);
-                }else{
-                    $('#popyn').prop('checked', false);
-                }
+                document.getElementById('accountName').value = selectedItem.accountName;
 
                 setButtonState();
             });
@@ -293,13 +302,7 @@
                 $('#btnDel').prop('disabled', false);
 
                 $('#materialGroupForm input').each(function () {
-                    if (this.id === 'popyn') {
-                        // 이 checkbox는 항상 disabled 유지
-                        $(this).prop('disabled', true);
-                    } else {
-                        // 나머지 input들은 활성화
-                        $(this).prop('disabled', false);
-                    }
+                    $(this).prop('disabled', false);
                 });
 
                 $('#materialGroupForm select').each(function () {
@@ -369,10 +372,10 @@
 
             let url = '/api/definition/account/save';
 
-            let bankname = $('#bankname').val();
+            let bankname = $('#bankid').val();
             let id = $('#id').val();
-            let accnum = $('#accnum').val();
-            let accname = $('#accname').val();
+            let accnum = $('#accountNumber').val();
+            let accname = $('#accountName').val();
 
             if(!bankname){
                 Alert.alert('', '은행명을 입력해주세요.'); return;
@@ -385,28 +388,19 @@
             }
 
 
-            let data = {
-                id : id,
-                bankname : bankname,
-                accnum : accnum,
-                accname : accname,
-                onlineid : $('#onlineid').val(),
-                viewid : $('#viewid').val(),
-                viewpw : $('#viewpw').val()
-            }
+            let data = FormUtil.extractForm($('#materialGroupForm'));
 
             Alert.confirm('', '저장하시겠습니까?', function () {
-                let fnSuccess = function (result) {
-                    if (result.success) {
-                        Alert.alert('', '저장되었습니다');
-                        searchMainData(); // 저장 후 데이터 갱신
-                    } else {
-                        Alert.alert('저장 실패', result.message);
-                        console.error('저장 실패:', result.message);
-                    }
-                };
                 // 데이터 저장 요청
-                AjaxUtil.postAsyncData(url, data, fnSuccess);
+                let result = AjaxUtil.postJsonSyncData(url, data);
+
+                if (result.success) {
+                    Alert.alert('', '저장되었습니다');
+                    searchMainData(); // 저장 후 데이터 갱신
+                } else {
+                    Alert.alert('저장 실패', result.message);
+                    console.error('저장 실패:', result.message);
+                }
             });
         }
 
@@ -461,15 +455,10 @@
                 $('#materialGroupForm')[0].reset();
                 $('#materialGroupForm').find('#id').val('');
 
-                selectBoxBinding('bankname', banknmComboList);
+                selectBoxBinding('bankid', banknmComboList);
 
                 $('#detail_box').find('input, select').each(function () {
                     const id = this.id;
-
-                    if (id === 'popyn') {
-                        //  이 ID는 항상 disabled 유지
-                        return; // skip
-                    }
 
                     if ($(this).is(':disabled')) {
                         $(this).removeAttr('disabled');
