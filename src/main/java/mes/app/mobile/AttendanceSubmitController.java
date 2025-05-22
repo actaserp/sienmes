@@ -93,10 +93,7 @@ public class AttendanceSubmitController {
         tbPb204.setAppdate(reqdate); // 결재상신일자
         TB_PB204 saved204 = tbPb204Repository.save(tbPb204);
         String savedId = String.format("%08d", saved204.getId()); // 8자리로 앞에 0을 채움
-        if(saved204.getAppnum() != null) {
-            // 기존 휴가에 결재정보가 있을경우 결재번호 not update
-            tbPb204.setAppnum(reqdate + savedId + spjangcd); // 결재번호 (현재날자(신청일자) + 휴가ID + spjangcd)
-        }
+        tbPb204.setAppnum(reqdate + savedId + spjangcd); // 결재번호 (현재날자(신청일자) + 휴가ID + spjangcd)
         // 결재구분
         tbPb204.setAppgubun("001"); // 결재구분 (001 = 결재대기)
         tbPb204.setAppperid(user.getPersonid()); // 결재상신사원 (personid)
