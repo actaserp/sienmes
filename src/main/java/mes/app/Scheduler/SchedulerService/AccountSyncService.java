@@ -140,14 +140,19 @@ public class AccountSyncService {
 
         try {
             for (int i = 0; i < maxRetry; i++) {
-                EasyFinBankJobState state = easyFinBankService.getJobState(corpNum, jobId);
+                EasyFinBankJobState jobState = easyFinBankService.getJobState(corpNum, jobId);
+                String jobStateCode = jobState.getJobState(); // 1=대기, 2=진행중, 3=완료
+                long errorCode = jobState.getErrorCode();
 
-                if (state.getErrorCode() != 1) {
-                    log.warn("팝빌 수집 에러코드 발생: {}, Job ID: {}", state.getErrorCode(), jobId);
-                    return BankJobState.ERROR.getCode();
+                if(errorCode != 1 && errorCode != 0){
+                    log.info("에러코드 발생 {}" ,errorCode);
+                    return "에러발생";
                 }
 
-                if (BankJobState.fromCode(state.getJobState()) == BankJobState.COMPLETE) {
+                BankJobState state = BankJobState.fromCode(jobStateCode);
+
+                if(state == BankJobState.COMPLETE){
+                    log.info("수집완료");
                     return BankJobState.COMPLETE.getCode();
                 }
 

@@ -36,7 +36,7 @@ public class TransactionInputController {
 
     }
 
-    @DecryptField(columns = {"account"}, masks = 4)
+    //@DecryptField(columns = {"account"}, masks = 4)
     @GetMapping("/history")
     public AjaxResult TransactionHistory(@RequestParam String searchfrdate,
                                          @RequestParam String searchtodate,
@@ -44,8 +44,10 @@ public class TransactionInputController {
                                          @RequestParam String spjangcd,
                                          @RequestParam(required = false) String accountNameHidden,
                                          @RequestParam(required = false) String cboCompanyHidden){
+        long start = System.currentTimeMillis();
 
         AjaxResult result = new AjaxResult();
+
         searchfrdate = searchfrdate.replaceAll("-", "");
         searchtodate = searchtodate.replaceAll("-", "");
 
@@ -60,7 +62,9 @@ public class TransactionInputController {
         }
 
         result.data = transactionInputService.getTransactionHistory(searchfrdate, searchtodate, tradetype, parsedAccountId, parsedCompanyId);
-
+        long end = System.currentTimeMillis();
+        System.out.println("끝남시간: " + end);
+        System.out.println("[/history] 처리 시간: " + (end - start) + " ms");
         return result;
     }
 

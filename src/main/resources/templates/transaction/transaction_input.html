@@ -718,8 +718,10 @@
                     itemsSource: this.viewData,
                     formatItem: function (s, e) {
                         const panel = e.panel;
+                        if (panel !== s.cells) return;
                         const col = s.columns[e.col];
                         const item = s.rows[e.row].dataItem;
+                        if (!item) return;
 
                         // 컬럼 헤더일 경우
                         if (panel === s.columnHeaders) {
@@ -1045,7 +1047,8 @@
                 data['spjangcd'] = 'ZZ';
 
                 let result = AjaxUtil.getSyncData(_this.url + '/history', data);
-
+                const end = Date.now();
+                console.log("끝남 시간:", end);
                 if(result.data != null){
                     this.viewData.sourceCollection = result.data;
                 }

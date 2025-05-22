@@ -117,7 +117,7 @@ public class TransactionInputService {
                 ,b.eumtodt as expiration
                 FROM public.tb_banktransit b
                 left join tb_trade t on t.trid = b.trid
-                left join sys_code s on s."Code" = b.iotype
+                left join sys_code s on s."Code" = b.iotype and "CodeType" = 'deposit_type'
                 left join company c on c.id = b.cltcd
                 left join tb_account d on d.accid = b.accid
                 where trdate between :searchfrdate and :searchtodate
@@ -125,13 +125,13 @@ public class TransactionInputService {
 
         if(TradeType != null && !TradeType.isEmpty()){
             sql += """
-                    AND ioflag = :ioflag
+                    AND b.ioflag = :ioflag
                     """;
         }
 
         if(parsedAccountId != null){
             sql += """
-                    AND accid = :accid
+                    AND b.accid = :accid
                     """;
         }
 
@@ -173,20 +173,26 @@ public class TransactionInputService {
 
 
         Integer accountId = dto.getAccountId();
-        TB_ACCOUNT acc = accountRepository.findById(accountId).orElseGet(() -> null);
+        String accountNumber = null;
 
-        dto.setAccountNumber(acc.getAccnum());
-
-        TB_BANKTRANSIT byId;
-
-        if (dto.getBankTransitId() != null) {
-            byId = tB_BANKTRANSITRepository.findById(dto.getBankTransitId()).orElseGet(TB_BANKTRANSIT::new);
-        } else {
-            byId = new TB_BANKTRANSIT();
+        if (accountId != null) {
+            TB_ACCOUNT acc = accountRepository.findById(accountId).orElse(null);
+            if (acc != null) {
+                accountNumber = acc.getAccnum();
+            }
         }
 
+        dto.setAccountNumber(accountNumber); // null일 수도 있음
 
-        TB_BANKTRANSIT banktransit = BankTransitDto.toEntity(dto, byId);
+        TB_BANKTRANSIT entity;
+
+        if (dto.getBankTransitId() != null) {
+            entity = tB_BANKTRANSITRepository.findById(dto.getBankTransitId()).orElseGet(TB_BANKTRANSIT::new);
+        } else {
+            entity = new TB_BANKTRANSIT();
+        }
+
+        TB_BANKTRANSIT banktransit = BankTransitDto.toEntity(dto, entity);
         tB_BANKTRANSITRepository.save(banktransit);
 
     }

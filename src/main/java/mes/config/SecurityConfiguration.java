@@ -43,7 +43,7 @@ public class SecurityConfiguration {
         http.csrf().ignoringAntMatchers("/api/files/upload/**");
         http.csrf().ignoringAntMatchers("/popbill/webhook");
         
-        http.authorizeRequests().mvcMatchers("/login","/logout" ,"/useridchk/**","/user-auth/save", "/popbill/webhook").permitAll()
+        http.authorizeRequests().mvcMatchers("/login","/logout" ,"/useridchk/**","/user-auth/save", "/popbill/webhook", "/api/transaction/input/**").permitAll()
         .mvcMatchers("/authentication/**","/user-auth/**").permitAll()
         .mvcMatchers("/setup").hasAuthority("admin")		// hasRole -> hasAuthority로 수정
         .anyRequest().authenticated();

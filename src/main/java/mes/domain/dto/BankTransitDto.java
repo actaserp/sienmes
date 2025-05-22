@@ -50,7 +50,6 @@ public class BankTransitDto {
 
     private String accountNumber; // 계좌번호
 
-    @NotNull(message = "계좌는 필수입니다.")
     private Integer accountId; // 계좌 아이디
 
     private String etc; // 기타 구분
