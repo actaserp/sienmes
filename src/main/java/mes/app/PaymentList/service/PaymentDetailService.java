@@ -66,13 +66,13 @@ public class PaymentDetailService {
     // startDate 필터링
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
     String startDateFormatted = LocalDate.parse(startDate).format(formatter);
-    sql.append(" AND e080.repodate >= :as_stdate ");
+    sql.append(" AND e080.indate >= :as_stdate ");
     params.addValue("as_stdate", startDateFormatted);
 
     // endDate 필터링
     if (endDate != null && !endDate.isEmpty()) {
       String endDateFormatted = LocalDate.parse(endDate).format(formatter);
-      sql.append(" AND e080.repodate <= :as_enddate ");
+      sql.append(" AND e080.indate <= :as_enddate ");
       params.addValue("as_enddate", endDateFormatted);
     }
 
@@ -284,13 +284,17 @@ public class PaymentDetailService {
       params.addValue("currentSeq", currentSeq);
 
       // 2. 다음 결재자 찾기
+      String flagValue = "101".equals(stateCode) ? "0" : "1";
+
       String findNextSql = """
-      SELECT TOP 1 seq FROM TB_E080
-      WHERE appnum = :appnum
-        AND seq > :currentSeq
-        AND flag = """ + ("101".equals(stateCode) ? "0" : "1") + """
-      ORDER BY seq ASC
-  """;
+        SELECT seq FROM TB_E080
+        WHERE appnum = :appnum
+          AND seq > :currentSeq
+          AND flag = :flag
+        ORDER BY seq ASC
+        LIMIT 1
+      """;
+      params.addValue("flag", flagValue);
       Map<String, Object> nextRow = sqlRunner.getRow(findNextSql, params);
 
       if (nextRow != null && nextRow.get("seq") != null) {
@@ -302,17 +306,22 @@ public class PaymentDetailService {
           nextSeq = Integer.parseInt((String) nextSeqObj);
         }
 
+        String flagValue2 = "101".equals(stateCode) ? "1" : "0";
+
         String updateFlagSql = """
-        UPDATE TB_E080
-        SET flag = """ + ("101".equals(stateCode) ? "1" : "0") + """
-        WHERE appnum = :appnum
-          AND seq = :nextSeq
-    """;
+            UPDATE TB_E080
+            SET flag = :flag
+            WHERE appnum = :appnum
+              AND seq = :nextSeq
+        """;
+
         MapSqlParameterSource nextParams = new MapSqlParameterSource();
         nextParams.addValue("appnum", appnum);
         nextParams.addValue("nextSeq", nextSeq);
+        nextParams.addValue("flag", flagValue2);
 
         int affected = sqlRunner.execute(updateFlagSql, nextParams);
+
         log.info("🔄 다음 결재자 flag = {} → 완료 (seq = {})",
             "101".equals(stateCode) ? "1" : "0", nextSeq);
       } else {
@@ -592,18 +601,22 @@ public class PaymentDetailService {
       int seqCursor = currentSeq;
       Map<String, Object> nextRow;
 
+      String flagValue = "101".equals(stateCode) ? "0" : "1";
+
       while (true) {
         String findNextSql = """
-        SELECT TOP 1 seq, gubun FROM TB_E080
-        WHERE appnum = :appnum
-          AND seq > :seqCursor
-          AND flag = """ + ("101".equals(stateCode) ? "0" : "1") + """
-        ORDER BY seq ASC
-    """;
+            SELECT seq, gubun FROM TB_E080
+            WHERE appnum = :appnum
+              AND seq > :seqCursor
+              AND flag = :flag
+            ORDER BY seq ASC
+            LIMIT 1
+        """;
 
         MapSqlParameterSource findParams = new MapSqlParameterSource();
         findParams.addValue("appnum", appnum);
         findParams.addValue("seqCursor", seqCursor);
+        findParams.addValue("flag", flagValue);
 
         nextRow = sqlRunner.getRow(findNextSql, findParams);
         if (nextRow == null) {
@@ -654,7 +667,7 @@ public class PaymentDetailService {
         WHERE appnum = :appnum
           AND personid = :personid
     """;
-    Integer mySeq = sqlRunner.queryForObject(seqSql, params, (rs, rowNum) -> rs.getInt(1));
+    String mySeq = sqlRunner.queryForObject(seqSql, params, (rs, rowNum) -> rs.getString(1));
     if (mySeq == null) {
       return false;
     }

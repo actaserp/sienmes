@@ -26,7 +26,7 @@
       </div>
       <ul class="page-navi">
         <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-        <li>결재목록</li>
+        <li>전자결재</li>
         <li>결재진행현황</li>
       </ul>
     </div>
@@ -129,13 +129,14 @@
     let theGrid;
     let theGrid1;
     let theGrid2;
-    let isBindSpjangcdCalled = false;
+    // let isBindSpjangcdCalled = false;
 
     $(document).ready(function () {
       // 현재 날짜 설정
       const today = new Date();
       const year = today.getFullYear();
       const month = today.getMonth();
+      AjaxUtil.fillSelectOptions($('#SearchPayment'), 'system_code', 'choose', false, 'approval_status');
 
       //시작일: 이번 달 1일
       const startOfMonth = new Date(year, month, 1);
@@ -156,10 +157,10 @@
     })
 
     function init() {
-      if (!isBindSpjangcdCalled) {
-        bindSpjangcd();
-        isBindSpjangcdCalled = true; // 플래그 업데이트
-      }
+      // if (!isBindSpjangcdCalled) {
+      //   bindSpjangcd();
+      //   isBindSpjangcdCalled = true; // 플래그 업데이트
+      // }
       fetchListData();
       fetchListData1();
     }
@@ -173,7 +174,7 @@
       let data = [];
 
       const params = {
-        search_spjangcd: $('#search_spjangcd').val(),
+        search_spjangcd: sessionStorage.getItem('spjangcd'),
         startDate: $('#startDate').val(),
         endDate: $('#endDate').val(),
         SearchPayment:$('#SearchPayment').val(),
@@ -211,6 +212,7 @@
               title: item.title ||'',
               fileList: item.fileList || [],
               isdownload: item.isdownload || false,
+              indate: item.indate || ''
 
             }));
             const jeonpyoFiles = [];
@@ -257,7 +259,8 @@
           fileList:'',
           jeonpyoFiles:'',
           atchFiles:'',
-          isdownload: ''
+          isdownload: '',
+          indate: ''
         });
       }
 
@@ -273,13 +276,13 @@
           columns: [
             {binding: 'rownum', header: '순번', width: 70, align: 'center'},
             {binding: 'appnum', header: '문서번호', width: '*', minWidth: 200, align: 'center', visible: false},
-            {binding: 'repodate', header: '상신일자', width: '*', minWidth: 120, align: 'center'},
+            {binding: 'indate', header: '상신일자', width: '*', minWidth: 120, align: 'center'},
             {binding: 'repopernm', header: '작성자명', width: '*', minWidth: 110, align: 'center'},
             {binding: 'papercd', header: '문서명', width: '*', minWidth: 250, align: 'center', visible: false},
             {binding: 'papercd_name', header: '문서명', width: '*', minWidth: 250, align: 'center'},
             {binding: 'appgubun', header: '결재구분', width: '*', minWidth: 100, align: 'center',  visible: false },
             {binding: 'appgubun_display', header: '결재구분', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'appdate', header: '결재일자', width: '*', minWidth: 120, align: 'center'},
+            {binding: 'repodate', header: '결재일자', width: '*', minWidth: 120, align: 'center'},
             {binding: 'title', header: '제목', width: '*', align: 'center', minWidth: 150},
             {binding: 'remark', header: '사유',width: '*' ,align: 'left', minWidth: 150},
             {binding: 'fileList', header: '다운로드', width: '*', minWidth: 120, align: 'center', visible: false },
@@ -393,7 +396,7 @@
       let data = [];
 
       const params = {
-        search_spjangcd: $('#search_spjangcd').val(),
+        search_spjangcd: sessionStorage.getItem('spjangcd'),
         startDate: $('#startDate').val(),
         endDate: $('#endDate').val(),
         searchUserNm: $('#searchUserNm').val()
@@ -473,7 +476,7 @@
 
       params={
         appnum : appnum,
-        search_spjangcd: $('#search_spjangcd').val(),
+        search_spjangcd: sessionStorage.getItem('spjangcd'),
       }
 
       // 서버에서 데이터 가져오기
@@ -488,13 +491,13 @@
             data = response.data.map((item, index) => ({
               appnum:  item.appnum || '',
               seq: item.seq || '' ,
-              appperid: item.appperid || '',
-              apppernm: item.apppernm || '',
+              personid: item.personid || '',
+              personnm: item.personnm || '',
               appgubun_display: item.appgubun_display || '',
               rspnm : item.rspnm ||'',
               divinm : item.divinm || '',
               appgubun : item.appgubun || '',
-              appdate: item.appdate || '',
+              repodate: item.repodate || '',
               remark : item.remark ||''
             }));
           }
@@ -509,13 +512,13 @@
         data.push({
           appnum:  '',
           seq:  '' ,
-          appperid:  '',
-          apppernm: '',
+          personid:  '',
+          personnm: '',
           appgubun_display:'',
           rspnm : '',
           divinm:'',
           appgubun :'',
-          appdate:  '',
+          repodate:  '',
           remark : ''
         });
       }
@@ -530,13 +533,13 @@
           columns: [
             {binding: 'appnum', header: '문서번호', width: '*', minWidth: 100, align: 'center',  visible: false},
             {binding: 'seq', header: '결재순서', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'appperid', header: '결제사원코드', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'apppernm', header: '결재자명', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'personid', header: '결제사원코드', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'personnm', header: '결재자명', width: '*', minWidth: 100, align: 'center'},
             {binding: 'divinm', header: '부서명', width: '*', minWidth: 100, align: 'center'},
             {binding: 'rspnm', header: '직급', width: '*', minWidth: 100, align: 'center'},
             {binding: 'appgubun', header: '결재구분', width: '*', minWidth: 100, align: 'center', visible: false},
             {binding: 'appgubun_display', header: '결재구분', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'appdate', header: '결재일자', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'repodate', header: '결재일자', width: '*', minWidth: 100, align: 'center'},
             {binding: 'remark', header: '사유', width: '*', minWidth: 100, align: 'left'},
           ],
           itemsSource: viewdata,

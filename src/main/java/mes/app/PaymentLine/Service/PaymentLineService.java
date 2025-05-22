@@ -14,32 +14,39 @@ public class PaymentLineService {
     SqlRunner sqlRunner;
 
     //문서코드 그리드 리스트 불러오기
-    public List<Map<String, Object>> getPaymentList(String perid, String comcd) {
+    public List<Map<String, Object>> getPaymentList(Integer personid, String comcd) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
-        dicParam.addValue("perid", perid);
+        dicParam.addValue("personid", personid);
         dicParam.addValue("papercd", comcd);
 
         String sql = """
                 select
-                e.*
+                e.*,
+                p."Name" as pernm,
+                s."Value" as papernm
                 from TB_E063 e
+                LEFT JOIN person p ON p.id = e.personid
+                LEFT JOIN sys_code s ON s."Code" = e.papercd AND s."CodeType" = 'appr_doc'
                 WHERE e.papercd = :papercd
-                order by e.indate DESC
                 """;
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
         return items;
     }
     // 사원별 결재라인 그리드 리스트 불러오기
-    public List<Map<String, Object>> getCheckPaymentList(String perid, String comcd) {
+    public List<Map<String, Object>> getCheckPaymentList(Integer personid, String comcd) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
-        dicParam.addValue("perid", perid);
+        dicParam.addValue("personid", personid);
         dicParam.addValue("papercd", comcd);
 
         String sql = """
                 select
-                e.*
+                e.*,
+                p."Name" as kcpernm,
+                s."Value" as gubunnm
                 from TB_E064 e
-                WHERE e.perid = :perid
+                LEFT JOIN person p ON p.id = e.kcpersonid
+                LEFT JOIN sys_code s ON s."Code" = e.gubun AND s."CodeType" = 'approval_status'
+                WHERE e.personid = :personid
                     AND e.papercd = :papercd
                 order by e.seq ASC
                 """;

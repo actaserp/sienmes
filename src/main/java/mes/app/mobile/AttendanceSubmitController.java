@@ -113,7 +113,7 @@ public class AttendanceSubmitController {
             e080PK.setSpjangcd(spjangcd);// 사업장코드
             e080PK.setAppnum(reqdate + savedId + spjangcd); // 결재번호
             e080PK.setPersonid((Integer) appInfoDetail.get("kcpersonid"));// 결재할 사원아이디
-            e080PK.setSeq(String.format("%03d", index)); // 순번
+            e080PK.setSeq(String.format("%03d", index + 1)); // 순번
             e080Info.setId(e080PK);
             e080Info.setTitle("휴가신청서");
             if(index == 0) {
@@ -123,7 +123,7 @@ public class AttendanceSubmitController {
             }else {
                 e080Info.setFlag("0");
             }
-            e080Info.setRepodate(reqdate);// 결재상신일자
+//            e080Info.setRepodate(reqdate);// 결재상신일자
             e080Info.setPapercd("301");// 결재문서구분 (301 휴가신첟서)
             e080Info.setInperid(user.getPersonid());// 등록사원아이디
             e080Info.setIndate(reqdate);// 등록일자

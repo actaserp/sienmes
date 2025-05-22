@@ -89,7 +89,7 @@
             </div>
           </div> <!--//section-top end -->
           <div class="row">
-            <div class="wp30 mg-r40">
+            <div class="wp30 mg-r10">
               <div class="container-fluid col">
                 <div id="theGrid" style="max-height: 580px;"></div>
               </div>
@@ -133,7 +133,7 @@
     const nextWeekDate = nextWeek.toISOString().split('T')[0];
 
     function init() {
-      getComcd()
+      AjaxUtil.fillSelectOptions($('#comcd'), 'system_code', 'choose', false, 'appr_doc');
       fetchListData();
       fetchListData2();
     }
@@ -150,9 +150,6 @@
         success: function (data) {
           data2 = data.data;
           data2.forEach(item =>{
-            var selectElement = document.getElementById('comcd');
-            var selectedOptionText = selectElement.options[selectElement.selectedIndex].text;
-            item.papernm = selectedOptionText;
           })
           // data2의 개수가 11개 미만인 경우 빈 객체 추가
           while (data2.length < 11) {
@@ -172,7 +169,7 @@
           isReadOnly: true,
           selectionMode: wijmo.grid.SelectionMode.Row,
           columns: [
-            {binding: 'perid', header: '사원코드', width: '*', minWidth: 105, align: 'center'},
+            {binding: 'personid', header: '사원코드', width: '*', minWidth: 105, align: 'center'},
             {binding: 'pernm', header: '사원명', width: '*', minWidth: 105, align: 'center'},
             {binding: 'papernm', header: '문서명', width: '*', minWidth: 105, align: 'center'}
           ],
@@ -205,7 +202,7 @@
             // 행(row), 행의 데이터(item) 정보 가져오기
             let row = hitTest.row;
             let item = theGrid.rows[row].dataItem;
-            fetchListData2(item.perid);
+            fetchListData2(item.personid);
           }
         })
       } else {
@@ -221,7 +218,7 @@
         type: 'GET',
         data: {
           'comcd': $('#comcd').val(),
-          'perid': perid ? perid : ''
+          'personid': perid
         },
         async: false,
         success: function (data) {
@@ -248,7 +245,7 @@
           selectionMode: wijmo.grid.SelectionMode.Row,
           columns: [
             {binding: 'no', header: 'No', width: 80, align: 'center'},
-            {binding: 'kcperid', header: '결재자코드', width: '*', minWidth: 105, align: 'center'},
+            {binding: 'kcpersonid', header: '결재자코드', width: '*', minWidth: 105, align: 'center'},
             {binding: 'kcpernm', header: '결재자명', width: '*', minWidth: 105, align: 'center'},
             {binding: 'gubunnm', header: '구분', width: '*', minWidth: 105, align: 'center'},
             {binding: 'seq', header: '결재순서', width: '*', minWidth: 105, align: 'center'},
@@ -282,31 +279,7 @@
       }
     }
 
-    // 문서코드 리스트 불러와 comcd(select)속성(option)으로 바인드
-    function getComcd() {
-      $.ajax({
-        url: '/api/approval/getComcd',
-        type: 'GET',
-        data: {},
-        async: false,
-        success: function (data) {
-          data2 = data.data;
-          let selectElement = document.getElementById('comcd');
 
-          // 기존 옵션 초기화 (중복 추가 방지)
-          selectElement.innerHTML = '<option value="">선택하세요</option>';
-          data2.forEach(item =>{
-            let option = document.createElement('option');
-            option.value = item.com_code;  // value 값
-            option.textContent = item.com_cnam; // 표시될 텍스트
-            selectElement.appendChild(option);
-          })
-        },
-        error: function (error) {
-          console.error("문서코드 목록을 불러오는 중 오류 발생:", error);
-        }
-      })
-    }
     // 문서코드 선택시 그리드 fetch 및 결재자 코드 option 바인드
     function changeComcdSelect(){
       let selectedValue = document.getElementById('comcd').value;
