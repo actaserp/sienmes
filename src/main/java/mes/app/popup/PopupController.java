@@ -597,4 +597,36 @@ public class PopupController {
 		return result;
 	}
 
+
+
+	@GetMapping("/search_AccountCode")
+	public AjaxResult getsearch_AccountCode(@RequestParam(value = "acccd")String acccd,
+																		 @RequestParam(value = "accnm") String accnm) {
+		AjaxResult result = new AjaxResult();
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("acccd", acccd);
+		paramMap.addValue("accnm", accnm);
+		//log.info("계정코드 팝업 요청 들어옴 --- acccd:{}, accnm:{}", acccd,accnm);
+		String sql = """
+				select ta.acccd, ta.accnm
+				from tb_accsubject ta 
+				where ta.useyn ='Y' 
+				""";
+
+		if (acccd != null && !acccd.isEmpty()) {
+			sql += " AND acccd ILIKE :acccd  ";
+			paramMap.addValue("acccd", "%" + acccd + "%");
+		}
+
+		if (accnm != null && !accnm.isEmpty()) {
+			sql += " AND ta.accnm ILIKE :accnm ";
+			paramMap.addValue("accnm", "%" + accnm + "%");
+		}
+
+//		log.info(" 최종 SQL: {}", sql);
+//		log.info(" 파라미터: {}", paramMap.getValues());
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+		return result;
+	}
+
 	}
