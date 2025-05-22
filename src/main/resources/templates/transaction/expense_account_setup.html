@@ -1,0 +1,268 @@
+<html layout:decorate="~{layout_page}">
+<th:block layout:fragment="content">
+
+  <div class="layout-contents">
+    <div class="page-title-wrap">
+      <div class="left">
+        <h2>비용항목등록</h2>
+        <a title="북마크" class="bookmark toggle">
+          내 메뉴
+        </a>
+      </div>
+      <ul class="page-navi">
+        <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+        <li>출금관리</li>
+        <li>비용항목등록</li>
+      </ul>
+    </div>
+    <section class="section">
+      <div class="section-top">
+        <div class="search-wrap">
+          <input type="hidden" id="spjangcdHidden">
+          <dl>
+            <dt>
+              조회기간<span class="eq">*</span>
+            </dt>
+            <dd>
+              <ul class="date-box">
+                <li>
+                  <input type="date" id="srchStartDt" name="srchStartDt">
+                  <label for="srchStartDt" class="hide">시작일</label>
+                </li>
+                <li>
+                  <input type="date" id="srchEndDt" name="srchEndDt">
+                  <label for="srchEndDt" class="hide">종료일</label>
+                </li>
+              </ul>
+            </dd>
+          </dl>
+          <dl>
+            <dt>&nbsp;</dt>
+            <dd>
+              <ul>
+                <li>
+                  <a class="btn btn-delete" title="검색" id="btnSearch">
+                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                    검색
+                  </a>
+                </li>
+              </ul>
+            </dd>
+          </dl>
+        </div>
+        <div class="button-wrap" style="border-top:none; text-align: right; !important;">
+          <ul>
+            <li>
+              <a class="btn btn-excell" title="신규등록" id="Newbtn">
+                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                신규등록
+              </a>
+            </li>
+            <li>
+              <a class="btn btn-edit" id="btnSave" title="저장">
+                <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
+                저장
+              </a>
+            </li>
+            <li>
+              <a class="btn btn-delete" title="삭제" id="btnDelete">
+                <img src="/images/icon/ico-delete.svg" alt="엑셀 아이콘">
+                삭제
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="wp20">
+            <div class="container-fluid col">
+              <p id="selectedItem"></p>
+              <div id="theGrid" style="height:750px"></div>
+            </div>
+          </div>
+          <div class="col 80">
+            <div class="section">
+              <form id="CategoryForm">
+                <!-- Hidden Fields -->
+                <!-- Table Wrap -->
+                <div class="table-wrap">
+                  <table class="view-table" id="selectedData">
+                    <caption>비용항목 등록</caption>
+                    <tbody>
+                    <tr>
+                      <th><label for="gartcd">그룹코드</label></th>
+                      <td>
+                        <input type="text" id="gartcd" name="gartcd" class="wp100" placeholder="그룹코드" readonly/>
+                      </td>
+                      <th><label for="gart_name">그룸명</label></th>
+                      <td>
+                        <input type="text" id="gart_name" name="gart_name" class="wp100" placeholder="그룸명"/>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><label for="remark">비고</label></th>
+                      <td>
+                        <input type="text" id="remark" name="remark" class="wp100" placeholder="비고"/>
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                  <div class="container-fluid">
+                    <div id="theGrid2" style="height: 640px; margin-top: 15px"></div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</th:block>
+
+<th:block layout:fragment="scripts">
+  <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
+  <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
+  <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+  <th:block th:replace="/common/popup_account :: popup_account"/>
+
+  <script type="text/javascript">
+    class ExpenseAccountSetupPage {
+      constructor() {
+        this.grid = null;
+        this.grid2 = null;
+        this.$btnEdit = $('#btnEdit');
+        this.$btnAddNew = $('#btnAddNew');
+        this.viewData = new wijmo.collections.CollectionView();
+        this.spjangcd = $('#spjangcdHidden');
+        this.init();
+      }
+
+      init() {
+        let _this = this;
+        this.grid = new wijmo.grid.FlexGrid('#theGrid', {
+          autoGenerateColumns: false,
+          selectionMode: wijmo.grid.SelectionMode.Row,
+          headersVisibility: wijmo.grid.HeadersVisibility.Column,
+          isReadOnly: false,
+          showMarquee: true,
+          formatItem: (sender, e) => {
+            if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+              e.cell.style.textAlign = 'center';
+            }
+          },
+          columns: [
+            {binding: 'code', header: '코드', width: 70},
+            {binding: 'group_name', header: '그룹명', width: '*'}
+          ],
+          itemsSource: this.viewData, // 데이터를 설정할 배열
+        });
+
+        new FlexGridContextMenu(this.grid);
+        this.grid.downloadFileName = '그룹 항목';
+
+
+        this.grid2 = new wijmo.grid.FlexGrid('#theGrid2', {
+          autoGenerateColumns: false,
+          selectionMode: wijmo.grid.SelectionMode.Row,
+          headersVisibility: wijmo.grid.HeadersVisibility.Column,
+          isReadOnly: false,
+          showMarquee: true,
+          formatItem: (sender, e) => {
+            if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+              e.cell.style.textAlign = 'center';
+            }
+          },
+          columns: [
+            {binding: 'useyn', header: '사용', width: 100},
+            {binding: 'artcd', header: '코드', width: 100},
+            {binding: 'artnm', header: '매입항목', width: 100},
+            {binding: 'jiflag', header: '고정비', width: 100},
+            {binding: 'gflag', header: '비용분류', width: 100},
+            {binding: 'accnm', header: '비용계정명', width:100},
+            {binding: 'wacccd', header: '원가계정', width: 100},
+            {binding: 'waccnm', header: '원가계정명', width: 100},
+            {binding: 'sacccd', header: '상대계정', width: 100},
+            {binding: 'saccnm', header: '상대계정명', width: 100},
+
+          ],
+          itemsSource: this.viewData, // 데이터를 설정할 배열
+        });
+
+        new FlexGridContextMenu(this.grid2);
+        this.grid2.downloadFileName = '그룹 항목';
+
+        // 엔터키 검색
+        $('#txtDescription, #txtEumnum').on('keypress', function (e) {
+          if (e.keyCode === 13) {
+            _this.searchMainData();
+          }
+        });
+      }
+
+      searchMainData() {
+        let _this = this;
+        let url = '/api/transaction/DepositList/read'
+
+        let data = {
+          'srchStartDt': $("#srchStartDt").val(),
+          'srchEndDt': $("#srchEndDt").val(),
+          'AccountName': $("#cboBankId").val(), //계좌명(accid로 검색)
+          'cboDepositType': $('#cboDepositType').val(),  //입금형태
+          'cboCompany': $("#cboCompanyHidden").val(),
+          'txtDescription': $("#txtDescription").val(),
+          'txtEumnum': $('#txtEumnum').val(),
+          spjangcd: this.spjangcd.val()  //사업장 코드
+        }
+        let fnsuccess = function (result) {
+          if (result != null) {
+            _this.viewData = new wijmo.collections.CollectionView(result.data);
+            _this.grid.itemsSource = _this.viewData;
+            _this.grid2.itemsSource = _this.viewData;
+          }
+        };
+
+        AjaxUtil.getAsyncData(url, data, fnsuccess);
+      }
+    }
+
+    let page = null;
+
+    $(document).ready(function (e) {
+
+      const spjangcd = sessionStorage.getItem('spjangcd');
+      if (spjangcd) {
+        $('#spjangcdHidden').val(spjangcd);  // hidden input이 있어야 함
+      }
+
+      page = new ExpenseAccountSetupPage();
+
+      AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);
+      AjaxUtil.fillSelectOptions($('#cboDepositType'), 'system_code', 'all', false, 'deposit_type', '');
+
+      let today = new Date();
+      let monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+      $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(monthStart));
+      $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(today));
+
+      page.searchMainData();
+
+      // 검색
+      $('#btnSearch').click(function (e) {
+        if ($('#cboCompany').val() !== '' && $('#cboCompanyHidden').val() === '') {
+          // 업체명 텍스트는 썼지만, 업체 검색 버튼 안 눌렀을 때
+          page.searchMainData();
+        } else {
+          page.searchMainData();
+        }
+      });
+
+    })
+  </script>
+
+</th:block>
+
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+</html>

@@ -21,30 +21,25 @@
         <div class="search-wrap">
           <dl>
             <dt>
-              조회기간<span class="eq">*</span>
-            </dt>
-            <dd>
-              <ul class="date-box">
-                <li>
-                  <input type="date" id="srchStartDt" name="srchStartDt">
-                  <label for="srchStartDt" class="hide">시작일</label>
-                </li>
-                <li>
-                  <input type="date" id="srchEndDt" name="srchEndDt">
-                  <label for="srchEndDt" class="hide">종료일</label>
-                </li>
-              </ul>
-            </dd>
-          </dl>
-          <dl>
-            <dt>
-              <label for="txtDescription">
+              <label for="txtcardnm">
                 카드명
               </label>
             </dt>
             <dd>
               <div class="srch-box">
-                <input class="form-control2" type="text" id="txtDescription" name="txtDescription" placeholder="카드명" style="width:200px"/>
+                <input class="form-control2" type="text" id="txtcardnm" name="txtcardnm" placeholder="카드명" style="width:200px"/>
+              </div>
+            </dd>
+          </dl>
+          <dl>
+            <dt>
+              <label for="txtcardnum">
+                카드번호
+              </label>
+            </dt>
+            <dd>
+              <div class="srch-box">
+                <input class="form-control2" type="text" id="txtcardnum" name="txtcardnum" placeholder="카드번호" style="width:200px"/>
               </div>
             </dd>
           </dl>
@@ -96,16 +91,15 @@
             <div class="section">
               <form id="CategoryForm">
                 <!-- Hidden Fields -->
-                <input class="form-control2" type="text" id="id" name="id" hidden />
                 <!-- Table Wrap -->
                 <div class="table-wrap">
                   <table class="view-table" id="selectedData">
-                    <caption>신용카드 등록 테이블/caption>
+                    <caption>신용카드 등록 테이블</caption>
                     <colgroup>
                       <col class="wp20">
                       <col class="wauto">
                       <col class="wp20">
-                      <col class="wp50">
+                      <col class="wp40">
                     </colgroup>
                     <tbody>
                     <tr>
@@ -125,93 +119,93 @@
                     </tr>
                     <tr>
                       <th>
-                        <label for="">카드번호</label>
+                        <label for="cardnum">카드번호</label>
                       </th>
                       <td>
-                        <input type="text" id="" name="" class="wp100" placeholder="카드번호" />
+                        <input type="text" id="cardnum" name="cardnum" class="wp100" placeholder="카드번호" />
                       </td>
                       <th>
-                        <label for="">카드사</label>
+                        <label for="cardnm">카드사</label>
                       </th>
                       <td>
-                        <input type="hidden" id="" name="" />
-                        <input type="text" id="" name="" class="wp100" placeholder="카드사 이름"/>
+                        <input type="hidden" id="cardco" name="cardco" />
+                        <input type="text" id="cardnm" name="cardnm" class="wp100" placeholder="카드사 이름"/>
                       </td>
                     </tr>
                     <tr>
                       <th><label for="">성명</label></th>
                       <td>
-                        <input type="text" id="subScore" name="subScore" class="wp100" placeholder="성명"/>
+                        <input type="text" id="" name="" class="wp100" placeholder="성명"/>
                       </td>
                     </tr>
                     <tr>
                       <th><label for="regAsName">발급일자</label></th>
                       <td>
-                        <input type="text" id="regAsName" name="regAsName" class="wp100" placeholder="발급일자"/>
+                        <input type="date" id="regAsName" name="regAsName" class="wp100" placeholder="발급일자"/>
                       </td>
-                      <th><label for="">만기일자</label></th>
+                      <th><label for="expdate">만기일자</label></th>
                       <td>
-                        <input type="text" id="" name="" class="wp100" placeholder="만기일자" />
+                        <input type="date" id="expdate" name="expdate" class="wp100" placeholder="만기일자" />
                       </td>
                     </tr>
                     <tr>
-                      <th><label for="">결제 계좌</label></th>
+                      <th><label for="ACCNUM">결제 계좌</label></th>
                       <td>
-                        <input type="text" id="" name="" class="wp100" style="width: 300px !important" placeholder="결제 계좌" />
+                        <input type="hidden" id="ACCID" name="ACCID" />
+                        <input type="text" id="ACCNUM" name="ACCNUM" class="wp100" style="width: 300px !important" placeholder="결제 계좌" />
                       </td>
-                      <th><label for="">결제 은행</label></th>
+                      <th><label for="BANKNM">결제 은행</label></th>
                       <td >
-                        <input type="hidden" id="" name="" placeholder="은행 코드"/>
-                        <input type="text" id="" name="senScore" class="wp100" placeholder="은행이름" oninput="inputNumber(this)" />
+                        <input type="hidden" id="bankid" name="bankid" placeholder="은행 코드"/>
+                        <input type="text" id="BANKNM" name="BANKNM" class="wp100" placeholder="은행이름" />
                       </td>
                     </tr>
                     <tr>
                       <th><label for="">결제 일자</label></th>
                       <td>
-                        <input type="text" id="" name="" class="wp100" placeholder="결제 일자" />
+                        <input type="number" name="paymentDay" class="wp100" placeholder="1~31일 중 작성하세요" min="1" max="31" />
                       </td>
                     </tr>
                     <tr>
-                      <th><label for="">사용여부</label></th>
+                      <th><label for="useyn">사용여부</label></th>
                       <td>
-                        <label><input type="radio" id="useYnYes" name="useYn" value="Y" /> 사용</label>
-                        <label style="margin-left: 20px;"><input type="radio" id="useYnNo" name="useYn" value="N" /> 미사용</label>
+                        <label><input type="radio" id="useYnYes" name="useYn" value="1" /> 사용</label>
+                        <label style="margin-left: 20px;"><input type="radio" id="useYnNo" name="useYn" value="0" /> 미사용</label>
                       </td>
-                      <th><label for="">카드거래연동</label></th>
+                      <th><label for="baroflag">카드거래연동</label></th>
                       <td >
-                        <input type="checkbox" id="" name="" class="wp100" style="display: flex; justify-content: center; align-items: center; " />
+                        <input type="checkbox" id="baroflag" name="baroflag" class="wp100" style="display: flex; justify-content: center; align-items: center; " />
                       </td>
                     </tr>
                     <tr>
-                      <th><label for="">정지일자</label></th>
-                      <td colspan="3">
-                        <input type="text" id="" name="" class="wp100" placeholder="정지일자" />
+                      <th><label for="stldate">정지일자</label></th>
+                      <td >
+                        <input type="date" id="stldate" name="stldate" class="wp100" placeholder="정지일자" />
                       </td>
-                    </tr>
-                    <tr>
+
                       <th><label for="">제출자와의 관계</label></th>
-                      <td colspan="3">
+                      <td >
                         <input type="text" id="" name="" class="wp100" placeholder="제출자와의 관계" />
                       </td>
                     </tr>
                     <tr>
-                      <th><label for="">홈페이지 아이디</label></th>
+                      <th><label for="cardwebid">홈페이지 아이디</label></th>
                       <td>
-                        <input type="text" id="" name="" class="wp100" placeholder="홈페이지 아이디" />
+                        <input type="text" id="cardwebid" name="cardwebid" class="wp100" placeholder="홈페이지 아이디" />
                       </td>
-                      <th><label for="">홈페이지 비밀번호</label></th>
+                      <th><label for="cardwebpw">홈페이지 비밀번호</label></th>
                       <td>
-                        <input type="text" id="" name="" class="wp100" placeholder="홈페이지 비밀번호" />
+                        <input type="text" id="cardwebpw" name="cardwebpw" class="wp100" placeholder="홈페이지 비밀번호" />
                       </td>
                     </tr>
                     <tr>
-                      <th><label for="">바로빌카드 코드</label></th>
+                      <th><label for="barocd">바로빌카드 코드</label></th>
                       <td>
-                        <input type="text" id="" name="" class="wp100" placeholder="비고" />
+                        <input type="text" id="barocd" name="barocd" class="wp100" placeholder="바로빌카드 코드" />
                       </td>
-                      <th><label for="">바로빌 아이디</label></th>
+                      <th><label for="baroid">바로빌 아이디</label></th>
                       <td>
-                        <input type="text" id="" name="" class="wp100" placeholder="바로빌 아이디" />
+                        <input type="text" id="baroid" name="baroid" class="wp100" placeholder="바로빌 아이디" />
                       </td>
                     </tr>
                     </tbody>
@@ -270,7 +264,7 @@
         this.grid.downloadFileName = '신용카드등록';
 
         // 엔터키 검색
-        $('#txtDescription, #txtEumnum').on('keypress', function (e) {
+        $('#txtcardnum, #txtcardnm').on('keypress', function (e) {
           if (e.keyCode === 13) {
             _this.searchMainData();
           }
@@ -279,17 +273,13 @@
 
       searchMainData() {
         let _this = this;
-        // let url = '/api/transaction/manageCreditCard/read'
-        let url = '/api/transaction/DepositList/read'
+        let url = '/api/transaction/manageCreditCard/read'
 
         let data = {
           'srchStartDt' : $("#srchStartDt").val(),
           'srchEndDt' : $("#srchEndDt").val(),
-          'AccountName' : $("#cboBankId").val(), //계좌명(accid로 검색)
-          'cboDepositType' : $('#cboDepositType').val(),  //입금형태
-          'cboCompany': $("#cboCompanyHidden").val(),
-          'txtDescription' : $("#txtDescription").val(),
-          'txtEumnum' :$('#txtEumnum').val(),
+          'txtcardnm' : $("#txtcardnm").val(),
+          'txtcardnum' : $("#txtcardnum").val(),
           spjangcd: this.spjangcd.val()  //사업장 코드
         }
         let fnsuccess = function(result) {
@@ -302,6 +292,8 @@
         AjaxUtil.getAsyncData(url, data, fnsuccess);
       }
     }
+
+
     let page = null;
 
     $(document).ready(function (e) {
@@ -334,62 +326,15 @@
         }
       });
 
+      $('#Newbtn').click(function(e) {
+        e.preventDefault();
 
-      $('#btnGridSetting').click(function (e) {
-        let _this = this;
-        let fix_cols = page.grid_config.frozenColumnIndex;
-        page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, { 'order_fix':false,  'fix_cols' : fix_cols });
+        // 폼 초기화
+        $('#CategoryForm')[0].reset();
+        $('input[name="cardType"]').prop('checked', false);
+        $('input[name="useYn"]').prop('checked', false);
       });
 
-      $('#btnCompanySearch').click(function () {
-        let poppage = new PopCompComponent();
-        let $poppage = $(poppage);
-        let searchcallback = function (items) {
-          //console.log('items : ',items);
-          document.getElementById('btnCompanySearch').value = items.compname;
-          document.getElementById('cboCompanyHidden').value = items.id;
-        };
-
-        poppage.show(searchcallback);
-      });
-
-      $('#btnCompanySearch').on('input', function () {
-        const val = $(this).val();
-        if (val === '') {
-          $('#cboCompanyHidden').val('');
-        }
-      });
-
-      //계좌 팝업
-      $('#btnAccountName').click(function () {
-        let poppage = new PopAccountComponent();
-        let searchcallback = function (items) {
-          //console.log('btnAccountName items : ', items);
-          document.getElementById('btnAccountName').value = items.accountName;
-          document.getElementById('cboBankId').value = items.accid;
-        };
-        poppage.show(searchcallback);
-      });
-
-      $('#btnAccountName').on('input', function () {
-        const val = $(this).val();
-        if (val === '') {
-          $('#cboBankId').val('');
-        }
-      });
-
-      // .btn-clear 클릭 후 input 이벤트 강제 발생
-      $(document).on('click', '.btn-clear', function () {
-        const $input = $(this).siblings('input[type="text"]');
-        $input.val('');
-        $input.trigger('input'); // 🔥 input 이벤트 강제 발생
-      });
-      // 초기화 버튼 클릭 이벤트
-      $('#btnClear').click(function () {
-
-        document.getElementById('cboCompany').value = '';
-        document.getElementById('cboCompanyHidden').value = '';
-      });
 
     })
   </script>
