@@ -16,10 +16,10 @@
       </ul>
     </div>
     <section class="section">
+      <input type="hidden" id="spjangcdHidden">
       <div class="section-top">
         <div class="search-wrap">
-          <input type="hidden" id="spjangcdHidden">
-          <dl>
+          <!--<dl>
             <dt>
               조회기간<span class="eq">*</span>
             </dt>
@@ -48,7 +48,7 @@
                 </li>
               </ul>
             </dd>
-          </dl>
+          </dl>-->
         </div>
         <div class="button-wrap" style="border-top:none; text-align: right; !important;">
           <ul>
@@ -78,7 +78,7 @@
           <div class="wp20">
             <div class="container-fluid col">
               <p id="selectedItem"></p>
-              <div id="theGrid" style="height:750px"></div>
+              <div id="theGrid" style="height:780px"></div>
             </div>
           </div>
           <div class="col 80">
@@ -108,8 +108,15 @@
                     </tr>
                     </tbody>
                   </table>
+                  <dl style="text-align: right; ">
+                    <dt></dt>
+                    <dd>
+                      <button type="button" class="btn-excellt btn-default" id="btnAddSubject" style="width: 115px; height: 36px;"><i class="fas fa-plus"></i> 행추가</button>
+                      <button type="button" class="btn-delete btn-danger" id="btnAccDel" style=" width: 115px; height: 36px;"><i class="fas fa-trash"></i> 행삭제</button>
+                    </dd>
+                  </dl>
                   <div class="container-fluid">
-                    <div id="theGrid2" style="height: 640px; margin-top: 15px"></div>
+                    <div id="theGrid2" style="height: 640px; margin-top: 10px"></div>
                   </div>
                 </div>
               </form>
@@ -124,8 +131,7 @@
 <th:block layout:fragment="scripts">
   <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
   <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
-  <th:block th:replace="/common/popup_company :: popup_company"></th:block>
-  <th:block th:replace="/common/popup_account :: popup_account"/>
+  <th:block th:replace="/common/popup_acccd :: popup_acccd"/>
 
   <script type="text/javascript">
     class ExpenseAccountSetupPage {
@@ -136,6 +142,8 @@
         this.$btnAddNew = $('#btnAddNew');
         this.viewData = new wijmo.collections.CollectionView();
         this.spjangcd = $('#spjangcdHidden');
+        this.groupListData = new wijmo.collections.CollectionView([]);   // 왼쪽
+        this.detailListData = new wijmo.collections.CollectionView([]); // 오른쪽
         this.init();
       }
 
@@ -161,6 +169,34 @@
 
         new FlexGridContextMenu(this.grid);
         this.grid.downloadFileName = '그룹 항목';
+        this.grid.hostElement.addEventListener('click', (e) => {
+          let ht = this.grid.hitTest(e);
+
+          // 클릭된 셀이 데이터 셀(CellType.Cell)인지 확인
+          if (ht.cellType === wijmo.grid.CellType.Cell) {
+            const row = this.grid.rows[ht.row];
+            const item = row.dataItem;
+
+            if (item) {
+              // Form 값 채우기
+              $('#gartcd').val(item.code);
+              $('#gart_name').val(item.group_name);
+              $('#remark').val(item.remark || '');
+
+              // 상세항목 로드
+              this.loadDetailItems(item.code);
+            }
+          }
+        });
+
+
+        const tempSelect1 = $('<select>');
+        const jiflagRows = AjaxUtil.fillSelectOptions(tempSelect1, 'system_code', 'choose', null, 'jiflag');
+        const jiflagMap = new wijmo.grid.DataMap(jiflagRows, 'value', 'text');
+
+        const tempSelect2 = $('<select>');
+        const gflagRows = AjaxUtil.fillSelectOptions(tempSelect2, 'system_code', 'choose', null, 'gflag');
+        const gflagMap = new wijmo.grid.DataMap(gflagRows, 'value', 'text');
 
 
         this.grid2 = new wijmo.grid.FlexGrid('#theGrid2', {
@@ -170,28 +206,90 @@
           isReadOnly: false,
           showMarquee: true,
           formatItem: (sender, e) => {
-            if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
-              e.cell.style.textAlign = 'center';
+            if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+              const col = sender.columns[e.col];
+              const row = sender.rows[e.row];
+              if (col.binding === 'jiflag' && row.dataItem.locked) {
+                const select = e.cell.querySelector('select');
+                if (select) {
+                  select.disabled = true;
+                  select.style.backgroundColor = '#f5f5f5';
+                }
+              }
             }
           },
           columns: [
-            {binding: 'useyn', header: '사용', width: 100},
-            {binding: 'artcd', header: '코드', width: 100},
-            {binding: 'artnm', header: '매입항목', width: 100},
-            {binding: 'jiflag', header: '고정비', width: 100},
-            {binding: 'gflag', header: '비용분류', width: 100},
-            {binding: 'accnm', header: '비용계정명', width:100},
-            {binding: 'wacccd', header: '원가계정', width: 100},
-            {binding: 'waccnm', header: '원가계정명', width: 100},
-            {binding: 'sacccd', header: '상대계정', width: 100},
-            {binding: 'saccnm', header: '상대계정명', width: 100},
-
+            {binding: 'useyn', header: '사용', width: 80, dataType: 'Boolean', align: 'center'},
+            {binding: 'artcd', header: '코드', width: 80 , align: 'center', isReadOnly: true},
+            {binding: 'artnm', header: '매입항목', width: 100, align: 'center'},
+            {
+              binding: 'jiflag',
+              header: '고정비',
+              width: 100,
+              dataMap: jiflagMap,
+              cellTemplate: '${text}'
+            },
+            {
+              binding: 'gflag',
+              header: '비용분류',
+              width: 100,
+              dataMap: gflagMap,
+              cellTemplate: '${text}'
+            },
+            {binding: 'acccd', header: '비용계정', width: 100, align: 'center'},
+            {binding: 'accnm', header: '비용계정명', width: 100, align: 'center', isReadOnly: true },
+            {binding: 'wacccd', header: '원가계정', width: 100, align: 'center'},
+            {binding: 'waccnm', header: '원가계정명', width: 100, align: 'center'},
+            {binding: 'sacccd', header: '상대계정', width: 100, align: 'center'},
+            {binding: 'saccnm', header: '상대계정명', width: 100, align: 'center'},
           ],
-          itemsSource: this.viewData, // 데이터를 설정할 배열
+          itemsSource: this.detailListData,
+
         });
 
         new FlexGridContextMenu(this.grid2);
         this.grid2.downloadFileName = '그룹 항목';
+        this.grid2.beginningEdit.addHandler(function (s, e) {
+          const col = s.columns[e.col];
+          const item = s.rows[e.row].dataItem;
+
+          if (col.binding === 'acccd') {
+            e.cancel = true; // 기본 편집기 막기
+
+            let popup = new PopAccountCodeComponent();
+            popup.show(function (selected) {
+              if (selected) {
+                item.acccd = selected.acccd;
+                item.accnm = selected.accnm;
+                s.refresh(); // 화면에 즉시 반영
+              }
+            });
+          }
+          if (col.binding === 'sacccd') {
+            e.cancel = true;
+
+            let popup = new PopAccountCodeComponent();
+            popup.show(function (selected) {
+              if (selected) {
+                item.sacccd = selected.acccd;
+                item.saccnm = selected.accnm;
+                s.refresh();
+              }
+            });
+          }
+          if (col.binding === 'wacccd') {
+            e.cancel = true;
+
+            let popup = new PopAccountCodeComponent();
+            popup.show(function (selected) {
+              if (selected) {
+                item.wacccd = selected.acccd;
+                item.waccnm = selected.accnm;
+                s.refresh();
+              }
+            });
+          }
+        });
 
         // 엔터키 검색
         $('#txtDescription, #txtEumnum').on('keypress', function (e) {
@@ -203,28 +301,70 @@
 
       searchMainData() {
         let _this = this;
-        let url = '/api/transaction/DepositList/read'
+        let url = '/api/transaction/ExpenseAccountSetup/read';
 
         let data = {
-          'srchStartDt': $("#srchStartDt").val(),
-          'srchEndDt': $("#srchEndDt").val(),
-          'AccountName': $("#cboBankId").val(), //계좌명(accid로 검색)
-          'cboDepositType': $('#cboDepositType').val(),  //입금형태
-          'cboCompany': $("#cboCompanyHidden").val(),
-          'txtDescription': $("#txtDescription").val(),
-          'txtEumnum': $('#txtEumnum').val(),
-          spjangcd: this.spjangcd.val()  //사업장 코드
-        }
+          spjangcd: this.spjangcd.val()
+        };
+
         let fnsuccess = function (result) {
-          if (result != null) {
-            _this.viewData = new wijmo.collections.CollectionView(result.data);
-            _this.grid.itemsSource = _this.viewData;
-            _this.grid2.itemsSource = _this.viewData;
+          if (result && Array.isArray(result.data) && result.data.length > 0) {
+            _this.groupListData = new wijmo.collections.CollectionView(result.data);
+          } else {
+            _this.groupListData = new wijmo.collections.CollectionView([]);
           }
+          _this.grid.itemsSource = _this.groupListData;
         };
 
         AjaxUtil.getAsyncData(url, data, fnsuccess);
       }
+
+
+      loadDetailItems(groupCode) {
+        let _this = this;
+        let url = '/api/transaction/ExpenseAccountSetup/readDetail';
+
+        let data = { groupCode: groupCode };
+
+        AjaxUtil.getAsyncData(url, data, function(result) {
+          if (result && Array.isArray(result.data)) {
+            _this.detailListData = new wijmo.collections.CollectionView(result.data);
+          } else {
+            _this.detailListData = new wijmo.collections.CollectionView([]);
+          }
+          _this.grid2.itemsSource = _this.detailListData;
+        });
+      }
+
+      saveMainData() {
+        const _this = this;
+        const url = '/api/transaction/ExpenseAccountSetup/save';
+
+        const grid = wijmo.Control.getControl('#theGrid2');
+        const details = grid.collectionView.items;
+
+        const data = {
+          gartcd: $('#gartcd').val(),
+          gart_name: $('#gart_name').val(),
+          remark: $('#remark').val(),
+          spjangcd: this.spjangcd.val(),
+          details: details
+        };
+
+        const confirmed = Alert.confirm('', '저장하시겠습니까?');
+        if (!confirmed) return;
+
+        AjaxUtil.postAsyncData(url, data, function(result) {
+          if (result && result.success) {
+            Alert.alert('', '저장 완료');
+            _this.searchMainData();
+            $('#CategoryForm')[0].reset();
+          } else {
+            Alert.alert('', '저장에 실패했습니다.');
+          }
+        });
+      }
+
     }
 
     let page = null;
@@ -239,24 +379,70 @@
       page = new ExpenseAccountSetupPage();
 
       AjaxUtil.fillSelectOptions($('#cboYear'), 'data_year', '', false);
-      AjaxUtil.fillSelectOptions($('#cboDepositType'), 'system_code', 'all', false, 'deposit_type', '');
-
-      let today = new Date();
-      let monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-
-      $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(monthStart));
-      $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(today));
 
       page.searchMainData();
 
       // 검색
       $('#btnSearch').click(function (e) {
-        if ($('#cboCompany').val() !== '' && $('#cboCompanyHidden').val() === '') {
-          // 업체명 텍스트는 썼지만, 업체 검색 버튼 안 눌렀을 때
           page.searchMainData();
-        } else {
-          page.searchMainData();
+      });
+
+      $('#btnAddSubject').on('click', function () {
+        if (!page.detailListData) return;
+
+        page.detailListData.sourceCollection.push({
+          useyn: 0,
+          artcd: '',
+          artnm: '',
+          jiflag: '',
+          gflag: '',
+          acccd: '',
+          accnm: '',
+          wacccd: '',
+          waccnm: '',
+          sacccd: '',
+          saccnm: ''
+        });
+        page.detailListData.refresh();
+      });
+
+      $('#btnAccDel').on('click', function () {
+        const sel = page.grid2.selection;
+        if (sel && sel.row >= 0) {
+          const item = page.grid2.rows[sel.row].dataItem;
+          const idx = page.detailListData.sourceCollection.indexOf(item);
+          if (idx > -1) {
+            page.detailListData.sourceCollection.splice(idx, 1);
+            page.detailListData.refresh(); // 오른쪽 그리드만 새로고침
+          }
         }
+      });
+
+      //계정과목 팝업
+      $('#btnAccountName').click(function () {
+        let poppage = new PopAccountCodeComponent();
+        let searchcallback = function (items) {
+          //console.log('btnAccountName items : ', items);
+          document.getElementById('acccd').value = items.acccd;
+          document.getElementById('accnm').value = items.accnm;
+        };
+        poppage.show(searchcallback);
+      });
+
+      //신규등록(초기화)
+      $('#Newbtn').click(function(e) {
+        e.preventDefault();
+        $('#CategoryForm')[0].reset();
+        let theGrid = wijmo.Control.getControl('#theGrid2');
+        if (theGrid) {
+          theGrid.itemsSource = new wijmo.collections.CollectionView([]);
+        }
+      });
+
+      //저장
+      $('#btnSave').click(function (e) {
+        e.preventDefault();
+        page.saveMainData();
       });
 
     })
