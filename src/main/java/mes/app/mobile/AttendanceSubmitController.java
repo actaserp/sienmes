@@ -93,9 +93,12 @@ public class AttendanceSubmitController {
         tbPb204.setAppdate(reqdate); // 결재상신일자
         TB_PB204 saved204 = tbPb204Repository.save(tbPb204);
         String savedId = String.format("%08d", saved204.getId()); // 8자리로 앞에 0을 채움
-        tbPb204.setAppnum(reqdate + savedId + spjangcd); // 결재번호 (현재날자 + 휴가ID + spjangcd)
+        if(saved204.getAppnum() != null) {
+            // 기존 휴가에 결재정보가 있을경우 결재번호 not update
+            tbPb204.setAppnum(reqdate + savedId + spjangcd); // 결재번호 (현재날자(신청일자) + 휴가ID + spjangcd)
+        }
         // 결재구분
-        tbPb204.setAppgubun("101"); // 결재구분 (101)
+        tbPb204.setAppgubun("001"); // 결재구분 (001 = 결재대기)
         tbPb204.setAppperid(user.getPersonid()); // 결재상신사원 (personid)
         tbPb204.setAppuserid(user.getUsername()); // 결재상신아이디
 
@@ -112,10 +115,11 @@ public class AttendanceSubmitController {
             e080PK.setPersonid((Integer) appInfoDetail.get("kcpersonid"));// 결재할 사원아이디
             e080PK.setSeq(String.format("%03d", index)); // 순번
             e080Info.setId(e080PK);
+            e080Info.setTitle("휴가신청서");
             if(index == 0) {
                 e080Info.setFlag("1");// 결재할라인구분(결재상신받는 사람만 1로)
                 e080Info.setRepoperid(user.getPersonid());// 결재상신사원아이디(결재라인에따라 개별 등록)
-                e080Info.setAppgubun("101");// 결재상태구분(결재"101")
+                e080Info.setAppgubun("001");// 결재상태구분 (001 = 결재대기)
             }else {
                 e080Info.setFlag("0");
             }

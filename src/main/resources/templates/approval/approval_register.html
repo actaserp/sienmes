@@ -98,7 +98,7 @@
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="personid" name="personid" style="width: 130px">
+                  <input type="text" id="personid" name="personid" style="width: 130px" readonly>
                 </td>
                 <th style="text-align: center">
                   <label for="personnm">
@@ -106,7 +106,9 @@
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="personnm" name="personnm" style="width: 130px" readonly>
+                  <select id="personnm" name="personnm" style="width: 130px" onchange="bindPersonid('personnm')">
+
+                  </select>
                 </td>
                 <th style="text-align: center">
                   <label for="kcpersonid">
@@ -114,15 +116,17 @@
                   </label>
                 </th>
                 <td>
-                  <input id="kcpersonid" style="width: 130px">
+                  <input id="kcpersonid" style="width: 130px" readonly>
                 </td>
                 <th style="text-align: center">
-                  <label for="kcpernm">
+                  <label for="kcpersonnm">
                     결재자이름
                   </label>
                 </th>
                 <td>
-                  <input id="kcpernm" style="width: 130px" readonly>
+                  <select id="kcpersonnm" name="kcpersonnm" style="width: 130px" onchange="bindPersonid('kcpersonnm')">
+
+                  </select>
                 </td>
                 </tbody>
                 <tbody>
@@ -202,8 +206,10 @@
       // for (const items of selectElementId2){
       //   getListCgrb(items);
       // }
-      AjaxUtil.fillSelectOptions($('#papercd'), 'system_code', 'choose', false, 'appr_doc'); // 품목구분
-      AjaxUtil.fillSelectOptions($('#gubuncd'), 'system_code', 'choose', false, 'approval_status'); // 품목구분
+      AjaxUtil.fillSelectOptions($('#papercd'), 'system_code', 'choose', false, 'appr_doc');
+      AjaxUtil.fillSelectOptions($('#gubuncd'), 'system_code', 'choose', false, 'approval_status');
+      AjaxUtil.fillSelectOptions($('#personnm'), 'person', 'choose', false);
+      AjaxUtil.fillSelectOptions($('#kcpersonnm'), 'person', 'choose', false);
     })
 
     // 결재라인 문서별 사원 그리드
@@ -263,7 +269,7 @@
             if(item != null && Object.keys(item).length > 0) {
 
               document.getElementById('personid').value = item.personid;
-              document.getElementById('personnm').value = item.Name;
+              document.getElementById('personnm').value = item.personid;
 
               fetchListData2(item.papercd, item.personid);
             }
@@ -357,12 +363,13 @@
             let row = hitTest.row;
             let item = theGrid2.rows[row].dataItem;
 
-            document.getElementById('kcpernm').value = item.Name;
+            document.getElementById('kcpersonnm').value = item.kcpersonid;
             document.getElementById('kcpersonid').value = item.kcpersonid;
             document.getElementById('comseq').value = item.seq;
             document.getElementById('064no').value = item.no;
 
             const selectGubuncd = document.getElementById('gubuncd');
+            const selectkcperid = document.getElementById('gubuncd');
 
             setSelectedIndex(selectGubuncd, item.gubun);
 
@@ -414,45 +421,85 @@
     });
 
     // 그리드 정보 삭제 (모든행 삭제시 063정보도 같이 삭제)
-    function deleteBody(){
-      if(SelectItem === undefined || SelectItem.length === 0){
+    function deleteBody() {
+      if (!SelectItem || SelectItem.length === 0) {
         Alert.alert('', '삭제할 항목을 선택해 주세요.');
         return;
       }
+
       Alert.confirm('', '선택된 행 내용을 삭제하시겠습니까?', function () {
+        let deleteCount = 0;
+        let completed = 0;
+        let papercd = '';
+        let personid = '';
+        console.log("확인 버튼 눌림");
+        console.log("SelectItem", SelectItem); // 선택된 행 있는지
+
         SelectItem.forEach(selectedRow => {
-          // 선택된 데이터들 삭제
           const selectedData = selectedRow.dataItem;
-          if(selectedData.no !== ""){
-            let deleteNum = {
+          if (selectedData.no !== "") {
+            const deleteNum = {
               kcpersonid: selectedData.kcpersonid,
               papercd: selectedData.papercd,
               personid: selectedData.personid,
               no: selectedData.no,
               spjangcd: sessionStorage.getItem('spjangcd')
             };
-            let fnSuccess = function (res) {
+            console.log("deleteNum", deleteNum);   // 삭제 요청 파라미터 유효한지
+
+            // 삭제 대상 기준 정보 저장
+            papercd = selectedData.papercd;
+            personid = selectedData.personid;
+            deleteCount++;
+
+            const fnSuccess = function (res) {
+              completed++;
+
               if (res.success) {
-                fetchListData2();
+                fetchListData2(papercd, personid); // 최신 064 데이터 로딩
+              }
+
+              if (completed === deleteCount) {
+                // 마지막 삭제 요청이 끝난 후에만 삭제 여부 판단
+                setTimeout(() => {
+                  const valid064Data = viewdata2.items.filter(item => item && item.kcpersonid);
+                  if (valid064Data.length === 0) {
+                    AjaxUtil.postAsyncData('/api/approval/deleteHead', {
+                      papercd: papercd,
+                      personid: personid,
+                      spjangcd: sessionStorage.getItem('spjangcd')
+                    }, function (res) {
+                      if (res.success) {
+                        fetchListData(); // 063 테이블 갱신
+                      }
+                    });
+                  } else {
+                    fetchListData(); // 063 테이블만 갱신
+                  }
+
+                  Alert.alert("", "삭제되었습니다.");
+                }, 150); // fetchListData2의 갱신 완료를 약간 기다림
               }
             };
+
             AjaxUtil.postAsyncData('/api/approval/delete', deleteNum, fnSuccess);
           }
         });
-        Alert.alert("", "삭제되었습니다.");
-      })
+      });
     }
+
 
     // 등록후 초기화
     function resetFormFields() {
       const fieldsToReset = [
-        'kcpersonid', 'kcpernm', 'comseq', '064no'
+        'kcpersonid', 'kcpersonnm', 'comseq', '064no'
       ];
 
       fieldsToReset.forEach(fieldId => {
         document.getElementById(fieldId).value = '';
 
       });
+      fetchListData2();
 
       document.getElementById('btnSave').title = "저장";
     }
@@ -510,6 +557,7 @@
           if (response.success) {
             Alert.alert('', response.message, function () {
               fetchListData2();
+              fetchListData($('#papercd').val(), $('#personid').val());
               resetFormFields();
             });
           } else {
@@ -518,6 +566,13 @@
         }
         sendAjaxRequest('/api/approval/save');
       })
+    }
+    function bindPersonid(tagId){
+      if(tagId !== 'kcpersonnm'){
+        document.getElementById('personid').value = document.getElementById('personnm').value
+      }else{
+        document.getElementById('kcpersonid').value = document.getElementById('kcpersonnm').value
+      }
     }
 
 

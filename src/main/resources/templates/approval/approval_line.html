@@ -68,7 +68,7 @@
       </div>
       <ul class="page-navi">
         <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-        <li>결재목록</li>
+        <li>전자결재</li>
         <li>결재목록현황</li>
       </ul>
     </div>
@@ -78,7 +78,7 @@
           <div class="search-wrap">
             <dl>
               <dt>
-                <label for="searchUserNm">
+                <label for="startDate">
                   작성일자<span class="eq">*</span>
                 </label>
               </dt>
@@ -111,13 +111,13 @@
             </dl>
             <dl>
               <dt>
-                <label for="searchUserNm">
+                <label for="searchText">
                   제목<span class="eq">*</span>
                 </label>
               </dt>
               <dd>
                 <div class="srch-box">
-                  <input type="text" id="searchUserNm" name="searchUserNm" class="input-srch"
+                  <input type="text" id="searchText" name="searchText" class="input-srch"
                          placeholder="제목" style="border-radius: 5px;">
                 </div>
               </dd>
@@ -232,7 +232,6 @@
   <script type="text/javascript">
     let theGrid;
     let theGrid1;
-    let isBindSpjangcdCalled = false;
 
     $(document).ready(function () {
       // 현재 날짜 설정
@@ -251,21 +250,18 @@
       $('#endDate').val(endMonthFormatted);
       init();
 
+      AjaxUtil.fillSelectOptions($('#SearchPayment'), 'system_code', 'choose', false, 'approval_status');
       const appgubun = $('#appgubun').val();
       setButtonStateByAppgubun(appgubun);
     });
 
-    document.getElementById('searchUserNm').addEventListener('keydown', function (event) {
+    document.getElementById('searchText').addEventListener('keydown', function (event) {
       if (event.key === 'Enter') {
         fetchListData(); // 엔터 키를 눌렀을 때 실행할 함수
       }
     })
 
     function init() {
-      if (!isBindSpjangcdCalled) {
-        bindSpjangcd();
-        isBindSpjangcdCalled = true; // 플래그 업데이트
-      }
       fetchListData();
       fetchListData1();
     }
@@ -279,11 +275,11 @@
       let data = [];
 
       const params = {
-        search_spjangcd: $('#search_spjangcd').val(),
+        search_spjangcd: sessionStorage.getItem("spjangcd"),
         startDate: $('#startDate').val(),
         endDate: $('#endDate').val(),
         SearchPayment: $('#SearchPayment').val(),
-        searchUserNm: $('#searchUserNm').val()
+        searchText: $('#searchText').val()
       };
 
       console.log("수집 데이터(결재 목록)", params);
@@ -295,7 +291,6 @@
         data: params,
         async: false,
         success: function (response) {
-          console.log("서버에서 받은 데이터 :", response);
           // 응답이 올바르게 도착했고, data 속성이 배열인지 확인
           if (response && Array.isArray(response.data)) {
             console.log("서버에서 받은 데이터 목록:", response.data); //실제 데이터 확인
@@ -304,6 +299,7 @@
             data = response.data.map((item, index) => ({
               rownum: index + 1,
               appdate: item.appdate || '',
+              indate: item.indate || '',
               appgubun: item.appgubun || '',
               appgubun_display: item.appgubun_display || '',
               appnum: item.appnum || '',
@@ -378,13 +374,13 @@
           columns: [
             {binding: 'rownum', header: '순번', width: 70, align: 'center'},
             {binding: 'appnum', header: '문서번호', width: '*', minWidth: 100, align: 'center', visible: false},
-            {binding: 'repodate', header: '상신일자', width: '*', minWidth: 110, align: 'center'},
+            {binding: 'indate', header: '상신일자', width: '*', minWidth: 110, align: 'center'},
             {binding: 'repopernm', header: '작성자명', width: '*', minWidth: 100, align: 'center'},
             {binding: 'papercd', header: '문서명', width: '*', minWidth: 250, align: 'center', visible: false},
             {binding: 'papercd_name', header: '문서명', width: '*', minWidth: 250, align: 'center'},
             {binding: 'appgubun', header: '결재구분', width: '*', minWidth: 100, align: 'center', visible: false},
             {binding: 'appgubun_display', header: '결재구분', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'appdate', header: '결재일자', width: '*', minWidth: 110, align: 'center'},
+            {binding: 'repodate', header: '결재일자', width: '*', minWidth: 110, align: 'center'},
             {binding: 'title', header: '제목', width: '*', align: 'center', minWidth: 250},
             {binding: 'remark', header: '사유', width: '*', align: 'left', minWidth: 100},
             {binding: 'fileList', header: '다운로드', width: '*', minWidth: 120, align: 'center', visible: false },
@@ -685,6 +681,7 @@
       const appgubun = document.getElementById("appgubun").value; //결재구분
       const remark = document.getElementById("remark").value; //사유
       const appperid =  document.getElementById('appperid').value;
+      // const appperid = 8;
       const papercd =  document.getElementById('papercd').value;
 
       if (!appnum || !appgubun) {
@@ -692,7 +689,7 @@
         return;
       }
 
-      console.log("상태 변경 요청:", {action, appnum, appgubun, remark});
+      console.log("상태 변경 요청:", {action, appnum, appgubun, remark, appperid});
 
       $.ajax({
         url: '/api/PaymentDetail/changeState',
@@ -739,7 +736,9 @@
           'X-CSRF-Token': $('[name=_csrf]').val()
         },
         success: function (response) {
+          // 뒤에 결재자가 존재
           const canCancel = response.data?.canCancel === true;
+          // 결재한 문서
           const isApproved = response.data?.isApproved === true;
 
           switch (appgubun) {
@@ -842,10 +841,10 @@
       let data = [];
 
       const params = {
-        search_spjangcd: $('#search_spjangcd').val(),
+        search_spjangcd: sessionStorage.getItem("spjangcd"),
         startDate: $('#startDate').val(),
         endDate: $('#endDate').val(),
-        searchUserNm: $('#searchUserNm').val()
+        searchText: $('#searchText').val()
       };
 
       // 서버에서 데이터 가져오기
@@ -931,21 +930,6 @@
       });
     });
 
-    //사업장 코드
-    function bindSpjangcd() {
-      $.ajax({
-        url: '/api/PaymentList/bindSpjangcd',
-        type: 'GET',
-        async: false,
-        success: function (data) {
-          data2 = data.data;
-          const selectElement = document.getElementById('search_spjangcd');
-          if (selectElement) {
-            selectElement.value = data2; // value 속성으로 선택
-          }
-        }
-      })
-    }
 
 
   </script>

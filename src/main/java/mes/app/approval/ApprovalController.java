@@ -134,12 +134,10 @@ public class ApprovalController {
                                  Authentication auth) {
         AjaxResult result = new AjaxResult();
         User user = (User)auth.getPrincipal();
-        String username = user.getUsername();
-        Map<String, Object> userInfo = approvalService.getMyInfo(username);
         // 063table PK - spjangcd,personid,papercd
         TB_E063_PK e063PK = new TB_E063_PK();
         e063PK.setPapercd(params.get("papercd"));
-        e063PK.setSpjangcd((String) userInfo.get("spjangcd"));
+        e063PK.setSpjangcd(params.get("spjangcd"));
         e063PK.setPersonid(Integer.valueOf(params.get("personid")));
 
         try {
@@ -173,8 +171,12 @@ public class ApprovalController {
         String spjangcd = params.get("spjangcd");
         String papercd = params.get("papercd");
         String gubun = params.get("gubun");
-
         String no = params.get("no");
+        if(no != null && !no.isEmpty()) {
+            no = params.get("no");
+        }else{
+            no = getNextNoForKey(spjangcd, personid, papercd);
+        }
         String seq = params.get("seq");
         Integer kcpersonid = Integer.valueOf(params.get("kcpersonid"));
 
@@ -211,6 +213,13 @@ public class ApprovalController {
             result.message = "저장 실패(" + e.getMessage() + ")";
         }
         return result;
+    }
+    // 064 테이블 no 컬럼 Max값 +1
+    public String getNextNoForKey(String spjangcd, Integer personid, String papercd) {
+        // 현재 max(no) 조회
+        String maxNo = e064Repository.findMaxNo(spjangcd, personid, papercd);
+        int next = maxNo != null ? Integer.parseInt(maxNo) + 1 : 1;
+        return String.valueOf(next); // 예: 001, 002
     }
 
 }

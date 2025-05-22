@@ -19,7 +19,7 @@ public class ApprovalService {
     //결재라인등록 그리드 리스트 불러오기
     public List<Map<String, Object>> getCheckPaymentList(int personid, String papercd, String spjangcd) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
-
+        dicParam.addValue("personid", personid);
         String sql = """
                 select
                 e.*,
@@ -30,11 +30,8 @@ public class ApprovalService {
                 LEFT JOIN sys_code s ON e.gubun = s."Code"
                 WHERE 1=1
                 AND s."CodeType" = 'approval_status'
+                AND e.personid = :personid
                 """;
-        if(personid != 0) {
-            dicParam.addValue("personid", personid);
-            sql += " AND e.personid = :personid";
-        }
         if(papercd != null && !papercd.isEmpty()) {
             dicParam.addValue("papercd", papercd);
             sql += " AND e.papercd = :papercd";
