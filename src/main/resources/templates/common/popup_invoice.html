@@ -1,4 +1,8 @@
 <th:block th:fragment="popup_invoice">
+<th:block th:replace="/common/popup_totalAmount :: popup_totalAmount"></th:block>
+<th:block th:replace="/common/popup_account_subject :: popup_account_subject"></th:block>
+<th:block th:replace="/common/popup_project :: popup_project"></th:block>
+<th:block th:replace="/common/popup_depart :: popup_depart"></th:block>
     <head>
         <style id="invoice_css">
 
@@ -611,42 +615,13 @@
                     <div class="container-fluid">
                         <div id="area_form">
                             <div id="etax_area_form" class="border_red">
-                                <table class="etax_table table_border_red" summary="세금계산서">
-                                    <thead>
-                                        <tr>
-                                            <th class="al_c" colspan="36" rowspan="2">
-                                                <span class="ft_24 bold" id="taxName">세금계산서</span>
-                                            </th>
-                                            <th class="al_c" colspan="12" rowspan="2"><span>공 급 자</span><br>(보 관 용)</th>
-                                            <th colspan="16" rowspan="2">
-                                                <span>매출구분</span>
-                                                <select class="in_txt" id="sale_type" name="sale_type" style="width:140px; line-height:1;"></select>
-                                            </th>
-                                            <input type="text" id="sale_type_print" style="display: none;" readonly />
-                                            <th class="al_r pdr_3" colspan="10">책번호 : </th>
-                                            <td class="al_l pdl_3" colspan="10"><input class="in_txt numeric" maxlength="4" tabindex="1" type="text" id="Kwon" name="Kwon" ></td>
-                                            <th class="al_l" colspan="4">권</th>
-                                            <td class="al_l pdl_3" colspan="10"><input class="in_txt numeric" maxlength="4"  tabindex="2" type="text" id="Ho" name="Ho" ></td>
-                                            <th class="al_l" colspan="2">호</th>
-                                        </tr>
-                                    <tr>
-                                        <th class="al_r pdr_3" colspan="10">일련번호 : </th>
-                                        <td class="al_l pdl_3" colspan="26"><input class="in_txt" maxlength="27" tabindex="3" type="text" id="SerialNum" name="SerialNum" ></td>
-                                    </tr>
-                                    </thead>
+                                <table class="etax_table table_border_red" summary="계산서">
                                     <tbody id="InvoiceList">
                                         <colgroup>
                                             <col span="50" style="width: 1%;">
                                             <col span="50" style="width: 1%;">
                                         </colgroup>
                                         <tr>
-                                            <th class="al_c invoicer_bg noborder_l" colspan="3" rowspan="6"><span class="bold lh_30">공<br>급<br>자</span></th>
-                                            <th class="al_c bold" colspan="8">등록번호</th>
-                                            <td class="al_l pdl_3" colspan="23"><input class="in_txt numeric al_c letspc_0 readonly" maxlength="12" tabindex="4" type="text" id="InvoicerCorpNum" name="InvoicerCorpNum"  readonly="readonly"></td>
-
-                                            <th class="al_c" colspan="8">종사업장</th>
-                                            <td class="al_l pdl_3" colspan="8"><input class="in_txt numeric letspc_0" maxlength="4"  tabindex="5" type="text" id="InvoicerTaxRegID" name="InvoicerTaxRegID" ></td>
-
                                             <th class="al_c invoicer_bg" colspan="3" rowspan="6"><span class="bold lh_16">공<br>급<br>받<br>는<br>자</span></th>
                                             <input type="hidden" id="InvoiceeID" name="InvoiceeID">
                                             <th class="al_c bold" colspan="8">등록번호</th>
@@ -656,74 +631,99 @@
 
                                             <th class="al_c" colspan="8">종사업장</th>
                                             <td class="al_l pdl_3" colspan="8"><input class="in_txt numeric letspc_0" maxlength="4"  tabindex="15" type="text" id="InvoiceeTaxRegID" name="InvoiceeTaxRegID"></td>
+
+                                            <th class="al_c bold" colspan="8">작성일자</th>
+                                            <td class="al_l pdl_3" colspan="17">
+                                                <input type="date" id="writeDate" name="writeDate" class="in_txt numeric al_c dp-applied" maxlength="10" style="width: 190px; padding: 0 14px 0 5px;">
+                                            </td>
+
+                                            <th class="al_c" colspan="8">작성 방법</th>
+                                            <td class="al_l pdl_3" colspan="17">
+                                                <select class="in_txt" id="WriteTypeSelect" name="WriteTypeSelect" style="width:190px; line-height:1;">
+
+                                                </select>
+                                                <button id="totalAmountAct" type="button" class="btn_white_gradient" style="display: none;">계산 창 열기</button>
+                                            </td>
                                         </tr>
                                         <tr>
                                             <th class="al_c bold" colspan="8"><span>상호</span></th>
-                                            <td class="al_l pdl_3" colspan="23"><textarea type="text" class="txt_ar kr" maxlength="200" tabindex="6" id="InvoicerCorpName" name="InvoicerCorpName"></textarea></td>
+                                            <td class="al_l pdl_3" colspan="23"><textarea type="text" class="txt_ar kr" maxlength="200" tabindex="6" id="InvoiceeCorpName" name="InvoiceeCorpName"></textarea></td>
                                             <th class="al_c bold lh_14" colspan="4"><p>성명</p></th>
-                                            <td class="al_l pdl_3" colspan="12"><textarea type="text" class="txt_ar kr" maxlength="100"  tabindex="7" id="InvoicerCEOName" name="InvoicerCEOName"></textarea></td>
-                                            <th class="al_c bold" colspan="8"><span>상호</span></th>
-                                            <td class="al_l pdl_3" colspan="23"><textarea type="text" class="txt_ar kr" maxlength="200"  tabindex="16" id="InvoiceeCorpName" name="InvoiceeCorpName"></textarea></td>
-                                            <th class="al_c bold lh_14" colspan="4">성명</th>
-                                            <td class="al_l pdl_3" colspan="12"><textarea type="text" class="txt_ar kr" maxlength="100" tabindex="17" id="InvoiceeCEOName" name="InvoiceeCEOName"></textarea></td>
+                                            <td class="al_l pdl_3" colspan="12"><textarea type="text" class="txt_ar kr" maxlength="100"  tabindex="7" id="InvoiceeCEOName" name="InvoiceeCEOName"></textarea></td>
+
+
+                                            <th class="al_c bold" colspan="8"><span>매출구분</span></th>
+                                            <td class="al_l pdl_3" colspan="17">
+                                                <select class="in_txt" id="sale_type" name="sale_type" style="width:190px; line-height:1;"></select>
+                                            </td>
+                                            <th class="al_c bold lh_14" colspan="8">발행구분</th>
+                                            <td class="al_l pdl_3" colspan="17">
+                                                <select class="in_txt" id="issue_div" name="issue_div" style="width:190px; line-height:1;"></select>
+                                            </td>
                                         </tr>
                                         <tr>
                                             <th class="al_c  lh_14" colspan="8"><p><span>사업장</span></p><p><span>주소</span></p></th>
-                                            <td class="al_l pdl_3" colspan="39"><textarea type="text" class="txt_ar kr" maxlength="300"  tabindex="8" id="InvoicerAddr" name="InvoicerAddr"></textarea></td>
-                                            <th class="al_c lh_14" colspan="8"><p><span>사업장</span></p><p><span>주소</span></p></th>
-                                            <td class="al_l pdl_3" colspan="39"><textarea type="text" class="txt_ar kr" maxlength="300" tabindex="18" id="InvoiceeAddr" name="InvoiceeAddr"></textarea></td>
+                                            <td class="al_l pdl_3" colspan="39"><textarea type="text" class="txt_ar kr" maxlength="300"  tabindex="8" id="InvoiceeAddr" name="InvoiceeAddr"></textarea></td>
+
+                                            <th class="al_c bold" colspan="8"><span>계정코드</span></th>
+                                            <td class="al_l pdl_3" colspan="17">
+                                                <input style="width: 74%; margin-right: 5px;" class="in_txt numeric letspc_0" maxlength="12" tabindex="14" type="text" id="account_code" name="account_code" readonly>
+                                                <input type="hidden" id="account_codeHidden" name="account_codeHidden">
+                                                <button class="btn_white_gradient mgl_2" id="btnSelectaccount_code" type="button">선택</button>
+                                            </td>
+                                            <th class="al_c bold" colspan="8"><span>귀속부서</span></th>
+                                            <td class="al_l pdl_3" colspan="17">
+                                                <input style="width: 74%; margin-right: 5px;" class="in_txt numeric letspc_0" maxlength="12" tabindex="14" type="text" id="att_depart" name="att_depart" readonly>
+                                                <input type="hidden" id="att_departHidden" name="att_departHidden">
+                                                <button class="btn_white_gradient mgl_2" id="btnSelectatt_depart" type="button">선택</button>
+                                            </td>
                                         </tr>
                                         <tr>
-                                            <th class="al_c" colspan="8"><span>업태</span></th>
-                                            <td class="al_l pdl_3" colspan="17"><input type="text" class="txt_ar kr" maxlength="100" tabindex="9" id="InvoicerBizType" name="InvoicerBizType"></td>
-                                            <th class="al_c lh_14" colspan="4"><p>종목</p></th>
-                                            <td class="al_l pdl_3" colspan="18"><input type="text" class="txt_ar kr" maxlength="100" tabindex="10" id="InvoicerBizClass" name="InvoicerBizClass"></td>
                                             <th class="al_c" colspan="8"><span>업태</span></th>
                                             <td class="al_l pdl_3" colspan="17"><input type="text" class="txt_ar kr" maxlength="100" tabindex="19" id="InvoiceeBizType" name="InvoiceeBizType"></td>
                                             <th class="al_c lh_14" colspan="4"><p>종목</p></th>
                                             <td class="al_l pdl_3" colspan="18"><input type="text" class="txt_ar kr" maxlength="100" tabindex="20" id="InvoiceeBizClass" name="InvoiceeBizClass"></td>
+
+                                            <th class="al_c bold" colspan="8"><span>프로젝트</span></th>
+                                            <td class="al_l pdl_3" colspan="17">
+                                                <input style="width: 74%; margin-right: 5px;" class="in_txt numeric letspc_0" maxlength="12" tabindex="14" type="text" id="project" name="project" readonly>
+                                                <input type="hidden" id="projectHidden" name="projectHidden">
+                                                <button class="btn_white_gradient mgl_2" id="btnSelect_project" type="button">선택</button>
+                                            </td>
+                                            <th class="al_c bold lh_14" colspan="8">발행목적</th>
+                                            <td class="al_l pdl_3" colspan="17">
+                                                <select class="in_txt" id="purpose_type" name="purpose_type" style="width:190px; line-height:1;">
+                                                    <option value="영수">영수</option>
+                                                    <option value="청구">청구</option>
+                                                    <option value="없음">없음</option>
+                                                </select>
+                                            </td>
                                         </tr>
                                         <tr>
-                                            <th class="al_c" colspan="8"><span>담당자</span></th>
-                                            <td class="al_l pdl_3" colspan="17"><input class="in_txt kr" maxlength="100" tabindex="11" type="text" id="InvoicerContactName" name="InvoicerContactName"></td>
-                                            <th class="al_c" colspan="6">연락처</th>
-                                            <td class="al_l pdl_3" colspan="16"><input class="in_txt numeric" maxlength="20" tabindex="12" type="text" id="InvoicerTEL" name="InvoicerTEL" ></td>
                                             <th class="al_c" colspan="8"><span>담당자</span></th>
                                             <td class="al_l pdl_3" colspan="17"><input class="in_txt kr" maxlength="100"  tabindex="21" type="text" id="InvoiceeContactName1" name="InvoiceeContactName1" ></td>
                                             <th class="al_c" colspan="6">연락처</th>
                                             <td class="al_l pdl_3" colspan="16"><input class="in_txt numeric" maxlength="20" tabindex="22" type="text" id="InvoiceeTEL1" name="InvoiceeTEL1" ></td>
+
+                                            <th class="al_c pet0 gray_border_l" colspan="8"><span class="bold">공급가액</span></th>
+                                            <td class="al_l pet0 pdl_3 gray_border_t gray_border_l" colspan="17"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="SupplyCostTotal" name="SupplyCostTotal" ></td>
+                                            <th class="al_c pet1 gray_border_l tax-related" colspan="8"><span class="bold">세액</span></th>
+                                            <td class="al_l pet1 pdl_3 gray_border_t gray_border_l tax-related" colspan="17"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="TaxTotal" name="TaxTotal" ></td>
+
                                         </tr>
                                         <tr>
                                             <th class="al_c" colspan="8"><span>이메일</span></th>
-                                            <td class="al_l pdl_3" colspan="39"><input class="in_txt en" maxlength="100" tabindex="13" type="text" id="InvoicerEmail" name="InvoicerEmail"></td>
-
-                                            <th class="al_c" colspan="8"><span>이메일</span></th>
-
                                             <td class="al_l pdl_3" colspan="39">
                                                 <input style="width: 83%;" class="in_txt en" maxlength="100" tabindex="23" type="text" id="InvoiceeEmail1" name="InvoiceeEmail1" >
                                                 <button class="btn_white_gradient mgl_2" id="saveInvoicee" type="button">정보 저장</button>
                                             </td>
+
+                                            <th class="al_c" colspan="8"><span class="bold">합계금액</span></th>
+                                            <td class="al_l pdl_3" colspan="42"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="TotalAmount" name="TotalAmount" ></td>
+
                                         </tr>
                                     </tbody>
 
-                                    <tbody id="TotalList">
-                                    <tr>
-                                            <th class="splitline noborder_t" colspan="50"></th>
-                                            <th class="splitline noborder_t" colspan="50"></th>
-                                        </tr>
-                                        <tr>
-                                            <th class="al_c noborder_l" colspan="11"><span class="bold">작성일자</span>
-                                                <img src="/images/icon/ico-calendar.svg" class="calendar-trigger" style="cursor:pointer; vertical-align: middle; margin-left: 5px;" />
-                                            </th>
-                                            <th class="al_c pet0 gray_border_l" colspan="47"><span class="bold">공급가액</span></th>
-                                            <th class="al_c pet1 gray_border_l tax-related" colspan="42"><span class="bold">세액</span></th>
-                                        </tr>
-                                        <tr>
-                                            <td class="al_c noborder_l gray_border_t" colspan="11"><input type="date" id="writeDate" name="writeDate" class="in_txt numeric al_c dp-applied" maxlength="10" style="min-width: 114px; background: none; padding: 0px 0px 0px 8px;"></td>
-                                            <td class="al_l pet0 pdl_3 gray_border_t gray_border_l" colspan="47"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="SupplyCostTotal" name="SupplyCostTotal" ></td>
-                                            <td class="al_l pet1 pdl_3 gray_border_t gray_border_l tax-related" colspan="42"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="TaxTotal" name="TaxTotal" ></td>
-                                        </tr>
-                                    </tbody>
                                     <tbody id="remarkList">
                                         <tr>
                                             <th class="splitline noborder_t" colspan="50"></th>
@@ -757,31 +757,7 @@
                                             </td>
                                         </tr>
                                     </tbody>
-                                    <tbody id="WriteTypeList">
-                                        <tr>
-                                            <th class="splitline noborder_t" colspan="50"></th>
-                                            <th class="splitline noborder_t" colspan="50"></th>
-                                        </tr>
-                                        <tr>
-                                            <th class="gray_bg al_c noborder_l" colspan="11"><span class="bold">작성방법</span></th>
-                                            <td class="gray_bg gray_border_l" colspan="89">
-                                                <span><input checked="checked" class="rad" id="WriteType1" name="WriteType" tabindex="38" type="radio" value="부가세 별도"><label class="for" for="WriteType1">부가세 별도</label></span>
-                                                <span class="mgl">
-                                                    <input class="rad" id="WriteType2" name="WriteType" tabindex="29" type="radio" value="부가세 포함">
-                                                    <label class="for" for="WriteType2" id="WCostVAT">부가세 포함</label></span>
 
-                                                <span class="mgl sm" id="lblWriteType">
-                                                    <input class="rad" id="WriteType4" name="WriteType" tabindex="40" type="radio" value="합계금액"><label class="for" for="WriteType4">합계금액</label>
-                                                    <!--<button class="btn_white_gradient mgl_2" id="totalAmountAct" type="button">계산</button>-->
-                                                </span>
-
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="splitline noborder_t" colspan="50"></th>
-                                            <th class="splitline noborder_t" colspan="50"></th>
-                                        </tr>
-                                    </tbody>
                                     <tbody id="taxList">
 
                                         <tr>
@@ -831,37 +807,6 @@
                                             </td>
                                         </tr>
                                     </tbody>
-                                    <tbody id="taxTotalList">
-                                        <tr>
-                                            <th class="splitline noborder_t" colspan="50"></th>
-                                            <th class="splitline noborder_t" colspan="50"></th>
-                                        </tr>
-                                        <tr>
-                                            <th class="al_c noborder_l" colspan="26"><span class="bold">합계금액</span></th>
-                                            <th class="al_c" colspan="12">현금</th>
-                                            <th class="al_c" colspan="12">수표</th>
-                                            <th class="al_c" colspan="12">어음</th>
-                                            <th class="al_c" colspan="12">외상미수금</th>
-                                            <th class="al_c" colspan="26" rowspan="2" style="padding-top: 5px; padding-bottom: 5px;">
-                                                <div class="PT fl_l" style="width:100%">
-                                                    <span class="pt1 c_333">이 금액을</span>
-                                                    <div class="pt_s">
-                                                        <p><input class="rad" id="PurposeType1" tabindex="55" type="radio" value="영수" name="PurposeType"><label class="for c_333" for="PurposeType1">영수</label></p>
-                                                        <p style="margin-top: 5px;"><input checked="checked" class="rad" id="PurposeType2" tabindex="55" type="radio" value="청구" name="PurposeType"><label class="for c_333" for="PurposeType2">청구</label></p>
-                                                        <p style="margin-top: 5px;"><input class="rad" id="PurposeType3" tabindex="55" type="radio" value="없음" name="PurposeType"><label class="for c_333" for="PurposeType3">없음</label></p>
-                                                    </div>
-                                                    <span class="pt2 c_333">함</span>
-                                                </div>
-                                            </th>
-                                        </tr>
-                                        <tr>
-                                            <td class="al_l pdl_3 noborder_l" colspan="26"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="TotalAmount" name="TotalAmount" ></td>
-                                            <td class="al_l pdl_3" colspan="12"><input class="in_txt numeric money al_r" maxlength="22" tabindex="51" type="text" id="Cash" name="Cash" ></td>
-                                            <td class="al_l pdl_3" colspan="12"><input class="in_txt numeric money al_r" maxlength="22" tabindex="52" type="text" id="ChkBill" name="ChkBill" ></td>
-                                            <td class="al_l pdl_3" colspan="12"><input class="in_txt numeric money al_r" maxlength="22" tabindex="53" type="text" id="Note" name="Note" ></td>
-                                            <td class="al_l pdl_3" colspan="12"><input class="in_txt numeric money al_r" maxlength="22" tabindex="54" type="text" id="Credit" name="Credit" ></td>
-                                        </tr>
-                                    </tbody>
                                 </table>
                             </div>
                             <div style="display:flex;">
@@ -895,60 +840,87 @@
         class PopInvoiceComponent {
             constructor() {
 
-                this.grid = null;
-                this.viewData = new wijmo.collections.CollectionView();
-                this.selectedItem = null;
-                this.callback = null;
-                this.modalContainer = new PopupDraggable('업체 검색');
             }
 
-            close() {
-                this.modalContainer.close();
+            initAfterOpen() {
+                const taxType = $('input[name="TaxType"]:checked').val();
+                setTaxTypeLayout(taxType);
             }
-
-
         }
 
-        AjaxUtil.fillSelectOptions($('#sale_type'), 'system_code', 'all', false, 'sale_type');
-
-        $(document).on('click', '.calendar-trigger', function () {
-            const input = document.getElementById('writeDate');
-            if (input) {
-                input.showPicker?.() || input.focus();
-            }
-        });
 
         $(document).on('change', 'input[name="TaxType"]', function () {
-            const taxType = $(this).val();
+            const taxType = $(this).val(); // 과세 / 영세 / 면세
+            setTaxTypeLayout(taxType);
+        });
+
+        function setTaxTypeLayout(taxType) {
+            const $writeTypeSelect = $('#WriteTypeSelect');
 
             if (taxType === '영세') {
-                $('#taxName').text('영세율 세금계산서');
-                $('#WCostVAT').text('수량단가');
-                $('#WriteType2').val('수량단가');
-                $('#lblWriteType').hide();
-                $('#WriteType1').prop('checked', true);
-                $('input[id$=".Tax"]').attr('readonly', true);
                 $('.tax-related').show();
-                updateTaxLayout('과세'); // 영세지만 세액 칸은 유지
-            } else if (taxType === '면세') {
-                $('#taxName').text('계산서');
-                $('#WCostVAT').text('수량단가');
-                $('#WriteType2').val('수량단가');
-                $('#lblWriteType').hide();
+                $writeTypeSelect.html(`
+                    <option value="직접입력">직접입력</option>
+                    <option value="수량단가">수량단가</option>
+                `).val('직접입력').prop('disabled', false).trigger('change');
+
                 $('input[id$=".Tax"]').attr('readonly', true);
-                $('#WriteType1').prop('checked', true);
+                updateTaxLayout('과세'); // 영세지만 세액 칸은 유지
+
+            } else if (taxType === '면세') {
+                $('input[id$=".Tax"]').attr('readonly', true);
+                $writeTypeSelect.html(`
+                    <option value="직접입력">직접입력</option>
+                    <option value="수량단가">수량단가</option>
+                `).val('직접입력').prop('disabled', false).trigger('change');
                 updateTaxLayout('면세'); // 세액 숨기고 colspan 수정
+
             } else if (taxType === '과세'){
-                $('#taxName').text('세금계산서');
-                $('#WCostVAT').text('부가세 포함');
-                $('#WriteType2').val('부가세 포함');
-                $('#lblWriteType').show();
                 $('input[id$=".Tax"]').removeAttr('readonly');
-                $('#WriteType1').prop('checked', true);
                 updateTaxLayout('과세');
+
+                $writeTypeSelect.html(`
+                    <option value="부가세 별도">부가세 별도</option>
+                    <option value="부가세 포함">부가세 포함</option>
+                    <option value="합계금액">합계금액</option>
+                `).val('부가세 별도').prop('disabled', false).trigger('change');
+
             }
 
+            updateWriteTypeBehavior($writeTypeSelect.val());
             recalculateTaxesIfNeeded();
+        }
+
+        function updateWriteTypeBehavior(writeType) {
+            const $supplyCostInputs = $('#taxList').find('input[id$="SupplyCost"]');
+            const $taxInputs = $('#taxList').find('input[id$="Tax"]');
+
+            if (writeType === '부가세 포함') {
+                $supplyCostInputs.prop('readonly', true);
+                $taxInputs.prop('readonly', true);
+            } else if (writeType === '수량단가') {
+                $supplyCostInputs.prop('readonly', true);
+                $taxInputs.prop('readonly', true);
+            } else if (writeType === '직접입력') {
+                $supplyCostInputs.prop('readonly', false);
+                $taxInputs.prop('readonly', true); // 영세, 면세 기준
+            } else {
+                $supplyCostInputs.prop('readonly', false);
+                $taxInputs.prop('readonly', false);
+            }
+        }
+
+        $(document).on('change', '#WriteTypeSelect', function () {
+            const writeType = $(this).val();
+            updateWriteTypeBehavior(writeType);
+
+            if (writeType === '합계금액') {
+                $('#WriteTypeSelect').css('width', '100px');
+                $('#totalAmountAct').show();
+            } else {
+                $('#WriteTypeSelect').css('width', '100%');
+                $('#totalAmountAct').hide();
+            }
         });
 
         $(document).on('change', 'input[name="InvoiceeType"]', function () {
@@ -1051,7 +1023,6 @@
         });
 
 
-
         function updateTaxLayout(taxType) {
             const showTax = taxType === '과세'; // or taxType !== '면세'
 
@@ -1059,20 +1030,22 @@
                 // 1. 세액 관련 요소 숨김
                 $('.tax-related').hide();
 
-                // 2. 항목행: 공급가액 colspan 확장
+                // 2. 공급가액 colspan 확장 (세액 사라짐으로 해당 공간 차지)
+                $('td.pet0').attr('colspan', 42); // 기존 17 + 17
+
                 $('th[colspan="12"].pet4, td[colspan="12"].pet4').attr('colspan', 22);
 
-                // 3. 총계행: 공급가액 colspan 확장
-                $('th[colspan="47"].pet0, td[colspan="47"].pet0').attr('colspan', 89); // 47 + 42
             } else {
                 // 1. 세액 관련 요소 보임
                 $('.tax-related').show();
 
-                // 2. 항목행: 공급가액 colspan 복구
                 $('th.pet4, td.pet4').attr('colspan', 12);
 
-                // 3. 총계행: 공급가액 colspan 복구
-                $('th.pet0, td.pet0').attr('colspan', 47);
+                // 2. 공급가액 colspan 복구
+                $('th.pet0').attr('colspan', 8);
+
+                $('td.pet0').attr('colspan', 17);
+
             }
         }
 
@@ -1151,8 +1124,6 @@
             updateTotals();
             detailRowCount = rowCount;
         }
-
-
 
         // 품목행 추가 버튼
         $(document).on('click', '#btnAddFiveDetails', function () {
@@ -1279,7 +1250,7 @@
 
         function recalculateTaxesForRow($row) {
             const taxMode = $('input[name="TaxType"]:checked').val();       // 과세 / 영세 / 면세
-            const writeType = $('input[name="WriteType"]:checked').val();   // 단가 유형
+            const writeType = $('#WriteTypeSelect').val();   // 단가 유형
 
             const $qty = $row.find('input[id$="Qty"]');
             const $unitCost = $row.find('input[id$="UnitCost"]');
@@ -1288,19 +1259,17 @@
 
             let qty = parseFloat($qty.val().replace(/,/g, '').trim()) || 0;
             let unitCost = parseFloat($unitCost.val().replace(/,/g, '').trim()) || 0;
-            let supplyCost = 0;
-            let tax = 0;
 
-            const isQtyOrUnitChanged = $(event.target).is($qty) || $(event.target).is($unitCost);
+            if (qty > 0 && unitCost > 0) {
+                let supplyCost = 0;
+                let tax = 0;
 
-            if (isQtyOrUnitChanged && qty > 0 && unitCost > 0) {
                 if (writeType === '부가세 포함' && taxMode === '과세') {
                     const unitSupply = unitCost / 1.1;
                     const unitTax = unitCost - unitSupply;
                     supplyCost = Math.floor(unitSupply * qty);
                     tax = Math.floor(unitTax * qty);
                 } else {
-                    // 일반 과세 or 영세, 면세
                     supplyCost = qty * unitCost;
                     tax = (taxMode === '과세') ? Math.floor(supplyCost * 0.1) : 0;
                 }
@@ -1338,6 +1307,61 @@
 
             updateTotals();
         }
+
+        // "합계금액" 선택
+        $(document).on('change', '#WriteTypeSelect', function () {
+            console.log('WriteTypeSelect');
+            const writeType = $(this).val();
+            updateWriteTypeBehavior(writeType);
+
+            if (writeType === '합계금액') {
+                openPopup(); // 기존에 사용하던 모달 여는 함수
+            }
+        });
+
+        // "계산 창 열기" 버튼 클릭
+        $(document).on('click', '#totalAmountAct', function (event) {
+            console.log('totalAmountAct');
+            event.stopPropagation(); // 이벤트 버블링 막기
+            openPopup();
+        });
+
+        function openPopup() {
+            console.log('openPopup');
+            let poppage = new PopTotalAmountComponent();
+            console.log(typeof PopTotalAmountComponent);
+            let searchcallback = function (items) {
+                let index = 0;
+                while (true) {
+                    let $supplyCost = $(document).find('#detailList' + index + '\\.SupplyCost');
+                    let $tax = $(document).find('#detailList' + index + '\\.Tax');
+
+                    // 없으면 반복 종료
+                    if ($supplyCost.length === 0 || $tax.length === 0) {
+                        break;
+                    }
+
+                    // 비어있는 행 찾기
+                    if ($supplyCost.val().trim() === '' && $tax.val().trim() === '') {
+                        $supplyCost.val(items.supplyCost.toLocaleString());
+                        $tax.val(items.tax.toLocaleString());
+
+                        const $row = $supplyCost.closest('tr');
+                        recalculateTaxesForRow($row);
+                        updateTotals();
+
+                        break; // 입력했으면 멈춘다
+                    }
+
+
+                    index++;
+                }
+
+            };
+
+            poppage.show(searchcallback);
+        }
+
 
         // 수량 또는 단가 입력 → 공급가 + 세액 계산
         $(document).on('input', '#taxList input[id$="Qty"], #taxList input[id$="UnitCost"]', function () {
@@ -1380,8 +1404,6 @@
                 $(this).val(Number(raw).toLocaleString()); // 숫자면 콤마 다시 붙이기
             }
         });
-
-
 
         // 사업자번호 또는 주민등록번호 입력 시 자동 포맷 적용
         $(document).on('input', '#InvoicerCorpNum, #InvoiceeCorpNum', function () {
@@ -1473,8 +1495,74 @@
             $(this).val(formatted);
         });
 
+        // 계정코드 선택
+        $(document).on('click', '#btnSelectaccount_code', function () {
+            let poppage = new PopAccSubComponent();
+            let searchcallback = function (items) {
+                $(document).find('#account_code').val(items.accnm);
+                $(document).find('#account_codeHidden').val(items.acccd);
 
+            };
 
+            poppage.show(searchcallback);
+        });
+
+        // 귀속부서 선택
+        $(document).on('click', '#btnSelectatt_depart', function () {
+            let poppage = new PopDepartComponent();
+            let searchcallback = function (items) {
+                $(document).find('#att_depart').val(items.Name);
+                $(document).find('#att_departHidden').val(items.Code);
+
+            };
+
+            poppage.show(searchcallback);
+        });
+
+        // 프로젝트 선택
+        $(document).on('click', '#btnSelect_project', function () {
+            let poppage = new PopProjectComponent();
+            let searchcallback = function (items) {
+                $(document).find('#project').val(items.projnm);
+                $(document).find('#projectHidden').val(items.projno);
+
+            };
+
+            poppage.show(searchcallback);
+        });
+
+        // 이름 다 지우면 id 값도 빠짐
+        $(document).on('input', '#account_code', function () {
+            if ($(this).val().trim() === '') {
+                $('#account_codeHidden').val('');
+            }
+        });
+
+        $(document).on('input', '#att_depart', function () {
+            if ($(this).val().trim() === '') {
+                $('#att_departHidden').val('');
+            }
+        });
+
+        $(document).on('input', '#project', function () {
+            if ($(this).val().trim() === '') {
+                $('#projectHidden').val('');
+            }
+        });
+
+        $(document).on('input', 'textarea[id^="detailList"][id$=".ItemName"]', function () {
+            const id = $(this).attr('id'); // ex: detailList0.ItemName
+            const match = id.match(/^detailList(\d+)\.ItemName$/);
+
+            if (match !== null) {
+                const index = match[1];
+                const itemIdSelector = 'input[id="detailList' + index + '.ItemId"]'; // 속성 선택자 방식
+
+                if ($(this).val().trim() === '') {
+                    $(itemIdSelector).val('');
+                }
+            }
+        });
 
 
     </script>

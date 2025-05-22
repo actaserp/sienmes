@@ -47,10 +47,11 @@ public class SalesInvoiceController {
 	@GetMapping("/shipment_head_list")
 	public AjaxResult getShipmentHeadList(
 			@RequestParam("srchStartDt") String dateFrom,
-			@RequestParam("srchEndDt") String dateTo
+			@RequestParam("srchEndDt") String dateTo,
+			@RequestParam(value="comp_id", required=false) Integer cltcd
 	) {
 		
-		List<Map<String, Object>> items = this.salesInvoiceService.getShipmentHeadList(dateFrom,dateTo);
+		List<Map<String, Object>> items = this.salesInvoiceService.getShipmentHeadList(dateFrom,dateTo, cltcd);
 
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -86,6 +87,7 @@ public class SalesInvoiceController {
 		return new DecimalFormat("###,###.##").format(number);
 	}
 
+	// 공급자(사업장) 정보 가져오기
 	@GetMapping("/invoicer_read")
 	public AjaxResult getInvoicerDatail(
 			@RequestParam("spjangcd") String spjangcd
@@ -272,6 +274,12 @@ public class SalesInvoiceController {
 
 		User user = (User) auth.getPrincipal();
 		return salesInvoiceService.saveInvoiceBulkData(upload_file, spjangcd, user);
+	}
+
+	@PostMapping("/invoice_copy")
+	public AjaxResult copyInvoice(@RequestBody List<Map<String, String>> copyList) {
+
+		return salesInvoiceService.copyInvoice(copyList);
 	}
 
 }

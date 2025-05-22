@@ -306,12 +306,26 @@
                       </ul>
                     </dd>
                   </dl>
-
+                  <dl>
+                    <dt style="text-align: left;">
+                        <label for="btnCompanySearch_ship">
+                            거래처
+                        </label>
+                    </dt>
+                    <dd>
+                        <div class="input-clear">
+                            <input type="text" id="btnCompanySearch_ship" name="btnCompanySearch_ship" placeholder="클릭하여 검색"
+                               style="width: 160px;">
+                            <span class="btn-clear" style="display: none;">×</span>
+                        </div>
+                        <input type="hidden" id="cboCompanyHidden_ship">
+                    </dd>
+                  </dl>
                   <dl>
                     <dt>&nbsp;</dt>
                     <dd>
                       <li>
-                        <a class="btn btn-delete" title="검색" id="btnSearch">
+                        <a class="btn btn-delete" title="검색" id="btnSearch_ship">
                           <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
                           <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                           검색
@@ -395,7 +409,7 @@
     </script>
 
     <script type="text/x-tmpl" id="excelUploadInvoiceTemplate">
-        <div class="content_wrap popup" id="div_excel_upload">
+        <div class="content_wrap popup">
 
             <div class="table-wrap">
                 <form id="excelUploadForm">
@@ -441,9 +455,119 @@
             </div>
 
             <div class="popup-button">
+                <button type="button" class="btn-popup" id="btn_excel_form" >양식 받기</button>
                 <button type="button" class="btn-popup y_write_auth" id="btn_excel_save" >저장</button>
                 <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
             </div>
+        </div>
+    </script>
+
+    <script type="text/x-tmpl" id="popup_reMessageTemplate">
+
+        <div class="content_wrap popup">
+
+            <section class="section" style="padding: 10px;">
+
+                <div class="section-top">
+                    <div class="search-wrap" style="text-align: left;">
+                        <div id="preState">
+                            <div class="dialog_note_box mgt_0">
+                                <ul>
+                                    <li>메일을 보낼 이메일을 입력하세요.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container-fluid">
+                        <div class="dialog_box">
+                            <table class="dialog_table" id="reMessage">
+                                <colgroup>
+                                    <col width="80px">
+                                    <col>
+                                    <col width="80px">
+                                    <col>
+                                </colgroup>
+                                <tbody>
+                                    <tr>
+                                        <th class="al_l noborder_l">이메일1</th>
+                                        <td class="al_r" colspan="3">
+                                            <input class="in_txt" id="reMessage1" maxlength="50" style="width:347px;height:30px;" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="al_l noborder_l">이메일2</th>
+                                        <td class="al_r" colspan="3">
+                                            <input class="in_txt" id="reMessage2" maxlength="50" style="width:347px;height:30px;" type="text">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="al_l noborder_l">이메일3</th>
+                                        <td class="al_r" colspan="3">
+                                            <input class="in_txt" id="reMessage3" maxlength="50" style="width:347px;height:30px;" type="text">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+                <div class="popup-button">
+                    <button type="button" class="btn-popup" id="btnSend" ><span data-commonCd="보내기">보내기</span></button>
+                    <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
+                </div>
+
+
+        </div>
+    </script>
+
+    <script type="text/x-tmpl" id="popup_copyTemplate">
+
+        <div class="content_wrap popup">
+
+            <section class="section" style="padding: 10px;">
+
+                <div class="section-top">
+                    <div class="search-wrap" style="text-align: left;">
+                        <div id="preState">
+                            <div class="dialog_note_box mgt_0">
+                                <ul>
+                                    <li>선택한 그리드의 매출이 복사됩니다.</li>
+                                    <li>복사된 그리드는 해당 작성일자로 저장됩니다.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container-fluid">
+                        <div class="dialog_box">
+                            <table class="dialog_table" id="reMessage">
+                                <colgroup>
+                                    <col width="80px">
+                                    <col>
+                                    <col width="80px">
+                                    <col>
+                                </colgroup>
+                                <tbody>
+                                    <tr>
+                                        <th class="al_l noborder_l">작성일자</th>
+                                        <td class="al_r" colspan="3">
+                                            <input class="in_txt" id="WriteDate" maxlength="50" style="width:180px;height:30px;" type="date">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+                <div class="popup-button">
+                    <button type="button" class="btn-popup" id="btnCopy"><span data-commonCd="복사하기">복사하기</span></button>
+                    <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
+                </div>
         </div>
     </script>
 
@@ -454,7 +578,7 @@
     <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
     <th:block th:replace="/common/popup_company :: popup_company"></th:block>
     <th:block th:replace="/common/popup_invoice :: popup_invoice"></th:block>
-    <th:block th:replace="/common/popup_totalAmount :: popup_totalAmount"></th:block>
+
 
     <script type="text/javascript">
         class SalesInvoicePage {
@@ -830,6 +954,45 @@
 
                 });
 
+                // 매출 복사 버튼
+                $('#btnCopy').click(function (e) {
+                    const items = _this.grid.rows
+                        .filter(row => row.isSelected)
+                        .map(row => row.dataItem);
+
+                    if (items.length === 0) {
+                        Alert.alert('', '복사할 항목을 선택해주세요.');
+                        return;
+                    }
+
+                    let content = tmpl('popup_copyTemplate', {});
+                    let $content = $(content);
+                    let modalContainer = new PopupDraggable('복사하기');
+                    modalContainer.open({width: 615, height: 450, $content});
+
+                    $content.find('#btnCopy').click(function () {
+                        let WriteDate = $content.find('#WriteDate').val();
+                        Alert.confirm('', '선택한 날짜로 복사 하시겠습니까?', function () {
+                            const copyList = items.map(item => ({
+                                misnum: item.misnum,
+                                writedate: WriteDate
+                            }));
+
+                            let url = _this.url + '/invoice_copy';
+                            AjaxUtil.postJsonData(url, copyList, function (res) {
+                                if (res.success) {
+                                    Alert.alert('', res.message || '복사되었습니다.', function () {
+                                        console.log('res.success', res);
+                                        _this.searchMainData();
+                                    });
+                                } else {
+                                    Alert.alert('', res.message || '복사 중 오류가 발생했습니다.');
+                                }
+                            });
+                        });
+                    });
+                });
+
                 // 발행 취소 버튼
                 // $('#btnIssueCancel').click(function (e) {
                 //     const items = _this.grid.rows
@@ -895,7 +1058,6 @@
             deleteinvoice(items, skipConfirm = false, onComplete = null) {
                 let _this = this;
 
-
                 const runDelete = function () {
                     const allDeleteList = items.map(item => ({misnum: item.misnum}));
 
@@ -925,7 +1087,7 @@
                             const finalDeleteList = [...nonPopbillDeleteList, ...filteredPopbillList];
 
                             if (finalDeleteList.length === 0) {
-                                Alert.alert('', '삭제할 항목이 없습니다.');
+                                Alert.alert('', '팝빌에 등록된 문서번호가 없습니다.');
                                 return;
                             }
 
@@ -1005,6 +1167,20 @@
 
                 $content.find('#modal-close-button').on('click', function () {
                     uploadedFiles = [];  // 파일 리스트 초기화
+                });
+
+                $content.find('#btn_excel_form').on('click', function () {
+                    let _this = this;
+                    //let url = '/api/files/mes_form?action=suju_upload';
+                    let fileName = "세금계산서양식.xlsx";
+                    let url = '/api/files/mes_form?file_name=' + fileName;
+                    /*
+                    let data = {
+                        //'tableName' : tableName,
+                        'file_name': "수주업로드양식.xlsx",
+                    };
+                    */
+                    AjaxUtil.downloadFile(url, fileName);
                 });
             }
 
@@ -1197,12 +1373,7 @@
                     $content.find('input[name="InvoiceeType"]:checked').trigger('change');
 
                     let $saleType = $content.find('#sale_type');
-
-                    AjaxUtil.fillSelectOptions($saleType, 'system_code', 'choose', false, 'sale_type', function () {
-                        const selectedText = $saleType.find('option:selected').text();
-                        $content.find('#sale_type_print').val(selectedText);
-                    });
-
+                    AjaxUtil.fillSelectOptions($saleType, 'system_code', 'choose', false, 'sale_type');
 
                     $content.find('#taxName').text('거래명세서');
 
@@ -1229,36 +1400,7 @@
                 let code = null;
 
                 setTimeout(() => {
-                    code = data.StateCode;
-                    console.log('code', code);
 
-                    // 상태 코드별 버튼 표시
-                    if (code === undefined || code === null || code === 100 || code === 999) {
-                        $content.find('#btnInvoiceSave').show(); // 저장 버튼
-                    }
-
-                    if (code === 305 || code === 600) {
-                        $content.find('#btnReSave').show(); // 실패 후 다시 저장 버튼
-                        $content.find('#btnInvoiceSave').hide();
-                    }
-
-                    if (code === 600) {
-                        $content.find('#btnDelete').show(); // 삭제 버튼
-                    }
-
-                    if (code === 300) {
-                        $content.find('#btnIssueCancel').show(); // 발행취소 버튼
-                        $content.find('#btnReMessage').show();   // 재전송 버튼
-                    }
-
-                    if ([301, 302, 303].includes(code)) {
-                        $content.find('#btnReMessage').show();   // 기타 전송 상태 재전송 버튼
-                    }
-
-                    if (code === 304) {
-                        $content.find('#btnReMessage').show();
-                        $content.find('#btnInvoiceSave').show(); // 수정 후 저장 허용
-                    }
                 }, 0);
 
                 let modalContainer = null;
@@ -1267,41 +1409,49 @@
                 let $saleType = $content.find('#sale_type');
                 AjaxUtil.fillSelectOptions($saleType, 'system_code', 'choose', false, 'sale_type');
 
+                // 발행 구분
+                let $issueDiv = $content.find('#issue_div');
+                let rows1 = AjaxUtil.getSelectData('system_code', 'issue_div_default');
+                let selectedValue = rows1.length > 0 ? rows1[0].value : null;
+                AjaxUtil.fillSelectOptions($issueDiv, 'system_code', 'choose', selectedValue, 'issue_div');
+
+                // 발행 목적
+                let $purposeType = $content.find('#purpose_type');
+                let rows2 = AjaxUtil.getSelectData('system_code', 'PurposeType');
+                console.log('rows2', rows2);
+                let selectedValue2 = rows2.length > 0 ? rows2[0].text : null;
+                console.log('selectedValue2', selectedValue2);
+                if (selectedValue2) {
+                    $purposeType.val(selectedValue2).trigger('change');
+                }
+
+
                 if (data.mode === 'new') {
                     modalContainer = new PopupDraggable('등록');
 
-                    let purposeType = AjaxUtil.getSyncData('/api/definition/code/getvalue', {code: 'PurposeType'});
+                    // // 공급자 정보 불러오기
+                    // let data1 = {
+                    //     spjangcd: sessionStorage.getItem('spjangcd'),
+                    // };
+                    // let url = _this.url + '/invoicer_read';
+                    // let fnSaveSuccess = function (result) {
+                    //     if (result.success) {
+                    //         $content.find('#InvoicerCorpNum').val(result.data.saupnum).trigger('input');
+                    //         // $content.find('#InvoicerTaxRegID').val(result.data);
+                    //         $content.find('#InvoicerCorpName').val(result.data.spjangnm);
+                    //         $content.find('#InvoicerCEOName').val(result.data.prenm);
+                    //         $content.find('#InvoicerAddr').val(result.data.address);
+                    //         $content.find('#InvoicerBizType').val(result.data.biztype);
+                    //         $content.find('#InvoicerBizClass').val(result.data.item);
+                    //         $content.find('#InvoicerContactName').val(result.data.agnertel1);
+                    //         $content.find('#InvoicerTEL').val(result.data.agnertel2).trigger('input');
+                    //         $content.find('#InvoicerEmail').val(result.data.emailadres);
+                    //
+                    //     }
+                    // };
+                    // AjaxUtil.getAsyncData(url, data1, fnSaveSuccess);
 
-                    if (purposeType.data.Value === '영수') {
-                        $content.find('#PurposeType1').prop('checked', true);
-                    } else if (purposeType.data.Value === '청구') {
-                        $content.find('#PurposeType2').prop('checked', true);
-                    } else if (purposeType.data.Value === '없음') {
-                        $content.find('#PurposeType3').prop('checked', true);
-                    }
-
-                    // 공급자 정보 불러오기
-                    let data1 = {
-                        spjangcd: sessionStorage.getItem('spjangcd'),
-                    };
-                    let url = _this.url + '/invoicer_read';
-                    let fnSaveSuccess = function (result) {
-                        if (result.success) {
-                            $content.find('#InvoicerCorpNum').val(result.data.saupnum).trigger('input');
-                            // $content.find('#InvoicerTaxRegID').val(result.data);
-                            $content.find('#InvoicerCorpName').val(result.data.spjangnm);
-                            $content.find('#InvoicerCEOName').val(result.data.prenm);
-                            $content.find('#InvoicerAddr').val(result.data.address);
-                            $content.find('#InvoicerBizType').val(result.data.biztype);
-                            $content.find('#InvoicerBizClass').val(result.data.item);
-                            $content.find('#InvoicerContactName').val(result.data.agnertel1);
-                            $content.find('#InvoicerTEL').val(result.data.agnertel2).trigger('input');
-                            $content.find('#InvoicerEmail').val(result.data.emailadres);
-
-                        }
-                    };
-                    AjaxUtil.getAsyncData(url, data1, fnSaveSuccess);
-
+                    // 출고리스트에서 작성시에는 신규이지만 거래처 정보가 있음
                     if (data.invoicee) {
                         const i = data.invoicee;
                         $content.find('#InvoiceeID').val(i.id).trigger('change');
@@ -1322,6 +1472,32 @@
                 } else {
                     modalContainer = new PopupDraggable('상세보기');
                     setTimeout(() => {
+
+                        code = data.StateCode;
+                        console.log('code', code);
+
+                        // 상태 코드별 버튼 표시
+                        if (code === undefined || code === null || code === 100 || code === 999) {
+                            $content.find('#btnInvoiceSave').show(); // 저장or수정 버튼
+                            $content.find('#btnDelete').show();
+                        }
+
+                        if (code === 305 || code === 600) {
+                            $content.find('#btnReSave').show(); // 실패 후 다시 저장 버튼
+                            $content.find('#btnInvoiceSave').hide();
+                            $content.find('#btnDelete').show(); // 삭제 버튼
+                        }
+
+                        if (code === 300) {
+                            $content.find('#btnIssueCancel').show(); // 발행취소 버튼
+                            $content.find('#btnReMessage').show();   // 재전송 버튼
+                            $content.find('#btnInvoiceSave').hide();
+                        }
+
+                        if ([301, 302, 303, 304].includes(code)) {
+                            $content.find('#btnReMessage').show();   // 기타 전송 상태 재전송 버튼
+                            $content.find('#btnInvoiceSave').hide();
+                        }
 
                         const stateName = data.statecode_name;
                         if (stateName) {
@@ -1360,15 +1536,18 @@
                     }, 0);
 
                 }
-                modalContainer.open({width: 1200, height: 680, $content});
-
+                const popInvoice = new PopInvoiceComponent();
+                modalContainer.open({width: 1200, height: 600, $content});
+                setTimeout(() => {
+                    popInvoice.initAfterOpen();
+                }, 0);
                 initializeDetailRows(data.detailList || []);
 
-
+                // 신규 버튼 클릭
                 $content.find('#btnInvoiceNew').click(function () {
                     const $form = $content.find('#taxForm');
 
-                    const excludeIds = ['ChargeDirection', 'IssueType']; // 초기화하지 않을 id들
+                    const excludeIds = ['ChargeDirection', 'IssueType', 'WriteTypeSelect', 'issue_div', 'purpose_type']; // 초기화하지 않을 id들
 
                     $form.find('input, select, textarea').each(function () {
                         const id = $(this).attr('id');
@@ -1558,47 +1737,6 @@
                     pop.searchDataBind();
                 });
 
-                // "합계금액" 라디오 버튼 클릭
-                $content.find('#WriteType4').click(function (event) {
-                    event.stopPropagation(); // 이벤트 버블링 막기
-                    openPopup();
-                });
-
-                // "계산" 버튼 클릭
-                $content.find('#totalAmountAct').click(function (event) {
-                    event.stopPropagation(); // 이벤트 버블링 막기
-                    openPopup();
-                });
-
-                function openPopup() {
-                    let poppage = new PopTotalAmountComponent();
-
-                    let searchcallback = function (items) {
-                        let index = 0;
-                        while (true) {
-                            let $supplyCost = $content.find('#detailList' + index + '\\.SupplyCost');
-                            let $tax = $content.find('#detailList' + index + '\\.Tax');
-
-                            // 없으면 반복 종료
-                            if ($supplyCost.length === 0 || $tax.length === 0) {
-                                break;
-                            }
-
-                            // 비어있는 행 찾기
-                            if ($supplyCost.val().trim() === '' && $tax.val().trim() === '') {
-                                $supplyCost.val(items.supplyCost.toLocaleString());
-                                $tax.val(items.tax.toLocaleString());
-                                break; // 입력했으면 멈춘다
-                            }
-
-                            index++;
-                        }
-
-                    };
-
-                    poppage.show(searchcallback);
-                }
-
                 if (data.shipids) {
                     if (Array.isArray(data.shipids)) {
                         _this.shipmentheadids = data.shipids.map(id => parseInt(id, 10));
@@ -1643,7 +1781,6 @@
                         AjaxUtil.postJsonAsyncData(url, data, function (result) {
                             if (result.success) {
                                 Notify.success("저장되었습니다.");
-                                modalContainer.close();
                                 _this.shipmentheadids = [];
                                 _this.searchMainData();
                             } else {
@@ -1674,7 +1811,11 @@
                         statecode: code // 앞서 showInvoiceForm에서 설정한 상태코드
                     };
 
-                    _this.deleteinvoice([item]);
+                    _this.deleteinvoice([item], false, function () {
+                        if (modalContainer) {
+                            modalContainer.close(); // 삭제 완료 후 모달 닫기
+                        }
+                    });
                 });
 
                 // 계산서 저장 버튼
@@ -1707,6 +1848,71 @@
                     } else {
                         _this.modify(item);
                     }
+                });
+
+                // 발행 취소 버튼
+                let $btnIssueCancel = $content.find('#btnIssueCancel');
+                $btnIssueCancel.click(function (e) {
+
+                    Alert.confirm('', '선택한 항목을 발행 취소하시겠습니까?', function () {
+                        const misnum = $content.find('#misnum').val();
+                        const item = {
+                            misnum: misnum
+                        };
+
+                        let url = _this.url + '/cancel_issue';
+                        AjaxUtil.postJsonData(url, [item], function (res) {
+                            if (res.success) {
+                                Alert.alert('', res.message || '발행이 취소되었습니다.', function () {
+                                    console.log('res.success', res);
+                                    _this.searchMainData();
+                                });
+                            } else {
+                                Alert.alert('', res.message || '발행 중 오류가 발생했습니다.');
+                            }
+                        });
+                    });
+
+                });
+
+                // 재전송 버튼
+                let $btnReMessage = $content.find('#btnReMessage');
+                $btnReMessage.click(function (e) {
+
+                    let popupHtml = tmpl('popup_reMessageTemplate', {});
+                    let $popupContent = $(popupHtml);
+                    let modalContainer = new PopupDraggable('재전송 ');
+                    modalContainer.open({width: 490, height: 350, $content: $popupContent});
+
+                    const currentEmail = $content.find('#InvoiceeEmail1').val();
+                    $popupContent.find('#reMessage1').val(currentEmail || '');
+
+                    $popupContent.find('#btnSend').click(function () {
+                        const email1 = $popupContent.find('#reMessage1').val();
+                        const email2 = $popupContent.find('#reMessage2').val();
+                        const email3 = $popupContent.find('#reMessage3').val();
+                        const misnum = $content.find('#misnum').val();
+                        const item = {
+                            misnum: misnum,
+                            email1: email1,
+                            email2: email2,
+                            email3: email3
+                        };
+
+                        let url = _this.url + '/re_message';
+                        AjaxUtil.postJsonData(url, [item], function (res) {
+                            if (res.success) {
+                                Alert.alert('', res.message || '재전송 되었습니다.', function () {
+                                    console.log('res.success', res);
+                                    _this.searchMainData();
+                                    modalContainer.close();
+                                });
+                            } else {
+                                Alert.alert('', res.message || '발행 중 오류가 발생했습니다.');
+                            }
+                        });
+                    });
+
                 });
 
 
@@ -1939,18 +2145,63 @@
                     }
                 });
 
-                $content.find('#btnSearch').on('click', function () {
+                $content.find('#btnCompanySearch_ship').click(function () {
+                    let poppage = new PopCompComponent();
+                    let $poppage = $(poppage);
+                    let searchcallback = function (items) {
+                        console.log('btnCompanySearch_ship', items);
+                        console.log('$content.find(\'btnCompanySearch_ship\')', $content.find('btnCompanySearch'));
+                        $content.find('#btnCompanySearch_ship').val(items.compname);
+                        $content.find('#cboCompanyHidden_ship').val(items.id);
+
+                        // 수동으로 input 이벤트 발생
+                        $content.find('#btnCompanySearch_ship').trigger('input');
+                    };
+
+                    poppage.show(searchcallback);
+                });
+
+                $content.find('#btnSearch_ship').on('click', function () {
                     fnLoadShipList();
+                });
+
+                // input 감지 → x 버튼 표시/숨김, 히든값 클리어
+                $content.on('input', '#btnCompanySearch_ship', function () {
+                    let $clearBtn = $(this).closest('.input-clear').find('.btn-clear');
+                    let value = $(this).val().trim();
+
+                    if (value) {
+                        $clearBtn.show();
+                    } else {
+                        $clearBtn.hide();
+                        $content.find('#cboCompanyHidden_ship').val('');
+                    }
+                });
+
+                // x 버튼 클릭 → 텍스트 초기화 및 input 이벤트 트리거
+                $content.on('click', '.btn-clear', function () {
+                    const $input = $(this).siblings('input[type="text"]');
+                    $input.val('').trigger('input'); // input 이벤트 강제 발생
+                });
+
+                $content.on('click', '.radio-box-mo', function (e) {
+                    const $radio = $(this).find('input[type=radio]');
+                    $radio.prop('checked', true).trigger('change');
                 });
 
                 let start = $content.find('#srchStartDt');
                 let end = $content.find('#srchEndDt');
 
+
                 start.val(CommonUtil.getYYYYMMDD(-7));
                 end.val(CommonUtil.getYYYYMMDD());
 
                 let fnLoadShipList = function () {
+                    let cltcd = $content.find('#cboCompanyHidden_ship').val();
+
                     let fnsuccess = function (result) {
+
+                        console.log('result', result.data);
                         if (result.data !== null) {
                             _this.shipListGrid.itemsSource = new wijmo.collections.CollectionView(result.data);
                             _this.shipSelector = new wijmo.grid.selector.Selector(_this.shipListGrid);
@@ -1960,6 +2211,7 @@
                     let shipParam = {
                         'srchStartDt': start.val(),
                         'srchEndDt': end.val(),
+                        'comp_id': cltcd
                     };
 
                     AjaxUtil.getAsyncData(_this.url + '/shipment_head_list', shipParam, fnsuccess);
@@ -2087,6 +2339,7 @@
 
             AjaxUtil.fillSelectOptions($('#cboStatecode'), 'system_code', 'all', '', 'state_code_pb');
             AjaxUtil.fillSelectOptions($('#cboInvoice'), 'system_code', 'all', '', 'sale_type');
+
 
             $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
             $('#srchEndDt').val(CommonUtil.getYYYYMMDD());

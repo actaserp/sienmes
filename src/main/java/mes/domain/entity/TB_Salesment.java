@@ -91,6 +91,9 @@ public class TB_Salesment {
     private String iveremail;
     private String issuediv;
     private String ntscode;
+    private String accsubcode;
+    private String departcode;
+    private String projectcode;
 
     @OneToMany(mappedBy = "salesment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TB_SalesDetail> details = new ArrayList<>();

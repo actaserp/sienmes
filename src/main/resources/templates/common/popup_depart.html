@@ -1,0 +1,177 @@
+<th:block th:fragment="popup_depart">
+    <script type="text/x-tmpl" id="popup_departSearchTemplate">
+
+        <div class="content_wrap popup">
+
+            <section class="section" style="padding-top: 10px;">
+
+                <div class="section-top">
+                    <div class="search-wrap" style="text-align: left;">
+                        <dl>
+                            <dt>
+                                <label for="srchCode">
+                                    부서코드<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="text" id="srchCode" name="srchCode" style="width:160px;"/>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label for="srchName">
+                                    부서명<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="text" id='srchName' name="srchName" style="width:160px;"/>
+                                </div>
+                            </dd>
+                        </dl>
+
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="container-fluid">
+                        <div id="search-grid" style="height: 300px;"></div>
+                    </div>
+                </div>
+
+            </section>
+
+                <div class="popup-button">
+                    <button type="button" class="btn-popup" id="btnSelect" ><span data-commonCd="선택">선택</span></button>
+                    <button type="button" class="btn-popup" id="btn-search-close"><span data-commonCd="닫기">닫기</span></button>
+                </div>
+
+
+        </div>
+    </script>
+
+    <script type="text/javascript">
+
+        class PopDepartComponent {
+            constructor() {
+
+                this.grid = null;
+                this.viewData = new wijmo.collections.CollectionView();
+                this.selectedItem = null;
+                this.callback = null;
+                this.modalContainer = new PopupDraggable('부서 선택');
+                this.$btnSearch = null;
+                this.$btnSelect = null;
+                this.$srchName = null;
+                this.$srchCode = null;
+            }
+
+            searchDataBind() {
+                let _this = this;
+                let url = '/api/popup/search_depart';
+                let data = {
+                    'srchCode': _this.$srchCode.val(),
+                    'srchName': _this.$srchName.val(),
+                    'spjangcd': sessionStorage.getItem('spjangcd')
+                };
+
+                let result = AjaxUtil.getSyncData(url, data);
+                if (result) {
+                    _this.viewData.sourceCollection = result.data;
+                }
+
+                //검색버튼을 누르고 초기화한다
+                this.selectedItem = null;
+            }
+
+            selectData(item) {
+                if (typeof this.callback !== 'undefined' && this.callback != null) {
+                    this.callback(item);
+                }
+                this.close();
+            }
+
+            show(callback) {
+                let _this = this;
+
+                this.callback = callback;
+
+                let content = tmpl('popup_departSearchTemplate', {});
+                let $content = $(content);
+                this.modalContainer.open({ width: 800, height: 500, $content });
+
+                this.grid = new wijmo.grid.FlexGrid('#search-grid', {
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    columns: [
+                        { binding: 'Code', header: '부서 코드', width: 120, align: 'center' },
+                        { binding: 'Name', header: '부서명', width: '*', align: 'left' },
+                        { binding: 'Type', header: '유형', width: 120, align: 'left' },
+                        { binding: 'Description', header: '비고', width: 120, align: 'center' }
+                    ],
+                    itemsSource: this.viewData,
+                });
+                this.grid.rowHeaders.columns.splice(0, 1);
+                new FlexGridContextMenu(this.grid);
+                this.grid.downloadFileName = '부서';
+
+                this.$btnSearch = $content.find('#btnSearch');
+                this.$srchCode = $content.find('#srchCode');
+                this.$srchName = $content.find('#srchName');
+                this.$btnSelect = $content.find('#btnSelect');
+
+
+                this.$btnSearch.click(function (e) {
+                    _this.searchDataBind();
+                });
+
+                _this.searchDataBind();
+
+                this.$btnSelect.click(function (e) {
+                    // 그리드에서 현재 선택된 item을 찾아서 호출한다.
+                    let items = _this.grid.selectedItems;
+                    if (items.length === 0) {
+                        return false;
+                    }
+                    _this.selectData(items[0]);
+                });
+
+
+                //닫기버튼을 아래 ID로 사용한다면 호출하는 화면에서 이벤트 처리 필요없음
+                $content.find('#btn-search-close').on('click', function () {
+                    _this.close();
+                });
+
+                //새로고침
+                // $('#btnTest').click(function (e) {
+                //     _this.grid.collectionView.refresh(); // Wijmo 그리드 새로고침
+                // });
+
+                this.grid.hostElement.addEventListener('dblclick', function (e) {
+                    let items = _this.grid.selectedItems;
+                    if (items.length === 0) {
+                        return false;
+                    }
+                    _this.selectData(items[0]); // btnCompSelect 클릭과 동일한 동작
+                });
+            }
+
+            close() {
+                this.modalContainer.close();
+            }
+        }
+
+    </script>

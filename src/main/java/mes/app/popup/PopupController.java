@@ -385,6 +385,113 @@ public class PopupController {
 		return result;
 	}
 
+	@RequestMapping("/search_acc_sub")
+	public AjaxResult getSearchAccSubject(
+			@RequestParam(value = "srchCode", required = false) String srchCode,
+			@RequestParam(value = "srchName", required = false) String srchName,
+			@RequestParam(value = "spjangcd") String spjangcd){
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("srchCode", srchCode);
+		paramMap.addValue("srchName", srchName);
+		paramMap.addValue("spjangcd", spjangcd);
+		AjaxResult result = new AjaxResult();
+
+		String sql = """
+            select *
+            from tb_accsubject
+            WHERE spjangcd = :spjangcd
+            and "useyn" = 'Y'
+			""";
+
+		if (srchCode != null && !srchCode.isEmpty()) {
+			sql += " AND \"acccd\" ILIKE :srchCode ";
+			paramMap.addValue("srchCode", "%" + srchCode + "%");
+		}
+
+		if (srchName != null && !srchName.isEmpty()) {
+			sql += " AND \"accnm\" ILIKE :srchName ";
+			paramMap.addValue("srchName", "%" + srchName + "%");
+		}
+
+		sql += " ORDER BY \"acccd\" ASC ";
+
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+
+		return result;
+	}
+
+	@RequestMapping("/search_project")
+	public AjaxResult getSearchProject(
+			@RequestParam(value = "srchCode", required = false) String srchCode,
+			@RequestParam(value = "srchName", required = false) String srchName,
+			@RequestParam(value = "spjangcd") String spjangcd){
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("srchCode", srchCode);
+		paramMap.addValue("srchName", srchName);
+		paramMap.addValue("spjangcd", spjangcd);
+		AjaxResult result = new AjaxResult();
+
+		String sql = """
+            select *
+            from TB_DA003
+            WHERE spjangcd = :spjangcd
+			""";
+
+		if (srchCode != null && !srchCode.isEmpty()) {
+			sql += " AND \"projno\" ILIKE :srchCode ";
+			paramMap.addValue("srchCode", "%" + srchCode + "%");
+		}
+
+		if (srchName != null && !srchName.isEmpty()) {
+			sql += " AND \"projnm\" ILIKE :srchName ";
+			paramMap.addValue("srchName", "%" + srchName + "%");
+		}
+
+		sql += " ORDER BY \"stdate\" DESC ";
+
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+
+		return result;
+	}
+
+	@RequestMapping("/search_depart")
+	public AjaxResult getSearchDepart(
+			@RequestParam(value = "srchCode", required = false) String srchCode,
+			@RequestParam(value = "srchName", required = false) String srchName,
+			@RequestParam(value = "spjangcd") String spjangcd){
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("srchCode", srchCode);
+		paramMap.addValue("srchName", srchName);
+		paramMap.addValue("spjangcd", spjangcd);
+		AjaxResult result = new AjaxResult();
+
+		String sql = """
+            select *
+            from depart
+            WHERE spjangcd = :spjangcd
+			""";
+
+		if (srchCode != null && !srchCode.isEmpty()) {
+			sql += " AND \"Code\" ILIKE :srchCode ";
+			paramMap.addValue("srchCode", "%" + srchCode + "%");
+		}
+
+		if (srchName != null && !srchName.isEmpty()) {
+			sql += " AND \"Name\" ILIKE :srchName ";
+			paramMap.addValue("srchName", "%" + srchName + "%");
+		}
+
+		sql += " ORDER BY \"Code\" ASC ";
+
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+
+		return result;
+	}
+
+
 	@RequestMapping("/get_Comp")
 	public AjaxResult getSearchComp(
 			@RequestParam(value = "id", required = false) Integer id
@@ -457,7 +564,7 @@ public class PopupController {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("bankName", bankName);
 		paramMap.addValue("accountNumber", accountNumber);
-//		log.info("계좌 팝업 요청 들어옴, bankName:{}, accountNumber:{}", bankName, accountNumber);
+		log.info("계좌 팝업 요청 들어옴, bankName:{}, accountNumber:{}", bankName, accountNumber);
 		String sql = """
 				select
 				ta.accid,
