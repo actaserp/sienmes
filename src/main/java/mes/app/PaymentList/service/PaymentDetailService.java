@@ -60,7 +60,7 @@ public class PaymentDetailService {
                  -- ) files ON TRUE
 
                  WHERE e080.spjangcd = 'ZZ'
-                  -- AND e080.personid = :personid
+                  AND e080.personid = :personid
                   AND e080.flag = '1'
         """);
     // startDate 필터링
@@ -98,7 +98,7 @@ public class PaymentDetailService {
   }
 
 
-  public List<Map<String, Object>> getPaymentList1(String spjangcd, String startDate, String endDate) {
+  public List<Map<String, Object>> getPaymentList1(String spjangcd, String startDate, String endDate, Integer personid) {
     MapSqlParameterSource params = new MapSqlParameterSource();
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -108,14 +108,13 @@ public class PaymentDetailService {
     params.addValue("as_stdate", startDateFormatted);
     params.addValue("as_enddate", endDateFormatted);
     params.addValue("as_spjangcd", spjangcd);
-//    params.addValue("as_perid", agencycd);
+    params.addValue("as_personid", personid);
     StringBuilder sql = new StringBuilder("""
           SELECT
-            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '001' AND flag = '1' AND repodate BETWEEN :as_stdate AND :as_enddate AND spjangcd = :as_spjangcd) AS appgubun1,
-            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '101' AND flag = '1' AND repodate BETWEEN :as_stdate AND :as_enddate) AS appgubun2,
-            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '131' AND flag = '1' AND repodate BETWEEN :as_stdate AND :as_enddate) AS appgubun3,
-            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '201' AND flag = '1' AND repodate BETWEEN :as_stdate AND :as_enddate) AS appgubun4
-          
+            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '001' AND personid = :as_personid AND flag = '1' AND repodate BETWEEN :as_stdate AND :as_enddate AND spjangcd = :as_spjangcd) AS appgubun1,
+            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '101' AND personid = :as_personid AND flag = '1' AND repodate BETWEEN :as_stdate AND :as_enddate) AS appgubun2,
+            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '131' AND personid = :as_personid AND flag = '1' AND repodate BETWEEN :as_stdate AND :as_enddate) AS appgubun3,
+            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '201' AND personid = :as_personid AND flag = '1' AND repodate BETWEEN :as_stdate AND :as_enddate) AS appgubun4
         """);
 //    log.info("결재목록_문서현황 List SQL: {}", sql);
 //    log.info("SQL Parameters: {}", params.getValues());

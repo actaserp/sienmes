@@ -112,8 +112,9 @@ public class PaymentDetailController {
       User user = (User) auth.getPrincipal();
 //      String agencycd = user.getAgencycd().replaceFirst("^p", "");
       String userName = user.getFirst_name();
+      Integer personid = user.getPersonid();
       // 데이터 조회
-      List<Map<String, Object>> getPaymentList = paymentDetailService.getPaymentList1(spjangcd, startDate, endDate);
+      List<Map<String, Object>> getPaymentList = paymentDetailService.getPaymentList1(spjangcd, startDate, endDate, personid);
 
 
       // 데이터가 있을 경우 성공 메시지
