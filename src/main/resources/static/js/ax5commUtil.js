@@ -342,6 +342,7 @@ var Notify = {
             icon: '<i class="far fa-bell"></i>',
             containerPosition: 'bottom-right',
             closeIcon: '<i class="fa fa-times"></i>',
+            displayTime: 5000,
             lang: {
                 "ok": i18n.getCommonText("닫기")
             }
@@ -351,7 +352,8 @@ var Notify = {
         let message = i18n.getCommonText(msg);
         toast.push({
             theme: 'success',
-            msg: message
+            msg: message,
+            displayTime : 8000
         }, function () {
         });
     },
