@@ -764,7 +764,7 @@
 
 <script type="text/javascript">
   var isChangeLang = 'N';
-
+  let clickedButtonId = '';
 
   function showLoader() {
     document.getElementById('loader2').style.display = 'block';
@@ -1243,6 +1243,10 @@
       $('#loginId').focus();
     }
 
+    document.getElementById('AttendanceManage').addEventListener('click', function() {
+      clickedButtonId = 'AttendanceManage';
+    });
+
     function submitHandler(form) {
 
       var submitData = $(form).serialize() + '&isChangeLang=' + isChangeLang;
@@ -1276,14 +1280,42 @@
         else {
           if (code === 'OK') {
             console.log("OK 진입")
-            console.log("form.id", form.id)
-            if (form.id === 'productionManage') {
-              location.href = "/mobile_pro/MobileFirstPage"; // 생산관리 페이지로 이동
+            if (clickedButtonId === 'productionManage') {
+              let lang_cd = sessionStorage.getItem('lang_code');
+              let url = '/api/common/labels';
+              let pData = { lang_code: lang_cd };
+              let fnsuccess = function (result) {
+                console.log("login /labels result success")
+                dic = {};
+                $.each(result, function (idx, item) {
+                  let storageKey = lang_cd + '_' + item.gui_code + '_' + item.template_key;
+                  let data = [];
+                  if (dic.hasOwnProperty(storageKey)) {
+                    data = dic[storageKey];
+                  } else {
+                    dic[storageKey] = data;
+                  }
+                  data.push({ 'label_code': item.label_code, 'text': item.text, 'desc': item.descr });
+                });
+
+                $.each(dic, function (k, v) {
+                  let sessionData = JSON.stringify(v);
+                  sessionStorage.setItem(k, sessionData);
+                });
+                location.href = "/mobile_pro/MobileFirstPage";
+              };
+
+              let fnfailure = function () {
+                location.href = "/login";
+              };
+              AjaxUtil.getAsyncData(url, pData, fnsuccess, fnfailure);
+              //location.href = "/";
             } else {
               let lang_cd = sessionStorage.getItem('lang_code');
               let url = '/api/common/labels';
               let pData = { lang_code: lang_cd };
               let fnsuccess = function (result) {
+                console.log("login /labels result success")
                 dic = {};
                 $.each(result, function (idx, item) {
                   let storageKey = lang_cd + '_' + item.gui_code + '_' + item.template_key;
@@ -1357,7 +1389,7 @@
 
   document.getElementById('productionManage').addEventListener('click', function() {
     console.log("🔄 생산관리 버튼이 클릭되었습니다!");
-
+    clickedButtonId = 'productionManage';
     // 로그인 폼의 검증과 서브밋 핸들러를 호출합니다.
     $('#loginFrm').submit();
   });
