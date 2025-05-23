@@ -52,24 +52,24 @@
         </div>
         <div class="button-wrap" style="border-top:none; text-align: right; !important;">
           <ul>
-            <li>
+            <!--<li>
               <a class="btn btn-excell" title="신규등록" id="Newbtn">
                 <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
                 신규등록
               </a>
-            </li>
+            </li>-->
             <li>
               <a class="btn btn-edit" id="btnSave" title="저장">
                 <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
                 저장
               </a>
             </li>
-            <li>
+            <!--<li>
               <a class="btn btn-delete" title="삭제" id="btnDelete">
                 <img src="/images/icon/ico-delete.svg" alt="엑셀 아이콘">
                 삭제
               </a>
-            </li>
+            </li>-->
           </ul>
         </div>
       </div>
@@ -176,7 +176,7 @@
           if (ht.cellType === wijmo.grid.CellType.Cell) {
             const row = this.grid.rows[ht.row];
             const item = row.dataItem;
-
+            $('#gartcd').prop('readonly', true);
             if (item) {
               // Form 값 채우기
               $('#gartcd').val(item.code);
@@ -188,8 +188,7 @@
             }
           }
         });
-
-
+        //콤보박스 처리
         const tempSelect1 = $('<select>');
         const jiflagRows = AjaxUtil.fillSelectOptions(tempSelect1, 'system_code', 'choose', null, 'jiflag');
         const jiflagMap = new wijmo.grid.DataMap(jiflagRows, 'value', 'text');
@@ -222,26 +221,14 @@
             {binding: 'useyn', header: '사용', width: 80, dataType: 'Boolean', align: 'center'},
             {binding: 'artcd', header: '코드', width: 80 , align: 'center', isReadOnly: true},
             {binding: 'artnm', header: '매입항목', width: 100, align: 'center'},
-            {
-              binding: 'jiflag',
-              header: '고정비',
-              width: 100,
-              dataMap: jiflagMap,
-              cellTemplate: '${text}'
-            },
-            {
-              binding: 'gflag',
-              header: '비용분류',
-              width: 100,
-              dataMap: gflagMap,
-              cellTemplate: '${text}'
-            },
+            {binding: 'jiflag', header: '고정비', width: 100, dataMap: jiflagMap, cellTemplate: '${text}'},
+            {binding: 'gflag', header: '비용분류', width: 100, dataMap: gflagMap, cellTemplate: '${text}'},
             {binding: 'acccd', header: '비용계정', width: 100, align: 'center'},
             {binding: 'accnm', header: '비용계정명', width: 100, align: 'center', isReadOnly: true },
             {binding: 'wacccd', header: '원가계정', width: 100, align: 'center'},
-            {binding: 'waccnm', header: '원가계정명', width: 100, align: 'center'},
+            {binding: 'waccnm', header: '원가계정명', width: 100, align: 'center', isReadOnly: true},
             {binding: 'sacccd', header: '상대계정', width: 100, align: 'center'},
-            {binding: 'saccnm', header: '상대계정명', width: 100, align: 'center'},
+            {binding: 'saccnm', header: '상대계정명', width: 100, align: 'center', isReadOnly: true},
           ],
           itemsSource: this.detailListData,
 
@@ -343,28 +330,62 @@
         const grid = wijmo.Control.getControl('#theGrid2');
         const details = grid.collectionView.items;
 
+        const gartcd = $('#gartcd').val();
+
         const data = {
-          gartcd: $('#gartcd').val(),
+          gartcd: gartcd,
           gart_name: $('#gart_name').val(),
           remark: $('#remark').val(),
           spjangcd: this.spjangcd.val(),
           details: details
         };
 
-        const confirmed = Alert.confirm('', '저장하시겠습니까?');
-        if (!confirmed) return;
-
-        AjaxUtil.postAsyncData(url, data, function(result) {
-          if (result && result.success) {
-            Alert.alert('', '저장 완료');
-            _this.searchMainData();
-            $('#CategoryForm')[0].reset();
-          } else {
-            Alert.alert('', '저장에 실패했습니다.');
-          }
+        //콜백 기반 confirm 사용
+        Alert.confirm('', '저장하시겠습니까?', function () {
+          //JSON 방식으로 postAsyncData 호출
+          $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            headers: {
+              'X-CSRF-Token': $('[name=_csrf]').val()
+            },
+            success: function(result) {
+              if (result && result.success) {
+                Alert.alert('', '저장 완료');
+                _this.loadDetailItems(gartcd);
+              } else {
+                Alert.alert('', '저장에 실패했습니다.');
+              }
+            },
+            error: function(xhr) {
+              Alert.alert('에러', '서버 오류 발생: ' + xhr.statusText);
+            }
+          });
         });
       }
 
+      //행 삭제
+      DeleteData(artcd, gartcd){
+        const _this = this;
+        const url = '/api/transaction/ExpenseAccountSetup/delete';
+        const data = {
+          artcd: artcd,
+          gartcd: gartcd,
+          spjangcd: this.spjangcd.val()
+        };
+
+        const fnsuccess = function (result) {
+          if (result && result.success) {
+            Alert.alert('','삭제되었습니다.');
+            _this.searchMainData();
+          } else {
+            Alert.alert('','삭제에 실패했습니다.');
+          }
+        };
+        AjaxUtil.postAsyncData(url, data, fnsuccess);
+      }
     }
 
     let page = null;
@@ -406,14 +427,24 @@
         page.detailListData.refresh();
       });
 
+      //행삭제
       $('#btnAccDel').on('click', function () {
         const sel = page.grid2.selection;
         if (sel && sel.row >= 0) {
           const item = page.grid2.rows[sel.row].dataItem;
           const idx = page.detailListData.sourceCollection.indexOf(item);
           if (idx > -1) {
-            page.detailListData.sourceCollection.splice(idx, 1);
-            page.detailListData.refresh(); // 오른쪽 그리드만 새로고침
+            Alert.confirm('', '행을 삭제하시겠습니까?',
+              function () {
+                //확인 시 실행
+                page.DeleteData(item.artcd, item.gartcd);
+                page.detailListData.sourceCollection.splice(idx, 1);
+                page.detailListData.refresh();
+              },
+              function () {
+                //취소 시 아무것도 안 함 (선택사항)
+              }
+            );
           }
         }
       });
@@ -429,15 +460,22 @@
         poppage.show(searchcallback);
       });
 
-      //신규등록(초기화)
+      // 신규등록(초기화)
       $('#Newbtn').click(function(e) {
         e.preventDefault();
+
+        // 폼 초기화
         $('#CategoryForm')[0].reset();
+
+        // 그리드 초기화
         let theGrid = wijmo.Control.getControl('#theGrid2');
         if (theGrid) {
           theGrid.itemsSource = new wijmo.collections.CollectionView([]);
         }
+        // readonly 속성 해제
+        $('#gartcd').prop('readonly', false);
       });
+
 
       //저장
       $('#btnSave').click(function (e) {
