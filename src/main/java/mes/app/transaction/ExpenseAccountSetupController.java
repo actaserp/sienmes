@@ -29,10 +29,11 @@ public class ExpenseAccountSetupController {
   TB_ca648Repository tb_ca648Repository;
 
   @GetMapping("/read")
-  public AjaxResult getExpenseAccountList(@RequestParam(value ="spjangcd") String spjangcd) {
-//    log.info("비용항목 등록 read - spjangcd:{}",spjangcd);
+  public AjaxResult getExpenseAccountList(@RequestParam (value = "txtDescription") String txtDescription,
+                                          @RequestParam(value ="spjangcd") String spjangcd) {
+//    log.info("비용항목 등록 read - spjangcd:{}, txtDescription::{}",spjangcd, txtDescription);
 
-    List<Map<String, Object>> items = this.accountSetupService.getExpenseAccountList(spjangcd);
+    List<Map<String, Object>> items = this.accountSetupService.getExpenseAccountList(spjangcd, txtDescription);
 
     AjaxResult result = new AjaxResult();
     result.data = items;
@@ -41,10 +42,11 @@ public class ExpenseAccountSetupController {
   }
 
   @GetMapping("/readDetail")
-  public AjaxResult getExpenseAccountDetail(@RequestParam(value ="groupCode") String groupCode) {
+  public AjaxResult getExpenseAccountDetail(@RequestParam(value ="groupCode") String groupCode,
+                                            @RequestParam(value ="spjangcd") String spjangcd) {
 //    log.info("비용항목 상세 - groupCode:{}",groupCode);
 
-    List<Map<String, Object>> items = this.accountSetupService.getExpenseAccountDetail(groupCode);
+    List<Map<String, Object>> items = this.accountSetupService.getExpenseAccountDetail(groupCode,spjangcd);
 
     AjaxResult result = new AjaxResult();
     result.data = items;
@@ -68,7 +70,7 @@ public class ExpenseAccountSetupController {
     String gartName = (String) payload.get("gart_name");
     String remark = (String) payload.get("remark");
 
-    // ✅ 그룹코드 remark 저장 처리 추가 (sys_code 테이블)
+    // 그룹코드 remark 저장 처리 추가 (sys_code 테이블)
     accountSetupService.saveGroupRemark(spjangcd, gartcdRoot, gartName, remark);
 
     // 상세 항목 저장 처리
@@ -151,7 +153,7 @@ public class ExpenseAccountSetupController {
   public @ResponseBody AjaxResult deleteData(@RequestParam("artcd") String artcd,
                                              @RequestParam("gartcd") String gartcd,
                                              @RequestParam("spjangcd") String spjangcd) {
-    log.info("행 삭제 요청 들어옴 --- artcd:{}, gartcd:{}, spjangcd :{}",artcd,gartcd, spjangcd);
+    //log.info("행 삭제 요청 들어옴 --- artcd:{}, gartcd:{}, spjangcd :{}",artcd,gartcd, spjangcd);
     AjaxResult result = new AjaxResult();
     TB_CA648Id id = new TB_CA648Id(spjangcd, gartcd, artcd);
 
@@ -167,4 +169,25 @@ public class ExpenseAccountSetupController {
     return result;
   }
 
+  @PostMapping("/deleteGroup")
+  public @ResponseBody AjaxResult deleteGroup(@RequestBody Map<String, Object> param) {
+    String gartcd = (String) param.get("gartcd");
+    String spjangcd = (String) param.get("spjangcd");
+
+    //log.info("그룹 삭제 요청: gartcd={}, spjangcd={}", gartcd, spjangcd);
+
+    AjaxResult result = new AjaxResult();
+
+    try {
+      accountSetupService.deleteGroupAndItems(gartcd, spjangcd);
+      result.success = true;
+      result.message = "그룹 및 상세항목 삭제 완료";
+    } catch (Exception e) {
+      log.error("삭제 중 오류 발생", e);
+      result.success = false;
+      result.message = "삭제 실패: " + e.getMessage();
+    }
+
+    return result;
+  }
 }

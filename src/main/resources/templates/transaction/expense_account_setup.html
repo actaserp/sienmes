@@ -19,21 +19,16 @@
       <input type="hidden" id="spjangcdHidden">
       <div class="section-top">
         <div class="search-wrap">
-          <!--<dl>
+          <dl>
             <dt>
-              조회기간<span class="eq">*</span>
+              <label for="txtDescription">
+                그룹명
+              </label>
             </dt>
             <dd>
-              <ul class="date-box">
-                <li>
-                  <input type="date" id="srchStartDt" name="srchStartDt">
-                  <label for="srchStartDt" class="hide">시작일</label>
-                </li>
-                <li>
-                  <input type="date" id="srchEndDt" name="srchEndDt">
-                  <label for="srchEndDt" class="hide">종료일</label>
-                </li>
-              </ul>
+              <div class="srch-box">
+                <input class="form-control2" type="text" id="txtDescription" name="txtDescription" placeholder="그룹명" style="width:200px"/>
+              </div>
             </dd>
           </dl>
           <dl>
@@ -48,28 +43,28 @@
                 </li>
               </ul>
             </dd>
-          </dl>-->
+          </dl>
         </div>
         <div class="button-wrap" style="border-top:none; text-align: right; !important;">
           <ul>
-            <!--<li>
+            <li>
               <a class="btn btn-excell" title="신규등록" id="Newbtn">
                 <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
                 신규등록
               </a>
-            </li>-->
+            </li>
             <li>
               <a class="btn btn-edit" id="btnSave" title="저장">
                 <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
                 저장
               </a>
             </li>
-            <!--<li>
+            <li>
               <a class="btn btn-delete" title="삭제" id="btnDelete">
                 <img src="/images/icon/ico-delete.svg" alt="엑셀 아이콘">
                 삭제
               </a>
-            </li>-->
+            </li>
           </ul>
         </div>
       </div>
@@ -93,7 +88,7 @@
                     <tr>
                       <th><label for="gartcd">그룹코드</label></th>
                       <td>
-                        <input type="text" id="gartcd" name="gartcd" class="wp100" placeholder="그룹코드" readonly/>
+                        <input type="text" id="gartcd" name="gartcd" class="wp100" max="99" placeholder="그룹코드" readonly/>
                       </td>
                       <th><label for="gart_name">그룸명</label></th>
                       <td>
@@ -218,17 +213,17 @@
             }
           },
           columns: [
-            {binding: 'useyn', header: '사용', width: 80, dataType: 'Boolean', align: 'center'},
+            {binding: 'useyn', header: '사용', width: 60, dataType: 'Boolean', align: 'center'},
             {binding: 'artcd', header: '코드', width: 80 , align: 'center', isReadOnly: true},
-            {binding: 'artnm', header: '매입항목', width: 100, align: 'center'},
+            {binding: 'artnm', header: '매입항목', width: 160, align: 'center'},
             {binding: 'jiflag', header: '고정비', width: 100, dataMap: jiflagMap, cellTemplate: '${text}'},
             {binding: 'gflag', header: '비용분류', width: 100, dataMap: gflagMap, cellTemplate: '${text}'},
-            {binding: 'acccd', header: '비용계정', width: 100, align: 'center'},
-            {binding: 'accnm', header: '비용계정명', width: 100, align: 'center', isReadOnly: true },
-            {binding: 'wacccd', header: '원가계정', width: 100, align: 'center'},
-            {binding: 'waccnm', header: '원가계정명', width: 100, align: 'center', isReadOnly: true},
-            {binding: 'sacccd', header: '상대계정', width: 100, align: 'center'},
-            {binding: 'saccnm', header: '상대계정명', width: 100, align: 'center', isReadOnly: true},
+            {binding: 'acccd', header: '비용계정', width: 90, align: 'center'},
+            {binding: 'accnm', header: '비용계정명', width: 130, align: 'center', isReadOnly: true },
+            {binding: 'wacccd', header: '원가계정', width: 90, align: 'center'},
+            {binding: 'waccnm', header: '원가계정명', width: 130, align: 'center', isReadOnly: true},
+            {binding: 'sacccd', header: '상대계정', width: 90, align: 'center'},
+            {binding: 'saccnm', header: '상대계정명', width: 130, align: 'center', isReadOnly: true},
           ],
           itemsSource: this.detailListData,
 
@@ -279,7 +274,7 @@
         });
 
         // 엔터키 검색
-        $('#txtDescription, #txtEumnum').on('keypress', function (e) {
+        $('#txtDescription').on('keypress', function (e) {
           if (e.keyCode === 13) {
             _this.searchMainData();
           }
@@ -291,6 +286,7 @@
         let url = '/api/transaction/ExpenseAccountSetup/read';
 
         let data = {
+          'txtDescription': $("#txtDescription").val(),
           spjangcd: this.spjangcd.val()
         };
 
@@ -311,7 +307,8 @@
         let _this = this;
         let url = '/api/transaction/ExpenseAccountSetup/readDetail';
 
-        let data = { groupCode: groupCode };
+        let data = { groupCode: groupCode,
+            spjangcd: this.spjangcd.val()};
 
         AjaxUtil.getAsyncData(url, data, function(result) {
           if (result && Array.isArray(result.data)) {
@@ -354,7 +351,14 @@
             success: function(result) {
               if (result && result.success) {
                 Alert.alert('', '저장 완료');
-                _this.loadDetailItems(gartcd);
+                $('#CategoryForm')[0].reset();
+                _this.searchMainData();
+                // 그리드 초기화
+                let theGrid = wijmo.Control.getControl('#theGrid2');
+                if (theGrid) {
+                  theGrid.itemsSource = new wijmo.collections.CollectionView([]);
+                }
+                //_this.loadDetailItems(gartcd);
               } else {
                 Alert.alert('', '저장에 실패했습니다.');
               }
@@ -385,6 +389,48 @@
           }
         };
         AjaxUtil.postAsyncData(url, data, fnsuccess);
+      }
+
+      DeletedeleteGroup (gartcd) {
+        const _this = this;
+        const url = '/api/transaction/ExpenseAccountSetup/deleteGroup';
+
+        const data = {
+          gartcd: gartcd,
+          spjangcd: this.spjangcd.val()
+        };
+
+        $.ajax({
+          url: url,
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(data),
+          headers: {
+            'X-CSRF-Token': $('[name=_csrf]').val()
+          },
+          success: function (result) {
+            if (result && result.success) {
+              Alert.alert('', '삭제되었습니다.');
+              _this.searchMainData(); // 목록 갱신
+              // 그리드 초기화
+              let theGrid = wijmo.Control.getControl('#theGrid2');
+              if (theGrid) {
+                theGrid.itemsSource = new wijmo.collections.CollectionView([]);
+              }
+              $('#CategoryForm')[0].reset();
+
+              let grid = wijmo.Control.getControl('#theGrid2');
+              if (grid) {
+                grid.itemsSource = new wijmo.collections.CollectionView([]);
+              }
+            } else {
+              Alert.alert('', result.message || '삭제에 실패했습니다.');
+            }
+          },
+          error: function (xhr) {
+            Alert.alert('에러', '서버 오류 발생: ' + xhr.statusText);
+          }
+        });
       }
     }
 
@@ -482,6 +528,23 @@
         e.preventDefault();
         page.saveMainData();
       });
+
+      //전체삭제(그룹+ 행)
+      $('#btnDelete').click(function (e) {
+        e.preventDefault();
+
+        const gartcd = $('#gartcd').val();
+
+        if (!gartcd) {
+          Alert.alert('', '삭제할 그룹코드를 선택해주세요.');
+          return;
+        }
+
+        Alert.confirm('', '정말 삭제하시겠습니까?', function () {
+          page.DeletedeleteGroup(gartcd);
+        });
+      });
+
 
     })
   </script>

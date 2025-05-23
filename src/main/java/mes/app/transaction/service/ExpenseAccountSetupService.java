@@ -5,6 +5,7 @@ import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -15,37 +16,42 @@ public class ExpenseAccountSetupService {
 
   @Autowired
   SqlRunner sqlRunner;
-
-  public List<Map<String, Object>> getExpenseAccountList(String spjangcd) {
+  public List<Map<String, Object>> getExpenseAccountList(String spjangcd, String txtDescription) {
     MapSqlParameterSource dicParam = new MapSqlParameterSource();
-
     dicParam.addValue("spjangcd", spjangcd);
 
-    String sql = """
-        select sc."Code" as code, 
-        sc."Value" as group_name, 
-        sc."Description" as remark
-       from sys_code sc
-       where sc."CodeType" ='gartcd'
-       ORDER BY CAST(sc."Code" AS INTEGER) ASC
-        """;
+    StringBuilder sql = new StringBuilder("""
+        SELECT sc."Code" AS code,
+               sc."Value" AS group_name,
+               sc."Description" AS remark
+        FROM sys_code sc
+        WHERE sc."CodeType" = 'gartcd'
+          AND sc.spjangcd = :spjangcd
+    """);
 
+    if (txtDescription != null && !txtDescription.isEmpty()) {
+      sql.append(" AND sc.\"Description\" ILIKE :txtDescription ");
+      dicParam.addValue("txtDescription", "%" + txtDescription + "%");
+    }
+
+    sql.append(" ORDER BY CAST(sc.\"Code\" AS INTEGER) ASC ");
 //    log.info("비용 항목등록 read SQL: {}", sql);
 //    log.info("SQL Parameters: {}", dicParam.getValues());
-    List<Map<String, Object>> itmes = this.sqlRunner.getRows(sql, dicParam);
 
-    return itmes;
+    return sqlRunner.getRows(sql.toString(), dicParam);
   }
 
-  public List<Map<String, Object>> getExpenseAccountDetail(String groupCode) {
+  public List<Map<String, Object>> getExpenseAccountDetail(String groupCode, String spjangcd) {
 
     MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
     dicParam.addValue("groupCode", groupCode);
+    dicParam.addValue("spjangcd", spjangcd);
 
     String sql = """
         select * from tb_ca648 tc 
         where tc.gartcd = :groupCode
+        and tc.spjangcd =:spjangcd
         ORDER BY CAST(tc.artcd AS INTEGER) 
         """;
 
@@ -67,8 +73,8 @@ public class ExpenseAccountSetupService {
         WHERE spjangcd = :spjangcd AND gartcd = :gartcd
     """;
 
-    log.info("gartcd 찾기 SQL: {}", sql);
-    log.info("SQL Parameters: {}", dicParam.getValues());
+//    log.info("gartcd 찾기 SQL: {}", sql);
+//    log.info("SQL Parameters: {}", dicParam.getValues());
 
     Map<String, Object> row = this.sqlRunner.getRow(sql, dicParam);
     return (String) row.get("maxSuffix");
@@ -87,6 +93,8 @@ public class ExpenseAccountSetupService {
           AND "Code" = :code 
           AND spjangcd = :spjangcd
     """;
+//    log.info("비용항목 sys_code 확인 :SQL: {}", checkSql);
+//    log.info("SQL Parameters: {}", param.getValues());
     int count = sqlRunner.queryForObject(checkSql, param, (rs, rowNum) -> rs.getInt(1));
 
     if (count > 0) {
@@ -112,6 +120,27 @@ public class ExpenseAccountSetupService {
       param.addValue("remark", remark);
       sqlRunner.execute(insertSql, param);
     }
+  }
+
+  @Transactional
+  public void deleteGroupAndItems(String gartcd, String spjangcd) {
+    MapSqlParameterSource param = new MapSqlParameterSource();
+    param.addValue("gartcd", gartcd);
+    param.addValue("spjangcd", spjangcd);
+
+    // 1. 상세항목 삭제
+    String deleteItemsSql = """
+        DELETE FROM tb_ca648 
+        WHERE gartcd = :gartcd AND spjangcd = :spjangcd
+    """;
+    sqlRunner.execute(deleteItemsSql, param);
+
+    // 2. 그룹 삭제
+    String deleteGroupSql = """
+        DELETE FROM sys_code 
+        WHERE "CodeType" = 'gartcd' AND "Code" = :gartcd AND spjangcd = :spjangcd
+    """;
+    sqlRunner.execute(deleteGroupSql, param);
   }
 
 }
