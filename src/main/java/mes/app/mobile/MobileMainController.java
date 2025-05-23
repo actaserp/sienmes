@@ -75,6 +75,7 @@ public class MobileMainController {
             @RequestParam(value="workcd", required=false) String workcd,
             @RequestParam(value="latitude", required=false) String latitude,
             @RequestParam(value="longitude", required=false) String longitude,
+            @RequestParam(value="gpsInfo", required=false) String gpsInfo,
             HttpServletRequest request,
             Authentication auth) {
         AjaxResult result = new AjaxResult();
@@ -106,6 +107,7 @@ public class MobileMainController {
         }else{
             inFlag = "1";
             tbPb201.setWorkcd(workcd);
+            tbPb201.setAddress(gpsInfo);
         }
 
         tbPb201Pk.setPersonid(Integer.valueOf(perId));
@@ -140,6 +142,7 @@ public class MobileMainController {
             @RequestParam(value="workday", required=false) String workday,
             @RequestParam(value="remark", required=false) String remark,
             @RequestParam(value="workcd", required=false) String workcd,
+            @RequestParam(value="gpsInfo", required=false) String gpsInfo,
             HttpServletRequest request,
             Authentication auth) {
         AjaxResult result = new AjaxResult();
@@ -195,6 +198,7 @@ public class MobileMainController {
             inFlag = "1";
             // 외부퇴근일경우 사유 바인드
             entity.setWorkcd(workcd);
+            entity.setAddress(gpsInfo);
         }
         // 출근시간 ~ 퇴근시간 비교하여 정상, 연장, 야간 근무시간 계산 후 바인드
         String sttime = (String) WorkTimeInfo.get("sttime"); // 출근시간
@@ -329,7 +333,19 @@ public class MobileMainController {
 
             // 소수점 2자리까지 반올림
             double hours = workDuration.toMinutes() / 60.0;
-            return BigDecimal.valueOf(hours).setScale(2, RoundingMode.HALF_UP);
+            double intPart = Math.floor(hours);
+            double fractional = hours - intPart;
+
+            double adjusted;
+            if (fractional == 0.0 || fractional == 0.5) {
+                adjusted = intPart + fractional;
+            } else if (fractional < 0.5) {
+                adjusted = intPart;
+            } else {
+                adjusted = intPart + 0.5;
+            }
+
+            return BigDecimal.valueOf(adjusted).setScale(1, RoundingMode.HALF_UP);
         }
         return BigDecimal.ZERO;
     }

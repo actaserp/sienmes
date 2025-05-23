@@ -146,6 +146,7 @@
 </head>
 
 <body>
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 <div class="mobile-wrapper page-ticket-list"><!-- ★페이지 Class명 -->
     <!-- [모바일] 헤더  -->
     <div class="mobile-layout-header">
@@ -209,10 +210,10 @@
                                 </dt>
                                 <dd>
                                     <div class="input-clear">
-                                        <input type="password" id="PasswordChange" name="PasswordChange"
+                                        <input type="password" id="loginPwd" name="loginPwd"
                                                placeholder="변경시에 입력하세요."
                                                autocomplete="off">
-                                        <i class="toggle-password" data-target="PasswordChange"></i>
+                                        <i class="toggle-password" data-target="loginPwd"></i>
                                     </div>
                                 </dd>
                             </dl>
@@ -224,9 +225,9 @@
                                 </dt>
                                 <dd>
                                     <div class="input-clear">
-                                        <input type="password" id="PasswordChangeChk" name="PasswordChangeChk"
+                                        <input type="password" id="loginPwd2" name="loginPwd2"
                                                placeholder="비밀번호 확인" autocomplete="off">
-                                        <i class="toggle-password" data-target="PasswordChangeChk"></i>
+                                        <i class="toggle-password" data-target="loginPwd2"></i>
                                     </div>
                                 </dd>
                             </dl>
@@ -243,13 +244,13 @@
                         </dl>
                         <dl>
                             <dt>
-                                <label for="userMail">
+                                <label for="email">
                                     이메일<span class="eq">*</span>
                                 </label>
                             </dt>
                             <dd>
                                 <div class="input-clear">
-                                    <input type="text" id="userMail" name="userMail" disabled>
+                                    <input type="text" id="email" name="email" disabled>
                                 </div>
                             </dd>
                         </dl>
@@ -257,7 +258,7 @@
                 </form>
             </div> <!--// contents-wrap end-->
             <div class="button-wrap">
-                <button class="btn-navy" id="btnSaveAuth" onclick="upUserInfo()">수정</button>
+                <button class="btn-navy" id="btnSaveAuth">수정</button>
             </div>
         </div> <!--//layout-contents end -->
     </div> <!-- //mobile-layout-contents end-->
@@ -279,12 +280,160 @@
 
 </script>
 <script type="text/javascript">
+    const requiredFields = [
+        { id: 'login_id', name: '사용자 ID' },
+        { id: 'name', name: '성명' },
+        { id: 'loginPwd', name: '비밀번호' },
+        { id: 'loginPwd2', name: '비밀번호 확인' },
+        { id: 'userHp', name: '핸드폰 번호' },
+        { id: 'email', name: '이메일' },
+    ];
+    const validationFields = [
+        { id: 'login_id', name: '사용자 ID' },
+        { id: 'name', name: '성명' },
+        { id: 'loginPwd', name: '비밀번호' },
+        { id: 'loginPwd2', name: '비밀번호 확인' },
+        { id: 'userHp', name: '핸드폰 번호' },
+        { id: 'email', name: '이메일' }
+    ];
 
     $(document).ready(function () {
+
+        userinformLoad();
+
     });
 
+    function userinformLoad() {
+        $.ajax({
+            url: '/account/myinfo',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                console.log('userinformLoad 응답 데이터:', response); // 서버 응답을 확인
+                if (response.success && response.data) {
+                    bindUserInfo(response.data);
+                } else {
+                    Alert.alert('', '사용자 정보를 가져올 수 없습니다.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX 요청 실패:', status, error);
+                Alert.alert('', '조회에 실패하였습니다.');
+            }
+        });
+    }
+
+    function bindUserInfo(data) {
+        $('#login_id').val(data.login_id || '');
+        $('#name').val(data.name);
+        $('#loginPwd').val('');
+        $('#loginPwd2').val('');
+        $('#userHp').val(data.userHp || '');
+        $('#email').val(data.email || '');
+    }
+    // 수정버튼
+    $('#btnSaveAuth').click(function () {
+        const emailInput = document.getElementById('email');
+        const emailValue = emailInput.value.trim();
+
+        // 필수 필드 검증
+        if (!validateFields()) {
+            return false;
+        }
+
+        // 이메일 형식 검증
+        if (!emailValidate(emailValue)) {
+            Alert.alert('', '유효한 이메일 형식을 입력하세요.');
+            return false;
+        }
+
+        // 전송 데이터
+        let data = {
+            'login_id': $('#login_id').val(),
+            'name': $('#name').val(),
+            'loginPwd': $('#loginPwd').val(),
+            'loginPwd2': $('#loginPwd2').val(),
+            'userHp': $('#userHp').val(),
+            'email': $('#email').val()
+        };
+
+        console.log('전송 데이터:', data);
+
+        // AJAX 요청
+        $.ajax({
+            url: '/account/myinfosave',
+            type: 'POST',
+            async: true,
+            data: data,
+            // contentType: 'application/json',
+            headers: {
+                'X-CSRF-Token': $('[name=_csrf]').val(),
+            },
+            success: function (response) {
+                Alert.alert('', response.message, function () {
+                    if (response.success) {
+                        location.href = '/logout';
+                    }
+                });
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.error('AJAX 오류:', textStatus, errorThrown);
+                Alert.alert('', '에러가 발생하였습니다.');
+            }
+        });
+    });
+
+    //이메일 정규식
+    function emailValidate(emailVal){
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        return emailPattern.test(emailVal);
+    }
+
+    // 유효성 검사
+    function validateFields() {
+        for (let field of validationFields) {
+            if (!validateField(field)) {
+                return false; // 검증 실패 시 중단
+            }
+        }
+        return true; // 모든 검증 통과
+    }
+
+    function validateField(field) {
+        const { id, name } = field; // key 대신 id 사용
+        const element = document.getElementById(id);
+
+        if (!element) {
+            console.error(`ID가 ${id}인 요소를 찾을 수 없습니다.`);
+            return false;
+        }
+
+        const value = element.value.trim();
+        if (!value) {
+            Alert.alert('', `${name}이(가) 입력되지 않았습니다.`);
+            element.focus();
+            return false;
+        }
+
+        return true; // 검증 통과
+    }
 
 
+    document.querySelectorAll('.toggle-password').forEach(icon => {
+        icon.addEventListener('click', () => {
+            const targetId = icon.getAttribute('data-target');
+            const inputField = document.getElementById(targetId);
+
+            if (inputField.type === 'password') {
+                inputField.type = 'text';
+                icon.style.backgroundImage = "url('/images/icon/btn-hidden.svg')"; // 비밀번호 보임 상태
+            } else {
+                inputField.type = 'password';
+                icon.style.backgroundImage = "url('/images/icon/btn-show.svg')"; // 비밀번호 숨김 상태
+            }
+        });
+    });
 
 </script>
 </body>

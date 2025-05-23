@@ -92,4 +92,7 @@ public class TB_PB201 {
 
     @Column(name = "inflag", length = 1)
     private String inflag;
+
+    @Column(name = "address")
+    private String address;
 }

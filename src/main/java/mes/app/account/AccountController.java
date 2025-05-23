@@ -26,10 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import mes.domain.entity.User;
@@ -175,58 +172,60 @@ public class AccountController {
 
 		return result;
 	}
-    
-    @GetMapping("/account/myinfo")
-    public AjaxResult getUserInfo(Authentication auth){
-    	User user = (User)auth.getPrincipal();
-    	AjaxResult result = new AjaxResult();
-    	
-    	Map<String, Object> dicData = new HashMap<String, Object>();
-    	dicData.put("login_id", user.getUsername());
-    	dicData.put("name", user.getUserProfile().getName());    	
-    	result.data = dicData;    	
-    	return result;    	
-    }
-    
+
+	@GetMapping("/account/myinfo")
+	public AjaxResult getUserInfo(Authentication auth){
+		User user = (User)auth.getPrincipal();
+		AjaxResult result = new AjaxResult();
+
+		Map<String, Object> dicData = new HashMap<String, Object>();
+		dicData.put("login_id", user.getUsername());
+		dicData.put("name", user.getUserProfile().getName());
+		dicData.put("userHp", user.getTel());
+		dicData.put("email", user.getEmail());
+		result.data = dicData;
+		return result;
+	}
+
     @PostMapping("/account/myinfo/password_change")
     public AjaxResult userPasswordChange(
     		@RequestParam("name") final String name,
     		@RequestParam("loginPwd") final String loginPwd,
-    		@RequestParam("loginPwd2") final String loginPwd2,    		
+    		@RequestParam("loginPwd2") final String loginPwd2,
     		Authentication auth
     		) {
-    	
+
     	User user = (User)auth.getPrincipal();
         AjaxResult result = new AjaxResult();
-        
+
         if (StringUtils.hasText(loginPwd)==false | StringUtils.hasText(loginPwd2)==false) {
         	result.success=false;
         	result.message="The verification password is incorrect.";
         	return result;
         }
-        
-        if(loginPwd.equals(loginPwd2)==false) {        	
+
+        if(loginPwd.equals(loginPwd2)==false) {
         	result.success=false;
         	result.message="The verification password is incorrect.";
         	return result;
         }
-        
-        user.setPassword(Pbkdf2Sha256.encode(loginPwd2));        
+
+        user.setPassword(Pbkdf2Sha256.encode(loginPwd2));
         //user.getUserProfile().setName(name);
         this.userRepository.save(user);
-        
+
         String sql = """
         	update user_profile set 
         	"Name"=:name, _modified = now(), _modifier_id=:id 
         	where id=:id 
         """;
-        
+
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("name", name);
         dicParam.addValue("id", user.getId());
         this.sqlRunner.execute(sql, dicParam);
-        
-        
+
+
         return result;
     }
 
@@ -479,10 +478,70 @@ public class AccountController {
 		return result;
 	}
 
+	@PostMapping("/account/myinfosave")
+	public AjaxResult setUserInfo(
+			@RequestParam("name") final String name,
+			@RequestParam("loginPwd") final String loginPwd,
+			@RequestParam("loginPwd2") final String loginPwd2,
+			@RequestParam("userHp") final String userHp,
+			Authentication auth
+	) {
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		AjaxResult result = new AjaxResult();
+		User user = (User)auth.getPrincipal();
+
+		if (StringUtils.hasText(loginPwd)==false | StringUtils.hasText(loginPwd2)==false) {
+			result.success=false;
+			result.message="The verification password is incorrect.";
+			return result;
+		}
+
+		if(loginPwd.equals(loginPwd2)==false) {
+			result.success=false;
+			result.message="비밀번호와 확인이 서로 맞지않습니다.";
+			return result;
+		}
+
+		String encodedPWD = Pbkdf2Sha256.encode(loginPwd2);
+		if(name != null && !name.isEmpty()) {
+			dicParam.addValue("name", name);
+		}
+		if(userHp != null && !userHp.isEmpty()) {
+			dicParam.addValue("userHp", userHp);
+		}
+		if(loginPwd2 != null && !loginPwd2.isEmpty()) {
+			dicParam.addValue("encodedPWD", encodedPWD);
+		}
+		//user.getUserProfile().setName(name);
+		String authSql = """
+        	update auth_user set 
+        	password = :encodedPWD, tel = :userHp, first_name = :name 
+        	where id=:id 
+        """;
+
+		String profileSql = """
+        	update user_profile set 
+        	"Name"=:name, _modified = now(), _modifier_id=:id 
+        	where "User_id"=:id 
+        """;
+
+		String personSql = """
+        	update person set 
+        	"Name"=:name, _modified = now(), _modifier_id=:id 
+        	where id=:personid 
+        """;
 
 
+		dicParam.addValue("name", name);
+		dicParam.addValue("id", user.getId());
+		dicParam.addValue("personid", user.getPersonid());
+		this.sqlRunner.execute(authSql, dicParam);
+		this.sqlRunner.execute(profileSql, dicParam);
+		this.sqlRunner.execute(personSql, dicParam);
+
+		result.message="사용자 정보가 수정되었습니다.\n다시 로그인하여 주십시오";
 
 
-
-
+		return result;
+	}
 }
