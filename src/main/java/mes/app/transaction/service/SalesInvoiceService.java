@@ -269,184 +269,12 @@ public class SalesInvoiceService {
 
         AjaxResult result = new AjaxResult();
         try {
-            // 1. 기본 키 생성
-            Integer misnum = parseInt(form.get("misnum"));
-            boolean isUpdate = misnum != null;
 
-            TB_Salesment salesment = new TB_Salesment();
+            // 인보이스 저장
+            TB_Salesment saved = saveSalesInvoiceInternal(form);
 
-            if (isUpdate) {
-                salesment.setMisnum(misnum); // 기존 데이터 수정
-            }
-
-            LocalDateTime now = LocalDateTime.now();
-            String statedt = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-
-            // 2. 필드 매핑
-            salesment.setIssuetype((String) form.get("IssueType")); // 발행형태
-            salesment.setTaxtype((String) form.get("TaxType")); // 과세형태
-
-            String invoiceeType = (String) form.get("InvoiceeType");
-            salesment.setInvoiceetype(invoiceeType); // 거래처 유형
-
-            salesment.setMisgubun(form.get("sale_type").toString()); // 매출구분
-            salesment.setKwon(parseInt(form.get("Kwon"))); // 권
-            salesment.setHo(parseInt(form.get("Ho"))); // 호
-            salesment.setSerialnum((String) form.get("SerialNum")); // 일련번호
-
-            // 공급자 사업장 정보 가져오기
-            String spjangcd = (String) form.get("spjangcd");
-            Map<String, Object> invoicer = this.getInvoicerDatail(spjangcd);
-            if (invoicer != null) {
-                salesment.setIcercorpnum((String) invoicer.get("saupnum")); // 사업자번호
-                salesment.setIcercorpnm((String) invoicer.get("spjangnm"));
-                salesment.setIcerceonm((String) invoicer.get("prenm"));
-                salesment.setIceraddr((String) invoicer.get("address"));
-                salesment.setIcerbiztype((String) invoicer.get("biztype"));
-                salesment.setIcerbizclass((String) invoicer.get("item"));
-                salesment.setIcerpernm((String) invoicer.get("agnertel1"));
-                salesment.setIcertel((String) invoicer.get("agnertel2"));
-                salesment.setIceremail((String) invoicer.get("emailadres"));
-            }
-
-            // 공급받는자
-            salesment.setCltcd(parseInt(form.get("InvoiceeID")));
-            String corpNum = sanitizeNumericString(form.get("InvoiceeCorpNum"));
-
-            if ("개인".equals(invoiceeType)) {
-                try {
-                    corpNum = EncryptionUtil.encrypt(corpNum); // 암호화된 값으로 교체
-                } catch (Exception e) {
-                    throw new RuntimeException("암호화 실패", e);
-                }
-            }
-            // 등록번호
-            salesment.setIvercorpnum(corpNum);
-
-            salesment.setIverregid((String) form.get("InvoiceeTaxRegID")); // 종사업장
-            salesment.setIvercorpnm((String) form.get("InvoiceeCorpName")); // 사업장
-            salesment.setIverceonm((String) form.get("InvoiceeCEOName")); // 대표자명
-            salesment.setIveraddr((String) form.get("InvoiceeAddr")); // 주소
-            salesment.setIverbiztype((String) form.get("InvoiceeBizType")); // 업태
-            salesment.setIverbizclass((String) form.get("InvoiceeBizClass")); // 종목
-            salesment.setIverpernm((String) form.get("InvoiceeContactName1")); // 담당자명
-            salesment.setIvertel(sanitizeNumericString(form.get("InvoiceeTEL1"))); // 담당자 연락처
-            salesment.setIveremail((String) form.get("InvoiceeEmail1")); // 이메일
-            String misdate = sanitizeNumericString(form.get("writeDate"));
-            salesment = tb_salesmentRepository.save(salesment);
-
-
-            salesment.setAccsubcode((String) form.get("account_codeHidden"));
-            salesment.setDepartcode((String) form.get("att_departHidden"));
-            salesment.setProjectcode((String) form.get("projectHidden"));
-            salesment.setPurposetype((String) form.get("purpose_type"));
-
-            salesment.setMgtkey("TAX-" + misdate + "-" + salesment.getMisnum());
-            salesment.setMisdate(misdate);
-
-            salesment.setTotalamt(parseMoney(form.get("TotalAmount"))); // 합계금액
-            salesment.setSupplycost(parseIntSafe(form.get("SupplyCostTotal"))); // 총 공급가액
-            salesment.setTaxtotal(parseIntSafe(form.get("TaxTotal"))); // 총 세액
-            salesment.setRemark1((String) form.get("Remark1")); // 비고1
-
-            Object remark2 = form.get("Remark2");
-            if (remark2 != null && !remark2.toString().trim().isEmpty()) {
-                salesment.setRemark2(remark2.toString().trim()); // 비고2
-            }
-
-            Object remark3 = form.get("Remark3");
-            if (remark3 != null && !remark3.toString().trim().isEmpty()) {
-                salesment.setRemark3(remark3.toString().trim()); // 비고3
-            }
-
-            salesment.setIssuediv((String) form.get("issue_div"));
-
-            String issueDiv = (String) form.get("issue_div");
-            // 팝빌 처리되는 코드값만 100
-            if ("nextday".equals(issueDiv) || "issuenow".equals(issueDiv)) {
-                salesment.setStatecode(100);
-            } else {
-                salesment.setStatecode(999);
-            }
-            salesment.setStatedt(statedt);
-
-            if (isUpdate) {
-                tb_salesDetailRepository.deleteByMisnum(misnum);   // 현재 PK로 삭제
-            }
-
-            salesment.setSpjangcd((String) form.get("spjangcd"));
-            TB_Salesment saved = tb_salesmentRepository.save(salesment);
-
-            // 3. 상세 목록 매핑
-            int serialIndex = 1;
-            List<TB_SalesDetail> details = new ArrayList<>();
-
-            int i = 0;
-            while (true) {
-                String prefix = "detailList[" + i + "]";
-                String itemName = (String) form.get(prefix + ".ItemName");
-
-                if (itemName == null) break; // 더 이상 항목 없음
-
-                if (itemName.trim().isEmpty()) {
-                    i++;
-                    continue;
-                }
-
-                String serialNum = String.valueOf(serialIndex++);
-
-                TB_SalesDetail detail = new TB_SalesDetail();
-                detail.setId(new TB_SalesDetailId(saved.getMisnum(), serialNum));
-                detail.setMaterialId(parseInt(form.get(prefix + ".ItemId")));
-                detail.setItemnm(itemName);
-                detail.setMisdate(misdate);
-                detail.setSpec((String) form.get(prefix + ".Spec"));
-                detail.setQty(parseMoney(form.get(prefix + ".Qty")));
-                detail.setUnitcost(parseMoney(form.get(prefix + ".UnitCost")));
-                detail.setSupplycost(parseMoney(form.get(prefix + ".SupplyCost")));
-                detail.setTaxtotal(parseMoney(form.get(prefix + ".Tax")));
-                detail.setRemark((String) form.get(prefix + ".Remark"));
-                detail.setSpjangcd((String) form.get("spjangcd"));
-
-                String purchaseDT = (String) form.get(prefix + ".PurchaseDT");
-                if (purchaseDT != null && purchaseDT.length() == 4) {
-                    String fullPurchaseDT = misdate.substring(0, 4) + purchaseDT;
-                    detail.setPurchasedt(fullPurchaseDT);
-                } else {
-                    detail.setPurchasedt(null);
-                }
-
-                detail.setSalesment(saved);
-                details.add(detail);
-
-                i++;
-            }
-
-            saved.getDetails().clear();
-            saved.getDetails().addAll(details);
-
-            tb_salesmentRepository.save(saved);
-
-
-            // 5. shipment_head 업데이트
-            Object shipIdsObj = form.get("shipids");
-            System.out.println("shipIdsObj: " + shipIdsObj);
-            if (shipIdsObj != null) {
-                String shipIdsStr = shipIdsObj.toString(); // "165,162,164"
-                List<Integer> shipIds = Arrays.stream(shipIdsStr.split(","))
-                        .map(String::trim)
-                        .filter(s -> !s.isEmpty())
-                        .map(Integer::parseInt)
-                        .toList();
-
-                // shipment_head 엔티티들 조회 후 misnum 설정
-                List<ShipmentHead> shipments = shipmentHeadRepository.findAllById(shipIds);
-                for (ShipmentHead shipment : shipments) {
-                    shipment.setMisnum(salesment.getMisnum()); // misnum은 auto-generated 이거나 업데이트 대상
-                }
-
-                shipmentHeadRepository.saveAll(shipments);
-            }
+            // 출고 리스트에 저장
+            updateShipmentLinks(form, saved);
 
             result.success = true;
         } catch (Exception e) {
@@ -466,6 +294,195 @@ public class SalesInvoiceService {
 
         return result;
     }
+
+    private TB_Salesment saveSalesInvoiceInternal(Map<String, Object> form) {
+        // 1. 기본 키 생성
+        Integer misnum = parseInt(form.get("misnum"));
+        boolean isUpdate = misnum != null;
+
+        TB_Salesment salesment = new TB_Salesment();
+
+        if (isUpdate) {
+            salesment.setMisnum(misnum); // 기존 데이터 수정
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        String statedt = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+
+        // 2. 필드 매핑
+        salesment.setIssuetype((String) form.get("IssueType")); // 발행형태
+        salesment.setTaxtype((String) form.get("TaxType")); // 과세형태
+
+        String invoiceeType = (String) form.get("InvoiceeType");
+        salesment.setInvoiceetype(invoiceeType); // 거래처 유형
+
+        salesment.setMisgubun(form.get("sale_type").toString()); // 매출구분
+        salesment.setKwon(parseInt(form.get("Kwon"))); // 권
+        salesment.setHo(parseInt(form.get("Ho"))); // 호
+        salesment.setSerialnum((String) form.get("SerialNum")); // 일련번호
+
+        // 공급자 사업장 정보 가져오기
+        String spjangcd = (String) form.get("spjangcd");
+        Map<String, Object> invoicer = this.getInvoicerDatail(spjangcd);
+        if (invoicer != null) {
+            salesment.setIcercorpnum((String) invoicer.get("saupnum")); // 사업자번호
+            salesment.setIcercorpnm((String) invoicer.get("spjangnm"));
+            salesment.setIcerceonm((String) invoicer.get("prenm"));
+            salesment.setIceraddr((String) invoicer.get("address"));
+            salesment.setIcerbiztype((String) invoicer.get("biztype"));
+            salesment.setIcerbizclass((String) invoicer.get("item"));
+            salesment.setIcerpernm((String) invoicer.get("agnertel1"));
+            salesment.setIcertel((String) invoicer.get("agnertel2"));
+            salesment.setIceremail((String) invoicer.get("emailadres"));
+        }
+
+        // 공급받는자
+        salesment.setCltcd(parseInt(form.get("InvoiceeID")));
+        String corpNum = sanitizeNumericString(form.get("InvoiceeCorpNum"));
+
+        if ("개인".equals(invoiceeType)) {
+            try {
+                corpNum = EncryptionUtil.encrypt(corpNum); // 암호화된 값으로 교체
+            } catch (Exception e) {
+                throw new RuntimeException("암호화 실패", e);
+            }
+        }
+        // 등록번호
+        salesment.setIvercorpnum(corpNum);
+
+        salesment.setIverregid((String) form.get("InvoiceeTaxRegID")); // 종사업장
+        salesment.setIvercorpnm((String) form.get("InvoiceeCorpName")); // 사업장
+        salesment.setIverceonm((String) form.get("InvoiceeCEOName")); // 대표자명
+        salesment.setIveraddr((String) form.get("InvoiceeAddr")); // 주소
+        salesment.setIverbiztype((String) form.get("InvoiceeBizType")); // 업태
+        salesment.setIverbizclass((String) form.get("InvoiceeBizClass")); // 종목
+        salesment.setIverpernm((String) form.get("InvoiceeContactName1")); // 담당자명
+        salesment.setIvertel(sanitizeNumericString(form.get("InvoiceeTEL1"))); // 담당자 연락처
+        salesment.setIveremail((String) form.get("InvoiceeEmail1")); // 이메일
+        String misdate = sanitizeNumericString(form.get("writeDate"));
+        salesment = tb_salesmentRepository.save(salesment);
+
+
+        salesment.setAccsubcode((String) form.get("account_codeHidden"));
+        salesment.setDepartcode((String) form.get("att_departHidden"));
+        salesment.setProjectcode((String) form.get("projectHidden"));
+        salesment.setPurposetype((String) form.get("purpose_type"));
+
+        salesment.setMgtkey("TAX-" + misdate + "-" + salesment.getMisnum());
+        salesment.setMisdate(misdate);
+
+        salesment.setTotalamt(parseMoney(form.get("TotalAmount"))); // 합계금액
+        salesment.setSupplycost(parseIntSafe(form.get("SupplyCostTotal"))); // 총 공급가액
+        salesment.setTaxtotal(parseIntSafe(form.get("TaxTotal"))); // 총 세액
+        salesment.setRemark1((String) form.get("Remark1")); // 비고1
+
+        Object remark2 = form.get("Remark2");
+        if (remark2 != null && !remark2.toString().trim().isEmpty()) {
+            salesment.setRemark2(remark2.toString().trim()); // 비고2
+        }
+
+        Object remark3 = form.get("Remark3");
+        if (remark3 != null && !remark3.toString().trim().isEmpty()) {
+            salesment.setRemark3(remark3.toString().trim()); // 비고3
+        }
+
+        salesment.setIssuediv((String) form.get("issue_div"));
+
+        // 수정세금계산서일 때 저장
+        salesment.setModifycd(parseInt(form.get("ModifyCode")));
+        salesment.setOrgntscfnum((String)form.get("orgntscfnum"));
+        salesment.setOrgmgtkey((String)form.get("orgmgtkey"));
+
+        String issueDiv = (String) form.get("issue_div");
+        // 팝빌 처리되는 코드값만 100
+        if ("nextday".equals(issueDiv) || "issuenow".equals(issueDiv)) {
+            salesment.setStatecode(100);
+        } else {
+            salesment.setStatecode(999);
+        }
+        salesment.setStatedt(statedt);
+
+        if (isUpdate) {
+            tb_salesDetailRepository.deleteByMisnum(misnum);   // 현재 PK로 삭제
+        }
+
+        salesment.setSpjangcd((String) form.get("spjangcd"));
+        TB_Salesment saved = tb_salesmentRepository.save(salesment);
+
+        // 3. 상세 목록 매핑
+        int serialIndex = 1;
+        List<TB_SalesDetail> details = new ArrayList<>();
+
+        int i = 0;
+        while (true) {
+            String prefix = "detailList[" + i + "]";
+            String itemName = (String) form.get(prefix + ".ItemName");
+
+            if (itemName == null) break; // 더 이상 항목 없음
+
+            if (itemName.trim().isEmpty()) {
+                i++;
+                continue;
+            }
+
+            String serialNum = String.valueOf(serialIndex++);
+
+            TB_SalesDetail detail = new TB_SalesDetail();
+            detail.setId(new TB_SalesDetailId(saved.getMisnum(), serialNum));
+            detail.setMaterialId(parseInt(form.get(prefix + ".ItemId")));
+            detail.setItemnm(itemName);
+            detail.setMisdate(misdate);
+            detail.setSpec((String) form.get(prefix + ".Spec"));
+            detail.setQty(parseMoney(form.get(prefix + ".Qty")));
+            detail.setUnitcost(parseMoney(form.get(prefix + ".UnitCost")));
+            detail.setSupplycost(parseMoney(form.get(prefix + ".SupplyCost")));
+            detail.setTaxtotal(parseMoney(form.get(prefix + ".Tax")));
+            detail.setRemark((String) form.get(prefix + ".Remark"));
+            detail.setSpjangcd((String) form.get("spjangcd"));
+
+            String purchaseDT = (String) form.get(prefix + ".PurchaseDT");
+            if (purchaseDT != null && purchaseDT.length() == 4) {
+                String fullPurchaseDT = misdate.substring(0, 4) + purchaseDT;
+                detail.setPurchasedt(fullPurchaseDT);
+            } else {
+                detail.setPurchasedt(null);
+            }
+
+            detail.setSalesment(saved);
+            details.add(detail);
+
+            i++;
+        }
+
+        saved.getDetails().clear();
+        saved.getDetails().addAll(details);
+
+        return tb_salesmentRepository.save(saved);
+
+    }
+
+    private void updateShipmentLinks(Map<String, Object> form, TB_Salesment salesment) {
+        // 5. shipment_head 업데이트
+        Object shipIdsObj = form.get("shipids");
+        System.out.println("shipIdsObj: " + shipIdsObj);
+        if (shipIdsObj != null) {
+            String shipIdsStr = shipIdsObj.toString(); // "165,162,164"
+            List<Integer> shipIds = Arrays.stream(shipIdsStr.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(Integer::parseInt)
+                    .toList();
+
+            // shipment_head 엔티티들 조회 후 misnum 설정
+            List<ShipmentHead> shipments = shipmentHeadRepository.findAllById(shipIds);
+            for (ShipmentHead shipment : shipments) {
+                shipment.setMisnum(salesment.getMisnum()); // misnum은 auto-generated 이거나 업데이트 대상
+            }
+
+            shipmentHeadRepository.saveAll(shipments);
+        }
+    }
+
 
     private Throwable getRootCause(Throwable throwable) {
         Throwable cause = throwable;
@@ -1226,28 +1243,220 @@ public class SalesInvoiceService {
         for (Map<String, String> item : copyList) {
             try {
                 Integer misnum = Integer.parseInt(item.get("misnum"));
+                String misdate = sanitizeNumericString(item.get("writedate"));
                 TB_Salesment origin = tb_salesmentRepository.findById(misnum).orElseThrow();
                 TB_Salesment copy = new TB_Salesment();
 
-                BeanUtils.copyProperties(origin, copy, "misnum", "writedate", "createdAt");
+                BeanUtils.copyProperties(origin, copy,
+                        "misnum", "writedate", "misdate",
+                        "mgtkey", "orgntscfnum", "orgmgtkey",
+                        "modifycd", "statedt", "ntscode", "statecode",
+                        "details"
+                );
 
-                copy.setMisnum(null);
+                copy.setMisnum(null); // 새 엔티티
+                copy.setMisdate(misdate); // 새 날짜만 지정
 
+                // 조건부 상태코드 설정
+                copy.setStatecode(origin.getStatecode() == 999 ? 999 : 100);
 
-                tb_salesmentRepository.save(copy);
+                TB_Salesment savedCopy = tb_salesmentRepository.save(copy);
 
+                savedCopy = tb_salesmentRepository.save(savedCopy);
 
+                savedCopy.setMgtkey("TAX-" + misdate + "-" + savedCopy.getMisnum());
+                savedCopy = tb_salesmentRepository.save(savedCopy);
 
+                List<TB_SalesDetail> details = tb_salesDetailRepository.findByMisnum(misnum);
+                int sequence = 1;
 
+                for (TB_SalesDetail detail : details) {
+                    TB_SalesDetail newDetail = new TB_SalesDetail();
+                    TB_SalesDetailId newId = new TB_SalesDetailId(savedCopy.getMisnum(), String.valueOf(sequence++));
+                    newDetail.setId(newId);
+
+                    newDetail.setMisdate(misdate);
+                    newDetail.setItemnm(detail.getItemnm());
+                    newDetail.setSpec(detail.getSpec());
+                    newDetail.setQty(detail.getQty());
+                    newDetail.setUnitcost(detail.getUnitcost());
+                    newDetail.setSupplycost(detail.getSupplycost());
+                    newDetail.setTaxtotal(detail.getTaxtotal());
+                    newDetail.setTotalamt(detail.getTotalamt());
+                    newDetail.setRemark(detail.getRemark());
+                    newDetail.setPurchasedt(detail.getPurchasedt());
+                    newDetail.setMaterialId(detail.getMaterialId());
+                    newDetail.setSpjangcd(detail.getSpjangcd());
+
+                    tb_salesDetailRepository.save(newDetail);
+                }
 
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
-
-
         return result;
     }
+
+    @Transactional
+    public AjaxResult saveModifiedInvoice(@RequestBody Map<String, Object> form) {
+        AjaxResult result = new AjaxResult();
+
+        String modifyCode = (String) form.get("ModifyCode");
+
+        if (modifyCode == null || modifyCode.isBlank()) {
+            result.success = false;
+            result.message = "수정사유 코드가 누락되었습니다.";
+            return result;
+        }
+
+        switch (modifyCode) {
+            case "1": // 기재사항 착오정정
+                result = handleCorrection(form);
+                break;
+            case "2": // 공급가액 변동
+                result = handlePriceChange(form);
+                break;
+            case "3": // 환입
+                result = handleReturn(form);
+                break;
+            case "4": // 계약의 해제
+                result = handleContractCancellation(form);
+                break;
+            case "5": // 내국신용장 사후개설
+                result = handleLaterLetterOfCredit(form);
+                break;
+            case "6": // 착오에 의한 이중발급
+                result = handleDuplicateIssue(form);
+                break;
+            default:
+                result.success = false;
+                result.message = "알 수 없는 수정사유 코드입니다.";
+                break;
+        }
+
+        return result;
+
+    }
+
+    // 기재사항 착오정정
+    private AjaxResult handleCorrection(Map<String, Object> form) {
+        AjaxResult result = new AjaxResult();
+
+        Integer misnum = parseInt(form.get("misnum"));
+
+
+        try {
+            // 여기 부터는 취소분 저장
+            TB_Salesment origin = tb_salesmentRepository.findById(misnum).orElseThrow();
+            TB_Salesment copy = new TB_Salesment();
+
+            BeanUtils.copyProperties(origin, copy,
+                    "misnum", "statedt", "ntscode", "statecode",
+                    "details", "ntscfnum", "mgtkey"
+            );
+
+            copy.setMisnum(null); // 새 엔티티
+            copy.setOrgntscfnum(copy.getNtscfnum());
+            copy.setOrgmgtkey(copy.getMgtkey());
+            copy.setModifycd(parseInt(form.get("ModifyCode")));
+            copy.setSupplycost(Optional.ofNullable(copy.getSupplycost()).orElse(0) * -1);
+            copy.setTaxtotal(Optional.ofNullable(copy.getTaxtotal()).orElse(0) * -1);
+            copy.setTotalamt(Optional.ofNullable(copy.getTotalamt()).orElse(0) * -1);
+            LocalDateTime now = LocalDateTime.now();
+            String statedt = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            copy.setStatedt(statedt);
+
+            // 조건부 상태코드 설정
+            copy.setStatecode(100);
+
+            TB_Salesment savedCopy = tb_salesmentRepository.save(copy);
+
+            savedCopy.setMgtkey("TAX-" + savedCopy.getMisdate() + "-" + savedCopy.getMisnum());
+            tb_salesmentRepository.save(savedCopy);
+
+            List<TB_SalesDetail> details = tb_salesDetailRepository.findByMisnum(misnum);
+            int sequence = 1;
+
+            for (TB_SalesDetail detail : details) {
+                TB_SalesDetail newDetail = new TB_SalesDetail();
+                TB_SalesDetailId newId = new TB_SalesDetailId(savedCopy.getMisnum(), String.valueOf(sequence++));
+                newDetail.setId(newId);
+
+                newDetail.setItemnm(detail.getItemnm());
+                newDetail.setSpec(detail.getSpec());
+                newDetail.setQty(detail.getQty());
+                newDetail.setUnitcost(Optional.ofNullable(detail.getUnitcost()).orElse(0) * -1);
+                newDetail.setSupplycost(Optional.ofNullable(detail.getSupplycost()).orElse(0) * -1);
+                newDetail.setUnitcost(Optional.ofNullable(detail.getUnitcost()).orElse(0) * -1);
+                newDetail.setTaxtotal(Optional.ofNullable(detail.getTaxtotal()).orElse(0) * -1);
+                newDetail.setTotalamt(Optional.ofNullable(detail.getTotalamt()).orElse(0) * -1);
+                newDetail.setRemark(detail.getRemark());
+                newDetail.setPurchasedt(detail.getPurchasedt());
+                newDetail.setMaterialId(detail.getMaterialId());
+                newDetail.setSpjangcd(detail.getSpjangcd());
+
+                tb_salesDetailRepository.save(newDetail);
+            }
+
+            // 여기 부터는 수정분 저장
+            form.put("orgntscfnum", copy.getNtscfnum());
+            form.put("orgmgtkey", copy.getMgtkey());
+            form.put("ModifyCode", copy.getModifycd());
+            form.remove("misnum");
+            form.remove("shipids");
+            saveSalesInvoiceInternal(form);
+
+        } catch (Exception e) {
+            log.error("handleCorrection 오류", e);
+            throw new RuntimeException("정정 처리 중 예외 발생", e);
+        }
+
+        result.success = true;
+        result.message = "기재사항 착오정정 처리 완료";
+        return result;
+    }
+
+    private AjaxResult handlePriceChange(Map<String, Object> form) {
+        AjaxResult result = new AjaxResult();
+
+        result.success = true;
+        result.message = "공급가액 변동 처리 완료";
+        return result;
+    }
+
+    private AjaxResult handleReturn(Map<String, Object> form) {
+        AjaxResult result = new AjaxResult();
+
+        result.success = true;
+        result.message = "환입 처리 완료";
+        return result;
+    }
+
+    private AjaxResult handleContractCancellation(Map<String, Object> form) {
+        AjaxResult result = new AjaxResult();
+
+        result.success = true;
+        result.message = "계약의 해제 처리 완료";
+        return result;
+    }
+
+    private AjaxResult handleLaterLetterOfCredit(Map<String, Object> form) {
+        AjaxResult result = new AjaxResult();
+
+        result.success = true;
+        result.message = "내국신용장 사후개설 처리 완료";
+        return result;
+    }
+
+    private AjaxResult handleDuplicateIssue(Map<String, Object> form) {
+        AjaxResult result = new AjaxResult();
+
+        result.success = true;
+        result.message = "착오에 의한 이중발급 처리 완료";
+        return result;
+    }
+
 
     @Transactional
     public AjaxResult saveInvoiceBulkData(MultipartFile upload_file, String spjangcd, User user) throws IOException {

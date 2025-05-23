@@ -213,7 +213,12 @@ public class SalesInvoiceController {
 			}
 		}
 
-        return salesInvoiceService.saveInvoice(form);
+		// 수정 세금계산서 처리 여부 분기
+		if (form.containsKey("ModifyCode")) {
+			return salesInvoiceService.saveModifiedInvoice(form);
+		} else {
+			return salesInvoiceService.saveInvoice(form);
+		}
 	}
 
 	@PostMapping("/invoice_update")

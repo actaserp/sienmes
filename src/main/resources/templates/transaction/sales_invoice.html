@@ -5,13 +5,25 @@
             display: grid;
             grid-template-columns: repeat(2, 300px);
             margin-bottom: 30px;
-
+            border: 2px solid black; /* 전체 테두리 굵게 */
         }
 
         .reason-grid div {
             padding: 20px;
-            border: 1px solid;
+            border-bottom: 1px solid #ccc;
+            border-right: 1px solid #ccc;
         }
+
+        /* 오른쪽 열 요소에는 border-right 제거 (테두리 겹침 방지) */
+        .reason-grid div:nth-child(2n) {
+            border-right: none;
+        }
+
+        /* 마지막 행 요소는 border-bottom 제거 */
+        .reason-grid div:nth-last-child(-n+2) {
+            border-bottom: none;
+        }
+
 
         .reason-grid label {
             display: block;
@@ -355,7 +367,7 @@
             <div class="container-fluid">
                 <form id="modifyReasonForm">
                     <div class="reason-grid">
-                        <div>
+                        <div class="radio-box-mo">
                             <label>
                                 <input type="radio" name="modifyReason" value="기재사항 착오정정">
                                 <strong>기재사항 착오정정</strong>
@@ -534,8 +546,7 @@
                         <div id="preState">
                             <div class="dialog_note_box mgt_0">
                                 <ul>
-                                    <li>선택한 그리드의 매출이 복사됩니다.</li>
-                                    <li>복사된 그리드는 해당 작성일자로 저장됩니다.</li>
+                                    <li>선택한 작성일자로 매출이 복사됩니다.</li>
                                 </ul>
                             </div>
                         </div>
@@ -968,14 +979,18 @@
                     let content = tmpl('popup_copyTemplate', {});
                     let $content = $(content);
                     let modalContainer = new PopupDraggable('복사하기');
-                    modalContainer.open({width: 615, height: 450, $content});
+                    modalContainer.open({width: 350, height: 270, $content});
+
+                    let $writeDate = $content.find('#WriteDate');
+                    let today = CommonUtil.getYYYYMMDD();
+                    $writeDate.val(today);
 
                     $content.find('#btnCopy').click(function () {
-                        let WriteDate = $content.find('#WriteDate').val();
+
                         Alert.confirm('', '선택한 날짜로 복사 하시겠습니까?', function () {
                             const copyList = items.map(item => ({
                                 misnum: item.misnum,
-                                writedate: WriteDate
+                                writedate: $writeDate.val()
                             }));
 
                             let url = _this.url + '/invoice_copy';
@@ -984,6 +999,7 @@
                                     Alert.alert('', res.message || '복사되었습니다.', function () {
                                         console.log('res.success', res);
                                         _this.searchMainData();
+                                        modalContainer.close();
                                     });
                                 } else {
                                     Alert.alert('', res.message || '복사 중 오류가 발생했습니다.');
@@ -1122,6 +1138,9 @@
                 }
             }
 
+
+
+            // 상세보기
             modify(selectedItem) {
                 let _this = this;
 
@@ -1494,7 +1513,13 @@
                             $content.find('#btnInvoiceSave').hide();
                         }
 
-                        if ([301, 302, 303, 304].includes(code)) {
+                        if (code === 304) {
+                            $content.find('#btnReMessage').show();   // 기타 전송 상태 재전송 버튼
+                            $content.find('#btnInvoiceSave').hide();
+                            $content.find('#btnEdit').show();
+                        }
+
+                        if ([301, 302, 303].includes(code)) {
                             $content.find('#btnReMessage').show();   // 기타 전송 상태 재전송 버튼
                             $content.find('#btnInvoiceSave').hide();
                         }
@@ -1509,6 +1534,12 @@
                         if (ntscodeDes) {
                             $content.find('div[name="ntscode_des"]').show(); // 라벨
                             $content.find('#ntscode_des').text(ntscodeDes);     // 값
+                        }
+
+                        if (code === 304 || code === 305) {
+                            $content.find('#resultList').show();
+                        } else {
+                            $content.find('#resultList').hide();
                         }
 
 
@@ -1537,7 +1568,14 @@
 
                 }
                 const popInvoice = new PopInvoiceComponent();
-                modalContainer.open({width: 1200, height: 600, $content});
+                let modalHeight = 600;
+
+                // 304 또는 305일 경우만 높이 650으로 조정
+                if (data.StateCode === 304 || data.StateCode === 305) {
+                    modalHeight = 630;
+                }
+
+                modalContainer.open({ width: 1200, height: modalHeight, $content });
                 setTimeout(() => {
                     popInvoice.initAfterOpen();
                 }, 0);
@@ -1818,35 +1856,84 @@
                     });
                 });
 
-                // 계산서 저장 버튼
+                // 수정세금계산서
                 let $btnEdit = $content.find('#btnEdit');
-                // 수정 클릭
                 $btnEdit.click(function (e) {
 
                     let item = _this.grid.selectedItems;
-                    console.log('$btnEdit item', item);
                     if (code === 304) {
-                        console.log('item.statecode', item.statecode);
-                        let content = tmpl('modifyReasonModal', {});
-                        let $content = $(content);
-                        let modalContainer = new PopupDraggable('수정사유 선택 ');
-                        modalContainer.open({width: 615, height: 450, $content});
+                        let popupHtml = tmpl('modifyReasonModal', {});
+                        let $popupContent = $(popupHtml);
+                        let modalContainer1 = new PopupDraggable('수정사유 선택 ');
+                        modalContainer1.open({width: 615, height: 460, $content: $popupContent});
 
-                        $content.find('#btnSelectModifyReason').click(function () {
-                            const selectedReason = $content.find('input[name="modifyReason"]:checked').val();
+                        $popupContent.find('#btnSelectModifyReason').click(function () {
+                            const selectedReason = $popupContent.find('input[name="modifyReason"]:checked').val();
                             if (!selectedReason) {
                                 Alert.alert('알림', '수정 사유를 선택해주세요.');
                                 return;
                             }
 
-                            console.log('선택된 수정사유:', selectedReason);
-                            $content.close(); // 선택 후 모달 닫기
-                            // 이후 로직 수행
-                            _this.modify(item);
+                            const reasonMap = {
+                                '기재사항 착오정정': '1',
+                                '공급가액 변동': '2',
+                                '환입': '3',
+                                '계약의 해제': '4',
+                                '내국신용장 사후개설': '5',
+                                '착오에 의한 이중발급': '6'
+                            };
+                            const modifyCode = reasonMap[selectedReason];
+                            const modifyName = selectedReason;
+
+                            item.modifyName = modifyName;
+                            item.modifyCode = modifyCode;
+
+                            $content.find('#ModifyCode').val(modifyCode);
+                            $(modalContainer.modal.$["root"])
+                                .find('.ax-modal-header')
+                                .contents()
+                                .filter(function () {
+                                    return this.nodeType === 3; // 텍스트 노드
+                                })
+                                .first()[0].textContent = '수정 계산서 - ' + modifyName;
+
+                            $content.find('#resultList').hide();
+                            $content.find('#btnInvoiceNew').hide();
+                            $content.find('#btnInvoiceSave').show();
+                            $content.find('#btnEdit').hide();
+                            $content.find('#btnReMessage').hide();
+
+                            if(modifyCode === '1'){
+                                const $taxList = $content.find('#taxList');
+
+                                $taxList.find('input, select, textarea').each(function () {
+                                    const id = $(this).attr('id');
+
+                                    const name = $(this).attr('name');
+                                    if (name && /^detailList\[\d+\]\.ItemName$/.test(name)) return;
+                                    if (name && /^detailList\[\d+\]\.ItemId$/.test(name)) return;
+
+                                    if ($(this).is(':checkbox') || $(this).is(':radio')) {
+
+                                    } else {
+                                        $(this).val('');
+                                    }
+                                });
+
+                                $content.find('#SupplyCostTotal').val('');
+                                $content.find('#TaxTotal').val('');
+                                $content.find('#TotalAmount').val('');
+                            }
+
+
+
+                            modalContainer1.close(); // 선택 후 모달 닫기
+
                         });
 
                     } else {
-                        _this.modify(item);
+                        Alert.alert("", "수정할 계산서가 없습니다.");
+                        modalContainer1.close();
                     }
                 });
 
@@ -2025,7 +2112,7 @@
                 let content = tmpl('addShipListPopup', {});
                 let $content = $(content);
                 let modalContainer = new PopupDraggable('출고 리스트');
-                modalContainer.open({width: 1300, height: 670, $content});
+                modalContainer.open({width: 1100, height: 560, $content});
 
                 this.shipListGrid = new wijmo.grid.FlexGrid('#ship-list-grid', {
                     autoGenerateColumns: false,
@@ -2067,7 +2154,7 @@
                         {
                             binding: 'total_qty',
                             header: '총 지시량',
-                            width: 120,
+                            width: 100,
                             align: 'center',
                             isReadOnly: true,
                             allowMerging: true
@@ -2075,7 +2162,7 @@
                         {
                             binding: 'total_price',
                             header: '총 공급가',
-                            width: 150,
+                            width: 120,
                             align: 'right',
                             isReadOnly: true,
                             allowMerging: true
@@ -2083,7 +2170,7 @@
                         {
                             binding: 'total_vat',
                             header: '총 세액',
-                            width: 150,
+                            width: 120,
                             align: 'right',
                             isReadOnly: true,
                             allowMerging: true
@@ -2091,7 +2178,7 @@
                         {
                             binding: 'total_amount',
                             header: '총액',
-                            width: 150,
+                            width: 120,
                             align: 'right',
                             isReadOnly: true,
                             allowMerging: true
@@ -2109,7 +2196,7 @@
                         {
                             binding: 'description',
                             header: '비고',
-                            width: 90,
+                            width: '*',
                             align: 'right',
                             isReadOnly: true,
                             allowMerging: true

@@ -586,6 +586,7 @@ class PopupDraggable {
 
         this.modal.close();
     }
+
 }
 
 $(document).ready(function () {
