@@ -136,8 +136,19 @@
                                 e.cell.textContent = formatted;
                             }
                         }
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            let col = sender.columns[e.col];
+                            if (col.binding === 'yearflag') {
+                                let value = sender.getCellData(e.row, e.col, false);
+                                e.cell.innerHTML = value === '1'
+                                    ? '<span style="color: black;">✔</span>'
+                                    : '';
+                                e.cell.style.textAlign = 'center';
+                            }
+                        }
                     },
                     columns: [
+                        {binding: 'fixflag', width: 120, align: 'center', visible:false},
                         {binding: 'first_name', header: '사원명', width: 120, align: 'center'},
                         {binding: 'jik_id', header: '직위', width: 100, align: 'center'},
                         {binding: 'reqdate', header: '신청일', width: 140, align: 'center'},
@@ -145,7 +156,7 @@
                         {binding: 'todate', header: '종료일', width: 140, align: 'center'},
                         {binding: 'worknm', header: '구분', width: 120, align: 'center'},
                         {binding: 'daynum', header: '기간', width: 100, align: 'center'},
-                        {binding: 'fixflag', header: '연차', width: 100, align: 'center'},
+                        {binding: 'yearflag', header: '연차', width: 100, align: 'center'},
                         {binding: 'remark', header: '사유', width: '*', align: 'left'},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
@@ -187,7 +198,7 @@
                      spjangcd: sessionStorage.getItem('spjangcd'),
                  }
                  let result = AjaxUtil.getSyncData(url, data);
-                 /*console.log(result);*/
+                 console.log(result);
 
                  if (result && result.data) {
                      _this.viewData.sourceCollection = result.data;
@@ -212,8 +223,6 @@
                              $('#btnSave').show();
                          }
                      });
-
-
 
                  }
 

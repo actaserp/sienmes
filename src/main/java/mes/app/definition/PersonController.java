@@ -72,6 +72,8 @@ public class PersonController {
 			@RequestParam(value="jik_id", required=false) String jik_id,
 			@RequestParam(value ="spjangcd") String spjangcd,
 			@RequestParam(value ="rtdate", required=false) String rtdate,
+			@RequestParam(value ="enddate", required=false) String enddate,
+			@RequestParam(value ="rtflag", required=false) String rtflag,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -105,6 +107,13 @@ public class PersonController {
 			rtdate = rtdate.replaceAll("-", "");  // "2024-06-24" → "20240624"
 			person.setRtdate(rtdate);
 		}
+
+		if (enddate != null && !enddate.isEmpty()) {
+			enddate = enddate.replaceAll("-", "");  // "2024-06-24" → "20240624"
+			person.setEnddate(enddate);
+		}
+
+
 		person.setSpjangcd(spjangcd);
 		person.setCode(code);
 		person.setName(name);
@@ -117,7 +126,7 @@ public class PersonController {
 		person.set_audit(user);
 		person.setPersonGroupId(Integer.valueOf(work_division));
 		person.setJik_id(jik_id);
-
+		person.setRtflag(rtflag);
 
 		person = this.personRepository.save(person);
 		
@@ -125,7 +134,7 @@ public class PersonController {
 		
 		return result;
 	}
-	
+
 	@PostMapping("/delete")
 	public AjaxResult deletePerson(@RequestParam("id") Integer id) {
 		this.personRepository.deleteById(id);

@@ -102,6 +102,7 @@ public class DayMonthlyService {
                LPAD(p."Depart_id"::text, 2, '0') = :depart_id
                 )
               AND t.spjangcd =:spjangcd
+              AND p.rtflag = '0'
         """;
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
@@ -232,6 +233,7 @@ public class DayMonthlyService {
                 )
               AND t.spjangcd =:spjangcd
               AND t.workym = :startdate
+              AND p.rtflag = '0'
         """;
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);

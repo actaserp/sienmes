@@ -37,7 +37,7 @@ public class ClockMemberService {
               t.workcd as workcd,
               t.remark as remark,
               t.fixflag as fixflag,
-              t.yearflag as yearflag,
+              tb210.yearflag as yearflag,
               tb210.worknm as worknm,
               p."Name" as first_name,
               s."Value" as jik_id

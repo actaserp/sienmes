@@ -39,6 +39,8 @@ public class PersonService {
 	            , p."PersonGroup_id" as person_group_id
 	            , s."Value" as jik_id
 	            , p.rtdate as rtdate
+	            , p.enddate as enddate
+	            , x."Value" as rtflag
 		        FROM person p
 		        left join work_center wc on p."WorkCenter_id" = wc.id
 		        left join Factory f on p."Factory_id" = f.id
@@ -49,6 +51,11 @@ public class PersonService {
 				        FROM sys_code
 				        WHERE "CodeType" = 'jik_type'
 				) s on s."Code" = p.jik_id
+				left join (
+				        SELECT "Code", "Value"
+				        FROM sys_code
+				        WHERE "CodeType" = 'rtflag_type'
+				) x on x."Code" = p.rtflag
 	            where 1=1
 	            AND p.spjangcd = :spjangcd
         		""";

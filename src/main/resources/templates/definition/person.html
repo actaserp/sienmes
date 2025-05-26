@@ -192,9 +192,24 @@
                             </td>
 
                             <th>
+                                <label for="enddate">퇴사일</label>
+                            </th>
+                            <td>
+                                <input type="date" id="enddate" name="enddate" style="width: 100%">
+                            </td>
+
+                            <th>
+                                <label for="rtflag">재직구분</label>
+                            </th>
+                            <td>
+                                <select style="width: 100%;" id="rtflag" name="rtflag"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
                                 <label for="Description">비고</label>
                             </th>
-                            <td colspan="3">
+                            <td colspan="7">
                                 <input type="text" id="Description" name="Description" style="width: 100%;">
                                 <!--<textarea id="Description" name="Description"></textarea>-->
                             </td>
@@ -224,7 +239,7 @@
 
         let columns = [
             {binding: 'id', header: '사번', width: 100, align: 'center'},
-            {binding: 'workcenter_name', header: '워크센터', width: 150, align: 'center'},
+            {binding: 'workcenter_name', header: '워크센터', width: 150, align: 'center',visible: false},
             {binding: 'person_code', header: '코드', width: 100, align: 'center'},
             {binding: 'person_name', header: '이름', width: 100, align: 'center',},
             {binding: 'jik_id', header: '직위', width: 100, align: 'center',},
@@ -234,6 +249,8 @@
             {binding: 'dept_name', header: '부서', width: 120, align: 'center'},
             {binding: 'factory_name', header: '공장', width: 120, align: 'center'},
             {binding: 'rtdate', header: '입사일', width: 120, align: 'center'},
+            {binding: 'enddate', header: '퇴사일', width: 120, align: 'center'},
+            {binding: 'rtflag', header: '재직여부', width: 120, align: 'center'},
             {binding: 'description', header: '비고', width: '*', align: 'center'},
         ]
 
@@ -267,12 +284,18 @@
                             formattedRtdate = `${item.rtdate.substring(0, 4)}-${item.rtdate.substring(4, 6)}-${item.rtdate.substring(6, 8)}`;
                         }
 
+                        let formattedEnddate = '';
+                        if (item.enddate && item.enddate.length === 8) {
+                            formattedEnddate = `${item.enddate.substring(0, 4)}-${item.enddate.substring(4, 6)}-${item.enddate.substring(6, 8)}`;
+                        }
+
                         const { person_group_name, rtdate, ...rest } = item;
 
                         return {
                             ...rest,
                             person_group_name: groupName,
-                            rtdate: formattedRtdate // 포맷된 날짜를 사용
+                            rtdate: formattedRtdate, // 포맷된 날짜를 사용
+                            enddate: formattedEnddate
                         };
                     });
 
@@ -304,7 +327,7 @@ console.log(selectedItem);
                 document.getElementById('WorkHour').value = selectedItem.work_hour;
                 document.getElementById('Description').value = selectedItem.description; // 체크박스 상태 설정
                 document.getElementById('rtdate').value = selectedItem.rtdate;
-
+                document.getElementById('enddate').value = selectedItem.enddate;
                 function setSelectValue(selectId, valueToMatch) {
                     let selectElement = document.getElementById(selectId);
                     if (selectElement) {
@@ -324,6 +347,7 @@ console.log(selectedItem);
                 setSelectValue('work_division', selectedItem.person_group_name);
                 setSelectValue('ShiftCode', selectedItem.shift_name);
                 setSelectValue('jik_id', selectedItem.jik_id);
+                setSelectValue('rtflag', selectedItem.rtflag);
                 setSelectValue('Depart_id', selectedItem.dept_name);
                 setSelectValue('WorkCenter_id', selectedItem.workcenter_name);
                 setSelectValue('Factory_id', selectedItem.factory_name);
@@ -398,6 +422,14 @@ console.log(selectedItem);
                 if (item.person_group_id == 1) groupName = '주간근무';
                 else if (item.person_group_id == 2) groupName = '야간근무';
 
+                // 날짜 포맷 함수
+                const formatDate = (dateStr) => {
+                    if (dateStr && dateStr.length === 8) {
+                        return `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`;
+                    }
+                    return dateStr; // 포맷할 수 없으면 원본 유지
+                };
+
                 return {
                     id: item.id,
                     workcenter_name: item.workcenter_name,
@@ -409,7 +441,9 @@ console.log(selectedItem);
                     shift_name: item.shift_name,
                     dept_name: item.dept_name,
                     factory_name: item.factory_name,
-                    rtdate: item.rtdate,
+                    rtdate: formatDate(item.rtdate),
+                    enddate: formatDate(item.enddate),
+                    rtflag: item.rtflag,
                     description: item.description
                 };
             });
@@ -546,7 +580,7 @@ console.log(selectedItem);
             AjaxUtil.fillSelectOptions($('#Factory_id'), 'factory', '', false);
             AjaxUtil.fillSelectOptions($('#ShiftCode'), 'shift', 'choose', false);
             AjaxUtil.fillSelectOptions($('#Depart_id'), 'depart', 'choose', false);
-
+            AjaxUtil.fillSelectOptions($('#rtflag'), 'system_code', 'choose', '', 'rtflag_type');
             AjaxUtil.fillSelectOptions($('#work_division'), 'system_code', 'choose', '', 'work_division');
             AjaxUtil.fillSelectOptions($('#jik_id'), 'system_code', 'choose','', 'jik_type');
 
