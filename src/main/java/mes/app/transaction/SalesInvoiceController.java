@@ -213,8 +213,9 @@ public class SalesInvoiceController {
 			}
 		}
 
+		Object modifyCode = form.get("ModifyCode");
 		// 수정 세금계산서 처리 여부 분기
-		if (form.containsKey("ModifyCode")) {
+		if (modifyCode != null && !modifyCode.toString().isBlank()) {
 			return salesInvoiceService.saveModifiedInvoice(form);
 		} else {
 			return salesInvoiceService.saveInvoice(form);

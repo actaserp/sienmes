@@ -679,14 +679,31 @@ public class SalesInvoiceService {
                 	m.purposetype AS "purpose_type",
                 	m.statecode AS "StateCode",
                 	sc1."Value" AS statecode_name,
-                	sc2."Description" AS ntscode_des,
                     m.accsubcode AS "account_codeHidden",
                     m.departcode AS "att_departHidden",
                     m.projectcode AS "projectHidden",
                  	sc3.accnm AS "account_code",
                  	sc4.projnm AS "project",
                  	sc5."Name" AS "att_depart",
-                 	m.issuediv AS "issue_div"
+                 	m.issuediv AS "issue_div",
+                 	SUBSTR(m.ntscfnum, 1, 8) || '-' ||
+                    SUBSTR(m.ntscfnum, 9, 8) || '-' ||
+                    SUBSTR(m.ntscfnum, 17) AS "ntscfnum",
+                  
+                    SUBSTR(m.orgntscfnum, 1, 8) || '-' ||
+                    SUBSTR(m.orgntscfnum, 9, 8) || '-' ||
+                    SUBSTR(m.orgntscfnum, 17) AS "orgntscfnum",
+                 	sc2."Description" AS ntscode_des,
+                 	m.modifycd,
+                  CASE m.modifycd
+                      WHEN 1 THEN '기재사항 착오정정'
+                      WHEN 2 THEN '공급가액 변동'
+                      WHEN 3 THEN '환입'
+                      WHEN 4 THEN '계약의 해제'
+                      WHEN 5 THEN '내국신용장 사후개설'
+                      WHEN 6 THEN '착오에 의한 이중발급'
+                      ELSE NULL
+                  END AS modify_name
                 		 			
                 FROM tb_salesment m
                 		
@@ -935,6 +952,13 @@ public class SalesInvoiceService {
         invoice.setRemark1(sm.getRemark1());
         invoice.setRemark2(sm.getRemark2());
         invoice.setRemark3(sm.getRemark3());
+
+        // 수정 세금계산서 정보
+        Optional.ofNullable(sm.getModifycd())
+                .map(Integer::shortValue)
+                .ifPresent(invoice::setModifyCode);
+        invoice.setOrgNTSConfirmNum(sm.getOrgntscfnum());
+        invoice.setOriginalTaxinvoiceKey(sm.getOrgmgtkey());
 
         // 세부 품목 정보 설정
         List<TaxinvoiceDetail> detailList = sm.getDetails().stream().map(d -> {
@@ -1251,7 +1275,7 @@ public class SalesInvoiceService {
                         "misnum", "writedate", "misdate",
                         "mgtkey", "orgntscfnum", "orgmgtkey",
                         "modifycd", "statedt", "ntscode", "statecode",
-                        "details"
+                        "details", "ntscfnum"
                 );
 
                 copy.setMisnum(null); // 새 엔티티
@@ -1357,8 +1381,8 @@ public class SalesInvoiceService {
             );
 
             copy.setMisnum(null); // 새 엔티티
-            copy.setOrgntscfnum(copy.getNtscfnum());
-            copy.setOrgmgtkey(copy.getMgtkey());
+            copy.setOrgntscfnum(origin.getNtscfnum());
+            copy.setOrgmgtkey(origin.getMgtkey());
             copy.setModifycd(parseInt(form.get("ModifyCode")));
             copy.setSupplycost(Optional.ofNullable(copy.getSupplycost()).orElse(0) * -1);
             copy.setTaxtotal(Optional.ofNullable(copy.getTaxtotal()).orElse(0) * -1);
@@ -1383,12 +1407,12 @@ public class SalesInvoiceService {
                 TB_SalesDetailId newId = new TB_SalesDetailId(savedCopy.getMisnum(), String.valueOf(sequence++));
                 newDetail.setId(newId);
 
+                newDetail.setMisdate(detail.getMisdate());
                 newDetail.setItemnm(detail.getItemnm());
                 newDetail.setSpec(detail.getSpec());
                 newDetail.setQty(detail.getQty());
                 newDetail.setUnitcost(Optional.ofNullable(detail.getUnitcost()).orElse(0) * -1);
                 newDetail.setSupplycost(Optional.ofNullable(detail.getSupplycost()).orElse(0) * -1);
-                newDetail.setUnitcost(Optional.ofNullable(detail.getUnitcost()).orElse(0) * -1);
                 newDetail.setTaxtotal(Optional.ofNullable(detail.getTaxtotal()).orElse(0) * -1);
                 newDetail.setTotalamt(Optional.ofNullable(detail.getTotalamt()).orElse(0) * -1);
                 newDetail.setRemark(detail.getRemark());
@@ -1400,9 +1424,8 @@ public class SalesInvoiceService {
             }
 
             // 여기 부터는 수정분 저장
-            form.put("orgntscfnum", copy.getNtscfnum());
-            form.put("orgmgtkey", copy.getMgtkey());
-            form.put("ModifyCode", copy.getModifycd());
+            form.put("orgntscfnum", origin.getNtscfnum());
+            form.put("orgmgtkey", origin.getMgtkey());
             form.remove("misnum");
             form.remove("shipids");
             saveSalesInvoiceInternal(form);

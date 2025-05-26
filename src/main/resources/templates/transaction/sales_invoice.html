@@ -1444,6 +1444,11 @@
                     $purposeType.val(selectedValue2).trigger('change');
                 }
 
+                const ntscfnum = data.ntscfnum;
+                const orgntscfnum = data.orgntscfnum;
+                const ntscodeDes = data.ntscode_des;
+                const modiname = data.modify_name;
+
 
                 if (data.mode === 'new') {
                     modalContainer = new PopupDraggable('등록');
@@ -1486,6 +1491,7 @@
                         $content.find('#InvoiceeEmail1').val(i.invoiceeemail1);
                         $content.find('#InvoiceeCorpNum').prop('readonly', true);
                     }
+                    $content.find('#resultList').hide();
 
 
                 } else {
@@ -1530,16 +1536,65 @@
                             $content.find('#statecode_name').text(stateName);   // 값
                         }
 
-                        const ntscodeDes = data.ntscode_des;
-                        if (ntscodeDes) {
-                            $content.find('div[name="ntscode_des"]').show(); // 라벨
-                            $content.find('#ntscode_des').text(ntscodeDes);     // 값
+                        const $resultList = $content.find('#resultList');
+
+                        // ntscfnum 표시 여부
+                        const $ntscfnumTd = $content.find('#ntscfnum').closest('td');
+                        const $ntscfnumTh = $ntscfnumTd.prev('th');
+
+                        if (ntscfnum || orgntscfnum) {
+                            $ntscfnumTd.show();
+                            $ntscfnumTh.show();
+                            $ntscfnumTd.attr('colspan', orgntscfnum ? 22 : 89); // orgntscfnum 없으면 colspan 확장
+
+                            if (ntscfnum) {
+                                $content.find('#ntscfnum').text(ntscfnum);
+                            } else {
+                                $content.find('#ntscfnum').text(''); // 빈 칸으로 유지
+                            }
+                        } else {
+                            $ntscfnumTd.hide();
+                            $ntscfnumTh.hide();
                         }
 
-                        if (code === 304 || code === 305) {
-                            $content.find('#resultList').show();
+                        // orgntscfnum 표시 여부
+                        const $orgntscfnumTd = $content.find('#orgntscfnum').closest('td');
+                        const $orgntscfnumTh = $orgntscfnumTd.prev('th');
+                        const $modinameTd = $content.find('#modify_name').closest('td');
+                        const $modinameTh = $modinameTd.prev('th');
+
+                        if (orgntscfnum) {
+                            $content.find('#orgntscfnum').text(orgntscfnum);
+                            $content.find('#modify_name').text(modiname);
+                            $orgntscfnumTd.show();
+                            $orgntscfnumTh.show();
+                            $modinameTd.show();
+                            $modinameTh.show();
                         } else {
-                            $content.find('#resultList').hide();
+                            $orgntscfnumTd.hide();
+                            $orgntscfnumTh.hide();
+                            $modinameTd.hide();
+                            $modinameTh.hide();
+                        }
+
+                        // ntscode_des 표시 여부
+                        const $ntscodeDesTd = $content.find('#ntscode_des').closest('td');
+                        const $ntscodeDesTh = $ntscodeDesTd.prev('th');
+
+                        if (ntscodeDes) {
+                            $content.find('#ntscode_des').text(ntscodeDes);
+                            $ntscodeDesTd.show();
+                            $ntscodeDesTh.show();
+                        } else {
+                            $ntscodeDesTd.hide();
+                            $ntscodeDesTh.hide();
+                        }
+
+                        // 전체 resultList 표시 여부
+                        if (ntscfnum || orgntscfnum || ntscodeDes) {
+                            $resultList.show();
+                        } else {
+                            $resultList.hide();
                         }
 
 
@@ -1570,9 +1625,11 @@
                 const popInvoice = new PopInvoiceComponent();
                 let modalHeight = 600;
 
-                // 304 또는 305일 경우만 높이 650으로 조정
-                if (data.StateCode === 304 || data.StateCode === 305) {
+                if (ntscfnum || orgntscfnum) {
                     modalHeight = 630;
+                    if (ntscodeDes) {
+                        modalHeight = 660;
+                    }
                 }
 
                 modalContainer.open({ width: 1200, height: modalHeight, $content });

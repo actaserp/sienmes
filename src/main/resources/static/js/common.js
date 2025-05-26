@@ -687,7 +687,7 @@ let FormUtil = {
                     if ($.isNumeric(value) || value === null) {
                         let biznumFields = ['InvoicerCorpNum', 'InvoiceeCorpNum'];
                         let phoneFields = ['InvoicerTEL', 'InvoiceeTEL1'];
-                        let numberFields = ['unitPrice', 'vat', 'price', 'totalAmount', 'SupplyCostTotal', 'TaxTotal', 'TotalAmount', 'Cash', 'ChkBill', 'Note', 'Credit'];
+                        let numberFields = ['qty', 'unitPrice', 'vat', 'price', 'totalAmount', 'SupplyCostTotal', 'TaxTotal', 'TotalAmount', 'Cash', 'ChkBill', 'Note', 'Credit'];
 
                         if (biznumFields.includes(key)) {
                             let raw = (value || '').replace(/[^\d]/g, '');
@@ -738,7 +738,9 @@ let FormUtil = {
                 $row.find('[name="detailList[' + i + '].ItemId"]').val(item.ItemId);
                 $row.find('[name="detailList[' + i + '].ItemName"]').val(item.ItemName);
                 $row.find('[name="detailList[' + i + '].Spec"]').val(item.Spec);
-                $row.find('[name="detailList[' + i + '].Qty"]').val(item.Qty);
+                $row.find('[name="detailList[' + i + '].Qty"]').val(
+                    item.Qty != null ? Number(item.Qty).toLocaleString() : ''
+                );
                 $row.find('[name="detailList[' + i + '].UnitCost"]').val(
                     item.UnitCost != null ? Number(item.UnitCost).toLocaleString() : ''
                 );

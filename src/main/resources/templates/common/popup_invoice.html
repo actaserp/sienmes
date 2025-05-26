@@ -813,7 +813,21 @@
                                             <th class="splitline noborder_t" colspan="50"></th>
                                         </tr>
                                         <tr>
-                                            <th class="al_c" colspan="11"><span class="bold">국세청 결과</span></th>
+                                            <th class="al_c" colspan="11"><span class="bold">국세청 승인 번호</span></th>
+                                            <td style="padding:0; padding-left:10px;" colspan="30">
+                                                <div tabindex="35" type="text" id="ntscfnum" name="ntscfnum" readonly></div>
+                                            </td>
+                                            <th class="al_c" colspan="15"><span class="bold">원본 국세청 승인 번호</span></th>
+                                            <td style="padding:0; padding-left:10px;" colspan="25">
+                                                <div tabindex="35" type="text" id="orgntscfnum" name="orgntscfnum" readonly></div>
+                                            </td>
+                                            <th class="al_c" colspan="11"><span class="bold">수정 사유</span></th>
+                                            <td style="padding:0; padding-left:10px;" colspan="30">
+                                                <div tabindex="35" type="text" id="modify_name" name="modify_name" readonly></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="al_c" colspan="11"><span class="bold">국세청 전송 결과</span></th>
                                             <td style="padding:0; padding-left:10px;" colspan="89">
                                                 <div tabindex="35" type="text" id="ntscode_des" name="ntscode_des" readonly></div>
                                             </td>
@@ -863,7 +877,7 @@
 
         function setTaxTypeLayout(taxType) {
             const $writeTypeSelect = $('#WriteTypeSelect');
-
+            console.log('setTaxTypeLayout $writeTypeSelect', $writeTypeSelect);
             if (taxType === '영세') {
                 $('.tax-related').show();
                 $writeTypeSelect.html(`
@@ -1236,6 +1250,7 @@
 
         // 총합계 계산 (공급가액 + 세액)
         function updateTotals() {
+            console.log('updateTotals');
             let supplyCostSum = 0;
             let taxSum = 0;
 
@@ -1256,6 +1271,7 @@
 
 
         function recalculateTaxesForRow($row) {
+            console.log('recalculateTaxesForRow');
             const taxMode = $('input[name="TaxType"]:checked').val();       // 과세 / 영세 / 면세
             const writeType = $('#WriteTypeSelect').val();   // 단가 유형
 
@@ -1272,10 +1288,10 @@
                 let tax = 0;
 
                 if (writeType === '부가세 포함' && taxMode === '과세') {
-                    const unitSupply = unitCost / 1.1;
-                    const unitTax = unitCost - unitSupply;
-                    supplyCost = Math.floor(unitSupply * qty);
-                    tax = Math.floor(unitTax * qty);
+                    const total = qty * unitCost;
+                    const supply = total / 1.1;
+                    supplyCost = Math.floor(supply);
+                    tax = total - supplyCost;
                 } else {
                     supplyCost = qty * unitCost;
                     tax = (taxMode === '과세') ? Math.floor(supplyCost * 0.1) : 0;
@@ -1288,6 +1304,7 @@
 
 
         function recalculateTaxesIfNeeded() {
+            console.log('recalculateTaxesIfNeeded');
             const taxType = $('input[name="TaxType"]:checked').val();
 
             let index = 0;
@@ -1304,7 +1321,7 @@
                     if (taxType === '영세' || taxType === '면세') {
                         $tax.val('0');
                     } else if (taxType === '과세') {
-                        let tax = Math.floor(supplyCost * 0.1);
+                        let tax = Math.round(supplyCost * 0.1);
                         $tax.val(tax.toLocaleString());
                     }
                 }
@@ -1372,6 +1389,7 @@
 
         // 수량 또는 단가 입력 → 공급가 + 세액 계산
         $(document).on('input', '#taxList input[id$="Qty"], #taxList input[id$="UnitCost"]', function () {
+            console.log('input\', \'#taxList input[id$="Qty"], #taxList input[id$="UnitCost"]');
             const $row = $(this).closest('tr');
             const $qty = $row.find('input[id$="Qty"]');
             const $unitCost = $row.find('input[id$="UnitCost"]');
@@ -1406,6 +1424,7 @@
 
         // 수량, 단가, 공급가액, 세액 필드 입력 시 숫자형으로 포맷팅 (천단위 콤마)
         $(document).on('input', '#taxList input[id$="Qty"], #taxList input[id$="UnitCost"], #taxList input[id$="SupplyCost"], #taxList input[id$="Tax"]', function () {
+            console.log('수량, 단가, 공급가액, 세액 필드 입력 시 숫자형으로 포맷팅');
             let raw = $(this).val().replace(/,/g, ''); // 기존 콤마 제거
             if (raw.length > 0 && !isNaN(raw)) {
                 $(this).val(Number(raw).toLocaleString()); // 숫자면 콤마 다시 붙이기
