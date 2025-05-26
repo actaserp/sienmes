@@ -1,6 +1,8 @@
 package mes.app.definition.service;
 
 import lombok.extern.slf4j.Slf4j;
+import mes.Encryption.EncryptionUtil;
+import mes.app.aop.DecryptField;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -15,7 +17,7 @@ public class ManageCreditCardsSecvice {
 
   @Autowired
   SqlRunner sqlRunner;
-
+  @DecryptField(columns = "cardnum" , masks = 4)
   public List<Map<String, Object>> getCreditCardsList(String spjangcd, String txtcardnm, String txtcardnum) {
     MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
@@ -42,4 +44,25 @@ public class ManageCreditCardsSecvice {
 
     return itmes;
   }
+
+  public String findDecryptedAccountNumberByAccid(Integer accid) throws Exception {
+    MapSqlParameterSource dicParam = new MapSqlParameterSource();
+    dicParam.addValue("accid", accid);
+
+    String sql = """
+        SELECT accnum 
+        FROM tb_account 
+        WHERE accid = :accid
+        """;
+
+    List<Map<String, Object>> result = this.sqlRunner.getRows(sql, dicParam);
+
+    if (result.isEmpty()) {
+      throw new RuntimeException("계좌 정보가 존재하지 않습니다. accid = " + accid);
+    }
+
+    String encryptedAccnum = (String) result.get(0).get("accnum");
+    return EncryptionUtil.decrypt(encryptedAccnum); // 복호화된 계좌번호 반환
+  }
+
 }

@@ -30,7 +30,7 @@ public class ExpenseAccountSetupService {
     """);
 
     if (txtDescription != null && !txtDescription.isEmpty()) {
-      sql.append(" AND sc.\"Description\" ILIKE :txtDescription ");
+      sql.append(" AND sc.\"Value\" ILIKE :txtDescription ");
       dicParam.addValue("txtDescription", "%" + txtDescription + "%");
     }
 
