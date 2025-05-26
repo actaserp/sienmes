@@ -454,15 +454,16 @@
   const getGPSLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-              (position) => {
-                latitude = position.coords.latitude;
-                longitude = position.coords.longitude;
-                console.log(`GPS Coordinates: Lat ${latitude}, Lon ${longitude}`);
-                getAddressFromVWorld(latitude, longitude);
-              },
-              (error) => {
-                console.error("GPS 접근이 거부되었거나 사용할 수 없습니다.", error.message);
-              }
+        (position) => {
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+          console.log(`GPS Coordinates: Lat ${latitude}, Lon ${longitude}`);
+          getAddressFromVWorld(latitude, longitude);
+        },
+        (error) => {
+          console.warn("GPS 접근 실패, IP 기반 위치로 대체합니다.", error.message);
+          getLocationFromIP();
+        }
       );
     } else {
       console.error("이 브라우저는 Geolocation을 지원하지 않습니다.");
@@ -481,6 +482,15 @@
       document.getElementById('gpsInfo').innerText = result.data
     };
     AjaxUtil.postAsyncData(url, data, fnsuccess);
+  }
+
+  function getLocationFromIP() {
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        console.log("IP 기반 위치:", data);
+        getAddressFromVWorld(data.latitude, data.longitude);
+      });
   }
 
 </script>

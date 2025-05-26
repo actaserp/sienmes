@@ -13,7 +13,6 @@ public class CommuteCurrentService {
     @Autowired
     SqlRunner sqlRunner;
 
-    // 차트 데이터 조회
     public List<Map<String, Object>> getUserInfo(String username, String workcd, String searchFromDate, String searchToDate) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();

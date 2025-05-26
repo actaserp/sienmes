@@ -8,9 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/attendance_statistics")
@@ -18,17 +21,33 @@ public class AttendanceStatisticsController {
     @Autowired
     AttendanceStatisticsService attendanceStatisticsService;
 
-    // 사용자 정보 조회(부서 이름 직급 출근여부)
+    // 사용자 출퇴근 현황 조회
     @GetMapping("/read")
+    public AjaxResult getVacInfo(
+            @RequestParam(value="searchYear") String searchYear,
+            HttpServletRequest request,
+            Authentication auth) {
+        AjaxResult result = new AjaxResult();
+        User user = (User)auth.getPrincipal();
+        String username = user.getUsername();
+
+        List<Map<String, Object>> data = attendanceStatisticsService.getVacInfo(username, searchYear);
+
+        result.data = data;
+
+        return result;
+    }
+    // 사용자 출퇴근 현황 조회
+    @GetMapping("/getUserInfo")
     public AjaxResult getUserInfo(
             HttpServletRequest request,
             Authentication auth) {
         AjaxResult result = new AjaxResult();
-        User user = (User) auth.getPrincipal();
+        User user = (User)auth.getPrincipal();
         String username = user.getUsername();
 
-
-        result.data = attendanceStatisticsService.getUserInfo(username);
+        Map<String, Object> userInfo = attendanceStatisticsService.getUserInfo(username);
+        result.data = userInfo;
 
         return result;
     }
