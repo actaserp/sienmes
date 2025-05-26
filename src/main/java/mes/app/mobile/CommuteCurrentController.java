@@ -25,31 +25,27 @@ public class CommuteCurrentController {
 
     // 사용자 출퇴근 현황 조회
     @GetMapping("/read")
-    public AjaxResult getVacInfo(
-            @RequestParam(value="searchYear") String searchYear,
-            HttpServletRequest request,
-            Authentication auth) {
-        AjaxResult result = new AjaxResult();
-        User user = (User)auth.getPrincipal();
-        String username = user.getUsername();
-
-        List<Map<String, Object>> data = commuteCurrentService.getVacInfo(username, searchYear);
-
-        result.data = data;
-
-        return result;
-    }
-    // 사용자 출퇴근 현황 조회
-    @GetMapping("/getUserInfo")
     public AjaxResult getUserInfo(
+            @RequestParam(value="workcd", required = false) String workcd,
+            @RequestParam(value="searchFromDate") String searchFromDate,
+            @RequestParam(value="searchToDate") String searchToDate,
             HttpServletRequest request,
             Authentication auth) {
         AjaxResult result = new AjaxResult();
         User user = (User)auth.getPrincipal();
         String username = user.getUsername();
 
-        Map<String, Object> userInfo = commuteCurrentService.getUserInfo(username);
-        result.data = userInfo;
+        List<Map<String, Object>> data = commuteCurrentService.getUserInfo(username, workcd, searchFromDate, searchToDate);
+        for(Map<String, Object>dataDetail : data) {
+            String workym = (String) dataDetail.get("workym"); // YYYYMM
+            String workday = (String) dataDetail.get("workday"); // DD
+
+            if (workym != null && workday != null && workym.length() == 6 && workday.length() == 2) {
+                String formattedDate = workym.substring(0, 4) + "." + workym.substring(4) + "." + workday;
+                dataDetail.put("workym", formattedDate);
+            }
+        }
+        result.data = data;
 
         return result;
     }
