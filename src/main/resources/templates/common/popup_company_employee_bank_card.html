@@ -1,4 +1,6 @@
+
 <th:block th:fragment="popup_company">
+
 <script type="text/x-tmpl" id="popup_compSearchTemplate">
 
 <div class="content_wrap popup">
@@ -94,11 +96,9 @@
 
         searchDataBind() {
             let _this = this;
-            let url = '/api/popup/search_Comp';
+            let url = '/api/popup/search_Comp_Custom';
             let data = {
-                'compCode': _this.$compCode.val(),
-                'compName': _this.$compName.val(),
-                'business_number': _this.$business_number.val(),
+                'spjangcd' : getSpjangcdFromSession()
             };
 
             let result = AjaxUtil.getSyncData(url, data);
@@ -132,38 +132,37 @@
                 showMarquee: true,
                 isReadOnly: true,
                 columns: [
-                    { binding: 'compcode', header: '업체코드', width: 120, align: 'center' },
-                    { binding: 'compname', header: '업체명', width: '*', align: 'left' },
-                    { binding: 'business_number', header: '사업자번호', width: 150, align: 'left' },
-                    { binding: 'tel_number', header: '연락처', width: 200, align: 'left' }
+                    { binding: 'item', header: '업체코드', width: 120, align: 'center' },
+                    { binding: 'item2', header: '업체명', width: '*', align: 'left' },
+                    { binding: 'item3', header: '사업자번호', width: 150, align: 'left' },
+                    { binding: 'item4', header: '연락처', width: 200, align: 'left' },
+                    { binding: 'cltflag', header: '구분값', width: '*', align: 'left', visible: false }
                 ],
                 itemsSource: this.viewData,
             });
+            this.grid.allowSorting = false;
             this.grid.rowHeaders.columns.splice(0, 1);
             new FlexGridContextMenu(this.grid);
             this.grid.downloadFileName = '업체 내역';
+
+            this.grid.headersVisibility = wijmo.grid.HeadersVisibility.None;
+            this.grid.formatItem.addHandler(function (s, e) {
+                if (e.panel === s.cells) {
+                    const row = s.rows[e.row];
+                    const data = row.dataItem;
+                    const item = data.item;
+
+                    if (data && (item === '카드사코드' || item === '직원이름' || item === '은행명' || item === '업체코드')) {
+                        row.cssClass = 'row-red'; // 행 전체에 클래스 적용
+                    }
+                }
+            });
 
             this.$btnCompSearch = $content.find('#btnCompSearch');
             this.$compCode = $content.find('#compCode');
             this.$compName = $content.find('#compName');
             this.$business_number = $content.find('#business_number');
             this.$btnCompSelect = $content.find('#btnCompSelect');
-
-            this.grid.loadedRows.addHandler(() => {
-                setTimeout(() => {
-                    this.grid.select(-1, -1); // 선택 상태 초기화
-                }, 0); // 비동기로 처리하여 초기 선택 해제
-            });
-            let isInitialLoad = true; // 초기 상태 플래그
-
-            this.grid.selectionChanged.addHandler((s, e) => {
-                if (isInitialLoad) {
-                    isInitialLoad = false;
-                    this.grid.select(-1, -1); // 초기 선택 해제
-                    return;
-                }
-
-            });
 
 
             this.$btnCompSearch.click(function (e) {
@@ -198,7 +197,15 @@
                 if (items.length === 0) {
                     return false;
                 }
-                _this.selectData(items[0]); // btnCompSelect 클릭과 동일한 동작
+                const selected = items[0];
+                const val = selected.item;
+                if (val === '카드사코드' || val === '직원이름' || val === '은행명' || val === '업체코드') {
+                    // 카드번호면 빠꾸
+                    console.log('카드번호는 선택 불가');
+                    return false;
+                }
+
+                _this.selectData(selected); // btnCompSelect 클릭과 동일한 동작
             });
         }
 
@@ -208,3 +215,5 @@
     }
 
 </script>
+</th:block>
+

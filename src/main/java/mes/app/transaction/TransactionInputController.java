@@ -36,7 +36,7 @@ public class TransactionInputController {
 
     }
 
-    @DecryptField(columns = {"account"}, masks = 4)
+    @DecryptField(columns = {"account"}, masks = 0)
     @GetMapping("/history")
     public AjaxResult TransactionHistory(@RequestParam String searchfrdate,
                                          @RequestParam String searchtodate,
@@ -116,7 +116,7 @@ public class TransactionInputController {
         return result;
     }
 
-    @DecryptField(columns = "accountNumber", masks = 4)
+    @DecryptField(columns = "accountNumber", masks = 0)
     @GetMapping("/searchDetail")
     public AjaxResult searchTransactionDetail(@RequestParam String companyId,
                                               @RequestParam String searchfrdate,

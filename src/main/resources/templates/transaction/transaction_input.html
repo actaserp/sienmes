@@ -37,6 +37,12 @@
             align-items: center;
             height: 100%;
         }
+
+        .row-red {
+            background-color: #EDEFF5 !important;
+            color: black;
+            font-weight: bold;
+        }
     </style>
 </head>
 <th:block layout:fragment="content">
@@ -115,11 +121,11 @@
                             <dt>&nbsp;</dt>
                             <dd>
                                 <li>
-                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <button type="button" class="btn btn-delete" title="검색" id="btnSearch">
                                         <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
                                         <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                         검색
-                                    </a>
+                                    </button>
                                 </li>
                             </dd>
                         </dl>
@@ -610,8 +616,9 @@
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
     <th:block th:replace="/common/popup_account :: popup_account" />
-    <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+    <th:block th:replace="/common/popup_company_employee_bank_card.html :: popup_company"></th:block>
     <th:block th:replace="/shipment/trade_stmt/trade_stmt_tmpl :: printTemplate"></th:block>
+    <script src="/js/AccountInputHandler.js"></script>
     <script type="text/javascript">
         let tradetypeList;
 
@@ -998,7 +1005,7 @@
             EditTransactionData(){
                 let _this = this;
 
-                Alert.confirm('', '수정하시겠습니까? 그리드의 모든 데이터가 수정됩니다.', function(){
+                Alert.confirm('', '저장 하시겠습니까?', function(){
                     const dataMap = getTradeTypeDataMap(tradetypeList);
                     const dataMap_iotype = getTradeTypeDataMap(iotype);
 
@@ -1181,7 +1188,8 @@
                     let money = data.input_money || data.output_money || 0;
                     if(data.tid != null){
                         $('#money').val(money).prop('readonly', true);
-
+                    }else{
+                        $('#money').val(money);
                     }
 
                     $('#inoutFlag').trigger('change');
@@ -1555,7 +1563,7 @@
                 form.BankName = $('#BankName').val();
                 form.AccountNumber = $('#AccountNumber').val();
 
-                Alert.confirm('', '수정하시겠습니까? 사업자번호와 입력불가능한 필드들은 수정되지 않습니다.',function (){
+                Alert.confirm('', '저장 하시겠습니까?',function (){
 
                     let result = AjaxUtil.getSyncData('/EasyFinBankService/updateBankAccount', form,
                     function(){
@@ -1680,7 +1688,11 @@
 
 
             AccountPopupOpen(intputId, hiddenid){
-                let poppage = new PopAccountComponent();
+
+
+                const val = document.getElementById(intputId).value;
+
+                let poppage = new PopAccountComponent(val);
                 let searchcallback = function (items) {
 
                     document.getElementById(intputId).value = items.accountNumber;
@@ -1811,9 +1823,15 @@
             $('#searchfrdate').val(getNowDateMinus7());
             $('#searchtodate').val(getNowDate());
 
-            $('#accountName').click(function () {
+            /*$('#accountName').click(function () {
                 page.AccountPopupOpen('accountName', 'accountNameHidden');
-            });
+            });*/
+
+            $('#accountName').on('keydown', function(e){
+                if(e.key === 'Enter' || e.keyCode === 13){
+                    page.AccountPopupOpen('accountName', 'accountNameHidden');
+                }
+            })
 
             $('#btnBulkEdit').click(function(){
                 page.EditTransactionData();

@@ -278,7 +278,7 @@ public class TransactionInputService {
                 ,s."Value" as depositAndWithdrawalType
                 FROM public.tb_banktransit b
                 left join tb_trade t on t.trid = b.trid
-                left join sys_code s on s."Code" = b.iotype
+                left join sys_code s on s."Code" = b.iotype and "CodeType" = 'deposit_type'
                 left join company c on c.id = b.cltcd
                 where trdate between :searchfrdate and :searchtodate
                 AND b.cltcd = :cltcd

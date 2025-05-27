@@ -64,8 +64,9 @@
   <script type="text/javascript">
 
     class PopAccountComponent {
-      constructor() {
+      constructor(eleVal) {
 
+        this.eleVal = eleVal;
         this.grid = null;
         this.viewData = new wijmo.collections.CollectionView();
         this.selectedItem = null;
@@ -88,10 +89,17 @@
 
         let result = AjaxUtil.getSyncData(url, data);
 
+
         if (result && Array.isArray(result.data)) {
+
           _this.viewData.sourceCollection = result.data;
         } else {
           _this.viewData.sourceCollection = [];
+        }
+
+        if(result.data.length === 1){
+
+          setTimeout(function(){   $('#btnCompSelect').trigger('click'); }, 0)
         }
 
         this.selectedItem = null;
@@ -105,12 +113,13 @@
       show(callback) {
         let _this = this;
 
+
         this.callback = callback;
 
         let content = tmpl('popup_AccountSearchTemplate', {});
         let $content = $(content);
         this.modalContainer.open({ width: 800, height: 500, $content });
-  /*      setTimeout(() => {
+        setTimeout(() => {
           if (_this.grid.rows.length > 0) {
             let colIndex = _this.grid.columns.findIndex(col => col.binding === 'accountNumber');
             if (colIndex > -1) {
@@ -119,7 +128,11 @@
               _this.grid.focus();
             }
           }
-        }, 100);*/
+        }, 100);
+
+        $('#account_number').val(_this.eleVal);
+
+
         this.grid = new wijmo.grid.FlexGrid('#AccountGrid', {
           selectionMode: wijmo.grid.SelectionMode.Row,
           autoGenerateColumns: false,
@@ -193,6 +206,7 @@
           _this.selectData(items[0]); // btnCompSelect 클릭과 동일한 동작
         });
 
+        this.grid.keyActionEnter = wijmo.grid.KeyAction.None;
         this.grid.hostElement.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.keyCode === 13) {
             let sel = _this.grid.selection;

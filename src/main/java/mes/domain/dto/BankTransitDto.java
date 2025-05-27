@@ -92,6 +92,8 @@ public class BankTransitDto {
             accout = UtilClass.parseInteger(money);
         }
 
+        String accountNum = dto.getAccountNumber() != null ? dto.getAccountNumber().replaceAll("-", "") : null;
+
         banktransit.setIoid(dto.getBankTransitId());
         banktransit.setIoflag(dto.getInoutFlag());  //입출금구분
         banktransit.setTrdate(dto.getTransactionDate().replaceAll("-", ""));
@@ -106,7 +108,7 @@ public class BankTransitDto {
         banktransit.setIotype(dto.getDepositAndWithdrawalType());
         banktransit.setBanknm(dto.getBankName());
         banktransit.setFeeamt(UtilClass.parseInteger(commission));
-        banktransit.setAccnum(dto.getAccountNumber().replaceAll("-", ""));
+        banktransit.setAccnum(accountNum);
         banktransit.setAccid(dto.getAccountId());
         banktransit.setEumnum(dto.getBill());
         banktransit.setEumtodt(dto.getExpiration());
