@@ -9,6 +9,10 @@ import mes.domain.entity.User;
 import mes.domain.model.AjaxResult;
 //import mes.domain.repository.approval.TB_AA010ATCHRepository;
 //import mes.domain.repository.approval.tb_aa010Repository;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.util.IOUtils;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
@@ -17,16 +21,16 @@ import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -531,6 +535,61 @@ public class PaymentDetailController {
       result.message = "기관명 조회 실패";
     }
     return result;
+  }
+
+  @GetMapping("/readVacFile")
+  public void readVacFile(@RequestParam("appnum") String appnum, HttpServletResponse response) throws Exception {
+    Map<String, Object> vacData = paymentDetailService.getVacFileList(appnum);
+
+    // 1. UUID 기반 임시 파일명 생성
+    String uuid = UUID.randomUUID().toString();
+    Path tempXlsx = Files.createTempFile(uuid, ".xlsx");
+    Path tempPdf = Path.of(tempXlsx.toString().replace(".xlsx", ".pdf"));
+
+    // 2. 엑셀 템플릿 불러오기 및 수정
+    try (FileInputStream fis = new FileInputStream("C:/Temp/mes21/문서/VacDemoFile.xlsx");
+         Workbook workbook = new XSSFWorkbook(fis);
+         FileOutputStream fos = new FileOutputStream(tempXlsx.toFile())) {
+
+      Sheet sheet = workbook.getSheetAt(0);
+      sheet.getRow(5).getCell(2).setCellValue((String) vacData.get("partName"));
+      sheet.getRow(7).getCell(2).setCellValue((String) vacData.get("jikName"));
+      sheet.getRow(9).getCell(2).setCellValue((String) vacData.get("repopernm"));
+      sheet.getRow(11).getCell(2).setCellValue(vacData.get("startDate") + " ~ " + vacData.get("endDate") + " (" + vacData.get("datenum") + "일간)");
+      sheet.getRow(16).getCell(0).setCellValue((String) vacData.get("remark"));
+
+      workbook.write(fos);
+    }
+
+    // 3. LibreOffice로 PDF 변환
+    ProcessBuilder pb = new ProcessBuilder(
+            "C:/Program Files/LibreOffice/program/soffice.exe",
+            "--headless",
+            "--convert-to", "pdf",
+            "--outdir", tempPdf.getParent().toString(),
+            tempXlsx.toAbsolutePath().toString()
+    );
+    pb.inheritIO();
+    Process process = pb.start();
+    process.waitFor();
+
+    // 4. PDF 응답 전송
+    try (FileInputStream fis = new FileInputStream(tempPdf.toFile())) {
+      response.setContentType("application/pdf");
+      response.setHeader("Content-Disposition", "inline; filename=vacation.pdf");
+      IOUtils.copy(fis, response.getOutputStream());
+      response.flushBuffer();
+    }
+
+    // 5. 일정 시간 후 임시파일 자동 삭제 (5분)
+    Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+      try {
+        Files.deleteIfExists(tempXlsx);
+        Files.deleteIfExists(tempPdf);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }, 5, TimeUnit.MINUTES);
   }
 
 

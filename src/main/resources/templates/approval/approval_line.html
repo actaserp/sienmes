@@ -169,13 +169,13 @@
               </colgroup>
               <tbody>
               <tr >
-                <th>전표 보기</th>
-                <th>첨부파일 보기</th>
+<!--                <th>전표 보기</th>-->
+                <th colspan="2">첨부파일 보기</th>
               </tr>
               <tr>
                 <td colspan="2">
                   <div id="pdfWrapper" style="display: flex;">
-                    <div id="pdfView" class="tab-item wp60" style="display: block;">
+                    <div id="pdfView" class="tab-item wp100" style="display: block;">
                       <div id="pdfContainer" style="
                               width: 100%;
                               height: auto;
@@ -186,17 +186,17 @@
                         <!-- PDF 페이지가 동적으로 추가됩니다. -->
                       </div>
                     </div>
-                    <div id="pdfView2" class="tab-item wp40" style="display: block;">
-                      <div id="pdfContainer2" style="
-                              width: 100%;
-                              height: auto;
-                              padding: 10px;
-                              background: #f8f9fa;
-                              overflow-y: auto;
-                              max-height: 500px;">
-                        <!-- PDF 페이지가 동적으로 추가됩니다. -->
-                      </div>
-                    </div>
+<!--                    <div id="pdfView2" class="tab-item wp40" style="display: block;">-->
+<!--                      <div id="pdfContainer2" style="-->
+<!--                              width: 100%;-->
+<!--                              height: auto;-->
+<!--                              padding: 10px;-->
+<!--                              background: #f8f9fa;-->
+<!--                              overflow-y: auto;-->
+<!--                              max-height: 500px;">-->
+<!--                        &lt;!&ndash; PDF 페이지가 동적으로 추가됩니다. &ndash;&gt;-->
+<!--                      </div>-->
+<!--                    </div>-->
                   </div>
                 </td>
               </tr>
@@ -491,7 +491,7 @@
 
             if (rowData) {
               modifyData(rowData);
-              modifyData2(rowData);
+              // modifyData2(rowData);
               NewSave2(); // 팝업 열기
             }
           }
@@ -499,182 +499,151 @@
         lastClickTime = now;
       });
     }
+    // 프론트엔드 JavaScript PDF 렌더링 (modifyData + showPdf 통합)
     function modifyData(rowData) {
       console.log("✔️ 더블클릭한 행의 데이터:", rowData);
       let container = document.getElementById("pdfContainer");
 
-      // ✅ appnum 값을 currentRealId로 설정
       currentRealId = rowData.appnum || "";
       appgubun = rowData.appgubun || '';
       appnum = rowData.appnum || '';
       remark = rowData.remark || '';
-      papercd = rowData.papercd ||'';
+      papercd = rowData.papercd || '';
+
       document.getElementById('appnum').value = currentRealId;
       document.getElementById('appgubun').value = appgubun;
       document.getElementById('remark').value = remark;
       document.getElementById('papercd').value = papercd;
 
-      let params = {appnum: rowData.appnum};
+      const url = `/api/PaymentDetail/readVacFile?appnum=${encodeURIComponent(rowData.appnum)}`;
 
-      console.log("📂 요청할 데이터:", params);
-
-      $.ajax({
-        url: '/api/PaymentDetail/pdf',  // ✅ PDF 파일을 요청하는 API
-        type: 'GET',
-        data: params,
-        xhrFields: {responseType: 'blob'},  // ✅ 응답을 Blob 형식으로 받음
-        success: function (response) {
-          console.log("📂 PDF 데이터 수신 완료");
-
-          let filepath = URL.createObjectURL(response); // ✅ Blob 데이터를 URL로 변환
-          console.log("📂 PDF URL 생성됨:", filepath);
-
-          container.innerHTML = ""; // 기존 내용 초기화
-          showPdf(filepath);  // ✅ PDF 렌더링 함수 호출
-        },
-        error: function () {
-          console.error("🚨 데이터 요청 중 오류 발생");
-          container.innerHTML = "<p style='color:red;'>PDF 파일을 불러올 수 없습니다.</p>";
-        }
-      });
+      fetch(url)
+              .then(res => res.blob())
+              .then(blob => {
+                const blobURL = URL.createObjectURL(blob);
+                renderPdf(blobURL);
+              })
+              .catch(() => {
+                container.innerHTML = "<p style='color:red;'>휴가서 양식을 불러올 수 없습니다.</p>";
+              });
     }
-    function showPdf(filepath) {
-      console.log(" PDF.js를 사용하여 PDF 렌더링:", filepath);
 
-      let container = document.getElementById("pdfContainer");
-      container.innerHTML = ""; // 기존 내용 초기화
+    function renderPdf(url) {
+      const container = document.getElementById("pdfContainer");
+      container.innerHTML = "";
 
-      // 🛠 PDF.js를 이용하여 PDF 불러오기
-      pdfjsLib.getDocument({url: filepath}).promise.then(pdf => {  // ✅ PDF.js는 Blob URL을 객체 형태로 받아야 함.
-        console.log(" PDF 로드 완료. 총 페이지 수:", pdf.numPages);
-
+      pdfjsLib.getDocument({ url }).promise.then(pdf => {
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
           pdf.getPage(pageNum).then(page => {
-            let viewport = page.getViewport({scale: 1.5}); // 기본 스케일
+            const viewport = page.getViewport({ scale: 1.3 });
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
 
-            // 🛠 컨테이너 너비에 맞춰 PDF를 자동 확대
-            let scale = container.clientWidth / viewport.width;
-            let scaledViewport = page.getViewport({scale: scale});
-
-            // 페이지별 <canvas> 생성
-            let canvas = document.createElement("canvas");
-            canvas.classList.add("pdf-page");
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
             container.appendChild(canvas);
 
-            let context = canvas.getContext("2d");
-
-            // 🛠 PDF 크기를 컨테이너에 맞게 설정
-            let scaleFactor = 3; // 3배 확대
-            canvas.width = scaledViewport.width * scaleFactor;
-            canvas.height = scaledViewport.height * scaleFactor;
-            canvas.style.width = "100%"; // 컨테이너에 맞게 꽉 채우기
-            canvas.style.height = "auto"; // 세로 비율 유지
-
-            // 고해상도 렌더링 (텍스트 선명하게)
-            let renderContext = {
+            page.render({
               canvasContext: context,
-              viewport: scaledViewport,
-              transform: [scaleFactor, 0, 0, scaleFactor, 0, 0]
-            };
-
-            page.render(renderContext);
+              viewport: viewport
+            });
           });
         }
       }).catch(error => {
         console.error("❌ PDF 렌더링 오류:", error);
-        Alert.alert('', " PDF를 불러올 수 없습니다.");
+        alert("PDF를 표시할 수 없습니다.");
       });
     }
 
-    function modifyData2(rowData) {
-      console.log("✔️ 더블클릭한 행의 데이터:", rowData);
-      let container = document.getElementById("pdfContainer2");
-
-      // ✅ appnum 값을 currentRealId로 설정
-      currentRealId = rowData.appnum || "";
-      appgubun = rowData.appgubun || '';
-      appnum = rowData.appnum || '';
-      remark = rowData.remark || '';
-      appperid = rowData.appperid || '';
-      repoperid = rowData.repoperid || '';
-
-      document.getElementById('appnum').value = currentRealId;
-      document.getElementById('appgubun').value = appgubun;
-      document.getElementById('remark').value = remark;
-      document.getElementById('appperid').value = repoperid;
-
-      let params = {appnum: rowData.appnum};
-
-      console.log("📂 요청할 데이터:", params);
-
-      $.ajax({
-        url: '/api/PaymentDetail/pdf2',  // ✅ PDF 파일을 요청하는 API
-        type: 'GET',
-        data: params,
-        xhrFields: {responseType: 'blob'},  // ✅ 응답을 Blob 형식으로 받음
-        success: function (response) {
-          console.log("📂 PDF 데이터 수신 완료");
-
-          let filepath = URL.createObjectURL(response); // ✅ Blob 데이터를 URL로 변환
-          console.log("📂 PDF URL 생성됨:", filepath);
-
-          container.innerHTML = ""; // 기존 내용 초기화
-          showPdf2(filepath);  // ✅ PDF 렌더링 함수 호출
-        },
-        error: function () {
-          console.error("🚨 데이터 요청 중 오류 발생");
-          container.innerHTML = "<p style='color:red;'>첨부된 파일이 없습니다.</p>";
-        }
-      });
-    }
-
-    function showPdf2(filepath) {
-      console.log(" PDF.js를 사용하여 PDF 렌더링:", filepath);
-
-      let container = document.getElementById("pdfContainer2");
-      container.innerHTML = ""; // 기존 내용 초기화
-
-      // 🛠 PDF.js를 이용하여 PDF 불러오기
-      pdfjsLib.getDocument({url: filepath}).promise.then(pdf => {  // ✅ PDF.js는 Blob URL을 객체 형태로 받아야 함.
-        console.log(" PDF 로드 완료. 총 페이지 수:", pdf.numPages);
-
-        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-          pdf.getPage(pageNum).then(page => {
-            let viewport = page.getViewport({scale: 1.5}); // 기본 스케일
-
-            // 🛠 컨테이너 너비에 맞춰 PDF를 자동 확대
-            let scale = container.clientWidth / viewport.width;
-            let scaledViewport = page.getViewport({scale: scale});
-
-            // 페이지별 <canvas> 생성
-            let canvas = document.createElement("canvas");
-            canvas.classList.add("pdf-page");
-            container.appendChild(canvas);
-
-            let context = canvas.getContext("2d");
-
-            // 🛠 PDF 크기를 컨테이너에 맞게 설정
-            let scaleFactor = 3; // 3배 확대
-            canvas.width = scaledViewport.width * scaleFactor;
-            canvas.height = scaledViewport.height * scaleFactor;
-            canvas.style.width = "100%"; // 컨테이너에 맞게 꽉 채우기
-            canvas.style.height = "auto"; // 세로 비율 유지
-
-            // 고해상도 렌더링 (텍스트 선명하게)
-            let renderContext = {
-              canvasContext: context,
-              viewport: scaledViewport,
-              transform: [scaleFactor, 0, 0, scaleFactor, 0, 0]
-            };
-
-            page.render(renderContext);
-          });
-        }
-      }).catch(error => {
-        console.error("❌ PDF 렌더링 오류:", error);
-        Alert.alert('', " PDF를 불러올 수 없습니다.");
-      });
-    }
+    // function modifyData2(rowData) {
+    //   console.log("✔️ 더블클릭한 행의 데이터:", rowData);
+    //   let container = document.getElementById("pdfContainer2");
+    //
+    //   // ✅ appnum 값을 currentRealId로 설정
+    //   currentRealId = rowData.appnum || "";
+    //   appgubun = rowData.appgubun || '';
+    //   appnum = rowData.appnum || '';
+    //   remark = rowData.remark || '';
+    //   appperid = rowData.appperid || '';
+    //   repoperid = rowData.repoperid || '';
+    //
+    //   document.getElementById('appnum').value = currentRealId;
+    //   document.getElementById('appgubun').value = appgubun;
+    //   document.getElementById('remark').value = remark;
+    //   document.getElementById('appperid').value = repoperid;
+    //
+    //   let params = {appnum: rowData.appnum};
+    //
+    //   console.log("📂 요청할 데이터:", params);
+    //
+    //   $.ajax({
+    //     url: '/api/PaymentDetail/pdf2',  // ✅ PDF 파일을 요청하는 API
+    //     type: 'GET',
+    //     data: params,
+    //     xhrFields: {responseType: 'blob'},  // ✅ 응답을 Blob 형식으로 받음
+    //     success: function (response) {
+    //       console.log("📂 PDF 데이터 수신 완료");
+    //
+    //       let filepath = URL.createObjectURL(response); // ✅ Blob 데이터를 URL로 변환
+    //       console.log("📂 PDF URL 생성됨:", filepath);
+    //
+    //       container.innerHTML = ""; // 기존 내용 초기화
+    //       showPdf2(filepath);  // ✅ PDF 렌더링 함수 호출
+    //     },
+    //     error: function () {
+    //       console.error("🚨 데이터 요청 중 오류 발생");
+    //       container.innerHTML = "<p style='color:red;'>첨부된 파일이 없습니다.</p>";
+    //     }
+    //   });
+    // }
+    //
+    // function showPdf2(filepath) {
+    //   console.log(" PDF.js를 사용하여 PDF 렌더링:", filepath);
+    //
+    //   let container = document.getElementById("pdfContainer2");
+    //   container.innerHTML = ""; // 기존 내용 초기화
+    //
+    //   // 🛠 PDF.js를 이용하여 PDF 불러오기
+    //   pdfjsLib.getDocument({url: filepath}).promise.then(pdf => {  // ✅ PDF.js는 Blob URL을 객체 형태로 받아야 함.
+    //     console.log(" PDF 로드 완료. 총 페이지 수:", pdf.numPages);
+    //
+    //     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    //       pdf.getPage(pageNum).then(page => {
+    //         let viewport = page.getViewport({scale: 1.5}); // 기본 스케일
+    //
+    //         // 🛠 컨테이너 너비에 맞춰 PDF를 자동 확대
+    //         let scale = container.clientWidth / viewport.width;
+    //         let scaledViewport = page.getViewport({scale: scale});
+    //
+    //         // 페이지별 <canvas> 생성
+    //         let canvas = document.createElement("canvas");
+    //         canvas.classList.add("pdf-page");
+    //         container.appendChild(canvas);
+    //
+    //         let context = canvas.getContext("2d");
+    //
+    //         // 🛠 PDF 크기를 컨테이너에 맞게 설정
+    //         let scaleFactor = 3; // 3배 확대
+    //         canvas.width = scaledViewport.width * scaleFactor;
+    //         canvas.height = scaledViewport.height * scaleFactor;
+    //         canvas.style.width = "100%"; // 컨테이너에 맞게 꽉 채우기
+    //         canvas.style.height = "auto"; // 세로 비율 유지
+    //
+    //         // 고해상도 렌더링 (텍스트 선명하게)
+    //         let renderContext = {
+    //           canvasContext: context,
+    //           viewport: scaledViewport,
+    //           transform: [scaleFactor, 0, 0, scaleFactor, 0, 0]
+    //         };
+    //
+    //         page.render(renderContext);
+    //       });
+    //     }
+    //   }).catch(error => {
+    //     console.error("❌ PDF 렌더링 오류:", error);
+    //     Alert.alert('', " PDF를 불러올 수 없습니다.");
+    //   });
+    // }
 
     // 결재 상태 업데이트
     function Statechange(action) {

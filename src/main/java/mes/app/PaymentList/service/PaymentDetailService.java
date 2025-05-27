@@ -97,6 +97,20 @@ public class PaymentDetailService {
 
   }
 
+  public Map<String, Object> getVacFileList(String appnum) {
+    MapSqlParameterSource params = new MapSqlParameterSource();
+    params.addValue("appnum", appnum);
+    StringBuilder sql = new StringBuilder("""
+                SELECT
+                    *
+                 FROM tb_e080 e080
+                 WHERE e080.spjangcd = 'ZZ'
+                 AND e080.appnum = :appnum
+        """);
+    return sqlRunner.getRow(sql.toString(), params);
+
+  }
+
 
   public List<Map<String, Object>> getPaymentList1(String spjangcd, String startDate, String endDate, Integer personid) {
     MapSqlParameterSource params = new MapSqlParameterSource();
