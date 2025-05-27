@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static mes.Encryption.EncryptionUtil.decrypt;
 
 @Slf4j
 @Service
@@ -18,7 +21,7 @@ public class ManageCreditCardsSecvice {
   @Autowired
   SqlRunner sqlRunner;
 
-  @DecryptField(columns = {"cardnum", "accnum", "cardnum_real"} )
+  @DecryptField(columns = {"cardnum", "accnum"} )
   public List<Map<String, Object>> getCreditCardsList(String spjangcd, String txtcardnm, String txtcardnum) {
     MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
@@ -27,24 +30,41 @@ public class ManageCreditCardsSecvice {
     dicParam.addValue("txtcardnum", txtcardnum);  //카드번호
 
     String sql = """
-        select ti.cardnum as cardnum_real , *
+        select *
         from tb_iz010 ti
         where ti.spjangcd = :spjangcd 
         """;
-
-    if (txtcardnum != null && !txtcardnum.isEmpty()) {  //카드번호
-      sql += " and ti.cardnum like :txtcardnum ";
-      dicParam.addValue("txtcardnum", "%" + txtcardnum + "%");
-    }
     if (txtcardnm != null && !txtcardnm.isEmpty()) {
       sql += " and ti.cardnm like :txtcardnm ";
       dicParam.addValue("txtcardnm", "%" + txtcardnm + "%");
     }
-//    log.info("신용카드 read SQL: {}", sql);
-//    log.info("SQL Parameters: {}", dicParam.getValues());
-    List<Map<String, Object>> itmes = this.sqlRunner.getRows(sql, dicParam);
+    // 쿼리 실행
+    List<Map<String, Object>> rawResults = this.sqlRunner.getRows(sql, dicParam);
 
-    return itmes;
+    // 자바단에서 복호화 후 카드번호 필터링
+    if (txtcardnum != null && !txtcardnum.isEmpty()) {
+      rawResults = rawResults.stream()
+          .filter(item -> {
+            String encrypted = String.valueOf(item.get("cardnum"));
+            String decrypted;
+            try {
+              decrypted = decrypt(encrypted);
+            } catch (Exception e) {
+              throw new RuntimeException("복호화 실패", e);
+            }
+            return decrypted.contains(txtcardnum);
+          })
+          .map(item -> {
+            try {
+              item.put("cardnum", decrypt(item.get("cardnum").toString())); // 복호화 값 덮어쓰기
+            } catch (Exception e) {
+              throw new RuntimeException("복호화 실패", e);
+            }
+            return item;
+          })
+          .collect(Collectors.toList());
+    }
+    return rawResults;
   }
 
   public String findDecryptedAccountNumberByAccid(Integer accid) throws Exception {
@@ -64,7 +84,7 @@ public class ManageCreditCardsSecvice {
     }
 
     String encryptedAccnum = (String) result.get(0).get("accnum");
-    return EncryptionUtil.decrypt(encryptedAccnum); // 복호화된 계좌번호 반환
+    return decrypt(encryptedAccnum); // 복호화된 계좌번호 반환
   }
 
 }

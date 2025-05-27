@@ -30,6 +30,17 @@ const AccountInputHandler = {
     $accnum.on('keydown', function (e) {
       if (e.key === 'Enter') {
         const accountNumber = $accnum.val().replace(/[\s-]/g, '');
+
+        // ✅ 입력이 없으면 무조건 팝업 열기
+        if (accountNumber.length === 0) {
+          const poppage = new PopAccountComponent();
+          poppage.show(function (item) {
+            setAccountInfo(item);
+          });
+          return;
+        }
+
+        // ✅ 그 외에는 기존 Ajax 검색 로직
         if (accountNumber.length < minLength) return;
 
         $.ajax({
@@ -43,10 +54,10 @@ const AccountInputHandler = {
             } else if (items.length === 1) {
               setAccountInfo(items[0]);
             } else {
-              let poppage = new PopAccountComponent();
+              const poppage = new PopAccountComponent();
               poppage.show(function (item) {
                 setAccountInfo(item);
-              }, accountNumber);
+              }, accountNumber); // 프리셋 전달
             }
           },
           error: function () {
@@ -55,5 +66,6 @@ const AccountInputHandler = {
         });
       }
     });
+
   }
 };

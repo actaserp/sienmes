@@ -122,7 +122,6 @@
                         <label for="cardnum">카드번호</label>
                       </th>
                       <td>
-                        <input type="hidden" id ="cardnum_real" name="cardnum_real">
                         <input type="text" id="cardnum" name="cardnum" class="wp100" placeholder="카드번호"/>
                       </td>
                       <th>
@@ -155,7 +154,7 @@
                       <td>
                         <input type="hidden" id="ACCID" name="ACCID" />
                         <input type="hidden" id="ACCNUM_REAL" />
-                        <input type="text" id="ACCNUM" name="ACCNUM" class="wp100" style="width: 300px !important" placeholder="해당 칸을 클릭해서 검색하세요." />
+                        <input type="text" id="ACCNUM" name="ACCNUM" class="wp100" style="width: 300px !important" placeholder="계좌번호 입력 후 엔터를 눌러 검색하세요." />
                       </td>
                       <th><label for="BANKNM">결제 은행</label></th>
                       <td >
@@ -286,7 +285,6 @@
             $('#bankid').val(selectedItem.bankid);                // 히든
             $('#BANKNM').val(selectedItem.banknm);                // 읽기전용 텍스트
             // 카드 정보
-            $('#cardnum_real').val(selectedItem.cardnum_real);    // 카드번호 원본 값
             $('#cardnum').val(selectedItem.cardnum);              // 카드번호
             $('#cardnm').val(selectedItem.cardnm);                // 카드명
             $('#cardco').val(selectedItem.cardco);                // 카드사
@@ -366,7 +364,6 @@
           baroid: $('#baroid').val(),                         // 바로빌 아이디
           cdpernm: $('#cdpernm option:selected').text(),      // 성명(카드 사용직원명)
           cdperid: $('#cdpernm').val(),                       // 성명(카드 사용직원)
-          cardnum_real: $('#cardnum_real').val()              // 카드번호 히든값
           };
 
         //콜백 기반 confirm 사용
@@ -381,7 +378,7 @@
             },
             success: function(result) {
               if (result && result.success) {
-                Alert.alert('', '저장 완료');
+                Alert.alert('', result.message);
                 $('#CategoryForm')[0].reset();
                 _this.searchMainData();
               } else {
@@ -395,6 +392,27 @@
         });
       }
 
+      //삭제
+      DeleteMainData() {
+        const _this = this;
+        const url = '/api/transaction/manageCreditCard/delete';
+        const data = {
+          cardnum: $('#cardnum').val(),
+          spjangcd: this.spjangcd.val()
+        };
+
+        Alert.confirm('', '삭제하시겠습니까?', function () {
+          AjaxUtil.postAsyncData(url, data, function (result) {
+            if (result && result.success) {
+              Alert.alert('', '삭제되었습니다.');
+              _this.searchMainData();
+              $('#CategoryForm')[0].reset();
+            } else {
+              Alert.alert('', '삭제에 실패했습니다.');
+            }
+          });
+        });
+      }
 
     }
     function formatDayInput(input) {
@@ -456,8 +474,6 @@
 
       });
 
-
-      //<!--<script src="/js/AccountInputHandler.js"/>--> 상위에 선언해서 사용
       AccountInputHandler.bind({
         accnumSelector: '#ACCNUM',
         banknmSelector: '#BANKNM',
@@ -480,6 +496,13 @@
         e.preventDefault();
         page.saveMainData();
       });
+
+      //삭제
+      $('#btnDelete').click(function (e) {
+        e.preventDefault();
+        page.DeleteMainData();
+      });
+
 
     })
   </script>
