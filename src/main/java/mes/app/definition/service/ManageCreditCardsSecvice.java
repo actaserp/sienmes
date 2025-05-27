@@ -17,7 +17,7 @@ public class ManageCreditCardsSecvice {
 
   @Autowired
   SqlRunner sqlRunner;
-  @DecryptField(columns = "cardnum" , masks = 4)
+  @DecryptField(columns = {"cardnum", "accnum"} , masks = {4, 3})
   public List<Map<String, Object>> getCreditCardsList(String spjangcd, String txtcardnm, String txtcardnum) {
     MapSqlParameterSource dicParam = new MapSqlParameterSource();
 

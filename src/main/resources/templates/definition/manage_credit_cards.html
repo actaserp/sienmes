@@ -265,6 +265,52 @@
         new FlexGridContextMenu(this.grid);
         this.grid.downloadFileName = '신용카드등록';
 
+        this.grid.hostElement.addEventListener('dblclick', (e) => {
+          const ht = this.grid.hitTest(e);
+          if (ht.cellType === wijmo.grid.CellType.Cell) {
+            const selectedItem = this.grid.selectedItems[0];
+
+            function formatDate(str) {
+              if (!str || str.length !== 8) return '';
+              return `${str.substring(0, 4)}-${str.substring(4, 6)}-${str.substring(6, 8)}`;
+            }
+            // 결제 계좌
+            $('#accid').val(selectedItem.accid);                  // 히든
+            $('#ACCID').val(selectedItem.accid);                  // 히든
+            $('#accnum').val(selectedItem.accnum);                // 비마스킹
+            $('#ACCNUM').val(selectedItem.accnum);                // 마스킹된 값 넣어도 무방
+            $('#ACCNUM_REAL').val(selectedItem.accnum);           // 히든 - 원본 값
+            // 결제 은행
+            $('#bankid').val(selectedItem.bankid);                // 히든
+            $('#BANKNM').val(selectedItem.banknm);                // 읽기전용 텍스트
+            // 카드 정보
+            $('#cardnum').val(selectedItem.cardnum);              // 카드번호
+            $('#cardnm').val(selectedItem.cardnm);                // 카드명
+            $('#cardco').val(selectedItem.cardco);                // 카드사
+            // 카드 구분 (법인/개인)
+            $("input[name='cardType'][value='" + selectedItem.cardclafi + "']").prop('checked', true);
+            // 성명
+            $('#cdpernm').val(selectedItem.cdperid);
+            // 발급일자 / 만기일자
+            $('#regAsName').val(formatDate(selectedItem.issudate));
+            $('#expdate').val(formatDate(selectedItem.expdate));
+            // 결제일자
+            const input = document.getElementById('stldate');
+            input.value = selectedItem.stldate;
+            formatDayInput(input);
+            // 사용여부 라디오 버튼
+            $("input[name='useYn'][value='" + selectedItem.useyn + "']").prop('checked', true);
+            // 카드 거래 연동 (체크박스)
+            $('#baroflag').prop('checked', selectedItem.baroflag === 'Y');
+            // 바로빌 정보
+            $('#barocd').val(selectedItem.barocd);
+            $('#baroid').val(selectedItem.baroid);
+            // 홈페이지 정보
+            $('#cardwebid').val(selectedItem.cardwebid);
+            $('#cardwebpw').val(selectedItem.cardwebpw || '');
+          }
+        });
+
         // 엔터키 검색
         $('#txtcardnum, #txtcardnm').on('keypress', function (e) {
           if (e.keyCode === 13) {
