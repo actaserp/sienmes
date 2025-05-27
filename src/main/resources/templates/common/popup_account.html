@@ -128,13 +128,6 @@
           itemsSource: this.viewData,
         });
 
-        setTimeout(() => {
-          if (_this.grid.rows.length > 0) {
-            _this.grid.select(new wijmo.grid.CellRange(0, 0)); // 첫 행 선택
-          }
-          _this.grid.focus();
-        }, 100);
-
         this.grid.rowHeaders.columns.splice(0, 1);
         new FlexGridContextMenu(this.grid);
         this.grid.downloadFileName = '계좌 리스트';
@@ -192,11 +185,19 @@
           }
           _this.selectData(items[0]); // btnCompSelect 클릭과 동일한 동작
         });
+
         this.grid.hostElement.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.keyCode === 13) {
-            let items = _this.grid.selectedItems;
-            if (items.length === 0) return;
-            _this.selectData(items[0]); // 엔터키로 선택
+            let sel = _this.grid.selection;
+
+            // 실제로 포커스가 있는 셀 기준으로 dataItem 추출
+            let row = _this.grid.rows[sel.row];
+            if (!row) return;
+
+            let item = row.dataItem;
+            if (!item) return;
+
+            _this.selectData(item);
           }
         });
       }
