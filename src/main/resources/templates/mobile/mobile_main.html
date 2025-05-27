@@ -441,8 +441,12 @@
           'gpsInfo' : document.getElementById('gpsInfo').innerText
         }
         let fnsuccess = function (result) {
-          if (result != null) {
-            Alert.alert('', result.message);
+          if (result.success) {
+            Alert.alert('', result.message, function() {
+              window.location.href = 'mobile/commute_current';
+            });
+          } else {
+            Alert.alert('', "출근 등록에 실패하였습니다.");
           }
         };
         AjaxUtil.postAsyncData(url, data, fnsuccess);
