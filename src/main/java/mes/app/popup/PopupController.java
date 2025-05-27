@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static mes.Encryption.EncryptionUtil.decrypt;
 
 @Slf4j
 @RestController
@@ -556,48 +559,65 @@ public class PopupController {
 		return result;
 	}
 
-	@DecryptField(columns = "accountNumber" , masks = 3)
 	@GetMapping("/search_Account")
-	public AjaxResult getSearchAccount(@RequestParam(value = "BankName")String bankName,
-																		 @RequestParam(value = "accountNumber") String accountNumber) {
+	public AjaxResult getSearchAccount(@RequestParam(value = "BankName", required = false) String bankName,
+																		 @RequestParam(value = "accountNumber", required = false) String accountNumber) {
 		AjaxResult result = new AjaxResult();
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+
 		paramMap.addValue("bankName", bankName);
 		paramMap.addValue("accountNumber", accountNumber);
-		log.info("계좌 팝업 요청 들어옴, bankName:{}, accountNumber:{}", bankName, accountNumber);
+
 		String sql = """
-				select
-				ta.accid,
-				tx.banknm as "BankName",
-				ta.bankid as "bankId",
-				ta.accnum as "accountNumber",
-				ta.accname as "accountName",
-				CASE
-					WHEN ta.popsort = '1' THEN '개인'
-					WHEN ta.popsort = '0' THEN '법인'
-					END AS "accountType"
-				from tb_account ta
-				left join tb_xbank tx on ta.bankid = tx.bankid
-				where 1 =1
-				""";
+        SELECT
+            ta.accid,
+            tx.banknm AS "BankName",
+            ta.bankid AS "bankId",
+            ta.accnum AS "accountNumber", -- 암호화된 계좌번호
+            ta.accname AS "accountName",
+            CASE
+                WHEN ta.popsort = '1' THEN '개인'
+                WHEN ta.popsort = '0' THEN '법인'
+            END AS "accountType"
+        FROM tb_account ta
+        LEFT JOIN tb_xbank tx ON ta.bankid = tx.bankid
+        WHERE 1=1
+    """;
 
 		if (bankName != null && !bankName.isEmpty()) {
-			sql += " AND banknm ILIKE :bankName ";
+			sql += " AND tx.banknm ILIKE :bankName ";
 			paramMap.addValue("bankName", "%" + bankName + "%");
 		}
 
-		if (accountNumber != null && !accountNumber.isEmpty()) {
-			sql += " AND ta.accnum ILIKE :accountNumber ";
-			paramMap.addValue("accountNumber", "%" + accountNumber + "%");
-		}
+		// 쿼리는 전체 계좌 가져오고, 자바단에서 복호화 후 필터링
+		List<Map<String, Object>> rawResults = this.sqlRunner.getRows(sql, paramMap);
 
-//		log.info(" 최종 SQL: {}", sql);
-//		log.info(" 파라미터: {}", paramMap.getValues());
-		result.data = this.sqlRunner.getRows(sql, paramMap);
+		// 자바단에서 복호화 + accountNumber 포함 여부 확인
+		List<Map<String, Object>> filtered = rawResults.stream()
+				.filter(item -> {
+					String encrypted = String.valueOf(item.get("accountNumber"));
+          String decrypted = null; // 복호화 함수
+          try {
+            decrypted = decrypt(encrypted);
+          } catch (Exception e) {
+            throw new RuntimeException(e);
+          }
+          return decrypted.contains(accountNumber); // 부분 검색
+				})
+				.map(item -> {
+					// 복호화된 값을 덮어쓰기 또는 별도 필드에 저장
+          try {
+            item.put("accountNumber", decrypt(item.get("accountNumber").toString()));
+          } catch (Exception e) {
+            throw new RuntimeException(e);
+          }
+          return item;
+				})
+				.collect(Collectors.toList());
+
+		result.data = filtered;
 		return result;
 	}
-
-
 
 	@GetMapping("/search_AccountCode")
 	public AjaxResult getsearch_AccountCode(@RequestParam(value = "acccd")String acccd,

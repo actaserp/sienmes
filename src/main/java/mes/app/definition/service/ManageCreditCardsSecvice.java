@@ -17,22 +17,24 @@ public class ManageCreditCardsSecvice {
 
   @Autowired
   SqlRunner sqlRunner;
-  @DecryptField(columns = {"cardnum", "accnum"} , masks = {4, 3})
+
+  @DecryptField(columns = {"cardnum", "accnum", "cardnum_real"} )
   public List<Map<String, Object>> getCreditCardsList(String spjangcd, String txtcardnm, String txtcardnum) {
     MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
     dicParam.addValue("spjangcd", spjangcd);
-    dicParam.addValue("txtcardnm", txtcardnm);
-    dicParam.addValue("txtcardnum", txtcardnum);
+    dicParam.addValue("txtcardnm", txtcardnm); //카드명
+    dicParam.addValue("txtcardnum", txtcardnum);  //카드번호
 
     String sql = """
-        select * from tb_iz010 ti
+        select ti.cardnum as cardnum_real , *
+        from tb_iz010 ti
         where ti.spjangcd = :spjangcd 
         """;
 
     if (txtcardnum != null && !txtcardnum.isEmpty()) {  //카드번호
-      sql += " and ti.cardnum like :txtcardnm ";
-      dicParam.addValue("txtcardnm", "%" + txtcardnum + "%");
+      sql += " and ti.cardnum like :txtcardnum ";
+      dicParam.addValue("txtcardnum", "%" + txtcardnum + "%");
     }
     if (txtcardnm != null && !txtcardnm.isEmpty()) {
       sql += " and ti.cardnm like :txtcardnm ";
