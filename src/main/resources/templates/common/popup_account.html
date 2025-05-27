@@ -96,14 +96,12 @@
 
         this.selectedItem = null;
       }
-
       selectData(item) {
         if (typeof this.callback !== 'undefined' && this.callback != null) {
           this.callback(item);
         }
         this.close();
       }
-
       show(callback) {
         let _this = this;
 
@@ -112,7 +110,16 @@
         let content = tmpl('popup_AccountSearchTemplate', {});
         let $content = $(content);
         this.modalContainer.open({ width: 800, height: 500, $content });
-
+  /*      setTimeout(() => {
+          if (_this.grid.rows.length > 0) {
+            let colIndex = _this.grid.columns.findIndex(col => col.binding === 'accountNumber');
+            if (colIndex > -1) {
+              _this.grid.select(0, colIndex);
+              _this.grid.selection = new wijmo.grid.CellRange(0, colIndex); // selection도 강제로 맞춰줌
+              _this.grid.focus();
+            }
+          }
+        }, 100);*/
         this.grid = new wijmo.grid.FlexGrid('#AccountGrid', {
           selectionMode: wijmo.grid.SelectionMode.Row,
           autoGenerateColumns: false,
@@ -189,8 +196,6 @@
         this.grid.hostElement.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.keyCode === 13) {
             let sel = _this.grid.selection;
-
-            // 실제로 포커스가 있는 셀 기준으로 dataItem 추출
             let row = _this.grid.rows[sel.row];
             if (!row) return;
 
@@ -200,6 +205,7 @@
             _this.selectData(item);
           }
         });
+
       }
 
       close() {
