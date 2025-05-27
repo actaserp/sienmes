@@ -241,7 +241,11 @@
         document.getElementById('editEndDateTime').addEventListener('change', calculateUseDays);
         searchMainData();
     });
-
+    // yy.mm.dd 형식 포멧함수
+    function formatDateToYYMMDD(dateStr) {
+        if (!dateStr || dateStr.length < 10) return '';
+        return dateStr.slice(2, 10); // "2024.05.27" → "24.05.27"
+    }
     function searchMainData() {
         let url = '/api/attendance_current/read';
         let data = {
@@ -321,11 +325,11 @@
                 vacitems.forEach(vacInfo => {
                     tableHtml += `
                     <tr>
-                        <td>${vacInfo.reqdate || ''}</td>
+                        <td>${formatDateToYYMMDD(vacInfo.reqdate) || ''}</td>
                         <td>${vacInfo.worknm || ''}</td>
                         <td>${vacInfo.yearflag || ''}</td>
-                        <td>${vacInfo.frdate || ''}</td>
-                        <td>${vacInfo.todate || ''}</td>
+                        <td>${formatDateToYYMMDD(vacInfo.todate) || ''}</td>
+                        <td>${formatDateToYYMMDD(vacInfo.todate) || ''}</td>
                         <td>${vacInfo.daynum || ''}</td>
                         <td>${vacInfo.remark || ''}</td>
                         <td>${vacInfo.sttime || ''}</td>
@@ -363,6 +367,13 @@
             button.click();
         });
     }
+    // yyyy.mm.dd 형식 복원함수
+    function restoreFullYearDate(shortDateStr) {
+        if (!shortDateStr || shortDateStr.length !== 8) return ''; // ex: "24.05.27"
+        const parts = shortDateStr.split('.');
+        const fullYear = '20' + parts[0]; // assumes 20xx
+        return `${fullYear}.${parts[1]}.${parts[2]}`;
+    }
     // 휴가정보 테이블 클릭 이벤트 추가
     document.querySelector('#theGrid').addEventListener('click', function (e) {
         const targetRow = e.target.closest('tr');
@@ -393,10 +404,10 @@
             }
         }
         // ✅ 날짜와 시간 조합해서 datetime-local 형식으로 변환
-        const startDate = cells[3].innerText.split('.'); // yyyy.mm.dd → ['yyyy', 'mm', 'dd']
+        const startDate = restoreFullYearDate(cells[3].innerText).split('.');
         const startTime = cells[7].innerText; // hh:mm
 
-        const endDate = cells[4].innerText.split('.');
+        const endDate = restoreFullYearDate(cells[4].innerText).split('.');
         const endTime = cells[8].innerText;
 
         // ✅ datetime-local 형식으로 변환

@@ -278,14 +278,18 @@ public class PaymentDetailController {
   }
 
   @PostMapping("/changeState")
-  public AjaxResult ChangeState(@RequestBody Map<String, Object> request) {
+  public AjaxResult ChangeState(@RequestBody Map<String, Object> request
+  , Authentication auth) {
     AjaxResult result = new AjaxResult();
 
+    User user = (User) auth.getPrincipal();
+    String username = user.getUsername();
+    Integer userid = user.getPersonid();
     String appnum = (String) request.get("appnum");
     String appgubun = (String) request.get("appgubun");
     String action = (String) request.get("action");
     String remark = (String) request.get("remark");
-    Integer appperid = (Integer) request.get("appperid");
+    Integer appperid = userid;
     String papercd = (String) request.get("papercd");
 
     log.info("📥 결재 상태 변경 요청: appnum={}, appgubun={}, action={}, remark={} ,appperid={}, papercd={}",

@@ -255,7 +255,11 @@
     document.getElementById('searchToDate').value = `${year}-${month}-${date}`;
     searchMainData();
   });
-
+  // yy.mm.dd 형식 포멧함수
+  function formatDateToYYMMDD(dateStr) {
+    if (!dateStr || dateStr.length < 10) return '';
+    return dateStr.slice(2, 10); // "2024.05.27" → "24.05.27"
+  }
   function searchMainData() {
     let url = '/api/commute_current/read';
     let data = {
@@ -287,7 +291,7 @@
         items.forEach(item => {
           tableHtml += `
                     <tr>
-                        <td>${item.workym || ''}</td>
+                        <td>${formatDateToYYMMDD(item.workym) || ''}</td>
                         <td>${item.worknm || ''}</td>
                         <td>${item.starttime || '--:--'}</td>
                         <td>${item.endtime || '--:--'}</td>
