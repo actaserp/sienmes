@@ -1179,7 +1179,10 @@
                     }
 
                     let money = data.input_money || data.output_money || 0;
-                    $('#money').val(money);
+                    if(data.tid != null){
+                        $('#money').val(money).prop('readonly', true);
+
+                    }
 
                     $('#inoutFlag').trigger('change');
                     $('#transactionTypeId').val(data.transactiontypeid);

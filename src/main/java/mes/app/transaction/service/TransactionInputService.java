@@ -95,6 +95,7 @@ public class TransactionInputService {
                 ,b.trid as transactionTypeId
                 ,accin as input_money
                 ,accout as output_money
+                ,tid as tid
                 ,CASE
                  WHEN b.feeamt IS NOT NULL THEN true
                  ELSE false
