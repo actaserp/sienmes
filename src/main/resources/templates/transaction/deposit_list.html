@@ -31,12 +31,12 @@
           <dl>
             <dt>
               <label for="btnAccountName">
-                계좌명
+                계좌
               </label>
             </dt>
             <dd>
               <div class="srch-box">
-                <input type="text" id="btnAccountName" name="btnAccountName" placeholder="해당 칸을 클릭해서 검색하세요.">
+                <input type="text" id="btnAccountName" name="btnAccountName" placeholder="입력 후 엔터를 눌러 검색하세요.">
                 <input type="hidden" id="cboBankId">
               </div>
             </dd>
@@ -122,7 +122,7 @@
   <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
   <th:block th:replace="/common/popup_company :: popup_company"></th:block>
   <th:block th:replace="/common/popup_account :: popup_account" />
-
+  <script src="/js/AccountInputHandler.js"></script>
   <script type="text/javascript">
     class DepositListPage {
       constructor() {
@@ -296,7 +296,12 @@
       });
 
       //계좌 팝업
-      $('#btnAccountName').click(function () {
+      AccountInputHandler.bind({
+        accnumSelector: '#btnAccountName',
+        accidSelector: '#cboBankId',
+        minLength: 2
+      });
+      /* $('#btnAccountName').click(function () {
         let poppage = new PopAccountComponent();
         let searchcallback = function (items) {
           //console.log('btnAccountName items : ', items);
@@ -311,7 +316,7 @@
         if (val === '') {
           $('#cboBankId').val('');
         }
-      });
+      });*/
 
       // .btn-clear 클릭 후 input 이벤트 강제 발생
       $(document).on('click', '.btn-clear', function () {

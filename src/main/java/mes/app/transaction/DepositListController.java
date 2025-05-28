@@ -24,7 +24,7 @@ public class DepositListController {
   DepositListService depositListService;
 
   // 입금현황조회
-  @DecryptField(columns  = {"accnum"}, masks = 4)
+  @DecryptField(columns  = {"accnum"})
   @GetMapping("/read")
   public AjaxResult getDepositList(
       @RequestParam(value="cboDepositType", required=false) String depositType,

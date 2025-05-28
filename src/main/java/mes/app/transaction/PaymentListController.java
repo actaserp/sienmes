@@ -27,7 +27,7 @@ public class PaymentListController {
     PaymentListService paymentListService;
 
     // 지급현황 리스트 조회
-    @DecryptField(columns  = {"accnum"}, masks = 4)
+    @DecryptField(columns  = {"accnum"})
     @GetMapping("/read")
     public AjaxResult getEquipmentRunChart(
         @RequestParam(value="cboDepositType", required=false) String depositType,
