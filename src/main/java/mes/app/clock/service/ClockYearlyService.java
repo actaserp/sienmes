@@ -305,7 +305,7 @@ public class ClockYearlyService {
                             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
                         ) AS cum_daynum
                     FROM tb_pb204 t
-                    LEFT JOIN tb_pb210 w ON t.workcd = w.workcd \s
+                    LEFT JOIN tb_pb210 w ON t.workcd = w.workcd 
                     WHERE t.personid = :id
                       AND t.fixflag = '1'
                       AND LEFT(CAST(t.reqdate AS VARCHAR), 4) = :year
@@ -318,14 +318,14 @@ public class ClockYearlyService {
                         NULL AS todate,
                         NULL AS daynum,
                         NULL AS workcd,
-                        '생성' AS worknm,\s
+                        '생성' AS worknm,
                         ewolnum,
                         holinum,
                         restnum
                     FROM latest_pb209
-                               \s
+                               
                     UNION ALL
-                               \s
+                               
                     SELECT
                         p.reqdate,
                         p.personid,
