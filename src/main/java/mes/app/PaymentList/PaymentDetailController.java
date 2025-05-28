@@ -9,6 +9,8 @@ import mes.domain.entity.User;
 import mes.domain.model.AjaxResult;
 //import mes.domain.repository.approval.TB_AA010ATCHRepository;
 //import mes.domain.repository.approval.tb_aa010Repository;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.util.IOUtils;
@@ -28,6 +30,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -541,6 +545,24 @@ public class PaymentDetailController {
   public void readVacFile(@RequestParam("appnum") String appnum, HttpServletResponse response) throws Exception {
     Map<String, Object> vacData = paymentDetailService.getVacFileList(appnum);
 
+    String frdateStr = vacData.get("frdate").toString();  // "YYYYMMDD"
+    String todateStr = vacData.get("todate").toString();  // "YYYYMMDD"
+    String daynum = vacData.get("daynum").toString();     //
+    String reqdateStr = vacData.get("reqdate").toString();
+
+    DateTimeFormatter ymdFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+    DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("yyyy 년 MM 월 dd 일");
+
+    LocalDate frDate = LocalDate.parse(frdateStr, ymdFormatter);
+    LocalDate toDate = LocalDate.parse(todateStr, ymdFormatter);
+    LocalDate reqDate = LocalDate.parse(reqdateStr, ymdFormatter);
+
+    String repodateFormat = String.format("%s  ~  %s  ( %s ) 일간",
+            frDate.format(displayFormatter),
+            toDate.format(displayFormatter),
+            daynum);
+
+
     // 1. UUID 기반 임시 파일명 생성
     String uuid = UUID.randomUUID().toString();
     Path tempXlsx = Files.createTempFile(uuid, ".xlsx");
@@ -552,11 +574,25 @@ public class PaymentDetailController {
          FileOutputStream fos = new FileOutputStream(tempXlsx.toFile())) {
 
       Sheet sheet = workbook.getSheetAt(0);
-      sheet.getRow(5).getCell(2).setCellValue((String) vacData.get("partName"));
-      sheet.getRow(7).getCell(2).setCellValue((String) vacData.get("jikName"));
-      sheet.getRow(9).getCell(2).setCellValue((String) vacData.get("repopernm"));
-      sheet.getRow(11).getCell(2).setCellValue(vacData.get("startDate") + " ~ " + vacData.get("endDate") + " (" + vacData.get("datenum") + "일간)");
-      sheet.getRow(16).getCell(0).setCellValue((String) vacData.get("remark"));
+      // sheet.getRow(5).getCell(2).setCellValue((String) vacData.get("papernm")); // 서류구분 (휴가신청서)
+//      sheet.getRow(2).getCell(2).setCellValue((String) vacData.get("worknm")); //  휴가구분 (연차, 반차, 병가 등)
+//      sheet.getRow(9).getCell(2).setCellValue((String) vacData.get("repopernm")); // 휴가신청자 이름
+//      sheet.getRow(7).getCell(2).setCellValue((String) vacData.get("jiknm")); // 직급명
+//      sheet.getRow(5).getCell(2).setCellValue((String) vacData.get("departnm")); // 부서명
+//      sheet.getRow(16).getCell(0).setCellValue((String) vacData.get("remark")); // 사유
+//      sheet.getRow(11).getCell(2).setCellValue(repodateFormat); // 기간
+//      sheet.getRow(24).getCell(3).setCellValue((String) vacData.get("worknm")); // 신청휴가구분
+//      sheet.getRow(27).getCell(0).setCellValue(reqDate.format(displayFormatter)); // 신청일
+//      sheet.getRow(29).getCell(10).setCellValue((String) vacData.get("repopernm")); // 제출인
+      setCell(sheet, 2, 2, (String) vacData.get("worknm"));
+      setCell(sheet, 9, 2, (String) vacData.get("repopernm"));
+      setCell(sheet, 7, 2, (String) vacData.get("jiknm"));
+      setCell(sheet, 5, 2, (String) vacData.get("departnm"));
+      setCell(sheet, 16, 0, (String) vacData.get("remark"));
+      setCell(sheet, 11, 2, repodateFormat);
+      setCell(sheet, 24, 3, (String) vacData.get("worknm"));
+      setCell(sheet, 27, 0, reqDate.format(displayFormatter));
+      setCell(sheet, 30, 10, (String) vacData.get("repopernm"));
 
       workbook.write(fos);
     }
@@ -591,6 +627,12 @@ public class PaymentDetailController {
       }
     }, 5, TimeUnit.MINUTES);
   }
-
+  private void setCell(Sheet sheet, int rowIdx, int colIdx, String value) {
+    Row row = sheet.getRow(rowIdx);
+    if (row == null) row = sheet.createRow(rowIdx);
+    Cell cell = row.getCell(colIdx);
+    if (cell == null) cell = row.createCell(colIdx);
+    cell.setCellValue(value);
+  }
 
 }

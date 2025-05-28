@@ -102,8 +102,29 @@ public class PaymentDetailService {
     params.addValue("appnum", appnum);
     StringBuilder sql = new StringBuilder("""
                 SELECT
-                    *
+                    e080.papercd,
+                    s."Value" as papernm,
+                    pb204.workcd,
+                    pb210.worknm,
+                    p."Name" as repopernm,
+                    p.jik_id,
+                    p."Depart_id",
+                    sc."Value" as jiknm,
+                    d."Name" as departnm,
+                    pb204.remark,
+                    pb204.frdate,
+                    pb204.sttime,
+                    pb204.todate,
+                    pb204.edtime,
+                    pb204.reqdate,
+                    pb204.daynum
                  FROM tb_e080 e080
+                 LEFT JOIN sys_code s ON s."Code" = e080.papercd AND s."CodeType" = 'appr_doc'
+                 LEFT JOIN tb_pb204 pb204 ON pb204.appnum = e080.appnum
+                 LEFT JOIN tb_pb210 pb210 ON pb210.workcd = pb204.workcd
+                 LEFT JOIN person p ON p.id = e080.repoperid
+                 LEFT JOIN sys_code sc ON sc."Code" = p.jik_id AND sc."CodeType" = 'jik_type'
+                 LEFT JOIN depart d ON d.id = p."Depart_id"
                  WHERE e080.spjangcd = 'ZZ'
                  AND e080.appnum = :appnum
         """);
@@ -125,10 +146,10 @@ public class PaymentDetailService {
     params.addValue("as_personid", personid);
     StringBuilder sql = new StringBuilder("""
           SELECT
-            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '001' AND personid = :as_personid AND flag = '1' AND repodate BETWEEN :as_stdate AND :as_enddate AND spjangcd = :as_spjangcd) AS appgubun1,
-            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '101' AND personid = :as_personid AND flag = '1' AND repodate BETWEEN :as_stdate AND :as_enddate) AS appgubun2,
-            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '131' AND personid = :as_personid AND flag = '1' AND repodate BETWEEN :as_stdate AND :as_enddate) AS appgubun3,
-            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '201' AND personid = :as_personid AND flag = '1' AND repodate BETWEEN :as_stdate AND :as_enddate) AS appgubun4
+            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '001' AND personid = :as_personid AND flag = '1' AND indate BETWEEN :as_stdate AND :as_enddate AND spjangcd = :as_spjangcd) AS appgubun1,
+            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '101' AND personid = :as_personid AND flag = '1' AND indate BETWEEN :as_stdate AND :as_enddate AND spjangcd = :as_spjangcd) AS appgubun2,
+            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '131' AND personid = :as_personid AND flag = '1' AND indate BETWEEN :as_stdate AND :as_enddate AND spjangcd = :as_spjangcd) AS appgubun3,
+            (SELECT count(appgubun) FROM tb_e080 WHERE appgubun = '201' AND personid = :as_personid AND flag = '1' AND indate BETWEEN :as_stdate AND :as_enddate AND spjangcd = :as_spjangcd) AS appgubun4
         """);
 //    log.info("결재목록_문서현황 List SQL: {}", sql);
 //    log.info("SQL Parameters: {}", params.getValues());

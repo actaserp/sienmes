@@ -55,9 +55,9 @@ public class DayMonthlyController {
     }
 
 
-    @PostMapping("/save")
+    @PostMapping("/savedata")
     @Transactional
-    public AjaxResult saveDayList(
+    public AjaxResult saveDayDataList(
             @RequestBody Map<String, Object> requestData,
             HttpServletRequest request,
             Authentication auth) {
@@ -77,10 +77,12 @@ public class DayMonthlyController {
         List<TB_PB201> tbpb201List = new ArrayList<>();
 
         for (Map<String, Object> item : dataList) {
-            String workym = (String) item.get("workym");
-            String workday = (String) item.get("workday");
-            Integer personid = ((Number) item.get("personid")).intValue();
-            String workcd = (String) item.get("workcd");
+            String workymd = (String) item.get("workymd");
+            String workym = workymd.substring(0, 4) + workymd.substring(5, 7); // 202505
+            String workday = workymd.substring(8, 10); // 28
+
+            Integer id = ((Number) item.get("id")).intValue();
+            String workcd = (String) item.get("worknm");
 
             String starttimeStr = (String) item.get("starttime"); // "09:30"
             String endtimeStr = (String) item.get("endtime");
@@ -94,12 +96,23 @@ public class DayMonthlyController {
             Object worktimeStr = item.get("worktime");
 
 
-            Optional<TB_PB201> optional = tbPb201Repository.findByIdSpjangcdAndIdWorkymAndIdWorkdayAndIdPersonid(spjangcd,workym, workday, personid);
+            Optional<TB_PB201> optional = tbPb201Repository.findByIdSpjangcdAndIdWorkymAndIdWorkdayAndIdPersonid(spjangcd,workym, workday, id);
+            TB_PB201 tbpb201;
 
 
             if (optional.isPresent()) {
-                TB_PB201 tbpb201 = optional.get();
-                tbpb201.setFixflag("1");
+                tbpb201 = optional.get(); // 기존 데이터 업데이트
+            }else {
+                tbpb201 = new TB_PB201();
+                TB_PB201_PK pk = new TB_PB201_PK();
+                pk.setSpjangcd(spjangcd);
+                pk.setWorkym(workym);
+                pk.setWorkday(workday);
+                pk.setPersonid(id);
+                tbpb201.setId(pk);
+                tbpb201.setFixflag("0");
+            }
+
                 tbpb201.setWorkcd(workcd);
 
                 if (starttimeStr != null && !starttimeStr.trim().isEmpty()) {
@@ -215,7 +228,7 @@ public class DayMonthlyController {
                 }
                 tbpb201List.add(tbpb201);
             }
-        }
+
 
         // 저장
         List<TB_PB201> savedList = tbPb201Repository.saveAll(tbpb201List);
@@ -225,6 +238,176 @@ public class DayMonthlyController {
         return result;
     }
 
+
+    @PostMapping("/save")
+    @Transactional
+    public AjaxResult saveDayList(
+            @RequestBody Map<String, Object> requestData,
+            HttpServletRequest request,
+            Authentication auth) {
+
+        AjaxResult result = new AjaxResult();
+        User user = (User)auth.getPrincipal();
+
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) requestData.get("list");
+        String spjangcd = (String) requestData.get("spjangcd");
+
+        if (dataList == null || dataList.isEmpty()) {
+            result.success=false;
+            result.message="저장할 데이터가 없습니다.";
+            return result;
+        }
+
+        List<TB_PB201> tbpb201List = new ArrayList<>();
+
+        for (Map<String, Object> item : dataList) {
+            String workym = (String) item.get("workym");
+            String workday = (String) item.get("workday");
+            Integer personid = ((Number) item.get("id")).intValue();
+            String workcd = (String) item.get("worknm");
+
+            String starttimeStr = (String) item.get("starttime"); // "09:30"
+            String endtimeStr = (String) item.get("endtime");
+            Object nomaltimeStr = item.get("nomaltime");
+            Object jitimeStr = item.get("jitime");
+            Object overtimeStr = item.get("overtime");
+            Object nighttimeStr = item.get("nighttime");
+            Object yuntimeStr =  item.get("yuntime");
+            Object abtimeStr = item.get("abtime");
+            Object holitimeStr = item.get("holitime");
+            Object worktimeStr = item.get("worktime");
+
+
+            Optional<TB_PB201> optional = tbPb201Repository.findByIdSpjangcdAndIdWorkymAndIdWorkdayAndIdPersonid(spjangcd,workym, workday, personid);
+
+
+            if (optional.isPresent()) {
+                TB_PB201 tbpb201 = optional.get();
+                tbpb201.setFixflag("1");
+                tbpb201.setWorkcd(workcd);
+
+                if (starttimeStr != null && !starttimeStr.trim().isEmpty()) {
+                    // "HH:mm" 형식인지 간단한 유효성 검사
+                    if (starttimeStr.matches("^\\d{2}:\\d{2}$")) {
+                        tbpb201.setStarttime(starttimeStr.trim());
+                    } else {
+                        result.success = false;
+                        result.message = "출근시간 형식이 올바르지 않습니다. (예: 09:30)";
+                        return result;
+                    }
+                }
+
+                if (endtimeStr != null && !endtimeStr.trim().isEmpty()) {
+                    // "HH:mm" 형식인지 간단한 유효성 검사
+                    if (endtimeStr.matches("^\\d{2}:\\d{2}$")) {
+                        tbpb201.setEndtime(endtimeStr.trim());
+                    } else {
+                        result.success = false;
+                        result.message = "퇴근시간 형식이 올바르지 않습니다. (예: 09:30)";
+                        return result;
+                    }
+                }
+
+                if (nomaltimeStr != null ) {
+                    try {
+                        BigDecimal nomaltime = new BigDecimal(nomaltimeStr.toString());
+                        tbpb201.setNomaltime(nomaltime);
+                    } catch (NumberFormatException e) {
+                        result.success = false;
+                        result.message = "근무시간 값이 숫자 형식이 아닙니다: " + nomaltimeStr;
+                        return result;
+                    }
+                }
+
+                if (jitimeStr != null ) {
+                    try {
+                        int jitime = Integer.parseInt(jitimeStr.toString());
+                        tbpb201.setJitime(jitime);
+                    } catch (NumberFormatException e) {
+                        result.success = false;
+                        result.message = "지각 값이 숫자 형식이 아닙니다: " + jitimeStr;
+                        return result;
+                    }
+                }
+
+                if (overtimeStr != null ) {
+                    try {
+                        BigDecimal overtime = new BigDecimal(overtimeStr.toString());
+                        tbpb201.setOvertime(overtime);
+                    } catch (NumberFormatException e) {
+                        result.success = false;
+                        result.message = "연장근무 값이 숫자 형식이 아닙니다: " + overtimeStr;
+                        return result;
+                    }
+                }
+
+                if (nighttimeStr != null) {
+                    try {
+                        BigDecimal nighttime = new BigDecimal(nighttimeStr.toString());
+                        tbpb201.setNighttime(nighttime);
+                    } catch (NumberFormatException e) {
+                        result.success = false;
+                        result.message = "야간근무 값이 숫자 형식이 아닙니다: " + nighttimeStr;
+                        return result;
+                    }
+                }
+
+                if (yuntimeStr != null ) {
+                    try {
+                        int yuntime = Integer.parseInt(yuntimeStr.toString());
+                        tbpb201.setYuntime(yuntime);
+                    } catch (NumberFormatException e) {
+                        result.success = false;
+                        result.message = "연차 값이 숫자 형식이 아닙니다: " + yuntimeStr;
+                        return result;
+                    }
+                }
+
+                if (abtimeStr != null ) {
+                    try {
+                        int abtime = Integer.parseInt(abtimeStr.toString());
+                        tbpb201.setAbtime(abtime);
+                    } catch (NumberFormatException e) {
+                        result.success = false;
+                        result.message = "지각 값이 숫자 형식이 아닙니다: " + abtimeStr;
+                        return result;
+                    }
+                }
+
+
+                if (holitimeStr != null ) {
+                    try {
+                        BigDecimal holitime = new BigDecimal(holitimeStr.toString());
+                        tbpb201.setHolitime(holitime);
+                    } catch (NumberFormatException e) {
+                        result.success = false;
+                        result.message = "지각 값이 숫자 형식이 아닙니다: " + holitimeStr;
+                        return result;
+                    }
+                }
+
+
+                if (worktimeStr != null ) {
+                    try {
+                        BigDecimal worktime = new BigDecimal(worktimeStr.toString());
+                        tbpb201.setWorktime(worktime);
+                    } catch (NumberFormatException e) {
+                        result.success = false;
+                        result.message = "총근무시간 값이 숫자 형식이 아닙니다: " + worktimeStr;
+                        return result;
+                    }
+                }
+                tbpb201List.add(tbpb201);
+            }
+        }
+
+        // 저장
+        List<TB_PB201> savedList = tbPb201Repository.saveAll(tbpb201List);
+
+        result.success = true;
+        result.data = savedList;
+        return result;
+    }
 
 
     @PostMapping("/MagamCancel")
@@ -242,7 +425,7 @@ public class DayMonthlyController {
             String workym = (String) item.get("workym"); // 년월
             String spjangcd = (String) item.get("spjangcd"); // 사업장코드
             String workday = (String) item.get("workday");
-            Integer personid = ((Number) item.get("personid")).intValue(); // 사번
+            Integer personid = ((Number) item.get("id")).intValue(); // 사번
 
             TB_PB201_PK id = new TB_PB201_PK(spjangcd, workym, workday, personid);
 

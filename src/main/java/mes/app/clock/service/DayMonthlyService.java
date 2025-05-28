@@ -47,7 +47,7 @@ public class DayMonthlyService {
                 t.workym,
                 t.workday,
                 SUBSTRING(t.workym, 1, 4) || '-' || SUBSTRING(t.workym, 5, 2) || '-' || LPAD(t.workday, 2, '0') AS workymd,
-                t.personid,
+                p.id,
                 t.worknum,
                 t.holiyn,
                 t.workyn,

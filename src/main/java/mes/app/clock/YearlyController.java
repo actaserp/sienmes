@@ -218,11 +218,12 @@ public class YearlyController {
     @GetMapping("/detail")
     public AjaxResult getYearlyDetail(
             @RequestParam(value="id") Integer id,
+            @RequestParam(value="year") String year,
             HttpServletRequest request) {
 
         AjaxResult result = new AjaxResult();
 
-        List<Map<String, Object>> item = this.clockYearlyService.getYearlyDetail(id);
+        List<Map<String, Object>> item = this.clockYearlyService.getYearlyDetail(id,year);
 
         result.data = item;
         return result;
