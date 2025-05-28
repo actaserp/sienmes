@@ -110,21 +110,13 @@
         let content = tmpl('popup_AccountSearchTemplate', {});
         let $content = $(content);
         this.modalContainer.open({ width: 800, height: 500, $content });
-  /*      setTimeout(() => {
-          if (_this.grid.rows.length > 0) {
-            let colIndex = _this.grid.columns.findIndex(col => col.binding === 'accountNumber');
-            if (colIndex > -1) {
-              _this.grid.select(0, colIndex);
-              _this.grid.selection = new wijmo.grid.CellRange(0, colIndex); // selection도 강제로 맞춰줌
-              _this.grid.focus();
-            }
-          }
-        }, 100);*/
+
         this.grid = new wijmo.grid.FlexGrid('#AccountGrid', {
           selectionMode: wijmo.grid.SelectionMode.Row,
           autoGenerateColumns: false,
           showMarquee: true,
           isReadOnly: true,
+          keyActionEnter: wijmo.grid.KeyAction.None, //Enter 키를 눌렀을 때 아무 동작도 하지 않도록 설정하는 옵션
           columns: [
             { binding: 'bankId', header: '은행코드', width: 150, align: 'center',visible: false },
             { binding: 'BankName', header: '은행명', width: 150, align: 'center' },
@@ -138,6 +130,18 @@
         this.grid.rowHeaders.columns.splice(0, 1);
         new FlexGridContextMenu(this.grid);
         this.grid.downloadFileName = '계좌 리스트';
+
+        setTimeout(() => {
+          if (_this.grid.rows.length > 0) {
+            let colIndex = _this.grid.columns.findIndex(col => col.binding === 'accountNumber');
+
+            if (colIndex > -1) {
+              _this.grid.select(0, colIndex);
+              _this.grid.selection = new wijmo.grid.CellRange(0, colIndex);
+              _this.grid.focus();
+            }
+          }
+        }, 100);
 
         this.$btnCompSearch = $content.find('#btnCompSearch');
         this.$BankName = $content.find('#BankName');
@@ -195,17 +199,17 @@
 
         this.grid.hostElement.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.keyCode === 13) {
-            let sel = _this.grid.selection;
-            let row = _this.grid.rows[sel.row];
-            if (!row) return;
-
-            let item = row.dataItem;
-            if (!item) return;
-
-            _this.selectData(item);
+            setTimeout(() => {
+              const selected = _this.grid.selectedItems;
+              if (selected.length > 0) {
+                console.log('선택된 item:', selected[0]);
+                _this.selectData(selected[0]);
+              } else {
+                console.log('선택된 행 없음');
+              }
+            }, 0); // 다음 이벤트 루프에서 실행
           }
         });
-
       }
 
       close() {
