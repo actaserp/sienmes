@@ -75,7 +75,7 @@ public class TransactionInputService {
         return items;
     }
 
-    public List<Map<String, Object>> getTransactionHistory(String searchfrdate, String searchtodate, String TradeType, Integer parsedAccountId, Integer parsedCompanyId){
+    public List<Map<String, Object>> getTransactionHistory(String searchfrdate, String searchtodate, String TradeType, Integer parsedAccountId, Integer parsedCompanyId, String spjangcd){
 
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("searchfrdate", searchfrdate);
@@ -83,6 +83,7 @@ public class TransactionInputService {
         parameterSource.addValue("accid", parsedAccountId);
         parameterSource.addValue("ioflag", TradeType);
         parameterSource.addValue("cltcd", parsedCompanyId);
+        parameterSource.addValue("spjangcd", spjangcd);
 
         String sql = """
                 SELECT to_char(to_date(trdate, 'YYYYMMDD'), 'YYYY-MM-DD') as trade_date
@@ -103,25 +104,42 @@ public class TransactionInputService {
                 ,b.feeamt as feeamt
                 ,d.mijamt as mijamt
                 ,remark1 as remark
-                ,c."Code" as code
+                ,case
+                    when b.cltflag = '0' then c."Code"
+                    when b.cltflag = '1' then p."Code"
+                    when b.cltflag = '2' then d2.accname
+                    when b.cltflag = '3' then i.cardco
+                    ELSE NULL
+                END as code
+                ,case
+                     when b.cltflag = '0' then c."Name"
+                     when b.cltflag = '1' then p."Name"
+                     when b.cltflag = '2' then d2.accnum
+                     when b.cltflag = '3' then i.cardnum
+                     ELSE NULL
+                END as "clientName"
                 ,t.tradenm as trade_type
-                ,banknm as bankname
+                ,b.banknm as bankname
                 ,b.accnum as account
                 ,s."Value" as depositAndWithdrawalType
                 ,s."Code" as iotype
-                ,c."Name" as "clientName"
-                ,c.id as cltcd
+                ,b.cltcd as cltcd
                 ,b.eumnum as bill
                 ,b.etcremark as etc
                 ,b.memo as memo
+                ,b.cltflag as cltflag
                 ,b.accid as accountId
                 ,b.eumtodt as expiration
                 FROM public.tb_banktransit b
                 left join tb_trade t on t.trid = b.trid
                 left join sys_code s on s."Code" = b.iotype and "CodeType" = 'deposit_type'
                 left join company c on c.id = b.cltcd
+                left join person p on p.id = b.cltcd
                 left join tb_account d on d.accid = b.accid
+                left join tb_account d2 on d2.accid = b.cltcd
+                left join tb_iz010 i on i.id = b.cltcd
                 where trdate between :searchfrdate and :searchtodate
+                and b.spjangcd = :spjangcd
                 """;
 
         if(TradeType != null && !TradeType.isEmpty()){
@@ -225,12 +243,14 @@ public class TransactionInputService {
 
                 Object remark = item.get("remark");
                 Object cltcd = item.get("cltcd");
+                Object cltflag = item.get("cltflag");
                 Object tradeType = item.get("trade_type");
                 Object memo = item.get("memo");
                 Boolean commission = (Boolean) item.get("commission");
 
                 entity.setRemark1(remark != null ? remark.toString() : null);
                 entity.setCltcd(cltcd != null ? UtilClass.parseInteger(cltcd) : null);
+                entity.setCltflag(cltflag != null ? UtilClass.getStringSafe(cltflag) : null);
                 entity.setTrid(UtilClass.parseInteger(tradeType));
                 entity.setMemo(UtilClass.getStringSafe(memo));
 
@@ -255,12 +275,13 @@ public class TransactionInputService {
         return  result;
     }
 
-    public List<Map<String, Object>> searchDetail(Integer cltcd, String searchfrdate, String searchtodate) {
+    public List<Map<String, Object>> searchDetail(Integer cltcd, String searchfrdate, String searchtodate, String spjangcd) {
 
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("cltcd", cltcd);
         parameterSource.addValue("searchfrdate", searchfrdate);
         parameterSource.addValue("searchtodate", searchtodate);
+        parameterSource.addValue("spjangcd", spjangcd);
 
 
         String sql = """
@@ -282,6 +303,7 @@ public class TransactionInputService {
                 left join company c on c.id = b.cltcd
                 where trdate between :searchfrdate and :searchtodate
                 AND b.cltcd = :cltcd
+                AND b.spjangcd = :spjangcd
                 ORDER BY trdt desc
                 """;
 

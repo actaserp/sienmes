@@ -36,7 +36,7 @@ public class TransactionInputController {
 
     }
 
-    @DecryptField(columns = {"account"}, masks = 0)
+    //@DecryptField(columns = {"account", "clientName"}, masks = 0)
     @GetMapping("/history")
     public AjaxResult TransactionHistory(@RequestParam String searchfrdate,
                                          @RequestParam String searchtodate,
@@ -61,7 +61,7 @@ public class TransactionInputController {
             parsedCompanyId = UtilClass.parseInteger(cboCompanyHidden);
         }
 
-        result.data = transactionInputService.getTransactionHistory(searchfrdate, searchtodate, tradetype, parsedAccountId, parsedCompanyId);
+        result.data = transactionInputService.getTransactionHistory(searchfrdate, searchtodate, tradetype, parsedAccountId, parsedCompanyId, spjangcd);
         long end = System.currentTimeMillis();
         System.out.println("끝남시간: " + end);
         System.out.println("[/history] 처리 시간: " + (end - start) + " ms");
@@ -120,13 +120,14 @@ public class TransactionInputController {
     @GetMapping("/searchDetail")
     public AjaxResult searchTransactionDetail(@RequestParam String companyId,
                                               @RequestParam String searchfrdate,
-                                              @RequestParam String searchtodate){
+                                              @RequestParam String searchtodate,
+                                              @RequestParam String spjangcd){
         AjaxResult result = new AjaxResult();
 
         searchfrdate = searchfrdate.replaceAll("-", "");
         searchtodate = searchtodate.replaceAll("-", "");
 
-        result.data = transactionInputService.searchDetail(UtilClass.parseInteger(companyId), searchfrdate, searchtodate);
+        result.data = transactionInputService.searchDetail(UtilClass.parseInteger(companyId), searchfrdate, searchtodate, spjangcd);
 
         return  result;
     }

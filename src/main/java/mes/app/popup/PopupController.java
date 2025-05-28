@@ -2,7 +2,6 @@ package mes.app.popup;
 
 
 import lombok.extern.slf4j.Slf4j;
-import mes.app.aop.DecryptField;
 import mes.domain.model.AjaxResult;
 import mes.domain.services.DateUtil;
 import mes.domain.services.SqlRunner;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,6 +27,9 @@ public class PopupController {
 
 	@Autowired
 	SqlRunner sqlRunner;
+
+	@Autowired
+	PopupService popupService;
 
 	@RequestMapping("/search_material")
 	public AjaxResult getSearchMaterial(
@@ -461,90 +462,15 @@ public class PopupController {
 	}
 
 	@RequestMapping("/search_Comp_Custom")
-	@DecryptField(columns = "item2", masks = 0)
-	public AjaxResult getSearchCompCustom(@RequestParam String spjangcd){
+	//@DecryptField(columns = "item2", masks = 0)
+	public AjaxResult getSearchCompCustom(@RequestParam String spjangcd,
+										  @RequestParam(required = false) String item,
+										  @RequestParam(required = false) String item2){
 
 		AjaxResult result = new AjaxResult();
 
-		MapSqlParameterSource param = new MapSqlParameterSource();
-		param.addValue("spjangcd", spjangcd);
-		List<Map<String, Object>> combineList = new ArrayList<>();
-
-		String sql = """
-				select id as id
-			, '0' as cltflag
-            , "Name" as item
-            , "Code" as item2
-            , "BusinessNumber" as item3
-            , "TelNumber" as item4
-            from company
-            WHERE ("CompanyType" = 'sale'
-            OR "CompanyType" = 'sale-purchase')
-            and "relyn" = '0'
-            and spjangcd = :spjangcd
-            ORDER BY "Name" ASC
-			""";
-		List<Map<String, Object>> companylist = this.sqlRunner.getRows(sql, param);
-
-		String sql2 = """
-				select cardco as item
-					  ,'3' as cltflag
-					  ,cardnum as item2
-					  ,cardnm as item3
-					  ,banknm as item4
-				from TB_IZ010
-				where useyn = '1'
-				and spjangcd = :spjangcd
-				""";
-		List<Map<String, Object>> cardList = this.sqlRunner.getRows(sql2, param);
-
-		String sql3 = """
-				select a.id
-				      , '1' as cltflag
-				      ,a."Name" as item
-				      ,a."Code" as item2
-				      ,a."ShiftCode" as item3
-				      ,d."Name" as item4
-				      from person a
-				      left join depart d on d.id = a."Depart_id"
-				      where rtflag = '0'
-				      and a.spjangcd = :spjangcd
-				""";
-
-		List<Map<String, Object>> EmployeeList = this.sqlRunner.getRows(sql3, param);
-
-		String sql4 = """
-				select accid as id
-				,'2' as cltflag
-				,b.banknm as item
-				,accnum as item2
-				,accname as item3
-				,CASE
-				        WHEN popsort = '0' THEN '법인'
-				        WHEN popsort = '1' THEN '개인'
-				        ELSE ''
-				    END AS item4
-				from
-				tb_account a
-				left join tb_xbank b on b.bankid = a.bankid
-				where a.spjangcd = :spjangcd
-				""";
-		List<Map<String, Object>> AccountList = this.sqlRunner.getRows(sql4, param);
-
-		companylist.add(0, Map.of("item", "업체코드", "item2", "업체명", "item3", "사업자번호", "item4", "사업자번호"));
-		combineList.addAll(companylist);
-
-		cardList.add(0, Map.of("item", "카드사코드", "item2", "카드번호", "item3", "카드3", "item4", "은행명"));
-		combineList.addAll(cardList);
-
-		EmployeeList.add(0, Map.of("item", "직원이름", "item2", "사번", "item3", "근무조", "item4", "부서명"));
-		combineList.addAll(EmployeeList);
-
-		AccountList.add(0, Map.of("item", "은행명", "item2", "계좌번호", "item3", "계좌별칭", "item4", "계좌유형"));
-		combineList.addAll(AccountList);
-
-		result.data = combineList;
-
+        result.data = popupService.getCltCombineList(spjangcd, item, item2);
+		
 		return result;
 	}
 

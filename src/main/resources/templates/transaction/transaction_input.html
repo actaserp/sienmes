@@ -72,8 +72,9 @@
                             </dt>
                             <dd>
                                 <div class="srch-box">
-                                    <input type="text" placeholder="해당 칸을 클릭해주세요"  id="cboCompany" name="cboCompany"/>
+                                    <input type="text" placeholder="입력 후 엔터를 눌러 검색하세요."  id="cboCompany" name="cboCompany"/>
                                     <input type="hidden"  id="cboCompanyHidden" name="cboCompanyHidden"  />
+                                    <input type="hidden"  id="cltflag" name="cltflag"  />
                                 </div>
                             </dd>
                         </dl>
@@ -98,14 +99,14 @@
                                 </label>
                             </dt>
                             <dd>
-                                <input type="text" placeholder="해당 칸을 클릭해주세요"  id="accountName" name="accountName" />
+                                <input type="text" placeholder="입력 후 엔터를 눌러 검색하세요."  id="accountName" name="accountName" />
                                 <input type="hidden"  id="accountNameHidden" name="accountNameHidden" />
                             </dd>
                         </dl>
                         <dl>
                             <dt>
                                 <label>
-                                    조회기간<span class="eq"></span>
+                                    조회 기간<span class="eq"></span>
                                 </label>
                             </dt>
                             <dd>
@@ -476,7 +477,7 @@
                         <td colspan="3">
                             <input id="clientId" name="clientId" type="hidden">
                             <input class="form-control2" type="text" id="CompanyName_Popup" name="CompanyName_Popup"
-                             placeholder="검색버튼을 클릭하여 거래처를 검색하세요" readonly/>
+                             placeholder="검색버튼을 클릭하여 거래처를 검색하세요"/>
                             &nbsp;
                             <a class="btn btn-delete" title="검색" id="btnCompanySearch" style='width: 120px'>
                                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
@@ -685,6 +686,7 @@
                         { binding: 'remark',  header: ' 적요', width: 150, align: 'right'},
                         { binding: 'code', header: '거래처코드', width: 120, align: 'center' },
                         { binding: 'cltcd', header: '거래처아이디', visible: false, align: 'center' },
+                        { binding: 'cltflag', header: '거래처구분', visible: false, align: 'center' },
                         { binding: 'clientName',   header: '거래처명', width: 140, align: 'center', isReadOnly : true },
                         {
                             binding: 'trade_type',
@@ -858,8 +860,8 @@
                             const filtered = conversionTradeTypeList.filter(item =>
                                 item.value === '' || item.ioflag === String(inoutFlag)
                             );
-                            console.log('inoutFlag',inoutFlag);
-                            console.log('fil',filtered);
+
+
                             col.dataMap = new wijmo.grid.DataMap(filtered, 'value', 'text');
                             col.cellTemplate = '${text}'
                             // 현재 셀 리렌더링
@@ -890,12 +892,14 @@
 
                     const searchcallback = function (selected) {
                         // 1. 그리드 데이터 변경
-                        item.code = selected.compcode;
-                        item.clientName = selected.compname;
+
+                        item.code = selected.item;
+                        item.clientName = selected.item2;
                         item.cltcd = selected.id;
+                        item.cltflag = selected.cltflag;
 
 
-                        $input.val(selected.compcode).css('display', 'block');
+                        $input.val(item.code).css('display', 'block');
                         $button.css('display', 'none');
 
                         const row = grid.rows[rowIndex];
@@ -906,16 +910,23 @@
                         const colIndex_id = grid.columns.findIndex(col => col.binding === 'cltcd');
                         const cellElement_id = grid.cells.getCellElement(rowIndex, colIndex_id);
 
+                        const colIndex_cltflag = grid.columns.findIndex(col => col.binding === 'cltflag');
+                        const cellElement_cltflag = grid.cells.getCellElement(rowIndex, colIndex_cltflag);
+
                         if(cellElement){
-                            cellElement.textContent = selected.compname;
+                            cellElement.textContent = item.clientName;
                         }
 
                         if(cellElement_id){
-                            cellElement_id.textContent = selected.id;
+                            cellElement_id.textContent = item.cltcd;
+                        }
+
+                        if(cellElement_cltflag){
+                            cellElement_cltflag.textContent = item.cltflag;
                         }
                     };
 
-                    let poppage = new PopCompComponent();
+                    let poppage = new PopCompComponentCustom();
                     poppage.show(searchcallback);
                 });
 
@@ -991,7 +1002,11 @@
 
 
 
-                let data = { companyId : companyId, searchfrdate : $('#searchfrdate').val(), searchtodate: $('#searchtodate').val() }
+                let data = { companyId : companyId,
+                    searchfrdate : $('#searchfrdate').val(),
+                    searchtodate: $('#searchtodate').val(),
+                    spjangcd : getSpjangcdFromSession()
+                }
                 let result = AjaxUtil.getSyncData(_this.url + '/searchDetail', data);
                 let list = result.data;
 
@@ -1051,11 +1066,10 @@
 
                 data['accountNameHidden'] = accountName;
                 data['cboCompanyHidden'] = cboCompany;
-                data['spjangcd'] = 'ZZ';
+                data['spjangcd'] = getSpjangcdFromSession();
 
                 let result = AjaxUtil.getSyncData(_this.url + '/history', data);
                 const end = Date.now();
-                console.log("끝남 시간:", end);
                 if(result.data != null){
                     this.viewData.sourceCollection = result.data;
                 }
@@ -1129,15 +1143,19 @@
 
                 //모달창 닫기  //data-modal-header-btn="close"
 
-
+                $('#CompanyName_Popup').on('keydown', function(e){
+                    if(e.key === 'Enter' || e.keyCode === 13){
+                        companyPopupOpenCustom('CompanyName_Popup', 'clientId');
+                    }
+                })
 
                 $('#btn-search-close').click(function(e){
                     modalContainer.close();
                 });
 
                 //거래처 팝업
-                $('#CompanyName_Popup, #btnCompanySearch').click(function(){
-                    companyPopupOpen('CompanyName_Popup', 'clientId');
+                $('#btnCompanySearch').click(function(){
+                    companyPopupOpenCustom('CompanyName_Popup', 'clientId');
                 })
 
                 //계좌 팝업
@@ -1170,7 +1188,7 @@
                 this.DateAndHourBinding();
 
                 if(flag === 'edit'){
-                    console.log('data', data);
+
 
                     $('#transactionDate').val(data.trade_date);
                     $('#transactionHour').val(data.transactionhour);
@@ -1208,7 +1226,7 @@
             }
 
             accountFieldBinding(data){
-                console.log('data', data);
+
 
                 $('#accountid').val(data.accountid);
                 $('#BankName').val(data.managementnum).prop('disabled', true);
@@ -1236,7 +1254,7 @@
             }
 
             DetailGridForm(data){
-                console.log('z', data);
+
                 let _this = this;
                 let content = tmpl('detailTemplate', data);
                 let $content = $(content);
@@ -1554,7 +1572,7 @@
                     Alert.alert('', '연동된 계좌가 아닙니다.'); return;
                 }
 
-                console.log('account', $('#accountid').val());
+
                 if($('#accountid').val() === null || $('#accountid').val() === ''){
                     Alert.alert('', '수정할 계좌를 선택해주세요.'); return;
                 }
@@ -1689,10 +1707,7 @@
 
             AccountPopupOpen(intputId, hiddenid){
 
-
-                const val = document.getElementById(intputId).value;
-
-                let poppage = new PopAccountComponent(val);
+                let poppage = new PopAccountComponent();
                 let searchcallback = function (items) {
 
                     document.getElementById(intputId).value = items.accountNumber;
@@ -1702,7 +1717,6 @@
                     if(bank){
                         bank.value = items.BankName;
                     }
-
                 };
                 poppage.show(searchcallback);
             }
@@ -1723,7 +1737,7 @@
             deleteTransactionData(){
                 let _this = this;
                 let SelectedItems = _this.theGrid_TransactionHistory.selectedItems;
-                console.log('sele', SelectedItems);
+
 
 
                 if(SelectedItems.length < 1){
@@ -1777,7 +1791,7 @@
                     }
                 });
 
-                console.log('list', list);
+
             }
 
         }
@@ -1785,7 +1799,7 @@
 
 
         function getTradeTypeDataMap(list){
-            console.log(list);
+
             return new wijmo.grid.DataMap(list, 'value', 'text');
         }
 
@@ -1823,15 +1837,29 @@
             $('#searchfrdate').val(getNowDateMinus7());
             $('#searchtodate').val(getNowDate());
 
+            AccountInputHandler.bind({
+                accnumSelector: '#accountName',
+                accidSelector: '#accountNameHidden',
+                minLength: 2 // 최소 검색 길이 조절 가능
+            });
+
+            $('#cboCompany').on('keydown', function(e){
+                if(e.key === 'Enter' || e.keyCode === 13){
+                    companyPopupOpenCustom('cboCompany', 'cboCompanyHidden');
+                }
+            });
+
+
+
             /*$('#accountName').click(function () {
                 page.AccountPopupOpen('accountName', 'accountNameHidden');
             });*/
 
-            $('#accountName').on('keydown', function(e){
+            /*$('#accountName').on('keydown', function(e){
                 if(e.key === 'Enter' || e.keyCode === 13){
                     page.AccountPopupOpen('accountName', 'accountNameHidden');
                 }
-            })
+            })*/
 
             $('#btnBulkEdit').click(function(){
                 page.EditTransactionData();
@@ -1842,9 +1870,9 @@
                 page.searchMainData();
             })
 
-            $('#cboCompany').click(function(){
-                companyPopupOpen('cboCompany', 'cboCompanyHidden');
-            });
+            /*$('#cboCompany').click(function(){
+                companyPopupOpenCustom('cboCompany', 'cboCompanyHidden');
+            });*/
 
             //삭제버튼 클릭
             $('#btnDelete').click(function(){

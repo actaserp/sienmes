@@ -96,5 +96,9 @@ public class TB_BANKTRANSIT extends BaseEntity{
     @Column(length = 8)
     private String acccd; //계정코드
 
+    @Column(length = 1)
+    private String cltflag; //거래처 구분값
+
+
 
 }

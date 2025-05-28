@@ -104,6 +104,7 @@ public class AccountSyncService {
     private Map<String, String> extractParameters(Map<String, Object> account) throws Exception {
         String today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String raw = UtilClass.getStringSafe(account.get("AccountNumber"));
+        String spjangcd = UtilClass.getStringSafe(account.get("spjangcd"));
 
         Map<String, String> param = new HashMap<>();
         param.put("CorpNum", UtilClass.getStringSafe(account.get("CorpNum")));
@@ -111,6 +112,7 @@ public class AccountSyncService {
         param.put("AccountNumber", EncryptionUtil.decrypt(raw));
         param.put("SDate", today);
         param.put("EDate", today);
+        param.put("spjangcd", spjangcd);
 
         return param;
     }
