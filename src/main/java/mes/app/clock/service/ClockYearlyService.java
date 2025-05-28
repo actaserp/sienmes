@@ -45,6 +45,7 @@ public class ClockYearlyService {
                 LEFT JOIN (
                     SELECT personid, SUM(daynum) AS daynum
                     FROM tb_pb204
+                    where fixflag = '1'
                     GROUP BY personid
                 ) tb204 ON p.id = tb204.personid
                 LEFT JOIN (
@@ -267,10 +268,11 @@ public class ClockYearlyService {
     }
 
 
-    public List<Map<String, Object>> getYearlyDetail(Integer id){
+    public List<Map<String, Object>> getYearlyDetail(Integer id, String year){
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("id", id);
+        dicParam.addValue("year", year);
 
         String sql = """
                 WITH latest_pb209 AS (
@@ -285,6 +287,7 @@ public class ClockYearlyService {
                         SELECT personid, MAX(reqdate) AS max_reqdate
                         FROM tb_pb209
                         WHERE personid = :id
+                          AND LEFT(CAST(reqdate AS VARCHAR), 4) = :year
                         GROUP BY personid
                     ) latest ON tb.personid = latest.personid AND tb.reqdate = latest.max_reqdate
                 ),
@@ -302,8 +305,10 @@ public class ClockYearlyService {
                             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
                         ) AS cum_daynum
                     FROM tb_pb204 t
-                    LEFT JOIN tb_pb210 w ON t.workcd = w.workcd  
+                    LEFT JOIN tb_pb210 w ON t.workcd = w.workcd \s
                     WHERE t.personid = :id
+                      AND t.fixflag = '1'
+                      AND LEFT(CAST(t.reqdate AS VARCHAR), 4) = :year
                 ),
                 unioned_data AS (
                     SELECT
@@ -313,14 +318,14 @@ public class ClockYearlyService {
                         NULL AS todate,
                         NULL AS daynum,
                         NULL AS workcd,
-                        '생성' AS worknm, 
+                        '생성' AS worknm,\s
                         ewolnum,
                         holinum,
                         restnum
                     FROM latest_pb209
-                                
+                               \s
                     UNION ALL
-                                
+                               \s
                     SELECT
                         p.reqdate,
                         p.personid,
@@ -335,7 +340,6 @@ public class ClockYearlyService {
                     FROM pb204_with_running_total p
                     CROSS JOIN latest_pb209 l
                 )
-                                
                 SELECT
                     ROW_NUMBER() OVER (ORDER BY reqdate) - 1 AS rownum,
                     *
