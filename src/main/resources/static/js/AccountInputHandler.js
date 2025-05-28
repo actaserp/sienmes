@@ -36,12 +36,13 @@ const AccountInputHandler = {
           const poppage = new PopAccountComponent();
           poppage.show(function (item) {
             setAccountInfo(item);
-          });
+          }, accountNumber);
           return;
         }
 
         // ✅ 그 외에는 기존 Ajax 검색 로직
         if (accountNumber.length < minLength) return;
+        //console.log('검색할 계좌번호:', accountNumber);
 
         $.ajax({
           url: '/api/popup/search_Account',

@@ -102,7 +102,7 @@
         }
         this.close();
       }
-      show(callback) {
+      show(callback, presetAccountNumber = '') {
         let _this = this;
 
         this.callback = callback;
@@ -148,6 +148,10 @@
         this.$accountNumber = $content.find('#account_number');
         this.$btnCompSelect = $content.find('#btnCompSelect');
 
+        if (presetAccountNumber && presetAccountNumber.trim() !== '') {
+          this.$accountNumber.val(presetAccountNumber);
+          this.searchDataBind(); // 검색 바로 실행
+        }
         // 엔터키로 검색
         this.$BankName.on('keypress', function (e) {
           if (e.keyCode === 13) {

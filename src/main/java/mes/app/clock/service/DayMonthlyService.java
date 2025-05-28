@@ -78,8 +78,11 @@ public class DayMonthlyService {
                 tp210.worknm as worknm,
                 p."Name" as first_name,
                 t.spjangcd as spjangcd
-            FROM tb_pb201 t
-            LEFT JOIN person p ON p.id = t.personid
+            FROM person p
+            LEFT JOIN tb_pb201 t
+             ON t.personid = p.id
+             AND t.workym = :workym
+             AND t.workday = :workday
            LEFT JOIN (
               SELECT "Code", "Value"
               FROM sys_code
@@ -91,9 +94,7 @@ public class DayMonthlyService {
                  WHERE "CodeType" = 'jik_type'
              ) s ON s."Code" = p.jik_id
              LEFT JOIN tb_pb210 tp210 ON tp210.workcd = t.workcd
-            WHERE t.workym = :workym
-              AND t.workday = :workday
-              AND (
+            WHERE(
                :work_division = '' OR
                LPAD(p."PersonGroup_id"::text, 2, '0') = :work_division
                 )
@@ -101,7 +102,7 @@ public class DayMonthlyService {
                :depart_id = '' OR
                LPAD(p."Depart_id"::text, 2, '0') = :depart_id
                 )
-              AND t.spjangcd =:spjangcd
+              AND p.spjangcd =:spjangcd
               AND p.rtflag = '0'
         """;
 
