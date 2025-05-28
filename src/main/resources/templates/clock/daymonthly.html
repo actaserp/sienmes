@@ -319,9 +319,17 @@
                             e.cell.style.color = '';
                             e.cell.style.fontWeight = 'normal';
 
+                            // 날짜 형식 변경
+                            if (col.binding === 'date') {
+                                const dateStr = item.date; // 'YYYY-MM-DD'
+                                if (dateStr) {
+                                    const [y, m, d] = dateStr.split('-');
+                                    e.cell.textContent = `${y.slice(2)}-${m}-${d}`; // '25-01-01'
+                                }
+                            }
+
                             if (col.binding === 'weekday') {
                                 const weekday = sender.getCellData(e.row, e.col, false);
-
                                 if (weekday === '일') {
                                     e.cell.style.color = 'red';
                                 } else if (weekday === '토') {
@@ -329,7 +337,6 @@
                                 }
                             }
 
-                            // 오늘 날짜이면 강조
                             if (item.isToday) {
                                 e.cell.style.fontWeight = 'bold';
                                 e.cell.style.color = 'Orange';

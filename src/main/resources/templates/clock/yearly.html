@@ -39,15 +39,6 @@
 
                     <dl>
                         <dt>
-                            <label>사원명</label>
-                        </dt>
-                        <dd>
-                            <input type="text" class="form-control2" id="name" name="name">
-                        </dd>
-                    </dl>
-
-                    <dl>
-                        <dt>
                             <label>기준일자</label>
                         </dt>
                         <dd>
@@ -63,6 +54,15 @@
                         </dt>
                         <dd>
                             <select style="width: 150px;" id="rtflag" name="rtflag"></select>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>
+                            <label>사원명</label>
+                        </dt>
+                        <dd>
+                            <input type="text" class="form-control2" id="name" name="name">
                         </dd>
                     </dl>
 
@@ -118,7 +118,7 @@
 
             <div class="container-fluid">
                 <p id="selectedItem"></p>
-                <div id="list-grid" style="height: 200px; max-height: 200px;"></div>
+                <div id="list-grid" style="height: 280px; max-height: 280px;"></div>
             </div>
             <!--//tab-wrap end-->
         </section>
@@ -171,14 +171,15 @@
                 });
 
 
-                /*this.grid.hostElement.addEventListener('dblclick', (e) => {
+                this.grid.hostElement.addEventListener('dblclick', (e) => {
                     let hitTest = this.grid.hitTest(e);
                     if (hitTest.cellType === wijmo.grid.CellType.Cell) {
                         let row = hitTest.row;
                         let selectedItem = this.grid.rows[row].dataItem;
+                        console.log(selectedItem);
                         _this.showDetail(selectedItem.id)
                     }
-                });*/
+                });
 
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '사원별근태현황';
@@ -197,16 +198,16 @@
                         }
                     },
                     columns: [
-                        {binding: '', header: '순번', width: 100, align: 'center'},
-                        {binding: '', header: '구분', width: 120, align: 'center'},
-                        {binding: '', header: '신청일', width: 100, align: 'center'},
-                        {binding: '', header: '시작일', width: 140, align: 'center'},
-                        {binding: '', header: '종료일', width: 140, align: 'center'},
-                        {binding: '', header: '기간', width: 140, align: 'center'},
-                        {binding: '', header: '이월일', width: 120, align: 'center'},
-                        {binding: '', header: '생성일', width: 100, align: 'center'},
-                        {binding: '', header: '사용일', width: 100, align: 'center'},
-                        {binding: '', header: '잔여일', width: 100, align: 'center'},
+                        {binding: 'rownum', header: '순번', width: 100, align: 'center'},
+                        {binding: 'worknm', header: '구분', width: 120, align: 'center'},
+                        {binding: 'reqdate', header: '신청일', width: 100, align: 'center'},
+                        {binding: 'frdate', header: '시작일', width: 140, align: 'center'},
+                        {binding: 'todate', header: '종료일', width: 140, align: 'center'},
+                        {binding: 'daynum', header: '기간', width: 140, align: 'center'},
+                        {binding: 'ewolnum', header: '이월일', width: 120, align: 'center'},
+                        {binding: 'holinum', header: '생성일', width: 100, align: 'center'},
+                        {binding: 'daynum', header: '사용일', width: 100, align: 'center'},
+                        {binding: 'restnum', header: '잔여일', width: 100, align: 'center'},
                     ],
                     itemsSource: this.viewData2, // 데이터를 설정할 배열
                 });
@@ -229,12 +230,13 @@
 
                 let result = AjaxUtil.getSyncData(url, data);
                 if (result && result.data) {
+                    console.log(result);
                     _this.viewData.sourceCollection = result.data;
                 }
 
             }//searchMainData
 
-
+//연차생성
             yearCreate(){
                 let _this = this;
 
@@ -249,16 +251,16 @@
                 let result = AjaxUtil.getSyncData(url, data);
                 if (result && result.data) {
                     result.data.sort((a, b) => a.rownum - b.rownum);
-
                     _this.viewData.sourceCollection = result.data;
+
+                    _this.saveyear()
                 }
 
             }
 
-
+//월차생성
             MonthlyCreate() {
                 let _this = this;
-
                 let url = '/api/clock/Yearly/MonthlyCreate';
                 let data = {
                     'year': $('#year').val(),
@@ -271,68 +273,117 @@
                 if (result && result.data) {
                     let newData = result.data;
 
-                    // 기존 데이터가 없으면 그냥 새 데이터로 초기화
+
+                    _this.generatedMonthlyData = newData;
+
+                    // 기존 데이터와 병합하여 화면에 보여줄 데이터 구성
                     if (!_this.viewData.sourceCollection || _this.viewData.sourceCollection.length === 0) {
                         _this.viewData.sourceCollection = newData;
                         return;
                     }
 
-                    // 기존 데이터 복사
                     let mergedData = [..._this.viewData.sourceCollection];
 
-                    // 병합: 같은 사원(person_name)이면 값만 덮어쓰기
                     newData.forEach(newItem => {
                         let index = mergedData.findIndex(item => String(item.id).trim() === String(newItem.id).trim());
 
                         if (index !== -1) {
-                            // 기존 사원이면 특정 값만 업데이트
                             mergedData[index].daynum = newItem.daynum;
                             mergedData[index].restnum = newItem.restnum;
                             mergedData[index].holinum = newItem.holinum;
-                            // 필요시 다른 필드도 병합 가능
                         } else {
-                            // 새로운 사원이면 추가
                             mergedData.push(newItem);
                         }
-
-                        /*console.log(`병합된 대상: ${newItem.person_name} (ID: ${newItem.id})`);*/
-
                     });
 
-                  /*  console.log('병합 전 기존 데이터:', mergedData);
-                    console.log('신규 데이터:', newData);*/
-
-                    // 병합된 데이터로 설정
-                    mergedData.sort((a, b) => a.rownum - b.rownum); // 정렬 필요시
+                    mergedData.sort((a, b) => a.rownum - b.rownum);
                     _this.viewData.sourceCollection = mergedData;
+
+                    _this.saveMonthly()
                 }
+            }
+
+
+            saveMonthly() {
+                let _this = this;
+                let url = '/api/clock/Yearly/Monthlysave';
+
+                let filteredData = _this.generatedMonthlyData;
+
+                if (!filteredData || filteredData.length === 0) {
+                    Alert.alert('', '저장할 월차 생성 데이터가 없습니다.');
+                    return;
+                }
+
+                let data = {
+                    spjangcd: sessionStorage.getItem('spjangcd'),
+                    year: $('#year').val(),
+                    saveList: filteredData
+                };
+
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('', '저장되었습니다');
+                        _this.searchMainData();
+                    } else {
+                        Alert.alert('', res.message || '저장에 실패했습니다.');
+                    }
+                };
+
+                AjaxUtil.postJsonData(url, data, fnSuccess);
             }
 
 
 
 
-            saveArea() {
-                let _this = this;
-                let url = '/api/definition/area/save';
-                //데이터입력체크루틴 누락
 
-                //let data = $('#basicForm').serialize();
-                let data = FormUtil.extractForm($('#basicForm'));
-                if (!data.name) {
-                    Alert.alert('', '에어리어 이름을 입력해주세요.');
-                    $('#basicForm #name').focus();
+            saveyear() {
+                let _this = this;
+                let url = '/api/clock/Yearly/Yearlysave';
+
+                // viewData에서 holinum이 있는 데이터만 필터링
+                let filteredData = _this.viewData.items.filter(item => {
+                    return item.holinum !== null && item.holinum !== undefined && Number(item.holinum) > 0;
+                });
+
+                if (filteredData.length === 0) {
+                    Alert.alert('', '저장할 연차 생성 데이터가 없습니다.');
                     return;
                 }
 
+                let data = {
+                    spjangcd: sessionStorage.getItem('spjangcd'),
+                    year: $('#year').val(),
+                    saveList: filteredData // 서버로 전송할 데이터
+                };
+
+                console.log(data);
+
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Alert.alert('', '저장되었습니다'); // Notification
-                        _this.searchMainData();
-                    } else if (!res.success) {
-                        Alert.alert('', res.message);
+                        Alert.alert('', '저장되었습니다');
+                       /* _this.searchMainData();*/
+                    } else {
+                        Alert.alert('', res.message || '저장에 실패했습니다.');
                     }
                 };
-                AjaxUtil.postAsyncData(url, data, fnSuccess);
+
+                AjaxUtil.postJsonData(url, data, fnSuccess);
+            }
+
+            showDetail(id){
+                console.log("showdetail진입");
+                let _this = this;
+                let data = {
+                    'id': id,
+                };
+                let url = '/api/clock/Yearly';
+                let result = AjaxUtil.getSyncData(url + "/detail", data);
+
+                if (result.data != null) {
+                    console.log(result);
+                    _this.viewData2.sourceCollection = result.data;
+                }
             }
 
 

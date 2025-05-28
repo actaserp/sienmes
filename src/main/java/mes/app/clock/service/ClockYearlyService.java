@@ -32,17 +32,21 @@ public class ClockYearlyService {
                     p."Name" AS person_name,
                     s."Value" AS jik_id,
                     p.rtdate AS rtdate,
-                    tb209.restnum,
+                    (COALESCE(tb209.ewolnum, 0) + COALESCE(tb209.holinum, 0) - COALESCE(tb204.daynum, 0)) AS restnum,
                     tb209.ewolnum,
                     tb209.holinum,
-                    tb209.daynum
+                    tb204.daynum
                 FROM person p
                 LEFT JOIN (
                     SELECT "Code", "Value"
                     FROM sys_code
                     WHERE "CodeType" = 'jik_type'
                 ) s ON s."Code" = p.jik_id
-                LEFT JOIN tb_pb204 tb204 ON p.id = tb204.personid
+                LEFT JOIN (
+                    SELECT personid, SUM(daynum) AS daynum
+                    FROM tb_pb204
+                    GROUP BY personid
+                ) tb204 ON p.id = tb204.personid
                 LEFT JOIN (
                     SELECT t.*
                     FROM tb_pb209 t
@@ -53,8 +57,9 @@ public class ClockYearlyService {
                     ) latest ON t.personid = latest.personid AND t.reqdate = latest.max_reqdate
                 ) tb209 ON p.id = tb209.personid
                 WHERE rtflag = '0'
+                AND p."Name" LIKE concat('%', :name, '%')
                 GROUP BY
-                    p.id, s."Value", tb209.restnum, tb209.ewolnum, tb209.holinum, tb209.daynum, p."Name", p.rtdate, p.jik_id
+                    p.id, s."Value", tb209.ewolnum, tb209.holinum, tb204.daynum, p."Name", p.rtdate, p.jik_id
                 ORDER BY p.jik_id;
                 """;
 
@@ -83,7 +88,8 @@ public class ClockYearlyService {
                         p.id,
                         TO_DATE(:year::INT - 1 || '-12-31', 'YYYY-MM-DD') AS end_date,
                         TO_DATE(:startdate, 'YYYYMMDD') AS start_date,
-                         ROW_NUMBER() OVER (ORDER BY TO_DATE(p.rtdate, 'YYYYMMDD')) AS rownum 
+                         ROW_NUMBER() OVER (ORDER BY TO_DATE(p.rtdate, 'YYYYMMDD')) AS rownum ,
+                         p.jik_id
                     FROM person p
                     WHERE TO_DATE(p.rtdate, 'YYYYMMDD') <= TO_DATE(:year::INT || '1231', 'YYYYMMDD')
                 ),
@@ -131,8 +137,14 @@ public class ClockYearlyService {
                     h.llHoliynum AS holinum,
                     COALESCE(l.cnt, 0) AS ewolnum,
                     (h.llHoliynum + COALESCE(l.cnt, 0)) AS restnum,
-                    h.rownum
+                    h.rownum,
+                    s."Value" AS jik_id
                 FROM holiday_calc h
+                LEFT JOIN (
+                    SELECT "Code", "Value"
+                    FROM sys_code
+                    WHERE "CodeType" = 'jik_type'
+                ) s ON s."Code" = h.jik_id
                 LEFT JOIN LATERAL (
                     SELECT restnum AS cnt
                     FROM TB_PB209
@@ -143,7 +155,7 @@ public class ClockYearlyService {
                     LIMIT 1
                 ) l ON TRUE
                 WHERE h.spjangcd = :spjangcd
-                ORDER BY h.id
+                ORDER BY h.rtdate
                 """;
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
@@ -159,10 +171,6 @@ public class ClockYearlyService {
         dicParam.addValue("year", year);
         dicParam.addValue("spjangcd", spjangcd);
 
-        if (startdate != null && startdate.length() == 6) {
-            startdate = startdate + "01";
-        }
-
         dicParam.addValue("startdate", startdate);
 
 
@@ -176,7 +184,11 @@ public class ClockYearlyService {
                         p.spjangcd,
                         p."Name" AS person_name,
                         TO_DATE(p.rtdate, 'YYYYMMDD') AS rtdate,
-                        TO_DATE(:startdate, 'YYYYMMDD') AS nowdate
+                        CASE
+                            WHEN TO_CHAR(CURRENT_DATE, 'YYYYMM') = :startdate
+                                THEN CURRENT_DATE
+                            ELSE (DATE_TRUNC('month', TO_DATE(:startdate || '01', 'YYYYMMDD')) + INTERVAL '1 month - 1 day')::DATE
+                        END AS nowdate
                     FROM person p
                     WHERE TO_DATE(p.rtdate, 'YYYYMMDD') <= TO_DATE('20251231', 'YYYYMMDD')
                 ),
@@ -254,9 +266,88 @@ public class ClockYearlyService {
         return items;
     }
 
-    /*
-        daynum 잔여일
-    * 
-    * */
+
+    public List<Map<String, Object>> getYearlyDetail(Integer id){
+
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        dicParam.addValue("id", id);
+
+        String sql = """
+                WITH latest_pb209 AS (
+                    SELECT
+                        tb.reqdate,
+                        tb.personid,
+                        tb.ewolnum,
+                        tb.holinum,
+                        tb.restnum
+                    FROM tb_pb209 tb
+                    JOIN (
+                        SELECT personid, MAX(reqdate) AS max_reqdate
+                        FROM tb_pb209
+                        WHERE personid = :id
+                        GROUP BY personid
+                    ) latest ON tb.personid = latest.personid AND tb.reqdate = latest.max_reqdate
+                ),
+                pb204_with_running_total AS (
+                    SELECT
+                        t.reqdate,
+                        t.personid,
+                        t.frdate,
+                        t.todate,
+                        t.daynum,
+                        t.workcd,
+                        w.worknm,
+                        SUM(COALESCE(t.daynum, 0)) OVER (
+                            ORDER BY t.reqdate
+                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+                        ) AS cum_daynum
+                    FROM tb_pb204 t
+                    LEFT JOIN tb_pb210 w ON t.workcd = w.workcd  
+                    WHERE t.personid = :id
+                ),
+                unioned_data AS (
+                    SELECT
+                        reqdate,
+                        personid,
+                        NULL AS frdate,
+                        NULL AS todate,
+                        NULL AS daynum,
+                        NULL AS workcd,
+                        '생성' AS worknm, 
+                        ewolnum,
+                        holinum,
+                        restnum
+                    FROM latest_pb209
+                                
+                    UNION ALL
+                                
+                    SELECT
+                        p.reqdate,
+                        p.personid,
+                        p.frdate,
+                        p.todate,
+                        p.daynum,
+                        p.workcd,
+                        p.worknm,
+                        0.00 AS ewolnum,
+                        0.00 AS holinum,
+                        GREATEST(l.restnum - p.cum_daynum) AS restnum
+                    FROM pb204_with_running_total p
+                    CROSS JOIN latest_pb209 l
+                )
+                                
+                SELECT
+                    ROW_NUMBER() OVER (ORDER BY reqdate) - 1 AS rownum,
+                    *
+                FROM unioned_data
+                ORDER BY reqdate;
+                """;
+
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+
+
+        return items;
+    }
+
 
 }

@@ -50,7 +50,7 @@ public class UserCodeService {
                 ,"Description" as description
                 from sys_code
                 where "Value" ilike concat('%%',:txtCode,'%%')
-                AND "CodeType" ilike concat('%%',:txtCodeType,'%%')
+                AND "Description" ilike concat('%%',:txtCodeType,'%%')
 				""";
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		return items;

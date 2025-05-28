@@ -1,16 +1,23 @@
 package mes.app.clock;
 
 import mes.app.clock.service.ClockYearlyService;
+import mes.domain.entity.Tb_pb203;
+import mes.domain.entity.Tb_pb209;
+import mes.domain.entity.User;
+import mes.domain.entity.commute.TB_PB201;
 import mes.domain.model.AjaxResult;
+import mes.domain.repository.Tb_pb209Repository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/clock/Yearly")
@@ -18,6 +25,9 @@ public class YearlyController {
 
     @Autowired
     private ClockYearlyService clockYearlyService;
+
+    @Autowired
+    private Tb_pb209Repository tpb209Repository;
 
     @GetMapping("/read")
     public AjaxResult getYearlyList(
@@ -87,5 +97,135 @@ public class YearlyController {
     }
 
 
+    @PostMapping("/Yearlysave")
+    @Transactional
+    public AjaxResult saveYearlysave(
+            @RequestBody Map<String, Object> requestData,
+            HttpServletRequest request,
+            Authentication auth) {
+
+        AjaxResult result = new AjaxResult();
+        User user = (User)auth.getPrincipal();
+
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) requestData.get("saveList");
+        String spjangcd = (String) requestData.get("spjangcd");
+        String yearStr = (String) requestData.get("year"); // 추가
+        int reqDate = Integer.parseInt(yearStr + "0000");  // 추가
+
+
+        List<Tb_pb209> tbpb209List = new ArrayList<>();
+
+        for (Map<String, Object> item : dataList) {
+            Object ewolnumStr = item.get("ewolnum");  //이월일수
+            Object holinumStr = item.get("holinum"); // 연차생성일수
+            Integer id = ((Number) item.get("id")).intValue(); //id
+            Object restnumStr = item.get("restnum"); //잔여일수
+
+            Optional<Tb_pb209> optional = tpb209Repository.findByPersonidAndReqdate(id, String.valueOf(reqDate));
+
+            Tb_pb209 tbpb209;
+
+            if (optional.isPresent()) {
+                // 기존 데이터 수정
+                tbpb209 = optional.get();
+            }else{
+                // 새로운 데이터 추가
+                tbpb209 = new Tb_pb209();
+                tbpb209.setPersonid(id);
+                tbpb209.setReqdate(String.valueOf(reqDate));
+                tbpb209.setSpjangcd(spjangcd);
+                tbpb209.setHflag("0");
+            }
+
+
+            tbpb209.setEwolnum(new BigDecimal(ewolnumStr.toString()));
+            tbpb209.setHolinum(new BigDecimal(holinumStr.toString()));
+            tbpb209.setRestnum(new BigDecimal(restnumStr.toString()));
+
+            tbpb209List.add(tbpb209);
+
+        }
+        // 저장
+        tpb209Repository.saveAll(tbpb209List);
+
+        result.success = true;
+        result.data = tbpb209List;
+        return result;
+    }
+
+    @PostMapping("/Monthlysave")
+    @Transactional
+    public AjaxResult saveMonthlysave(
+            @RequestBody Map<String, Object> requestData,
+            HttpServletRequest request,
+            Authentication auth) {
+
+        AjaxResult result = new AjaxResult();
+        User user = (User)auth.getPrincipal();
+
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) requestData.get("saveList");
+        String spjangcd = (String) requestData.get("spjangcd");
+        String yearStr = (String) requestData.get("year"); // 추가
+        int reqDate = Integer.parseInt(yearStr + "0000");  // 추가
+
+
+        List<Tb_pb209> tbpb209List = new ArrayList<>();
+
+        for (Map<String, Object> item : dataList) {
+            Object ewolnumStr = item.get("ewolnum");  //이월일수
+            Object holinumStr = item.get("holinum"); // 연차생성일수
+            Integer id = ((Number) item.get("id")).intValue(); //id
+            Object restnumStr = item.get("restnum"); //잔여일수
+
+            Optional<Tb_pb209> optional = tpb209Repository.findByPersonidAndReqdate(id, String.valueOf(reqDate));
+
+            Tb_pb209 tbpb209;
+
+            if (optional.isPresent()) {
+                // 기존 데이터 수정
+                tbpb209 = optional.get();
+            }else{
+                // 새로운 데이터 추가
+                tbpb209 = new Tb_pb209();
+                tbpb209.setPersonid(id);
+                tbpb209.setReqdate(String.valueOf(reqDate));
+                tbpb209.setSpjangcd(spjangcd);
+                tbpb209.setHflag("0");
+            }
+
+
+            tbpb209.setEwolnum(toBigDecimalOrNull(ewolnumStr));
+            tbpb209.setHolinum(toBigDecimalOrNull(holinumStr));
+            tbpb209.setRestnum(toBigDecimalOrNull(restnumStr));
+
+
+            tbpb209List.add(tbpb209);
+
+        }
+        // 저장
+        tpb209Repository.saveAll(tbpb209List);
+
+        result.success = true;
+        result.data = tbpb209List;
+        return result;
+    }
+
+    private BigDecimal toBigDecimalOrNull(Object value) {
+        return value != null ? new BigDecimal(value.toString()) : null;
+    }
+
+
+    @GetMapping("/detail")
+    public AjaxResult getYearlyDetail(
+            @RequestParam(value="id") Integer id,
+            HttpServletRequest request) {
+
+        AjaxResult result = new AjaxResult();
+
+        List<Map<String, Object>> item = this.clockYearlyService.getYearlyDetail(id);
+
+        result.data = item;
+        return result;
+    }
 
 }
