@@ -259,6 +259,7 @@
       document.getElementById('outside').style.display = 'flex';
       document.getElementById('workcd').style.display = 'block';
 
+      getGPSLocation();
     }
   };
 
@@ -454,15 +455,18 @@
 
   // GPS 좌표를 가져오는 함수
   const getGPSLocation = () => {
+    console.log('GPS 메서드 진입')
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           latitude = position.coords.latitude;
           longitude = position.coords.longitude;
           console.log(`GPS Coordinates: Lat ${latitude}, Lon ${longitude}`);
+          getAddressFromVWorld(latitude, longitude);
         },
         (error) => {
           console.warn("GPS 접근 실패, IP 기반 위치로 대체합니다.", error.message);
+          document.getElementById('gpsInfo').innerText = '위치정보를 조회할 수 없습니다.'
         }
       );
     } else {
@@ -484,14 +488,7 @@
     AjaxUtil.postAsyncData(url, data, fnsuccess);
   }
 
-  function getLocationFromIP() {
-    fetch('https://ipapi.co/json/')
-      .then(res => res.json())
-      .then(data => {
-        console.log("IP 기반 위치:", data);
-        getAddressFromVWorld(data.latitude, data.longitude);
-      });
-  }
+
 
 </script>
 </body>
