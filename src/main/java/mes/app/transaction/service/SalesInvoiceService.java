@@ -14,13 +14,10 @@ import mes.config.Settings;
 import mes.domain.entity.*;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.*;
-import mes.domain.services.CommonUtil;
 import mes.domain.services.SqlRunner;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -33,24 +30,22 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+
+
+import java.io.FileInputStream;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static javax.swing.UIManager.getString;
 
 @Slf4j
 @Service
@@ -135,6 +130,7 @@ public class SalesInvoiceService {
                    m.taxtype,
                    issue_div."Value" AS issuediv_name,
                    m.issuediv,
+                   m.modifycd,
                    CASE
                 	   WHEN ds.item_count > 1 THEN ds.first_itemnm || ' 외 ' || (ds.item_count - 1) || '개'
                 	   WHEN ds.item_count = 1 THEN ds.first_itemnm
@@ -464,7 +460,7 @@ public class SalesInvoiceService {
     private void updateShipmentLinks(Map<String, Object> form, TB_Salesment salesment) {
         // 5. shipment_head 업데이트
         Object shipIdsObj = form.get("shipids");
-        System.out.println("shipIdsObj: " + shipIdsObj);
+
         if (shipIdsObj != null) {
             String shipIdsStr = shipIdsObj.toString(); // "165,162,164"
             List<Integer> shipIds = Arrays.stream(shipIdsStr.split(","))
@@ -1680,6 +1676,98 @@ public class SalesInvoiceService {
             }
         }
         return true;
+    }
+
+    public Map<String, Object> getInvoicePrint(Integer misnum) throws IOException {
+        MapSqlParameterSource paramMap = new MapSqlParameterSource();
+        paramMap.addValue("misnum", misnum);
+
+        String sql = """ 
+                SELECT\s
+                	m.icercorpnum,
+                	m.icercorpnm,
+                	m.icerceonm,
+                	m.iceraddr,
+                	m.icerbiztype,
+                	m.icerbizclass,
+                	m.ivercorpnum,
+                	m.ivercorpnm,
+                	m.iverceonm,
+                	m.iveraddr,
+                	m.iverbiztype,
+                	m.iverbizclass,
+                	m.supplycost
+                FROM tb_salesment m
+                WHERE m.misnum = :misnum
+                """;
+
+        String detailSql = """ 
+            SELECT\s
+                ROW_NUMBER() OVER (ORDER BY sh."ShipDate") AS misseq,
+                TO_CHAR(sh."ShipDate", 'MM') AS month,
+                   TO_CHAR(sh."ShipDate", 'DD') AS day,
+                   sh."ShipDate",
+                sh.misnum,
+                s."Qty" as qty,
+                s."UnitPrice" as unitcost,
+                s."Price" as supplycost,
+                s."Vat" as tax,
+                s."Description" as remark,
+                   m."Name" AS name
+               FROM\s
+                   shipment_head sh
+               JOIN\s
+                   shipment s ON sh.id = s."ShipmentHead_id"
+               JOIN\s
+                   material m ON s."Material_id" = m.id
+               WHERE\s
+                   sh.misnum = :misnum
+               order by sh."ShipDate"
+            """;
+
+        String fallbackDetailSql = """
+            SELECT
+                d.misseq,
+                d.itemnm as name,
+                d.qty,
+                d.unitcost,
+                d.supplycost,
+                d.taxtotal as tax,
+                d.remark,
+                SUBSTRING(d.misdate FROM 5 FOR 2) AS month,
+                SUBSTRING(d.misdate FROM 7 FOR 2) AS day
+            FROM tb_salesdetail d
+            WHERE d.misnum = :misnum
+            ORDER BY d.misseq
+            """;
+
+        Map<String, Object> master = this.sqlRunner.getRow(sql, paramMap);
+        List<Map<String, Object>> detailList = this.sqlRunner.getRows(detailSql, paramMap);
+
+        if (detailList == null || detailList.isEmpty()) {
+            detailList = this.sqlRunner.getRows(fallbackDetailSql, paramMap);
+        }
+
+        UtilClass.decryptItem(master, "ivercorpnum", 0);
+
+        master.put("icercorpnum", formatIdentifier((String) master.get("icercorpnum")));
+        master.put("ivercorpnum", formatIdentifier((String) master.get("ivercorpnum")));
+        master.put("detailList", detailList);
+        return master;
+    }
+
+    private String formatIdentifier(String num) {
+        if (num == null) return "";
+        num = num.replaceAll("[^0-9]", ""); // 숫자만 추출
+
+        if (num.length() == 10) {
+            // 사업자등록번호: 000-00-00000
+            return num.substring(0, 3) + "-" + num.substring(3, 5) + "-" + num.substring(5);
+        } else if (num.length() == 13) {
+            // 주민등록번호: 000000-0000000
+            return num.substring(0, 6) + "-" + num.substring(6);
+        }
+        return num; // 길이 안 맞으면 그대로 반환
     }
 
 }

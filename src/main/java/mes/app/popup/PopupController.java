@@ -35,7 +35,8 @@ public class PopupController {
 	public AjaxResult getSearchMaterial(
 			@RequestParam(value="material_type", required=false) String material_type,
 			@RequestParam(value="material_group", required=false) Integer material_group,
-			@RequestParam(value="keyword", required=false) String keyword
+			@RequestParam(value="keyword", required=false) String keyword,
+			@RequestParam(value="spjangcd") String spjangcd
 			) {
 		AjaxResult result = new AjaxResult();
 
@@ -54,12 +55,7 @@ public class PopupController {
 	            , m."WorkCenter_id"
 				, m."Equipment_id"
 				, m."VatExemptionYN"
-				, concat_ws(' × ',
-                      case when m."Width" is not null then '폭:' || to_char(m."Width", 'FM9999990.##') else null end,
-                      case when m."Length" is not null then '길이:' || to_char(m."Length", 'FM9999990.##') else null end,
-                      case when m."Height" is not null then '높이:' || to_char(m."Height", 'FM9999990.##') else null end,
-                      case when m."Thickness" is not null then '두께:' || to_char(m."Thickness", 'FM9999990.##') else null end
-                  ) as "Spec"
+				, m."Standard1" as "Spec"
 	            from material m
 	            left join unit u on m."Unit_id" = u.id
 	            left join mat_grp mg on m."MaterialGroup_id" = mg.id
@@ -67,6 +63,7 @@ public class PopupController {
 	            and sc."CodeType" ='mat_type'
 	            where 1=1 
 	            AND "Useyn" ='0' 
+	            and m."spjangcd" = :spjangcd
 	    """;
 
 		if (StringUtils.hasText(material_type)){
@@ -91,6 +88,7 @@ public class PopupController {
 		paramMap.addValue("material_type", material_type);
 		paramMap.addValue("material_group", material_group, java.sql.Types.INTEGER);
 		paramMap.addValue("keyword", keyword);
+		paramMap.addValue("spjangcd", spjangcd);
 		result.data = this.sqlRunner.getRows(sql, paramMap);
 		return result;
 	}

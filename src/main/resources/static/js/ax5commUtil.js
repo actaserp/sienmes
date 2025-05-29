@@ -313,7 +313,7 @@ var Alert = {
         let message = i18n.getCommonText(_msg);
         setTimeout(() => {
             document.querySelector('[data-dialog-btn="ok"]')?.focus();
-        }, 0);
+        }, 50);
         dialog.alert(Utils.decodingHTMLTag(message), function () {
             if (_okCallback !== undefined) {
                 _okCallback();
@@ -324,19 +324,53 @@ var Alert = {
         if (_title) dialog.config.title = i18n.getCommonText(_title);
 
         let message = i18n.getCommonText(_msg);
+
+        // handleKey를 외부에 선언해서 스코프 공유
+        const handleKey = (e) => {
+            const okBtn = document.querySelector('[data-dialog-btn="ok"]');
+            const cancelBtn = document.querySelector('[data-dialog-btn="cancel"]');
+
+            if (document.activeElement === okBtn && e.key === 'ArrowRight') {
+                cancelBtn?.focus();
+                e.preventDefault();
+            } else if (document.activeElement === cancelBtn && e.key === 'ArrowLeft') {
+                okBtn?.focus();
+                e.preventDefault();
+            }
+        };
+
         confirmDialog.confirm({
-            msg: Utils.decodingHTMLTag(message)
+            msg: Utils.decodingHTMLTag(message),
+            showCancel: true
         }, function () {
+            // 확인 또는 취소 시 이벤트 제거
+            document.removeEventListener('keydown', handleKey);
+
             if (this.key == 'ok') {
                 _yesCallback();
-            }
-            else if (this.key == 'cancel') {
+            } else if (this.key == 'cancel') {
                 if (typeof _noCallback !== 'undefined') {
                     _noCallback();
                 }
             }
         });
+
+        setTimeout(() => {
+            const okBtn = document.querySelector('[data-dialog-btn="ok"]');
+            const cancelBtn = document.querySelector('[data-dialog-btn="cancel"]');
+
+            if (okBtn && cancelBtn) {
+                okBtn.setAttribute('tabindex', '0');
+                cancelBtn.setAttribute('tabindex', '0');
+
+                okBtn.focus();
+
+                // 이벤트 등록
+                document.addEventListener('keydown', handleKey);
+            }
+        }, 100);
     }
+
 };
 
 var Notify = {

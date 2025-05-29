@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -309,6 +310,19 @@ public class SalesInvoiceController {
 	public AjaxResult copyInvoice(@RequestBody List<Map<String, String>> copyList) {
 
 		return salesInvoiceService.copyInvoice(copyList);
+	}
+
+	@GetMapping("/invoice_print")
+	public AjaxResult getInvoicePrint(
+			@RequestParam("misnum") Integer misnum,
+			HttpServletResponse response) throws IOException {
+
+		Map<String, Object> item = this.salesInvoiceService.getInvoicePrint(misnum);
+
+		AjaxResult result = new AjaxResult();
+		result.data = item;
+
+		return result;
 	}
 
 }

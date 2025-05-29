@@ -23,6 +23,10 @@
                 font-size: 13px; /* 원하는 크기로 */
             }
 
+            textarea[name^="detailList"][name$=".ItemName"]::placeholder {
+                font-size: 13px;
+            }
+
 
 
             .content_wrap.popup {
@@ -648,7 +652,7 @@
                                             <th class="al_c invoicer_bg" colspan="3" rowspan="6"><span class="bold lh_16">공<br>급<br>받<br>는<br>자</span></th>
                                             <input type="hidden" id="InvoiceeID" name="InvoiceeID">
                                             <th class="al_c bold" colspan="8">등록번호</th>
-                                            <td class="al_l pdl_3" colspan="23"><input style="width: 80%; margin-right: 5px;" class="in_txt numeric al_c letspc_0" maxlength="12" type="text" id="InvoiceeCorpNum" name="InvoiceeCorpNum" placeholder="입력 후 엔터">
+                                            <td class="al_l pdl_3" colspan="23"><input style="width: 80%; margin-right: 5px;" class="in_txt numeric al_c letspc_0" maxlength="12" type="text" id="InvoiceeCorpNum" name="InvoiceeCorpNum" placeholder="입력 후 엔터" autocomplete="off">
                                                 <button class="btn_white_gradient mgl_2" id="btnSelectInvoicee" type="button">검색</button>
                                             </td>
 
@@ -811,7 +815,7 @@
                                             <td class="al_l pdl_3 item_border" colspan="24">
                                                 <div class="align-center-wrap">
                                                     <input type="hidden" id="detailList0.ItemId" name="detailList[0].ItemId">
-                                                    <textarea class="txt_ar" style="width: 88%; margin-right: 3px;" maxlength="100" id="detailList0.ItemName" name="detailList[0].ItemName"></textarea>
+                                                    <textarea class="txt_ar" style="width: 88%; margin-right: 3px;" maxlength="100" id="detailList0.ItemName" name="detailList[0].ItemName" placeholder="입력 후 엔터"></textarea>
                                                     <a class="btn in_btn" title="검색" id="btnViewItem_0">
                                                         <img src="/images/icon/btn-srch-black.svg" alt="검색 아이콘">
                                                     </a>
@@ -1051,7 +1055,9 @@
                     'InvoiceeTEL1', 'InvoiceeEmail1'
                 ];
                 fields.forEach(id => $('#' + id).val(''));
+                $('#InvoiceeCorpNum').removeAttr('readonly');
             }
+
 
         }
 
@@ -1174,6 +1180,7 @@
         // 품목행 추가 버튼
         $(document).on('click', '#btnAddFiveDetails', function () {
             addFiveDetails();
+            $('#writeDate').trigger('change');
         });
 
         // 품목행 삭제 버튼
@@ -1747,6 +1754,14 @@
                 if ($(this).val().trim() === '') {
                     $(itemIdSelector).val('');
                 }
+            }
+        });
+
+        $(document).on('keydown', function (e) {
+            // Ctrl + S (또는 Cmd + S for Mac)
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault(); // 브라우저 기본 저장 방지
+                $('#btnInvoiceSave').click(); // 저장 버튼 클릭 실행
             }
         });
 
