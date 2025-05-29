@@ -67,17 +67,18 @@
                         <dl>
                             <dt>
                                 <label>
-                                    거래처<span class="eq"></span>
+                                    조회 기간<span class="eq"></span>
                                 </label>
                             </dt>
                             <dd>
                                 <div class="srch-box">
-                                    <input type="text" placeholder="입력 후 엔터를 눌러 검색하세요."  id="cboCompany" name="cboCompany"/>
-                                    <input type="hidden"  id="cboCompanyHidden" name="cboCompanyHidden"  />
-                                    <input type="hidden"  id="cltflag" name="cltflag"  />
+                                    <input type="date" id="searchfrdate" name="searchfrdate"  />
+                                    <span class="slow_sign">~</span>
+                                    <input type="date" id="searchtodate" name="searchtodate" />
                                 </div>
                             </dd>
                         </dl>
+
                         <dl>
                             <dt>
                                 <label>
@@ -92,6 +93,22 @@
                                 </select>
                             </dd>
                         </dl>
+
+                        <dl>
+                            <dt>
+                                <label>
+                                    거래처<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="text" placeholder="입력 후 엔터를 눌러 검색하세요."  id="cboCompany" name="cboCompany"/>
+                                    <input type="hidden"  id="cboCompanyHidden" name="cboCompanyHidden"  />
+                                    <input type="hidden"  id="cltflag" name="cltflag"  />
+                                </div>
+                            </dd>
+                        </dl>
+
                         <dl>
                             <dt>
                                 <label>
@@ -103,20 +120,7 @@
                                 <input type="hidden"  id="accountNameHidden" name="accountNameHidden" />
                             </dd>
                         </dl>
-                        <dl>
-                            <dt>
-                                <label>
-                                    조회 기간<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <div class="srch-box">
-                                    <input type="date" id="searchfrdate" name="searchfrdate"  />
-                                    <span class="slow_sign">~</span>
-                                    <input type="date" id="searchtodate" name="searchtodate" />
-                                </div>
-                            </dd>
-                        </dl>
+
 
                         <dl>
                             <dt>&nbsp;</dt>
@@ -508,7 +512,7 @@
                         </th>
                         <td colspan="3">
                             <input type="text" id="accountNumber" name="accountNumber"
-                                   placeholder="검색버튼을 클릭하여 계좌를 검색하세요" readonly>
+                                   placeholder="검색버튼을 클릭하여 계좌를 검색하세요">
                             <input type="hidden" id="accountId" name="accountId">
                             &nbsp;
                             <a class="btn btn-delete" title="검색" id="btnAccountSearch" style='width: 120px'>
@@ -675,19 +679,20 @@
                     selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
                     isReadOnly: false,
                     columns: [
-                        { binding: 'id', header: '아이디', width: '*', visible: false, align: 'center', isReadOnly : true },
+                        { binding: 'id', header: '아이디', width: 10, visible: false, align: 'center', isReadOnly : true },
                         { binding: 'trade_date', header: '일자', width: 100, align: 'center', isReadOnly : true },
                         { binding: 'inoutFlag', header: '입출구분', width: 80, align: 'center', isReadOnly : true },
                         { binding: 'input_money', header: '입금액', width: 100, format: 'n0', aggregate: 'Sum', align: 'right', isReadOnly : true },
                         { binding: 'output_money',  header: ' 출금액', width: 100, format: 'n0', aggregate: 'Sum', align: 'right', isReadOnly : true},
+                        { binding: 'balance',  header: '잔액', width: 100, format: 'n0', aggregate: 'Sum', align: 'right', isReadOnly : true},
                         { binding: 'feeamt',header: ' 수수료', width: 80, format: 'n0', visible: false, align: 'center', isReadOnly : true},
                         { binding: 'mijamt',header: ' 수수료', width: 80, format: 'n0', visible: false, align: 'center', isReadOnly : true},
                         { binding: 'commission',header: ' 수수료', width: 80, format: 'n0', dataType: 'Boolean', align: 'center', isReadOnly : false},
-                        { binding: 'remark',  header: ' 적요', width: 150, align: 'right'},
+                        { binding: 'remark',  header: ' 적요', width: 150, align: 'left'},
                         { binding: 'code', header: '거래처코드', width: 120, align: 'center' },
                         { binding: 'cltcd', header: '거래처아이디', visible: false, align: 'center' },
                         { binding: 'cltflag', header: '거래처구분', visible: false, align: 'center' },
-                        { binding: 'clientName',   header: '거래처명', width: 140, align: 'center', isReadOnly : true },
+                        { binding: 'clientName',   header: '거래처명', width: 140, align: 'right', isReadOnly : true },
                         {
                             binding: 'trade_type',
                             header: '거래구분',
@@ -700,27 +705,28 @@
                             header: '메모',
                             width: 80,
                             isReadOnly: true,
+                            align: 'center',
                             binding: 'memo',
                             cellTemplate: `<div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                                                 <button class="memo-btn" style="padding: 4px 8px; width: 50px; font-size: 12px;">메모</button>
                                            </div>`
                         },
-                        { binding: 'memo', header: '메모내용', width: '*', align: 'center' , isReadOnly : true},
+                        { binding: 'memo', header: '메모내용', width: 200, align: 'center' , isReadOnly : true},
                         { binding: 'depositandwithdrawaltype', header: '입금형태', width: 100, align: 'center',
                             /*dataMap : getTradeTypeDataMap(iotype),
                             cellTemplate: '${text}',
                             align: 'center' */
                             isReadOnly : true
                         },
-                        { binding: 'button',
+                        /*{ binding: 'button',
                           header: '상세보기',
                             width: '*',
                             align: 'center',
                             cellTemplate: `<div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                                                 <button class="detail-btn" style="padding: 4px 8px; width: 50px; font-size: 12px;">상세보기</button>
                                            </div>`,
-                            isReadOnly : true},
-                        { binding: 'bankname', header: '은행', width: '*', align: 'center' , isReadOnly : true},
+                            isReadOnly : true},*/
+                        { binding: 'bankname', header: '은행', width: 120, align: 'center' , isReadOnly : true},
                         { binding: 'account', header: '계좌', width: 150, align: 'center' , isReadOnly : true},
 
                     ],
@@ -890,6 +896,8 @@
                     const $input = $container.find('input');
                     const $button = $container.find('button');
 
+                    let result = AjaxUtil.getSyncData('/api/popup/search_Comp_Custom', { spjangcd: getSpjangcdFromSession() });
+
                     const searchcallback = function (selected) {
                         // 1. 그리드 데이터 변경
 
@@ -927,7 +935,7 @@
                     };
 
                     let poppage = new PopCompComponentCustom();
-                    poppage.show(searchcallback);
+                    poppage.show(searchcallback, result.data);
                 });
 
 
@@ -978,7 +986,7 @@
                         };
                     }
 
-                    if (e.target && e.target.classList.contains('detail-btn')) {
+                    /*if (e.target && e.target.classList.contains('detail-btn')) {
                         const flex = _this.theGrid_TransactionHistory;
 
                         // .wj-cell DOM 요소를 기준으로 hitTest
@@ -993,16 +1001,18 @@
 
                         // 상세보기 실행
                         _this.showAddNewDataForm([rowData], 'edit');
-                    }
+                    }*/
                 });
             }
 
-            searchDetail(companyId){
+            searchDetail(companyId, cltflag){
                 let _this = this;
 
 
 
-                let data = { companyId : companyId,
+                let data = {
+                    companyId : companyId,
+                    cltflag : cltflag,
                     searchfrdate : $('#searchfrdate').val(),
                     searchtodate: $('#searchtodate').val(),
                     spjangcd : getSpjangcdFromSession()
@@ -1044,6 +1054,9 @@
                     });
                     let result = AjaxUtil.postJsonSyncData(_this.url + '/edit', list);
                     ApiSuccessMessage(result);
+                    if(result.success){
+                        _this.searchMainData();
+                    }
                 })
             }
 
@@ -1147,7 +1160,13 @@
                     if(e.key === 'Enter' || e.keyCode === 13){
                         companyPopupOpenCustom('CompanyName_Popup', 'clientId');
                     }
-                })
+                });
+
+                $('#accountNumber').on('keydown', function(e){
+                    if(e.key === 'Enter' || e.keyCode === 13){
+                        _this.AccountPopupOpen('accountNumber', 'accountId');
+                    }
+                });
 
                 $('#btn-search-close').click(function(e){
                     modalContainer.close();
@@ -1159,7 +1178,7 @@
                 })
 
                 //계좌 팝업
-                $('#accountNumber, #btnAccountSearch').click(function(){
+                $('#btnAccountSearch').click(function(){
                     _this.AccountPopupOpen('accountNumber', 'accountId');
                 });
 
@@ -1315,7 +1334,7 @@
                 new FlexGridContextMenu(this.grid2);
                 this.grid2.downloadFileName = '출하 내역';
 
-                _this.searchDetail(data.cltcd);
+                _this.searchDetail(data.cltcd, data.cltflag);
             }
 
             showSettingForm(data){
@@ -1707,8 +1726,11 @@
 
             AccountPopupOpen(intputId, hiddenid){
 
-                let poppage = new PopAccountComponent();
+                const value = document.getElementById(intputId).value;
+
+                let poppage = new PopAccountComponent(value);
                 let searchcallback = function (items) {
+                    console.log('items', items);
 
                     document.getElementById(intputId).value = items.accountNumber;
                     document.getElementById(hiddenid).value = items.accid;
@@ -1717,6 +1739,8 @@
                     if(bank){
                         bank.value = items.BankName;
                     }
+
+                    $('#accountNumber').focus();
                 };
                 poppage.show(searchcallback);
             }
@@ -1831,6 +1855,28 @@
         let page = null;
 
 
+        function companyPopupOpenCustom(intputId, hiddenid){
+
+            const value = document.getElementById(intputId).value;
+
+            let poppage = new PopCompComponentCustom(value);
+
+            let result = AjaxUtil.getSyncData('/api/popup/search_Comp_Custom', { item2 : value, spjangcd : getSpjangcdFromSession() });
+
+            let searchcallback = function (items) {
+                document.getElementById(intputId).focus();
+
+                document.getElementById(intputId).value = items.item2;
+                document.getElementById(hiddenid).value = items.id;
+            };
+            if(result && result.data.length === 1){
+                searchcallback(result.data[0]);   ``
+                return;
+            }
+            console.log('result', result);
+            poppage.show(searchcallback, result.data);
+        }
+
         $(document).ready(function (e) {
             page = new TransactionInput();
 
@@ -1848,6 +1894,8 @@
                     companyPopupOpenCustom('cboCompany', 'cboCompanyHidden');
                 }
             });
+
+
 
 
 

@@ -81,7 +81,7 @@ public class AccountSyncService {
 
         LocalDateTime endTime = LocalDateTime.now();
         Duration duration = Duration.between(startTime, endTime);
-        log.info("총 계좌 수집 소요 시간 : {}", duration.getSeconds());
+        log.info("총 계좌 수집 소요 시간 : {} 초", duration.getSeconds());
     }
 
     private List<Map<String, Object>> getAccountList() {

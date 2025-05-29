@@ -64,8 +64,9 @@
   <script type="text/javascript">
 
     class PopAccountComponent {
-      constructor() {
+      constructor(ele) {
 
+        this.ele = ele;
         this.grid = null;
         this.viewData = new wijmo.collections.CollectionView();
         this.selectedItem = null;
@@ -110,6 +111,8 @@
         let content = tmpl('popup_AccountSearchTemplate', {});
         let $content = $(content);
         this.modalContainer.open({ width: 800, height: 500, $content });
+
+        $('#account_number').val(_this.ele);
 
         this.grid = new wijmo.grid.FlexGrid('#AccountGrid', {
           selectionMode: wijmo.grid.SelectionMode.Row,

@@ -36,7 +36,7 @@ public class TransactionInputController {
 
     }
 
-    //@DecryptField(columns = {"account", "clientName"}, masks = 0)
+    @DecryptField(columns = {"account", "clientName"}, masks = 0)
     @GetMapping("/history")
     public AjaxResult TransactionHistory(@RequestParam String searchfrdate,
                                          @RequestParam String searchtodate,
@@ -119,6 +119,7 @@ public class TransactionInputController {
     @DecryptField(columns = "accountNumber", masks = 0)
     @GetMapping("/searchDetail")
     public AjaxResult searchTransactionDetail(@RequestParam String companyId,
+                                              @RequestParam String cltflag,
                                               @RequestParam String searchfrdate,
                                               @RequestParam String searchtodate,
                                               @RequestParam String spjangcd){
@@ -127,7 +128,7 @@ public class TransactionInputController {
         searchfrdate = searchfrdate.replaceAll("-", "");
         searchtodate = searchtodate.replaceAll("-", "");
 
-        result.data = transactionInputService.searchDetail(UtilClass.parseInteger(companyId), searchfrdate, searchtodate, spjangcd);
+        result.data = transactionInputService.searchDetail(UtilClass.parseInteger(companyId), cltflag, searchfrdate,  searchtodate, spjangcd);
 
         return  result;
     }

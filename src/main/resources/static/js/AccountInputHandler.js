@@ -63,6 +63,7 @@ const AccountInputHandler = {
           },
           error: function () {
             Alert.alert('에러', '계좌 조회 중 오류가 발생했습니다.');
+            $accnum.focus();
           }
         });
       }

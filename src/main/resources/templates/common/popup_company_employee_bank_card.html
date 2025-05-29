@@ -82,7 +82,11 @@
             this.$business_number = null;
         }
 
+
+
         searchDataBind() {
+
+
             let _this = this;
             let url = '/api/popup/search_Comp_Custom';
             let data = {
@@ -92,10 +96,11 @@
             };
 
             let result = AjaxUtil.getSyncData(url, data);
+
+            console.log('rere', result);
             if (result) {
                 _this.viewData.sourceCollection = result.data;
             }
-
             //검색버튼을 누르고 초기화한다
             this.selectedItem = null;
         }
@@ -107,7 +112,7 @@
             this.close();
         }
 
-        show(callback) {
+        show(callback, result) {
             let _this = this;
 
             this.callback = callback;
@@ -117,6 +122,8 @@
             this.modalContainer.open({ width: 800, height: 500, $content });
 
             $('#item2').val(_this.ele);
+
+            _this.viewData.sourceCollection = result;
 
             this.grid = new wijmo.grid.FlexGrid('#theGrid2', {
                 selectionMode: wijmo.grid.SelectionMode.Row,
@@ -168,7 +175,7 @@
                 _this.searchDataBind();
             });
 
-            $('#btnCompSearch').click();
+            //$('#btnCompSearch').click();
 
 
             this.$btnCompSelect.click(function (e) {
@@ -200,7 +207,6 @@
                 const val = selected.item;
                 if (val === '카드사코드' || val === '직원이름' || val === '은행명' || val === '업체코드') {
                     // 카드번호면 빠꾸
-                    console.log('카드번호는 선택 불가');
                     return false;
                 }
 
@@ -212,10 +218,9 @@
                     setTimeout(() => {
                         const selected = _this.grid.selectedItems;
                         if (selected.length > 0) {
-                            console.log('선택된 item:', selected[0]);
                             _this.selectData(selected[0]);
                         } else {
-                            console.log('선택된 행 없음');
+
                         }
                     }, 0); // 다음 이벤트 루프에서 실행
                 }
@@ -229,9 +234,9 @@
 
 
 
-    $('#btnCompSearch').addEventListener('keydown', function(e){
+    /*$('#btnCompSearch').addEventListener('keydown', function(e){
         $('#btnCompSearch').trigger('click');
-    })
+    })*/
 
 </script>
 </th:block>

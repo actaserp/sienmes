@@ -94,6 +94,7 @@ public class TransactionInputService {
                 end as "inoutFlag"
                 ,ioid as id
                 ,b.trid as transactionTypeId
+                ,b.balance
                 ,accin as input_money
                 ,accout as output_money
                 ,tid as tid
@@ -161,7 +162,7 @@ public class TransactionInputService {
         }
 
         sql += """
-                ORDER BY trdt desc
+                ORDER BY trdt asc
                 """;
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, parameterSource);
@@ -275,10 +276,11 @@ public class TransactionInputService {
         return  result;
     }
 
-    public List<Map<String, Object>> searchDetail(Integer cltcd, String searchfrdate, String searchtodate, String spjangcd) {
+    public List<Map<String, Object>> searchDetail(Integer cltcd, String cltflag, String searchfrdate, String searchtodate, String spjangcd) {
 
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("cltcd", cltcd);
+        parameterSource.addValue("cltflag", cltflag);
         parameterSource.addValue("searchfrdate", searchfrdate);
         parameterSource.addValue("searchtodate", searchtodate);
         parameterSource.addValue("spjangcd", spjangcd);
@@ -287,7 +289,13 @@ public class TransactionInputService {
         String sql = """
                 SELECT
                 ioid as id
-                ,c."Name" as "clientName" --거래처명
+                ,case
+                                     when b.cltflag = '0' then c."Name"
+                                     when b.cltflag = '1' then p."Name"
+                                     when b.cltflag = '2' then d.accnum
+                                     when b.cltflag = '3' then i.cardnum
+                                     ELSE NULL
+                                END as "clientName"
                 ,to_char(to_date(trdate, 'YYYYMMDD'), 'YYYY-MM-DD') as trade_date --일자
                 ,case when b.ioflag = '0' then '입금' else '출금' end as ioflag -- 구분
                 ,accin as input_money -- 금액
@@ -301,8 +309,12 @@ public class TransactionInputService {
                 left join tb_trade t on t.trid = b.trid
                 left join sys_code s on s."Code" = b.iotype and "CodeType" = 'deposit_type'
                 left join company c on c.id = b.cltcd
+                left join person p on p.id = b.cltcd
+                left join tb_account d on d.accid = b.cltcd
+                left join tb_iz010 i on i.id = b.cltcd
                 where trdate between :searchfrdate and :searchtodate
                 AND b.cltcd = :cltcd
+                AND b.cltflag = :cltflag
                 AND b.spjangcd = :spjangcd
                 ORDER BY trdt desc
                 """;

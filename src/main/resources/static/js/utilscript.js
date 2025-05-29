@@ -142,7 +142,7 @@ function companyPopupOpen(intputId, hiddenid){
     let searchcallback = function (items) {
         // $content.find('#cboCompany').val(items.id);
         // $content.find('#CompanyName').val(items.compname);
-        console.log('items', items);
+
         document.getElementById(intputId).value = items.compname;
         document.getElementById(hiddenid).value = items.id;
     };
@@ -150,22 +150,7 @@ function companyPopupOpen(intputId, hiddenid){
     poppage.show(searchcallback);
 }
 
-function companyPopupOpenCustom(intputId, hiddenid){
 
-    const value = document.getElementById(intputId).value;
-
-    let poppage = new PopCompComponentCustom(value);
-    let $poppage = $(poppage);
-    let searchcallback = function (items) {
-        // $content.find('#cboCompany').val(items.id);
-        // $content.find('#CompanyName').val(items.compname);
-        console.log('items', items);
-        document.getElementById(intputId).value = items.item2;
-        document.getElementById(hiddenid).value = items.id;
-    };
-
-    poppage.show(searchcallback);
-}
 
 //숫자 금액으로 변환 , 숫자 아니면 0으로 리턴
 function formatMoney(val){
