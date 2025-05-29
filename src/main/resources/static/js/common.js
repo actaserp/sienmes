@@ -1097,6 +1097,35 @@ let AjaxUtil = {
 
         return rows;
     },
+    fillSelectedOptions: function ($combo, combo_type, null_option, selected_value, condition1, condition2, condition3) {
+        let rows = AjaxUtil.getSelectDataWithNull(combo_type, null_option, condition1, condition2, condition3);
+        $combo.empty();
+        $.each(rows, function (index, row) {
+            //let option = $('<option>',
+            //    {
+            //        value: row['value'],
+            //        text: row['text'],
+            //    });
+            let option = $('<option>');
+            option.val(row['value']).text(row['text']);
+            Object.keys(row).forEach(function (key) {
+
+                if (key != 'value' && key != 'text') {
+                    option.data(key, row[key]);
+                }
+            });
+
+            $combo.append(option);
+        });
+
+        if (selected_value) {
+            $combo.val(selected_value).change();
+        } else if (rows.length > 0) {
+            $combo.val(rows[1].value).change(); // 첫 번째 항목 강제 선택
+        }
+
+        return rows;
+    },
     fillSelectSyncData: function ($combo, url, param, null_option, selected_value) {
         $combo.empty();
         let rows = AjaxUtil.getSyncData(url, param);

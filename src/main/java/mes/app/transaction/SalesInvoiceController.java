@@ -113,6 +113,13 @@ public class SalesInvoiceController {
 		try {
 			JsonNode data = salesInvoiceService.validateSingleBusiness(bno);
 
+			if (data == null) {
+				result.success = false;
+				result.message = "계속사업자가 아니므로 거래중지 처리하시겠습니까?";
+				result.code = "STOP_CONFIRM"; // 추가
+				return result;
+			}
+
 			String statusCode = data.path("b_stt_cd").asText();
 			String statusText = data.path("b_stt").asText();
 			String taxTypeText = data.path("tax_type").asText();
@@ -139,6 +146,22 @@ public class SalesInvoiceController {
 			result.message = "사업자 진위 확인 실패: " + e.getMessage();
 		}
 
+		return result;
+	}
+
+	@PostMapping("/invoicee_stop")
+	public AjaxResult stopInvoicee(@RequestParam("compid") Integer compid) {
+		AjaxResult result = new AjaxResult();
+		try {
+			Company company = companyRepository.getCompanyById(compid);
+			company.setRelyn("1");
+			companyRepository.save(company);
+			result.success = true;
+			result.message = "거래중지 처리되었습니다.";
+		} catch (Exception e) {
+			result.success = false;
+			result.message = "거래중지 처리 실패: " + e.getMessage();
+		}
 		return result;
 	}
 

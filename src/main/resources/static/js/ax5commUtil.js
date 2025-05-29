@@ -311,6 +311,9 @@ var Alert = {
     alert: function (_title, _msg, _okCallback) {
         if (_title) dialog.config.title = i18n.getCommonText(_title);
         let message = i18n.getCommonText(_msg);
+        setTimeout(() => {
+            document.querySelector('[data-dialog-btn="ok"]')?.focus();
+        }, 0);
         dialog.alert(Utils.decodingHTMLTag(message), function () {
             if (_okCallback !== undefined) {
                 _okCallback();

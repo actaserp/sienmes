@@ -741,7 +741,7 @@ public class SalesInvoiceService {
                 	 d.misseq AS "SerialNum"
                  FROM tb_salesdetail d
                  WHERE d.misnum = :misnum
-                 ORDER BY d.misseq
+                 ORDER BY d.misseq::int asc
                 """;
 
         Map<String, Object> master = this.sqlRunner.getRow(sql, paramMap);

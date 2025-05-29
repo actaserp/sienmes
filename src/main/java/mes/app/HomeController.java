@@ -37,12 +37,25 @@ public class HomeController {
 	UserService userService;
 
 	@RequestMapping(value= "/", method=RequestMethod.GET)
-    public ModelAndView pageIndex(HttpServletRequest request, HttpSession session) {
+    public ModelAndView pageIndex(HttpServletRequest request, HttpSession session, HttpServletResponse response) {
 
 		// User-Agent 확인
 		String userAgent = request.getHeader("User-Agent").toLowerCase();
 		boolean isMobile = userAgent.contains("mobile") || userAgent.contains("android") || userAgent.contains("iphone");
-		
+
+		String serverName = request.getServerName();
+
+		if (isMobile && serverName.equalsIgnoreCase("actascld.co.kr")) {
+			String redirectUrl = "https://mes.actascld.co.kr";
+			try {
+				response.sendRedirect(redirectUrl);
+				return null; // redirect 했으므로 이후 처리 중단
+			} catch (IOException e) {
+				e.printStackTrace(); // 로그로 출력하거나, 에러 뷰로 포워딩도 가능
+				return new ModelAndView("error/redirect_error"); // 예외 시 fallback 처리
+			}
+		}
+
         SecurityContext sc = SecurityContextHolder.getContext();
         Authentication auth = sc.getAuthentication();         
         User user = (User)auth.getPrincipal();
