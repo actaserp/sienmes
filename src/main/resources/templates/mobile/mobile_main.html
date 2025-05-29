@@ -259,7 +259,6 @@
       document.getElementById('outside').style.display = 'flex';
       document.getElementById('workcd').style.display = 'block';
 
-      getGPSLocation();
     }
   };
 
@@ -461,11 +460,9 @@
           latitude = position.coords.latitude;
           longitude = position.coords.longitude;
           console.log(`GPS Coordinates: Lat ${latitude}, Lon ${longitude}`);
-          getAddressFromVWorld(latitude, longitude);
         },
         (error) => {
           console.warn("GPS 접근 실패, IP 기반 위치로 대체합니다.", error.message);
-          getLocationFromIP();
         }
       );
     } else {
