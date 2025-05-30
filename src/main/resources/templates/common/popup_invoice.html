@@ -616,11 +616,12 @@
         <div class="content_wrap popup">
 
                 <form id="taxForm">
-                <div class="section-top">
+                    <div class="section-top">
                         <input type="hidden" id="misnum" name="misnum" >
                         <input type="hidden" id="ChargeDirection" name="ChargeDirection" value="정과금">
                         <input type="hidden" id="IssueType" name="IssueType" value="정발행">
                         <input type="hidden" id="ModifyCode" name="ModifyCode" >
+                        <input type="hidden" id="newModifiedInvoice" name="newModifiedInvoice" value="false">
                         <div id="taxtype_area">
                             <div class="taxtype">
                                 <div class="taxtype_radio">
@@ -639,244 +640,248 @@
                             </div>
                         </div>
 
-                    <div class="container-fluid">
-                        <div id="area_form">
-                            <div id="etax_area_form" class="border_red">
-                                <table class="etax_table table_border_red" summary="계산서">
-                                    <tbody id="InvoiceList">
-                                        <colgroup>
-                                            <col span="50" style="width: 1%;">
-                                            <col span="50" style="width: 1%;">
-                                        </colgroup>
-                                        <tr>
-                                            <th class="al_c invoicer_bg" colspan="3" rowspan="6"><span class="bold lh_16">공<br>급<br>받<br>는<br>자</span></th>
-                                            <input type="hidden" id="InvoiceeID" name="InvoiceeID">
-                                            <th class="al_c bold" colspan="8">등록번호</th>
-                                            <td class="al_l pdl_3" colspan="23"><input style="width: 80%; margin-right: 5px;" class="in_txt numeric al_c letspc_0" maxlength="12" type="text" id="InvoiceeCorpNum" name="InvoiceeCorpNum" placeholder="입력 후 엔터" autocomplete="off">
-                                                <button class="btn_white_gradient mgl_2" id="btnSelectInvoicee" type="button">검색</button>
-                                            </td>
+                        <div class="container-fluid">
+                            <div id="area_form">
+                                <div id="etax_area_form" class="border_red">
+                                    <table class="etax_table table_border_red" summary="계산서">
+                                        <tbody id="InvoiceList">
+                                            <colgroup>
+                                                <col span="50" style="width: 1%;">
+                                                <col span="50" style="width: 1%;">
+                                            </colgroup>
+                                            <tr>
+                                                <th class="al_c invoicer_bg" colspan="3" rowspan="6"><span class="bold lh_16">공<br>급<br>받<br>는<br>자</span></th>
+                                                <input type="hidden" id="InvoiceeID" name="InvoiceeID">
+                                                <th class="al_c bold" colspan="8">등록번호</th>
+                                                <td class="al_l pdl_3" colspan="23"><input style="width: 80%; margin-right: 5px;" class="in_txt numeric al_c letspc_0" maxlength="12" type="text" id="InvoiceeCorpNum" name="InvoiceeCorpNum" placeholder="입력 후 엔터" autocomplete="off">
+                                                    <button class="btn_white_gradient mgl_2" id="btnSelectInvoicee" type="button">검색</button>
+                                                </td>
 
-                                            <th class="al_c" colspan="8">종사업장</th>
-                                            <td class="al_l pdl_3" colspan="8"><input class="in_txt numeric letspc_0" maxlength="4" type="text" id="InvoiceeTaxRegID" name="InvoiceeTaxRegID"></td>
+                                                <th class="al_c" colspan="8">종사업장</th>
+                                                <td class="al_l pdl_3" colspan="8"><input class="in_txt numeric letspc_0" maxlength="4" type="text" id="InvoiceeTaxRegID" name="InvoiceeTaxRegID"></td>
 
-                                            <th class="al_c bold" colspan="8">작성일자</th>
-                                            <td class="al_l pdl_3" colspan="17">
-                                                <input type="date" id="writeDate" name="writeDate" class="in_txt numeric al_c dp-applied" maxlength="10" style="width: 190px; padding: 0 14px 0 5px;">
-                                            </td>
+                                                <th class="al_c bold" colspan="8">작성일자</th>
+                                                <td class="al_l pdl_3" colspan="17">
+                                                    <input type="date" id="writeDate" name="writeDate" class="in_txt numeric al_c dp-applied" maxlength="10" style="width: 190px; padding: 0 14px 0 5px;">
+                                                </td>
 
-                                            <th class="al_c" colspan="8">작성 방법</th>
-                                            <td class="al_l pdl_3" colspan="17">
-                                                <select class="in_txt" id="WriteTypeSelect" name="WriteTypeSelect" style="width:190px; line-height:1;">
+                                                <th class="al_c" colspan="8">작성 방법</th>
+                                                <td class="al_l pdl_3" colspan="17">
+                                                    <select class="in_txt" id="WriteTypeSelect" name="WriteTypeSelect" style="width:190px; line-height:1;">
 
-                                                </select>
-                                                <button id="totalAmountAct" type="button" class="btn_white_gradient" style="display: none;">계산 창 열기</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="al_c bold" colspan="8"><span>상호</span></th>
-                                            <td class="al_l pdl_3" colspan="23"><textarea type="text" class="txt_ar kr" maxlength="200" id="InvoiceeCorpName" name="InvoiceeCorpName"></textarea></td>
-                                            <th class="al_c bold lh_14" colspan="4"><p>성명</p></th>
-                                            <td class="al_l pdl_3" colspan="12"><textarea type="text" class="txt_ar kr" maxlength="100" id="InvoiceeCEOName" name="InvoiceeCEOName"></textarea></td>
+                                                    </select>
+                                                    <button id="totalAmountAct" type="button" class="btn_white_gradient" style="display: none;">계산 창 열기</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th class="al_c bold" colspan="8"><span>상호</span></th>
+                                                <td class="al_l pdl_3" colspan="23"><textarea type="text" class="txt_ar kr" maxlength="200" id="InvoiceeCorpName" name="InvoiceeCorpName"></textarea></td>
+                                                <th class="al_c bold lh_14" colspan="4"><p>성명</p></th>
+                                                <td class="al_l pdl_3" colspan="12"><textarea type="text" class="txt_ar kr" maxlength="100" id="InvoiceeCEOName" name="InvoiceeCEOName"></textarea></td>
 
 
-                                            <th class="al_c bold" colspan="8"><span>매출구분</span></th>
-                                            <td class="al_l pdl_3" colspan="17">
-                                                <select class="in_txt" id="sale_type" name="sale_type" style="width:190px; line-height:1;"></select>
-                                            </td>
-                                            <th class="al_c bold lh_14" colspan="8">발행구분</th>
-                                            <td class="al_l pdl_3" colspan="17">
-                                                <select class="in_txt" id="issue_div" name="issue_div" style="width:190px; line-height:1;"></select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="al_c  lh_14" colspan="8"><p><span>사업장</span></p><p><span>주소</span></p></th>
-                                            <td class="al_l pdl_3" colspan="39"><textarea type="text" class="txt_ar kr" maxlength="300" id="InvoiceeAddr" name="InvoiceeAddr"></textarea></td>
+                                                <th class="al_c bold" colspan="8"><span>매출구분</span></th>
+                                                <td class="al_l pdl_3" colspan="17">
+                                                    <select class="in_txt" id="sale_type" name="sale_type" style="width:190px; line-height:1;"></select>
+                                                </td>
+                                                <th class="al_c bold lh_14" colspan="8">발행구분</th>
+                                                <td class="al_l pdl_3" colspan="17">
+                                                    <select class="in_txt" id="issue_div" name="issue_div" style="width:190px; line-height:1;"></select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th class="al_c  lh_14" colspan="8"><p><span>사업장</span></p><p><span>주소</span></p></th>
+                                                <td class="al_l pdl_3" colspan="39"><textarea type="text" class="txt_ar kr" maxlength="300" id="InvoiceeAddr" name="InvoiceeAddr"></textarea></td>
 
-                                            <th class="al_c bold" colspan="8"><span>계정코드</span></th>
-                                            <td class="al_l pdl_3" colspan="17">
-                                                <input style="width: 74%; margin-right: 5px;" class="in_txt numeric letspc_0" maxlength="12" type="text" id="account_code" name="account_code" placeholder="입력 후 엔터">
-                                                <input type="hidden" id="account_codeHidden" name="account_codeHidden">
-                                                <button class="btn_white_gradient mgl_2" id="btnSelectaccount_code" type="button">검색</button>
-                                            </td>
-                                            <th class="al_c bold" colspan="8"><span>귀속부서</span></th>
-                                            <td class="al_l pdl_3" colspan="17">
-                                                <input style="width: 74%; margin-right: 5px;" class="in_txt numeric letspc_0" maxlength="12" type="text" id="att_depart" name="att_depart" placeholder="입력 후 엔터">
-                                                <input type="hidden" id="att_departHidden" name="att_departHidden">
-                                                <button class="btn_white_gradient mgl_2" id="btnSelectatt_depart" type="button">검색</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="al_c" colspan="8"><span>업태</span></th>
-                                            <td class="al_l pdl_3" colspan="17"><input type="text" class="txt_ar kr" maxlength="100" id="InvoiceeBizType" name="InvoiceeBizType"></td>
-                                            <th class="al_c lh_14" colspan="4"><p>종목</p></th>
-                                            <td class="al_l pdl_3" colspan="18"><input type="text" class="txt_ar kr" maxlength="100" id="InvoiceeBizClass" name="InvoiceeBizClass"></td>
+                                                <th class="al_c bold" colspan="8"><span>계정코드</span></th>
+                                                <td class="al_l pdl_3" colspan="17">
+                                                    <input style="width: 74%; margin-right: 5px;" class="in_txt numeric letspc_0" maxlength="12" type="text" id="account_code" name="account_code" placeholder="입력 후 엔터">
+                                                    <input type="hidden" id="account_codeHidden" name="account_codeHidden">
+                                                    <button class="btn_white_gradient mgl_2" id="btnSelectaccount_code" type="button">검색</button>
+                                                </td>
+                                                <th class="al_c bold" colspan="8"><span>귀속부서</span></th>
+                                                <td class="al_l pdl_3" colspan="17">
+                                                    <input style="width: 74%; margin-right: 5px;" class="in_txt numeric letspc_0" maxlength="12" type="text" id="att_depart" name="att_depart" placeholder="입력 후 엔터">
+                                                    <input type="hidden" id="att_departHidden" name="att_departHidden">
+                                                    <button class="btn_white_gradient mgl_2" id="btnSelectatt_depart" type="button">검색</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th class="al_c" colspan="8"><span>업태</span></th>
+                                                <td class="al_l pdl_3" colspan="17"><input type="text" class="txt_ar kr" maxlength="100" id="InvoiceeBizType" name="InvoiceeBizType"></td>
+                                                <th class="al_c lh_14" colspan="4"><p>종목</p></th>
+                                                <td class="al_l pdl_3" colspan="18"><input type="text" class="txt_ar kr" maxlength="100" id="InvoiceeBizClass" name="InvoiceeBizClass"></td>
 
-                                            <th class="al_c bold" colspan="8"><span>프로젝트</span></th>
-                                            <td class="al_l pdl_3" colspan="17">
-                                                <input style="width: 74%; margin-right: 5px;" class="in_txt numeric letspc_0" maxlength="12" type="text" id="project" name="project" placeholder="입력 후 엔터">
-                                                <input type="hidden" id="projectHidden" name="projectHidden">
-                                                <button class="btn_white_gradient mgl_2" id="btnSelect_project" type="button">검색</button>
-                                            </td>
-                                            <th class="al_c bold lh_14" colspan="8">발행목적</th>
-                                            <td class="al_l pdl_3" colspan="17">
-                                                <select class="in_txt" id="purpose_type" name="purpose_type" style="width:190px; line-height:1;">
-                                                    <option value="영수">영수</option>
-                                                    <option value="청구">청구</option>
-                                                    <option value="없음">없음</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="al_c" colspan="8"><span>담당자</span></th>
-                                            <td class="al_l pdl_3" colspan="17"><input class="in_txt kr" maxlength="100"  type="text" id="InvoiceeContactName1" name="InvoiceeContactName1" ></td>
-                                            <th class="al_c" colspan="6">연락처</th>
-                                            <td class="al_l pdl_3" colspan="16"><input class="in_txt numeric" maxlength="20" type="text" id="InvoiceeTEL1" name="InvoiceeTEL1" ></td>
+                                                <th class="al_c bold" colspan="8"><span>프로젝트</span></th>
+                                                <td class="al_l pdl_3" colspan="17">
+                                                    <input style="width: 74%; margin-right: 5px;" class="in_txt numeric letspc_0" maxlength="12" type="text" id="project" name="project" placeholder="입력 후 엔터">
+                                                    <input type="hidden" id="projectHidden" name="projectHidden">
+                                                    <button class="btn_white_gradient mgl_2" id="btnSelect_project" type="button">검색</button>
+                                                </td>
+                                                <th class="al_c bold lh_14" colspan="8">발행목적</th>
+                                                <td class="al_l pdl_3" colspan="17">
+                                                    <select class="in_txt" id="purpose_type" name="purpose_type" style="width:190px; line-height:1;">
+                                                        <option value="영수">영수</option>
+                                                        <option value="청구">청구</option>
+                                                        <option value="없음">없음</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th class="al_c" colspan="8"><span>담당자</span></th>
+                                                <td class="al_l pdl_3" colspan="17"><input class="in_txt kr" maxlength="100"  type="text" id="InvoiceeContactName1" name="InvoiceeContactName1" ></td>
+                                                <th class="al_c" colspan="6">연락처</th>
+                                                <td class="al_l pdl_3" colspan="16"><input class="in_txt numeric" maxlength="20" type="text" id="InvoiceeTEL1" name="InvoiceeTEL1" ></td>
 
-                                            <th class="al_c pet0 gray_border_l" colspan="8"><span class="bold">공급가액</span></th>
-                                            <td class="al_l pet0 pdl_3 gray_border_t gray_border_l" colspan="17"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="SupplyCostTotal" name="SupplyCostTotal" ></td>
-                                            <th class="al_c pet1 gray_border_l tax-related" colspan="8"><span class="bold">세액</span></th>
-                                            <td class="al_l pet1 pdl_3 gray_border_t gray_border_l tax-related" colspan="17"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="TaxTotal" name="TaxTotal" ></td>
+                                                <th class="al_c pet0 gray_border_l" colspan="8"><span class="bold">공급가액</span></th>
+                                                <td class="al_l pet0 pdl_3 gray_border_t gray_border_l" colspan="17"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="SupplyCostTotal" name="SupplyCostTotal" ></td>
+                                                <th class="al_c pet1 gray_border_l tax-related" colspan="8"><span class="bold">세액</span></th>
+                                                <td class="al_l pet1 pdl_3 gray_border_t gray_border_l tax-related" colspan="17"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="TaxTotal" name="TaxTotal" ></td>
 
-                                        </tr>
-                                        <tr>
-                                            <th class="al_c" colspan="8"><span>이메일</span></th>
-                                            <td class="al_l pdl_3" colspan="39">
-                                                <input style="width: 83%;" class="in_txt en" maxlength="100" type="text" id="InvoiceeEmail1" name="InvoiceeEmail1" >
-                                                <button class="btn_white_gradient mgl_2" id="saveInvoicee" type="button">정보 저장</button>
-                                            </td>
+                                            </tr>
+                                            <tr>
+                                                <th class="al_c" colspan="8"><span>이메일</span></th>
+                                                <td class="al_l pdl_3" colspan="39">
+                                                    <input style="width: 83%;" class="in_txt en" maxlength="100" type="text" id="InvoiceeEmail1" name="InvoiceeEmail1" >
+                                                    <button class="btn_white_gradient mgl_2" id="saveInvoicee" type="button">정보 저장</button>
+                                                </td>
 
-                                            <th class="al_c" colspan="8"><span class="bold">합계금액</span></th>
-                                            <td class="al_l pdl_3" colspan="42"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="TotalAmount" name="TotalAmount" ></td>
+                                                <th class="al_c" colspan="8"><span class="bold">합계금액</span></th>
+                                                <td class="al_l pdl_3" colspan="42"><input class="in_txt readonly al_r" maxlength="22" readonly="readonly" type="text" id="TotalAmount" name="TotalAmount" ></td>
 
-                                        </tr>
-                                    </tbody>
+                                            </tr>
+                                        </tbody>
 
-                                    <tbody id="remarkList">
-                                        <tr>
-                                            <th class="splitline noborder_t" colspan="50"></th>
-                                            <th class="splitline noborder_t" colspan="50"></th>
-                                        </tr>
-                                        <tr>
-                                            <th class="al_c noborder_l" colspan="11"><span class="bold">비고1</span></th>
-                                            <td class="al_l pdl_3 gray_border_l" colspan="85"><input class="in_txt kr" maxlength="150" type="text" id="Remark1" name="Remark1" ></td>
-                                            <td class="al_c item_l_border gray_border_l" colspan="4">
-                                                <a class="btn in_btn plus" title="추가" id="addRemark">
-                                                    <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        <tr id="remark2" class="none">
-                                            <th class="al_c noborder_l gray_border_t" colspan="11"><span class="bold">비고2</span></th>
-                                            <td class="al_l pdl_3 gray_border_l gray_border_t" colspan="85"><input class="in_txt kr" maxlength="150" type="text" id="Remark2" name="Remark2" ></td>
-                                            <td class="al_c item_l_border gray_border_l gray_border_t" colspan="4">
-                                                <a class="btn in_btn plus" title="삭제" id="removeRemark2">
-                                                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        <tr id="remark3" class="none">
-                                            <th class="al_c noborder_l gray_border_t" colspan="11"><span class="bold">비고3</span></th>
-                                            <td class="al_l pdl_3 gray_border_l gray_border_t" colspan="85"><input class="in_txt kr" maxlength="150" type="text" id="Remark3" name="Remark3" ></td>
-                                            <td class="al_c item_l_border gray_border_l gray_border_t" colspan="4">
-                                                <a class="btn in_btn plus" title="삭제" id="removeRemark3">
-                                                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-
-                                    <tbody id="taxList">
-
-                                        <tr>
-                                            <th class="al_c noborder_l" colspan="4"><span class="bold">월</span></th>
-                                            <th class="al_c item_l_border" colspan="4"><span class="bold">일</span></th>
-                                            <th class="al_c item_l_border" colspan="24"><span class="bold">품목</span></th>
-                                            <th class="al_c item_l_border" colspan="14"><span class="bold">규격</span></th>
-                                            <th class="al_c pet2 item_l_border" colspan="8"><span class="bold">수량</span></th>
-                                            <th class="al_c pet3 item_l_border" colspan="8"><span class="bold">단가</span></th>
-                                            <th class="al_c pet4 item_l_border" colspan="12"><span class="bold">공급가액</span></th>
-                                            <th class="al_c pet5 item_l_border tax-related" colspan="10"><span class="bold">세액</span></th>
-                                            <th class="al_c item_l_border" colspan="12"><span class="bold">비고</span></th>
-                                            <th class="al_c item_l_border" colspan="4">
-                                                <a class="btn in_btn plus" title="추가" id="btnAddFiveDetails">
-                                                    <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                                </a>
-                                            </th>
-                                        </tr>
-                                        <tr id="item_0">
-                                            <td class="al_l pdl_3 noborder_l item_t_border" colspan="4">
-                                                <input type="hidden" id="detailList0.SerialNum" name="detailList[0].SerialNum" >
-                                                <input type="hidden" id="detailList0.PurchaseDT" name="detailList[0].PurchaseDT" >
-                                                <input class="in_txt numeric al_c in_detail" maxlength="2" type="text" id="detailList0.PurchaseDT1" name="detailList[0].PurchaseDT1">
-                                            </td>
-                                            <td class="al_l pdl_3 item_border" colspan="4">
-                                                <input class="in_txt numeric al_c in_detail" maxlength="2" type="text" id="detailList0.PurchaseDT2" name="detailList[0].PurchaseDT2">
-                                            </td>
-                                            <td class="al_l pdl_3 item_border" colspan="24">
-                                                <div class="align-center-wrap">
-                                                    <input type="hidden" id="detailList0.ItemId" name="detailList[0].ItemId">
-                                                    <textarea class="txt_ar" style="width: 88%; margin-right: 3px;" maxlength="100" id="detailList0.ItemName" name="detailList[0].ItemName" placeholder="입력 후 엔터"></textarea>
-                                                    <a class="btn in_btn" title="검색" id="btnViewItem_0">
-                                                        <img src="/images/icon/btn-srch-black.svg" alt="검색 아이콘">
+                                        <tbody id="remarkList">
+                                            <tr>
+                                                <th class="splitline noborder_t" colspan="50"></th>
+                                                <th class="splitline noborder_t" colspan="50"></th>
+                                            </tr>
+                                            <tr>
+                                                <th class="al_c noborder_l" colspan="11"><span class="bold">비고1</span></th>
+                                                <td class="al_l pdl_3 gray_border_l" colspan="85"><input class="in_txt kr" maxlength="150" type="text" id="Remark1" name="Remark1" ></td>
+                                                <td class="al_c item_l_border gray_border_l" colspan="4">
+                                                    <a class="btn in_btn plus" title="추가" id="addRemark">
+                                                        <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
                                                     </a>
-                                                </div>
-                                            </td>
-                                            <td class="al_l pdl_3 item_border" colspan="14"><textarea class="txt_ar" maxlength="60" id="detailList0.Spec" name="detailList[0].Spec"></textarea></td>
-                                            <td class="al_l pdl_3 item_border pet2" colspan="8"><input class="in_txt numeric number al_r in_detail" maxlength="16" type="text" id="detailList0.Qty" name="detailList[0].Qty" ></td>
-                                            <td class="al_l pdl_3 item_border pet3" colspan="8"><input class="in_txt numeric number al_r in_detail" maxlength="22" type="text" id="detailList0.UnitCost" name="detailList[0].UnitCost" ></td>
-                                            <td class="al_l pdl_3 item_border pet4" colspan="12"><input class="in_txt numeric money al_r in_detail" maxlength="22" type="text" id="detailList0.SupplyCost" name="detailList[0].SupplyCost" ></td>
-                                            <td class="al_l pdl_3 item_border pet5 tax-related" colspan="10"><input class="in_txt numeric money al_r in_detail" maxlength="22" type="text" id="detailList0.Tax" name="detailList[0].Tax" ></td>
-                                            <td class="al_l pdl_3 item_border" colspan="12"><textarea class="txt_ar" maxlength="100" id="detailList0.Remark" name="detailList[0].Remark"></textarea></td>
-                                            <td class="al_c item_border" colspan="4">
-                                                <a class="btn in_btn" title="삭제" id="btnDelItem_0">
-                                                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                    <tbody id="resultList">
-                                        <tr>
-                                            <th class="splitline noborder_t" colspan="50"></th>
-                                            <th class="splitline noborder_t" colspan="50"></th>
-                                        </tr>
-                                        <tr>
-                                            <th class="al_c" colspan="11"><span class="bold">국세청 승인 번호</span></th>
-                                            <td style="padding:0; padding-left:10px;" colspan="30">
-                                                <div type="text" id="ntscfnum" name="ntscfnum" readonly></div>
-                                            </td>
-                                            <th class="al_c" colspan="15"><span class="bold">원본 국세청 승인 번호</span></th>
-                                            <td style="padding:0; padding-left:10px;" colspan="25">
-                                                <div type="text" id="orgntscfnum" name="orgntscfnum" readonly></div>
-                                            </td>
-                                            <th class="al_c" colspan="11"><span class="bold">수정 사유</span></th>
-                                            <td style="padding:0; padding-left:10px;" colspan="30">
-                                                <div type="text" id="modify_name" name="modify_name" readonly></div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="al_c" colspan="11"><span class="bold">국세청 전송 결과</span></th>
-                                            <td style="padding:0; padding-left:10px;" colspan="89">
-                                                <div type="text" id="ntscode_des" name="ntscode_des" readonly></div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                                </td>
+                                            </tr>
+                                            <tr id="remark2" class="none">
+                                                <th class="al_c noborder_l gray_border_t" colspan="11"><span class="bold">비고2</span></th>
+                                                <td class="al_l pdl_3 gray_border_l gray_border_t" colspan="85"><input class="in_txt kr" maxlength="150" type="text" id="Remark2" name="Remark2" ></td>
+                                                <td class="al_c item_l_border gray_border_l gray_border_t" colspan="4">
+                                                    <a class="btn in_btn plus" title="삭제" id="removeRemark2">
+                                                        <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <tr id="remark3" class="none">
+                                                <th class="al_c noborder_l gray_border_t" colspan="11"><span class="bold">비고3</span></th>
+                                                <td class="al_l pdl_3 gray_border_l gray_border_t" colspan="85"><input class="in_txt kr" maxlength="150" type="text" id="Remark3" name="Remark3" ></td>
+                                                <td class="al_c item_l_border gray_border_l gray_border_t" colspan="4">
+                                                    <a class="btn in_btn plus" title="삭제" id="removeRemark3">
+                                                        <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+                                        <tbody id="taxList">
+
+                                            <tr>
+                                                <th class="al_c noborder_l" colspan="4"><span class="bold">월</span></th>
+                                                <th class="al_c item_l_border" colspan="4"><span class="bold">일</span></th>
+                                                <th class="al_c item_l_border" colspan="24"><span class="bold">품목</span></th>
+                                                <th class="al_c item_l_border" colspan="14"><span class="bold">규격</span></th>
+                                                <th class="al_c pet2 item_l_border" colspan="8"><span class="bold">수량</span></th>
+                                                <th class="al_c pet3 item_l_border" colspan="8"><span class="bold">단가</span></th>
+                                                <th class="al_c pet4 item_l_border" colspan="12"><span class="bold">공급가액</span></th>
+                                                <th class="al_c pet5 item_l_border tax-related" colspan="10"><span class="bold">세액</span></th>
+                                                <th class="al_c item_l_border" colspan="12"><span class="bold">비고</span></th>
+                                                <th class="al_c item_l_border" colspan="4">
+                                                    <a class="btn in_btn plus" title="추가" id="btnAddFiveDetails">
+                                                        <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                                    </a>
+                                                </th>
+                                            </tr>
+                                            <tr id="item_0">
+                                                <td class="al_l pdl_3 noborder_l item_t_border" colspan="4">
+                                                    <input type="hidden" id="detailList0.SerialNum" name="detailList[0].SerialNum" >
+                                                    <input type="hidden" id="detailList0.PurchaseDT" name="detailList[0].PurchaseDT" >
+                                                    <input class="in_txt numeric al_c in_detail" maxlength="2" type="text" id="detailList0.PurchaseDT1" name="detailList[0].PurchaseDT1">
+                                                </td>
+                                                <td class="al_l pdl_3 item_border" colspan="4">
+                                                    <input class="in_txt numeric al_c in_detail" maxlength="2" type="text" id="detailList0.PurchaseDT2" name="detailList[0].PurchaseDT2">
+                                                </td>
+                                                <td class="al_l pdl_3 item_border" colspan="24">
+                                                    <div class="align-center-wrap">
+                                                        <input type="hidden" id="detailList0.ItemId" name="detailList[0].ItemId">
+                                                        <textarea class="txt_ar" style="width: 88%; margin-right: 3px;" maxlength="100" id="detailList0.ItemName" name="detailList[0].ItemName" placeholder="입력 후 엔터"></textarea>
+                                                        <a class="btn in_btn" title="검색" id="btnViewItem_0">
+                                                            <img src="/images/icon/btn-srch-black.svg" alt="검색 아이콘">
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td class="al_l pdl_3 item_border" colspan="14"><textarea class="txt_ar" maxlength="60" id="detailList0.Spec" name="detailList[0].Spec"></textarea></td>
+                                                <td class="al_l pdl_3 item_border pet2" colspan="8"><input class="in_txt numeric number al_r in_detail" maxlength="16" type="text" id="detailList0.Qty" name="detailList[0].Qty" ></td>
+                                                <td class="al_l pdl_3 item_border pet3" colspan="8"><input class="in_txt numeric number al_r in_detail" maxlength="22" type="text" id="detailList0.UnitCost" name="detailList[0].UnitCost" ></td>
+                                                <td class="al_l pdl_3 item_border pet4" colspan="12"><input class="in_txt numeric money al_r in_detail" maxlength="22" type="text" id="detailList0.SupplyCost" name="detailList[0].SupplyCost" ></td>
+                                                <td class="al_l pdl_3 item_border pet5 tax-related" colspan="10"><input class="in_txt numeric money al_r in_detail" maxlength="22" type="text" id="detailList0.Tax" name="detailList[0].Tax" ></td>
+                                                <td class="al_l pdl_3 item_border" colspan="12"><textarea class="txt_ar" maxlength="100" id="detailList0.Remark" name="detailList[0].Remark"></textarea></td>
+                                                <td class="al_c item_border" colspan="4">
+                                                    <a class="btn in_btn" title="삭제" id="btnDelItem_0">
+                                                        <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tbody id="resultList">
+                                            <tr>
+                                                <th class="splitline noborder_t" colspan="50"></th>
+                                                <th class="splitline noborder_t" colspan="50"></th>
+                                            </tr>
+                                            <tr>
+                                                <th class="al_c" colspan="11"><span class="bold">국세청 승인 번호</span></th>
+                                                <td style="padding:2px; height:35px;" colspan="30">
+                                                    <input class="al_l in_txt number in_detail" style="border:none !important; background-color:white;" type="text" id="ntscfnum" name="ntscfnum" readonly>
+                                                </td>
+                                                <th class="al_c" colspan="15"><span class="bold">원본 국세청 승인 번호</span></th>
+                                                <td style="padding:2px; height:35px;" colspan="25">
+                                                    <input class="al_l in_txt number in_detail" type="text" style="border:none !important; background-color:white;" id="orgntscfnum" name="orgntscfnum" readonly>
+                                                    <input class="in_txt number in_detail" type="hidden" id="orgmgtkey" name="orgmgtkey" readonly>
+                                                </td>
+                                                <th class="al_c" colspan="11"><span class="bold">수정 사유</span></th>
+                                                <td style="padding:2px; height:35px;" colspan="30">
+                                                    <div type="text" id="modify_name" name="modify_name" readonly></div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th class="al_c" colspan="11"><span class="bold">국세청 전송 결과</span></th>
+                                                <td style="padding:0; padding-left:10px;" colspan="89">
+                                                    <div type="text" id="ntscode_des" name="ntscode_des" readonly></div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 </form>
 
 
             <div class="popup-button">
                 <button type="button" class="btn-popup" id="btnInvoiceNew" ><span data-commonCd="신규">신규</span></button>
-                <button type="button" class="btn-popup" id="btnInvoiceSave" ><span data-commonCd="저장">저장</span></button>
+                <button type="button" class="btn-popup" id="btnInvoiceSave" ><span data-commonCd="저장(ctrl+s)">저장</span></button>
                 <button type="button" class="btn-popup" id="btnEdit" style="display:none;"><span data-commonCd="수정 계산서 작성">수정 계산서 작성</span></button>
                 <button type="button" class="btn-popup" id="btnReSave" style="display:none;"><span data-commonCd="다시 저장">다시 저장</span></button> <!-- 상태가 실패 했을때 다시 저장하는 저장 -->
-                <button type="button" class="btn-popup" id="btnDelete" style="display:none;"><span data-commonCd="삭제">삭제</span></button>
+                <button type="button" class="btn-popup" id="btnDelete" style="display:none;"><span data-commonCd="삭제(shift+del)">삭제</span></button>
                 <button type="button" class="btn-popup" id="btnIssueCancel" style="display:none;"><span data-commonCd="발행 취소">발행 취소</span></button>
                 <button type="button" class="btn-popup" id="btnReMessage" style="display:none;"><span data-commonCd="재전송">재전송</span></button>
                 <button type="button" class="btn-popup" id="modal-close-button"><span data-commonCd="닫기">닫기</span></button>
+                <!-- 포커스 받을 숨겨진 div (탭 가능) -->
+                <div id="keyboardFocusCatcher" tabindex="0" style="position:absolute; opacity:0; pointer-events:none;"></div>
+
             </div>
 
 
@@ -1315,7 +1320,7 @@
             let qty = parseFloat($qty.val().replace(/,/g, '').trim()) || 0;
             let unitCost = parseFloat($unitCost.val().replace(/,/g, '').trim()) || 0;
 
-            if (qty > 0 && unitCost > 0) {
+            if (qty && unitCost) {
                 let supplyCost = 0;
                 let tax = 0;
 
@@ -1758,10 +1763,17 @@
         });
 
         $(document).on('keydown', function (e) {
-            // Ctrl + S (또는 Cmd + S for Mac)
+            console.log('key:', e.key, 'shift:', e.shiftKey);
+            // Ctrl + S 저장
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-                e.preventDefault(); // 브라우저 기본 저장 방지
-                $('#btnInvoiceSave').click(); // 저장 버튼 클릭 실행
+                e.preventDefault();
+                $('#btnInvoiceSave').click();
+            }
+
+            // Shift + Delete 삭제
+            if (e.shiftKey && (e.key === 'Delete' || e.key === 'Del')) {
+                e.preventDefault();
+                $('#btnDelete').click();
             }
         });
 

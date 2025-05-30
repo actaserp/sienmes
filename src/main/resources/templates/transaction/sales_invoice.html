@@ -1011,7 +1011,7 @@
                 });
 
                 // 거래명세서 출력
-                $('#btnWritePrint').click(function (e) {
+                $('#btnWritePrint').on('click', async function (e) {
                     const items = _this.grid.rows
                         .filter(row => row.isSelected)
                         .map(row => row.dataItem);
@@ -1021,52 +1021,54 @@
                         return;
                     }
 
-                    const data = {
-                        misnum: items[0].misnum,
-                    };
+                    let allHtml = `
+                        <html>
+                        <head>
+                            <title>거래명세서 출력</title>
+                            ${$('#print_invoice_css')[0].outerHTML}
+                            <style>
+                                @media print {
+                                    .print-page {
+                                        page-break-after: always;
+                                        break-after: page;
+                                    }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                    `;
 
-                    let url = _this.url + '/invoice_print';
-
-                    AjaxUtil.getAsyncData(_this.url + '/invoice_print', data, function (result) {
-                        const html = renderInvoiceHtml(result.data); // ✅ 템플릿 + detailList 모두 처리
+                    for (const item of items) {
+                        const result = await getInvoiceData(item.misnum);
+                        const html = renderInvoiceHtml(result.data);
                         const $content = $(html);
 
-                        const modalContainer = new PopupDraggable('거래명세서 출력');
-                        modalContainer.open({width: 850, height: 700, $content});
+                        allHtml += `<div class="print-page">${$content[0].outerHTML}</div>`;
+                    }
 
-                        setTimeout(() => {
-                            const $printDiv = $content;
+                    allHtml += `</body></html>`;
 
-                            const printWindow = window.open('', '_blank', 'width=850,height=700');
+                    const printWindow = window.open('', '_blank', 'width=850,height=1000');
+                    printWindow.document.open();
+                    printWindow.document.write(allHtml);
+                    printWindow.document.close();
 
-                            const html = `
-                                <html>
-                                <head>
-                                    <title>거래명세서 출력</title>
-                                </head>
-                                <body>
-                                    ${$printDiv[0].outerHTML}
-                                </body>
-                                </html>
-                            `;
-
-                            let css = $('#print_invoice_css')[0].outerHTML;
-                            printWindow.document.open();
-                            printWindow.document.write(css);
-                            printWindow.document.write(html);
-                            printWindow.document.close();
-
-                            printWindow.focus();
-
-                            // print 후 자동 닫기
-                            printWindow.onload = function () {
-                                printWindow.print();
-                                setTimeout(() => printWindow.close(), 300);
-                            };
-                            modalContainer.close();
-                        }, 300);
-                    });
+                    printWindow.onload = function () {
+                        printWindow.focus();
+                        printWindow.print();
+                        setTimeout(() => printWindow.close(), 300);
+                    };
                 });
+
+                // AjaxUtil.getAsyncData → Promise 감싸기
+                function getInvoiceData(misnum) {
+                    return new Promise((resolve, reject) => {
+                        AjaxUtil.getAsyncData(_this.url + '/invoice_print', { misnum }, function (result) {
+                            resolve(result);
+                        });
+                    });
+                }
+
 
                 function renderInvoiceHtml(data) {
                     let template = document.getElementById('writPrint_Template').innerHTML;
@@ -1818,24 +1820,37 @@
                         }
 
                         const $resultList = $content.find('#resultList');
+                        const isEmpty = (val) => val === null || val === undefined || val.toString().trim() === ' ';
 
                         // ntscfnum 표시 여부
                         const $ntscfnumTd = $content.find('#ntscfnum').closest('td');
                         const $ntscfnumTh = $ntscfnumTd.prev('th');
+                        // ntscode_des 표시 여부
+                        const $ntscodeDesTd = $content.find('#ntscode_des').closest('td');
+                        const $ntscodeDesTh = $ntscodeDesTd.prev('th');
 
-                        if (ntscfnum || orgntscfnum) {
+                        if (!isEmpty(ntscfnum) || !isEmpty(orgntscfnum)) {
+                            const hasNtscodeDes = !isEmpty(ntscodeDes);
+
                             $ntscfnumTd.show();
                             $ntscfnumTh.show();
-                            $ntscfnumTd.attr('colspan', orgntscfnum ? 22 : 89); // orgntscfnum 없으면 colspan 확장
+                            $ntscfnumTd.attr('colspan', !isEmpty(orgntscfnum) ? 22 : 89);
 
-                            if (ntscfnum) {
-                                $content.find('#ntscfnum').text(ntscfnum);
+                            if (hasNtscodeDes) {
+                                $content.find('#ntscode_des').text(ntscodeDes);
+                                $ntscodeDesTd.show();
+                                $ntscodeDesTh.show();
                             } else {
-                                $content.find('#ntscfnum').text(''); // 빈 칸으로 유지
+                                $ntscodeDesTd.hide();
+                                $ntscodeDesTh.hide();
                             }
+
+                            $content.find('#ntscfnum').text(isEmpty(ntscfnum) ? '' : ntscfnum);
                         } else {
                             $ntscfnumTd.hide();
                             $ntscfnumTh.hide();
+                            $ntscodeDesTd.hide();
+                            $ntscodeDesTh.hide();
                         }
 
                         // orgntscfnum 표시 여부
@@ -1844,7 +1859,7 @@
                         const $modinameTd = $content.find('#modify_name').closest('td');
                         const $modinameTh = $modinameTd.prev('th');
 
-                        if (orgntscfnum) {
+                        if (!isEmpty(orgntscfnum)) {
                             $content.find('#orgntscfnum').text(orgntscfnum);
                             $content.find('#modify_name').text(modiname);
                             $orgntscfnumTd.show();
@@ -1858,21 +1873,9 @@
                             $modinameTh.hide();
                         }
 
-                        // ntscode_des 표시 여부
-                        const $ntscodeDesTd = $content.find('#ntscode_des').closest('td');
-                        const $ntscodeDesTh = $ntscodeDesTd.prev('th');
-
-                        if (ntscodeDes) {
-                            $content.find('#ntscode_des').text(ntscodeDes);
-                            $ntscodeDesTd.show();
-                            $ntscodeDesTh.show();
-                        } else {
-                            $ntscodeDesTd.hide();
-                            $ntscodeDesTh.hide();
-                        }
 
                         // 전체 resultList 표시 여부
-                        if (ntscfnum || orgntscfnum || ntscodeDes) {
+                        if (!isEmpty(ntscfnum) || !isEmpty(orgntscfnum) || !isEmpty(ntscodeDes) ) {
                             $resultList.show();
                         } else {
                             $resultList.hide();
@@ -1916,6 +1919,7 @@
                 modalContainer.open({width: 1200, height: modalHeight, $content});
                 setTimeout(() => {
                     popInvoice.initAfterOpen();
+                    $content.find('#keyboardFocusCatcher').focus();
                 }, 0);
                 initializeDetailRows(data.detailList || []);
 
@@ -2646,43 +2650,197 @@
                                 })
                                 .first()[0].textContent = '수정 계산서 - ' + modifyName;
 
-                            $content.find('#resultList').hide();
                             $content.find('#btnInvoiceNew').hide();
                             $content.find('#btnInvoiceSave').show();
                             $content.find('#btnEdit').hide();
                             $content.find('#btnReMessage').hide();
 
+                            const fields = [
+                                { id: 'ntscfnum', tdColspan: 22, thColspan: 11 },
+                                { id: 'orgntscfnum', tdColspan: 22, thColspan: 15 },
+                                { id: 'modify_name', tdColspan: 30, thColspan: 11 },
+                            ];
+
+                            fields.forEach(({ id, tdColspan, thColspan }) => {
+                                const $td = $content.find(`#${id}`).closest('td');
+                                const $th = $td.prev('th');
+                                const $row = $td.closest('tr');
+
+                                $row.show();
+                                $th.show();
+                                $td.show();
+                                $td.attr('colspan', tdColspan);
+                                $th.attr('colspan', thColspan);
+                            });
+
+                            const ntscfnum = $content.find('#ntscfnum').val().trim();
+                            $content.find('#orgntscfnum').val(ntscfnum);
+                            $content.find('#ntscfnum').val('');
+                            $content.find('#modify_name').text(modifyName);
+
+                            // 국세청 전송결과 숨김
+                            const $ntscodeRow = $content.find('#ntscode_des').closest('tr');
+                            const $ntscodeTh = $content.find('#ntscode_des').closest('td').prev('th');
+                            $ntscodeRow.hide();   // 전체 row 숨김
+                            $ntscodeTh.hide();
+
+                            // 수정세금계산서 신규 등록
+                            $content.find('#newModifiedInvoice').val('true');
+
                             if (modifyCode === '1') {
 
-                                const $taxList = $content.find('#taxList');
 
-                                $taxList.find('input, select, textarea').each(function () {
-                                    const id = $(this).attr('id');
+                            } else if (modifyCode === '2') {
+                                const $writeDate = $content.find('#writeDate');
+                                const $remark1 = $content.find('#Remark1');
 
-                                    const name = $(this).attr('name');
-                                    if (name && /^detailList\[\d+\]\.ItemName$/.test(name)) return;
-                                    if (name && /^detailList\[\d+\]\.ItemId$/.test(name)) return;
+                                // 기존 날짜 가져오기 (YYYY-MM-DD)
+                                const originalDate = $writeDate.val(); // 예: '2025-05-26'
 
-                                    if ($(this).is(':checkbox') || $(this).is(':radio')) {
+                                // 오늘 날짜 구하기 (YYYY-MM-DD)
+                                const today = new Date();
+                                const yyyy = today.getFullYear();
+                                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                                const dd = String(today.getDate()).padStart(2, '0');
+                                const todayFormatted = `${yyyy}-${mm}-${dd}`;
 
-                                    } else {
-                                        $(this).val('');
+                                // writeDate를 오늘 날짜로 설정
+                                $writeDate.val(todayFormatted).trigger('change');
+
+                                // 품목 PurchaseDT1, PurchaseDT2에 MM/DD 넣기
+                                $content.find('tr[id^="item_"]').each(function (index) {
+                                    $(this).find(`#detailList${index}\\.PurchaseDT1`).val(mm);
+                                    $(this).find(`#detailList${index}\\.PurchaseDT2`).val(dd);
+                                });
+
+                                // remark1에 기존 작성일 기록
+                                if (originalDate) {
+                                    $remark1.val('');
+                                    const formattedOriginal = originalDate.replace(/-/g, '.'); // '2025.05.30'
+                                    const remarkText = `${formattedOriginal} (당초 세금계산서 작성일)`;
+                                    const currentRemark = $remark1.val() || '';
+                                    const updatedRemark = currentRemark ? currentRemark + '\n' + remarkText : remarkText;
+                                    $remark1.val(updatedRemark);
+                                }
+
+
+                            } else if (modifyCode === '3') {
+
+                                const $writeDate = $content.find('#writeDate');
+                                const $remark1 = $content.find('#Remark1');
+
+                                // 기존 날짜 가져오기 (YYYY-MM-DD)
+                                const originalDate = $writeDate.val(); // 예: '2025-05-26'
+
+                                // 오늘 날짜 구하기 (YYYY-MM-DD)
+                                const today = new Date();
+                                const yyyy = today.getFullYear();
+                                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                                const dd = String(today.getDate()).padStart(2, '0');
+                                const todayFormatted = `${yyyy}-${mm}-${dd}`;
+
+                                // writeDate를 오늘 날짜로 설정
+                                $writeDate.val(todayFormatted).trigger('change');
+
+                                // 품목 PurchaseDT1, PurchaseDT2에 MM/DD 넣기
+                                $content.find('tr[id^="item_"]').each(function (index) {
+                                    $(this).find(`#detailList${index}\\.PurchaseDT1`).val(mm);
+                                    $(this).find(`#detailList${index}\\.PurchaseDT2`).val(dd);
+                                });
+
+                                // remark1에 기존 작성일 기록
+                                if (originalDate) {
+                                    $remark1.val('');
+                                    const formattedOriginal = originalDate.replace(/-/g, '.'); // '2025.05.30'
+                                    const remarkText = `${formattedOriginal} (당초 세금계산서 작성일)`;
+                                    const currentRemark = $remark1.val() || '';
+                                    const updatedRemark = currentRemark ? currentRemark + '\n' + remarkText : remarkText;
+                                    $remark1.val(updatedRemark);
+                                }
+
+                            } else if (modifyCode === '4') {
+
+                                const $writeDate = $content.find('#writeDate');
+                                const $remark1 = $content.find('#Remark1');
+
+                                // 기존 날짜 가져오기 (YYYY-MM-DD)
+                                const originalDate = $writeDate.val(); // 예: '2025-05-26'
+
+                                // 오늘 날짜 구하기 (YYYY-MM-DD)
+                                const today = new Date();
+                                const yyyy = today.getFullYear();
+                                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                                const dd = String(today.getDate()).padStart(2, '0');
+                                const todayFormatted = `${yyyy}-${mm}-${dd}`;
+
+                                // writeDate를 오늘 날짜로 설정
+                                $writeDate.val(todayFormatted).trigger('change');
+
+                                // 품목 PurchaseDT1, PurchaseDT2에 MM/DD 넣기
+                                $content.find('tr[id^="item_"]').each(function (index) {
+                                    $(this).find(`#detailList${index}\\.PurchaseDT1`).val(mm);
+                                    $(this).find(`#detailList${index}\\.PurchaseDT2`).val(dd);
+                                });
+
+                                // remark1에 기존 작성일 기록
+                                if (originalDate) {
+                                    $remark1.val('');
+                                    const formattedOriginal = originalDate.replace(/-/g, '.'); // '2025.05.30'
+                                    const remarkText = `${formattedOriginal} (당초 세금계산서 작성일)`;
+                                    const currentRemark = $remark1.val() || '';
+                                    const updatedRemark = currentRemark ? currentRemark + '\n' + remarkText : remarkText;
+                                    $remark1.val(updatedRemark);
+                                }
+
+                                $content.find('tr[id^="item_"]').each(function (index) {
+                                    const $row = $(this);
+                                    const $unitCost = $row.find(`#detailList${index}\\.UnitCost`);
+                                    const $supplyCost = $row.find(`#detailList${index}\\.SupplyCost`);
+                                    const $tax = $row.find(`#detailList${index}\\.Tax`);
+
+                                    const unitCostVal = $unitCost.val().replace(/,/g, '').trim();
+                                    const supplyCostVal = $supplyCost.val().replace(/,/g, '').trim();
+                                    const taxVal = $tax.val().replace(/,/g, '').trim();
+
+                                    if (unitCostVal && parseFloat(unitCostVal) !== 0) {
+                                        const negatedUnit = -parseFloat(unitCostVal);
+                                        $unitCost.val(negatedUnit.toLocaleString());
+                                    }
+
+                                    if (supplyCostVal && parseFloat(supplyCostVal) !== 0) {
+                                        const negatedSupply = -parseFloat(supplyCostVal);
+                                        $supplyCost.val(negatedSupply.toLocaleString());
+                                    }
+
+                                    if (taxVal && parseFloat(taxVal) !== 0) {
+                                        const negatedTax = -parseFloat(taxVal);
+                                        $tax.val(negatedTax.toLocaleString());
                                     }
                                 });
 
+                                updateTotals();
+
+                            } else if (modifyCode === '5') {
+                                $content.find('input[name="TaxType"][value="영세"]').prop('checked', true).trigger('change');
+
+
                             } else if (modifyCode === '6') {
 
-                                console.log('6번 ');
-
+                                Alert.confirm('', '수정 사유 : 착오에 의한 이중발급 \n생성하시겠습니까?', function () {
+                                    saveInvoice($content.find('#taxForm'), modalContainer, true);
+                                });
+                                modalContainer1.close();
+                                modalContainer.close();
+                                return;
 
                             }
 
 
                             modalContainer1.close(); // 선택 후 모달 닫기
 
-                            $content.closest('[data-modal-els="root"]').css('height', '630px');
-                            $content.closest('[data-modal-els="body"]').css('height', '600px');
-                            $content.closest('[data-modal-els="body-frame"]').css('height', '600px');
+                            $content.closest('[data-modal-els="root"]').css('height', '670px');
+                            $content.closest('[data-modal-els="body"]').css('height', '630px');
+                            $content.closest('[data-modal-els="body-frame"]').css('height', '630px');
                             $content.find('.content_wrap.popup').css('height', '100%');
 
                         });

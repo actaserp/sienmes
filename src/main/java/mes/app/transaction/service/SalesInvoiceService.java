@@ -38,6 +38,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.FileInputStream;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -367,7 +369,10 @@ public class SalesInvoiceService {
         salesment.setMgtkey("TAX-" + misdate + "-" + salesment.getMisnum());
         salesment.setMisdate(misdate);
 
-        salesment.setTotalamt(parseMoney(form.get("TotalAmount"))); // 합계금액
+        BigDecimal totalAmount = parseMoney(form.get("TotalAmount"));
+        if (totalAmount != null) {
+            salesment.setTotalamt(totalAmount.intValue()); // 합계금액
+        }
         salesment.setSupplycost(parseIntSafe(form.get("SupplyCostTotal"))); // 총 공급가액
         salesment.setTaxtotal(parseIntSafe(form.get("TaxTotal"))); // 총 세액
         salesment.setRemark1((String) form.get("Remark1")); // 비고1
@@ -386,7 +391,7 @@ public class SalesInvoiceService {
 
         // 수정세금계산서일 때 저장
         salesment.setModifycd(parseInt(form.get("ModifyCode")));
-        salesment.setOrgntscfnum((String)form.get("orgntscfnum"));
+        salesment.setOrgntscfnum(removeMinusSign(form.get("orgntscfnum")));
         salesment.setOrgmgtkey((String)form.get("orgmgtkey"));
 
         String issueDiv = (String) form.get("issue_div");
@@ -429,10 +434,18 @@ public class SalesInvoiceService {
             detail.setItemnm(itemName);
             detail.setMisdate(misdate);
             detail.setSpec((String) form.get(prefix + ".Spec"));
-            detail.setQty(parseMoney(form.get(prefix + ".Qty")));
-            detail.setUnitcost(parseMoney(form.get(prefix + ".UnitCost")));
-            detail.setSupplycost(parseMoney(form.get(prefix + ".SupplyCost")));
-            detail.setTaxtotal(parseMoney(form.get(prefix + ".Tax")));
+            BigDecimal qty = parseMoney(form.get(prefix + ".Qty"));
+            if (qty != null) detail.setQty(qty.intValue());
+
+            BigDecimal unitCost = parseMoney(form.get(prefix + ".UnitCost"));
+            if (unitCost != null) detail.setUnitcost(unitCost.intValue());
+
+            BigDecimal supplyCost = parseMoney(form.get(prefix + ".SupplyCost"));
+            if (supplyCost != null) detail.setSupplycost(supplyCost.intValue());
+
+            BigDecimal tax = parseMoney(form.get(prefix + ".Tax"));
+            if (tax != null) detail.setTaxtotal(tax.intValue());
+
             detail.setRemark((String) form.get(prefix + ".Remark"));
             detail.setSpjangcd((String) form.get("spjangcd"));
 
@@ -682,15 +695,21 @@ public class SalesInvoiceService {
                  	sc4.projnm AS "project",
                  	sc5."Name" AS "att_depart",
                  	m.issuediv AS "issue_div",
-                 	SUBSTR(m.ntscfnum, 1, 8) || '-' ||
-                    SUBSTR(m.ntscfnum, 9, 8) || '-' ||
-                    SUBSTR(m.ntscfnum, 17) AS "ntscfnum",
-                  
-                    SUBSTR(m.orgntscfnum, 1, 8) || '-' ||
-                    SUBSTR(m.orgntscfnum, 9, 8) || '-' ||
-                    SUBSTR(m.orgntscfnum, 17) AS "orgntscfnum",
                  	sc2."Description" AS ntscode_des,
-                 	m.modifycd,
+                    CASE
+                      WHEN m.ntscfnum IS NULL OR m.ntscfnum = '' OR LENGTH(m.ntscfnum) < 5 THEN NULL
+                      ELSE SUBSTR(m.ntscfnum, 1, 8) || '-' ||
+                           SUBSTR(m.ntscfnum, 9, 8) || '-' ||
+                           SUBSTR(m.ntscfnum, 17)
+                    END AS "ntscfnum",
+                      
+                    CASE
+                      WHEN m.orgntscfnum IS NULL OR m.orgntscfnum = '' OR LENGTH(m.orgntscfnum) < 5 THEN NULL
+                      ELSE SUBSTR(m.orgntscfnum, 1, 8) || '-' ||
+                           SUBSTR(m.orgntscfnum, 9, 8) || '-' ||
+                           SUBSTR(m.orgntscfnum, 17)
+                    END AS "orgntscfnum",
+                 	m.modifycd as "ModifyCode",
                   CASE m.modifycd
                       WHEN 1 THEN '기재사항 착오정정'
                       WHEN 2 THEN '공급가액 변동'
@@ -962,10 +981,22 @@ public class SalesInvoiceService {
             detail.setSerialNum(Short.parseShort(d.getId().getMisseq()));
             detail.setItemName(Optional.ofNullable(d.getItemnm()).orElse(""));
             detail.setSpec(Optional.ofNullable(d.getSpec()).orElse(""));
-            detail.setQty(String.valueOf(Optional.ofNullable(d.getQty()).orElse(0)));
-            detail.setUnitCost(String.valueOf(Optional.ofNullable(d.getUnitcost()).orElse(0)));
-            detail.setSupplyCost(String.valueOf(Optional.ofNullable(d.getSupplycost()).orElse(0)));
-            detail.setTax(String.valueOf(Optional.ofNullable(d.getTaxtotal()).orElse(0)));
+            if (d.getQty() != null) {
+                detail.setQty(String.valueOf(d.getQty()));
+            }
+
+            if (d.getUnitcost() != null) {
+                detail.setUnitCost(String.valueOf(d.getUnitcost()));
+            }
+
+            if (d.getSupplycost() != null) {
+                detail.setSupplyCost(String.valueOf(d.getSupplycost()));
+            }
+
+            if (d.getTaxtotal() != null) {
+                detail.setTax(String.valueOf(d.getTaxtotal()));
+            }
+
             detail.setRemark(Optional.ofNullable(d.getRemark()).orElse(""));
             return detail;
         }).toList();
@@ -1018,14 +1049,22 @@ public class SalesInvoiceService {
         jdbcTemplate.update(sql, idList.toArray());
     }
 
-    private Integer parseInt(Object obj) {
-        if (obj == null || obj.toString().trim().isEmpty()) return null;
-        return Integer.parseInt(obj.toString().trim());
+    private Integer parseInt(Object value) {
+        if (value == null) return null;
+        try {
+            return Integer.parseInt(value.toString().trim());
+        } catch (Exception e) {
+            return null; // 또는 0
+        }
     }
 
-    private Integer parseMoney(Object obj) {
+    private BigDecimal parseMoney(Object obj) {
         if (obj == null || obj.toString().trim().isEmpty()) return null;
-        return Integer.parseInt(obj.toString().replaceAll(",", "").trim());
+        try {
+            return new BigDecimal(obj.toString().replaceAll(",", "").trim());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private String sanitizeNumericString(Object obj) {
@@ -1034,8 +1073,15 @@ public class SalesInvoiceService {
     }
 
     private Integer parseIntSafe(Object obj) {
-        String numStr = sanitizeNumericString(obj);
-        return (numStr == null || numStr.isEmpty()) ? null : Integer.parseInt(numStr);
+        if (obj == null) return null;
+        String str = obj.toString().replaceAll(",", "").trim();
+        if (!str.matches("-?\\d+")) return null; // 정수 패턴 검사: optional 음수부호 + 숫자
+        return Integer.parseInt(str);
+    }
+
+    private String removeMinusSign(Object obj) {
+        if (obj == null) return null;
+        return obj.toString().replaceAll("-", ""); // '-'만 정규식으로 제거
     }
 
     @Transactional
@@ -1365,7 +1411,6 @@ public class SalesInvoiceService {
 
         Integer misnum = parseInt(form.get("misnum"));
 
-
         try {
             // 여기 부터는 취소분 저장
             TB_Salesment origin = tb_salesmentRepository.findById(misnum).orElseThrow();
@@ -1407,10 +1452,18 @@ public class SalesInvoiceService {
                 newDetail.setItemnm(detail.getItemnm());
                 newDetail.setSpec(detail.getSpec());
                 newDetail.setQty(detail.getQty());
-                newDetail.setUnitcost(Optional.ofNullable(detail.getUnitcost()).orElse(0) * -1);
-                newDetail.setSupplycost(Optional.ofNullable(detail.getSupplycost()).orElse(0) * -1);
-                newDetail.setTaxtotal(Optional.ofNullable(detail.getTaxtotal()).orElse(0) * -1);
-                newDetail.setTotalamt(Optional.ofNullable(detail.getTotalamt()).orElse(0) * -1);
+                if (detail.getUnitcost() != null) {
+                    newDetail.setUnitcost(detail.getUnitcost() * -1);
+                }
+                if (detail.getSupplycost() != null) {
+                    newDetail.setSupplycost(detail.getSupplycost() * -1);
+                }
+                if (detail.getTaxtotal() != null) {
+                    newDetail.setTaxtotal(detail.getTaxtotal() * -1);
+                }
+                if (detail.getTotalamt() != null) {
+                    newDetail.setTotalamt(detail.getTotalamt() * -1);
+                }
                 newDetail.setRemark(detail.getRemark());
                 newDetail.setPurchasedt(detail.getPurchasedt());
                 newDetail.setMaterialId(detail.getMaterialId());
@@ -1439,6 +1492,15 @@ public class SalesInvoiceService {
     private AjaxResult handlePriceChange(Map<String, Object> form) {
         AjaxResult result = new AjaxResult();
 
+        Integer misnum = parseInt(form.get("misnum"));
+        TB_Salesment origin = tb_salesmentRepository.findById(misnum).orElseThrow();
+
+        form.put("orgntscfnum", origin.getNtscfnum());
+        form.put("orgmgtkey", origin.getMgtkey());
+        form.remove("misnum");
+        form.remove("shipids");
+        saveSalesInvoiceInternal(form);
+
         result.success = true;
         result.message = "공급가액 변동 처리 완료";
         return result;
@@ -1446,6 +1508,15 @@ public class SalesInvoiceService {
 
     private AjaxResult handleReturn(Map<String, Object> form) {
         AjaxResult result = new AjaxResult();
+
+        Integer misnum = parseInt(form.get("misnum"));
+        TB_Salesment origin = tb_salesmentRepository.findById(misnum).orElseThrow();
+
+        form.put("orgntscfnum", origin.getNtscfnum());
+        form.put("orgmgtkey", origin.getMgtkey());
+        form.remove("misnum");
+        form.remove("shipids");
+        saveSalesInvoiceInternal(form);
 
         result.success = true;
         result.message = "환입 처리 완료";
@@ -1455,6 +1526,15 @@ public class SalesInvoiceService {
     private AjaxResult handleContractCancellation(Map<String, Object> form) {
         AjaxResult result = new AjaxResult();
 
+        Integer misnum = parseInt(form.get("misnum"));
+        TB_Salesment origin = tb_salesmentRepository.findById(misnum).orElseThrow();
+
+        form.put("orgntscfnum", origin.getNtscfnum());
+        form.put("orgmgtkey", origin.getMgtkey());
+        form.remove("misnum");
+        form.remove("shipids");
+        saveSalesInvoiceInternal(form);
+
         result.success = true;
         result.message = "계약의 해제 처리 완료";
         return result;
@@ -1463,13 +1543,195 @@ public class SalesInvoiceService {
     private AjaxResult handleLaterLetterOfCredit(Map<String, Object> form) {
         AjaxResult result = new AjaxResult();
 
+        Integer misnum = parseInt(form.get("misnum"));
+
+        try {
+            // 여기 부터는 취소분 저장
+            TB_Salesment origin = tb_salesmentRepository.findById(misnum).orElseThrow();
+            TB_Salesment copy = new TB_Salesment();
+
+            BeanUtils.copyProperties(origin, copy,
+                    "misnum", "statedt", "ntscode", "statecode",
+                    "details", "ntscfnum", "mgtkey"
+            );
+
+            copy.setMisnum(null); // 새 엔티티
+            copy.setOrgntscfnum(origin.getNtscfnum());
+            copy.setOrgmgtkey(origin.getMgtkey());
+            copy.setModifycd(parseInt(form.get("ModifyCode")));
+
+            String taxType = copy.getTaxtype(); // 과세, 영세, 면세 등
+
+            BigDecimal supplyCost = parseMoney(form.get("SupplyCostTotal"));
+            BigDecimal taxTotal;
+            BigDecimal totalAmt;
+
+            if ("과세".equals(taxType)) {
+                taxTotal = supplyCost.multiply(BigDecimal.valueOf(0.1)).setScale(0, RoundingMode.HALF_UP);
+                totalAmt = supplyCost.add(taxTotal);
+            } else {
+                taxTotal = BigDecimal.ZERO;
+                totalAmt = supplyCost;
+            }
+
+            copy.setSupplycost(supplyCost.intValue() * -1);
+            copy.setTaxtotal(taxTotal.intValue() * -1);
+            copy.setTotalamt(totalAmt.intValue() * -1);
+
+            LocalDateTime now = LocalDateTime.now();
+            String statedt = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            copy.setStatedt(statedt);
+
+            // 조건부 상태코드 설정
+            copy.setStatecode(100);
+
+            TB_Salesment savedCopy = tb_salesmentRepository.save(copy);
+
+            savedCopy.setMgtkey("TAX-" + savedCopy.getMisdate() + "-" + savedCopy.getMisnum());
+            tb_salesmentRepository.save(savedCopy);
+
+            int serialIndex = 1;
+            List<TB_SalesDetail> details = new ArrayList<>();
+
+            int i = 0;
+            while (true) {
+                String prefix = "detailList[" + i + "]";
+                String itemName = (String) form.get(prefix + ".ItemName");
+
+                if (itemName == null) break; // 더 이상 항목 없음
+                if (itemName.trim().isEmpty()) {
+                    i++;
+                    continue;
+                }
+
+                String serialNum = String.valueOf(serialIndex++);
+
+                TB_SalesDetail detail = new TB_SalesDetail();
+                detail.setId(new TB_SalesDetailId(savedCopy.getMisnum(), serialNum));
+                detail.setMaterialId(parseInt(form.get(prefix + ".ItemId")));
+                detail.setItemnm(itemName);
+                detail.setMisdate(savedCopy.getMisdate());
+                detail.setSpec((String) form.get(prefix + ".Spec"));
+                BigDecimal qty = parseMoney(form.get(prefix + ".Qty"));
+                if (qty != null) detail.setQty(qty.intValue());
+
+                BigDecimal unitCost = parseMoney(form.get(prefix + ".UnitCost"));
+                if (unitCost != null) detail.setUnitcost(unitCost.intValue() * -1);
+
+                BigDecimal supplyCostValue = parseMoney(form.get(prefix + ".SupplyCost"));
+                if (supplyCostValue != null) detail.setSupplycost(supplyCostValue.intValue() * -1);
+
+                BigDecimal tax = parseMoney(form.get(prefix + ".Tax"));
+                if (tax != null) detail.setTaxtotal(tax.intValue() * -1);
+                detail.setRemark((String) form.get(prefix + ".Remark"));
+                detail.setSpjangcd((String) form.get("spjangcd"));
+
+                String purchaseDT = (String) form.get(prefix + ".PurchaseDT");
+                if (purchaseDT != null && purchaseDT.length() == 4) {
+                    String fullPurchaseDT = savedCopy.getMisdate().substring(0, 4) + purchaseDT;
+                    detail.setPurchasedt(fullPurchaseDT);
+                } else {
+                    detail.setPurchasedt(null);
+                }
+
+                detail.setSalesment(savedCopy);
+                tb_salesDetailRepository.save(detail);
+
+                i++;
+            }
+
+
+            // 여기 부터는 수정분 저장
+            form.put("orgntscfnum", origin.getNtscfnum());
+            form.put("orgmgtkey", origin.getMgtkey());
+            form.remove("misnum");
+            form.remove("shipids");
+            saveSalesInvoiceInternal(form);
+
+        } catch (Exception e) {
+            log.error("handleCorrection 오류", e);
+            throw new RuntimeException("정정 처리 중 예외 발생", e);
+        }
+
         result.success = true;
         result.message = "내국신용장 사후개설 처리 완료";
         return result;
     }
 
+    
+    // 이중발급
     private AjaxResult handleDuplicateIssue(Map<String, Object> form) {
         AjaxResult result = new AjaxResult();
+
+        Integer misnum = parseInt(form.get("misnum"));
+        long start = System.currentTimeMillis();
+
+        try {
+            // 취소분 저장
+            TB_Salesment origin = tb_salesmentRepository.findById(misnum).orElseThrow();
+            TB_Salesment copy = new TB_Salesment();
+
+            BeanUtils.copyProperties(origin, copy,
+                    "misnum", "statedt", "ntscode", "statecode",
+                    "details", "ntscfnum", "mgtkey"
+            );
+            log.info("복사 시간: {}ms", System.currentTimeMillis() - start);
+
+            copy.setMisnum(null); // 새 엔티티
+            copy.setOrgntscfnum(origin.getNtscfnum());
+            copy.setOrgmgtkey(origin.getMgtkey());
+            copy.setModifycd(parseInt(form.get("ModifyCode")));
+            copy.setSupplycost(Optional.ofNullable(copy.getSupplycost()).orElse(0) * -1);
+            copy.setTaxtotal(Optional.ofNullable(copy.getTaxtotal()).orElse(0) * -1);
+            copy.setTotalamt(Optional.ofNullable(copy.getTotalamt()).orElse(0) * -1);
+            LocalDateTime now = LocalDateTime.now();
+            String statedt = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            copy.setStatedt(statedt);
+
+            // 조건부 상태코드 설정
+            copy.setStatecode(100);
+
+            TB_Salesment savedCopy = tb_salesmentRepository.save(copy);
+
+            savedCopy.setMgtkey("TAX-" + savedCopy.getMisdate() + "-" + savedCopy.getMisnum());
+            tb_salesmentRepository.save(savedCopy);
+
+            List<TB_SalesDetail> details = tb_salesDetailRepository.findByMisnum(misnum);
+            int sequence = 1;
+
+            for (TB_SalesDetail detail : details) {
+                TB_SalesDetail newDetail = new TB_SalesDetail();
+                TB_SalesDetailId newId = new TB_SalesDetailId(savedCopy.getMisnum(), String.valueOf(sequence++));
+                newDetail.setId(newId);
+
+                newDetail.setMisdate(detail.getMisdate());
+                newDetail.setItemnm(detail.getItemnm());
+                newDetail.setSpec(detail.getSpec());
+                newDetail.setQty(detail.getQty());
+                if (detail.getUnitcost() != null) {
+                    newDetail.setUnitcost(detail.getUnitcost() * -1);
+                }
+                if (detail.getSupplycost() != null) {
+                    newDetail.setSupplycost(detail.getSupplycost() * -1);
+                }
+                if (detail.getTaxtotal() != null) {
+                    newDetail.setTaxtotal(detail.getTaxtotal() * -1);
+                }
+                if (detail.getTotalamt() != null) {
+                    newDetail.setTotalamt(detail.getTotalamt() * -1);
+                }
+                newDetail.setRemark(detail.getRemark());
+                newDetail.setPurchasedt(detail.getPurchasedt());
+                newDetail.setMaterialId(detail.getMaterialId());
+                newDetail.setSpjangcd(detail.getSpjangcd());
+
+                tb_salesDetailRepository.save(newDetail);
+            }
+
+        } catch (Exception e) {
+            log.error("handleCorrection 오류", e);
+            throw new RuntimeException("정정 처리 중 예외 발생", e);
+        }
 
         result.success = true;
         result.message = "착오에 의한 이중발급 처리 완료";
