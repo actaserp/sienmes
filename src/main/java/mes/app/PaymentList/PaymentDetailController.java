@@ -34,6 +34,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -491,17 +492,19 @@ public class PaymentDetailController {
 
       IOUtils.copy(fis, response.getOutputStream());
       response.flushBuffer();
-      return; // ✅ 추가 응답 없이 여기서 종료
-    } finally {
-      Executors.newSingleThreadScheduledExecutor().schedule(() -> {
-        try {
-          Files.deleteIfExists(tempXlsx);
-          Files.deleteIfExists(tempPdf);
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }, 5, TimeUnit.MINUTES);
     }
+    // ⬇ 여기서 executor 실행
+    ScheduledExecutorService cleaner = Executors.newSingleThreadScheduledExecutor();
+    cleaner.schedule(() -> {
+      try {
+        Files.deleteIfExists(tempXlsx);
+        Files.deleteIfExists(tempPdf);
+        System.out.println("🧹 삭제 완료: " + tempPdf.getFileName());
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }, 5, TimeUnit.MINUTES);
+    cleaner.shutdown();
   }
 
 
