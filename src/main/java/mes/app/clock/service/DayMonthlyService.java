@@ -73,7 +73,6 @@ public class DayMonthlyService {
                 t.adttime07,
                 t.remark,
                 t.fixflag,
-                t.address,
                 g."Value" AS group_name,
                 s."Value" as jik_id,
                 tp210.worknm as worknm,
