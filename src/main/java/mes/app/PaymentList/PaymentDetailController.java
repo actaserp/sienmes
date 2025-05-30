@@ -421,111 +421,90 @@ public class PaymentDetailController {
 //  }
 
   @PostMapping("/downloader")
-  public ResponseEntity<?> downloadFile(@RequestBody List<Map<String, Object>> downloadList) throws IOException {
+  public void downloadFile(@RequestParam("appnum") String appnum, HttpServletResponse response) throws IOException, InterruptedException {
+    Map<String, Object> vacData = paymentDetailService.getVacFileList(appnum);
 
-    // 파일 목록과 파일 이름을 담을 리스트 초기화
-    List<File> filesToDownload = new ArrayList<>();
-    List<String> fileNames = new ArrayList<>();
+    String frdateStr = vacData.get("frdate").toString();
+    String todateStr = vacData.get("todate").toString();
+    String daynum = vacData.get("daynum").toString();
+    String reqdateStr = vacData.get("reqdate").toString();
 
-    // ZIP 파일 이름을 설정할 변수 초기화
-    String tketcrdtm = null;
-    String tketnm = null;
+    DateTimeFormatter ymdFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+    DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("yyyy 년 MM 월 dd 일");
 
-    // 파일을 메모리에 쓰기
-    for (Map<String, Object> fileInfo : downloadList) {
-      String filePath = (String) fileInfo.get("filepath");    // 파일 경로
-      String fileName = (String) fileInfo.get("filesvnm");    // 파일 이름(uuid)
-      String originFileName = (String) fileInfo.get("fileornm");  //파일 원본이름(origin Name)
+    LocalDate frDate = LocalDate.parse(frdateStr, ymdFormatter);
+    LocalDate toDate = LocalDate.parse(todateStr, ymdFormatter);
+    LocalDate reqDate = LocalDate.parse(reqdateStr, ymdFormatter);
 
-      File file = new File(filePath + File.separator + fileName);
+    String repodateFormat = String.format("%s  ~  %s  ( %s ) 일간",
+            frDate.format(displayFormatter),
+            toDate.format(displayFormatter),
+            daynum);
 
-      // 파일이 실제로 존재하는지 확인
-      if (file.exists()) {
-        filesToDownload.add(file);
-        fileNames.add(originFileName); // 다운로드 받을 파일 이름을 originFileName으로 설정
-      }
+    String uuid = UUID.randomUUID().toString();
+    Path tempXlsx = Files.createTempFile(uuid, ".xlsx");
+    Path tempPdf = Path.of(tempXlsx.toString().replace(".xlsx", ".pdf"));
+
+    try (FileInputStream fis = new FileInputStream("C:/Temp/mes21/문서/VacDemoFile.xlsx");
+         Workbook workbook = new XSSFWorkbook(fis);
+         FileOutputStream fos = new FileOutputStream(tempXlsx.toFile())) {
+
+      Sheet sheet = workbook.getSheetAt(0);
+      setCell(sheet, 2, 2, (String) vacData.get("worknm"));
+      setCell(sheet, 9, 2, (String) vacData.get("repopernm"));
+      setCell(sheet, 7, 2, (String) vacData.get("jiknm"));
+      setCell(sheet, 5, 2, (String) vacData.get("departnm"));
+      setCell(sheet, 16, 0, (String) vacData.get("remark"));
+      setCell(sheet, 11, 2, repodateFormat);
+      setCell(sheet, 24, 3, (String) vacData.get("worknm"));
+      setCell(sheet, 27, 0, reqDate.format(displayFormatter));
+      setCell(sheet, 30, 10, (String) vacData.get("repopernm"));
+
+      workbook.write(fos);
     }
 
-    // 파일이 없는 경우
-    if (filesToDownload.isEmpty()) {
-      return ResponseEntity.notFound().build();
+    ProcessBuilder pb = new ProcessBuilder(
+            "C:/Program Files/LibreOffice/program/soffice.exe",
+            "--headless",
+            "--convert-to", "pdf",
+            "--outdir", tempPdf.getParent().toString(),
+            tempXlsx.toAbsolutePath().toString()
+    );
+    pb.inheritIO();
+    Process process = pb.start();
+    process.waitFor();
+
+    int retries = 0;
+    while ((!Files.exists(tempPdf) || Files.size(tempPdf) == 0) && retries++ < 100) {
+      Thread.sleep(100); // 최대 10초 대기
+    }
+    if (!Files.exists(tempPdf) || Files.size(tempPdf) == 0) {
+      throw new FileNotFoundException("PDF 변환 실패: " + tempPdf.toString());
     }
 
-    // 파일이 하나인 경우 그 파일을 바로 다운로드
-    if (filesToDownload.size() == 1) {
-      File file = filesToDownload.get(0);
-      String originFileName = fileNames.get(0); // originFileName 가져오기
+    try (FileInputStream fis = new FileInputStream(tempPdf.toFile())) {
+      response.setContentType("application/pdf");
+      response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''휴가신청서.pdf");
+      response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      response.setHeader("Pragma", "no-cache");
+      response.setHeader("Expires", "0");
 
-      HttpHeaders headers = new HttpHeaders();
-      String encodedFileName = URLEncoder.encode(originFileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
-      headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=*''" + encodedFileName);
-      headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-      headers.setContentLength(file.length());
-
-      ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(file.toPath()));
-
-      return ResponseEntity.ok()
-          .headers(headers)
-          .body(resource);
-    }
-
-    String zipFileName = (tketcrdtm != null && tketnm != null) ? tketcrdtm + "_" + tketnm + ".zip" : "download.zip";
-
-    // 파일이 두 개 이상인 경우 ZIP 파일로 묶어서 다운로드
-    ByteArrayOutputStream zipBaos = new ByteArrayOutputStream();
-    try (ZipOutputStream zipOut = new ZipOutputStream(zipBaos)) {
-
-      Set<String> addedFileNames = new HashSet<>(); // 이미 추가된 파일 이름을 저장할 Set
-      int fileCount = 1;
-
-      for (int i = 0; i < filesToDownload.size(); i++) {
-        File file = filesToDownload.get(i);
-        String originFileName = fileNames.get(i); // originFileName 가져오기
-
-        // 파일 이름이 중복될 경우 숫자를 붙여 고유한 이름으로 만듦
-        String uniqueFileName = originFileName;
-        while (addedFileNames.contains(uniqueFileName)) {
-          uniqueFileName = originFileName.replace(".", "_" + fileCount++ + ".");
-        }
-
-        // 고유한 파일 이름을 Set에 추가
-        addedFileNames.add(uniqueFileName);
-
-        try (FileInputStream fis = new FileInputStream(file)) {
-          ZipEntry zipEntry = new ZipEntry(originFileName);
-          zipOut.putNextEntry(zipEntry);
-
-          byte[] buffer = new byte[1024];
-          int len;
-          while ((len = fis.read(buffer)) > 0) {
-            zipOut.write(buffer, 0, len);
-          }
-
-          zipOut.closeEntry();
+      IOUtils.copy(fis, response.getOutputStream());
+      response.flushBuffer();
+      return; // ✅ 추가 응답 없이 여기서 종료
+    } finally {
+      Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+        try {
+          Files.deleteIfExists(tempXlsx);
+          Files.deleteIfExists(tempPdf);
         } catch (IOException e) {
           e.printStackTrace();
-          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-      }
-
-      zipOut.finish();
-    } catch (IOException e) {
-      e.printStackTrace();
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+      }, 5, TimeUnit.MINUTES);
     }
-
-    ByteArrayResource zipResource = new ByteArrayResource(zipBaos.toByteArray());
-
-    HttpHeaders headers = new HttpHeaders();
-    String encodedZipFileName = URLEncoder.encode(zipFileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
-    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=*''" + encodedZipFileName);
-    headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-    headers.setContentLength(zipResource.contentLength());
-
-    return ResponseEntity.ok()
-        .headers(headers)
-        .body(zipResource);
   }
+
+
 
   @GetMapping("/agencyName")
   public AjaxResult getAgencyName(Authentication auth) {

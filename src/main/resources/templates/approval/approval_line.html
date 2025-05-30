@@ -472,26 +472,19 @@
               }
               // 📎 첨부파일 컬럼
               else if (col.binding === 'atchFiles') {
-                const atchFiles = Array.isArray(item.fileList)
-                        ? item.fileList.filter(f => f.fileType === '첨부')
-                        : [];
-                if (atchFiles.length > 0) {
-                  atchFiles.forEach(file => {
-                    const btn = document.createElement("a");
-                    btn.href = "#";
-                    btn.classList.add("btn-filedown");
-                    btn.title = "첨부파일";
-                    btn.textContent = "다운로드";
-                    // btn.textContent = file.fileornm;
-                    btn.onclick = function (e) {
-                      e.preventDefault();
-                      downloadFile([file]);
-                    };
-                    cell.appendChild(btn);
-                    cell.appendChild(document.createElement("br"));
-                  });
-                } else {
-                  cell.textContent = '';
+                if (item.appnum !== '') {
+                  const btn = document.createElement("a");
+                  btn.href = "#";
+                  btn.classList.add("btn-filedown");
+                  btn.title = "첨부파일";
+                  btn.textContent = "다운로드";
+                  // btn.textContent = file.fileornm;
+                  btn.onclick = function (e) {
+                    e.preventDefault();
+                    downloadFile(item.appnum, cell);
+                  };
+                  cell.appendChild(btn);
+                  cell.appendChild(document.createElement("br"));
                 }
               }
             }
@@ -791,25 +784,71 @@
       });
     }
 
-    function downloadFile(fileList) {
-      if (!fileList || fileList.length === 0) {
-        console.warn("다운로드할 파일이 없습니다.");
-        return;
-      }
+    function downloadFile(appnum, cell) {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/api/PaymentDetail/downloader", true);
+      xhr.responseType = "blob";
+      xhr.setRequestHeader("X-CSRF-Token", $('[name=_csrf]').val());
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-      console.log("다운로드할 파일 목록:", fileList);
+      if (cell) cell.textContent = "다운로드 중...";
 
-      let downloadList = fileList.map(file => ({
-        filepath: file.filepath,
-        filesvnm: file.filesvnm,
-        fileornm: file.fileornm
-      }));
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          const url = window.URL.createObjectURL(xhr.response);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = "휴가신청서.pdf";
+          a.click();
+          window.URL.revokeObjectURL(url);
+          if (cell) {
+            // 기존 텍스트 제거
+            cell.innerHTML = "";
 
-      let downloadUrl = '/api/PaymentList/downloader';
+            // 버튼 복원
+            const btn = document.createElement("a");
+            btn.href = "#";
+            btn.classList.add("btn-filedown");
+            btn.title = "첨부파일";
+            btn.textContent = "다운로드";
+            btn.onclick = function (e) {
+              e.preventDefault();
+              downloadFile(appnum, cell); // 다시 다운로드 가능하도록
+            };
 
-      // 파일 리스트를 서버에 전송하여 다운로드 실행
-      downloadFiles(downloadList, downloadUrl);
+            cell.appendChild(btn);
+            cell.appendChild(document.createElement("br"));
+          }
+        } else {
+          console.error("다운로드 실패", xhr.statusText);
+          if (cell) {
+            // 기존 텍스트 제거
+            cell.innerHTML = "";
+
+            // 버튼 복원
+            const btn = document.createElement("a");
+            btn.href = "#";
+            btn.classList.add("btn-filedown");
+            btn.title = "첨부파일";
+            btn.textContent = "다운로드";
+            btn.onclick = function (e) {
+              e.preventDefault();
+              downloadFile(appnum, cell); // 다시 다운로드 가능하도록
+            };
+
+            cell.appendChild(btn);
+            cell.appendChild(document.createElement("br"));
+          }
+        }
+      };
+
+      xhr.onerror = function () {
+        console.error("네트워크 오류");
+      };
+
+      xhr.send("appnum=" + encodeURIComponent(appnum));
     }
+
 
     function NewSave2() {
       let popup = document.getElementById('popup1');
