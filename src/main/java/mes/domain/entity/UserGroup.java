@@ -40,4 +40,8 @@ public class UserGroup extends AbstractAuditModel implements Serializable {
 	
 	@Column(name = "\"Description\"")
 	String description;
+
+	@Column(name="spjangcd")
+	String spjangcd;
+
 }

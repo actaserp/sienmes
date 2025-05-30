@@ -34,7 +34,9 @@ public class UserGroupController{
 	
 	
 	@GetMapping("/read")
-	public AjaxResult getUserGroupList(HttpServletRequest request,
+	public AjaxResult getUserGroupList(
+			@RequestParam(value ="spjangcd") String spjangcd,
+			HttpServletRequest request,
 			Authentication auth) {
 		
 		User user = (User)auth.getPrincipal();
@@ -45,7 +47,7 @@ public class UserGroupController{
 		}			
 				
 		
-		List<Map<String,Object>> items = this.userGroupService.getUserGroupList(super_user);
+		List<Map<String,Object>> items = this.userGroupService.getUserGroupList(super_user,spjangcd);
 		AjaxResult result = new AjaxResult();
 		result.data = items;
 		return result;
@@ -74,6 +76,7 @@ public class UserGroupController{
 			@RequestParam("code") String code,
 			@RequestParam("name") String name,
 			@RequestParam ("description") String description,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 			User user = (User)auth.getPrincipal();
@@ -90,6 +93,8 @@ public class UserGroupController{
 			ug.setCode(code);
 			ug.setDescription(description);
 			ug.set_audit(user);
+			ug.setSpjangcd(spjangcd);
+
 			
 			ug = this.userGroupRepository.save(ug);
 			

@@ -15,7 +15,10 @@ public class UserGroupService {
 	@Autowired
 	SqlRunner sqlRunner;
 	
-	public List<Map<String,Object>> getUserGroupList(Boolean super_user) {
+	public List<Map<String,Object>> getUserGroupList(Boolean super_user, String spjangcd) {
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("spjangcd", spjangcd);
+
 		String sql = """
 			select id, "Code" as code 
             , "Name" as name 
@@ -24,6 +27,7 @@ public class UserGroupService {
             , to_char("_created" ,'yyyy-mm-dd hh24:mi:ss') as created
             from user_group ug 
             where 1 = 1
+            AND ug.spjangcd = :spjangcd
 			""";
 				
 			
