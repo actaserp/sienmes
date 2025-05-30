@@ -45,7 +45,7 @@ public class BomService {
 	 * @param not_past_flag
 	 * @return
 	 */
-	public List<Map<String, Object>> getBomMaterialList(String mat_type, Integer mat_group,	String bom_type, String mat_name,String not_past_flag){
+	public List<Map<String, Object>> getBomMaterialList(String mat_type, Integer mat_group,	String bom_type, String mat_name,String not_past_flag,String spjangcd){
 		
         String sql = """        		
         		with A as (select b.id
@@ -73,6 +73,7 @@ public class BomService {
 				left join unit u on u.id = m."Unit_id"
 				left join mat_grp mg on mg.id=m."MaterialGroup_id" 
 				where 1=1
+				AND b.spjangcd = :spjangcd
                 """;
             		
             if (StringUtils.hasText(mat_type)){            	
@@ -118,6 +119,7 @@ public class BomService {
             paramMap.addValue("mat_group", mat_group);
             paramMap.addValue("bom_type", bom_type);
             paramMap.addValue("mat_name", mat_name);
+			paramMap.addValue("spjangcd", spjangcd);
             return this.sqlRunner.getRows(sql, paramMap);		
 		
 	}

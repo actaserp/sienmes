@@ -31,9 +31,10 @@ public class DepartController {
 	
 	@GetMapping("/read")
 	public AjaxResult getDepart(
-			@RequestParam("keyword") String keyword) {
+			@RequestParam("keyword") String keyword,
+			@RequestParam(value ="spjangcd") String spjangcd) {
 		
-		List<Map<String, Object>> items = this.departService.getDepart(keyword);
+		List<Map<String, Object>> items = this.departService.getDepart(keyword,spjangcd);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -61,6 +62,7 @@ public class DepartController {
 			@RequestParam(value="Description", required=false) String description,
 			@RequestParam(value="Name", required=false) String name,
 			@RequestParam(value="Type", required=false) String type,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth
 			) {
@@ -77,6 +79,7 @@ public class DepartController {
 		d.setType(type);
 		d.setDescription(description);
 		d.set_audit(user);
+		d.setSpjangcd(spjangcd);
 		
 		d = this.departRepository.save(d);
 		

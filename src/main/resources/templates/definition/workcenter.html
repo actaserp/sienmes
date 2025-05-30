@@ -239,6 +239,7 @@
                 type: 'GET',
                 data: {
                     'keyword ': keyword,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
                 success: function (data) {
@@ -302,6 +303,7 @@
                 type: 'GET',
                 data: {
                     'keyword': keyword,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
                 success: function (result) {
@@ -390,6 +392,8 @@
                 $('#workcenterForm #Process_id').focus();
                 return false;
             }
+
+            data.spjangcd = sessionStorage.getItem('spjangcd');
 
             let fnSuccess = function (res) {
                 if (res.success) {

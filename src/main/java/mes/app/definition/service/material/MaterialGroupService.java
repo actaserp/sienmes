@@ -18,12 +18,13 @@ public class MaterialGroupService {
 	SqlRunner sqlRunner;
 	
 	// 품목그룹 목록 조회
-	public List<Map<String, Object>> getMatGrouptList(String matType, String matGrp){
+	public List<Map<String, Object>> getMatGrouptList(String matType, String matGrp,String spjangcd){
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();        
         dicParam.addValue("mat_type", matType);
         dicParam.addValue("mat_grp", matGrp);
-        
+		dicParam.addValue("spjangcd", spjangcd);
+
         String sql = """
 			select mg.id
             , mg."Name" as material_group_name
@@ -31,6 +32,7 @@ public class MaterialGroupService {
             , fn_code_name('mat_type', mg."MaterialType") as material_type
             from mat_grp mg 
             where 1=1
+            AND spjangcd = :spjangcd
 		    """;
         if (StringUtils.isEmpty(matType)==false) sql += " and mg.\"MaterialType\"= :mat_type ";
         if (StringUtils.isEmpty(matGrp)==false) sql += " and upper(mg.\"Name\") like concat('%%',upper( :mat_grp ),'%%') ";

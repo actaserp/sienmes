@@ -40,9 +40,10 @@ public class WorkcenterController {
 	@GetMapping("/read")
 	public AjaxResult getWorkcenterList(
 			@RequestParam(value="keyword", required=false) String keyword,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request) {
 		
-		List<Map<String, Object>> items = this.workcenterService.getWorkcenterList(keyword);
+		List<Map<String, Object>> items = this.workcenterService.getWorkcenterList(keyword,spjangcd);
         AjaxResult result = new AjaxResult();
         result.data = items;
 		return result;
@@ -87,6 +88,7 @@ public class WorkcenterController {
 			@RequestParam(value="name") String name,
 			@RequestParam(value="process_storehouse_id", required=false) Integer processStorehouseId,
 			@RequestParam(value="outsourcing_yn", required=false) String outsourcingYN,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -126,6 +128,8 @@ public class WorkcenterController {
 		workcenter.setOutSourcingYN(outsourcingYN);
 		workcenter.setProcessId(processId);
 		workcenter.set_audit(user);
+		workcenter.setSpjangcd(spjangcd);
+
 		
 		workcenter = this.workcenterRepository.save(workcenter);
 		

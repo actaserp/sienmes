@@ -19,10 +19,11 @@ public class StoreHouseService {
 	SqlRunner sqlRunner;
 	
 	//창고 목록 조회
-	public List<Map<String,Object>> getStorehouseList(String storehouseName) {
+	public List<Map<String,Object>> getStorehouseList(String storehouseName,String spjangcd) {
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("storehouse_name", storehouseName);
+		dicParam.addValue("spjangcd", spjangcd);
 		
 		String sql = """
 			select sh.id
@@ -36,6 +37,7 @@ public class StoreHouseService {
             from store_house sh 
             left join factory f on f.id  = sh."Factory_id"
             where 1=1
+            AND sh.spjangcd = :spjangcd
 			""";
 		if (StringUtils.isEmpty(storehouseName)==false) sql +="and upper(sh.\"Name\") like concat('%%',upper(:storehouse_name),'%%')";
 			

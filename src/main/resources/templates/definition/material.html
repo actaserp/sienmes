@@ -1664,7 +1664,8 @@
                     'mat_type': $('#cboMaterialType').val(),
                     'mat_group': $('#cboMaterialGroup').val(),
                     'keyword': $('#keyword').val(),
-                    'action': 'read'
+                    'action': 'read',
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 };
 
                 let result = AjaxUtil.getSyncData(this.url + '/read', data);
@@ -1715,7 +1716,9 @@
 
             // 품목 상세 조회
             showDetail(mat_pk) {
-                let param = {'id': mat_pk};
+                let param = {'id': mat_pk,
+                    spjangcd: sessionStorage.getItem('spjangcd')
+                };
                 let result = AjaxUtil.getSyncData(this.url + '/detail', param);
                 if (result.success != null) {
                     let detailData = result.data;
@@ -1765,8 +1768,6 @@
                 let validate = true;
                 let $target = null;
 
-
-
                 $('.mat_detail').find('input, select').each(function () {
                     if ($(this).is(':required')) {
                         if (!$(this).val()) {
@@ -1794,6 +1795,9 @@
                 let priceData = FormUtil.extractForm($('#priceForm'));
                 //let data = $.extend({}, basicData, productionData, stockData, testData, routingData);
                 let data = $.extend({}, basicData, productionData, stockData, routingData, priceData);
+
+                data.spjangcd= sessionStorage.getItem('spjangcd');
+
 
                 let fnSuccess = function (res) {
                     if (!res.success) {

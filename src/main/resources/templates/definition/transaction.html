@@ -285,6 +285,7 @@
                 let param = {
                     'searchtradenm': $('#searchtradenm').val(),
                     'searchioflag': $('#searchioflag').val(),
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 }
 
                 let url = '/api/definition/trade';
@@ -309,6 +310,8 @@
                     return;
                 }
 
+                data.spjangcd=sessionStorage.getItem('spjangcd');
+
                 let fnSuccess = function (res) {
                     Alert.alert('','저장되었습니다');
                     _this.searchMainData();
@@ -318,7 +321,8 @@
 
 
             showDetail(trid){
-                let param = {'id': trid};
+                let param = {'id': trid,
+                    spjangcd: sessionStorage.getItem('spjangcd')};
                 let url = '/api/definition/trade'
 
                 let result = AjaxUtil.getSyncData(url + '/detail', param);
@@ -450,7 +454,8 @@
 
                 let data = {
                     searchCode: searchCode,
-                    searchName: searchName
+                    searchName: searchName,
+                    spjangcd: sessionStorage.getItem('spjangcd')
                 };
 
                 AjaxUtil.getAsyncData(url, data, function (result) {

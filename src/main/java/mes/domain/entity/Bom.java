@@ -50,4 +50,9 @@ public class Bom extends AbstractAuditModel{
 	
 	@Column(name = "\"EndDate\"")
 	Timestamp EndDate;
+
+	@Column(name="spjangcd")
+	String spjangcd;
+
+
 }

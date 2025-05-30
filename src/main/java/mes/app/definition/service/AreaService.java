@@ -14,7 +14,7 @@ public class AreaService {
 	@Autowired
 	SqlRunner sqlRunner;
 	
-	public List<Map<String, Object>> getAreaList(String txtName) {
+	public List<Map<String, Object>> getAreaList(String txtName, String spjangcd) {
 		
 		String sql = """
 				select A.id
@@ -26,10 +26,12 @@ public class AreaService {
                 from area A
                 left join factory F on F.id = A."Factory_id"
                 where A."Name" like concat('%',:txtName,'%')
+                AND A.spjangcd = :spjangcd
                 order by  A."Name"
 				""";
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("txtName", txtName);
+		dicParam.addValue("spjangcd", spjangcd);
 		
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		return items;

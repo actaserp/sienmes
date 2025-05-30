@@ -191,6 +191,11 @@ public class Material extends AbstractAuditModel {
 	@Column(name = "\"Avrqty\"")
 	String avrqty;
 
+	@Column(name = "spjangcd")
+	String spjangcd;
+
+
+
 	//Entity 생성 후 활성화
 	//MaterialGroup materialGroup;
 	//Unit unit;

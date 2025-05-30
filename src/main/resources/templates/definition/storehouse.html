@@ -140,16 +140,10 @@
                                 <input class="form-control2 readonly" type="text" style="width: 100%;" id="created"
                                        name="created" placeholder="자동으로 생성됩니다." disabled="disabled" readonly>
                             </td>
-                            <th></th>
-                            <td></td>
-                        </tr>
-
-                        <tr>
                             <th>
                                 <label for="description">비고</label>
                             </th>
-                            <td colspan="9">
-                                <!--<textarea id="description" name="description"></textarea>-->
+                            <td>
                                 <input type="text" id="description" name="description" style="width: 100%;">
                             </td>
                         </tr>
@@ -200,6 +194,7 @@
                 type: 'GET',
                 data: {
                     'storehouse_name': storehouse_name,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
                 success: function (data) {
@@ -276,6 +271,7 @@
                 type: 'GET',
                 data: {
                     'storehouse_name': storehouse_name,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
                 success: function (result) {
@@ -371,6 +367,8 @@
                 $('#storehouseForm #factory_id').focus();
                 return;
             }
+
+            data.spjangcd = sessionStorage.getItem('spjangcd');
 
 
             Alert.confirm('', '저장하시겠습니까?', function () {

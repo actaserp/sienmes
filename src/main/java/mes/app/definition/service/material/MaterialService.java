@@ -19,12 +19,13 @@ public class MaterialService {
 	SqlRunner sqlRunner;
 	
 	
-	public List<Map<String, Object>> getMaterialList(String matType, String matGroupId, String keyword){
+	public List<Map<String, Object>> getMaterialList(String matType, String matGroupId, String keyword, String spjangcd){
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();        
 		paramMap.addValue("mat_type", matType);
 		paramMap.addValue("mat_group_id", matGroupId);
 		paramMap.addValue("keyword", keyword);
+		paramMap.addValue("spjangcd", spjangcd);
         
         String sql = """
 			select m.id
@@ -87,6 +88,7 @@ public class MaterialService {
             left join equ e on e.id = m."Equipment_id"
             left join routing r on r.id = m."Routing_id"
             where 1=1
+            AND m.spjangcd = :spjangcd
         """;
         if (StringUtils.isEmpty(matType)==false) sql +="and mg.\"MaterialType\" = :mat_type ";
         if (StringUtils.isEmpty(matGroupId)==false) sql +="and m.\"MaterialGroup_id\" = (:mat_group_id)::int ";
@@ -104,9 +106,10 @@ public class MaterialService {
 		
 	}
 	
-    public Map<String, Object> getMaterial(int matPK){
+    public Map<String, Object> getMaterial(int matPK, String spjangcd){
     	MapSqlParameterSource paramMap = new MapSqlParameterSource();        
     	paramMap.addValue("mat_pk", matPK);
+		paramMap.addValue("spjangcd", spjangcd);
         
         String sql = """
 			select m.id, m."MaterialGroup_id" 
@@ -152,6 +155,7 @@ public class MaterialService {
             inner join mat_grp mg on m."MaterialGroup_id" = mg.id
             left join unit u on u.id = m."Unit_id"
             where m.id = :mat_pk
+            AND m.spjangcd = :spjangcd
         """;
         	
         
@@ -175,7 +179,8 @@ public class MaterialService {
 		dicParam.addValue("storeHouseId", CommonUtil.tryIntNull(data.getFirst("StoreHouse_id")));
 		dicParam.addValue("storeHouseLoc", CommonUtil.tryString(data.getFirst("StoreHouseLoc")));
 		dicParam.addValue("managementLevel", CommonUtil.tryString(data.getFirst("ManagementLevel")));
-		
+		dicParam.addValue("spjangcd", CommonUtil.tryString(data.getFirst("spjangcd")));
+
 		dicParam.addValue("safetyStock", CommonUtil.tryFloatNull(data.getFirst("SafetyStock")));
 		dicParam.addValue("maxStock", CommonUtil.tryFloatNull(data.getFirst("MaxStock")));
 		dicParam.addValue("processSafetyStock", CommonUtil.tryFloatNull(data.getFirst("ProcessSafetyStock")));
@@ -286,6 +291,7 @@ public class MaterialService {
 						 , "Mtyn"
 						 , "Useyn"
 						 ,"Avrqty"
+						 ,"spjangcd"
 						 )
 						VALUES
 						(now()
@@ -335,7 +341,8 @@ public class MaterialService {
 						, :unitPrice
 						, :mtyn
 						, :useyn
-						, :avrqty)
+						, :avrqty
+						, :spjangcd)
 					""";
 		}else {
 			sql = """
@@ -389,6 +396,7 @@ public class MaterialService {
 					, "Useyn" = :useyn
 					,"Avrqty" = :avrqty
 					WHERE id = :id
+					AND spjangcd = :spjangcd
 					""";
 		}
 		

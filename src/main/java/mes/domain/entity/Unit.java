@@ -31,5 +31,9 @@ public class Unit extends AbstractAuditModel {
 	
 
 	@Column(name = "\"PieceYN\"")
-	String pieceYN;	
+	String pieceYN;
+
+	@Column(name="spjangcd")
+	String spjangcd;
+
 }

@@ -14,10 +14,11 @@ public class TradeService {
     @Autowired
     SqlRunner sqlRunner;
 
-    public List<Map<String, Object>> gettradeList(String name, String flag) {
+    public List<Map<String, Object>> gettradeList(String name, String flag, String spjangcd) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("name", name);
         dicParam.addValue("flag", flag);
+        dicParam.addValue("spjangcd", spjangcd);
 
         String sql = """
                     SELECT
@@ -30,15 +31,17 @@ public class TradeService {
                     FROM tb_trade A
                      WHERE A.tradenm like concat('%',:name,'%')
                      AND A.ioflag like concat('%',:flag,'%')
+                     AND A.spjangcd = :spjangcd
                 """;
         return this.sqlRunner.getRows(sql, dicParam);
     }
 
 
-    public Map<String, Object> getTradeDetail(int idx) {
+    public Map<String, Object> getTradeDetail(int idx, String spjangcd) {
 
         MapSqlParameterSource paramMap = new MapSqlParameterSource();
         paramMap.addValue("idx", idx);
+        paramMap.addValue("spjangcd", spjangcd);
 
         String sql = """
                 select trid
@@ -57,10 +60,11 @@ public class TradeService {
     }
 
 
-    public List<Map<String, Object>> getAccSearchitem(String code, String name) {
+    public List<Map<String, Object>> getAccSearchitem(String code, String name, String spjangcd) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("code", code);
         dicParam.addValue("name", name);
+        dicParam.addValue("spjangcd", spjangcd);
 
         String sql = """
                  select
@@ -71,6 +75,7 @@ public class TradeService {
                 AND A.spyn = '1'
                 AND A.acccd like concat('%',:code,'%')
                 AND A.accnm like concat('%',:name,'%')
+                AND A.spjangcd = :spjangcd
                 order by A.acccd
                 """;
 

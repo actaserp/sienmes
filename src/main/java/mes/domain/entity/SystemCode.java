@@ -36,4 +36,7 @@ public class SystemCode extends AbstractAuditModel {
 
 	@Column(name="\"_ordering\"")
 	Integer _ordering;
+
+	@Column(name = "spjangcd")
+	String spjangcd;
 }

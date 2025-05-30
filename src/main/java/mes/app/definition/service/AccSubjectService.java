@@ -15,8 +15,9 @@ public class AccSubjectService {
     @Autowired
     SqlRunner sqlRunner;
 
-    public List<Map<String, Object>> getAccList() {
+    public List<Map<String, Object>> getAccList(String spjangcd) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        dicParam.addValue("spjangcd", spjangcd);
 
         String sql = """
             SELECT
@@ -35,6 +36,7 @@ public class AccSubjectService {
             FROM tb_accsubject A
             LEFT JOIN tb_accsubject B
                 ON A.uacccd = B.acccd
+            WHERE A.spjangcd = :spjangcd
             ORDER BY A.acccd
         """;
 
@@ -43,10 +45,11 @@ public class AccSubjectService {
 
 
 
-    public List<Map<String, Object>> getAccSearchitem(String code, String name) {
+    public List<Map<String, Object>> getAccSearchitem(String code, String name,String spjangcd) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("code", code);
         dicParam.addValue("name", name);
+        dicParam.addValue("spjangcd", spjangcd);
 
         String sql = """
                  select
@@ -57,6 +60,7 @@ public class AccSubjectService {
                 A.spyn = '1'
                 AND A.acccd like concat('%',:code,'%')
                 AND A.accnm like concat('%',:name,'%')
+                AND A.spjangcd = :spjangcd
                 order by A.acccd
                 """;
 

@@ -409,6 +409,7 @@
             showDetail(idx) {
                 let param = {
                     'id': idx,
+
                 };
 
                 let url = '/api/definition/code';
@@ -425,6 +426,7 @@
             showDetail2(idx) {
                 let param = {
                     'id': idx,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 };
 
                 let url = '/api/definition/code';
@@ -443,6 +445,7 @@
                 let _this = this;
                 let data = {
                     'txtCode': $('#txtCode').val(),
+
                 };
 
                 $('#codeForm')[0].reset();
@@ -469,6 +472,7 @@
                 let data = {
                     'txtCode': $('#txtCode2').val(),
                     'txtCodeType': $('#txtCodeType').val(),
+                    spjangcd: sessionStorage.getItem('spjangcd'),
 
                 };
 
@@ -542,6 +546,8 @@
                     return;
                 }
 
+
+
                 let fnSuccess = function (res) {
                     if (res.success) {
                         Alert.alert('', '저장되었습니다'); // Notification
@@ -579,6 +585,8 @@
                     $('#SystemcodeForm #name').focus();
                     return;
                 }
+
+                data.spjangcd=sessionStorage.getItem('spjangcd')
 
                 let fnSuccess = function (res) {
                     if (res.success) {

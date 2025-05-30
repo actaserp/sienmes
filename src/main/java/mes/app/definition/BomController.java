@@ -34,11 +34,12 @@ public class BomController {
 			@RequestParam(value="mat_group", required=false) Integer mat_group,
 			@RequestParam(value="bom_type", required=false) String bom_type,
 			@RequestParam(value="mat_name", required=false) String mat_name,
-			@RequestParam(value="not_past_flag", required=false) String not_past_flag
+			@RequestParam(value="not_past_flag", required=false) String not_past_flag,
+			@RequestParam(value ="spjangcd") String spjangcd
 			) {
 		
 		AjaxResult result = new AjaxResult();  
-        result.data = this.bomService.getBomMaterialList(mat_type,mat_group,bom_type, mat_name, not_past_flag);            
+        result.data = this.bomService.getBomMaterialList(mat_type,mat_group,bom_type, mat_name, not_past_flag,spjangcd);
 		return result;
 	}	
 		
@@ -53,7 +54,8 @@ public class BomController {
 			@RequestParam(value="EndDate") String endDate,
 			@RequestParam(value="BOMType") String bomType,
 			@RequestParam(value="Version") String version,
-			@RequestParam(value="OutputAmount") float outputAmount,			
+			@RequestParam(value="OutputAmount") float outputAmount,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			Authentication auth	
 			) {				
 		
@@ -100,7 +102,9 @@ public class BomController {
 		bom.setStartDate(startTs);
 		bom.setEndDate(endTs);
 		bom.set_audit(user);
-				
+		bom.setSpjangcd(spjangcd);
+
+
 		this.bomService.saveBom(bom);		
 		result.data = bom.getId();
 		

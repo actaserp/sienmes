@@ -107,31 +107,31 @@
                         <input type="hidden" id="id" name="id"/>
                         <tbody>
                         <tr>
-                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                            <th>
                                 <label for="Code"><span class="eq">*</span>코드</label>
                             </th>
-                            <td style="width: 10%; padding: 5px; border: 1px solid #ddd;">
+                            <td>
                                 <input id="Code" name="Code" style="width: 100%;">
                             </td>
-                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                            <th>
                                 <label for="Name"><span class="eq">*</span>부서명</label>
                             </th>
-                            <td style="width: 10%;; padding: 5px; border: 1px solid #ddd;">
+                            <td>
                                 <input type="text" id="Name" name="Name" style="width: 100%;">
                             </td>
-                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                            <th>
                                 <label for="Type"><span class="eq">*</span>부서구분</label>
                             </th>
-                            <td style="width: 10%; padding: 5px; border: 1px solid #ddd;">
+                            <td>
                                 <input type="text" style="width: 100%;" id="Type" name="Type">
                             </td>
                         </tr>
 
                         <tr>
-                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                            <th>
                                 <label for="Description">비고</label>
                             </th>
-                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;" colspan="5">
+                            <td  colspan="5">
                                 <!--<textarea id="Description" name="Description"></textarea>-->
                                 <input type="text" id="Description" name="Description" style="width: 100%;">
                             </td>
@@ -180,7 +180,8 @@
                 url: '/api/definition/depart/read',
                 type: 'GET',
                 data: {
-                    'keyword': keyword
+                    'keyword': keyword,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
                 success: function (data) {
@@ -239,7 +240,8 @@
                 url: '/api/definition/depart/read',
                 type: 'GET',
                 data: {
-                    'keyword': keyword
+                    'keyword': keyword,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
                 success: function (result) {
@@ -329,6 +331,7 @@
                 $('#basicForm #Type').focus();
                 return false;
             }
+            data.spjangcd = sessionStorage.getItem('spjangcd');
 
             let fnSuccess = function (result) {
                 if (result.success) {

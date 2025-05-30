@@ -70,9 +70,10 @@ public class MaterialController {
 	public AjaxResult getMaterialList(
 			@RequestParam("mat_type") String matType, 
     		@RequestParam("mat_group") String matGroupId,
-    		@RequestParam("keyword") String keyword) {
+    		@RequestParam("keyword") String keyword,
+			@RequestParam(value ="spjangcd") String spjangcd) {
        
-        List<Map<String, Object>> items = this.materialService.getMaterialList(matType, matGroupId, keyword);      
+        List<Map<String, Object>> items = this.materialService.getMaterialList(matType, matGroupId, keyword,spjangcd);
                		
         AjaxResult result = new AjaxResult();
         result.data = items;        				
@@ -87,8 +88,9 @@ public class MaterialController {
 	 * @return
 	 */
 	@GetMapping("/detail")
-	public AjaxResult getMaterial(@RequestParam("id") int matPk) {
-        Map<String, Object> item = this.materialService.getMaterial(matPk);      
+	public AjaxResult getMaterial(@RequestParam("id") int matPk,
+								  @RequestParam(value ="spjangcd") String spjangcd) {
+        Map<String, Object> item = this.materialService.getMaterial(matPk,spjangcd);
                		
         AjaxResult result = new AjaxResult();
         result.data = item;        				

@@ -34,9 +34,11 @@ public class UnitController {
 	
 	// 단위 목록 조회
 	@GetMapping("/read")
-	public AjaxResult getUnitList(@RequestParam("unit_name") String unitName, HttpServletRequest request) {
+	public AjaxResult getUnitList(@RequestParam("unit_name") String unitName,
+								  @RequestParam(value ="spjangcd") String spjangcd,
+								  HttpServletRequest request) {
 		
-        List<Map<String, Object>> items = this.unitService.getUnitList(unitName);
+        List<Map<String, Object>> items = this.unitService.getUnitList(unitName,spjangcd);
         AjaxResult result = new AjaxResult();
         result.data = items;
 		return result;
@@ -69,6 +71,7 @@ public class UnitController {
 			@RequestParam("name") String name,
 			@RequestParam("description") String description,
 			@RequestParam("pieceYN") String pieceYN,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth	) {
 		
@@ -97,6 +100,8 @@ public class UnitController {
 		unit.setDescription(description);
 		unit.setPieceYN(pieceYN);
 		unit.set_audit(user);
+		unit.setSpjangcd(spjangcd);
+
 		
 		unit = this.unitRepository.save(unit);
 		

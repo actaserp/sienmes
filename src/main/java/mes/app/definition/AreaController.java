@@ -34,8 +34,9 @@ public class AreaController {
 	@GetMapping("/read")
 	public AjaxResult getAreaList(
 			@RequestParam("txtName") String txtName,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request) {
-		List<Map<String, Object>> items = this.areaService.getAreaList(txtName);
+		List<Map<String, Object>> items = this.areaService.getAreaList(txtName,spjangcd);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -70,6 +71,7 @@ public class AreaController {
 			@RequestParam("name") String name,
 			@RequestParam(value="parent_id" , required=false) Integer parent_id,
 			@RequestParam("description") String description,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -98,6 +100,7 @@ public class AreaController {
 		area.setFactory_id(factory_id);
 		area.setParent_id(parent_id);
 		area.set_audit(user);
+		area.setSpjangcd(spjangcd);
 		
 		area = this.areaRepository.save(area);
 		

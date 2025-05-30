@@ -34,9 +34,10 @@ public class MaterialGroupController {
 	public AjaxResult getMatGrouptList(
 			@RequestParam("mat_type") String matType,
 			@RequestParam("mat_grp") String matGrp,
+			@RequestParam(value ="spjangcd") String spjangcd,
     		HttpServletRequest request) {
        
-        List<Map<String, Object>> items = this.materialGroupService.getMatGrouptList(matType, matGrp);      
+        List<Map<String, Object>> items = this.materialGroupService.getMatGrouptList(matType, matGrp,spjangcd);
                		
         AjaxResult result = new AjaxResult();
         result.data = items;        				
@@ -64,6 +65,7 @@ public class MaterialGroupController {
 			@RequestParam("material_type") String matType,
 			@RequestParam("material_group_code") String code,
 			@RequestParam("material_group_name") String name,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -97,6 +99,8 @@ public class MaterialGroupController {
 		matGrp.setCode(code);
 		matGrp.setMaterialType(matType);
 		matGrp.set_audit(user);
+		matGrp.setSpjangcd(spjangcd);
+
 		
 		matGrp = this.materialGroupRepository.save(matGrp);
 		

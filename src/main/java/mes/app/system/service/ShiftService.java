@@ -16,17 +16,20 @@ public class ShiftService {
 	@Autowired
 	SqlRunner sqlRunner;
 	
-	public List<Map<String, Object>> getShiftList( String shift_name) {
+	public List<Map<String, Object>> getShiftList( String shift_name, String spjangcd) {
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();        
         dicParam.addValue("shift_name", shift_name);
-        
+		dicParam.addValue("spjangcd", spjangcd);
+
         String sql = """
 			select s.id, s."Code" as shift_code
 			, s."Name" as shifht_name
 			, s."StartTime" as start_time
 			, s."EndTime" as end_time 
 			, s."Description" as description
-			from shift s  where 1=1 
+			from shift s  
+			where 1=1
+			AND s.spjangcd = :spjangcd 
             """;
         if (StringUtils.isEmpty(shift_name)==false) sql +="and upper(s.\"Name\") like concat('%%',upper(:shift_name),'%%')";
         

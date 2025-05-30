@@ -39,4 +39,8 @@ public class Shift extends AbstractAuditModel {
 	@Column(name = "\"Description\"")
 	String description;
 
+	@Column(name = "spjangcd")
+	String spjangcd;
+
+
 }

@@ -16,10 +16,11 @@ public class DepartService {
 	@Autowired
 	SqlRunner sqlRunner;
 	
-	public List<Map<String, Object>> getDepart(String keyword) {
+	public List<Map<String, Object>> getDepart(String keyword, String spjangcd) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("keyword", keyword);
+		paramMap.addValue("spjangcd", spjangcd);
 		
 		String sql = """
 				SELECT d.id
@@ -29,6 +30,7 @@ public class DepartService {
 		        , d."Type" as dept_type
 		        FROM depart d
 		        where 1=1
+		        AND d.spjangcd = :spjangcd
 				""";
 		if(StringUtils.hasText(keyword)) {
 			sql += """
@@ -49,7 +51,7 @@ public class DepartService {
 
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("id", id);
-		
+
 		String sql = """
 				SELECT d.id
 		        , d."Name" 

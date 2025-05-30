@@ -33,6 +33,7 @@ public class Trade {
     @Column(name = "remark")
     String remark; //비고
 
-
+    @Column(name="spjangcd")
+    String spjangcd;
 
 }

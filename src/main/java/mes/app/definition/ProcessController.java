@@ -43,9 +43,10 @@ public class ProcessController {
 	@GetMapping("/read")
 	public AjaxResult getProcessList(
 			@RequestParam("process_name") String processName,
+			@RequestParam(value ="spjangcd") String spjangcd,
     		HttpServletRequest request) {
        
-        List<Map<String, Object>> items = this.processService.getProcessList(processName);      
+        List<Map<String, Object>> items = this.processService.getProcessList(processName,spjangcd);
                		
         AjaxResult result = new AjaxResult();
         result.data = items;        				
@@ -75,6 +76,7 @@ public class ProcessController {
 			@RequestParam(value="process_type", required=false) String processType,
 			@RequestParam(value="description", required=false) String description,
 			@RequestParam("factory_id") Integer factoryId,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -124,6 +126,8 @@ public class ProcessController {
 		process.setDescription(description);
 		process.setFactory_id(factoryId);
 		process.set_audit(user);
+		process.setSpjangcd(spjangcd);
+
 		
 		process = this.processRepository.save(process);
 	
@@ -145,9 +149,10 @@ public class ProcessController {
 	// 공정별 부적합 유형 조회
 	@GetMapping("/proc_defect_type_list")
 	public AjaxResult getProcDefectTypeList(
-			@RequestParam("proc_pk") int processId, 
+			@RequestParam("proc_pk") int processId,
+			@RequestParam(value ="spjangcd") String spjangcd,
     		HttpServletRequest request) {
-		List<Map<String, Object>> items = this.processService.getProcDefectTypeList(processId);      
+		List<Map<String, Object>> items = this.processService.getProcDefectTypeList(processId,spjangcd);
                		
         AjaxResult result = new AjaxResult();
         result.data = items;        				
@@ -158,9 +163,10 @@ public class ProcessController {
 	// 공정별 비가동 유형 조회
 	@GetMapping("/proc_stop_cause_list")
 	public AjaxResult getProcStopCauseList(
-			@RequestParam("proc_pk") int processId, 
+			@RequestParam("proc_pk") int processId,
+			@RequestParam(value ="spjangcd") String spjangcd,
     		HttpServletRequest request) {
-		List<Map<String, Object>> items = this.processService.getProcStopCauseList(processId);      
+		List<Map<String, Object>> items = this.processService.getProcStopCauseList(processId,spjangcd);
                		
         AjaxResult result = new AjaxResult();
         result.data = items;        				

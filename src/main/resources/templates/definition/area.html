@@ -350,6 +350,7 @@
                 //let url = '/api/definition/area?txtName='+txtName;
                 let data = {
                     'txtName' :$('#txtName').val(),
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                     //'action':'read'
                 }
                 let result = AjaxUtil.getSyncData(this.url+'/read', data);
@@ -405,6 +406,8 @@
                     $('#basicForm #name').focus();
                     return;
                 }
+
+                data.spjangcd = sessionStorage.getItem('spjangcd')
 
                 let fnSuccess = function (res) {
                     if (res.success) {
@@ -519,6 +522,8 @@
 
             $('#btnDel').click(function (e) {
                 let id = $('#basicForm').find('#id').val()
+                let spjangcd = sessionStorage.getItem('spjangcd');
+
                 Alert.confirm('',
                     '삭제하시겠습니까?',
                     function () { page.deleteArea(id) },

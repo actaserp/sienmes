@@ -34,9 +34,9 @@ public class AccsubjectController {
     AccmanageRepository accmanageRepository;
 
     @GetMapping("/read")
-    public AjaxResult getAccList() {
+    public AjaxResult getAccList(@RequestParam(value ="spjangcd") String spjangcd) {
         AjaxResult result = new AjaxResult();
-        result.data = this.accSubjectService.getAccList();
+        result.data = this.accSubjectService.getAccList(spjangcd);
         return result;
     }
 
@@ -53,6 +53,7 @@ public class AccsubjectController {
             @RequestParam(value="cacccd" , required=false) String cacccd, // 차감계정 acccd
             @RequestParam(value="acclv", required=false) String acclvStr,
             @RequestParam(value="useyn", required=false) String useyn,
+            @RequestParam(value ="spjangcd") String spjangcd,
             Authentication auth
     ) {
 
@@ -83,6 +84,7 @@ public class AccsubjectController {
         acc.setAccprtnm(accprtnm); // 양식명
         acc.setEtccode(etccode); // 연결코드
         acc.setCacccd(cacccd); //차감계정
+        acc.setSpjangcd(spjangcd);
 
         this.accSubjectRepository.save(acc);
         result.data = acc;
@@ -207,11 +209,12 @@ public class AccsubjectController {
     @GetMapping("/search_acc")
     public AjaxResult getAccSearchList(
             @RequestParam(value="searchCode", required=false) String code,
-            @RequestParam(value="searchName", required=false) String name
+            @RequestParam(value="searchName", required=false) String name,
+            @RequestParam(value ="spjangcd") String spjangcd
     ) {
 
         AjaxResult result = new AjaxResult();
-        result.data = this.accSubjectService.getAccSearchitem(code,name);
+        result.data = this.accSubjectService.getAccSearchitem(code,name,spjangcd);
         return result;
     }
 

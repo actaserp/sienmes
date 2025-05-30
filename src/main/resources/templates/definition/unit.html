@@ -181,6 +181,7 @@
                 type: 'GET',
                 data: {
                     'unit_name': unit_name,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
                 success: function (data) {
@@ -248,6 +249,7 @@
                 type: 'GET',
                 data: {
                     'unit_name': unit_name,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 success: function (result) {
                     if (result.success) {
@@ -315,6 +317,8 @@
                 $('#unitForm #description').focus();
                 return false;
             }
+
+            data.spjangcd=sessionStorage.getItem('spjangcd');
 
             Alert.confirm('', '저장하시겠습니까?', function () {
                 let fnSuccess = function (result) {

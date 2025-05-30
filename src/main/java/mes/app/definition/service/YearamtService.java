@@ -269,13 +269,14 @@ public class YearamtService {
     }
 
 
-    public List<Map<String, Object>> getYearamtList(String year, String ioflag, String cltid, String name) {
+    public List<Map<String, Object>> getYearamtList(String year, String ioflag, String cltid, String name,String spjangcd) {
         // 공통 파라미터 설정
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("year", year);
         dicParam.addValue("ioflag", ioflag);
         dicParam.addValue("searchid", cltid);
         dicParam.addValue("name", name);
+        dicParam.addValue("spjangcd", spjangcd);
 
         int targetYear = Integer.parseInt(year) - 1;
         String yyyymm = targetYear + "12";
@@ -320,6 +321,7 @@ public class YearamtService {
             WHERE c.relyn = '0'
               AND c.id::text LIKE concat('%', :searchid, '%')
               AND c."Name" LIKE concat('%', :name, '%')
+              AND c.spjangcd = :spjangcd
             ORDER BY c.id
         """;
             } else {
@@ -360,6 +362,7 @@ public class YearamtService {
             WHERE c.relyn = '0'
               AND c.id::text LIKE concat('%', :searchid, '%')
               AND c."Name" LIKE concat('%', :name, '%')
+              AND c.spjangcd = :spjangcd
             ORDER BY c.id
         """;
         }

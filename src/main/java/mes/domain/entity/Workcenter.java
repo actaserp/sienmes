@@ -52,4 +52,7 @@ public class Workcenter extends AbstractAuditModel {
 	@Column(name = "\"ProcessStoreHouse_id\"")
 	Integer proccesStoreHouseId;
 
+	@Column(name = "spjangcd")
+	String spjangcd;
+
 }

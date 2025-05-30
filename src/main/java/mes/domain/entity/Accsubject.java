@@ -46,5 +46,8 @@ public class Accsubject {
     @Column(name = "etccode")
     String etccode; //연결코드
 
+    @Column(name = "spjangcd")
+    String spjangcd;
+
 
 }

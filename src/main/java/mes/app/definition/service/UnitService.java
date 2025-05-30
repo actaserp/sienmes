@@ -19,16 +19,18 @@ public class UnitService {
 	
 
 	// 단위 목록 조회
-	public List<Map<String, Object>> getUnitList(String unitName){
+	public List<Map<String, Object>> getUnitList(String unitName, String spjangcd){
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("unit_name", unitName);
+		dicParam.addValue("spjangcd", spjangcd);
         
         String sql = """
 			select id, "Name" as name ,"Description" as description
 		    , "PieceYN" as piece_yn
 		    from unit  
 		    where 1 = 1
+		    AND spjangcd = :spjangcd
 		    """;
         if (StringUtils.isEmpty(unitName)==false) sql += "and upper(\"Name\") like concat('%%',upper( :unit_name ),'%%') ";
         sql += "order by id, \"Name\" ";

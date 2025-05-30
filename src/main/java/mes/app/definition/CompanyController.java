@@ -49,9 +49,10 @@ public class CompanyController {
 	public AjaxResult getCompanyList(
 			@RequestParam("comp_type") String compType,
 			/*@RequestParam("group_name") String groupName,*/
-			@RequestParam("keyword") String keyword) {
+			@RequestParam("keyword") String keyword,
+			@RequestParam(value ="spjangcd") String spjangcd) {
 		
-		List<Map<String, Object>> items = this.companyService.getCompnayList(compType, keyword);
+		List<Map<String, Object>> items = this.companyService.getCompnayList(compType, keyword, spjangcd);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -111,6 +112,7 @@ public class CompanyController {
 			@RequestParam("account_number") String accountNumber,
 			@RequestParam("payment_condition") String paymentCondition,
 			@RequestParam("manage_remark") String manageRemark,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth ) {
 		User user = (User)auth.getPrincipal();
@@ -158,7 +160,8 @@ public class CompanyController {
 		company.setPaymentCondition(paymentCondition);
 		company.setManageRemark(manageRemark);
 		company.set_audit(user);
-		
+		company.setSpjangcd(spjangcd);
+
 		company = this.companyRepository.save(company);
 		
 		AjaxResult result = new AjaxResult();

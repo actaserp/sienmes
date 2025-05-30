@@ -32,11 +32,13 @@ public class YearamtController {
             @RequestParam(value="cboYear", required=false) String year,
             @RequestParam(value="ioflag", required=false) String ioflag,
             @RequestParam(value="searchId", required=false) String cltid,
-            @RequestParam(value="searchname", required=false) String name
+            @RequestParam(value="searchname", required=false) String name,
+            @RequestParam(value ="spjangcd") String spjangcd
+
     ) {
         AjaxResult result = new AjaxResult();
 
-        result.data = this.yearamtService.getYearamtList(year,ioflag,cltid,name);
+        result.data = this.yearamtService.getYearamtList(year,ioflag,cltid,name,spjangcd);
         return result;
     }
 

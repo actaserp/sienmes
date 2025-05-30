@@ -33,5 +33,8 @@ public class Area extends AbstractAuditModel {
 	
 	@Column(name = "\"Description\"")
 	String description;
+
+	@Column(name = "spjangcd")
+	String spjangcd;
 	
 }

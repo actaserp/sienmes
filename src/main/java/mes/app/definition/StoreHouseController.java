@@ -38,9 +38,10 @@ public class StoreHouseController {
 	@GetMapping("/read")
 	public AjaxResult getStorehouseList(
 			@RequestParam("storehouse_name") String storehouseName,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request) {
 		
-		List<Map<String,Object>> items = this.StoreHouseService.getStorehouseList(storehouseName);
+		List<Map<String,Object>> items = this.StoreHouseService.getStorehouseList(storehouseName,spjangcd);
 		
 		AjaxResult result = new AjaxResult();
         result.data = items;        				
@@ -70,6 +71,7 @@ public class StoreHouseController {
 			@RequestParam(value="storehouse_name") String storehouseName,
 			@RequestParam(value="factory_id") Integer factoryId,
 			@RequestParam(value="description") String description,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth ) {
 		
@@ -107,6 +109,8 @@ public class StoreHouseController {
 		storehouse.setFactory_id(factoryId);
 		storehouse.setDescription(description);
 		storehouse.set_audit(user);
+		storehouse.setSpjangcd(spjangcd);
+
 		
 		storehouse = this.StorehouseRepository.save(storehouse);
 		

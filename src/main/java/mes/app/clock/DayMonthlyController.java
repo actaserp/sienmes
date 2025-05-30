@@ -95,6 +95,8 @@ public class DayMonthlyController {
             Object holitimeStr = item.get("holitime");
             Object worktimeStr = item.get("worktime");
 
+            String address= (String) item.get("address");
+
 
             Optional<TB_PB201> optional = tbPb201Repository.findByIdSpjangcdAndIdWorkymAndIdWorkdayAndIdPersonid(spjangcd,workym, workday, id);
             TB_PB201 tbpb201;
@@ -114,6 +116,7 @@ public class DayMonthlyController {
             }
 
                 tbpb201.setWorkcd(workcd);
+                tbpb201.setAddress(address);
 
                 if (starttimeStr != null && !starttimeStr.trim().isEmpty()) {
                     // "HH:mm" 형식인지 간단한 유효성 검사
@@ -277,6 +280,8 @@ public class DayMonthlyController {
             Object holitimeStr = item.get("holitime");
             Object worktimeStr = item.get("worktime");
 
+            String address= (String) item.get("address");
+
 
             Optional<TB_PB201> optional = tbPb201Repository.findByIdSpjangcdAndIdWorkymAndIdWorkdayAndIdPersonid(spjangcd,workym, workday, personid);
 
@@ -285,6 +290,7 @@ public class DayMonthlyController {
                 TB_PB201 tbpb201 = optional.get();
                 tbpb201.setFixflag("1");
                 tbpb201.setWorkcd(workcd);
+                tbpb201.setAddress(address);
 
                 if (starttimeStr != null && !starttimeStr.trim().isEmpty()) {
                     // "HH:mm" 형식인지 간단한 유효성 검사

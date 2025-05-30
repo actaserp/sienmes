@@ -1037,6 +1037,7 @@
                     'comp_type': $('#cboCompanyType').val(),
                     /*'group_name': $('#cboGroupName').val(),*/
                     'keyword': $('#txtCompany').val(),
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 };
                 let result = AjaxUtil.getSyncData(this.url + '/read', data);
                 if (result != null) {
@@ -1065,7 +1066,7 @@
                 let url = '/api/definition/company';
                 let data = {
                     'action': 'mat_price_list',
-                    'company_id': company_id
+                    'company_id': company_id,
                 };
                 let result = AjaxUtil.getSyncData(this.url + '/mat_price_list', data);
 
@@ -1309,6 +1310,8 @@
                 }
 
                 data.relyn = $('#relyn').is(':checked') ? "1" : "0";
+                data.spjangcd = sessionStorage.getItem('spjangcd');
+
 
                 if (!data.name) {
                     Alert.alert('', '업체명을 입력해주세요.');

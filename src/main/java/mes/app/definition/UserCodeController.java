@@ -53,10 +53,11 @@ public class UserCodeController {
 	@GetMapping("/SystemCoderead")
 	public AjaxResult getSystemCodeList(
 			@RequestParam("txtCode") String txtCode,
-			@RequestParam("txtCodeType") String txtCodeType
+			@RequestParam("txtCodeType") String txtCodeType,
+			@RequestParam(value ="spjangcd") String spjangcd
 	) {
 
-		List<Map<String, Object>> items = this.codeService.getSystemCodeList(txtCode,txtCodeType);
+		List<Map<String, Object>> items = this.codeService.getSystemCodeList(txtCode,txtCodeType,spjangcd);
 		AjaxResult result = new AjaxResult();
 
 		result.data = items;
@@ -73,8 +74,9 @@ public class UserCodeController {
 	}
 
 	@GetMapping("/Systemcodedetail")
-	public AjaxResult getSystemCode(@RequestParam("id") int id) {
-		Map<String, Object> item = this.codeService.getSystemcCode(id);
+	public AjaxResult getSystemCode(@RequestParam("id") int id,
+									@RequestParam(value ="spjangcd") String spjangcd) {
+		Map<String, Object> item = this.codeService.getSystemcCode(id,spjangcd);
 
 		AjaxResult result = new AjaxResult();
 		result.data = item;
@@ -121,6 +123,7 @@ public class UserCodeController {
 			@RequestParam("name") String value,
 			@RequestParam("code") String code,
 			@RequestParam("description") String description,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		User user = (User)auth.getPrincipal();
@@ -138,6 +141,7 @@ public class UserCodeController {
 		s.setCode(code);
 		s.setDescription(description);
 		s.set_audit(user);
+		s.setSpjangcd(spjangcd);
 
 		s = this.sysCodeRepository.save(s);
 

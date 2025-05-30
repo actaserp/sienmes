@@ -33,9 +33,10 @@ public class ShiftController {
 	@GetMapping("/read")
 	public AjaxResult getShiftList(
 			@RequestParam(value="shift_name", required=false) String shift_name,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request) {
 		
-		List<Map<String, Object>> items = this.shiftService.getShiftList(shift_name);      
+		List<Map<String, Object>> items = this.shiftService.getShiftList(shift_name,spjangcd);
    		
         AjaxResult result = new AjaxResult();
         result.data = items;        				
@@ -66,6 +67,7 @@ public class ShiftController {
 			@RequestParam(value="StartTime") String StartTime,
 			@RequestParam(value="EndTime") String EndTime,
 			@RequestParam(value="Description", required=false) String Description,
+			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -97,6 +99,8 @@ public class ShiftController {
 		shift.setEndTime(edTime);
 		shift.setDescription(Description);
 		shift.set_audit(user);
+		shift.setSpjangcd(spjangcd);
+
 		
 		shift = this.shiftRepository.save(shift);
 		

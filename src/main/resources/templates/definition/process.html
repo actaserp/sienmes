@@ -275,6 +275,7 @@
                 type: 'GET',
                 data: {
                     'process_name': process_name,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
                 success: function (data) {
@@ -354,6 +355,7 @@
                 type: 'GET',
                 data: {
                     'process_name': process_name,
+                    spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
                 success: function (result) {
@@ -460,6 +462,8 @@
                 return;
             }
 
+            data.spjangcd=sessionStorage.getItem('spjangcd');
+
             Alert.confirm('', '저장하시겠습니까?', function () {
                 let fnSuccess = function (result) {
                     if (result.success) {
@@ -512,6 +516,7 @@
                 type: 'GET',
                 data: {
                     'proc_pk': id,
+                    spjangcd:sessionStorage.getItem('spjangcd')
                 },
                 async: false,
                 success: function (data) {
@@ -626,6 +631,7 @@
                 type: 'GET',
                 data: {
                     'proc_pk': id,
+                    spjangcd:sessionStorage.getItem('spjangcd')
                 },
                 async: false,
                 success: function (data) {

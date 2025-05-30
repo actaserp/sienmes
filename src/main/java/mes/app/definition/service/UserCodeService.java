@@ -36,11 +36,12 @@ public class UserCodeService {
 	}
 
 
-	public List<Map<String, Object>> getSystemCodeList(String txtCode,String txtCodeType){
+	public List<Map<String, Object>> getSystemCodeList(String txtCode,String txtCodeType, String spjangcd){
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("txtCode", txtCode);
 		dicParam.addValue("txtCodeType", txtCodeType);
+		dicParam.addValue("spjangcd", spjangcd);
 
 		String sql = """
 				select id
@@ -51,6 +52,7 @@ public class UserCodeService {
                 from sys_code
                 where "Value" ilike concat('%%',:txtCode,'%%')
                 AND "Description" ilike concat('%%',:txtCodeType,'%%')
+                AND spjangcd = :spjangcd
 				""";
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		return items;
@@ -78,7 +80,7 @@ public class UserCodeService {
 	}
 
 
-	public Map<String, Object> getSystemcCode(int id) {
+	public Map<String, Object> getSystemcCode(int id, String spjangcd) {
 		String sql = """
 				select S.id
 			, S."CodeType" as code_type
@@ -87,6 +89,7 @@ public class UserCodeService {
             , S."Description" as description
             from sys_code S
             where S.id = :id
+            AND S.spjangcd = :spjangcd
 			""";
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();

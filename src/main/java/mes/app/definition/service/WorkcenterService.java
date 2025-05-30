@@ -17,9 +17,11 @@ public class WorkcenterService {
 	SqlRunner sqlRunner;
 	
 	// 워크센터 목록 조회
-	public List<Map<String, Object>> getWorkcenterList(String keyword){
+	public List<Map<String, Object>> getWorkcenterList(String keyword, String spjangcd){
 		MapSqlParameterSource dicParam = new MapSqlParameterSource(); 
 		dicParam.addValue("keyword", keyword);
+		dicParam.addValue("spjangcd", spjangcd);
+
 
         String sql = """
 			select wc.id, wc."Code" as code
@@ -38,6 +40,7 @@ public class WorkcenterService {
                 left join process p on p.id= wc."Process_id"
                 left join store_house sh on sh.id = wc."ProcessStoreHouse_id"
                 where 1=1 
+                AND wc.spjangcd = :spjangcd
             """;
         if (StringUtils.isEmpty(keyword)==false) sql +="and upper(wc.\"Name\") like concat('%%',upper( :keyword ),'%%')";
         

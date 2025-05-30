@@ -29,10 +29,11 @@ public class TradeController {
     @RequestMapping("/read")
     public AjaxResult gettradeList(
             @RequestParam(value="searchtradenm" , required=false) String searchtradenm,
-            @RequestParam(value="searchioflag" , required=false) String searchioflag){
+            @RequestParam(value="searchioflag" , required=false) String searchioflag,
+            @RequestParam(value ="spjangcd") String spjangcd){
 
         AjaxResult result = new AjaxResult();
-        result.data = this.tradeService.gettradeList(searchtradenm,searchioflag);
+        result.data = this.tradeService.gettradeList(searchtradenm,searchioflag,spjangcd);
         return result;
     }
 
@@ -45,6 +46,7 @@ public class TradeController {
             @RequestParam(value="acccd" , required=false) String acccd, //계정코드
             @RequestParam(value="reacccd", required=false) String reacccd, //상대계정
             @RequestParam(value="remark" , required=false) String remark, // 비고
+            @RequestParam(value ="spjangcd") String spjangcd,
             Authentication auth
     ) {
 
@@ -65,6 +67,7 @@ public class TradeController {
         trade.setAcccd(acccd); // 계정코드
         trade.setReacccd(reacccd); // 상대계정
         trade.setRemark(remark); // 비고
+        trade.setSpjangcd(spjangcd);
 
         this.tradeRepository.save(trade);
         result.data = trade;
@@ -76,10 +79,11 @@ public class TradeController {
     @GetMapping("/detail")
     public AjaxResult getTradeDetail(
             @RequestParam("id") String id,
+            @RequestParam(value ="spjangcd") String spjangcd,
             HttpServletRequest request) {
 
         int idx = Integer.parseInt(id);
-        Map<String, Object> item = this.tradeService.getTradeDetail(idx);
+        Map<String, Object> item = this.tradeService.getTradeDetail(idx,spjangcd);
 
         AjaxResult result = new AjaxResult();
         result.data = item;
@@ -98,11 +102,12 @@ public class TradeController {
     @GetMapping("/search_acc")
     public AjaxResult getAccSearchList(
             @RequestParam(value="searchCode", required=false) String code,
-            @RequestParam(value="searchName", required=false) String name
+            @RequestParam(value="searchName", required=false) String name,
+            @RequestParam(value ="spjangcd") String spjangcd
     ) {
 
         AjaxResult result = new AjaxResult();
-        result.data = this.tradeService.getAccSearchitem(code,name);
+        result.data = this.tradeService.getAccSearchitem(code,name,spjangcd);
         return result;
     }
 

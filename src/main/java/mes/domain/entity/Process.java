@@ -37,4 +37,7 @@ public class Process extends AbstractAuditModel {
 	@Column(name="\"Factory_id\"")
 	Integer factory_id;
 
+	@Column(name="spjangcd")
+	String spjangcd;
+
 }
