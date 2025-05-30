@@ -42,7 +42,7 @@ public class AccountsReceivableListController {
 
 
   // 미수금 현황 상세
-  @DecryptField(columns  = {"accnum"}, masks = 4)
+  @DecryptField(columns  = {"accnum"})
   @GetMapping("/DetailList")
   public AjaxResult getDetailList(
       @RequestParam(value="srchStartDt", required=false) String start_date,

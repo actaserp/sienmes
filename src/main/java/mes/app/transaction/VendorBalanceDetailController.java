@@ -24,7 +24,7 @@ public class VendorBalanceDetailController {
     VendorBalanceDetailService vendorBalanceDetailService;
 
     // 거래처별 잔액 명세(출금) 리스트 조회
-    @DecryptField(columns  = {"accnum"}, masks = 4)
+    @DecryptField(columns  = {"accnum"})
     @GetMapping("/read")
     public AjaxResult getEquipmentRunChart(
             @RequestParam(value="srchStartDt", required=false) String start,

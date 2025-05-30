@@ -39,7 +39,7 @@ public class AccountsPayableListController {
     }
 
     // 미지급현황 상세 리스트 조회
-    @DecryptField(columns  = {"accnum"}, masks = 4)
+    @DecryptField(columns  = {"accnum"})
     @GetMapping("/DetailList")
     public AjaxResult getEquipmentRunChartDetail(
             @RequestParam(value="srchStartDt", required=false) String start,

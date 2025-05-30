@@ -23,7 +23,7 @@ public class CompBalanceDetailController {
   CompBalanceDetailServicr compBalanceDetailServicr;
 
   // 거래처잔액 명세(입금 관리)
-  @DecryptField(columns  = {"accnum"}, masks = 4)
+  @DecryptField(columns  = {"accnum"})
   @GetMapping("/read")
   public AjaxResult getList(
       @RequestParam(value="srchStartDt", required=false) String start,
