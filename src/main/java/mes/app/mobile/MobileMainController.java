@@ -10,8 +10,7 @@ import mes.domain.model.AjaxResult;
 import mes.domain.repository.commute.TB_PB201Repository;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -284,20 +283,20 @@ public class MobileMainController {
             RestTemplate restTemplate = new RestTemplate();
             String response = restTemplate.getForObject(apiUrl, String.class);
 
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(response);
+            JSONObject json = new JSONObject(response);
+            JSONObject responseObj = json.getJSONObject("response");
 
-            JsonNode responseObj = root.path("response");
-            JsonNode resultArray = responseObj.path("result");
+            if (responseObj.has("result") && responseObj.getJSONArray("result").length() > 0) {
+                String address = responseObj.getJSONArray("result")
+                        .getJSONObject(0)
+                        .getString("text");
 
-            if (resultArray.isArray() && !resultArray.isEmpty()) {
-                String address = resultArray.get(0).path("text").asText();
-                result.success = true;
-                result.message = "주소 변환 성공";
+                result.success=true;
+                result.message="주소 변환 성공";
                 result.data = address;
             } else {
-                result.success = false;
-                result.message = "주소를 찾을 수 없습니다.";
+                result.success=false;
+                result.message="주소를 찾을 수 없습니다.";
             }
 
         } catch (Exception e) {
