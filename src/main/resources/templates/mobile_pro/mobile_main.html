@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<style>
+  .contents-wrap{
+
+  }
+  .currentData{
+
+  }
+
+  .ip-card{
+    width: 80%;
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(135deg, #4dd0e1, #81c784);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    margin-bottom: 10px;
+    position: relative;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    margin-left: 10%;
+    font-size: large;
+  }
+
+  .office-card{
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 5px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btnArea{
+    position: fixed;
+    bottom: 0px;
+    width: 93%;
+    height: 180px;
+  }
+
+  .office_btn {
+    background-color: #007aff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 100px;
+    height: 100px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 50px;
+    border: none;
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  #officeIcon {
+    color: #ffffff;
+    background-color: #9acaf4;
+    border-radius: 10px;
+    font-size: 2.5em;
+    width: 15%;
+    aspect-ratio: 1 / 1;
+    padding-top: 2%;
+    margin-right: 10%;
+  }
+
+  #selectWorkcd {
+    max-height: 150px; /* 최대 150px까지만 보여줌 */
+    overflow-y: auto;  /* 스크롤 가능하게 설정 */
+  }
+</style>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACTAS ERP</title>
+  <link rel="icon" type="image/png" href="/images/logo/actas_log_a.png">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/> <!-- Slide css -->
+  <link rel="stylesheet" href="/resource/ax5ui/ax5ui.all.css">
+  <link rel="stylesheet" type="text/css" href="/assets_mobile/css/import.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+  <script src="/assets_mobile/js/ui.js"></script> <!-- Common js -->
+  <script th:inline="javascript">
+    var sandanData = /*[[${session.sandanList}]]*/ [];
+  </script>
+
+
+  <script type="text/javascript" src="/resource/ax5ui/ax5ui.all.min.js?v=1000"></script>
+
+  <script type="text/javascript" src="/js/ax5commUtil.js?v=1070"></script>
+
+  <script src="/js/common.js?v=1060"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script> <!-- Slide js -->
+  <script src="/js/Mobile.js"></script>
+  <script src="https://kit.fontawesome.com/84dc79ac13.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+<div class="mobile-wrapper page-ticket-list"><!-- ★페이지 Class명 -->
+  <!-- [모바일] 헤더  -->
+  <div class="mobile-layout-header">
+    <header>
+      <div class="left">
+        <a href="#" title="전체메뉴" class="logo">
+        </a>
+      </div>
+      <div class="left" style="margin-left:35px; font-size: 25px;">
+        <h2>출퇴근등록</h2>
+      </div>
+      <div class="right">
+        <a href="#" title="전체메뉴" class="btn-menu">
+          <img src="/assets_mobile/images/icon/btn-menu.svg" alt="전체메뉴 아이콘">
+        </a>
+      </div>
+    </header>
+  </div> <!-- //mobile-layout-header end-->
+
+  <!-- [모바일] 메뉴  -->
+  <div th:insert="~{mobile/mobile_menu :: mobile_menu}"></div>
+  <!-- [모바일] 컨덴츠  -->
+  <div class="mobile-layout-contents">
+    <!--- (레이아웃) Contents 영역 -->
+    <div class="layout-contents" >
+      <!-- 검색 영역  -->
+      <div class="search-wrap" style="margin-bottom: 10px">
+
+      </div>
+      <!-- 컨텐츠 영역  -->
+      <div class="contents-wrap">
+        <dl style="margin-bottom: 10px">
+<!--          <div style="width: 100%; display: flex; justify-content: center; margin: 30px 0 30px 0;">-->
+<!--            <img src="/assets_mobile/images/logo/actas_log.png" alt="로고 이미지" style="width: 70%">-->
+<!--          </div>-->
+          <div class="ip-card">
+            <input type="hidden" id="postno">
+            <!--현재 정보 카드-->
+            <!-- 현재 날자 출력 -->
+            <div style="margin-bottom: 10px">
+              <div id="searchDate" class="currentData" style="text-align: justify;"></div>
+              <div id="userInfo" class="currentData" style="text-align: end">생산부 홍길동 사원</div>
+            </div>
+            <!-- ip 검색 시간(현재시간) -->
+            <div>
+              <span id="searchTime" class="currentData" style="height: 100px; font-size: 40px;"></span>
+            </div>
+            <!-- 현재ip -->
+            <div>
+              <span id="ipAddress" class="currentData" style="border-radius: 0 0 10px 10px;"></span>
+            </div>
+          </div>
+
+          <!-- 출근시간 카드 -->
+          <div class="office-card">
+            <i class="fa-solid fa-stopwatch fa_xl" id="officeIcon"></i>
+            <div>
+              <div class="status">출근</div>
+              <div class="time" id="officeTime" style="font-weight: bold">오전 09:00</div>
+            </div>
+          </div>
+
+          <!-- 근태구분 확인 -->
+          <div id="workcd" style="display: none">
+            <label>근태구분</label>
+            <div>
+              <select id="selectWorkcd">
+                <option>휴가</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 버튼 -->
+          <div class="btnArea">
+            <div id="inside" style="display: none; gap: 13%; justify-content: center; margin-top: 50px;">
+              <button onclick="submitCommute('inOfficeIn')" class="office_btn" style=""><i class="fa-solid fa-briefcase fa_xl" style="color: #ffffff;"></i><br>사내출근</button>
+              <button onclick="submitCommute('inOfficeOut')" class="office_btn" style="background-color: red;"><i class="fa-solid fa-person-walking fa-xl" style="color: #ffffff;"></i><br>사내퇴근</button>
+            </div>
+            <div id="outside" style="display: none; gap: 13%; justify-content: center; margin-top: 50px;">
+              <button onclick="submitCommute('outOfficeIn')" class="office_btn" style=""><i class="fa-solid fa-briefcase fa_xl" style="color: #ffffff;"></i><br>외부출근</button>
+              <button onclick="submitCommute('outOfficeOut')" class="office_btn" style="background-color: red;"><i class="fa-solid fa-person-walking fa_xl" style="color: #fafafa;"></i><br>외부퇴근</button>
+            </div>
+          </div>
+        </dl>
+      </div><!--// contents-wrap end-->
+    </div> <!--//layout-contents end -->
+  </div> <!-- //mobile-layout-contents end-->
+</div> <!-- //page-wrapper end-->
+<script th:inline="javascript">
+  // // Thymeleaf에서 값 설정: Null 체크와 기본값 처리
+  // var groupid = [[${session.groupid != null ? session.groupid : 'null'}]];
+  // var id = /*[[${id != null ? id : 'null'}]]*/;
+  // var groupname = /*[[${groupname != null ? groupname : 'null'}]]*/;
+  // var username = /*[[${username != null ? username : 'null'}]]*/;
+  //
+  // // 로컬스토리지에 값 유지 (null 또는 빈 문자열은 저장하지 않음)
+  // if (groupid && groupid !== 'null') localStorage.setItem('groupid', groupid);
+  // if (id && id !== 'null') localStorage.setItem('id', id);
+  // if (username && username !== 'null') localStorage.setItem('username', username);
+  // if (groupname && groupname !== 'null') localStorage.setItem('groupname', groupname);
+</script>
+<script type="text/javascript">
+  // 현재 날짜 설정 (페이지 로딩 시 1회 설정)
+  // 요일 이름 배열
+  const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
+
+  const updateDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const date = String(today.getDate()).padStart(2, '0');
+    const weekDay = weekDays[today.getDay()];
+    document.getElementById('searchDate').innerText = `${year}.${month}.${date}(${weekDay})`;
+  };
+  // 🔄 IP 주소 조회 함수 정의
+  const updateIPAddress = () => {
+    fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+              // IP 주소를 화면에 업데이트
+              document.getElementById('ipAddress').innerText = 'IP : ' + data.ip;
+              if (data.ip === '106.240.249.66') {
+                console.log('사내 IP 확인');
+                document.getElementById('inside').style.display = 'flex';
+                document.getElementById('outside').style.display = 'none';
+                document.getElementById('workcd').style.display = 'none';
+              } else {
+                console.log('외부 IP 확인');
+                document.getElementById('inside').style.display = 'none';
+                document.getElementById('outside').style.display = 'flex';
+                // 외부 출퇴근시 사유 작성 태그 활성화
+                document.getElementById('workcd').style.display = 'block';
+              }
+            })
+            .catch(error => {
+              console.error("IP 조회 중 에러 발생: ", error);
+            });
+  };
+
+  // 🔄 시간 업데이트 함수 정의
+  const updateTime = () => {
+    const now = new Date();
+
+    // 시간, 분, 초 구하기
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    // AM/PM 설정
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    // 12시간 형식으로 변경
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0시를 12시로 변경
+
+    // 시간 포맷 설정
+    const formattedTime = `${hours}:${minutes}:${seconds} ${ampm}`;
+
+    // 화면에 업데이트
+    document.getElementById('searchTime').innerText = formattedTime;
+  };
+
+  // 🔄 페이지 로딩 시 즉시 실행
+  (() => {
+    updateIPAddress();
+    updateTime();
+  })();
+
+  // 🔄 5초마다 IP 주소 조회 및 시간 업데이트
+  setInterval(updateIPAddress, 5000);
+  setInterval(updateTime, 5000);
+
+
+  updateDate();
+
+  $(document).ready(function (e) {
+    // 유저정보 확인
+    function searchMainData(){
+      let _this = this;
+      let url = '/api/mobile_main/read_userInfo'
+      let data = {
+      }
+      let fnsuccess = function (result) {
+        console.log('result : ', result)
+        if (result != null) {
+          document.getElementById('userInfo').textContent = result.data.Name +" "+ result.data.first_name +" "+ result.data.jik_id;
+          document.getElementById('officeTime').textContent = result.data.inOfficeTime ? result.data.inOfficeTime : "--:--";
+        }
+      };
+      AjaxUtil.getAsyncData(url, data, fnsuccess);
+    }
+    searchMainData();
+    AjaxUtil.fillSelectOptions($('#selectWorkcd'), 'workcd', 'choose', false, 'work_division', '');
+  })
+
+  // 공휴일 확인 api
+  // API 정보
+  const API_KEY = 'bu6q9pRCluI8rJbEWr3Rzw5Dy6yiZC0XMpLyxho278jONlqE5NxPaaVyULwLr3WEYKyWfBOWnHyG2iOxdd4Uxg==';  // 🔥 발급받은 API 키를 여기에 넣으세요
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  let isHoly = 0;
+
+  // API URL 설정
+  const url = `http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getHoliDeInfo?solYear=${year}&solMonth=${month}&ServiceKey=${API_KEY}`;
+  async function checkHoliday() {
+    try {
+      const response = await axios.get(url, {
+        params: {
+          _type: 'json'
+        }
+      });
+
+      const items = response.data.response.body.items.item;
+      const todayString = `${year}${month}${day}`;
+      const isWeekend = today.getDay() === 0 || today.getDay() === 6;
+      const isHoliday = items && items.some(item => item.locdate === todayString);
+      if (isWeekend) {
+        console.log("오늘은 주말입니다.");
+        isHoly = 1;
+      } else if (isHoliday) {
+        console.log("오늘은 공휴일입니다.");
+        isHoly = 1;
+      } else {
+        console.log("오늘은 평일입니다.");
+      }
+
+    } catch (error) {
+      console.error("API 호출에 실패했습니다:", error.message);
+    }
+  }
+  function reloadWindow(){
+    console.log("확인 버튼 클릭됨");
+    window.location.reload(); // ✅ 페이지 새로고침
+  }
+
+  // 출근/퇴근 등록(상태값에 따라 로직 변경)
+  function submitCommute(office){
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const date = String(today.getDate()).padStart(2, '0');
+    const weekDay = weekDays[today.getDay()];
+    const weekNum = today.getDay();
+    console.log('office tag : ', office)
+      //출근 버튼클릭
+    if(office.trim() === 'inOfficeIn' || office.trim() === 'outOfficeIn') {
+      if(document.getElementById('officeTime').textContent !== '--:--') {
+        Alert.alert('', '이미출근 하셨습니다.');
+      }else {
+        checkHoliday();
+        let _this = this;
+        let url = '/api/mobile_main/submitCommute'
+        let data = {
+          'weekNum': weekNum,
+          'office': office,
+          'workym': year + month,
+          'workday': date,
+          'isHoly': isHoly,
+          'workcd': document.getElementById('selectWorkcd').value
+
+        }
+        let fnsuccess = function (result) {
+          if (result != null) {
+            if (result.success) {
+              Alert.alert('', result.message, reloadWindow);
+            } else {
+              Alert.alert('', "출근 등록에 실패하였습니다.");
+            }
+          } else {
+            Alert.alert('', "오류가 발생하였습니다.");
+          }
+        };
+        AjaxUtil.postAsyncData(url, data, fnsuccess);
+      }
+    }else{
+      // 퇴근버튼 클릭
+      if(document.getElementById('officeTime').textContent === '--:--') {
+        Alert.alert('', '출근기록이 없습니다.');
+      }else{
+        console.log('office tag : ', office)
+        let _this = this;
+        let url = '/api/mobile_main/modifyCommute'
+        let data = {
+          'office': office,
+          'workym': year + month,
+          'workday': date,
+        }
+        let fnsuccess = function (result) {
+          if (result != null) {
+            Alert.alert('', result.message);
+          }
+        };
+        AjaxUtil.postAsyncData(url, data, fnsuccess);
+      }
+    }
+  }
+
+
+
+</script>
+</body>
+</html>

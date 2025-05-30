@@ -23,6 +23,86 @@
                 <!-- dep1 -->
                 <ul class="dep1">
                     <li data-target="menu1">전체메뉴</li>
+                    <li class="dep1-1">
+                        <a href="#a" title="모니터링" class="ico-lnb01">
+                            모니터링
+                        </a>
+
+                    </li>
+                    <li class="dep1-1">
+                        <a href="#a" title="기준정보" class="ico-lnb05">
+                            기준정보
+                        </a>
+                        <ul class="dep2" id="dep2-information">
+
+                        </ul>
+                    </li>
+                    <li class="dep1-1">
+                        <a href="#a" title="영업 관리" class="ico-lnb02">
+                            영업 관리
+                        </a>
+                        <ul class="dep2" id="dep2-sales-management">
+
+                        </ul>
+                    </li>
+                    <li class="dep1-1">
+                        <a href="#a" title="자재 관리" class="ico-lnb03">
+                            자재 관리
+                        </a>
+                        <ul class="dep2" id="dep2-purchase-materials">
+
+                        </ul>
+                    </li>
+                    <li class="dep1-1">
+                        <a href="#a" title="생산 관리" class="ico-lnb03">
+                            생산 관리
+                        </a>
+                        <ul class="dep2" id="dep2-production-management">
+
+                        </ul>
+                    </li>
+                    <li class="dep1-1">
+                        <a href="#a" title="품질 관리" class="ico-lnb04">
+                            품질 관리
+                        </a>
+                        <ul class="dep2" id="dep2-quality">
+
+                        </ul>
+                    </li>
+                    <li class="dep1-1">
+                        <a href="#a" title="보고서 관리" class="ico-lnb04">
+                            보고서 관리
+                        </a>
+                        <ul class="dep2" id="dep2-report">
+
+                        </ul>
+                    </li>
+                    <li class="dep1-1">
+                        <a href="#a" title="입출금 관리" class="ico-lnb04">
+                            입출금 관리
+                        </a>
+                        <ul class="dep2" id="dep2-transaction">
+
+                        </ul>
+                    </li>
+                    <li class="dep1-1">
+                        <a href="#a" title="근태관리" class="ico-lnb04">
+                            근태 관리
+                        </a>
+                        <ul class="dep2" id="dep2-clock-inout">
+
+                        </ul>
+                    </li>
+                    <li class="dep1-1">
+                        <a href="#a" title="시스템설정" class="ico-lnb05">
+                            시스템 설정
+                        </a>
+                        <ul class="dep2" id="dep2-system-settings">
+
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="dep2" id="dep2-monitoring">
 
                 </ul>
                 <div class="dep2">
@@ -39,3 +119,400 @@
         </div> <!--//menu-wrapper end-->
     </div> <!--//mobile-layout-menu end-->
 </div>
+<script type="text/javascript">
+    let nthTabs = null;
+    let default_menu = null;
+
+    $(document).ready(function () {
+
+        $(".left").click(function () {
+            nthTabs.delAllTab();
+            // window.location.reload();
+        });
+
+
+        // let lang_cd = i18n.getLanguageCode();
+        //i18n.initializeCommonData(lang_cd);
+        // i18n.initializeMenuData(lang_cd);
+
+        // 메뉴 매핑(FrontFolder_id)
+
+        nthTabs = $('#main-tabs').nthTabs();
+
+        const dep2Mappings = {
+            1: '#dep2-monitoring',
+            2: '#dep2-information',
+            3: '#dep2-sales-management',
+            4: '#dep2-purchase-materials',
+            5: '#dep2-production-management',
+            6: '#dep2-quality',
+            7: '#dep2-report',
+            8: '#dep2-transaction',
+            9: '#dep2-system-settings',
+            10: '#dep2-clock-inout',
+            12: '#dep2-approval'
+        };
+
+        function loadMenu(FrontFolderId, $FrontFolderElement) {
+            $.ajax({
+                url: '/api/system/menus', // menus API를 통해 전체 메뉴 데이터를 가져옴
+                type: 'GET',
+                success: function (response) {
+                    // FrontFolder_id를 기반으로 폴더 필터링
+                    const folders = response.data.filter(folder => folder.frontfolder_id === parseInt(FrontFolderId));
+
+                    if (folders.length > 0) {
+                        // 해당 FrontFolderId에 해당하는 폴더가 있으면 대 메뉴를 다시 보여줌
+                        $FrontFolderElement.closest('.dep1-1').css('display', 'block');
+
+                        folders.forEach(function (folder) {
+                            let $li = $('<li class="dep2-1"></li>');
+                            let $a = $('<a href="#"></a>').text(folder.folder_name);
+                            $li.append($a);
+
+                            let $subUl = $('<ul class="dep3 documents" style="display: none;"></ul>');
+                            $li.append($subUl);
+
+                            // 해당 폴더의 하위 메뉴 항목 추가
+                            folder.nodes.forEach(function (item) {
+                                let $itemLi = $('<li class="dep3-custom-list-style"></li>');
+                                let $itemA = $('<a href="#" menuurl="' + item.url + '" data-bookmark="' + item.isbookmark + '" data-objid="' + item.objId + '" title="' + item.objNm + '"></a>').text(item.objNm);
+
+                                $itemLi.append($itemA);
+                                $subUl.append($itemLi);
+                            });
+
+                            $FrontFolderElement.append($li);
+
+                            // dep2 클릭 시 dep3 항목이 1개면 바로 탭 추가하고 dep3 숨김
+                            $a.on('click', function (e) {
+                                e.preventDefault();
+
+                                // dep3 항목 찾기
+                                var $dep3 = $li.find('.dep3 li');
+
+                                if ($dep3.length > 1) {
+
+                                } else if ($dep3.length === 1) {
+                                    $('.dep2-1').removeClass('on');
+                                    $('.dep3 li').removeClass('on');
+                                    $li.addClass('on');
+
+                                    var $a = $dep3.find('a');
+                                    var val = $a.text();
+                                    var menuurl = $a.attr('menuurl');
+                                    var objid = $a.attr('data-objid');
+                                    // var _bookmark = $a.attr('data-bookmark');
+
+                                    if (nthTabs.isExistsTab('#' + objid)) {
+                                        nthTabs.toggleTab('#' + objid);
+                                    } else {
+                                        nthTabs.addTab({
+                                            id: objid,
+                                            title: val,
+                                            url: '/gui/' + objid + '/default',
+                                            active: true,
+                                            allowClose: true,
+                                            // isbookmark: _bookmark
+                                        });
+                                        // nthTabs.bindBookmarkEvent(objid, _bookmark);
+                                    }
+
+                                    // dep3 리스트 숨김
+                                    $subUl.hide(); // dep3 항목이 1개일 때 숨김
+                                    return false;
+                                }
+                            });
+                        });
+
+                        $FrontFolderElement.find('.dep3').on('click', 'a', function (e) {
+                            e.preventDefault();
+
+                            // 모든 dep3의 li에서 on 클래스 제거
+                            $('.dep3 li').removeClass('on');
+
+                            // 현재 클릭한 li에 on 클래스 추가
+                            var $clickedDep3 = $(this).parent('li');
+                            $clickedDep3.addClass('on');
+
+                            // dep3가 1개인 dep2에서 on 클래스 제거
+                            $('.dep2-1.on').removeClass('on');
+
+                            var val = $(this).text();
+                            var menuurl = $(this).attr('menuurl');
+                            var objid = $(this).attr('data-objid');
+                            var _bookmark = $(this).attr('data-bookmark');
+
+                            if (nthTabs.isExistsTab('#' + objid)) {
+                                nthTabs.toggleTab('#' + objid);
+                            } else {
+                                nthTabs.addTab({
+                                    id: objid,
+                                    title: val,
+                                    url: '/gui/' + objid + '/default',
+                                    active: true,
+                                    allowClose: true,
+                                    isbookmark: _bookmark
+                                });
+                                nthTabs.bindBookmarkEvent(objid, _bookmark);
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+
+        Object.keys(dep2Mappings).forEach(FrontFolderId => {
+            loadMenu(FrontFolderId, $(dep2Mappings[FrontFolderId]));
+        });
+
+
+        $('#navbarBarMenu2 .open_menu').click(function () {
+            $(this).toggleClass('menu_open'); // 메뉴 숨김 토글
+
+            $('.menu_area').toggleClass('hidden');
+            const isMenuHidden = $('.menu_area').hasClass('hidden');
+
+            $('.con_area, .tab-content').css({
+                'width': isMenuHidden ? '100%' : 'calc(100% - 250px)', // 메뉴가 닫히면 전체 확장
+                'left': isMenuHidden ? '0' : '250px' // 왼쪽으로 확장
+            });
+        });
+
+        // 북마크 및 default_menu를 한 번에 처리
+        $.getJSON('/api/system/bookmark', function (result) {
+            let _data = result.data;
+            var litagbook = '';
+
+            // 북마크 메뉴 생성
+            for (var i = 0; i < _data.length; i++) {
+                litagbook += '<li><a href="#" data-objid="' + _data[i].code + '" menuurl="' + _data[i].url + '">' + i18n.getMenuText(_data[i].name) + '</a></li>';
+            }
+
+            $('#bookmark-menu').html(litagbook);
+
+            // 클릭 이벤트 바인딩
+            $('#bookmark-menu').on('click', 'a', function (e) {
+                e.preventDefault();
+                $('#bookmark-menu li').removeClass('on');
+                $(this).parent('li').addClass('on');
+
+                var val = $(this).text();
+                var menuurl = $(this).attr('menuurl');
+                var objid = $(this).attr('data-objid');
+                var _bookmark = 'true';
+
+                if (nthTabs.isExistsTab('#' + objid)) {
+                    nthTabs.toggleTab('#' + objid);
+                } else {
+                    nthTabs.addTab({
+                        id: objid,
+                        title: val,
+                        url: '/gui/' + objid + '/default',
+                        active: true,
+                        allowClose: true,
+                        isbookmark: _bookmark
+                    });
+                }
+            });
+
+            // default_menu 처리
+            $.getJSON('/api/system/usergroup/defaultmenu', function (result) {
+                default_menu = result.data.gmenu;
+                let title = result.data.MenuName;
+
+                let _bookmark = 'false';
+                _data.forEach(function (item) {
+                    if (item.code === default_menu) {
+                        _bookmark = 'true';
+                    }
+                });
+
+                // default_menu 탭 추가
+                nthTabs.addTab({
+                    id: default_menu,
+                    title: title,
+                    url: '/gui/' + default_menu + '/default',
+                    active: true,
+                    allowClose: false,
+                    // isbookmark: _bookmark
+                });
+
+            }).fail(function (e) {
+                console.error('Failed to retrieve default menu data.');
+            });
+
+        }).fail(function (e) {
+            Notify.error('Failed to retrieve bookmark data.');
+        });
+
+
+        $('.scrollbar-inner').scrollbar();
+        //
+        // var parentClass = $(this).parent('li');
+        // if (!$(this).hasClass('on')) {
+        //     $('.documents a').removeClass('on');
+        //     $(this).addClass('on');
+        // }
+        // if (parentClass.attr('class') == 'documents') {
+        //     $('.gnb li').removeClass('open');
+        //     $('.gnb li > ul').slideUp(100);
+        // }
+        // if (localStorage.getItem('theme-top') === null && localStorage.getItem('theme-left') === null) {
+        //     dynamicLinkCss('/css/theme-top-mes', '/css/theme-left-mes');
+        // } else {
+        //     dynamicLinkCss(localStorage.getItem('theme-top'), localStorage.getItem('theme-left'));
+        // }
+
+        //let _mainUrl = 'wm_dashboard_summary';
+        // let _mainUrl = default_menu;
+        // // 모바일 구분
+        // if ('B' == 'F') {
+        //     _mainUrl = '#OBJ0000000199';
+        //     $('#navbarBarMenu1').show();
+        //     $('#navbarBarMenu2').hide();
+        //     $('.menu_wrap').addClass('mobile_menu_wrap');
+        //     $('.menu_area').addClass('mobile_menu_area');
+        //     $('.con_area').addClass('mobile_con_area');
+        // } else {
+        //     $('#navbarBarMenu1').hide();
+        //     $('#navbarBarMenu2').show();
+        // }
+        //
+        // // 메뉴 자동으로 닫히게
+        // if ($(window).innerWidth() < 800) {
+        //     $('body').addClass('open');
+        //     $('.wrap').addClass('menu_close');
+        //     $('.con_area').addClass('open');
+        // }
+        //
+        // var jsmedia = window.matchMedia("screen and (max-width:799px)");
+        // jsmedia.addListener(function (e) {
+        //     if (e.matches) {
+        //         $('body').addClass('open');
+        //         $('.wrap').addClass('menu_close');
+        //         $('.con_area').addClass('open');
+        //         $('.menu_wrap').addClass('mobile_menu_wrap');
+        //         $('.menu_area').addClass('mobile_menu_area');
+        //         $('.con_area').addClass('mobile_con_area');
+        //     } else {
+        //         $('body').removeClass('open');
+        //         $('.wrap').removeClass('menu_close');
+        //         $('.con_area').removeClass('open');
+        //         $('.menu_wrap').removeClass('mobile_menu_wrap');
+        //         $('.menu_area').removeClass('mobile_menu_area');
+        //         $('.con_area').removeClass('mobile_con_area');
+        //     }
+        // });
+        //
+        // //$('#mainlogotitle').text("");
+        // $('#mainlogotitle').on('click', function () {
+        //     nthTabs.toggleTab(_mainUrl);
+        // });
+        //
+        // //menu slide(left open)
+        // $('.open_menu').click(function () {
+        //     $(this).toggleClass('menu_close');
+        //     $('.wrap').toggleClass('menu_close');
+        // });
+        // //menu slide(left open)
+        // $('.open_menu').click(function () {
+        //     $('.con_area').toggleClass('open');
+        //     $('.left_area').toggleClass('open');
+        //     $('body').toggleClass('open');
+        // });
+
+        // TAB메뉴 Context Menu
+        $('#tabdragdrop').on('contextmenu', 'li', function (e) {
+            if ($(this).attr('not-allow-close') === undefined) {
+                $('.otherAuthmaintab').show();
+                if ($(this).hasClass('active')) {
+                    $('.otherAuthtab').show();
+                } else {
+                    $('.otherAuthtab').hide();
+                }
+            } else {
+                $('.otherAuthmaintab').hide();
+            }
+            var leftxpo = 260;
+            if ($('.menu_close .menu_area').css('left') !== undefined) {
+                leftxpo = 15;
+            }
+            var left = e.pageX - leftxpo;
+            $('#contextTabMenu').toggle().css({
+                left: left + 'px'
+            }).attr('targetObjId', $(this).children('a').attr('href'));
+            return false;
+        });
+
+        $(".profile_box").click(function () {
+            $(".profile_mbox").toggle();
+        })
+
+        $(".btn_nbox_close").click(function () {
+            $(".notification_mbox").hide();
+        });
+
+        $(".btn_pbox_close").click(function () {
+            $(".profile_mbox").hide();
+        });
+
+
+        $('#logout').on('click', function (e) {
+            e.preventDefault();
+            Alert.confirm('', '로그아웃하시겠습니까?', function () {
+                i18n.resetData();
+                location.href = '/logout';
+            });
+        });
+
+
+        // CR = String.fromCharCode(10);
+        // let notify_list = notify_text.split(CR);
+        //
+        // let notify_index = 0;
+        //
+        // let timer = setInterval(function () {
+        //     return;
+        //
+        //     if (notify_index >= notify_list.length)
+        //         notify_index = 0;
+        //     let notify_text = notify_list[notify_index];
+        //     $('#notify_text').text(notify_text);
+        //     notify_index++;
+        // }, 5000);
+        //
+        // // 내정보 클릭
+        $('#myinfo').on('click', function (e) {
+            e.preventDefault();
+            Ax5Modal.open({url: '/page/account/myinfo', width: 400, height: 380});
+            $(".profile_contbox").hide();
+        });
+        //
+        // // 언어설정
+        // $('#myLanguage').on('click', function (e) {
+        //     e.preventDefault();
+        //     Ax5Modal.open({url: '/page/account/language', width: 400, height: 200});
+        //     $(".profile_contbox").hide();
+        // });
+        //
+        // // 테마변경
+        // $('.setting-color > label').on('click', function (e) {
+        //     dynamicLinkCss($(this).data('load-top-css'), $(this).data('load-left-css'));
+        // });
+        //
+        // // 개인정보 처리방침 클릭
+        // $('#link_privatepolicy').on('click', function (e) {
+        //     Ax5Modal.open({url: '/page/popup/privacy_policy', width: 800, height: 200});
+        // });
+        //
+        // // 이메일 무단수집 거부 클릭
+        // $('#link_emailreject').on('click', function (e) {
+        //     Ax5Modal.open({url: '/page/popup/email_unauthorized_collection_policy', width: 800, height: 400});
+        // });
+
+        // 오픈소스 사용공지 필요
+    });
+
+</script>
