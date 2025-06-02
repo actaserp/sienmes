@@ -473,6 +473,7 @@
               // 📎 첨부파일 컬럼
               else if (col.binding === 'atchFiles') {
                 if (item.appnum !== '') {
+                  const currentCell = cell; // ⬅️ cell 고정
                   const btn = document.createElement("a");
                   btn.href = "#";
                   btn.classList.add("btn-filedown");
@@ -481,10 +482,10 @@
                   // btn.textContent = file.fileornm;
                   btn.onclick = function (e) {
                     e.preventDefault();
-                    downloadFile(item.appnum, cell);
+                    downloadFile(item.appnum, currentCell);
                   };
-                  cell.appendChild(btn);
-                  cell.appendChild(document.createElement("br"));
+                  currentCell.appendChild(btn);
+                  currentCell.appendChild(document.createElement("br"));
                 }
               }
             }
@@ -791,7 +792,10 @@
       xhr.setRequestHeader("X-CSRF-Token", $('[name=_csrf]').val());
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-      if (cell) cell.textContent = "다운로드 중...";
+      if (cell) {
+        while (cell.firstChild) cell.removeChild(cell.firstChild);
+        cell.textContent = "다운로드 중...";
+      }
 
       xhr.onload = function () {
         if (xhr.status === 200) {
@@ -801,45 +805,12 @@
           a.download = "휴가신청서.pdf";
           a.click();
           window.URL.revokeObjectURL(url);
-          if (cell) {
-            // 기존 텍스트 제거
-            cell.innerHTML = "";
 
-            // 버튼 복원
-            const btn = document.createElement("a");
-            btn.href = "#";
-            btn.classList.add("btn-filedown");
-            btn.title = "첨부파일";
-            btn.textContent = "다운로드";
-            btn.onclick = function (e) {
-              e.preventDefault();
-              downloadFile(appnum, cell); // 다시 다운로드 가능하도록
-            };
-
-            cell.appendChild(btn);
-            cell.appendChild(document.createElement("br"));
-          }
+          // ⚠️ DON'T trust `cell`, use itemFormatter to refresh instead
+          refreshFileButton(appnum, cell);
         } else {
-          console.error("다운로드 실패", xhr.statusText);
-          Alert.alert('','다운로드에 실패하였습니다.');
-          if (cell) {
-            // 기존 텍스트 제거
-            cell.innerHTML = "";
-
-            // 버튼 복원
-            const btn = document.createElement("a");
-            btn.href = "#";
-            btn.classList.add("btn-filedown");
-            btn.title = "첨부파일";
-            btn.textContent = "다운로드";
-            btn.onclick = function (e) {
-              e.preventDefault();
-              downloadFile(appnum, cell); // 다시 다운로드 가능하도록
-            };
-
-            cell.appendChild(btn);
-            cell.appendChild(document.createElement("br"));
-          }
+          Alert.alert('', '다운로드에 실패하였습니다.');
+          refreshFileButton(appnum, cell);
         }
       };
 
@@ -848,6 +819,24 @@
       };
 
       xhr.send("appnum=" + encodeURIComponent(appnum));
+    }
+    function refreshFileButton(appnum, cell) {
+      if (!cell) return;
+
+      while (cell.firstChild) cell.removeChild(cell.firstChild);
+
+      const btn = document.createElement("a");
+      btn.href = "#";
+      btn.classList.add("btn-filedown");
+      btn.title = "첨부파일";
+      btn.textContent = "다운로드";
+      btn.onclick = function (e) {
+        e.preventDefault();
+        downloadFile(appnum, cell); // 이 시점에서 셀은 아직 안전
+      };
+
+      cell.appendChild(btn);
+      cell.appendChild(document.createElement("br"));
     }
 
 
