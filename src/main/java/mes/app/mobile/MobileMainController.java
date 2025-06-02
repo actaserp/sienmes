@@ -100,7 +100,7 @@ public class MobileMainController {
         LocalTime sttimeParsed = LocalTime.parse(sttime, timeFormatter);
         LocalTime currentTime = inOfficeTime.toLocalTime();
         String formattedCurrentTime = currentTime.format(timeFormatter); // "HH:mm" 형식으로 포맷
-        String jitFlag = sttimeParsed.isAfter(currentTime) ? "0" : "1";
+        String jitFlag = currentTime.isAfter(sttimeParsed) ? "1" : "0";
         // 사내 / 외부 출근 확인
         String inFlag = "";
         if(office.equals("inOfficeIn")){

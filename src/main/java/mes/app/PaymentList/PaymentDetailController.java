@@ -499,7 +499,6 @@ public class PaymentDetailController {
       try {
         Files.deleteIfExists(tempXlsx);
         Files.deleteIfExists(tempPdf);
-        System.out.println("🧹 삭제 완료: " + tempPdf.getFileName());
       } catch (IOException e) {
         e.printStackTrace();
       }
