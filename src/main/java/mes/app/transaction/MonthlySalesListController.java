@@ -27,7 +27,7 @@ public class MonthlySalesListController {
       @RequestParam(value="cboCompany",required=false) Integer cboCompany,
       @RequestParam(value = "spjangcd") String spjangcd
   ) {
-    log.info("월별 매출현황(매출)read : cboYear:{}, cboCompany:{} , spjangcd:{}", cboYear, cboCompany,spjangcd);
+//    log.info("월별 매출현황(매출)read : cboYear:{}, cboCompany:{} , spjangcd:{}", cboYear, cboCompany,spjangcd);
     List<Map<String,Object>> items = this.monthlySalesListService.getSalesList(cboYear,cboCompany, spjangcd);
 
     AjaxResult result = new AjaxResult();
@@ -40,7 +40,7 @@ public class MonthlySalesListController {
       @RequestParam(value="cltcd",required=false) Integer cltcd,
       @RequestParam(value = "spjangcd") String spjangcd
   ) {
-    log.info("월별 매출현황 상세 read : cboYear:{}, cboCompany:{} , spjangcd:{}", cboYear, cltcd,spjangcd);
+//    log.info("월별 매출현황 상세 read : cboYear:{}, cboCompany:{} , spjangcd:{}", cboYear, cltcd,spjangcd);
     List<Map<String,Object>> items = this.monthlySalesListService.getSalesDetail(cboYear,cltcd, spjangcd);
 
     AjaxResult result = new AjaxResult();
@@ -67,7 +67,7 @@ public class MonthlySalesListController {
       @RequestParam(value="cltcd",required=false) Integer cltcd,
       @RequestParam(value = "spjangcd") String spjangcd
   ) {
-    log.info("월별 매출현황(입금)__입금 상세내역 read : cboYear:{}, cboCompany:{} , spjangcd:{} ", cboYear, cltcd, spjangcd);
+//    log.info("월별 매출현황(입금)__입금 상세내역 read : cboYear:{}, cboCompany:{} , spjangcd:{} ", cboYear, cltcd, spjangcd);
     List<Map<String,Object>> items = this.monthlySalesListService.getDepositDetail(cboYear,cltcd, spjangcd);
 
     AjaxResult result = new AjaxResult();

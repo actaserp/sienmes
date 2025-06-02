@@ -321,20 +321,24 @@ public class MonthlySalesListService {
     StringBuilder sql = new StringBuilder();
 
     sql.append("""
-        SELECT
-         c."Name" AS comp_name,
-         ts.cltcd,
+        select 
          TO_CHAR(TO_DATE(ts.misdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS misdate,
-         MAX(sc."Value") AS misgubun,
-         MAX(ts.totalamt) AS totalamt
-        FROM tb_salesment ts
-        LEFT JOIN company c ON c.id = ts.cltcd
-        LEFT JOIN tb_salesdetail d ON ts.misnum = d.misnum
-        LEFT JOIN sys_code sc ON sc."Code" = ts.misgubun
-        WHERE ts.spjangcd = :spjangcd
-         AND ts.cltcd = :cltcd
-         AND ts.misdate BETWEEN :date_form AND :date_to
-        GROUP BY ts.misnum, ts.misdate, c."Name", ts.cltcd
+          ts.cltcd,
+          sc."Value" AS misgubun,
+          d.itemnm,
+          d.spec,
+          d.qty,
+          d. supplycost,
+          d. taxtotal,
+          d.totalamt
+          FROM tb_salesment ts
+            LEFT JOIN company c ON c.id = ts.cltcd
+            LEFT JOIN tb_salesdetail d ON ts.misnum = d.misnum
+            LEFT JOIN sys_code sc ON sc."Code" = ts.misgubun
+         WHERE ts.spjangcd = :spjangcd
+              AND ts.cltcd = :cltcd
+              AND ts.misdate BETWEEN :date_form AND :date_to
+              ORDER BY ts.misnum
        """);
 
     return this.sqlRunner.getRows(sql.toString(), paramMap);

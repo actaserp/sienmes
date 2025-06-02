@@ -338,42 +338,78 @@
         const cltcd = data.cltcd;
         const compName = data.comp_name;
 
-        // 템플릿 삽입
         let content = tmpl('popup_Select', {});
         let $content = $(content);
 
-        // 팝업 컨테이너 생성 (조회 전용)
         let modal = new PopupDraggable(`[${compName}] 매출 상세`);
         modal.open({ width: 800, height: 500, $content });
 
-        // 그리드 초기화
+        // ✅ 그룹용 CollectionView 생성 (빈 상태)
+        this.viewData = new wijmo.collections.CollectionView();
+
+        // ✅ 그룹핑 기준을 월별로 설정
+        this.viewData.groupDescriptions.push(
+          new wijmo.collections.PropertyGroupDescription('misdate', (item, prop) => {
+            if (!item[prop]) return '';
+            // misdate: "YYYY-MM-DD" 형식 기준
+            const [year, month] = item[prop].split('-');
+            return `${year}년 ${month}월`;
+          })
+        );
+
         _this.SalesGrid = new wijmo.grid.FlexGrid('#SalesGrid', {
           selectionMode: wijmo.grid.SelectionMode.Row,
           autoGenerateColumns: false,
           showMarquee: true,
           isReadOnly: true,
+          itemsSource: this.viewData,  // ✅ 그룹이 적용된 viewData 사용
+          formatItem: (sender, e) => {
+            if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+              e.cell.style.textAlign = 'center';
+            }
+            if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+              const row = sender.rows[e.row];
+              if (row instanceof wijmo.grid.GroupRow) {
+                const group = row.dataItem;
+                const sumSupply = wijmo.getAggregate(wijmo.Aggregate.Sum, group.items, 'supplycost');
+                const sumTax = wijmo.getAggregate(wijmo.Aggregate.Sum, group.items, 'taxtotal');
+
+                e.cell.colSpan = sender.columns.length;
+                e.cell.innerHTML = `<b>${group.name}</b> (공급가액: ${sumSupply.toLocaleString()}원 / 세액: ${sumTax.toLocaleString()}원)`;
+                e.cell.style.textAlign = 'left';
+                e.cell.style.paddingLeft = '8px';
+              }
+            }
+          },
           columns: [
-            { binding: 'misdate', header: '일자', width: '*', align: 'center' },
+            { binding: 'misdate', header: '일자', width: 120, align: 'center' },
             { binding: 'misgubun', header: '매출구분', width: '*', align: 'center' },
-            { binding: 'totalamt', header: '금액', width: '*', align: 'right', format: 'n0' },
-          ],
-          itemsSource: []  // 초기에는 비움
+            { binding: 'itemnm', header: '품목', width: '*', align: 'center' },
+            { binding: 'spec', header: '규격', width: 70, align: 'center' },
+            { binding: 'qty', header: '수량', width: 70, align: 'center' },
+            { binding: 'supplycost', header: '공급가액', width: '*', align: 'right', format: 'n0' },
+            { binding: 'taxtotal', header: '세액', width: '*', align: 'right', format: 'n0' },
+          ]
         });
 
-        // ✅ 팝업 그리드에 적용해야 하는 로직들은 모두 SalesGrid로 적용
         _this.SalesGrid.rowHeaders.columns.splice(0, 1);
         new FlexGridContextMenu(_this.SalesGrid);
         _this.SalesGrid.downloadFileName = `[${compName}] 매출 상세`;
-        _this.SalesGrid.downloadFileName = '매출 상세내역';
+
+        // Footer 설정
         _this.SalesGrid.columnFooters.rows.push(new wijmo.grid.Row());
         _this.SalesGrid.loadedRows.addHandler(() => {
           const rows = _this.SalesGrid.rows;
           const footer = _this.SalesGrid.columnFooters.rows[0];
-          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+          const getSum = (field) => rows
+            .filter(r => r.dataItem && !(r instanceof wijmo.grid.GroupRow))
+            .map(r => +r.dataItem[field] || 0)
+            .reduce((a, b) => a + b, 0);
 
           footer.dataItem = {
             misdate: '합계',
-            totalamt: getSum('totalamt'),
+            supplycost: getSum('supplycost'),
+            taxtotal: getSum('taxtotal'),
           };
         });
 
@@ -389,10 +425,10 @@
           dataType: 'json',
           success: function (response) {
             if (response && Array.isArray(response.data)) {
-              _this.SalesGrid.itemsSource = response.data;
+              _this.viewData.sourceCollection = response.data;
             } else {
-              alert('데이터 형식이 잘못되었습니다.');
-              _this.SalesGrid.itemsSource = [];
+              Alert.alert('', '데이터 형식이 잘못되었습니다.');
+              _this.viewData.sourceCollection = [];
             }
           },
           error: function () {
@@ -421,18 +457,14 @@
           showMarquee: true,
           isReadOnly: true,
           columns: [
-            {binding: 'trdate', header: '일자', width: 120, align: 'left'},
+            {binding: 'trdate', header: '일자', width: 100, align: 'left'},
             {binding: 'ioid', header: '코드', width: 100, align: 'right',visible: false },
-            {binding: 'CompanyName', header: '거래처명', width: 160, align: 'center'},
-            {binding: 'accin', header: '금액', width: 120, align: 'right'},
+            {binding: 'CompanyName', header: '거래처명', width: 140, align: 'center'},
+            {binding: 'accin', header: '금액', width: 100, align: 'right'},
             {binding: 'deposit_type', header: '입급형태', width: 80, align: 'center'},
-            {binding: 'banknm', header: '은행', width: 130, align: 'center'},
-            {binding: 'accnum', header: '계좌', width: 180, align: 'center'},
-            {binding: 'eumnum', header: '어음번호', width: 180, align: 'center'},
-            {binding: 'eumtodt', header: '만기일자', width: 120, align: 'center'},
-            {binding: 'tradenm', header: '거래구분', width: 80, align: 'center'},
-            {binding: 'remark1', header: '적요', width: 170},
-            {binding: 'memo', header: '메모', width: 170}
+            {binding: 'banknm', header: '은행', width: 80, align: 'center'},
+            {binding: 'accnum', header: '계좌', width: 140, align: 'center'},
+            {binding: 'memo', header: '메모', width: 150}
           ],
           itemsSource: []  // 초기에는 비움
         });
