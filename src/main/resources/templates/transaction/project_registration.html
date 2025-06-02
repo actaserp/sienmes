@@ -331,9 +331,23 @@
 
       let today = new Date();
       let monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+      //let monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);// 이번 달 마지막 날
 
       $('#srchStartDt').val(CommonUtil.formatYYYYMMDD(monthStart));
       $('#srchEndDt').val(CommonUtil.formatYYYYMMDD(today));
+
+      //공사일자 및 계약일자도 오늘 날짜로 설정
+      function formatToDashYMD(date) {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      }
+
+      const todayStr = formatToDashYMD(today);
+      $('#stdate').val(todayStr);
+      $('#eddate').val(todayStr);
+      $('#contdate').val(todayStr);
 
       page.searchMainData();
 
@@ -359,11 +373,17 @@
         page.DeleteMainData();
       });
 
-      //신규등록(초기화)
-      $('#Newbtn').click(function(e) {
+      $('#Newbtn').click(function (e) {
         e.preventDefault();
         $('#CategoryForm')[0].reset();
         $('#balcltcd').val('');
+
+        const today = new Date();
+        const todayStr = formatToDashYMD(today);
+
+        $('#stdate').val(todayStr);
+        $('#eddate').val(todayStr);
+        $('#contdate').val(todayStr);
       });
 
       // 팝업 열기 및 값 세팅

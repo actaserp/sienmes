@@ -48,6 +48,7 @@ public class MonthlyPurchaseListService {
     // SELECT 본문
     sql.append("""
         SELECT
+            ps.cltcd,
             c."Name" AS comp_name,
             MAX(sc."Value") AS misgubun,
             ps.iverpernm,
@@ -70,7 +71,7 @@ public class MonthlyPurchaseListService {
         FROM parsed_sales ps
         LEFT JOIN company c ON c.id = ps.cltcd
         LEFT JOIN sys_code sc ON sc."Code" = ps.misgubun::text
-        GROUP BY c."Name", ps.iverpernm, ps.iverdeptnm
+        GROUP BY c."Name", ps.iverpernm, ps.iverdeptnm, ps.cltcd
         ORDER BY c."Name", ps.iverpernm, ps.iverdeptnm
         """);
 

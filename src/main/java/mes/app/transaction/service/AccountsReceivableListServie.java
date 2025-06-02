@@ -30,7 +30,7 @@ public class AccountsReceivableListServie {
     String formattedStart = startDate.format(dbFormatter);
     String formattedEnd = endDate.format(dbFormatter);
 
-    YearMonth baseYm = YearMonth.from(startDate);  // 기준월 (예: 2025-01)
+    YearMonth baseYm = YearMonth.from(startDate);
     String baseYmStr = baseYm.format(DateTimeFormatter.ofPattern("yyyyMM"));
 
     paramMap.addValue("start", formattedStart);
@@ -69,12 +69,12 @@ public class AccountsReceivableListServie {
             LEFT JOIN tb_salesment s ON c.id = s.cltcd
                 AND s.misdate BETWEEN 
                     TO_CHAR((SELECT TO_DATE(MAX(yyyymm), 'YYYYMM') + interval '1 month' FROM last_amt), 'YYYYMMDD')
-                    AND TO_CHAR(TO_DATE(:baseYm, 'YYYYMM') - interval '1 day', 'YYYYMMDD')
+                    AND TO_CHAR(TO_DATE(:start, 'YYYYMMDD') - interval '1 day', 'YYYYMMDD')
                 AND s.spjangcd = :spjangcd
             LEFT JOIN tb_banktransit b ON c.id = b.cltcd
                 AND b.trdate BETWEEN 
                     TO_CHAR((SELECT TO_DATE(MAX(yyyymm), 'YYYYMM') + interval '1 month' FROM last_amt), 'YYYYMMDD')
-                    AND TO_CHAR(TO_DATE(:baseYm, 'YYYYMM') - interval '1 day', 'YYYYMMDD')
+                    AND TO_CHAR(TO_DATE(:start, 'YYYYMMDD') - interval '1 day', 'YYYYMMDD')
                 AND b.ioflag = '0'
                 AND b.spjangcd = :spjangcd
             GROUP BY c.id
@@ -86,10 +86,10 @@ public class AccountsReceivableListServie {
                 SUM(COALESCE(b.accin, 0)) AS total_accin
             FROM company c
             LEFT JOIN tb_salesment s ON c.id = s.cltcd
-                AND s.misdate < TO_CHAR(TO_DATE(:baseYm, 'YYYYMM'), 'YYYYMMDD')
+                AND s.misdate < :start
                 AND s.spjangcd = :spjangcd
             LEFT JOIN tb_banktransit b ON c.id = b.cltcd
-                AND b.trdate < TO_CHAR(TO_DATE(:baseYm, 'YYYYMM'), 'YYYYMMDD')
+                AND b.trdate < :start
                 AND b.ioflag = '0'
                 AND b.spjangcd = :spjangcd
             WHERE NOT EXISTS (
@@ -143,11 +143,12 @@ public class AccountsReceivableListServie {
     }
 
     sql.append(" ORDER BY m.\"Name\"");
+
 //    log.info("미수금 집계 read SQL: {}", sql);
 //    log.info("SQL Parameters: {}", paramMap.getValues());
+
     return this.sqlRunner.getRows(sql.toString(), paramMap);
   }
-
 
   //미수금 현황 상세
   public List<Map<String, Object>> getDetailList(String start_date, String end_date, String company, String spjangcd) {
@@ -158,38 +159,85 @@ public class AccountsReceivableListServie {
     LocalDate startDate = LocalDate.parse(start_date, inputFormatter);
     LocalDate endDate = LocalDate.parse(end_date, inputFormatter);
 
-    // SQL용 날짜 포맷
     String formattedStart = startDate.format(dbFormatter);
     String formattedEnd = endDate.format(dbFormatter);
 
-    // 전월 기준 계산
-    YearMonth prevMonth = YearMonth.from(startDate).minusMonths(1);
-    String prevYm = prevMonth.format(DateTimeFormatter.ofPattern("yyyyMM"));
-    String baseDate = prevMonth.atDay(1).format(dbFormatter);
+    YearMonth baseYm = YearMonth.from(startDate);
+    String baseYmStr = baseYm.format(DateTimeFormatter.ofPattern("yyyyMM"));
+    String baseDate = baseYm.atDay(1).format(dbFormatter);
 
-    paramMap.addValue("prevYm", prevYm);
+    paramMap.addValue("baseYm", baseYmStr);
     paramMap.addValue("baseDate", baseDate);
     paramMap.addValue("start", formattedStart);
     paramMap.addValue("end", formattedEnd);
     paramMap.addValue("company", Integer.valueOf(company));
     paramMap.addValue("spjangcd", spjangcd);
 
-    String sql= """
+    String sql = """
         WITH lastym AS (
             SELECT cltcd, MAX(yyyymm) AS yyyymm
             FROM tb_yearamt
-            WHERE yyyymm < :prevYm
+            WHERE yyyymm < :baseYm
               AND ioflag = '0'
-              AND cltcd = :company
               AND spjangcd = :spjangcd
+              AND cltcd = :company
             GROUP BY cltcd
         ),
-        lasttbl AS (
-            SELECT y.cltcd, y.yearamt, y.yyyymm, y.spjangcd
+        last_amt AS (
+            SELECT y.cltcd, y.yearamt, y.yyyymm
             FROM tb_yearamt y
             JOIN lastym m ON y.cltcd = m.cltcd AND y.yyyymm = m.yyyymm
             WHERE y.ioflag = '0'
               AND y.spjangcd = :spjangcd
+        ),
+        post_close_txns AS (
+            SELECT
+                s.cltcd,
+                SUM(COALESCE(s.totalamt, 0)) AS extra_sales,
+                SUM(COALESCE(b.accin, 0)) AS extra_accin
+            FROM tb_salesment s
+            LEFT JOIN tb_banktransit b ON s.cltcd = b.cltcd
+                AND b.trdate BETWEEN 
+                    TO_CHAR((SELECT TO_DATE(MAX(yyyymm), 'YYYYMM') + interval '1 month' FROM last_amt), 'YYYYMMDD')
+                    AND TO_CHAR(TO_DATE(:start, 'YYYYMMDD') - interval '1 day', 'YYYYMMDD')
+                AND b.ioflag = '0'
+                AND b.spjangcd = :spjangcd
+            WHERE s.misdate BETWEEN 
+                    TO_CHAR((SELECT TO_DATE(MAX(yyyymm), 'YYYYMM') + interval '1 month' FROM last_amt), 'YYYYMMDD')
+                    AND TO_CHAR(TO_DATE(:start, 'YYYYMMDD') - interval '1 day', 'YYYYMMDD')
+              AND s.spjangcd = :spjangcd
+              AND s.cltcd = :company
+            GROUP BY s.cltcd
+        ),
+        uncalculated_txns AS (
+            SELECT
+                s.cltcd,
+                SUM(COALESCE(s.totalamt, 0)) AS total_sales,
+                SUM(COALESCE(b.accin, 0)) AS total_accin
+            FROM tb_salesment s
+            LEFT JOIN tb_banktransit b ON s.cltcd = b.cltcd
+                AND b.trdate < :start
+                AND b.ioflag = '0'
+                AND b.spjangcd = :spjangcd
+            WHERE s.misdate < :start
+              AND s.spjangcd = :spjangcd
+              AND s.cltcd = :company
+              AND NOT EXISTS (
+                  SELECT 1 FROM last_amt y WHERE y.cltcd = s.cltcd
+              )
+            GROUP BY s.cltcd
+        ),
+        final_prev_amt AS (
+            SELECT
+                y.cltcd,
+                y.yearamt + COALESCE(p.extra_sales, 0) - COALESCE(p.extra_accin, 0) AS prev_amt
+            FROM last_amt y
+            LEFT JOIN post_close_txns p ON y.cltcd = p.cltcd
+            UNION
+            SELECT
+                u.cltcd,
+                COALESCE(u.total_sales, 0) - COALESCE(u.total_accin, 0)
+            FROM uncalculated_txns u
         ),
         union_data_raw AS (
             -- 전잔액
@@ -198,7 +246,7 @@ public class AccountsReceivableListServie {
                 c."Name" AS comp_name,
                 TO_DATE(:baseDate, 'YYYYMMDD') AS date,
                 '전잔액' AS summary,
-                COALESCE(h.yearamt, 0) AS amount,
+                COALESCE(f.prev_amt, 0) AS amount,
                 NULL::text AS itemnm,
                 NULL::text AS misgubun,
                 NULL::text AS iotype,
@@ -213,7 +261,7 @@ public class AccountsReceivableListServie {
                 NULL::text AS remark1,
                 0 AS remaksseq
             FROM company c
-            LEFT JOIN lasttbl h ON c.id = h.cltcd AND c.spjangcd = h.spjangcd
+            LEFT JOIN final_prev_amt f ON c.id = f.cltcd
             WHERE c.id = :company AND c.spjangcd = :spjangcd
             UNION ALL
             -- 매출
@@ -246,7 +294,7 @@ public class AccountsReceivableListServie {
             WHERE s.misdate BETWEEN :start AND :end
               AND s.cltcd = :company
               AND s.spjangcd = :spjangcd
-            GROUP BY s.cltcd, c."Name", s.misdate,  s.misnum,  s.totalamt, s.misgubun, sc."Value", s.remark1
+            GROUP BY s.cltcd, c."Name", s.misdate, s.misnum, s.totalamt, s.misgubun, sc."Value", s.remark1
             UNION ALL
             -- 입금
             SELECT
@@ -276,11 +324,6 @@ public class AccountsReceivableListServie {
               AND b.cltcd = :company
               AND b.spjangcd = :spjangcd
               AND b.ioflag = '0'
-        ),
-        union_data AS (
-            SELECT *,
-                ROW_NUMBER() OVER (PARTITION BY cltcd, date ORDER BY remaksseq) AS rn
-            FROM union_data_raw
         )
         SELECT
             x.cltcd,
@@ -295,7 +338,7 @@ public class AccountsReceivableListServie {
               PARTITION BY x.cltcd
               ORDER BY x.date, x.remaksseq, x.itemnm
               ROWS UNBOUNDED PRECEDING
-            ) AS balance,        
+            ) AS balance,
             x.accin,
             x.totalamt,
             x.itemnm,
@@ -308,13 +351,14 @@ public class AccountsReceivableListServie {
             x.tradenm,
             x.memo,
             x.remark1
-        FROM union_data x
+        FROM union_data_raw x
         ORDER BY x.cltcd, x.date, x.remaksseq
         """;
 
-    List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-//    log.info("미수금 현황 상세 read SQL: {}", sql);
+//    log.info("미수금 상세 read SQL: {}", sql);
 //    log.info("SQL Parameters: {}", paramMap.getValues());
-    return items;
+
+    return this.sqlRunner.getRows(sql, paramMap);
   }
+
 }

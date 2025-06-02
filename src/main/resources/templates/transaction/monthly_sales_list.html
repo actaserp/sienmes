@@ -85,6 +85,32 @@
       </div>
     </section>
   </div>
+
+  <!-- 매출 상세 팝업-->
+  <script type="text/x-tmpl" id="popup_Select">
+    <div class="content_wrap popup">
+        <section class="section" style="padding-top: 10px;">
+            <div class="section-top">
+                <div class="container-fluid">
+                    <div id="SalesGrid" style="height: 450px;"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+  </script>
+  <!-- 입금 상세 팝업-->
+  <script type="text/x-tmpl" id="popup_Deposit">
+    <div class="content_wrap popup">
+        <section class="section" style="padding-top: 10px;">
+            <div class="section-top">
+                <div class="container-fluid">
+                    <div id="DepositGrid" style="height: 450px;"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+  </script>
+
 </th:block>
 
 <th:block layout:fragment="scripts">
@@ -96,7 +122,8 @@
       constructor() {
         this.grid = null;
         this.grid3 = null;
-        this.grid4= null;
+        this.grid4 = null;
+        this.SalesGrid = null;
         this.$btnEdit = $('#btnEdit');
         this.$btnAddNew = $('#btnAddNew');
         this.spjangcd = $('#spjangcdHidden');
@@ -106,7 +133,7 @@
 
       init() {
         let _this = this;
-        const monthColumns = Array.from({ length: 12 }, (_, i) => {
+        const monthColumns = Array.from({length: 12}, (_, i) => {
           const month = i + 1;
           return {
             binding: `mon_${month}`,
@@ -133,17 +160,25 @@
             }
           },
           columns: [
-            { binding: 'comp_name', header: '거래처명', width: 250, align: 'center', allowMerging: false },
-            { binding: 'misgubun', header: '매출구분', width: 90, align: 'center', allowMerging: false },
-            { binding: 'iverdeptnm', header: '부서', width: 90, align: 'center', allowMerging: false },
-            { binding: 'iverpernm', header: '담당자', width: 100, align: 'center', allowSorting: false },
+            {binding: 'cltcd', header: '커래처 코드', width: 250, visible: false},
+            {binding: 'comp_name', header: '거래처명', width: 250, align: 'center', allowMerging: false},
+            {binding: 'misgubun', header: '매출구분', width: 90, align: 'center', allowMerging: false},
+            {binding: 'iverdeptnm', header: '부서', width: 90, align: 'center', allowMerging: false},
+            {binding: 'iverpernm', header: '담당자', width: 100, align: 'center', allowSorting: false},
             ...monthColumns,  //여기에서 월별 컬럼을 삽입
-            { binding: 'total_sum', header: '합계', width: 120, align: 'right', allowSorting: false },
+            {binding: 'total_sum', header: '합계', width: 120, align: 'right', allowSorting: false},
           ],
           itemsSource: this.viewData,
         });
         this.grid.rowHeaders.columns.splice(0, 1);
-
+        this.grid.hostElement.addEventListener('dblclick', (e) => {
+          const ht = this.grid.hitTest(e);
+          if (ht.cellType === wijmo.grid.CellType.Cell) {
+            const row = this.grid.rows[ht.row];
+            const data = row.dataItem;
+            this.openSalesPopup(data);
+          }
+        });
         new FlexGridContextMenu(this.grid);
         this.grid.downloadFileName = '월별 매출 현황(매출)';
         //Footer 패널 사용 설정
@@ -165,6 +200,7 @@
           footerTotal.dataItem = footerData;
         });
 
+
         this.grid3 = new wijmo.grid.FlexGrid('#deposit-grid', {
           frozenColumns: 1,
           frozenRows: 0,
@@ -180,17 +216,27 @@
             }
           },
           columns: [
-            { binding: 'comp_name', header: '거래처명', width: 250, align: 'center', allowMerging: true },
+            {binding: 'cltcd', header: '커래처 코드', width: 250, visible: false},
+            {binding: 'comp_name', header: '거래처명', width: 250, align: 'center', allowMerging: true},
             /*{ binding: 'deposit_type', header: '입금형태', width: 90, align: 'center', allowMerging: true },
             { binding: 'icerdeptnm', header: '부서', width: 130, align: 'center', allowMerging: true },
             { binding: 'icerceonm', header: '담당자', width: 100, align: 'center', allowSorting: false },*/
             ...monthColumns,
-            { binding: 'total_sum', header: '합계', width: 120, align: 'right', allowSorting: false },
+            {binding: 'total_sum', header: '합계', width: 120, align: 'right', allowSorting: false},
           ],
           itemsSource: this.viewData,
         });
 
         this.grid3.rowHeaders.columns.splice(0, 1);
+        this.grid3.hostElement.addEventListener('dblclick', (e) => {
+          const ht = this.grid3.hitTest(e); // ✅ 올바르게 grid3에서 hitTest
+          if (ht.cellType === wijmo.grid.CellType.Cell) {
+            const row = this.grid3.rows[ht.row];
+            const data = row.dataItem;
+            this.openDepositPopup(data);  // ✅ 입금 상세 팝업 함수 실행
+          }
+        });
+
         new FlexGridContextMenu(this.grid3);
         this.grid3.downloadFileName = '월별 매출 현황(입금)';
         //Footer 패널 사용 설정
@@ -226,9 +272,9 @@
             }
           },
           columns: [
-            { binding: 'comp_name', header: '거래처명', width: 170, align: 'center', allowMerging: true },
-            { binding: 'amount', header: '전잔액', width: 110, align: 'right'},
-           /* { binding: 'misgubun', header: '매출구분', width: 100, align: 'center', allowMerging: true },
+            {binding: 'comp_name', header: '거래처명', width: 170, align: 'center', allowMerging: true},
+            {binding: 'amount', header: '전잔액', width: 110, align: 'right'},
+            /* { binding: 'misgubun', header: '매출구분', width: 100, align: 'center', allowMerging: true },
             { binding: 'icerdeptnm', header: '부서', width: 130, align: 'center', allowMerging: true },
             { binding: 'icerceonm', header: '담당자', width: 100, align: 'center', allowSorting: false },*/
             ...monthColumns,
@@ -268,25 +314,172 @@
           spjangcd: this.spjangcd.val()
         };
         //매출 내역
-        AjaxUtil.getAsyncData(url+'/SalesRead', baseData, function (result) {
+        AjaxUtil.getAsyncData(url + '/SalesRead', baseData, function (result) {
           if (result != null) {
             _this.grid.itemsSource = result.data;
           }
         });
         // 입금 내역
-        AjaxUtil.getAsyncData(url+'/DepositRead' , baseData, function (result) {
+        AjaxUtil.getAsyncData(url + '/DepositRead', baseData, function (result) {
           if (result != null) {
             _this.grid3.itemsSource = result.data;
           }
         });
         // 미수금 내역
-        AjaxUtil.getAsyncData(url+'/ReceivableRead' , baseData, function (result) {
+        AjaxUtil.getAsyncData(url + '/ReceivableRead', baseData, function (result) {
           if (result != null) {
             _this.grid4.itemsSource = result.data;
           }
         });
       }
+
+      openSalesPopup(data) {
+        let _this = this;
+        const cltcd = data.cltcd;
+        const compName = data.comp_name;
+
+        // 템플릿 삽입
+        let content = tmpl('popup_Select', {});
+        let $content = $(content);
+
+        // 팝업 컨테이너 생성 (조회 전용)
+        let modal = new PopupDraggable(`[${compName}] 매출 상세`);
+        modal.open({ width: 800, height: 500, $content });
+
+        // 그리드 초기화
+        _this.SalesGrid = new wijmo.grid.FlexGrid('#SalesGrid', {
+          selectionMode: wijmo.grid.SelectionMode.Row,
+          autoGenerateColumns: false,
+          showMarquee: true,
+          isReadOnly: true,
+          columns: [
+            { binding: 'misdate', header: '일자', width: '*', align: 'center' },
+            { binding: 'misgubun', header: '매출구분', width: '*', align: 'center' },
+            { binding: 'totalamt', header: '금액', width: '*', align: 'right', format: 'n0' },
+          ],
+          itemsSource: []  // 초기에는 비움
+        });
+
+        // ✅ 팝업 그리드에 적용해야 하는 로직들은 모두 SalesGrid로 적용
+        _this.SalesGrid.rowHeaders.columns.splice(0, 1);
+        new FlexGridContextMenu(_this.SalesGrid);
+        _this.SalesGrid.downloadFileName = `[${compName}] 매출 상세`;
+        _this.SalesGrid.downloadFileName = '매출 상세내역';
+        _this.SalesGrid.columnFooters.rows.push(new wijmo.grid.Row());
+        _this.SalesGrid.loadedRows.addHandler(() => {
+          const rows = _this.SalesGrid.rows;
+          const footer = _this.SalesGrid.columnFooters.rows[0];
+          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+
+          footer.dataItem = {
+            misdate: '합계',
+            totalamt: getSum('totalamt'),
+          };
+        });
+
+        // 데이터 로딩
+        $.ajax({
+          url: '/api/transaction/MonthlySalesList/SalesDetail',
+          method: 'GET',
+          data: {
+            cltcd: cltcd,
+            cboYear: $("#cboYear").val(),
+            spjangcd: this.spjangcd.val()
+          },
+          dataType: 'json',
+          success: function (response) {
+            if (response && Array.isArray(response.data)) {
+              _this.SalesGrid.itemsSource = response.data;
+            } else {
+              alert('데이터 형식이 잘못되었습니다.');
+              _this.SalesGrid.itemsSource = [];
+            }
+          },
+          error: function () {
+            alert('매출 상세 데이터를 불러오는 데 실패했습니다.');
+          }
+        });
+      }
+
+      openDepositPopup(data) {
+        let _this = this;
+        const cltcd = data.cltcd;
+        const compName = data.comp_name;
+
+        // 템플릿 삽입
+        let content = tmpl('popup_Deposit', {});
+        let $content = $(content);
+
+        // 팝업 컨테이너 생성 (조회 전용)
+        let modal = new PopupDraggable(`[${compName}] 입금 상세`);
+        modal.open({ width: 800, height: 500, $content });
+
+        // 그리드 초기화
+        _this.DepositGrid = new wijmo.grid.FlexGrid('#DepositGrid', {
+          selectionMode: wijmo.grid.SelectionMode.Row,
+          autoGenerateColumns: false,
+          showMarquee: true,
+          isReadOnly: true,
+          columns: [
+            {binding: 'trdate', header: '일자', width: 120, align: 'left'},
+            {binding: 'ioid', header: '코드', width: 100, align: 'right',visible: false },
+            {binding: 'CompanyName', header: '거래처명', width: 160, align: 'center'},
+            {binding: 'accin', header: '금액', width: 120, align: 'right'},
+            {binding: 'deposit_type', header: '입급형태', width: 80, align: 'center'},
+            {binding: 'banknm', header: '은행', width: 130, align: 'center'},
+            {binding: 'accnum', header: '계좌', width: 180, align: 'center'},
+            {binding: 'eumnum', header: '어음번호', width: 180, align: 'center'},
+            {binding: 'eumtodt', header: '만기일자', width: 120, align: 'center'},
+            {binding: 'tradenm', header: '거래구분', width: 80, align: 'center'},
+            {binding: 'remark1', header: '적요', width: 170},
+            {binding: 'memo', header: '메모', width: 170}
+          ],
+          itemsSource: []  // 초기에는 비움
+        });
+
+        // ✅ 팝업 그리드에 적용해야 하는 로직들은 모두 DepositGrid로 적용
+        _this.DepositGrid.rowHeaders.columns.splice(0, 1);
+        new FlexGridContextMenu(_this.DepositGrid);
+        _this.DepositGrid.downloadFileName = `[${compName}] 입금 상세`;
+        _this.DepositGrid.downloadFileName = '입금 상세내역';
+        _this.DepositGrid.columnFooters.rows.push(new wijmo.grid.Row());
+        _this.DepositGrid.loadedRows.addHandler(() => {
+          const rows = _this.DepositGrid.rows;
+          const footer = _this.DepositGrid.columnFooters.rows[0];
+          const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
+
+          footer.dataItem = {
+            misdate: '합계',
+            totalamt: getSum('totalamt'),
+          };
+        });
+
+        // 데이터 로딩
+        $.ajax({
+          url: '/api/transaction/MonthlySalesList/DepositDetail',
+          method: 'GET',
+          data: {
+            cltcd: cltcd,
+            cboYear: $("#cboYear").val(),
+            spjangcd: this.spjangcd.val()
+          },
+          dataType: 'json',
+          success: function (response) {
+            if (response && Array.isArray(response.data)) {
+              _this.DepositGrid.itemsSource = response.data;
+            } else {
+              alert('데이터 형식이 잘못되었습니다.');
+              _this.DepositGrid.itemsSource = [];
+            }
+          },
+          error: function () {
+            alert('매출 상세 데이터를 불러오는 데 실패했습니다.');
+          }
+        });
+      }
+
     }
+
     let page = null;
 
     $(document).ready(function (e) {
