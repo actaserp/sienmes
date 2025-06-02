@@ -539,7 +539,7 @@ public class SalesInvoiceService {
             System.out.println("=== 사업자 진위확인 API 예외 발생 ===");
             System.out.println("에러 메시지     : " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("사업자 진위 확인 중 오류: " + e.getMessage(), e);
+            throw new RuntimeException("사업자 진위 확인 중 오류");
         }
     }
 
@@ -575,7 +575,7 @@ public class SalesInvoiceService {
                 throw new RuntimeException("사업자 진위 확인 실패 - 응답 없음");
             }
         } catch (Exception e) {
-            throw new RuntimeException("사업자 진위 확인 중 오류: " + e.getMessage(), e);
+            throw new RuntimeException("사업자 진위 확인 중 오류");
         }
     }
 

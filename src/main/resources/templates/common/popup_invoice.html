@@ -7,20 +7,24 @@
         <style id="invoice_css">
 
             #InvoiceeCorpNum::placeholder {
-                font-size: 13px; /* 원하는 크기로 */
+                font-size: 13px;
                 text-align: left;
             }
 
             #account_code::placeholder {
-                font-size: 13px; /* 원하는 크기로 */
+                font-size: 13px;
             }
 
             #att_depart::placeholder {
-                font-size: 13px; /* 원하는 크기로 */
+                font-size: 13px;
             }
 
             #project::placeholder {
-                font-size: 13px; /* 원하는 크기로 */
+                font-size: 13px;
+            }
+
+            #InvoiceeCorpName::placeholder {
+                font-size: 13px;
             }
 
             textarea[name^="detailList"][name$=".ItemName"]::placeholder {
@@ -653,8 +657,7 @@
                                                 <th class="al_c invoicer_bg" colspan="3" rowspan="6"><span class="bold lh_16">공<br>급<br>받<br>는<br>자</span></th>
                                                 <input type="hidden" id="InvoiceeID" name="InvoiceeID">
                                                 <th class="al_c bold" colspan="8">등록번호</th>
-                                                <td class="al_l pdl_3" colspan="23"><input style="width: 80%; margin-right: 5px;" class="in_txt numeric al_c letspc_0" maxlength="12" type="text" id="InvoiceeCorpNum" name="InvoiceeCorpNum" placeholder="입력 후 엔터" autocomplete="off">
-                                                    <button class="btn_white_gradient mgl_2" id="btnSelectInvoicee" type="button">검색</button>
+                                                <td class="al_l pdl_3" colspan="23"><input style="width: 100%;" class="in_txt numeric al_c letspc_0" maxlength="12" type="text" id="InvoiceeCorpNum" name="InvoiceeCorpNum" placeholder="입력 후 엔터" autocomplete="off">
                                                 </td>
 
                                                 <th class="al_c" colspan="8">종사업장</th>
@@ -675,7 +678,9 @@
                                             </tr>
                                             <tr>
                                                 <th class="al_c bold" colspan="8"><span>상호</span></th>
-                                                <td class="al_l pdl_3" colspan="23"><textarea type="text" class="txt_ar kr" maxlength="200" id="InvoiceeCorpName" name="InvoiceeCorpName"></textarea></td>
+                                                <td class="al_l pdl_3" colspan="23"><textarea style="width: 80%;margin-right: 5px;" type="text" class="txt_ar kr" maxlength="200" id="InvoiceeCorpName" name="InvoiceeCorpName" placeholder="입력 후 엔터"></textarea>
+                                                <button class="btn_white_gradient mgl_2" id="btnSelectInvoicee" type="button" style="height:35px; margin-top:2px;">검색</button>
+                                                </td>
                                                 <th class="al_c bold lh_14" colspan="4"><p>성명</p></th>
                                                 <td class="al_l pdl_3" colspan="12"><textarea type="text" class="txt_ar kr" maxlength="100" id="InvoiceeCEOName" name="InvoiceeCEOName"></textarea></td>
 
@@ -909,7 +914,6 @@
 
         function setTaxTypeLayout(taxType) {
             const $writeTypeSelect = $('#WriteTypeSelect');
-            console.log('setTaxTypeLayout $writeTypeSelect', $writeTypeSelect);
             if (taxType === '영세') {
                 $('.tax-related').show();
                 $writeTypeSelect.html(`
@@ -984,7 +988,7 @@
                 clearInvoiceeFields();
                 $('#InvoiceeCorpNum')
                     .removeAttr('readonly')
-                    .css('width', '80%');
+                    .css('width', '100%');
 
                 if (!window.__skipCorpNumReset) {
                     $corpNum.val('');
@@ -1005,6 +1009,10 @@
                     $('#InvoiceeContactName1').val(name);
                 });
 
+                setTimeout(() => {
+                    $('#InvoiceeCorpName').focus();
+                }, 0);
+
 
             } else if (taxType === '외국인') {
                 clearInvoiceeFields();
@@ -1012,7 +1020,7 @@
                     .attr('readonly', true)
                     .css('width', '100%')
                     .val("999999-9999999");
-                $('#btnSelectInvoicee').hide();
+
                 $('#InvoiceeTaxRegID').attr('readonly', true);
                 $('#InvoiceeCEOName').attr('readonly', true);
                 $('#InvoiceeBizType').attr('readonly', true);
@@ -1021,17 +1029,22 @@
                 $('#InvoiceeEmail1')
                     .css('width', '100%');
                 $('#saveInvoicee').hide();
-                Alert.alert('', '외국인 등록번호 또는 여권번호를 [비고1]에 입력하여 주시기 바랍니다.');
+
+                Alert.alert('', '외국인 등록번호 또는 여권번호를 [비고1]에 입력하여 주시기 바랍니다.', function () {
+                    $('#InvoiceeCorpName').focus();  // 확인 누른 후 포커스 이동
+                });
+
 
                 $('#InvoiceeCorpName').off('input._autoFill').on('input._autoFill', function () {
                     const name = $(this).val();
                     $('#InvoiceeCEOName').val(name);
                     $('#InvoiceeContactName1').val(name);
                 });
+
             } else if (taxType === '사업자') {
                 clearInvoiceeFields();
                 $('#InvoiceeCorpNum')
-                    .css('width', '80%')
+                    .css('width', '100%')
                     .removeAttr('readonly');
 
                 if (!window.__skipCorpNumReset) {
@@ -1047,6 +1060,10 @@
                     .css('width', '80%');
                 $('#saveInvoicee').show();
                 $('#InvoiceeCorpName').off('input._autoFill');
+
+                setTimeout(() => {
+                    $('#InvoiceeCorpName').focus();
+                }, 0);
             }
             window.__skipCorpNumReset = false;
         });
@@ -1134,7 +1151,6 @@
 
         // 품목 행 디폴트
         function initializeDetailRows(data = []) {
-            console.log('initializeDetailRows', data);
             const $originRow = $('#item_0');
             const rowCount = Math.max(data.length, 4);
 
@@ -1287,7 +1303,6 @@
 
         // 총합계 계산 (공급가액 + 세액)
         function updateTotals() {
-            console.log('updateTotals');
             let supplyCostSum = 0;
             let taxSum = 0;
 
@@ -1308,7 +1323,6 @@
 
 
         function recalculateTaxesForRow($row) {
-            console.log('recalculateTaxesForRow');
             const taxMode = $('input[name="TaxType"]:checked').val();       // 과세 / 영세 / 면세
             const writeType = $('#WriteTypeSelect').val();   // 단가 유형
 
@@ -1341,7 +1355,6 @@
 
 
         function recalculateTaxesIfNeeded() {
-            console.log('recalculateTaxesIfNeeded');
             const taxType = $('input[name="TaxType"]:checked').val();
 
             let index = 0;
@@ -1371,7 +1384,6 @@
 
         // "합계금액" 선택
         $(document).on('change', '#WriteTypeSelect', function () {
-            console.log('WriteTypeSelect');
             const writeType = $(this).val();
             updateWriteTypeBehavior(writeType);
 
@@ -1382,15 +1394,12 @@
 
         // "계산 창 열기" 버튼 클릭
         $(document).on('click', '#totalAmountAct', function (event) {
-            console.log('totalAmountAct');
             event.stopPropagation(); // 이벤트 버블링 막기
             openPopup();
         });
 
         function openPopup() {
-            console.log('openPopup');
             let poppage = new PopTotalAmountComponent();
-            console.log(typeof PopTotalAmountComponent);
             let searchcallback = function (items) {
                 let index = 0;
                 while (true) {
@@ -1426,7 +1435,6 @@
 
         // 수량 또는 단가 입력 → 공급가 + 세액 계산
         $(document).on('input', '#taxList input[id$="Qty"], #taxList input[id$="UnitCost"]', function () {
-            console.log('input\', \'#taxList input[id$="Qty"], #taxList input[id$="UnitCost"]');
             const $row = $(this).closest('tr');
             const $qty = $row.find('input[id$="Qty"]');
             const $unitCost = $row.find('input[id$="UnitCost"]');
@@ -1461,7 +1469,6 @@
 
         // 수량, 단가, 공급가액, 세액 필드 입력 시 숫자형으로 포맷팅 (천단위 콤마)
         $(document).on('input', '#taxList input[id$="Qty"], #taxList input[id$="UnitCost"], #taxList input[id$="SupplyCost"], #taxList input[id$="Tax"]', function () {
-            console.log('수량, 단가, 공급가액, 세액 필드 입력 시 숫자형으로 포맷팅');
             let raw = $(this).val().replace(/,/g, ''); // 기존 콤마 제거
             if (raw.length > 0 && !isNaN(raw)) {
                 $(this).val(Number(raw).toLocaleString()); // 숫자면 콤마 다시 붙이기
@@ -1602,8 +1609,6 @@
 
             const result = AjaxUtil.getSyncData('/api/popup/search_acc_sub', data);
             const rows = result?.data || [];
-            console.log('search_acc_sub data', data);
-            console.log('search_acc_sub rows', rows);
             if (rows.length === 1) {
                 searchcallback(rows[0]);
             } else {
@@ -1625,7 +1630,6 @@
             const poppage = new PopDepartComponent();
 
             const searchcallback = function (item) {
-                console.log('att_depart item', item);
                 $('#att_depart').val(item.Name);
                 $('#att_departHidden').val(item.Code);
                 setTimeout(() => {
@@ -1763,7 +1767,6 @@
         });
 
         $(document).on('keydown', function (e) {
-            console.log('key:', e.key, 'shift:', e.shiftKey);
             // Ctrl + S 저장
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
                 e.preventDefault();

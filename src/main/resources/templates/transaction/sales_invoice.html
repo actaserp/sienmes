@@ -995,7 +995,7 @@
                     if (ht.cellType === wijmo.grid.CellType.Cell) {
                         let row = _this.grid.rows[ht.row]; // 해당 행
                         let item = _this.grid.rows[ht.row].dataItem; // 해당 row의 데이터
-                        console.log('dblclicked row item:', item);
+
                         _this.modify([item]); // 배열로 넘기는 걸 유지하려면 이렇게
                     }
                 });
@@ -1170,7 +1170,6 @@
                         .filter(row => row.isSelected)
                         .map(row => row.dataItem);
 
-                    console.log('btnIssue items', items);
 
                     if (items.length === 0) {
                         Alert.alert('', '발행할 항목을 선택해주세요.');
@@ -1192,7 +1191,6 @@
                         AjaxUtil.postJsonData(url, issueList, function (res) {
                             if (res.success) {
                                 Alert.alert('', res.message || '발행이 완료되었습니다.', function () {
-                                    console.log('res.success', res);
                                     _this.searchMainData();
                                 });
                             } else {
@@ -1235,7 +1233,6 @@
                             AjaxUtil.postJsonData(url, copyList, function (res) {
                                 if (res.success) {
                                     Alert.alert('', res.message || '복사되었습니다.', function () {
-                                        console.log('res.success', res);
                                         _this.searchMainData();
                                         modalContainer.close();
                                     });
@@ -1648,7 +1645,7 @@
 
             // 등록 팝업
             showInvoiceForm(data) {
-                console.log('showInvoiceForm', data);
+
                 let _this = this;
                 let content = tmpl('popup_invoiceTemplate', data);
                 let $content = $(content);
@@ -1673,9 +1670,7 @@
                 // 발행 목적
                 let $purposeType = $content.find('#purpose_type');
                 let rows2 = AjaxUtil.getSelectData('system_code', 'PurposeType');
-                console.log('rows2', rows2);
                 let selectedValue2 = rows2.length > 0 ? rows2[0].text : null;
-                console.log('selectedValue2', selectedValue2);
                 if (selectedValue2) {
                     $purposeType.val(selectedValue2).trigger('change');
                 }
@@ -1730,7 +1725,7 @@
                     $content.find('#resultList').hide();
 
                     setTimeout(() => {
-                        $content.find('#InvoiceeCorpNum').focus();
+                        $content.find('#InvoiceeCorpName').focus();
                     }, 0);
 
                     // 품목의 일자
@@ -1782,7 +1777,6 @@
                     setTimeout(() => {
 
                         code = data.StateCode;
-                        console.log('code', code);
 
                         // 상태 코드별 버튼 표시
                         if (code === undefined || code === null || code === 100 || code === 999) {
@@ -1905,6 +1899,11 @@
 
                     }, 0);
 
+                    setTimeout(() => {
+                        popInvoice.initAfterOpen();
+                        $content.find('#keyboardFocusCatcher').focus();
+                    }, 0);
+
                 }
                 const popInvoice = new PopInvoiceComponent();
                 let modalHeight = 600;
@@ -1917,10 +1916,7 @@
                 }
 
                 modalContainer.open({width: 1200, height: modalHeight, $content});
-                setTimeout(() => {
-                    popInvoice.initAfterOpen();
-                    $content.find('#keyboardFocusCatcher').focus();
-                }, 0);
+
                 initializeDetailRows(data.detailList || []);
 
                 // 신규 버튼 클릭
@@ -2002,7 +1998,6 @@
 
                         // 사업자가 아닌 경우 API 호출 없이 기본 값만 채우기 또는 무시
                         if (invoiceeType !== '사업자') {
-                            console.log('사업자 유형이 아니므로 API 호출 생략');
 
                             $content.find('#InvoiceeID').val(items.id).trigger('change');
                             $content.find('#InvoiceeCorpNum').val(items.business_number).trigger('input');
@@ -2027,30 +2022,32 @@
                         // 사업자 진위 여부 확인
                         let url = _this.url + '/invoicee_check';
 
-                        let fnSaveSuccess = function (result) {
+                        const fnSaveSuccess = function (result) {
                             if (result.success) {
                                 const data = result.data;
-                                const statusCode = data.b_stt_cd; // 상태 코드
-
-                                if (statusCode === '01') {
-                                    // 계속사업자일 경우만 정보 채우기
-                                    $content.find('#InvoiceeID').val(items.id).trigger('change');
-                                    $content.find('#InvoiceeCorpNum').val(items.business_number).trigger('input');
-                                    $content.find('#InvoiceeTaxRegID').val(items.invoiceetaxregid);
-                                    $content.find('#InvoiceeCorpName').val(items.compname);
-                                    $content.find('#InvoiceeCEOName').val(items.invoiceeceoname);
-                                    $content.find('#InvoiceeAddr').val(items.invoiceeaddr);
-                                    $content.find('#InvoiceeBizType').val(items.invoiceebiztype);
-                                    $content.find('#InvoiceeBizClass').val(items.invoiceebizclass);
-                                    $content.find('#InvoiceeContactName1').val(items.invoiceecontactname1);
-                                    $content.find('#InvoiceeTEL1').val(items.invoiceetel1).trigger('input');
-                                    $content.find('#InvoiceeEmail1').val(items.invoiceeemail1);
-                                    oldBusinessNumber = items.business_number;
+                                if (data.b_stt_cd === '01') {
+                                    $content.find('#InvoiceeID').val(item.id).trigger('change');
+                                    $content.find('#InvoiceeCorpNum').val(item.business_number).trigger('input');
+                                    $content.find('#InvoiceeTaxRegID').val(item.invoiceetaxregid);
+                                    $content.find('#InvoiceeCorpName').val(item.compname);
+                                    $content.find('#InvoiceeCEOName').val(item.invoiceeceoname);
+                                    $content.find('#InvoiceeAddr').val(item.invoiceeaddr);
+                                    $content.find('#InvoiceeBizType').val(item.invoiceebiztype);
+                                    $content.find('#InvoiceeBizClass').val(item.invoiceebizclass);
+                                    $content.find('#InvoiceeContactName1').val(item.invoiceecontactname1);
+                                    $content.find('#InvoiceeTEL1').val(item.invoiceetel1).trigger('input');
+                                    $content.find('#InvoiceeEmail1').val(item.invoiceeemail1);
+                                    oldBusinessNumber = item.business_number;
                                     $content.find('#InvoiceeCorpNum').prop('readonly', true);
-
                                 } else {
                                     Alert.alert('', result.message);
                                 }
+                            } else if (result.code === 'STOP_CONFIRM') {
+                                Alert.confirm('', result.message, function () {
+                                    AjaxUtil.postAsyncData(_this.url + '/invoicee_stop', {compid: compid}, function (res) {
+                                        Alert.alert('', res.message);
+                                    });
+                                });
                             } else {
                                 Alert.alert('', result.message);
                             }
@@ -2076,8 +2073,6 @@
                         const compid = item.id;
 
                         if (invoiceeType !== '사업자') {
-                            console.log('사업자 유형이 아니므로 API 호출 생략');
-
                             $content.find('#InvoiceeID').val(items.id).trigger('change');
                             $content.find('#InvoiceeCorpNum').val(items.business_number).trigger('input');
                             $content.find('#InvoiceeTaxRegID').val(items.invoiceetaxregid);
@@ -2115,19 +2110,22 @@
                                     oldBusinessNumber = item.business_number;
                                     $content.find('#InvoiceeCorpNum').prop('readonly', true);
                                 } else {
-                                    console.log('else');
                                     Alert.alert('', result.message);
                                 }
                             } else if (result.code === 'STOP_CONFIRM') {
-                                console.log('STOP_CONFIRM');
-                                Alert.confirm('', result.message, function () {
-                                    AjaxUtil.postAsyncData(_this.url + '/invoicee_stop', {compid: compid}, function (res) {
-                                        console.log('invoicee_stop');
-                                        Alert.alert('', res.message);
-                                    });
-                                });
+                                Alert.confirm('', result.message,
+                                    function onYes() {
+                                        // 확인 눌렀을 때 로직
+                                        AjaxUtil.postAsyncData(_this.url + '/invoicee_stop', { compid: compid }, function (res) {
+                                            Alert.alert('', res.message);
+                                        });
+                                    },
+                                    function onCancel() {
+                                        // 취소 눌렀을 때 포커스 이동
+                                        $content.find('#InvoiceeCorpName').focus();
+                                    }
+                                );
                             } else {
-                                console.log('else222222222');
                                 Alert.alert('', result.message);
                             }
                         };
@@ -2140,7 +2138,7 @@
                     };
 
                     if (!keyword) {
-                        poppage.focusAfterClose = $content.find('#InvoiceeCorpNum')[0];
+                        poppage.focusAfterClose = $content.find('#InvoiceeCorpName')[0];
                         poppage.show(searchcallback);
                         return;
                     }
@@ -2180,21 +2178,25 @@
                         const compid = item.id;
 
                         if (invoiceeType !== '사업자') {
-                            console.log('사업자 유형이 아니므로 API 호출 생략');
 
-                            $content.find('#InvoiceeID').val(items.id).trigger('change');
-                            $content.find('#InvoiceeCorpNum').val(items.business_number).trigger('input');
-                            $content.find('#InvoiceeTaxRegID').val(items.invoiceetaxregid);
-                            $content.find('#InvoiceeCorpName').val(items.compname);
-                            $content.find('#InvoiceeCEOName').val(items.invoiceeceoname);
-                            $content.find('#InvoiceeAddr').val(items.invoiceeaddr);
-                            $content.find('#InvoiceeBizType').val(items.invoiceebiztype);
-                            $content.find('#InvoiceeBizClass').val(items.invoiceebizclass);
-                            $content.find('#InvoiceeContactName1').val(items.invoiceecontactname1);
-                            $content.find('#InvoiceeTEL1').val(items.invoiceetel1).trigger('input');
-                            $content.find('#InvoiceeEmail1').val(items.invoiceeemail1);
-                            oldBusinessNumber = items.business_number;
+                            $content.find('#InvoiceeID').val(item.id).trigger('change');
+                            $content.find('#InvoiceeCorpNum').val(item.business_number).trigger('input');
+                            $content.find('#InvoiceeTaxRegID').val(item.invoiceetaxregid);
+                            $content.find('#InvoiceeCorpName').val(item.compname);
+                            $content.find('#InvoiceeCEOName').val(item.invoiceeceoname);
+                            $content.find('#InvoiceeAddr').val(item.invoiceeaddr);
+                            $content.find('#InvoiceeBizType').val(item.invoiceebiztype);
+                            $content.find('#InvoiceeBizClass').val(item.invoiceebizclass);
+                            $content.find('#InvoiceeContactName1').val(item.invoiceecontactname1);
+                            $content.find('#InvoiceeTEL1').val(item.invoiceetel1).trigger('input');
+                            $content.find('#InvoiceeEmail1').val(item.invoiceeemail1);
+                            oldBusinessNumber = item.business_number;
                             $content.find('#InvoiceeCorpNum').prop('readonly', true);
+
+                            setTimeout(() => {
+                                $content.find('#Remark1').focus();
+                            }, 0);
+
                             return;
                         }
 
@@ -2218,15 +2220,27 @@
                                     $content.find('#InvoiceeEmail1').val(item.invoiceeemail1);
                                     oldBusinessNumber = item.business_number;
                                     $content.find('#InvoiceeCorpNum').prop('readonly', true);
+
+                                    setTimeout(() => {
+                                        $content.find('#Remark1').focus();
+                                    }, 0);
                                 } else {
                                     Alert.alert('', result.message);
                                 }
                             } else if (result.code === 'STOP_CONFIRM') {
-                                Alert.confirm('', result.message, function () {
-                                    AjaxUtil.postAsyncData(_this.url + '/invoicee_stop', {compid: compid}, function (res) {
-                                        Alert.alert('', res.message);
-                                    });
-                                });
+                                Alert.confirm('', result.message,
+                                    function onYes() {
+                                        // 확인 눌렀을 때 로직
+                                        AjaxUtil.postAsyncData(_this.url + '/invoicee_stop', { compid: compid }, function (res) {
+                                            Alert.alert('', res.message);
+                                        });
+                                    },
+                                    function onCancel() {
+                                        // 취소 눌렀을 때 포커스 이동
+                                        $content.find('#InvoiceeCorpName').focus();
+                                    }
+                                );
+
                             } else {
                                 Alert.alert('', result.message);
                             }
@@ -2234,9 +2248,6 @@
 
                         AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
 
-                        setTimeout(() => {
-                            $content.find('#Remark1').focus();
-                        }, 0);
                     };
 
                     if (!keyword) {
@@ -2429,7 +2440,6 @@
                     pop.material_type = 'product,sangpum';
 
                     const callback = function (item) {
-                        console.log('item item', item);
                         $row.find('input[id$=".ItemId"]').val(item.id || '');
                         $row.find('textarea[id$=".ItemName"]').val(item.Name || '');
                         $row.find('textarea[id$=".Spec"]').val(item.Spec || '');
@@ -2472,7 +2482,6 @@
                     pop.material_type = 'product,sangpum';
 
                     pop.show(function (item) {
-                        console.log('mate item', item);
                         $row.find('input[id$=".ItemId"]').val(item.id || '');
                         $row.find('textarea[id$=".ItemName"]').val(item.Name || '');
                         $row.find('textarea[id$=".Spec"]').val(item.Spec || '');
@@ -2497,7 +2506,6 @@
                 });
 
                 function saveInvoice($taxForm, modalContainer, skipConfirm = false) {
-                    console.log('saveInvoice', $taxForm);
                     let data = FormUtil.extractForm($taxForm);
 
                     if (!data.InvoiceeCorpNum?.trim()) {
@@ -2520,7 +2528,6 @@
                         });
                         return;
                     }
-                    console.log('TotalAmount', data.TotalAmount);
                     if (!data.TotalAmount || data.TotalAmount === '0') {
 
                         Alert.alert('', '금액이 없습니다.');
@@ -2865,7 +2872,6 @@
                         AjaxUtil.postJsonData(url, [item], function (res) {
                             if (res.success) {
                                 Alert.alert('', res.message || '발행이 취소되었습니다.', function () {
-                                    console.log('res.success', res);
                                     _this.searchMainData();
                                 });
                             } else {
@@ -2904,7 +2910,6 @@
                         AjaxUtil.postJsonData(url, [item], function (res) {
                             if (res.success) {
                                 Alert.alert('', res.message || '재전송 되었습니다.', function () {
-                                    console.log('res.success', res);
                                     _this.searchMainData();
                                     modalContainer.close();
                                 });
@@ -2996,7 +3001,6 @@
                     if (result != null && result.data) {
                         result.data.forEach(item => {
                             let corpNum = item.ivercorpnum;
-                            console.log('corpNum', corpNum);
 
                             // 값이 존재할 경우만 처리
                             if (corpNum) {
@@ -3150,8 +3154,6 @@
                     let poppage = new PopCompComponent();
                     let $poppage = $(poppage);
                     let searchcallback = function (items) {
-                        console.log('btnCompanySearch_ship', items);
-                        console.log('$content.find(\'btnCompanySearch_ship\')', $content.find('btnCompanySearch'));
                         $content.find('#btnCompanySearch_ship').val(items.compname);
                         $content.find('#cboCompanyHidden_ship').val(items.id);
 
@@ -3202,7 +3204,6 @@
 
                     let fnsuccess = function (result) {
 
-                        console.log('result', result.data);
                         if (result.data !== null) {
                             _this.shipListGrid.itemsSource = new wijmo.collections.CollectionView(result.data);
                             _this.shipSelector = new wijmo.grid.selector.Selector(_this.shipListGrid);
