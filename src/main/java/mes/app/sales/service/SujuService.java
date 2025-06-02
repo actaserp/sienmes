@@ -142,6 +142,8 @@ public class SujuService {
             , s."InVatYN" as "invatyn"
             , fn_code_name('suju_state', s."State") as "StateName"
             , to_char(s."_created", 'yyyy-mm-dd') as create_date
+            , s.project_id AS "projectHidden"
+			, sc4.projnm AS "project"
             , case
 				when sh.shippedQty is not null and sh.shippedQty = s."SujuQty" then '출하'
 				when sh.shippedQty is not null and sh.shippedQty < s."SujuQty" then '부분출하'
@@ -151,6 +153,7 @@ public class SujuService {
             inner join mat_grp mg on mg.id = m."MaterialGroup_id"
             left join unit u on m."Unit_id" = u.id
             left join company c on c.id= s."Company_id"
+            LEFT JOIN TB_DA003 sc4 ON sc4."projno" = s.project_id
             LEFT JOIN (
 				 SELECT "SourceDataPk", SUM("Qty") as shippedQty
 				 FROM shipment

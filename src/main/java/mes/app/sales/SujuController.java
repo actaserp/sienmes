@@ -98,6 +98,7 @@ public class SujuController {
 			@RequestParam(value="vat") String vatStr,
 			@RequestParam(value="totalAmount") String totalAmountStr,
 			@RequestParam(value="invatyn") String invatyn,
+			@RequestParam(value="projectHidden") String project_id,
 			HttpServletRequest request,
 			Authentication auth	) {
 		User user = (User)auth.getPrincipal();
@@ -136,6 +137,7 @@ public class SujuController {
 		suju.setVat(vat);
 		suju.setInVatYN(invatyn);
 		suju.setTotalAmount(totalAmount);
+		suju.setProject_id(project_id);
 
 		suju = this.SujuRepository.save(suju);
 		

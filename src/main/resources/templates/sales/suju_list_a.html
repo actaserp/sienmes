@@ -216,10 +216,25 @@
                         </tr>
                         <tr>
                             <th style="text-align: center">
+                                <label for="cboCompany">프로젝트</label>
+                            </th>
+                            <td colspan="3">
+                                <input id="projectHidden" name="projectHidden" type="hidden">
+                                <input class="form-control2" type="text" id="project" name="project"
+                                placeholder="프로젝트 검색 버튼을 클릭하여 검색하세요" readonly/>
+                                &nbsp;
+                                <a class="btn btn-delete" title="검색" id="btnSelect_project">
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    프로젝트 검색
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
                                 <label for="description">비고</label>
                             </th>
                             <td colspan="3">
-                                <textarea id="description" name="Description"></textarea>
+                                <textarea id="description" name="Description" style="height:70px;"></textarea>
                             </td>
                         </tr>
                         <tr>
@@ -256,6 +271,7 @@
     <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
     <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
     <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+    <th:block th:replace="/common/popup_project :: popup_project"></th:block>
 
     <script type="text/javascript">
 
@@ -464,6 +480,17 @@
                         if ($Material_id.val() && $cboCompany.val()) {
                             tryShowPrice();
                         }
+                    };
+
+                    poppage.show(searchcallback);
+                });
+
+                $content.find('#btnSelect_project').click(function () {
+                    let poppage = new PopProjectComponent();
+                    let searchcallback = function (items) {
+                        $(document).find('#project').val(items.projnm);
+                        $(document).find('#projectHidden').val(items.projno);
+
                     };
 
                     poppage.show(searchcallback);
