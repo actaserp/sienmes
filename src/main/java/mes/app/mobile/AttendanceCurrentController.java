@@ -75,8 +75,10 @@ public class AttendanceCurrentController {
     public AjaxResult submitCommute(
             @RequestParam(value="vacId", required=false) Integer vacId,
             @RequestParam(value="attKind", required=false) String attKind,
-            @RequestParam(value="startDateTime", required=false) String startDateTime,
-            @RequestParam(value="endDateTime", required=false) String endDateTime,
+            @RequestParam(value="startDate", required=false) String startDate,
+            @RequestParam(value="startTime", required=false) String startTime,
+            @RequestParam(value="endDate", required=false) String endDate,
+            @RequestParam(value="endTime", required=false) String endTime,
             @RequestParam(value="isAnnual", required=false) String isAnnual,
             @RequestParam(value="useDate", required=false) BigDecimal useDate,
             @RequestParam(value="remark", required=false) String remark,
@@ -85,20 +87,20 @@ public class AttendanceCurrentController {
         AjaxResult result = new AjaxResult();
         // 기존 휴가 데이터 조회
         Optional<TB_PB204> optionalTbPb204 = tbPb204Repository.findById(vacId);
+        String formattedStartDate = startDate.replaceAll("-", ""); // "20250505"
+        String formattedEndDate = endDate.replaceAll("-", "");
 
         if (optionalTbPb204.isPresent()) {
             TB_PB204 savedtbPb204 = optionalTbPb204.get();
 
-            Map<String, String> startParts = extractDateTimeParts(startDateTime);
-            Map<String, String> endParts = extractDateTimeParts(endDateTime);
-
-            savedtbPb204.setFrdate(startParts.get("date")); // 시작일자
-            savedtbPb204.setSttime(startParts.get("time")); // 시작시간
-            savedtbPb204.setTodate(endParts.get("date"));   // 종료일자
-            savedtbPb204.setEdtime(endParts.get("time"));   // 종료시간
+            savedtbPb204.setFrdate(formattedStartDate); // 시작일자
+            savedtbPb204.setSttime(startTime); // 시작시간
+            savedtbPb204.setTodate(formattedEndDate);   // 종료일자
+            savedtbPb204.setEdtime(endTime);   // 종료시간
             savedtbPb204.setDaynum(useDate); // 휴가기간
             savedtbPb204.setWorkcd(attKind); // 휴가구분
             savedtbPb204.setRemark(remark); // 휴가 사유
+            savedtbPb204.setYearflag(isAnnual); // 연차여부
             result.data = tbPb204Repository.save(savedtbPb204);
             result.message = "휴가수정이 완료되었습니다.";
         } else {

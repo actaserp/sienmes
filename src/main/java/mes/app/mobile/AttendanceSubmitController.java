@@ -59,8 +59,10 @@ public class AttendanceSubmitController {
             @RequestParam(value="userId") String userId,
             @RequestParam(value="userName") String userName,
             @RequestParam(value="attKind", required=false) String attKind,
-            @RequestParam(value="startDateTime", required=false) String startDateTime,
-            @RequestParam(value="endDateTime", required=false) String endDateTime,
+            @RequestParam(value="startDate", required=false) String startDate,
+            @RequestParam(value="startTime", required=false) String startTime,
+            @RequestParam(value="endDate", required=false) String endDate,
+            @RequestParam(value="endTime", required=false) String endTime,
             @RequestParam(value="isAnnual", required=false) String isAnnual,
             @RequestParam(value="useDate", required=false) BigDecimal useDate,
             @RequestParam(value="usedDate", required=false) String usedDate,
@@ -76,17 +78,17 @@ public class AttendanceSubmitController {
         String username = user.getUsername();
         String spjangcd = user.getSpjangcd();
         String reqdate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String formattedStartDate = startDate.replaceAll("-", ""); // "20250505"
+        String formattedEndDate = endDate.replaceAll("-", "");
 
         tbPb204.setSpjangcd(spjangcd); // 사업장코드
         tbPb204.setReqdate(reqdate); // 신청일자
         tbPb204.setPersonid(user.getPersonid()); // 직원코드 personid
-        Map<String, String> startParts = extractDateTimeParts(startDateTime);
-        Map<String, String> endParts = extractDateTimeParts(endDateTime);
 
-        tbPb204.setFrdate(startParts.get("date")); // 시작일자
-        tbPb204.setSttime(startParts.get("time")); // 시작시간
-        tbPb204.setTodate(endParts.get("date"));   // 종료일자
-        tbPb204.setEdtime(endParts.get("time"));   // 종료시간
+        tbPb204.setFrdate(formattedStartDate);
+        tbPb204.setSttime(startTime); // 시작시간
+        tbPb204.setTodate(formattedEndDate);  // 종료일자
+        tbPb204.setEdtime(endTime);   // 종료시간
         tbPb204.setDaynum(useDate); // 휴가기간
         tbPb204.setWorkcd(attKind); // 휴가구분
         tbPb204.setRemark(remark); // 휴가 사유
@@ -98,7 +100,7 @@ public class AttendanceSubmitController {
         tbPb204.setAppgubun("001"); // 결재구분 (001 = 결재대기)
         tbPb204.setAppperid(user.getPersonid()); // 결재상신사원 (personid)
         tbPb204.setAppuserid(user.getUsername()); // 결재상신아이디
-
+        tbPb204.setYearflag(isAnnual);
         // 결재테이블 insert
         // 결재구분별 결재라인 및 상신사원 조회(문서구분 301 / 휴가신청서)
         List<Map<String, Object>> appInfo = attendanceSubmitService.getAppInfoList(user.getPersonid());

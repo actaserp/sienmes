@@ -138,10 +138,10 @@ public class ApprovalListService {//결재목록
     params.addValue("as_enddate", endDate);
     params.addValue("as_perid", personid);
     StringBuilder sql = new StringBuilder("""
-        SELECT (select count(appgubun) from tb_e080 where appgubun = '001' AND repoperid = :as_perid AND flag = '1' AND repodate Between :as_stdate AND :as_enddate) as appgubun1,
-               (select count(appgubun) from tb_e080 where appgubun = '101' AND repoperid = :as_perid AND flag = '1'  AND repodate Between :as_stdate AND :as_enddate) as appgubun2,
-               (select count(appgubun) from tb_e080 where appgubun = '131' AND repoperid = :as_perid AND flag = '1'  AND repodate Between :as_stdate AND :as_enddate) as appgubun3,
-               (select count(appgubun) from tb_e080 where appgubun = '201' AND repoperid = :as_perid AND flag = '1'  AND repodate Between :as_stdate AND :as_enddate) as appgubun4
+        SELECT (select count(appgubun) from tb_e080 where appgubun = '001' AND repoperid = :as_perid AND flag = '1' AND indate Between :as_stdate AND :as_enddate AND spjangcd = :as_spjangcd) as appgubun1,
+               (select count(appgubun) from tb_e080 where appgubun = '101' AND repoperid = :as_perid AND flag = '1'  AND indate Between :as_stdate AND :as_enddate AND spjangcd = :as_spjangcd) as appgubun2,
+               (select count(appgubun) from tb_e080 where appgubun = '131' AND repoperid = :as_perid AND flag = '1'  AND indate Between :as_stdate AND :as_enddate AND spjangcd = :as_spjangcd) as appgubun3,
+               (select count(appgubun) from tb_e080 where appgubun = '201' AND repoperid = :as_perid AND flag = '1'  AND indate Between :as_stdate AND :as_enddate AND spjangcd = :as_spjangcd) as appgubun4
         """);
 //    log.info("결재목록_문서현황 List SQL: {}", sql);
 //    log.info("SQL Parameters: {}", params.getValues());

@@ -176,7 +176,7 @@
                 <div class="form-group" >
                     <label for="editAttKind">근태항목:</label>
                     <div style="display: flex; gap: 10%">
-                        <select id="editAttKind" style="width: 70%">
+                        <select id="editAttKind" style="width: 70%" onchange="bindPeriod();">
                             <option>휴가</option>
                         </select>
                         <label style="display: flex; align-items: center">
@@ -185,14 +185,20 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="editStartDateTime">시작일:</label>
-                    <input type="datetime-local" id="editStartDateTime">
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label for="editStartDate">시작일:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="date" id="editStartDate" style="width: 140px;">
+                        <input type="time" id="editStartTime" style="width: 140px;">
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="editEndDateTime">종료일:</label>
-                    <input type="datetime-local" id="editEndDateTime">
+                    <label for="editEndDate">종료일:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="date" id="editEndDate" style="width: 140px;">
+                        <input type="time" id="editEndTime" style="width: 140px;">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -237,8 +243,8 @@
         AjaxUtil.fillSelectOptions($('#selectWorkcd'), 'workcd', 'all', false, 'work_division', '');
         AjaxUtil.fillSelectOptions($('#editAttKind'), 'workcd', 'choose', false, 'work_division', '');
         // 이벤트 리스너 등록
-        document.getElementById('editStartDateTime').addEventListener('change', calculateUseDays);
-        document.getElementById('editEndDateTime').addEventListener('change', calculateUseDays);
+        document.getElementById('editStartDate').addEventListener('change', calculateUseDays);
+        document.getElementById('editEndDate').addEventListener('change', calculateUseDays);
         searchMainData();
     });
     // yy.mm.dd 형식 포멧함수
@@ -411,13 +417,16 @@
         const endTime = cells[8].innerText;
 
         // ✅ datetime-local 형식으로 변환
-        const formattedStartDateTime = `${startDate[0]}-${startDate[1]}-${startDate[2]}T${startTime}`;
-        const formattedEndDateTime = `${endDate[0]}-${endDate[1]}-${endDate[2]}T${endTime}`;
-        document.getElementById('editStartDateTime').value = formattedStartDateTime;
-        document.getElementById('editEndDateTime').value = formattedEndDateTime;
+        const formattedStartDateTime = `${startDate[0]}-${startDate[1]}-${startDate[2]}`;
+        const formattedEndDateTime = `${endDate[0]}-${endDate[1]}-${endDate[2]}`;
+        document.getElementById('editStartDate').value = formattedStartDateTime;
+        document.getElementById('editStartTime').value = startTime;
+        document.getElementById('editEndDate').value = formattedEndDateTime;
+        document.getElementById('editEndTime').value = endTime;
         document.getElementById('editUseDate').value = cells[5].innerText;
         document.getElementById('editRemark').value = cells[6].innerText;
         document.getElementById('vacId').value = cells[10].innerText;
+        document.getElementById('isAnnual').checked = cells[2].innerText !== '';
 
         // 모달 열기
         document.getElementById('vacationEditModal').style.display = 'block';
@@ -436,8 +445,11 @@
             'attKind': document.getElementById('editAttKind').value,
             'useDate': document.getElementById('editUseDate').value,
             'remark': document.getElementById('editRemark').value,
-            'startDateTime': document.getElementById('editStartDateTime').value,
-            'endDateTime': document.getElementById('editEndDateTime').value
+            'startDate': document.getElementById('editStartDate').value,
+            'startTime': document.getElementById('editStartTime').value,
+            'endDate': document.getElementById('editEndDate').value,
+            'endTime': document.getElementById('editEndTime').value,
+            'isAnnual': document.getElementById('isAnnual').checked ? "1" : "0"
         };
 
         let fnsuccess = function (result) {
@@ -457,29 +469,26 @@
 
     // 날짜와 시간 차이 계산 함수
     function calculateUseDays() {
-        const startDateTime = document.getElementById('editStartDateTime').value;
-        const endDateTime = document.getElementById('editEndDateTime').value;
+        const startDate = document.getElementById('editStartDate').value;
+        const endDate = document.getElementById('editEndDate').value;
         const useDateInput = document.getElementById('editUseDate');
 
         console.log('날자계산 메서드 동작')
-        if (startDateTime && endDateTime) {
-            const start = new Date(startDateTime);
-            const end = new Date(endDateTime);
+        if (useDateInput.getAttribute('data-fixed') === 'true') {
+            console.log('useDate는 고정값 상태입니다. 계산하지 않음.');
+            return;
+        }
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            // 같은 날짜면 최소 하루
+            // 하루 = 1000ms * 60s * 60m * 24h
+            const dayDiff = (end - start) / (1000 * 60 * 60 * 24);
 
-            // 시간 차이를 밀리초(ms)로 계산
-            const timeDiff = end.getTime() - start.getTime();
-
-            // 시간(시간 단위)
-            const hoursDiff = timeDiff / (1000 * 60 * 60);
-
-            // 일수로 변환 (소수점 2자리까지 표현)
-            const dayDiff = (hoursDiff / 24).toFixed(2);
-
-            // 음수인 경우 0으로 설정
-            if (dayDiff > 0) {
-                useDateInput.value = dayDiff;
+            if (dayDiff === 0) {
+                useDateInput.value = "1.00"; // 같은 날이면 1일
             } else {
-                useDateInput.value = '0.00';
+                useDateInput.value = dayDiff > 0 ? (dayDiff + 1).toFixed(2) : '0.00'; // 양수면 +1일
             }
         }
     }
@@ -487,7 +496,30 @@
         console.log("확인 버튼 클릭됨");
         window.location.reload(); // ✅ 페이지 새로고침
     }
-
+    function bindPeriod() {
+        let _this = this;
+        let url = '/api/attendance_submit/bindPeriod'
+        let data = {
+            'attKind': document.getElementById('editAttKind').value,
+        }
+        let fnsuccess = function (result) {
+            if (result != null) {
+                console.log("result : ", result);
+                let usenum = parseFloat(result.data.usenum);
+                if (usenum > 0 && usenum < 1) {
+                    const useDateInput = document.getElementById('editUseDate');
+                    useDateInput.value = usenum.toFixed(2);
+                    useDateInput.setAttribute('data-fixed', 'true'); // 🔒 잠금 표시
+                } else {
+                    document.getElementById('editUseDate').removeAttribute('data-fixed');
+                }
+                document.getElementById('isAnnual').checked = result.data.yearflag === '1';
+            } else {
+                Alert.alert('', "오류가 발생하였습니다.");
+            }
+        };
+        AjaxUtil.getAsyncData(url, data, fnsuccess);
+    }
 </script>
 </body>
 </html>

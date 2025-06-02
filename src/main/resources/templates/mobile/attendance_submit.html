@@ -203,13 +203,24 @@
             </dd>
             <dt>기간</dt>
             <dd>
-              <div style="display: flex; gap: 10px">
-                <input type="datetime-local" id="startDateTime" style="width: 70%" value="YYYY-MM-DDT00:00">
+              <!-- 시작 날짜/시간 -->
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="display: flex; gap: 10px;">
+                  <input type="date" id="startDate" style="width: 140px;">
+                  <input type="time" id="startTime" style="width: 140px;">
+                </div>
               </div>
-              <span style="font-weight: bold; margin: 0px 10px 0px 10px;">~</span>
-              <div style="display: flex; gap: 10px">
-                <input type="datetime-local" id="endDateTime" style="width: 70%" value="YYYY-MM-DDT00:00">
+
+              <span style="font-weight: bold;">~</span>
+
+              <!-- 종료 날짜/시간 -->
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="display: flex; gap: 10px;">
+                  <input type="date" id="endDate" style="width: 140px;">
+                  <input type="time" id="endTime" style="width: 140px;">
+                </div>
               </div>
+
             </dd>
             <div style="display: flex;">
               <dt>사용일수</dt>
@@ -260,10 +271,8 @@
     searchMainData();
     AjaxUtil.fillSelectOptions($('#attKind'), 'workcd', 'choose', false, 'work_division', '');
     // 이벤트 리스너 등록
-    document.getElementById('startDateTime').addEventListener('change', calculateUseDays);
-    document.getElementById('endDateTime').addEventListener('change', calculateUseDays);
-
-
+    document.getElementById('startDate').addEventListener('change', calculateUseDays);
+    document.getElementById('endDate').addEventListener('change', calculateUseDays);
   })
   // 휴가기간 초기 00시00분 바인드
   function bindDate(userStartTime){
@@ -274,8 +283,8 @@
     const startTime = userStartTime ?? "00:00";
 
     // 시작 시간과 종료 시간 초기화
-    document.getElementById('startDateTime').value = `${formattedDate}T${startTime}`;
-    document.getElementById('endDateTime').value = `${formattedDate}T${startTime}`;
+    document.getElementById('startDate').value = `${formattedDate}`;
+    document.getElementById('endDate').value = `${formattedDate}`;
   }
 
   // 유저정보 확인 (사용자정보/ ID, 이름, 연차잔여일수 바인드)
@@ -314,8 +323,11 @@
       'useDate': document.getElementById('useDate').value,
       'usedDate': document.getElementById('usedDate').value,
       'remark': document.getElementById('remark').value,
-      'startDateTime': document.getElementById('startDateTime').value,
-      'endDateTime': document.getElementById('endDateTime').value
+      'startDate': document.getElementById('startDate').value,
+      'startTime': document.getElementById('startTime').value,
+      'endDate': document.getElementById('endDate').value,
+      'endTime': document.getElementById('endTime').value,
+      'isAnnual': document.getElementById('isAnnual').checked ? "1" : "0"
     }
     let fnsuccess = function (result) {
       if (result != null) {
@@ -335,8 +347,8 @@
 
   // 날짜와 시간 차이 계산 함수
   function calculateUseDays() {
-    const startDateTime = document.getElementById('startDateTime').value;
-    const endDateTime = document.getElementById('endDateTime').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
     const useDateInput = document.getElementById('useDate');
 
     console.log('날자계산 메서드 동작')
@@ -344,24 +356,17 @@
       console.log('useDate는 고정값 상태입니다. 계산하지 않음.');
       return;
     }
-    if (startDateTime && endDateTime) {
-      const start = new Date(startDateTime);
-      const end = new Date(endDateTime);
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      // 같은 날짜면 최소 하루
+      // 하루 = 1000ms * 60s * 60m * 24h
+      const dayDiff = (end - start) / (1000 * 60 * 60 * 24);
 
-      // 시간 차이를 밀리초(ms)로 계산
-      const timeDiff = end.getTime() - start.getTime();
-
-      // 시간(시간 단위)
-      const hoursDiff = timeDiff / (1000 * 60 * 60);
-
-      // 일수로 변환 (소수점 2자리까지 표현)
-      const dayDiff = (hoursDiff / 24).toFixed(2);
-
-      // 음수인 경우 0으로 설정
-      if (dayDiff > 0) {
-        useDateInput.value = dayDiff;
+      if (dayDiff === 0) {
+        useDateInput.value = "1.00"; // 같은 날이면 1일
       } else {
-        useDateInput.value = '0.00';
+        useDateInput.value = dayDiff > 0 ? (dayDiff + 1).toFixed(2) : '0.00'; // 양수면 +1일
       }
     }
   }
@@ -375,8 +380,14 @@
       if (result != null) {
         console.log("result : ", result);
         let usenum = parseFloat(result.data.usenum);
-        const useDateInput = document.getElementById('useDate');
-        useDateInput.value = usenum.toFixed(2);
+        if (usenum > 0 && usenum < 1) {
+          const useDateInput = document.getElementById('useDate');
+          useDateInput.value = usenum.toFixed(2);
+          useDateInput.setAttribute('data-fixed', 'true'); // 🔒 잠금 표시
+        } else {
+          document.getElementById('useDate').removeAttribute('data-fixed');
+        }
+        document.getElementById('isAnnual').checked = result.data.yearflag === '1';
       } else {
         Alert.alert('', "오류가 발생하였습니다.");
       }
