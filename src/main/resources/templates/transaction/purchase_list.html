@@ -101,7 +101,7 @@
                                             </label>
                                         </dt>
                                         <dd>
-                                            <select class="form-control2" id="sale_type" name="sale_type" >
+                                            <select class="form-control2" id="purchase_type" name="purchase_type" >
 
                                             </select>
                                         </dd>
@@ -158,7 +158,7 @@
 
                         <div class="grid_box" id="divList">
 
-                            <div id="theGrid_purchaseList" style="height: 350px;"></div>
+                            <div id="theGrid_purchaseList" style="height: 730px;"></div>
                         </div>
                     </section>
                 </section>
@@ -203,7 +203,7 @@
                                         </label>
                                     </dt>
                                     <dd>
-                                        <select class="form-control2" id="sale_type2" name="sale_type2" >
+                                        <select class="form-control2" id="purchase_type2" name="purchase_type2" >
 
                                         </select>
                                     </dd>
@@ -252,7 +252,7 @@
 
                             </div>
                         </div>
-                        <table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; text-align: center; font-family: sans-serif;">
+                        <!--<table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; text-align: center; font-family: sans-serif;">
                             <thead>
                             <tr>
                                 <th>구분</th>
@@ -285,8 +285,8 @@
                                 <td></td>
                             </tr>
                             </tbody>
-                        </table>
-                        <div id="theGrid_purchaseList2" style="height: 350px;"></div>
+                        </table>-->
+                        <div id="theGrid_purchaseList2" style="height: 730px;"></div>
                     </section>
 
                     <!--<section class="section">
@@ -312,161 +312,8 @@
     <script type="text/javascript">
 
         let purchase_type = [];
-
-        const salesData = [
-            { 일련번호: 1, 사업자등록번호: '-', 상호: '홀운동기룡하이빌', 매수: 1, 공급가액: 56000, 세액: 5600 },
-            { 일련번호: 2, 사업자등록번호: '-', 상호: '대경아르체아파트', 매수: 1, 공급가액: 182400, 세액: 18240 },
-            { 일련번호: 3, 사업자등록번호: '-', 상호: '페트라빌', 매수: 1, 공급가액: 90909, 세액: 9091 },
-            { 일련번호: 4, 사업자등록번호: '-', 상호: '일광빌딩2차', 매수: 1, 공급가액: 84800, 세액: 8480 },
-            { 일련번호: 5, 사업자등록번호: '-', 상호: '정진빌딩', 매수: 1, 공급가액: 100000, 세액: 10000 },
-            { 일련번호: 6, 사업자등록번호: '101-82-22657', 상호: '서울여자간호대학교 휴먼캐슬', 매수: 1, 공급가액: 65800, 세액: 6580 },
-            { 일련번호: 7, 사업자등록번호: '101-82-69992', 상호: '기독교대한감리회예수사랑교회', 매수: 1, 공급가액: 80955, 세액: 8095 },
-            { 일련번호: 8, 사업자등록번호: '-', 상호: '서울문화유체국', 매수: 2, 공급가액: 360000, 세액: 36000 },
-            { 일련번호: 9, 사업자등록번호: '102-13-93738', 상호: '공간관리소(영화빌리지)', 매수: 1, 공급가액: 100000, 세액: 10000 },
-            { 일련번호: 10, 사업자등록번호: '102-39-04399', 상호: '송학빌딩', 매수: 1, 공급가액: 60000, 세액: 6000 },
-            { 일련번호: 11, 사업자등록번호: '102-80-00837', 상호: '쉐레미오피스텔', 매수: 1, 공급가액: 140000, 세액: 14000 },
-            { 일련번호: 12, 사업자등록번호: '104-10-62971', 상호: '양지타빌', 매수: 1, 공급가액: 58800, 세액: 5880 },
-            { 일련번호: 13, 사업자등록번호: '104-81-24695', 상호: '조선일보사(구, 디지털서울문화예술)', 매수: 1, 공급가액: 65800, 세액: 6580 },
-            { 일련번호: 14, 사업자등록번호: '105-05-83693', 상호: 'P.M.SE빌', 매수: 1, 공급가액: 65800, 세액: 6580 },
-            { 일련번호: 15, 사업자등록번호: '105-07-55809', 상호: '마인드월드', 매수: 1, 공급가액: 183636, 세액: 18364 },
-            { 일련번호: 16, 사업자등록번호: '105-07-85957', 상호: '예건빌딩', 매수: 1, 공급가액: 85764, 세액: 8576 },
-            { 일련번호: 17, 사업자등록번호: '105-09-67537', 상호: '주연빌딩', 매수: 1, 공급가액: 90909, 세액: 9091 },
-            { 일련번호: 18, 사업자등록번호: '105-10-41004', 상호: '마니하우스', 매수: 1, 공급가액: 58000, 세액: 5800 },
-            { 일련번호: 19, 사업자등록번호: '105-14-32842', 상호: 'BS빌딩', 매수: 1, 공급가액: 90909, 세액: 9091 },
-            { 일련번호: 20, 사업자등록번호: '105-17-74909', 상호: '푸른솔리빙텔', 매수: 1, 공급가액: 90000, 세액: 9000 }
-        ];
-
-        const mockData = [
-            {
-                매출일자: '2025-04-01',
-                매출구분: '부품교체',
-                거래처코드: '018641b',
-                거래처명: '보령누락본부1기-1단지',
-                발송EMAIL: 'gktrhr012@naver.com',
-                품명: '103동1호 비상장치 LP PHO1',
-                규격: '24',
-                공급가: 432967,
-                부가세: 43297,
-                합계: 476264,
-                수정사유: '',
-                발행상태: '발행'
-            },
-            {
-                매출일자: '2025-04-01',
-                매출구분: '부품교체',
-                거래처코드: '021368a',
-                거래처명: '운행등록 마곡11타입',
-                발송EMAIL: 'mk991020@naver.com',
-                품명: '버튼 쪽 및 홀더 + 스프링 구매',
-                규격: '14',
-                공급가: 286000,
-                부가세: 28600,
-                합계: 314600,
-                수정사유: '',
-                발행상태: '발행'
-            },
-            {
-                매출일자: '2025-04-02',
-                매출구분: '부품교체',
-                거래처코드: '136823',
-                거래처명: '주식회사 화태',
-                발송EMAIL: 'dnqeyo3@naver.com',
-                품명: '24년1호승강기ELD배터리교체',
-                규격: '1',
-                공급가: 217000,
-                부가세: 21700,
-                합계: 238700,
-                수정사유: '',
-                발행상태: '발행'
-            },
-            {
-                매출일자: '2025-04-03',
-                매출구분: '부품교체',
-                거래처코드: '101340',
-                거래처명: '백석로엘이엔지(주)',
-                발송EMAIL: 'hills3151@naver.com',
-                품명: '115동1호기 주판 긴급교체',
-                규격: '1',
-                공급가: 5597727,
-                부가세: 559727,
-                합계: 6157000,
-                수정사유: '',
-                발행상태: '발행'
-            },
-            {
-                매출일자: '2025-04-04',
-                매출구분: '부품교체',
-                거래처코드: 'N20609',
-                거래처명: '블링이샵아트공업사협동조합',
-                발송EMAIL: 'sms85702@naver.com',
-                품명: 'ELD배터리 교체(11층 1호기)',
-                규격: '23',
-                공급가: 195200,
-                부가세: 19520,
-                합계: 214720,
-                수정사유: '',
-                발행상태: '발행'
-            },
-            {
-                매출일자: '2025-04-08',
-                매출구분: '부품교체',
-                거래처코드: '000023',
-                거래처명: '한정도타워',
-                발송EMAIL: 'dabservices@naver.com',
-                품명: '3/21 방문 배선 교체(1층)',
-                규격: '1',
-                공급가: 40000,
-                부가세: 4000,
-                합계: 44000,
-                수정사유: '',
-                발행상태: '발행'
-            },
-            {
-                매출일자: '2025-04-08',
-                매출구분: '부품교체',
-                거래처코드: '000020',
-                거래처명: '대화프라자',
-                발송EMAIL: 'helic10@hanmail.net',
-                품명: '승강기 메인컨택 REPAIR후 재작동',
-                규격: '1',
-                공급가: 1818182,
-                부가세: 181818,
-                합계: 2000000,
-                수정사유: '',
-                발행상태: '발행'
-            },
-            {
-                매출일자: '2025-05-08',
-                매출구분: '부품교체',
-                거래처코드: '000020',
-                거래처명: '한빛미디어',
-                발송EMAIL: 'helic10@hanmail.net',
-                품명: '승강기 메인컨택 REPAIR후 재작동',
-                규격: '1',
-                공급가: 1818182,
-                부가세: 181818,
-                합계: 2000000,
-                수정사유: '',
-                발행상태: '발행'
-            },
-            {
-                매출일자: '2025-05-12',
-                매출구분: '부품교체',
-                거래처코드: '000020',
-                거래처명: '대화프라자',
-                발송EMAIL: 'helic10@hanmail.net',
-                품명: '승강기 부속품 교체',
-                규격: '1',
-                공급가: 1818182,
-                부가세: 181818,
-                합계: 2000000,
-                수정사유: '',
-                발행상태: '발행'
-            }
-            // 생략된 행도 동일한 형식으로 추가 가능
-        ];
-
-        class SalesList {
+        let LoadingFlag = false;
+        class purchaseList {
             constructor() {
                 this.grid1 = null;
                 this.grid2 = null;
@@ -477,8 +324,8 @@
 
                 $('#searchfrdate, #searchfrdate2').val(getNowDateMinus7());
                 $('#searchtodate, #searchtodate2').val(getNowDate());
-                purchase_type = AjaxUtil.fillSelectOptions($('#sale_type'), 'system_code', 'choose', false, 'sale_type');
-                selectBoxBinding('sale_type2', sales_type);
+                purchase_type = AjaxUtil.fillSelectOptions($('#purchase_type'), 'system_code', 'choose', false, 'purchase_type');
+                selectBoxBinding('purchase_type2', purchase_type);
 
                 this.init();
             }
@@ -502,32 +349,25 @@
                     itemsSource: cv,
                     groupHeaderFormat: '{value}월 매출 - 총 {count}건',
                     columns: [
-                        { binding: 'misdate', header: '작성일자', align: 'center', width: '*' },
+                        { binding: 'misdate', header: '매입일자', align: 'center', width: '*' },
                         { binding: 'misgubun', header: '매입구분', align: 'center', width: '*' },
                         { binding: 'companycode', header: '거래처코드', align: 'right', width: '*'},
                         { binding: 'companyname', header: '거래처명', align: 'right', width: '*' },
-                        { binding: '발송EMAIL', header: '발송EMAIL', align: 'right', width: '*' },
                         { binding: 'itemnm', header: '품명', align: 'left', width: 150 },
                         { binding: 'spec', header: '규격', align: 'center', width: 100 },
                         { binding: 'supplycost', header: '공급가', align: 'right', width: 120, aggregate: 'Sum' },
                         { binding: 'taxtotal', header: '부가세', align: 'right', width: 120, aggregate: 'Sum' },
                         { binding: 'totalamt', header: '합계', align: 'right', width: 120, aggregate: 'Sum' },
-                        { binding: 'modifycd', header: '수정사유', align: 'center', width: 100 },
-                        { binding: 'stateLabel', header: '발행상태', align: 'center', width: 100 }
                     ]
                 });
                 this.grid1.rowHeaders.columns.splice(0, 1);
                 new FlexGridContextMenu(this.grid1);
-                this.grid1.downloadFileName = '매입현황';
+                this.grid1.downloadFileName = '매입현황_상세현황';
 
                 this.grid1.allowMerging = wijmo.grid.AllowMerging.All;
                 this.grid1.columns[0].allowMerging = true;
                 this.grid1.columns[1].allowMerging = true;
 
-                const cv2 = _this.viewData2;
-                cv2.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription('ivercorpnum', function(item, prop){
-                    return item[prop];
-                }));
 
                 this.grid2 = new wijmo.grid.FlexGrid('#theGrid_purchaseList2', {
                     autoGenerateColumns: false,
@@ -535,8 +375,7 @@
                     allowSorting: 'MultiColumn',
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     isReadOnly: true,
-                    groupHeaderFormat: '사업자 번호: {value} 총 {count} 건',
-                    itemsSource: cv2,
+                    itemsSource: _this.viewData2,
                     columns: [
                         { binding: 'ivercorpnum', header: '사업자등록번호', align: 'center', width: '*' },
                         { binding: 'ivercorpnm', header: '상호', align: 'left', width: '*'},
@@ -546,6 +385,15 @@
                     ]
                 });
                 this.grid2.rowHeaders.columns.splice(0, 1);
+                new FlexGridContextMenu(this.grid2);
+                this.grid2.downloadFileName = '매입현황_집계현황';
+
+                this.grid2.columnFooters.rows.push(new wijmo.grid.GroupRow());
+
+                const tradeDateColIndex = this.grid2.columns.findIndex(c => c.binding === 'ivercorpnum');
+
+                this.grid2.columnFooters.setCellData(0, tradeDateColIndex, '합계');
+
             }
 
             searchMain(){
@@ -572,6 +420,9 @@
 
                 if(type==='load' && LoadingFlag) return;
 
+                const 허욱 = "이재명";
+                console.log('허욱', 허욱);
+
                 let data = {
                     searchfrdate2: $('#searchfrdate2').val(),
                     searchtodate2: $('#searchtodate2').val(),
@@ -585,7 +436,7 @@
 
                 if(result != null) {
                     _this.viewData2.sourceCollection = result.data['list'];
-                    _this.bindingStatisticsField(result.data['Statistics']);
+                    //_this.bindingStatisticsField(result.data['Statistics']);
                     LoadingFlag = true; //서브탭 클릭할때마다 서치 방지
                 }
 
@@ -596,8 +447,28 @@
 
 
         $(document).ready(function (e) {
-            page = new SalesList();
+            page = new purchaseList();
 
+            $('#cboCompany').click(function(){
+                companyPopupOpen('cboCompany', 'cboCompanyHidden');
+            });
+            $('#cboCompany2').click(function(){
+                companyPopupOpen('cboCompany2', 'cboCompanyHidden2');
+            });
+
+            $('#btnSearch').click(function(){
+                page.searchMain();
+            });
+
+            $('#btnSearch2').click(function(){
+                page.searchMain2();
+            });
+
+            $('#inputTabLink').click(function (){
+                page.searchMain2('load');
+            })
+
+            page.searchMain();
 
         })
     </script>

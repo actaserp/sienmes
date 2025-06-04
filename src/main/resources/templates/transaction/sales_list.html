@@ -152,7 +152,7 @@
                             </div>
                             <div class="grid_box" id="divList">
 
-                                <div id="theGrid_saleList" style="height: 500px;"></div>
+                                <div id="theGrid_saleList" style="height: 730px;"></div>
                             </div>
                         </section>
 
@@ -282,7 +282,7 @@
                                 </tr>
                                 </tbody>
                             </table>-->
-                            <div id="theGrid_saleList2" style="height: 500px;"></div>
+                            <div id="theGrid_saleList2" style="height: 730px;"></div>
                         </section>
 
                     <!--<section class="section">
@@ -362,7 +362,7 @@
                     });
                 this.grid1.rowHeaders.columns.splice(0, 1);
                 new FlexGridContextMenu(this.grid1);
-                this.grid1.downloadFileName = '매출현황';
+                this.grid1.downloadFileName = '매출현황_상세현황';
 
                 this.grid1.allowMerging = wijmo.grid.AllowMerging.All;
                 this.grid1.columns[0].allowMerging = true;
@@ -388,7 +388,8 @@
                 });
 
                 this.grid2.rowHeaders.columns.splice(0, 1);
-
+                new FlexGridContextMenu(this.grid2);
+                this.grid2.downloadFileName = '매출현황_집계현황';
 
                 // 1. footer에 GroupRow 추가
                 this.grid2.columnFooters.rows.push(new wijmo.grid.GroupRow());
@@ -401,23 +402,6 @@
 
             }
 
-            /*bindingStatisticsField(statistics){
-                $('#cltCnt').text(statistics['cltCnt']);
-                $('#cnt').text(statistics['cnt']);
-                $('#supplySum').text(formatMoney(statistics['supplySum']));
-                $('#taxSum').text(formatMoney(statistics['taxSum']));
-
-                $('#SaupCltSum').text(statistics['SaupCltSum']);
-                $('#SaupCntSum').text(statistics['SaupCntSum']);
-                $('#SaupSupplySum').text(formatMoney(statistics['SaupSupplySum']));
-                $('#SaupTaxSum').text(formatMoney(statistics['SaupTaxSum']));
-
-                $('#PersonCltSum').text(statistics['PersonCltSum']);
-                $('#PersonCntSum').text(statistics['PersonCntSum']);
-                $('#PersonSupplySum').text(formatMoney(statistics['PersonSupplySum']));
-                $('#PersonTaxSum').text(formatMoney(statistics['PersonTaxSum']));
-
-            }*/
 
             searchMain(){
                 let _this = this;

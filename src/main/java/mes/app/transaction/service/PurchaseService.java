@@ -2,23 +2,22 @@ package mes.app.transaction.service;
 
 
 import mes.app.util.UtilClass;
-import mes.domain.enums.IssueState;
 import mes.domain.services.SqlRunner;
-import org.eclipse.jdt.internal.compiler.codegen.ObjectCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 
-import java.text.NumberFormat;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 @Service
-public class SalesListService {
+public class PurchaseService {
+
 
     @Autowired
     SqlRunner sqlRunner;
+
 
     public List<Map<String, Object>> getList(Map<String, Object> parameter){
         MapSqlParameterSource param = new MapSqlParameterSource();
@@ -51,8 +50,8 @@ public class SalesListService {
                 ,COALESCE(a.taxtotal, 0) AS taxtotal
                 ,(COALESCE(a.supplycost, 0) + COALESCE(a.taxtotal, 0)) as totalamt
                 ,b.statecode
-                from tb_salesdetail a
-                left join tb_salesment b
+                from tb_invoicedetail a
+                left join tb_invoicement b
                 on a.misdate = b.misdate
                 and a.misnum = b.misnum
                 left join company c on b.cltcd = c.id
@@ -110,7 +109,7 @@ public class SalesListService {
                 ,ivercorpnm
                 ,SUM(supplycost) as supplycost
                 ,SUM(taxtotal) as taxtotal
-                from tb_salesment
+                from tb_invoicement
                 where spjangcd = :spjangcd
                 and misdate between :searchfrdate and :searchtodate
                 """;
@@ -202,5 +201,4 @@ public class SalesListService {
 
         return bucket;
     }
-
 }

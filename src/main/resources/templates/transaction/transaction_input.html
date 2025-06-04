@@ -437,12 +437,11 @@
         </div>
     </section>
 
-        <!--
+
         <div class="popup-button">
-            <button type="button" class="btn-popup" id="btnCompSelect" ><span data-commonCd="출하목록반영">출하목록반영</span></button>
-            <button type="button" class="btn-popup" id="btn-search-close"><span data-commonCd="닫기">닫기</span></button>
+            <button type="button" class="btn-popup" id="btn-detailsearch-close"><span data-commonCd="닫기">닫기</span></button>
         </div>
-        -->
+
 </div>
     </script>
 
@@ -476,7 +475,7 @@
                     </tr>
                     <tr>
                         <th style="text-align: center">
-                            <label for="cboCompany">거래처</label>
+                            <label>거래처</label>
                         </th>
                         <td colspan="3">
                             <input id="clientId" name="clientId" type="hidden">
@@ -684,7 +683,7 @@
                         { binding: 'inoutFlag', header: '입출구분', width: 80, align: 'center', isReadOnly : true },
                         { binding: 'input_money', header: '입금액', width: 100, format: 'n0', aggregate: 'Sum', align: 'right', isReadOnly : true },
                         { binding: 'output_money',  header: ' 출금액', width: 100, format: 'n0', aggregate: 'Sum', align: 'right', isReadOnly : true},
-                        { binding: 'balance',  header: '잔액', width: 100, format: 'n0', aggregate: 'Sum', align: 'right', isReadOnly : true},
+                        { binding: 'balance',  header: '잔액', width: 100, format: 'n0', align: 'right', isReadOnly : true},
                         { binding: 'feeamt',header: ' 수수료', width: 80, format: 'n0', visible: false, align: 'center', isReadOnly : true},
                         { binding: 'mijamt',header: ' 수수료', width: 80, format: 'n0', visible: false, align: 'center', isReadOnly : true},
                         { binding: 'commission',header: ' 수수료', width: 80, format: 'n0', dataType: 'Boolean', align: 'center', isReadOnly : false},
@@ -711,7 +710,7 @@
                                                 <button class="memo-btn" style="padding: 4px 8px; width: 50px; font-size: 12px;">메모</button>
                                            </div>`
                         },
-                        { binding: 'memo', header: '메모내용', width: 200, align: 'center' , isReadOnly : true},
+                        { binding: 'memo', header: '메모내용', width: 200, align: 'left' , isReadOnly : true},
                         { binding: 'depositandwithdrawaltype', header: '입금형태', width: 100, align: 'center',
                             /*dataMap : getTradeTypeDataMap(iotype),
                             cellTemplate: '${text}',
@@ -1279,7 +1278,7 @@
                 let $content = $(content);
 
                 let modalContainer = new PopupDraggable('거래처별조회');
-                modalContainer.open({width: 1350, height: 470, $content});
+                modalContainer.open({width: 1350, height: 530, $content});
 
                 this.grid2 = new wijmo.grid.FlexGrid('#DetailGrid', {
                     autoGenerateColumns: false,
@@ -1335,6 +1334,10 @@
                 this.grid2.downloadFileName = '출하 내역';
 
                 _this.searchDetail(data.cltcd, data.cltflag);
+
+                $('#btn-detailsearch-close').click(function(e){
+                    modalContainer.close();
+                })
             }
 
             showSettingForm(data){

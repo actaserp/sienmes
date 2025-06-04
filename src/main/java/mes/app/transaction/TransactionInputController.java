@@ -116,7 +116,7 @@ public class TransactionInputController {
         return result;
     }
 
-    @DecryptField(columns = "accountNumber", masks = 0)
+    @DecryptField(columns = {"accountNumber", "clientName"}, masks = 0)
     @GetMapping("/searchDetail")
     public AjaxResult searchTransactionDetail(@RequestParam String companyId,
                                               @RequestParam String cltflag,

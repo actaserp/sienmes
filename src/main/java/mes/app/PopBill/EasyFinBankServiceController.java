@@ -206,7 +206,7 @@ public class EasyFinBankServiceController {
 
             //비동기로 DB에 내역 저장
 
-            easyFinBankCustomService.saveBankDataAsync(list, jobID, accountnumber, accountid, bankname);
+            easyFinBankCustomService.saveBankDataAsync(list, jobID, accountnumber, accountid, bankname, spjangcd);
 
             System.out.println(mapList);
 

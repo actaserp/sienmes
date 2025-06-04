@@ -178,6 +178,7 @@ public class TransactionInputService {
                 select distinct on (remark1)
                 remark1,
                 cltcd,
+                cltflag,
                 trdt
                 from tb_banktransit
                 order by remark1, cltcd, trdt desc;

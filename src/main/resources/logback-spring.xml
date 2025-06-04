@@ -33,6 +33,15 @@
         </encoder>
     </appender>
 
+    <!--로그는 비동기로 출력하도록 -->
+    <appender name="ASYNC_INFO_WARN" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="INFO_WARN_FILE"/>
+        <queueSize>1024</queueSize> <!-- 필요 시 조정 -->
+        <discardingThreshold>0</discardingThreshold> <!-- 로그 유실 방지 -->
+        <neverBlock>true</neverBlock> <!-- 큐가 가득 차도 블로킹 없이 무시 -->
+    </appender>
+
+
     <appender name="DEBUG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/debug/debug.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -68,11 +77,20 @@
 
 
     <!-- 나머지 로그는 여전히 파일+콘솔로 처리 -->
-    <root level="INFO">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="INFO_WARN_FILE" />
-        <appender-ref ref="ERROR_FILE" />
-        <appender-ref ref="DEBUG_FILE" />
-    </root>
+    <!-- 개발환경 (dev): 콘솔만 -->
+    <springProfile name="local">
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE" />
+        </root>
+    </springProfile>
+
+    <!-- 운영환경 (prod): 파일만 -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="ASYNC_INFO_WARN" />
+            <appender-ref ref="ERROR_FILE" />
+            <appender-ref ref="DEBUG_FILE" />
+        </root>
+    </springProfile>
 
 </configuration>

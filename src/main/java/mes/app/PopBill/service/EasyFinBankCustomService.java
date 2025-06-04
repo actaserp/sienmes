@@ -2,6 +2,7 @@ package mes.app.PopBill.service;
 
 
 import com.popbill.api.easyfin.EasyFinBankSearchDetail;
+import jdk.jshell.execution.Util;
 import lombok.extern.slf4j.Slf4j;
 import mes.Encryption.EncryptionUtil;
 import mes.Exception.EncryptionException;
@@ -57,16 +58,6 @@ public class EasyFinBankCustomService {
     SseController sseController;
 
 
-    public void Insert_Tb_Account(EasyFinBankAccountFormDto form){
-        TB_ACCOUNT account = new TB_ACCOUNT();
-
-        String bankId_form = form.getBankId();
-
-        Integer BankId = Integer.parseInt(bankId_form);
-
-        //account.setBankid();
-    }
-
     //TODO: tid를 기준으로 중복저장 방지함 , tid 목록을 메모리에 적재한다음 유효성 판단할 것
     /**
      * 비동기나 트랜잭션은 프록시 객체에서 처리하는데 Spring이 만들어주는
@@ -77,12 +68,11 @@ public class EasyFinBankCustomService {
      *
      * **/
     @Async
-    public void saveBankDataAsync(List<EasyFinBankSearchDetail> list, String jobID, String  accountNumber, Integer accountid, String bankname){
+    public void saveBankDataAsync(List<EasyFinBankSearchDetail> list, String jobID, String  accountNumber, Integer accountid, String bankname, String spjangcd){
 
 
         List<String> tidList = getTidList(list);
-        Map<String, Integer> cltCdRelationRemarkList =
-        convertToRemarkCltcdMap(transactionInputService.getCltCdRelationRemarkList());
+        List<Map<String, Object>> cltCdRelationRemarkList = transactionInputService.getCltCdRelationRemarkList();
 
 
         Map<String, TB_BANKTRANSIT> existing = tB_BANKTRANSITRepository.findByTidIn(tidList)
@@ -92,10 +82,13 @@ public class EasyFinBankCustomService {
             List<TB_BANKTRANSIT> tb_banktransitList = new ArrayList<>();
 
             for(EasyFinBankSearchDetail  map : list){
+
+                String remark = map.getRemark1();
+                Map<String, Object> cacheHitItem = findRemarkInList(remark, cltCdRelationRemarkList);
+
                 TB_BANKTRANSIT entity = new TB_BANKTRANSIT();
 
                 String tid = map.getTid();
-                String remark = map.getRemark1();
 
                 if(existing.containsKey(tid)){
                     continue;
@@ -103,7 +96,6 @@ public class EasyFinBankCustomService {
 
                 Integer accIn = UtilClass.parseInteger(map.getAccIn());
                 String inoutFlag = (accIn == 0) ? "1" : "0";
-                String EncryptedAccountNum = EncryptionUtil.encrypt(accountNumber);
 
                 entity.setTid(tid);
                 entity.setTrdate( map.getTrdate());
@@ -121,13 +113,15 @@ public class EasyFinBankCustomService {
                 entity.setIotype("0");
                 entity.setMemo(map.getMemo());
                 entity.setIoflag(inoutFlag);
+                entity.setSpjangcd(spjangcd);
                 entity.setAccnum(EncryptionUtil.encrypt(accountNumber));
 
                 entity.setAccid(accountid);
                 entity.setBanknm(bankname);
 
-                if(remark != null && cltCdRelationRemarkList.containsKey(remark)){
-                    entity.setCltcd(cltCdRelationRemarkList.get(remark));
+                if(cacheHitItem != null){
+                    entity.setCltcd(UtilClass.parseInteger(cacheHitItem.get("cltcd")));
+                    entity.setCltflag(UtilClass.getStringSafe(cacheHitItem.get("cltflag")));
                 }
                 tb_banktransitList.add(entity);
 
@@ -139,19 +133,19 @@ public class EasyFinBankCustomService {
         }
     }
 
+    private Map<String, Object> findRemarkInList(String remark, List<Map<String, Object>> list){
+            for(Map<String, Object> item : list){
+                String value = UtilClass.getStringSafe(item.get("remark1"));
+                if(value.equals(remark)) return item;
+            }
+            return null;
+    }
+
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveBankDataSync(List<EasyFinBankSearchDetail> list, String jobID, String  accountNumber, Integer accountid, String bankname, String spjangcd){
 
-
-        //List<String> tidList = getTidList(list);
-        Map<String, Integer> cltCdRelationRemarkList =
-                convertToRemarkCltcdMap(transactionInputService.getCltCdRelationRemarkList());
-
-
-        //Map<String, TB_BANKTRANSIT> existing = tB_BANKTRANSITRepository.findByTidIn(tidList)
-        //        .stream()
-        //        .collect(Collectors.toMap(TB_BANKTRANSIT::getTid, Function.identity()));
+        List<Map<String, Object>> cltCdRelationRemarkList = transactionInputService.getCltCdRelationRemarkList();
 
         final int CHUNK_SIZE = 200;
 
@@ -160,16 +154,14 @@ public class EasyFinBankCustomService {
                         INSERT INTO TB_BANKTRANSIT (
                             tid, trdate, trserial, trdt, accin, accout, balance,
                             remark1, remark2, remark3, remark4, regdt, jobid, memo,
-                            ioflag, accnum, accid, banknm, spjangcd, cltcd
+                            ioflag, accnum, accid, banknm, spjangcd, cltcd, iotype, cltflag
                         ) VALUES (
                             :tid, :trdate, :trserial, :trdt, :accin, :accout, :balance,
                             :remark1, :remark2, :remark3, :remark4, :regdt, :jobid, :memo,
-                            :ioflag, :accnum, :accid, :banknm, :spjangcd, :cltcd
+                            :ioflag, :accnum, :accid, :banknm, :spjangcd, :cltcd, '0', :cltflag
                         )
                         ON CONFLICT (tid) DO NOTHING
                         """;
-            List<TB_BANKTRANSIT> buffer = new ArrayList<>();
-
 
                 for(EasyFinBankSearchDetail  map : list){
 
@@ -177,9 +169,8 @@ public class EasyFinBankCustomService {
                         String tid = map.getTid();
                         String remark = map.getRemark1();
 
-                /*if(existing.containsKey(tid)){
-                    continue;
-                }*/
+                        Map<String, Object> remarkInList = findRemarkInList(remark, cltCdRelationRemarkList);
+
 
                         Integer accIn = UtilClass.parseInteger(map.getAccIn());
                         String inoutFlag = (accIn == 0) ? "1" : "0";
@@ -205,7 +196,9 @@ public class EasyFinBankCustomService {
                                 .addValue("accid", accountid)
                                 .addValue("banknm", bankname)
                                 .addValue("spjangcd", spjangcd)
-                                .addValue("cltcd", cltCdRelationRemarkList.getOrDefault(map.getRemark1(), null));
+                                .addValue("cltcd", remarkInList.getOrDefault("cltcd", null))
+                                .addValue("cltflag", remarkInList.getOrDefault("cltflag", null));
+
 
                         batchParams.add(param);
 
