@@ -4,6 +4,7 @@ package mes.domain.dto;
 import lombok.*;
 import mes.app.util.UtilClass;
 import mes.domain.entity.TB_BANKTRANSIT;
+import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -68,6 +69,10 @@ public class BankTransitDto {
     @Pattern(regexp = "^[\\d,]+$", message = "숫자와 쉼표만 입력가능합니다.")
     private String money;
 
+    private String projectNumber; //프로젝트이름
+    private String projno; //프로젝트번호
+
+
     public static TB_BANKTRANSIT toEntity(BankTransitDto dto, TB_BANKTRANSIT banktransit){
 
         if(dto == null) return null;
@@ -115,6 +120,9 @@ public class BankTransitDto {
         banktransit.setEtcremark(dto.getEtc());
         banktransit.setMemo(dto.getMemo());
         banktransit.setSpjangcd(dto.getSpjangcd());
+
+        banktransit.setProjno(StringUtils.hasText(dto.getProjectNumber()) ? dto.getProjno() : null);
+        banktransit.setAccid(StringUtils.hasText(accountNum) ? dto.getAccountId() : null);
 
         return banktransit;
     }

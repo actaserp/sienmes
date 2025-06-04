@@ -167,8 +167,8 @@
                             </a>
                         </li>-->
                         <li class="right_align rpt"  style="margin-right: 5px">
-                            <a class="btn btn-delete" title="수정" id="btnBulkEdit">
-                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
+                            <a class="btn btn-delete" title="저장" id="btnBulkEdit">
+                                <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
                                 저장
                             </a>
                         </li>
@@ -520,6 +520,24 @@
                             </a>
                         </td>
                     </tr>
+
+                    <tr>
+                        <th style="text-align: center">
+                            <label>프로젝트</label>
+                        </th>
+                        <td colspan="3">
+                            <input type="text" id="projectNumber" name="projectNumber"
+                                   placeholder="검색버튼을 클릭하여 프로젝트를 검색하세요">
+                            <input type="hidden" id="projno" name="projno">
+                            &nbsp;
+                            <a class="btn btn-delete" title="검색" id="btnProjnoSearch" style='width: 120px'>
+                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                검색
+                            </a>
+                        </td>
+                    </tr>
+
+
                     <tr>
                         <th style="text-align: center">
                             <label>금액</label> <span style='color : red'>*</span>
@@ -621,6 +639,7 @@
     <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
     <th:block th:replace="/common/popup_account :: popup_account" />
     <th:block th:replace="/common/popup_company_employee_bank_card.html :: popup_company"></th:block>
+    <th:block th:replace="/common/popup_project.html :: popup_project"></th:block>
     <th:block th:replace="/shipment/trade_stmt/trade_stmt_tmpl :: printTemplate"></th:block>
     <script src="/js/AccountInputHandler.js"></script>
     <script type="text/javascript">
@@ -727,7 +746,8 @@
                             isReadOnly : true},*/
                         { binding: 'bankname', header: '은행', width: 120, align: 'center' , isReadOnly : true},
                         { binding: 'account', header: '계좌', width: 150, align: 'center' , isReadOnly : true},
-
+                        { binding: 'projno', header: '프로젝트번호', width: 150, align: 'center' , isReadOnly : true, visible: false},
+                        { binding: 'projnm', header: '프로젝트이름', width: 150, align: 'center' , isReadOnly : true},
                     ],
                     itemsSource: this.viewData,
                     formatItem: function (s, e) {
@@ -1148,42 +1168,38 @@
                 let $content = $(content);
 
                 let modalContainer = new PopupDraggable('등록');
-                modalContainer.open({width: 1000, height: 650, $content});
+                modalContainer.open({width: 1000, height: 700, $content});
 
                 filterAndBindTradeTypes($('#inoutFlag').val(), tradetypeList, 'transactionTypeId');
                 //AjaxUtil.fillSelectOptions($('#transactionTypeId'), 'trade', 'choose', false);
 
-                //모달창 닫기  //data-modal-header-btn="close"
-
-                $('#CompanyName_Popup').on('keydown', function(e){
+                //키입력 핸들러
+                $('#CompanyName_Popup, #projectNumber, #accountNumber').on('keydown', function(e){
                     if(e.key === 'Enter' || e.keyCode === 13){
-                        companyPopupOpenCustom('CompanyName_Popup', 'clientId');
+                       const keydownId = this.id;
+
+                       switch (keydownId){
+                           case 'CompanyName_Popup' : companyPopupOpenCustom('CompanyName_Popup', 'clientId');
+                                break;
+                           case 'projectNumber' : ProjectPopupOpen('projectNumber', 'projno');
+                                break;
+                           case 'accountNumber' : _this.AccountPopupOpen('accountNumber', 'accountId');
+                                break;
+                       }
                     }
                 });
-
-                $('#accountNumber').on('keydown', function(e){
-                    if(e.key === 'Enter' || e.keyCode === 13){
-                        _this.AccountPopupOpen('accountNumber', 'accountId');
+                //클릭 핸들러
+                $('#btn-search-close, #btnCompanySearch, #btnAccountSearch, #btnPopSave, #btnPopReset, #btnProjnoSearch').click(function(){
+                    const clickId = this.id;
+                    switch (clickId){
+                        case 'btn-search-close' : modalContainer.close(); break;
+                        case 'btnCompanySearch' : companyPopupOpenCustom('CompanyName_Popup', 'clientId'); break;
+                        case 'btnAccountSearch' : _this.AccountPopupOpen('accountNumber', 'accountId'); break;
+                        case 'btnPopSave' : _this.saveNewTransactionData(); break;
+                        case 'btnPopReset' : _this.AccountHistorySaveFormReset(); break;
+                        case 'btnProjnoSearch' : ProjectPopupOpen('projectNumber', 'projno');  break;
                     }
-                });
-
-                $('#btn-search-close').click(function(e){
-                    modalContainer.close();
-                });
-
-                //거래처 팝업
-                $('#btnCompanySearch').click(function(){
-                    companyPopupOpenCustom('CompanyName_Popup', 'clientId');
                 })
-
-                //계좌 팝업
-                $('#btnAccountSearch').click(function(){
-                    _this.AccountPopupOpen('accountNumber', 'accountId');
-                });
-
-                /*$('#bankName, #btnBankSearch_pop').click(function(){
-                    _this.BankPopupOpen('bankName', 'bankcode_popup');
-                })*/
 
                 //숫자만 입력
                 $('#money').on('input', formatToCommaNumberInput);
@@ -1195,18 +1211,9 @@
                     filterAndBindTradeTypes(selectedType, tradetypeList, 'transactionTypeId');
                 })
 
-                $('#btnPopSave').click(function(){
-                    _this.saveNewTransactionData();
-                });
-
-                $('#btnPopReset').click(function(){
-                    _this.AccountHistorySaveFormReset();
-                });
-
                 this.DateAndHourBinding();
 
                 if(flag === 'edit'){
-
 
                     $('#transactionDate').val(data.trade_date);
                     $('#transactionHour').val(data.transactionhour);
@@ -1240,6 +1247,9 @@
                     $('#bankTransitId').val(data.id);
                     $('#clientId').val(data.cltcd);
                     $('#accountId').val(data.accountid);
+
+                    $('#projno').val(data.projno);
+                    $('#projectNumber').val(data.projnm);
                 }
             }
 
@@ -1726,7 +1736,6 @@
             }
 
 
-
             AccountPopupOpen(intputId, hiddenid){
 
                 const value = document.getElementById(intputId).value;
@@ -1742,8 +1751,8 @@
                     if(bank){
                         bank.value = items.BankName;
                     }
+                    document.getElementById(intputId).focus();
 
-                    $('#accountNumber').focus();
                 };
                 poppage.show(searchcallback);
             }
@@ -1898,42 +1907,14 @@
                 }
             });
 
+            $('#btnBulkEdit, #btnSearch, #btnDelete').click(function(){
 
+                const clickId = this.id
 
-
-
-            /*$('#accountName').click(function () {
-                page.AccountPopupOpen('accountName', 'accountNameHidden');
-            });*/
-
-            /*$('#accountName').on('keydown', function(e){
-                if(e.key === 'Enter' || e.keyCode === 13){
-                    page.AccountPopupOpen('accountName', 'accountNameHidden');
-                }
-            })*/
-
-            $('#btnBulkEdit').click(function(){
-                page.EditTransactionData();
+                if(clickId === 'btnBulkEdit') page.EditTransactionData();
+                else if(clickId === 'btnSearch') page.searchMainData();
+                else if(clickId === 'btnDelete') page.deleteTransactionData();
             })
-
-            //검색버튼 클릭
-            $('#btnSearch').click(function (){
-                page.searchMainData();
-            })
-
-            /*$('#cboCompany').click(function(){
-                companyPopupOpenCustom('cboCompany', 'cboCompanyHidden');
-            });*/
-
-            //삭제버튼 클릭
-            $('#btnDelete').click(function(){
-                page.deleteTransactionData();
-            });
-
-            /*$('#editAccountPopBill').click(function(){
-                page.editAccount();
-            })*/
-
 
             page.searchMainData();
         })

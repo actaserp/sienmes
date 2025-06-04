@@ -99,6 +99,10 @@ public class TB_BANKTRANSIT extends BaseEntity{
     @Column(length = 1)
     private String cltflag; //거래처 구분값
 
+    @Column(length = 50)
+    private String projno; //프로젝트 관리
+
+
 
 
 }

@@ -281,7 +281,7 @@ public class ShipmentOrderController {
 						double UnitVat = vat / qty;
 						double VatSum = UnitVat * orderQty;
 
-						sm.setUnitPrice(VatSum);
+						sm.setVat(VatSum);
 						totalVat += VatSum;
 					}
 					if (item.getPrice() != null) {
@@ -290,6 +290,7 @@ public class ShipmentOrderController {
 						double UnitPrice = price / qty;
 						double PriceSum = UnitPrice * orderQty;
 
+						sm.setUnitPrice(UnitPrice);
 						sm.setPrice(PriceSum);
 						totalPrice += PriceSum;
 					}

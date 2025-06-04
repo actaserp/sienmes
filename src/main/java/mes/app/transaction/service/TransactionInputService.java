@@ -131,6 +131,8 @@ public class TransactionInputService {
                 ,b.cltflag as cltflag
                 ,b.accid as accountId
                 ,b.eumtodt as expiration
+                ,d3.projno as projno
+                ,d3.projnm as projnm
                 FROM public.tb_banktransit b
                 left join tb_trade t on t.trid = b.trid
                 left join sys_code s on s."Code" = b.iotype and "CodeType" = 'deposit_type'
@@ -139,6 +141,7 @@ public class TransactionInputService {
                 left join tb_account d on d.accid = b.accid
                 left join tb_account d2 on d2.accid = b.cltcd
                 left join tb_iz010 i on i.id = b.cltcd
+                left join tb_da003 d3 on d3.projno = b.projno and d3.spjangcd = :spjangcd
                 where trdate between :searchfrdate and :searchtodate
                 and b.spjangcd = :spjangcd
                 """;

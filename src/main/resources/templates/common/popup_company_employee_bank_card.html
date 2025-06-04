@@ -145,17 +145,6 @@
             this.grid.downloadFileName = '업체 내역';
 
             //this.grid.headersVisibility = wijmo.grid.HeadersVisibility.None;
-            this.grid.formatItem.addHandler(function (s, e) {
-                if (e.panel === s.cells) {
-                    const row = s.rows[e.row];
-                    const data = row.dataItem;
-                    const item = data.item;
-
-                    if (data && (item === '카드사코드' || item === '직원이름' || item === '은행명' || item === '업체코드')) {
-                        row.cssClass = 'row-red'; // 행 전체에 클래스 적용
-                    }
-                }
-            });
 
             this.$btnCompSearch = $content.find('#btnCompSearch');
             this.$compCode = $content.find('#compCode');

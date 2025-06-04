@@ -64,8 +64,9 @@
     <script type="text/javascript">
 
         class PopProjectComponent {
-            constructor() {
+            constructor(ele) {
 
+                this.ele = ele;
                 this.grid = null;
                 this.viewData = new wijmo.collections.CollectionView();
                 this.selectedItem = null;
@@ -122,7 +123,7 @@
                 this.close();
             }
 
-            show(callback) {
+            show(callback, result) {
                 let _this = this;
 
                 this.callback = callback;
@@ -130,6 +131,8 @@
                 let content = tmpl('popup_projectSearchTemplate', {});
                 let $content = $(content);
                 this.modalContainer.open({ width: 800, height: 500, $content });
+
+                $('#srchName').val(_this.ele);
 
                 this.grid = new wijmo.grid.FlexGrid('#search-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
@@ -160,7 +163,11 @@
                     _this.searchDataBind();
                 });
 
-                _this.searchDataBind();
+                if(result){
+                    _this.viewData.sourceCollection = result;
+                }else{
+                    _this.searchDataBind();
+                }
 
                 this.$btnSelect.click(function (e) {
                     // 그리드에서 현재 선택된 item을 찾아서 호출한다.

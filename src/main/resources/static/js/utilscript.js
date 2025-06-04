@@ -150,6 +150,29 @@ function companyPopupOpen(intputId, hiddenid){
     poppage.show(searchcallback);
 }
 
+function ProjectPopupOpen(intputId, hiddenid){
+    const value = document.getElementById(intputId).value;
+
+    let poppage = new PopProjectComponent(value);
+
+    let result = AjaxUtil.getSyncData('/api/popup/search_project', { srchName : value, spjangcd : getSpjangcdFromSession() });
+
+    let searchcallback = function (items) {
+        console.log('items', items);
+
+        document.getElementById(intputId).value = items.projnm;
+        document.getElementById(hiddenid).value = items.projno;
+
+        document.getElementById(intputId).focus();
+    };
+    if(result && result.data.length === 1){
+        searchcallback(result.data[0]);
+        return;
+    }
+
+    poppage.show(searchcallback);
+}
+
 
 
 //숫자 금액으로 변환 , 숫자 아니면 0으로 리턴
