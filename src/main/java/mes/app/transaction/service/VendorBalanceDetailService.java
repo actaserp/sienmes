@@ -161,7 +161,7 @@ public class VendorBalanceDetailService {
                 s.remark1,
                 1 AS remaksseq
             FROM tb_invoicement s
-            LEFT JOIN tb_invoicdetail d ON s.misdate = d.misdate AND s.misnum = d.misnum AND s.spjangcd = d.spjangcd
+            LEFT JOIN tb_invoicedetail d ON s.misdate = d.misdate AND s.misnum = d.misnum AND s.spjangcd = d.spjangcd
             LEFT JOIN sys_code sc ON sc."Code" = s.misgubun::text
             JOIN company c ON c.id = s.cltcd AND c.spjangcd = s.spjangcd
             WHERE s.misdate BETWEEN :start AND :end

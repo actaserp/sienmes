@@ -1,6 +1,7 @@
 package mes.app.transaction.service;
 
 import lombok.extern.slf4j.Slf4j;
+import mes.app.aop.DecryptField;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -50,9 +51,10 @@ public class MonthlyPurchaseListService {
         SELECT
             ps.cltcd,
             c."Name" AS comp_name,
-            MAX(sc."Value") AS misgubun,
-            ps.iverpernm,
-            ps.iverdeptnm
+            c."AccountManager"  as account_manager,
+            ps.depart_id ,
+            dp."Name" AS dp_name,
+            MAX(sc."Value") AS misgubun
         """);
 
     // 월별 합계 컬럼 추가 (mon_1 ~ mon_12)
@@ -71,8 +73,9 @@ public class MonthlyPurchaseListService {
         FROM parsed_sales ps
         LEFT JOIN company c ON c.id = ps.cltcd
         LEFT JOIN sys_code sc ON sc."Code" = ps.misgubun::text
-        GROUP BY c."Name", ps.iverpernm, ps.iverdeptnm, ps.cltcd
-        ORDER BY c."Name", ps.iverpernm, ps.iverdeptnm
+        LEFT JOIN depart dp ON ps.depart_id = dp.id
+        GROUP BY c."Name", ps.cltcd, c."AccountManager", ps.depart_id, dp."Name"
+        ORDER BY c."Name"
         """);
 
     // 로그 출력
@@ -118,6 +121,7 @@ public class MonthlyPurchaseListService {
     // SELECT 본문 시작
     sql.append("""
         SELECT
+            pd.cltcd,
             c."Name" AS comp_name
         """);
 
@@ -135,7 +139,7 @@ public class MonthlyPurchaseListService {
     sql.append("""
         FROM parsed_deposit pd
         LEFT JOIN company c ON c.id = pd.cltcd
-        GROUP BY c."Name"
+        GROUP BY c."Name", pd.cltcd
         ORDER BY c."Name"
         """);
 
@@ -301,5 +305,93 @@ public class MonthlyPurchaseListService {
     return this.sqlRunner.getRows(sql.toString(), paramMap);
   }
 
+  public List<Map<String, Object>> getPurchaseDetail(String cboYear, Integer cltcd, String spjangcd,Integer depart_id) {
+    MapSqlParameterSource paramMap = new MapSqlParameterSource();
+    paramMap.addValue("cboYear", cboYear);
+    paramMap.addValue("cltcd", cltcd);
+    paramMap.addValue("spjangcd", spjangcd);
+    paramMap.addValue("depart_id", depart_id);
+
+    String data_year = cboYear;
+    paramMap.addValue("date_form", data_year + "0101");
+    paramMap.addValue("date_to", data_year + "1231");
+
+    StringBuilder sql = new StringBuilder();
+
+    sql.append("""
+       select 
+        TO_CHAR(TO_DATE(s.misdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS misdate,
+          s.misnum,
+          d.misseq ,
+          s.cltcd,
+          sc."Value" AS misgubun,
+          d.itemnm,
+          d.spec,
+          d.qty,
+          d. supplycost,
+          d. taxtotal,
+          d.totalamt
+        from tb_invoicement s
+        LEFT JOIN tb_invoicedetail d ON s.misnum = d.misnum
+        LEFT JOIN sys_code sc ON sc."Code" = s.misgubun
+        LEFT JOIN company c ON c.id = s.cltcd
+        WHERE s.spjangcd = :spjangcd
+          AND s.cltcd = :cltcd
+          and s.depart_id = :depart_id
+          AND s.misdate BETWEEN :date_form AND :date_to
+          ORDER BY s.misnum ,d.misseq 
+       """);
+
+    return this.sqlRunner.getRows(sql.toString(), paramMap);
+  }
+
+  @DecryptField(columns  = {"accnum"})
+  public List<Map<String, Object>> getPaymentDetail(String cboYear, Integer cltcd, String spjangcd) {
+    MapSqlParameterSource paramMap = new MapSqlParameterSource();
+    paramMap.addValue("cboYear", cboYear);
+    paramMap.addValue("cltcd", cltcd);
+    paramMap.addValue("spjangcd", spjangcd);
+
+    String data_year = cboYear;
+    paramMap.addValue("start", data_year + "0101");
+    paramMap.addValue("end", data_year + "1231");
+
+    StringBuilder sql = new StringBuilder();
+
+    sql.append("""
+        select
+           tb.ioid,
+           TO_CHAR(TO_DATE(tb.trdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS trdate,
+           tb.accout ,
+           c."Name" as "CompanyName" ,
+           tb.iotype ,
+           sc."Value" as deposit_type,
+           sc."Code" as deposit_code,
+           tb.banknm,
+           tb.accnum ,
+           tt.tradenm ,
+           tb.remark1,
+           tb.eumnum,
+           CASE
+             WHEN LENGTH(TRIM(tb.eumtodt)) = 8 THEN TO_CHAR(TO_DATE(tb.eumtodt, 'YYYYMMDD'), 'YYYY-MM-DD')
+             ELSE NULL
+           END AS eumtodt,
+           tb.memo
+           from tb_banktransit tb
+           left join company c on c.id = tb.cltcd and tb.spjangcd =  c.spjangcd 
+           left join  sys_code sc on sc."Code" = tb.iotype and "CodeType" ='deposit_type'
+           left join tb_trade tt on tb.trid = tt.trid and tt.spjangcd = tb.spjangcd
+           WHERE tb.ioflag = '1'
+           AND TO_DATE(tb.trdate, 'YYYYMMDD') 
+          BETWEEN TO_DATE(:start, 'YYYYMMDD') AND TO_DATE(:end, 'YYYYMMDD')
+           AND tb.spjangcd =  :spjangcd
+          AND tb.cltcd = :cltcd
+       """);
+
+//    log.info("월별 매입현황(지급)__지급 상세내역 SQL: {}", sql);
+//    log.info("SQL Parameters: {}", paramMap.getValues());
+
+    return this.sqlRunner.getRows(sql.toString(), paramMap);
+  }
 }
 

@@ -78,8 +78,8 @@ public class MonthlySalesListService {
         """);
 
     // 로그 출력
-    log.info("월별 매출현황 (salesment 기준) SQL: {}", sql);
-    log.info("SQL Parameters: {}", paramMap.getValues());
+//    log.info("월별 매출현황 (salesment 기준) SQL: {}", sql);
+//    log.info("SQL Parameters: {}", paramMap.getValues());
 
     // 실행 및 반환
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), paramMap);
@@ -321,24 +321,24 @@ public class MonthlySalesListService {
     StringBuilder sql = new StringBuilder();
 
     sql.append("""
-        select 
-         TO_CHAR(TO_DATE(ts.misdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS misdate,
-          ts.cltcd,
-          sc."Value" AS misgubun,
-          d.itemnm,
-          d.spec,
-          d.qty,
-          d. supplycost,
-          d. taxtotal,
-          d.totalamt
-          FROM tb_salesment ts
-            LEFT JOIN company c ON c.id = ts.cltcd
-            LEFT JOIN tb_salesdetail d ON ts.misnum = d.misnum
-            LEFT JOIN sys_code sc ON sc."Code" = ts.misgubun
-         WHERE ts.spjangcd = :spjangcd
-              AND ts.cltcd = :cltcd
-              AND ts.misdate BETWEEN :date_form AND :date_to
-              ORDER BY ts.misnum
+         select 
+         TO_CHAR(TO_DATE(s.misdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS misdate,
+           s.cltcd,
+           sc."Value" AS misgubun,
+           d.itemnm,
+           d.spec,
+           d.qty,
+           d. supplycost,
+           d. taxtotal,
+           d.totalamt
+         from tb_salesment s
+         LEFT JOIN tb_salesdetail d ON s.misnum = d.misnum
+         LEFT JOIN sys_code sc ON sc."Code" = s.misgubun and sc."CodeType" ='sale_type'
+         LEFT JOIN company c ON c.id = s.cltcd
+         WHERE s.spjangcd = :spjangcd
+           AND s.cltcd = :cltcd
+           AND s.misdate BETWEEN :date_form AND :date_to
+           ORDER BY s.misnum,d.misseq
        """);
 
     return this.sqlRunner.getRows(sql.toString(), paramMap);

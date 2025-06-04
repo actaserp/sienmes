@@ -34,14 +34,9 @@
               거래처
             </dt>
             <dd>
-              <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
+              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭해서 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
               <input type="hidden" id="spjangcdHidden">
-              &nbsp;
-              <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                업체 검색
-              </a>
             </dd>
           </dl>
           <dl>
@@ -217,10 +212,7 @@
           },
           columns: [
             {binding: 'cltcd', header: '커래처 코드', width: 250, visible: false},
-            {binding: 'comp_name', header: '거래처명', width: 250, align: 'center', allowMerging: true},
-            /*{ binding: 'deposit_type', header: '입금형태', width: 90, align: 'center', allowMerging: true },
-            { binding: 'icerdeptnm', header: '부서', width: 130, align: 'center', allowMerging: true },
-            { binding: 'icerceonm', header: '담당자', width: 100, align: 'center', allowSorting: false },*/
+            {binding: 'comp_name', header: '거래처명', width: 250, align: 'center', allowMerging: false},
             ...monthColumns,
             {binding: 'total_sum', header: '합계', width: 120, align: 'right', allowSorting: false},
           ],
@@ -229,11 +221,11 @@
 
         this.grid3.rowHeaders.columns.splice(0, 1);
         this.grid3.hostElement.addEventListener('dblclick', (e) => {
-          const ht = this.grid3.hitTest(e); // ✅ 올바르게 grid3에서 hitTest
+          const ht = this.grid3.hitTest(e); //올바르게 grid3에서 hitTest
           if (ht.cellType === wijmo.grid.CellType.Cell) {
             const row = this.grid3.rows[ht.row];
             const data = row.dataItem;
-            this.openDepositPopup(data);  // ✅ 입금 상세 팝업 함수 실행
+            this.openDepositPopup(data);  //입금 상세 팝업 함수 실행
           }
         });
 
@@ -241,7 +233,7 @@
         this.grid3.downloadFileName = '월별 매출 현황(입금)';
         //Footer 패널 사용 설정
         this.grid3.columnFooters.rows.push(new wijmo.grid.Row());
-        // ✅ Footer 합계 설정
+        //Footer 합계 설정
         this.grid3.loadedRows.addHandler(() => {
           const rows = this.grid3.rows;
           const footerTotal = this.grid3.columnFooters.rows[0];
@@ -288,7 +280,7 @@
 
         //Footer 패널 사용 설정
         this.grid4.columnFooters.rows.push(new wijmo.grid.Row());
-        // ✅ Footer 합계 설정
+        //Footer 합계 설정
         this.grid4.loadedRows.addHandler(() => {
           const rows = this.grid4.rows;
           const footerTotal = this.grid4.columnFooters.rows[0];
@@ -344,10 +336,10 @@
         let modal = new PopupDraggable(`[${compName}] 매출 상세`);
         modal.open({ width: 800, height: 500, $content });
 
-        // ✅ 그룹용 CollectionView 생성 (빈 상태)
+        //그룹용 CollectionView 생성 (빈 상태)
         this.viewData = new wijmo.collections.CollectionView();
 
-        // ✅ 그룹핑 기준을 월별로 설정
+        //그룹핑 기준을 월별로 설정
         this.viewData.groupDescriptions.push(
           new wijmo.collections.PropertyGroupDescription('misdate', (item, prop) => {
             if (!item[prop]) return '';
@@ -362,7 +354,7 @@
           autoGenerateColumns: false,
           showMarquee: true,
           isReadOnly: true,
-          itemsSource: this.viewData,  // ✅ 그룹이 적용된 viewData 사용
+          itemsSource: this.viewData,  //그룹이 적용된 viewData 사용
           formatItem: (sender, e) => {
             if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
               e.cell.style.textAlign = 'center';
@@ -373,9 +365,10 @@
                 const group = row.dataItem;
                 const sumSupply = wijmo.getAggregate(wijmo.Aggregate.Sum, group.items, 'supplycost');
                 const sumTax = wijmo.getAggregate(wijmo.Aggregate.Sum, group.items, 'taxtotal');
+                const sumTotal = sumSupply + sumTax;  //합계 계산
 
                 e.cell.colSpan = sender.columns.length;
-                e.cell.innerHTML = `<b>${group.name}</b> (공급가액: ${sumSupply.toLocaleString()}원 / 세액: ${sumTax.toLocaleString()}원)`;
+                e.cell.innerHTML = `<b>${group.name}</b> (공급가액: ${sumSupply.toLocaleString()}원 / 세액: ${sumTax.toLocaleString()}원 / 합계: ${sumTotal.toLocaleString()}원)`;
                 e.cell.style.textAlign = 'left';
                 e.cell.style.paddingLeft = '8px';
               }
@@ -383,12 +376,13 @@
           },
           columns: [
             { binding: 'misdate', header: '일자', width: 120, align: 'center' },
-            { binding: 'misgubun', header: '매출구분', width: '*', align: 'center' },
-            { binding: 'itemnm', header: '품목', width: '*', align: 'center' },
+            { binding: 'misgubun', header: '매출구분', width: 80, align: 'center' },
+            { binding: 'itemnm', header: '품목', width:'*', align: 'center' },
             { binding: 'spec', header: '규격', width: 70, align: 'center' },
             { binding: 'qty', header: '수량', width: 70, align: 'center' },
             { binding: 'supplycost', header: '공급가액', width: '*', align: 'right', format: 'n0' },
             { binding: 'taxtotal', header: '세액', width: '*', align: 'right', format: 'n0' },
+            { binding: 'totalamt', header: '합계', width: '*', align: 'right', format: 'n0' },
           ]
         });
 
@@ -410,6 +404,7 @@
             misdate: '합계',
             supplycost: getSum('supplycost'),
             taxtotal: getSum('taxtotal'),
+            totalamt: getSum('totalamt'),
           };
         });
 
@@ -425,7 +420,11 @@
           dataType: 'json',
           success: function (response) {
             if (response && Array.isArray(response.data)) {
-              _this.viewData.sourceCollection = response.data;
+              const processedData = response.data.map(item => ({
+                ...item,
+                totalamt: (+item.supplycost || 0) + (+item.taxtotal || 0)
+              }));
+              _this.viewData.sourceCollection = processedData;
             } else {
               Alert.alert('', '데이터 형식이 잘못되었습니다.');
               _this.viewData.sourceCollection = [];
@@ -457,7 +456,7 @@
           showMarquee: true,
           isReadOnly: true,
           columns: [
-            {binding: 'trdate', header: '일자', width: 100, align: 'left'},
+            {binding: 'trdate', header: '일자', width: 120, align: 'left'},
             {binding: 'ioid', header: '코드', width: 100, align: 'right',visible: false },
             {binding: 'CompanyName', header: '거래처명', width: 140, align: 'center'},
             {binding: 'accin', header: '금액', width: 100, align: 'right'},
@@ -469,7 +468,7 @@
           itemsSource: []  // 초기에는 비움
         });
 
-        // ✅ 팝업 그리드에 적용해야 하는 로직들은 모두 DepositGrid로 적용
+        //팝업 그리드에 적용해야 하는 로직들은 모두 DepositGrid로 적용
         _this.DepositGrid.rowHeaders.columns.splice(0, 1);
         new FlexGridContextMenu(_this.DepositGrid);
         _this.DepositGrid.downloadFileName = `[${compName}] 입금 상세`;
@@ -481,11 +480,24 @@
           const getSum = (field) => rows.map(r => +r.dataItem[field] || 0).reduce((a, b) => a + b, 0);
 
           footer.dataItem = {
-            misdate: '합계',
-            totalamt: getSum('totalamt'),
+            trdate: '합계',
+            accin: getSum('accin'),
           };
         });
+        _this.DepositGrid.formatItem.addHandler(function (s, e) {
+          if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+            const row = s.rows[e.row];
+            if (row instanceof wijmo.grid.GroupRow) {
+              const group = row.dataItem;
+              const sumAmount = wijmo.getAggregate(wijmo.Aggregate.Sum, group.items, 'accin');
 
+              e.cell.colSpan = s.columns.length;
+              e.cell.innerHTML = `<b>${group.name}</b> (합계: ${sumAmount.toLocaleString()}원)`;
+              e.cell.style.textAlign = 'left';
+              e.cell.style.paddingLeft = '8px';
+            }
+          }
+        });
         // 데이터 로딩
         $.ajax({
           url: '/api/transaction/MonthlySalesList/DepositDetail',
@@ -498,7 +510,15 @@
           dataType: 'json',
           success: function (response) {
             if (response && Array.isArray(response.data)) {
-              _this.DepositGrid.itemsSource = response.data;
+              // 그룹화 처리를 위한 CollectionView 생성
+              const view = new wijmo.collections.CollectionView(response.data);
+              view.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription(null, function(item) {
+                const date = new Date(item.trdate);
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                return `${year}년 ${month}월`;
+              }));
+              _this.DepositGrid.itemsSource = view;
             } else {
               alert('데이터 형식이 잘못되었습니다.');
               _this.DepositGrid.itemsSource = [];
@@ -530,11 +550,12 @@
 
       // 검색
       $('#btnSearch').click(function (e) {
-        if ($('#cboCompanyHidden').val() === '' && $('#cboCompany').val() !== '') {
-          Alert.alert('', '업체명은 업체검색 버튼을 통해서 \n 검색해주세요');
-          return;
+        if ($('#cboCompany').val() !== '' && $('#cboCompanyHidden').val() === '') {
+          // 업체명 텍스트는 썼지만, 업체 검색 버튼 안 눌렀을 때
+          page.searchMainData();
+        } else {
+          page.searchMainData();
         }
-        page.searchMainData();
       });
 
       $('#btnGridSetting').click(function (e) {
@@ -547,19 +568,21 @@
         let poppage = new PopCompComponent();
         let $poppage = $(poppage);
         let searchcallback = function (items) {
-          console.log('items : ',items);
-          document.getElementById('cboCompany').value = items.compname;
+          //console.log('items : ',items);
+          document.getElementById('btnCompanySearch').value = items.compname;
           document.getElementById('cboCompanyHidden').value = items.id;
         };
 
         poppage.show(searchcallback);
       });
-      $('#cboCompany').on('input', function () {
+
+      $('#btnCompanySearch').on('input', function () {
         const val = $(this).val();
         if (val === '') {
           $('#cboCompanyHidden').val('');
         }
       });
+
       // .btn-clear 클릭 후 input 이벤트 강제 발생
       $(document).on('click', '.btn-clear', function () {
         const $input = $(this).siblings('input[type="text"]');
