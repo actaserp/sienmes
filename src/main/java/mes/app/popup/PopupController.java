@@ -459,6 +459,81 @@ public class PopupController {
 		return result;
 	}
 
+	@RequestMapping("/search_deduction")
+	public AjaxResult getSearchDeduction(
+			@RequestParam(value = "srchCode", required = false) String srchCode,
+			@RequestParam(value = "srchName", required = false) String srchName,
+			@RequestParam(value = "spjangcd") String spjangcd){
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("srchCode", srchCode);
+		paramMap.addValue("srchName", srchName);
+		paramMap.addValue("spjangcd", spjangcd);
+		AjaxResult result = new AjaxResult();
+
+		String sql = """
+            select *
+            from vat_deduction_type
+            WHERE spjangcd = :spjangcd
+			""";
+
+		if (srchCode != null && !srchCode.isEmpty()) {
+			sql += " AND \"code\" ILIKE :srchCode ";
+			paramMap.addValue("srchCode", "%" + srchCode + "%");
+		}
+
+		if (srchName != null && !srchName.isEmpty()) {
+			sql += " AND \"name\" ILIKE :srchName ";
+			paramMap.addValue("srchName", "%" + srchName + "%");
+		}
+
+		sql += " ORDER BY \"code\" ";
+
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+
+		return result;
+	}
+
+	@RequestMapping("/search_expense")
+	public AjaxResult getSearchExpense(
+			@RequestParam(value = "srchCode", required = false) String srchCode,
+			@RequestParam(value = "srchName", required = false) String srchName,
+			@RequestParam(value = "spjangcd") String spjangcd){
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("srchCode", srchCode);
+		paramMap.addValue("srchName", srchName);
+		paramMap.addValue("spjangcd", spjangcd);
+		AjaxResult result = new AjaxResult();
+
+		String sql = """
+            SELECT
+				 tc.*,
+				 sc."Value" AS gartnm
+			 FROM tb_ca648 tc
+			 LEFT JOIN sys_code sc
+				 ON sc."CodeType" = 'gartcd'
+				AND sc."Code" = tc.gartcd
+			   where tc.spjangcd = :spjangcd
+			""";
+
+		if (srchCode != null && !srchCode.isEmpty()) {
+			sql += " AND \"artcd\" ILIKE :srchCode ";
+			paramMap.addValue("srchCode", "%" + srchCode + "%");
+		}
+
+		if (srchName != null && !srchName.isEmpty()) {
+			sql += " AND \"artnm\" ILIKE :srchName ";
+			paramMap.addValue("srchName", "%" + srchName + "%");
+		}
+
+		sql += " ORDER BY CAST(tc.gartcd AS INTEGER), CAST(tc.artcd AS INTEGER)";
+
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+
+		return result;
+	}
+
 	@RequestMapping("/search_Comp_Custom")
 	//@DecryptField(columns = "item2", masks = 0)
 	public AjaxResult getSearchCompCustom(@RequestParam String spjangcd,

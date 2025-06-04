@@ -1,41 +1,29 @@
 package mes.app.transaction;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.popbill.api.*;
 import mes.app.aop.DecryptField;
 import mes.app.transaction.service.SalesInvoiceService;
 import mes.domain.entity.*;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.CompanyRepository;
 import mes.domain.repository.MaterialRepository;
-import mes.domain.repository.TB_SalesDetailRepository;
-import mes.domain.repository.TB_SalesmentRepository;
-import mes.domain.services.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
-@RequestMapping("/api/tran/tran")
+@RequestMapping("/api/tran/sales")
 public class SalesInvoiceController {
 	
 	@Autowired
@@ -67,26 +55,15 @@ public class SalesInvoiceController {
 
 		Material item = materialRepository.getMaterialById(id);
 
-		String spec = Stream.of(
-						item.getWidth() != null ? "폭:" + formatNumber(item.getWidth()) : null,
-						item.getLength() != null ? "길이:" + formatNumber(item.getLength()) : null,
-						item.getHeight() != null ? "높이:" + formatNumber(item.getHeight()) : null,
-						item.getThickness() != null ? "두께:" + formatNumber(item.getThickness()) : null
-				).filter(Objects::nonNull)
-				.collect(Collectors.joining(" × "));
-
 		Map<String, Object> data = new HashMap<>();
 		data.put("material_name", item.getName());
-		data.put("spec", spec);
+		data.put("spec", item.getStandard1());
 
 		AjaxResult result = new AjaxResult();
 		result.data = data;
 		return result;
 	}
 
-	private String formatNumber(Number number) {
-		return new DecimalFormat("###,###.##").format(number);
-	}
 
 	// 공급자(사업장) 정보 가져오기
 	@GetMapping("/invoicer_read")

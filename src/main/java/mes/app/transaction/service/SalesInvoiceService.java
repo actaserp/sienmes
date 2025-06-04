@@ -298,10 +298,13 @@ public class SalesInvoiceService {
         Integer misnum = parseInt(form.get("misnum"));
         boolean isUpdate = misnum != null;
 
-        TB_Salesment salesment = new TB_Salesment();
+        TB_Salesment salesment;
 
         if (isUpdate) {
-            salesment.setMisnum(misnum); // 기존 데이터 수정
+            salesment = tb_salesmentRepository.findById(misnum)
+                    .orElseThrow(() -> new RuntimeException("해당 misnum의 데이터가 존재하지 않습니다."));
+        } else {
+            salesment = new TB_Salesment();
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -1350,7 +1353,7 @@ public class SalesInvoiceService {
                     newDetail.setTaxtotal(detail.getTaxtotal());
                     newDetail.setTotalamt(detail.getTotalamt());
                     newDetail.setRemark(detail.getRemark());
-                    newDetail.setPurchasedt(detail.getPurchasedt());
+                    newDetail.setPurchasedt(misdate);
                     newDetail.setMaterialId(detail.getMaterialId());
                     newDetail.setSpjangcd(detail.getSpjangcd());
 

@@ -720,7 +720,7 @@
     <script type="text/javascript">
         class SalesInvoicePage {
             constructor() {
-                this.url = '/api/tran/tran';
+                this.url = '/api/tran/sales';
                 this.grid = null;
                 // this.$btnEdit = $('#btnEdit');
                 this.$btnAddNewRegular = $('#btnAddNewRegular');
@@ -743,7 +743,7 @@
                     $cboInvoice.focus();
                 }, 100);
 
-                // 워크센터
+                // 매출 구분
                 this.issueDivOptions = AjaxUtil.getSelectData('issuediv');
 
                 let dicIssuediv = {};
@@ -1892,6 +1892,9 @@
                             $content.find('#InvoiceeCorpNum').prop('readonly', false);
                         }
 
+                        setTimeout(() => {
+                            $content.find('#keyboardFocusCatcher').focus();
+                        }, 0);
 
                         $content.find('#InvoiceeCorpNum').trigger('input');
                         $content.find('#btnInvoiceSave span').text('수정');
@@ -1899,10 +1902,7 @@
 
                     }, 0);
 
-                    setTimeout(() => {
-                        popInvoice.initAfterOpen();
-                        $content.find('#keyboardFocusCatcher').focus();
-                    }, 0);
+
 
                 }
                 const popInvoice = new PopInvoiceComponent();
@@ -1914,6 +1914,10 @@
                         modalHeight = 660;
                     }
                 }
+
+                setTimeout(() => {
+                    popInvoice.initAfterOpen();
+                }, 0);
 
                 modalContainer.open({width: 1200, height: modalHeight, $content});
 
@@ -1943,8 +1947,25 @@
                         }
                     });
 
-
                     $content.find('tr[id^="item_"]').not('#item_0').remove();
+
+                    // 품목의 일자
+                    $content.find('#writeDate').on('change', function () {
+                        const val = $(this).val(); // yyyy-mm-dd
+                        if (!val) return;
+
+                        const parts = val.split('-');
+                        if (parts.length !== 3) return;
+
+                        const mm = parts[1];
+                        const dd = parts[2];
+
+                        // 모든 품목행에 적용
+                        $content.find('tr[id^="item_"]').each(function (index) {
+                            $(this).find(`#detailList${index}\\.PurchaseDT1`).val(mm);
+                            $(this).find(`#detailList${index}\\.PurchaseDT2`).val(dd);
+                        });
+                    });
 
                     // 첫 번째 행은 값만 초기화
                     const $firstRow = $content.find('#item_0');
@@ -1979,7 +2000,7 @@
                     $content.find('#btnInvoiceSave span').text('저장');
 
                     setTimeout(() => {
-                        $content.find('#InvoiceeCorpNum').focus();
+                        $content.find('#InvoiceeCorpName').focus();
                     }, 0);
                 };
 
