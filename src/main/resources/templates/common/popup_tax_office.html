@@ -1,0 +1,170 @@
+<th:block th:fragment="popup_tax_office">
+  <script type="text/x-tmpl" id="popup_taxSearchTemplate">
+    <div class="content_wrap popup">
+      <section class="section" style="padding-top: 10px;">
+        <div class="section-top">
+          <div class="search-wrap" style="text-align: left;">
+<!--            <dl>-->
+<!--              <dt><label for="compCode">세무서코드</label></dt>-->
+<!--              <dd><input type="text" id="compCode" name="compCode" style="width:160px;"></dd>-->
+<!--            </dl>-->
+<!--            <dl>-->
+<!--              <dt><label for="compName">세무서명</label></dt>-->
+<!--              <dd><input type="text" id="compName" name="compName" style="width:160px;"></dd>-->
+<!--            </dl>-->
+<!--            <dl>-->
+<!--              <dt><label for="business_number">관할구역</label></dt>-->
+<!--              <dd><input class="form-control2" type="text" id="business_number" name="business_number" style="width:160px;"></dd>-->
+<!--            </dl>-->
+<!--            <dl>-->
+              <dt>&nbsp;</dt>
+              <dd>
+                <li>
+                  <a class="btn btn-delete" title="검색" id="btnCompSearch">
+                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">검색
+                  </a>
+                </li>
+              </dd>
+            </dl>
+          </div>
+          <div class="container-fluid">
+            <div id="theGrid2" style="height: 300px;"></div>
+          </div>
+        </div>
+      </section>
+      <div class="popup-button">
+        <button type="button" class="btn-popup" id="btnCompSelect"><span>선택</span></button>
+        <button type="button" class="btn-popup" id="btn-search-close"><span>닫기</span></button>
+      </div>
+    </div>
+  </script>
+
+  <script type="text/javascript">
+    class PopTaxComponent {
+      static currentInstance = null;
+
+      constructor() {
+        if (PopTaxComponent.currentInstance) {
+          PopTaxComponent.currentInstance.close();
+        }
+        PopTaxComponent.currentInstance = this;
+
+        this.grid = null;
+        this.viewData = new wijmo.collections.CollectionView();
+        this.selectedItem = null;
+        this.callback = null;
+        this.modalContainer = new PopupDraggable('업체 선택');
+      }
+
+      searchDataBind() {
+        let _this = this;
+        let url = 'https://api.odcloud.kr/api/15099881/v1/uddi:387b47c2-55c0-4da1-ac65-f6bb1d5eeec5';
+        let data = {
+          page: 1,
+          perPage: 100,
+          serviceKey: 'bu6q9pRCluI8rJbEWr3Rzw5Dy6yiZC0XMpLyxho278jONlqE5NxPaaVyULwLr3WEYKyWfBOWnHyG2iOxdd4Uxg=='
+        };
+
+        AjaxUtil.getAsyncData(url, data, function (result) {
+          if (result && result.data) {
+            const list = result.data.map(item => ({
+              compcode: String(item["\uC138\uBB34\uC11C\uCF54\uB4DC"]),
+              compname: item["\uC138\uBB34\uC11C\uBA85"],
+              business_number: item["\uAD00\uD560\uAD6C\uC5ED"],
+              tel_number: item["\uC804\uD654\uBC88\uD638"]
+            }));
+
+            _this.viewData.sourceCollection = list;
+
+            setTimeout(() => {
+              if (_this.grid && _this.grid.rows.length > 0) {
+                _this.grid.select(0, 0);
+                _this.grid.focus();
+              }
+            }, 100);
+          }
+        });
+
+        this.selectedItem = null;
+      }
+
+      selectData(item) {
+        if (typeof this.callback === 'function') {
+          this.callback(item);
+        }
+        this.close();
+      }
+
+      show(callback) {
+        let _this = this;
+        this.callback = callback;
+
+        let content = tmpl('popup_taxSearchTemplate', {});
+        let $content = $(content);
+        this.modalContainer.open({width: 800, height: 500, $content});
+
+        setTimeout(() => {
+          const el = document.getElementById('theGrid2');
+          const existingGrid = wijmo.Control.getControl(el);
+          if (existingGrid) existingGrid.dispose();
+
+          this.grid = new wijmo.grid.FlexGrid('#theGrid2', {
+            selectionMode: wijmo.grid.SelectionMode.Row,
+            autoGenerateColumns: false,
+            showMarquee: true,
+            isReadOnly: true,
+            columns: [
+              {binding: 'compcode', header: '세무서코드', width: 100, align: 'center'},
+              {binding: 'compname', header: '세무서명', width: 150, align: 'left'},
+              {binding: 'business_number', header: '관할구역', width: '*', align: 'left'},
+              {binding: 'tel_number', header: '전화번호', width: 150, align: 'center'}
+            ],
+            itemsSource: this.viewData,
+          });
+
+          this.$btnCompSearch = $content.find('#btnCompSearch');
+          this.$compCode = $content.find('#compCode');
+          this.$compName = $content.find('#compName');
+          this.$business_number = $content.find('#business_number');
+          this.$btnCompSelect = $content.find('#btnCompSelect');
+
+          this.$btnCompSearch.click(() => _this.searchDataBind());
+          this.$btnCompSelect.click(() => {
+            const items = _this.grid.selectedItems;
+            if (items.length === 0) return;
+            _this.selectData(items[0]);
+          });
+
+          this.grid.hostElement.addEventListener('dblclick', function (e) {
+            console.log('dbclick function')
+            let items = _this.grid.selectedItems;
+            if (items.length === 0) {
+              return false;
+            }
+            _this.selectData(items[0]); // btnCompSelect 클릭과 동일한 동작
+          });
+
+          $content.find('#btn-search-close').click(() => _this.close());
+
+          ['#compCode', '#compName', '#business_number'].forEach(id => {
+            $(document).on('keydown', id, function (e) {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                $('#btnCompSearch').trigger('click');
+              }
+            });
+          });
+
+        }, 50);
+      }
+
+      close() {
+        this.modalContainer.close();
+        if (this.modalContainer.$content) this.modalContainer.$content.remove();
+        if (PopTaxComponent.currentInstance === this) {
+          PopTaxComponent.currentInstance = null;
+        }
+      }
+    }
+  </script>
+</th:block>
