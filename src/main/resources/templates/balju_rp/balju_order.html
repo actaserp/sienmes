@@ -476,13 +476,16 @@
 
           if (selectedItems.length === 1) {
 
+            let selected = selectedItems[0];
+
             let data = {
-              id: selectedItems[0].id,
+              id: selected.id,
+              SujuQty3: selected.SujuQty3,
               action: 'detail'
             };
             let fnsuccess = function (result) {
               result.data['mode'] = 'edit';
-
+              result.data['SujuQty3'] = selected.SujuQty3;
               _this.showBaljuForm(result.data);
             };
             AjaxUtil.getAsyncData(_this.url + '/detail', data, fnsuccess);
@@ -567,6 +570,8 @@
         let $isVatExempt = false;
         let $BaljuTotalPrice = $content.find('#BaljuTotalPri');
         let $vatCheck = $content.find('#VatIncluded');
+
+        let $sujuQty3 = $content.find('#sujuQty3');
 
         $content.find('#spjangcdHidden').val(data.spjangcd || '');
 
@@ -675,15 +680,23 @@
           });
         }
 
-
         // 저장버튼
         let $btnPopBaljuSave = $('#btnPopBaljuSave');
+        // 중지 버튼
         let $btnPopBaljuStop = $('#btnPopBaljuStop');
+
         if (data.mode === 'new') {
           $btnProductSearch.removeAttr('disabled');
           $btnPopBaljuStop.hide();  // 등록 모드 → 중지 버튼 숨김
         } else {
-          $btnPopBaljuStop.show();  // 수정 모드 → 중지 버튼 보이기
+          //미입고 수량 조건
+          if (Number(data.SujuQty3 || 0) === 0) {
+            console.log('SujuQty3 원본 값:', data.SujuQty3);
+            $btnPopBaljuStop.hide();
+          } else {
+            $btnPopBaljuStop.show();
+          }
+
           if (data.State && data.State !== 'draft') {
             $btnPopBaljuSave.hide();
             $BaljuUnitPrice.prop('readonly', true);

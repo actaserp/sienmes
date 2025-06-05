@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -269,19 +270,36 @@ public class BaljuOrderService {
 
   public List<Map<String, Object>> balju_stop(Integer id) {
     // 1. 현재 상태 조회
-    String selectSql = "SELECT \"State\" FROM balju WHERE id = :id;";
-    MapSqlParameterSource selectParams = new MapSqlParameterSource()
-        .addValue("id", id);
+    String selectSql = "SELECT \"State\", \"SujuQty\", \"SujuQty2\" FROM balju WHERE id = :id;";
+    MapSqlParameterSource selectParams = new MapSqlParameterSource().addValue("id", id);
 
-    String currentState = sqlRunner.queryForObject(
-        selectSql,
-        selectParams,
-        (rs, rowNum) -> rs.getString("State")
-    );
-    // 2.새 상태값 결정
-    String newState = "canceled";
+    Map<String, Object> result = sqlRunner.queryForObject(selectSql, selectParams, (rs, rowNum) -> {
+      Map<String, Object> map = new HashMap<>();
+      map.put("State", rs.getString("State"));
+      map.put("SujuQty", rs.getInt("SujuQty"));
+      map.put("SujuQty2", rs.getInt("SujuQty2"));
+      return map;
+    });
+
+    String currentState = (String) result.get("State");
+    int sujuQty = (int) result.get("SujuQty");
+    int sujuQty2 = (int) result.get("SujuQty2");
+
+    // 2. 새 상태값 결정
+    String newState;
+
     if ("canceled".equalsIgnoreCase(currentState)) {
-      newState = "draft"; // 다시 입고 가능한 상태로
+      // 중지 취소 → 입고량에 따라 상태 판단
+      if (sujuQty2 == 0) {
+        newState = "draft";
+      } else if (sujuQty2 < sujuQty) {
+        newState = "partial";
+      } else {
+        newState = "received";
+      }
+    } else {
+      // 상태가 중지가 아니면 → 중지로 변경
+      newState = "canceled";
     }
 
     // 3. 상태 업데이트
@@ -290,12 +308,12 @@ public class BaljuOrderService {
         SET "State" = :state
         WHERE id = :id
     """;
+
     MapSqlParameterSource updateParams = new MapSqlParameterSource()
         .addValue("state", newState)
         .addValue("id", id);
 
     int affected = sqlRunner.execute(updateSql, updateParams);
-//    log.info("상태 변경 완료: {} → {}, affected = {}", currentState, newState, affected);
 
     return List.of(Map.of(
         "updatedRows", affected,
