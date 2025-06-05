@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +44,7 @@ public class TransactionInputController {
                                          @RequestParam String tradetype,
                                          @RequestParam String spjangcd,
                                          @RequestParam(required = false) String accountNameHidden,
+                                         @RequestParam(required = false) String cltflag,
                                          @RequestParam(required = false) String cboCompanyHidden){
         long start = System.currentTimeMillis();
 
@@ -61,7 +63,19 @@ public class TransactionInputController {
             parsedCompanyId = UtilClass.parseInteger(cboCompanyHidden);
         }
 
-        result.data = transactionInputService.getTransactionHistory(searchfrdate, searchtodate, tradetype, parsedAccountId, parsedCompanyId, spjangcd);
+        Map<String, Object> param = new HashMap<>();
+
+        param.put("searchfrdate", searchfrdate);
+        param.put("searchtodate", searchtodate); // searchtodate가 null이더라도 문제없이 추가됨
+        param.put("parsedAccountId", parsedAccountId);
+        param.put("parsedCompanyId", parsedCompanyId);
+        param.put("spjangcd", spjangcd);
+        param.put("cltflag", cltflag);
+        param.put("tradetype", tradetype);
+
+        result.data = transactionInputService.getTransactionHistory(param);
+
+
         long end = System.currentTimeMillis();
         System.out.println("끝남시간: " + end);
         System.out.println("[/history] 처리 시간: " + (end - start) + " ms");

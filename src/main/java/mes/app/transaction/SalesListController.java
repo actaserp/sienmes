@@ -86,11 +86,7 @@ public class SalesListController {
 
         List<Map<String, Object>> list = salesListService.getList2(paramSet);
 
-
-        Map<String, Object> StatisticsCalculatorList = salesListService.StatisticsCalculator(list);
-
-        result.data = Map.of("list", list, "Statistics", StatisticsCalculatorList);
-
+        result.data = list;
         return result;
     }
 }

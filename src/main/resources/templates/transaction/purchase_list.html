@@ -107,7 +107,7 @@
                                         </dd>
                                     </dl>
 
-                                    <dl>
+                                    <!--<dl>
                                         <dt>
                                             <label>
                                                 과세형태<span class="eq"></span>
@@ -133,7 +133,7 @@
                                                 </div>
                                             </div>
                                         </dd>
-                                    </dl>
+                                    </dl>-->
 
                                     <dl>
                                         <dt>&nbsp;</dt>
@@ -209,7 +209,7 @@
                                     </dd>
                                 </dl>
 
-                                <dl>
+                                <!--<dl>
                                     <dt>
                                         <label>
                                             과세형태<span class="eq"></span>
@@ -235,7 +235,7 @@
                                             </div>
                                         </div>
                                     </dd>
-                                </dl>
+                                </dl>-->
 
                                 <dl>
                                     <dt>&nbsp;</dt>
@@ -377,8 +377,8 @@
                     isReadOnly: true,
                     itemsSource: _this.viewData2,
                     columns: [
-                        { binding: 'ivercorpnum', header: '사업자등록번호', align: 'center', width: '*' },
-                        { binding: 'ivercorpnm', header: '상호', align: 'left', width: '*'},
+                        { binding: 'saupnum', header: '사업자등록번호', align: 'center', width: '*' },
+                        { binding: 'clientName', header: '상호', align: 'left', width: '*'},
                         { binding: 'cnt', header: '매수', align: 'right', width: '*' },
                         { binding: 'supplycost', header: '공급가액', align: 'right', width: '*', aggregate: 'Sum' },
                         { binding: 'taxtotal', header: '세액', align: 'right', width: 150, aggregate: 'Sum' },
@@ -390,7 +390,7 @@
 
                 this.grid2.columnFooters.rows.push(new wijmo.grid.GroupRow());
 
-                const tradeDateColIndex = this.grid2.columns.findIndex(c => c.binding === 'ivercorpnum');
+                const tradeDateColIndex = this.grid2.columns.findIndex(c => c.binding === 'saupnum');
 
                 this.grid2.columnFooters.setCellData(0, tradeDateColIndex, '합계');
 
@@ -404,7 +404,7 @@
                     searchtodate: $('#searchtodate').val(),
                     cltcd: $('#cboCompany').val().trim() === '' ? '' : $('#cboCompanyHidden').val(),
                     purchase_type: $('#purchase_type').val(),
-                    taxtype: $('input[name=taxtype]:checked').val(),
+                    //taxtype: $('input[name=taxtype]:checked').val(),
                     spjangcd: getSpjangcdFromSession(),
                 }
 
@@ -420,22 +420,19 @@
 
                 if(type==='load' && LoadingFlag) return;
 
-                const 허욱 = "이재명";
-                console.log('허욱', 허욱);
-
                 let data = {
                     searchfrdate2: $('#searchfrdate2').val(),
                     searchtodate2: $('#searchtodate2').val(),
                     cltcd2: $('#cboCompany2').val().trim() === '' ? '' : $('#cboCompanyHidden2').val(),
                     purchase2: $('#purchase_type2').val(),
-                    taxtype2: $('input[name=taxtype2]:checked').val(),
+                    //taxtype2: $('input[name=taxtype2]:checked').val(),
                     spjangcd: getSpjangcdFromSession(),
                 }
 
                 let result = AjaxUtil.getSyncData(_this.url + '/search2', data);
 
                 if(result != null) {
-                    _this.viewData2.sourceCollection = result.data['list'];
+                    _this.viewData2.sourceCollection = result.data
                     //_this.bindingStatisticsField(result.data['Statistics']);
                     LoadingFlag = true; //서브탭 클릭할때마다 서치 방지
                 }

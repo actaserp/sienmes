@@ -158,7 +158,7 @@ function ProjectPopupOpen(intputId, hiddenid){
     let result = AjaxUtil.getSyncData('/api/popup/search_project', { srchName : value, spjangcd : getSpjangcdFromSession() });
 
     let searchcallback = function (items) {
-        console.log('items', items);
+
 
         document.getElementById(intputId).value = items.projnm;
         document.getElementById(hiddenid).value = items.projno;

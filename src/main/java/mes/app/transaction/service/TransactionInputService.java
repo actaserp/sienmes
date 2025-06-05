@@ -75,14 +75,24 @@ public class TransactionInputService {
         return items;
     }
 
-    public List<Map<String, Object>> getTransactionHistory(String searchfrdate, String searchtodate, String TradeType, Integer parsedAccountId, Integer parsedCompanyId, String spjangcd){
+    public List<Map<String, Object>> getTransactionHistory(Map<String, Object> param){
 
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+
+        String searchfrdate = UtilClass.getStringSafe(param.get("searchfrdate"));
+        String searchtodate = UtilClass.getStringSafe(param.get("searchtodate"));
+        Integer parsedAccountId = UtilClass.parseInteger(param.get("parsedAccountId"));
+        Integer parsedCompanyId = UtilClass.parseInteger(param.get("parsedCompanyId"));
+        String ioflag = UtilClass.getStringSafe(param.get("tradetype"));
+        String cltflag = UtilClass.getStringSafe(param.get("cltflag"));
+        String spjangcd = UtilClass.getStringSafe(param.get("spjangcd"));
+
         parameterSource.addValue("searchfrdate", searchfrdate);
         parameterSource.addValue("searchtodate", searchtodate);
         parameterSource.addValue("accid", parsedAccountId);
-        parameterSource.addValue("ioflag", TradeType);
+        parameterSource.addValue("ioflag", ioflag);
         parameterSource.addValue("cltcd", parsedCompanyId);
+        parameterSource.addValue("cltflag", cltflag);
         parameterSource.addValue("spjangcd", spjangcd);
 
         String sql = """
@@ -146,7 +156,7 @@ public class TransactionInputService {
                 and b.spjangcd = :spjangcd
                 """;
 
-        if(TradeType != null && !TradeType.isEmpty()){
+        if(!StringUtils.isEmpty(ioflag)){
             sql += """
                     AND b.ioflag = :ioflag
                     """;
@@ -161,6 +171,7 @@ public class TransactionInputService {
         if(parsedCompanyId != null){
             sql += """
                     AND b.cltcd = :cltcd
+                    AND b.cltflag = :cltflag
                     """;
         }
 
@@ -199,7 +210,7 @@ public class TransactionInputService {
         Integer accountId = dto.getAccountId();
         String accountNumber = null;
 
-        if (accountId != null) {
+        if (accountId != null && !StringUtils.isEmpty(dto.getAccountNumber())) {
             TB_ACCOUNT acc = accountRepository.findById(accountId).orElse(null);
             if (acc != null) {
                 accountNumber = acc.getAccnum();

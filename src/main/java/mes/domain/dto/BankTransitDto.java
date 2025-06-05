@@ -72,6 +72,9 @@ public class BankTransitDto {
     private String projectNumber; //프로젝트이름
     private String projno; //프로젝트번호
 
+    private String clientFlag; //거래처 구분값
+
+    private String clientName;
 
     public static TB_BANKTRANSIT toEntity(BankTransitDto dto, TB_BANKTRANSIT banktransit){
 
@@ -108,13 +111,13 @@ public class BankTransitDto {
         banktransit.setRemark1(dto.getNote1());
         banktransit.setRegdt(UtilClass.combineDateAndHourReturnyyyyMMddHHmmss(dto.getRegidate(), null));
         banktransit.setRegpernm(dto.getRegistername());
-        banktransit.setCltcd(UtilClass.parseInteger(dto.getClientId()));
+
         banktransit.setTrid(UtilClass.parseInteger(dto.getTransactionTypeId()));
         banktransit.setIotype(dto.getDepositAndWithdrawalType());
         banktransit.setBanknm(dto.getBankName());
         banktransit.setFeeamt(UtilClass.parseInteger(commission));
         banktransit.setAccnum(accountNum);
-        banktransit.setAccid(dto.getAccountId());
+
         banktransit.setEumnum(dto.getBill());
         banktransit.setEumtodt(dto.getExpiration());
         banktransit.setEtcremark(dto.getEtc());
@@ -123,6 +126,11 @@ public class BankTransitDto {
 
         banktransit.setProjno(StringUtils.hasText(dto.getProjectNumber()) ? dto.getProjno() : null);
         banktransit.setAccid(StringUtils.hasText(accountNum) ? dto.getAccountId() : null);
+
+        boolean hasClient = StringUtils.hasText(dto.getClientName());
+        banktransit.setCltcd(hasClient ? UtilClass.parseInteger(dto.getClientId()) : null);
+        banktransit.setCltflag(hasClient ? dto.getClientFlag() : null);
+
 
         return banktransit;
     }

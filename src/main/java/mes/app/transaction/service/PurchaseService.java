@@ -26,14 +26,14 @@ public class PurchaseService {
         String searchfrdate = UtilClass.getStringSafe(parameter.get("searchfrdate"));
         String searchtodate = UtilClass.getStringSafe(parameter.get("searchtodate"));
         Integer cltcd = UtilClass.parseInteger(parameter.get("cltcd"));
-        String taxtype = UtilClass.getStringSafe(parameter.get("taxtype"));
+        //String taxtype = UtilClass.getStringSafe(parameter.get("taxtype"));
         String misgubun = UtilClass.getStringSafe(parameter.get("misgubun"));
 
         param.addValue("spjangcd", spjangcd);
         param.addValue("searchfrdate", searchfrdate);
         param.addValue("searchtodate", searchtodate);
         param.addValue("cltcd", cltcd);
-        param.addValue("taxtype", taxtype);
+       // param.addValue("taxtype", taxtype);
         param.addValue("misgubun", misgubun);
 
         String sql = """
@@ -43,13 +43,11 @@ public class PurchaseService {
                 ,s."Value" as misgubun
                 ,c."Code" as companyCode
                 ,c."Name" as companyName
-                ,b.iveremail
                 ,a.itemnm
                 ,a.spec
                 ,COALESCE(a.supplycost, 0) AS supplycost
                 ,COALESCE(a.taxtotal, 0) AS taxtotal
                 ,(COALESCE(a.supplycost, 0) + COALESCE(a.taxtotal, 0)) as totalamt
-                ,b.statecode
                 from tb_invoicedetail a
                 left join tb_invoicement b
                 on a.misdate = b.misdate
@@ -66,11 +64,11 @@ public class PurchaseService {
                     """;
         }
 
-        if(taxtype != null && !taxtype.isEmpty()){
+        /*if(taxtype != null && !taxtype.isEmpty()){
             sql += """
                     and b.taxtype = :taxtype
                     """;
-        }
+        }*/
 
         if(misgubun != null && !misgubun.isEmpty()){
             sql += """
@@ -93,24 +91,25 @@ public class PurchaseService {
         String searchfrdate = UtilClass.getStringSafe(parameter.get("searchfrdate"));
         String searchtodate = UtilClass.getStringSafe(parameter.get("searchtodate"));
         Integer cltcd = UtilClass.parseInteger(parameter.get("cltcd"));
-        String taxtype = UtilClass.getStringSafe(parameter.get("taxtype"));
+        //String taxtype = UtilClass.getStringSafe(parameter.get("taxtype"));
         String misgubun = UtilClass.getStringSafe(parameter.get("misgubun"));
 
         param.addValue("spjangcd", spjangcd);
         param.addValue("searchfrdate", searchfrdate);
         param.addValue("searchtodate", searchtodate);
         param.addValue("cltcd", cltcd);
-        param.addValue("taxtype", taxtype);
+       // param.addValue("taxtype", taxtype);
         param.addValue("misgubun", misgubun);
 
         String sql = """
-                select ivercorpnum
-                ,count(ivercorpnum) as cnt
-                ,ivercorpnm
+                select c."BusinessNumber" as saupnum
+                ,count(c."BusinessNumber") as cnt
+                ,c."Name" as "clientName"
                 ,SUM(supplycost) as supplycost
                 ,SUM(taxtotal) as taxtotal
-                from tb_invoicement
-                where spjangcd = :spjangcd
+                from tb_invoicement a
+                left join company c on c.id = a.cltcd
+                where a.spjangcd = :spjangcd
                 and misdate between :searchfrdate and :searchtodate
                 """;
 
@@ -120,11 +119,11 @@ public class PurchaseService {
                     """;
         }
 
-        if(taxtype != null && !taxtype.isEmpty()){
+        /*if(taxtype != null && !taxtype.isEmpty()){
             sql += """
                     and taxtype = :taxtype
                     """;
-        }
+        }*/
 
         if(misgubun != null && !misgubun.isEmpty()){
             sql += """
@@ -133,72 +132,12 @@ public class PurchaseService {
         }
 
         sql += """
-                group by ivercorpnum, ivercorpnm
-                order by ivercorpnum;
+                group by c."Name", c."BusinessNumber"
+                order by saupnum;;
                 """;
 
         List<Map<String, Object>> rows = sqlRunner.getRows(sql, param);
         return rows;
     }
 
-    public Map<String, Object> StatisticsCalculator(List<Map<String, Object>> list){
-
-        Map<String, Object> bucket = new HashMap<>();
-
-        int SaupCltSum = 0;
-        int SaupCntSum = 0;
-        int SaupSupplySum = 0;
-        int SaupTaxSum = 0;
-
-        int PersonCltSum = 0;
-        int PersonCntSum = 0;
-        int PersonSupplySum = 0;
-        int PersonTaxSum = 0;
-
-
-        for(Map<String, Object> item : list){
-
-            Object cnt = item.get("cnt");
-            Object supply = item.get("supplycost");
-            Object tax = item.get("taxtotal");
-            Object corpnum = item.get("ivercorpnum");
-
-
-            int parsedCnt = cnt != null ? UtilClass.parseInteger(cnt) : 0;
-            int parsedSupply = supply != null ? UtilClass.parseInteger(supply) : 0;
-            int parsedTax = tax != null ? UtilClass.parseInteger(tax) : 0;
-            String parsedCorpNum = corpnum != null ? corpnum.toString() : "";
-
-            //주민번호 일 경우 (개인)
-            if(parsedCorpNum.length() > 11){
-                PersonCltSum++;
-                PersonCntSum += parsedCnt;
-                PersonSupplySum += parsedSupply;
-                PersonTaxSum += parsedTax;
-            }else{
-                SaupCltSum++;
-                SaupCntSum += parsedCnt;
-                SaupSupplySum += parsedSupply;
-                SaupTaxSum += parsedTax;
-            }
-
-        }
-
-        bucket.put("cltCnt", SaupCltSum + PersonCltSum);
-        bucket.put("cnt", SaupCntSum + PersonCntSum);
-        bucket.put("supplySum", SaupSupplySum + PersonSupplySum);
-        bucket.put("taxSum", SaupTaxSum + PersonTaxSum);
-
-        bucket.put("SaupCltSum", SaupCltSum);
-        bucket.put("SaupCntSum", SaupCntSum);
-        bucket.put("SaupSupplySum", SaupSupplySum);
-        bucket.put("SaupTaxSum", SaupTaxSum);
-
-        bucket.put("PersonCltSum", PersonCltSum);
-        bucket.put("PersonCntSum", PersonCntSum);
-        bucket.put("PersonSupplySum", PersonSupplySum);
-        bucket.put("PersonTaxSum", PersonTaxSum);
-
-        return bucket;
-    }
 }

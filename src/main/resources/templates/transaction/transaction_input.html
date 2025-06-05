@@ -479,7 +479,9 @@
                         </th>
                         <td colspan="3">
                             <input id="clientId" name="clientId" type="hidden">
-                            <input class="form-control2" type="text" id="CompanyName_Popup" name="CompanyName_Popup"
+                            <input id="clientFlag" name="clientFlag" type="hidden">
+
+                            <input class="form-control2" type="text" id="clientName" name="clientName"
                              placeholder="검색버튼을 클릭하여 거래처를 검색하세요"/>
                             &nbsp;
                             <a class="btn btn-delete" title="검색" id="btnCompanySearch" style='width: 120px'>
@@ -752,10 +754,10 @@
                     itemsSource: this.viewData,
                     formatItem: function (s, e) {
                         const panel = e.panel;
-                        if (panel !== s.cells) return;
+                        //if (panel !== s.cells) return;
                         const col = s.columns[e.col];
                         const item = s.rows[e.row].dataItem;
-                        if (!item) return;
+                        //if (!item) return;
 
                         // 컬럼 헤더일 경우
                         if (panel === s.columnHeaders) {
@@ -1174,12 +1176,12 @@
                 //AjaxUtil.fillSelectOptions($('#transactionTypeId'), 'trade', 'choose', false);
 
                 //키입력 핸들러
-                $('#CompanyName_Popup, #projectNumber, #accountNumber').on('keydown', function(e){
+                $('#clientName, #projectNumber, #accountNumber').on('keydown', function(e){
                     if(e.key === 'Enter' || e.keyCode === 13){
                        const keydownId = this.id;
 
                        switch (keydownId){
-                           case 'CompanyName_Popup' : companyPopupOpenCustom('CompanyName_Popup', 'clientId');
+                           case 'clientName' : companyPopupOpenCustom('clientName', 'clientId', 'clientFlag');
                                 break;
                            case 'projectNumber' : ProjectPopupOpen('projectNumber', 'projno');
                                 break;
@@ -1193,7 +1195,7 @@
                     const clickId = this.id;
                     switch (clickId){
                         case 'btn-search-close' : modalContainer.close(); break;
-                        case 'btnCompanySearch' : companyPopupOpenCustom('CompanyName_Popup', 'clientId'); break;
+                        case 'btnCompanySearch' : companyPopupOpenCustom('clientName', 'clientId', 'clientFlag'); break;
                         case 'btnAccountSearch' : _this.AccountPopupOpen('accountNumber', 'accountId'); break;
                         case 'btnPopSave' : _this.saveNewTransactionData(); break;
                         case 'btnPopReset' : _this.AccountHistorySaveFormReset(); break;
@@ -1218,7 +1220,7 @@
                     $('#transactionDate').val(data.trade_date);
                     $('#transactionHour').val(data.transactionhour);
                     $('#inoutFlag').val(data.inoutFlag === '입금' ? '0' : '1');
-                    $('#CompanyName_Popup').val(data.clientName);
+                    $('#clientName').val(data.clientName);
                     $('#bankName').val(data.bankname);
                     $('#accountNumber').val(data.account);
 
@@ -1246,6 +1248,7 @@
 
                     $('#bankTransitId').val(data.id);
                     $('#clientId').val(data.cltcd);
+                    $('#clientFlag').val(data.cltflag);
                     $('#accountId').val(data.accountid);
 
                     $('#projno').val(data.projno);
@@ -1742,7 +1745,7 @@
 
                 let poppage = new PopAccountComponent(value);
                 let searchcallback = function (items) {
-                    console.log('items', items);
+
 
                     document.getElementById(intputId).value = items.accountNumber;
                     document.getElementById(hiddenid).value = items.accid;
@@ -1867,7 +1870,7 @@
         let page = null;
 
 
-        function companyPopupOpenCustom(intputId, hiddenid){
+        function companyPopupOpenCustom(intputId, hiddenid, hiddenflag){
 
             const value = document.getElementById(intputId).value;
 
@@ -1876,16 +1879,18 @@
             let result = AjaxUtil.getSyncData('/api/popup/search_Comp_Custom', { item2 : value, spjangcd : getSpjangcdFromSession() });
 
             let searchcallback = function (items) {
+
                 document.getElementById(intputId).focus();
 
                 document.getElementById(intputId).value = items.item2;
                 document.getElementById(hiddenid).value = items.id;
+                document.getElementById(hiddenflag).value = items.cltflag;
             };
             if(result && result.data.length === 1){
                 searchcallback(result.data[0]);   ``
                 return;
             }
-            console.log('result', result);
+
             poppage.show(searchcallback, result.data);
         }
 
@@ -1903,7 +1908,7 @@
 
             $('#cboCompany').on('keydown', function(e){
                 if(e.key === 'Enter' || e.keyCode === 13){
-                    companyPopupOpenCustom('cboCompany', 'cboCompanyHidden');
+                    companyPopupOpenCustom('cboCompany', 'cboCompanyHidden', 'cltflag');
                 }
             });
 

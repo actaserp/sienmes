@@ -142,7 +142,7 @@ public class SalesListService {
         return rows;
     }
 
-    public Map<String, Object> StatisticsCalculator(List<Map<String, Object>> list){
+    /*public Map<String, Object> StatisticsCalculator(List<Map<String, Object>> list){
 
         Map<String, Object> bucket = new HashMap<>();
 
@@ -201,6 +201,6 @@ public class SalesListService {
         bucket.put("PersonTaxSum", PersonTaxSum);
 
         return bucket;
-    }
+    }*/
 
 }
