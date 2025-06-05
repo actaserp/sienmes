@@ -37,7 +37,7 @@ public class ProjectStatusController {
   //경비 사용내역
   @GetMapping("/ExpenseHistory")
   public AjaxResult getExpenseHistory(@RequestParam(value ="spjangcd") String spjangcd,
-                                         @RequestParam(value = "projno") String projno,
+                                         @RequestParam(value = "projno", required = false) String projno,
                                          HttpServletRequest request) {
 
     List<Map<String, Object>> items = this.projectStatusService.getExpenseHistory( spjangcd, projno);
@@ -68,7 +68,7 @@ public class ProjectStatusController {
                                       @RequestParam(value = "projno") String projno,
                                       HttpServletRequest request) {
 
-    List<Map<String, Object>> items = this.projectStatusService.getTransactionHistory( spjangcd, projno);
+    List<Map<String, Object>> items = this.projectStatusService.getTransactionHistory( spjangcd, projno );
 
     AjaxResult result = new AjaxResult();
     result.data = items;
