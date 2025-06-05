@@ -16,12 +16,13 @@ public class ProjectStatusService {
   @Autowired
   SqlRunner sqlRunner;
 
-  public List<Map<String, Object>> getProjectStatusList(String spjangcd, String txtProjectName) {
+  public List<Map<String, Object>> getProjectStatusList(String spjangcd, String txtProjectName, String cboYear) {
 
     MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
     dicParam.addValue("spjangcd", spjangcd);
     dicParam.addValue("txtProjectName", txtProjectName);
+    dicParam.addValue("cboYear", cboYear);
 
     String sql = """
         SELECT
@@ -60,6 +61,10 @@ public class ProjectStatusService {
     if (txtProjectName != null && !txtProjectName.isEmpty()) {
       sql += " AND da003.projnm LIKE :txtDescription ";
       dicParam.addValue("txtDescription", "%" + txtProjectName + "%");
+    }
+    if (cboYear != null && !cboYear.isEmpty()) {
+      sql += " AND da003.contdate LIKE :cboYear ";
+      dicParam.addValue("cboYear", cboYear+"%");
     }
     sql += """
         GROUP BY da003.projno, da003.projnm, da003.contdate, da003.spjangcd
@@ -115,7 +120,7 @@ public class ProjectStatusService {
         select
          to_char(to_date(s.misdate, 'YYYYMMDD'), 'YYYY-MM-DD') as misdate,
          cs."Value" as misgubun,
-         s.icerdeptnm,
+          sc5."Name" AS "icerdeptnm",
          s.misnum ,
          d.misseq ,
          d.itemnm,
@@ -129,8 +134,10 @@ public class ProjectStatusService {
          from tb_salesment s
          left join tb_salesdetail d on s.misnum =d.misnum and s.spjangcd =d.spjangcd
          left join sys_code cs on cs."Code" = s.misgubun
+         LEFT JOIN depart sc5 ON sc5."Code" = s.departcode
          where s.spjangcd = :spjangcd
          and s.projectcode =:projno
+         ORDER BY s.misdate
         """;
 
 //    log.info("프로젝트 현황_매출내역 SQL: {}", sql);

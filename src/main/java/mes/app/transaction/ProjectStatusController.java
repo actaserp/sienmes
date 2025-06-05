@@ -23,10 +23,11 @@ public class ProjectStatusController {
 
   @GetMapping("/allRead")
   public AjaxResult getProjectStatusList(@RequestParam(value ="spjangcd") String spjangcd,
+                                         @RequestParam(value = "cboYear") String cboYear,
                                          @RequestParam(value = "txtProjectName", required = false) String txtProjectName,
                                          HttpServletRequest request) {
 
-    List<Map<String, Object>> items = this.projectStatusService.getProjectStatusList( spjangcd, txtProjectName);
+    List<Map<String, Object>> items = this.projectStatusService.getProjectStatusList( spjangcd, txtProjectName, cboYear);
 
     AjaxResult result = new AjaxResult();
     result.data = items;

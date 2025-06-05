@@ -318,7 +318,7 @@ public class AccountsReceivableListServie {
                 1 AS remaksseq
             FROM tb_banktransit b
             JOIN company c ON c.id = b.cltcd 
-            LEFT JOIN sys_code sc ON sc."Code" = b.iotype
+            LEFT JOIN sys_code sc ON sc."Code" = b.iotype and sc."CodeType" = 'depodit_type'
             LEFT JOIN tb_trade tt ON tt.trid = b.trid AND tt.spjangcd = b.spjangcd
             WHERE TO_DATE(b.trdate, 'YYYYMMDD') BETWEEN TO_DATE(:start, 'YYYYMMDD') AND TO_DATE(:end, 'YYYYMMDD') 
               AND b.cltcd = :company
@@ -355,8 +355,8 @@ public class AccountsReceivableListServie {
         ORDER BY x.cltcd, x.date, x.remaksseq
         """;
 
-//    log.info("미수금 상세 read SQL: {}", sql);
-//    log.info("SQL Parameters: {}", paramMap.getValues());
+    log.info("미수금 상세 read SQL: {}", sql);
+    log.info("SQL Parameters: {}", paramMap.getValues());
 
     return this.sqlRunner.getRows(sql, paramMap);
   }
