@@ -677,7 +677,6 @@ let FormUtil = {
                         $frmCtl.prop('checked', value);
                     //$frmCtl.attr('checked', value);
                 } else if (type_name === 'radio') {
-                    console.log('라디오 바인딩 시도:', key, value);
                     $frmCtl.removeAttr('checked');
                     let escapedValue = value.replace(/"/g, '\\"');
                     var $radioCtl = $('input:radio[name=' + key + ']:input[value=' + escapedValue + ']');
@@ -899,6 +898,33 @@ let AjaxUtil = {
             url: url,
             data: JSON.stringify(param_data), // JSON 형식으로 변환
             contentType: 'application/json',  // 반드시 설정
+            headers: {
+                'X-CSRF-TOKEN': csrf
+            },
+            success: function (res) {
+                if (typeof fn_success === 'function') {
+                    fn_success(res);
+                }
+            },
+            error: function (req, status, error) {
+                if (typeof fn_failure === 'function') {
+                    fn_failure(req, status, error);
+                } else {
+                    AjaxUtil.failureCallback(req, status, error);
+                }
+            }
+        });
+    },
+    postJsonDataUTF: function (url, param_data, fn_success, fn_failure) {
+        let csrf = $('[name=_csrf]').val();
+
+        $.ajax({
+            async: true,
+            dataType: 'json',
+            type: 'POST',
+            url: url,
+            data: JSON.stringify(param_data), // JSON 형식으로 변환
+            contentType: 'application/json; charset=UTF-8',  // 반드시 설정
             headers: {
                 'X-CSRF-TOKEN': csrf
             },

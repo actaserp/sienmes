@@ -1,23 +1,28 @@
 package mes.app.transaction;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder;
 import mes.app.aop.DecryptField;
 import mes.app.transaction.service.SalesInvoiceService;
+import mes.config.Settings;
 import mes.domain.entity.*;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.CompanyRepository;
 import mes.domain.repository.MaterialRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,6 +37,8 @@ public class SalesInvoiceController {
     private CompanyRepository companyRepository;
     @Autowired
     private MaterialRepository materialRepository;
+	@Autowired
+	Settings settings;
 
 	@GetMapping("/shipment_head_list")
 	public AjaxResult getShipmentHeadList(
@@ -230,6 +237,48 @@ public class SalesInvoiceController {
 
 		return salesInvoiceService.updateinvoice(misnum, issuediv);
 	}
+
+	@PostMapping("/save_invoice_pdf")
+	public ResponseEntity<?> saveInvoicePdf(@RequestBody Map<String, String> body) {
+		String html = body.get("html");
+		String misnum = body.get("misnum");
+
+		String basePath = settings.getProperty("file_temp_upload_path");
+		if (basePath == null) {
+			return ResponseEntity.status(500).body("PDF 경로 설정이 누락되었습니다.");
+		}
+
+		File dir = new File(basePath);
+		if (!dir.exists()) dir.mkdirs();
+
+		String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+		String filePath = basePath + "TAX-" + today + "-" + misnum + ".pdf";
+
+		try (OutputStream os = new FileOutputStream(filePath)) {
+			PdfRendererBuilder builder = new PdfRendererBuilder();
+
+			// Windows에서 맑은 고딕 폰트 등록
+			builder.useFont(
+					new File("C:/Windows/Fonts/malgun.ttf"),
+					"Malgun Gothic",
+					400,
+					BaseRendererBuilder.FontStyle.NORMAL,
+					true
+			);
+
+			builder.withHtmlContent(html, null);
+			builder.toStream(os);
+			builder.run();
+			os.flush();
+
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("PDF 생성 실패");
+		}
+
+		return ResponseEntity.ok(Map.of("success", true, "message", "PDF 생성 완료"));
+
+	}
+
 
 	@PostMapping("/invoice_issue")
 	public AjaxResult issueInvoice(@RequestBody List<Map<String, String>> issueList) {

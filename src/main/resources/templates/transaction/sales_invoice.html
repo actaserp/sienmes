@@ -2,7 +2,7 @@
 <head>
     <style id="print_invoice_css">
         #printArea {
-            font-family: 'MalgunGothic', sans-serif;
+            font-family: 'Malgun Gothic', sans-serif;
             font-size: 12px;
             padding: 10px;
         }
@@ -44,6 +44,27 @@
         #printArea .vertical-text {
             vertical-align: middle;
         }
+
+        #printArea .text-right {
+            text-align: right;
+        }
+
+        #printArea .text-left {
+            text-align: left;
+        }
+
+        #printArea th, #printArea td {
+            word-wrap: break-word;
+            overflow: hidden;
+            white-space: normal; /* ✅ 줄바꿈 허용 */
+        }
+
+        .wp4  { width: 4%; }
+        .wp7  { width: 7%; }
+        .wp10 { width: 10%; }
+        .wp12 { width: 12%; }
+        .wp14 { width: 14%; }
+        .wp20 { width: 20%; }
 
         @media print {
             @page {
@@ -651,36 +672,69 @@
     <script type="text/x-tmpl" id="writPrint_Template">
         <div id="printArea">
 
-        <table style="border-bottom: none;">
+        <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+            <tr style="height: 0; font-size: 0; line-height: 0; border: none;">
+              <th style="border: none; padding: 0; width: 4%;"></th>
+              <th style="border: none; padding: 0; width: 9%;"></th>
+              <th style="border: none; padding: 0; width: 18%;"></th>
+              <th style="border: none; padding: 0; width: 7%;"></th>
+              <th style="border: none; padding: 0; width: 12%;"></th>
+              <th style="border: none; padding: 0; width: 4%;"></th>
+              <th style="border: none; padding: 0; width: 9%;"></th>
+              <th style="border: none; padding: 0; width: 18%;"></th>
+              <th style="border: none; padding: 0; width: 7%;"></th>
+              <th style="border: none; padding: 0; width: 12%;"></th>
+            </tr>
+
+
             <tr>
-                <td colspan="10" style="font-weight: bold; text-align: center;">거래 명세서
-                    <span style="font-size: 12px;">(공급받는자용)</span>
+                <td colspan="10" style="text-align: center; font-weight: bold; height: 35px;">
+                   <span style="font-size: 16px;">거래 명세서</span>
+                   <span style="font-size: 12px;">(공급받는자용)</span>
                 </td>
-            </tr>
-            <tr>
-                <th rowspan="4" class="vertical-text">공<br>급<br>자</th>
+              </tr>
+
+              <tr>
+                <th rowspan="4" class="vertical-text">공<br/>급<br/>자</th>
                 <th>등록번호</th><td colspan="3">${icercorpnum}</td>
-                <th rowspan="4" class="vertical-text">공<br>급<br>받<br>는<br>자</th>
+                <th rowspan="4" class="vertical-text">공<br/>급<br/>받<br/>는<br/>자</th>
                 <th>등록번호</th><td colspan="3">${ivercorpnum}</td>
-            </tr>
-            <tr>
-                <th>상호명</th><td>${icercorpnm}</td>
-                <th>성명</th><td>${icerceonm}</td>
-                <th>상호명</th><td>${ivercorpnm}</td>
-                <th>성명</th><td>${iverceonm}</td>
-            </tr>
-            <tr>
-                <th>주소</th><td colspan="3">${iceraddr}</td>
-                <th>주소</th><td colspan="3">${iveraddr}</td>
-            </tr>
-            <tr>
-                <th>업태</th><td>${icerbiztype}</td>
-                <th>종목</th><td>${icerbizclass}</td>
-                <th>업태</th><td>${iverbiztype}</td>
-                <th>종목</th><td>${iverbizclass}</td>
-            </tr>
+              </tr>
+
+              <tr>
+                <th>상호명</th><td class="text-left">${icercorpnm}</td>
+                <th>성명</th><td class="text-left">${icerceonm}</td>
+                <th>상호명</th><td class="text-left">${ivercorpnm}</td>
+                <th>성명</th><td class="text-left">${iverceonm}</td>
+              </tr>
+
+              <tr>
+                <th>주소</th><td class="text-left" colspan="3">${iceraddr}</td>
+                <th>주소</th><td class="text-left" colspan="3">${iveraddr}</td>
+              </tr>
+
+              <tr>
+                <th>업태</th><td class="text-left">${icerbiztype}</td>
+                <th>종목</th><td class="text-left">${icerbizclass}</td>
+                <th>업태</th><td class="text-left">${iverbiztype}</td>
+                <th>종목</th><td class="text-left">${iverbizclass}</td>
+              </tr>
         </table>
-        <table style="border-top: none;">
+
+        <table style="width: 100%; table-layout: fixed; border-collapse: collapse; border-top: none;">
+          <!-- 열 너비 고정용 헤더 -->
+          <tr style="height: 0; font-size: 0; line-height: 0; border: none;">
+            <th style="border: none; padding: 0; width: 5%;"></th>   <!-- No -->
+            <th style="border: none; padding: 0; width: 6%;"></th>   <!-- 월 -->
+            <th style="border: none; padding: 0; width: 6%;"></th>   <!-- 일 -->
+            <th style="border: none; padding: 0; width: 23%;"></th>  <!-- 품목 -->
+            <th style="border: none; padding: 0; width: 8%;"></th>   <!-- 수량 -->
+            <th style="border: none; padding: 0; width: 10%;"></th>  <!-- 단가 -->
+            <th style="border: none; padding: 0; width: 12%;"></th>  <!-- 공급가액 -->
+            <th style="border: none; padding: 0; width: 12%;"></th>  <!-- 부가세액 -->
+            <th style="border: none; padding: 0; width: 10%;"></th>   <!-- 비고1 -->
+            <th style="border: none; padding: 0; width: 8%;"></th>   <!-- 비고2 -->
+          </tr>
             <tr>
                 <td colspan="10" style="font-weight: bold; text-align: center; border-top: none;">내&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;용</td>
             </tr>
@@ -1102,12 +1156,12 @@
                                     <td>${i + 1}</td>
                                     <td>${item.month || ''}</td>
                                     <td>${item.day || ''}</td>
-                                    <td>${item.name || ''}</td>
+                                    <td class="text-left">${item.name || ''}</td>
                                     <td>${formatNumber(item.qty)}</td>
                                     <td>${formatNumber(item.unitcost)}</td>
-                                    <td>${formatNumber(item.supplycost)}</td>
-                                    <td>${formatNumber(item.tax)}</td>
-                                    <td colspan="2">${item.remark || ''}</td>
+                                    <td class="text-right">${formatNumber(item.supplycost)}</td>
+                                    <td class="text-right">${formatNumber(item.tax)}</td>
+                                    <td class="text-left" colspan="2">${item.remark || ''}</td>
                                 `;
                             tbody.appendChild(tr);
                         }
@@ -1116,9 +1170,9 @@
                     const tfoot = tempDiv.querySelector('tfoot tr');
                     if (tfoot) {
                         tfoot.innerHTML = `
-                            <td colspan="6">합계</td>
-                            <td>${formatNumber(data.supplycost)}</td>
-                            <td colspan="2"></td>
+                          <td colspan="6" style="text-align: center; font-weight: bold;">합계</td>
+                          <td style="text-align: right;">${formatNumber(data.supplycost)}</td>
+                          <td colspan="3"></td>
                         `;
                                     }
 
@@ -1165,7 +1219,7 @@
                 // });
 
                 // 발행 버튼
-                $('#btnIssue').click(function (e) {
+                $('#btnIssue').click(async function (e) {
                     const items = _this.grid.rows
                         .filter(row => row.isSelected)
                         .map(row => row.dataItem);
@@ -1182,21 +1236,55 @@
                         return;
                     }
 
-                    Alert.confirm('', '선택한 항목을 발행하시겠습니까?', function () {
-                        const issueList = items.map(item => ({
-                            misnum: item.misnum
-                        }));
+                    const confirm = await Alert.confirmAsync('', '선택한 항목을 발행하시겠습니까?');
+                    if (!confirm) return;
 
-                        let url = _this.url + '/invoice_issue';
-                        AjaxUtil.postJsonData(url, issueList, function (res) {
-                            if (res.success) {
-                                Alert.alert('', res.message || '발행이 완료되었습니다.', function () {
-                                    _this.searchMainData();
-                                });
-                            } else {
-                                Alert.alert('', res.message || '발행 중 오류가 발생했습니다.');
-                            }
+                    // PDF 생성 및 저장 예시
+                    for (const item of items) {
+                        const result = await getInvoiceData(item.misnum);
+                        let htmlBody = renderInvoiceHtml(result.data);
+
+                        htmlBody = htmlBody
+                            .replace(/&nbsp;/g, ' ')
+                            .replace(/<br>/g, '<br/>')
+                            .replace(/<hr>/g, '<hr/>')
+                            .replace(/<img([^>]+?)>/g, '<img$1/>');
+
+                        const style = $('#print_invoice_css')[0]?.outerHTML || '';
+                        const html = `
+                            <html>
+                            <head>
+                                <meta charset="UTF-8"/>
+                                ${style}
+                                <style>
+                                    body {
+                                        font-family: 'Malgun Gothic', sans-serif;
+                                    }
+                                </style>
+                            </head>
+                            <body>${htmlBody}</body>
+                            </html>
+                        `;
+
+                        await AjaxUtil.postJsonDataUTF(_this.url + '/save_invoice_pdf', {
+                            misnum: item.misnum,
+                            html: html
                         });
+                    }
+
+                    const issueList = items.map(item => ({
+                        misnum: item.misnum
+                    }));
+
+                    let url = _this.url + '/invoice_issue';
+                    AjaxUtil.postJsonData(url, issueList, function (res) {
+                        if (res.success) {
+                            Alert.alert('', res.message || '발행이 완료되었습니다.', function () {
+                                _this.searchMainData();
+                            });
+                        } else {
+                            Alert.alert('', res.message || '발행 중 오류가 발생했습니다.');
+                        }
                     });
 
                 });
@@ -2373,11 +2461,13 @@
                         _this.deleteinvoice(items, true, function () {
                             $content.find('#misnum').val('');
                             saveInvoice($taxForm, modalContainer, true);
+                            modalContainer.close();
                         });
                     }, function () {
                         // 취소 클릭 시: 삭제 없이 저장만
                         $content.find('#misnum').val('');
                         saveInvoice($taxForm, modalContainer, true);
+                        modalContainer.close();
                     });
                 });
 

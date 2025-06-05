@@ -44,6 +44,7 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -539,8 +540,8 @@ public class SalesInvoiceService {
                 throw new RuntimeException("사업자 진위 확인 실패 - 응답 없음");
             }
         } catch (Exception e) {
-            System.out.println("=== 사업자 진위확인 API 예외 발생 ===");
-            System.out.println("에러 메시지     : " + e.getMessage());
+            log.info("=== 사업자 진위확인 API 예외 발생 ===");
+            log.info("에러 메시지     : {}", e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("사업자 진위 확인 중 오류");
         }
@@ -856,59 +857,111 @@ public class SalesInvoiceService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public AjaxResult callSingleIssue(TB_Salesment sm) {
         AjaxResult result = new AjaxResult();
+        String statedt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 
         try {
             Taxinvoice taxinvoice = makeTaxInvoiceObject(sm);
 
             try {
                 ObjectMapper mapper = new ObjectMapper();
-                System.out.println("=== 팝빌 요청 세금계산서 JSON ===");
-                System.out.println(mapper.writeValueAsString(taxinvoice));
+                log.info("=== 팝빌 요청 세금계산서 JSON ===");
+                log.info(mapper.writeValueAsString(taxinvoice));
             } catch (JsonProcessingException e) {
-                System.err.println("JSON 출력 실패: " + e.getMessage());
+                log.error("JSON 출력 실패: {}", e.getMessage());
             }
 
-            // 고유 관리번호 필수
-            String mgtKey = sm.getIcercorpnum();
-            System.out.println(taxinvoice);
+            String CorpNum = sm.getIcercorpnum();
+            String mgtKey = sm.getMgtkey();
 
-            // 발행 요청
-            IssueResponse response = taxinvoiceService.registIssue(mgtKey, taxinvoice, false, "", false, "", "", "");
-            System.out.println("팝빌 발행 결과 ==================");
-            System.out.println("code: " + response.getCode());
-            System.out.println("message: " + response.getMessage());
-            System.out.println("ntsConfirmNum: " + response.getNtsConfirmNum());
+            // 1. 임시저장 실패 시 바로 catch 블록으로 빠지므로 state 변경 안됨
+            taxinvoiceService.register(CorpNum, taxinvoice, null);
 
-            LocalDateTime now = LocalDateTime.now();
-            String statedt = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-            sm.setStatecode(300); // 즉시 발행 완료
-            sm.setStatedt(statedt);
-            sm.setNtscfnum(response.getNtsConfirmNum());
-            tb_salesmentRepository.save(sm);
+            // 2. 첨부파일
+            String basePath = settings.getProperty("file_temp_upload_path");
+            String filePath = basePath + "TAX-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "-" + sm.getMisnum() + ".pdf";
+            File file = new File(filePath);
+            log.info("PDF 파일 존재 여부: {}", file.exists());
+            log.info("PDF 파일 크기: {} bytes", file.length());
+            if (file.exists()) {
+                try (FileInputStream fis = new FileInputStream(file)) {
+                    taxinvoiceService.attachFile(
+                            CorpNum,
+                            MgtKeyType.SELL,
+                            mgtKey,
+                            "TAX-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "-" + sm.getMisnum() + ".pdf",
+                            fis
+                    );
+                    log.info("파일 첨부 성공: {}", filePath);
+                } catch (Exception e) {
+                    log.error("파일 첨부 실패: {}", e.getMessage());
+                    sm.setStatecode(305);
+                    sm.setStatedt(statedt);
+                    tb_salesmentRepository.save(sm);
+                    result.success = false;
+                    result.message = "파일 첨부 실패: " + e.getMessage();
+                    return result;
+                }
 
+                if (file.delete()) {
+                    log.info("첨부 후 PDF 파일 삭제 성공: {}", filePath);
+                } else {
+                    log.info("첨부 후 PDF 파일 삭제 실패: {}", filePath);
+                }
+            }
+
+            // 3. 발행
+            IssueResponse response;
+            try {
+                response = taxinvoiceService.issue(
+                        CorpNum,
+                        MgtKeyType.SELL,
+                        mgtKey,
+                        "자동 발행 처리",
+                        ""
+                );
+            } catch (Exception e) {
+                log.error("발행 실패: {}", e.getMessage());
+                sm.setStatecode(305);
+                sm.setStatedt(statedt);
+                tb_salesmentRepository.save(sm);
+                result.success = false;
+                result.message = "세금계산서 발행 실패: " + e.getMessage();
+                return result;
+            }
+
+            // 즉시 발행일 경우 국세청 전송
             if ("issuenow".equalsIgnoreCase(sm.getIssuediv())) {
                 try {
                     Response ntsResponse = taxinvoiceService.sendToNTS(
                             sm.getIcercorpnum(),
                             MgtKeyType.SELL,
-                            sm.getMgtkey(), // mgtKey
-                            "" // UserID
+                            sm.getMgtkey(),
+                            ""
                     );
-                    System.out.println("국세청 전송 요청 완료: " + ntsResponse.getMessage());
+                    log.info("국세청 전송 요청 완료: {}", ntsResponse.getMessage());
                 } catch (PopbillException ex) {
-                    System.err.println("국세청 전송 요청 실패: " + ex.getMessage());
+                    log.info("국세청 전송 요청 실패: {}", ex.getMessage());
                 }
             }
+
+            // 정상 처리 시
+            sm.setStatecode(300);
+            sm.setStatedt(statedt);
+            sm.setNtscfnum(response.getNtsConfirmNum());
+            tb_salesmentRepository.save(sm);
 
             result.success = true;
             result.message = "세금계산서가 발행되었습니다.";
         } catch (PopbillException e) {
+            // register 실패 시만 여기에 옴 — 상태코드 변경 없음
+            log.error("팝빌 오류 (임시저장): {}", e.getMessage());
             result.success = false;
-            result.message = "팝빌 단건 발행 실패: " + e.getMessage();
+            result.message = "팝빌 임시저장 실패: " + e.getMessage();
         }
 
         return result;
     }
+
 
     private Taxinvoice makeTaxInvoiceObject(TB_Salesment sm) {
         // LazyInitializationException 방지
@@ -951,7 +1004,7 @@ public class SalesInvoiceService {
                 UtilClass.decryptItem(tempMap, "ivercorpnum", 0); // 마스킹 없이 복호화
                 invoicerCorpNum = (String) tempMap.get("ivercorpnum");
             } catch (IOException e) {
-                System.err.println("주민번호 복호화 실패: " + e.getMessage());
+                log.error("주민번호 복호화 실패: {}", e.getMessage());
             }
         }
 
@@ -1120,9 +1173,9 @@ public class SalesInvoiceService {
                         ""
                 );
 
-                System.out.println("팝빌 발행 취소 결과 === misnum: " + misnum);
-                System.out.println("code: " + response.getCode());
-                System.out.println("message: " + response.getMessage());
+                log.info("팝빌 발행 취소 결과 === misnum: {}", misnum);
+                log.info("code: {}", response.getCode());
+                log.info("message: {}", response.getMessage());
 
                 if (response.getCode() == 1) {
                     sm.setStatecode(600); // 발행 취소
@@ -1948,7 +2001,7 @@ public class SalesInvoiceService {
         paramMap.addValue("misnum", misnum);
 
         String sql = """ 
-                SELECT\s
+                SELECT
                 	m.icercorpnum,
                 	m.icercorpnm,
                 	m.icerceonm,
@@ -1967,7 +2020,7 @@ public class SalesInvoiceService {
                 """;
 
         String detailSql = """ 
-            SELECT\s
+            SELECT
                 ROW_NUMBER() OVER (ORDER BY sh."ShipDate") AS misseq,
                 TO_CHAR(sh."ShipDate", 'MM') AS month,
                    TO_CHAR(sh."ShipDate", 'DD') AS day,
@@ -1979,13 +2032,13 @@ public class SalesInvoiceService {
                 s."Vat" as tax,
                 s."Description" as remark,
                    m."Name" AS name
-               FROM\s
+               FROM
                    shipment_head sh
-               JOIN\s
+               JOIN
                    shipment s ON sh.id = s."ShipmentHead_id"
-               JOIN\s
+               JOIN
                    material m ON s."Material_id" = m.id
-               WHERE\s
+               WHERE
                    sh.misnum = :misnum
                order by sh."ShipDate"
             """;

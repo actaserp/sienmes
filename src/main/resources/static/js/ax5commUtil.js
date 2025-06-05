@@ -369,8 +369,13 @@ var Alert = {
                 document.addEventListener('keydown', handleKey);
             }
         }, 100);
-    }
 
+    },
+    confirmAsync(title, msg) {
+        return new Promise((resolve) => {
+            Alert.confirm(title, msg, () => resolve(true), () => resolve(false));
+        });
+    }
 };
 
 var Notify = {
