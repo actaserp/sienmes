@@ -15,7 +15,7 @@ public class AccSubjectService {
     @Autowired
     SqlRunner sqlRunner;
 
-    public List<Map<String, Object>> getAccList(String spjangcd) {
+    public List<Map<String, Object>> getAccList(String spjangcd, String acccd, String accnm, String useyn) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("spjangcd", spjangcd);
 
@@ -37,8 +37,22 @@ public class AccSubjectService {
             LEFT JOIN tb_accsubject B
                 ON A.uacccd = B.acccd
             WHERE A.spjangcd = :spjangcd
-            ORDER BY A.acccd
         """;
+
+        if(acccd != null && !acccd.isEmpty()){
+            dicParam.addValue("acccd", "%" + acccd + "%");
+            sql += " AND A.acccd LIKE :acccd";
+        }
+        if(accnm != null && !accnm.isEmpty()){
+            dicParam.addValue("accnm", "%" + accnm + "%");
+            sql += " AND A.accnm LIKE :accnm";
+        }
+        if(useyn != null && !useyn.isEmpty()){
+            dicParam.addValue("useyn", useyn);
+            sql += " AND A.useyn = :useyn";
+        }
+
+        sql += " ORDER BY A.acccd";
 
         return this.sqlRunner.getRows(sql, dicParam);
     }

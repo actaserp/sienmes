@@ -1,11 +1,4 @@
 <html layout:decorate="~{layout_page}">
-
-<head>
-    <style>
-    </style>
-</head>
-
-
 <th:block layout:fragment="content">
     <script type="text/javascript" src="/js/fileupload.js?v=20220503"></script> <!--?v=1003-->
     <div class="layout-contents">
@@ -27,6 +20,46 @@
         <section class="section">
             <div class="section-top">
                 <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label>계정코드</label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input type="text" class="form-control2" id="acccd" name="acccd">
+                            </div>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>
+                            <label>계정명</label>
+                        </dt>
+                        <dd>
+                            <input type="text" class="form-control2" id="accnm" name="accnm">
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>
+                            <label>사용여부</label>
+                        </dt>
+                        <dd>
+                            <input type="checkbox" class="form-control2" id="useyn" name="useyn">
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt><span class="eq"></span></dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
                 </div>
                 <div class="button-wrap">
                     <button type="button" class="btn-edit btn-default" id="btnAccedit"
@@ -406,16 +439,18 @@
             }
 
             // 계정과목 리스트 조회
-            searchDataBind() {
+            searchDataBind(data) {
                 let _this = this;
                 let url = '/api/definition/Accsubject';
 
 
                 let param = {
                     spjangcd: sessionStorage.getItem('spjangcd'),
+                    'acccd': data?.acccd || '',
+                    'accnm': data?.accnm || '',
+                    'useyn': data?.useyn || ''
+
                 }
-
-
                 let result = AjaxUtil.getSyncData(url + '/read',param);
                 if (result.success) {
                        _this.viewData.sourceCollection = result.data;
@@ -812,7 +847,15 @@
                     Alert.alert('삭제할 행을 선택하세요.');
                 }
             });
-
+            // 계정과목 검색필터 조회
+            $('#btnSearch').click(function (e) {
+                let data = {
+                    'acccd' : document.getElementById('acccd').value,
+                    'accnm' : document.getElementById('accnm').value,
+                    'useyn': document.getElementById('useyn').checked ? 'Y' : '',
+                }
+                page.searchDataBind(data);
+            });
 
 
             page.searchDataBind()

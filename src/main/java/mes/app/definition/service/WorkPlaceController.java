@@ -33,34 +33,42 @@ public class WorkPlaceController {
         result.data = tbXa012Repository.findAll();
         return result;
     }
-    // 사업장 세부조회
-    @GetMapping("/detail")
-    public AjaxResult getSpjangDetail(
-            HttpServletRequest request,
-            Authentication auth) {
-        AjaxResult result = new AjaxResult();
-        User user = (User) auth.getPrincipal();
-        String username = user.getUsername();
-        int personId = user.getPersonid();
-
-        return result;
-    }
     // 사업장 등록
     @PostMapping("/save")
     public AjaxResult saveSpjangInfo(
-            @RequestParam Map<String, String> params,
+            @ModelAttribute  Tb_xa012 tbXa012,
             HttpServletRequest request,
             Authentication auth) {
         AjaxResult result = new AjaxResult();
 
-        Tb_xa012 tbXa012 = new Tb_xa012();
-        tbXa012 = (Tb_xa012) params;
-        try{
+        try {
             tbXa012Repository.save(tbXa012);
-        }catch (Exception e){
+            result.success = true;
+            result.message = "저장되었습니다.";
+        } catch (Exception e) {
             e.printStackTrace();
+            result.success = false;
+            result.message = "저장 중 오류 발생";
         }
 
+        return result;
+    }
+    // 사업장 삭제
+    @PostMapping("/delete")
+    public AjaxResult deleteSpjangInfo(
+            @RequestParam String spjangcd,
+            HttpServletRequest request,
+            Authentication auth) {
+        AjaxResult result = new AjaxResult();
+        try {
+            tbXa012Repository.deleteById(spjangcd);
+            result.success = true;
+            result.message = "삭제되었습니다.";
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.success = false;
+            result.message = "삭제 중 오류 발생";
+        }
         return result;
     }
 }

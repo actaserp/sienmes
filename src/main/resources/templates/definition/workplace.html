@@ -160,7 +160,7 @@
               <tr>
                 <th>관할세무서</th>
                 <th>세무서명</th>
-                <td><input type="text" id="taxArea" name="taxoffcode" style="width:100px;"></td>
+                <td><input type="text" id="taxArea" name="taxArea" style="width:100px;"></td>
                 <th style="width: 70px;">코드</th>
                 <td><input type="text" id="comtaxoff" name="comtaxoff" style="width:100px;"></td>
                 <th rowspan="1">성명</th>
@@ -341,8 +341,35 @@
             let item = theGrid.rows[row].dataItem;
             if(item != null && Object.keys(item).length > 0) {
 
-              document.getElementById('personid').value = item.personid;
-              document.getElementById('personnm').value = item.personid;
+              document.getElementById('spjangcd').value = item.spjangcd;
+              document.getElementById('spjangnm').value = item.spjangnm;
+              document.querySelector(`input[name="custperclsf"][value="${item.custperclsf}"]`).checked = true;
+              document.getElementById('saupnum').value = item.saupnum;
+              document.getElementById('prenm').value = item.prenm;
+              document.getElementById('compnum').value = item.compnum;
+              document.getElementById('biztype').value = item.biztype;
+              document.getElementById('item').value = item.item;
+              document.getElementById('openDate').value = item.openDate;
+              document.getElementById('closeDate').value = item.closeDate;
+              document.getElementById('tel1').value = item.tel1;
+              document.getElementById('fax').value = item.fax;
+              document.getElementById('zipcd').value = item.zipcd;
+              document.getElementById('adresa').value = item.adresa;
+              document.getElementById('adresb').value = item.adresb;
+              document.getElementById('zipcd2').value = item.zipcd2;
+              document.getElementById('adres2a').value = item.adres2a;
+              document.getElementById('adres2b').value = item.adres2b;
+              document.getElementById('taxArea').value = item.taxArea;
+              document.getElementById('comtaxoff').value = item.comtaxoff;
+              document.getElementById('taxagentnm').value = item.taxagentnm;
+              document.getElementById('taxagentcd').value = item.taxagentcd;
+              document.getElementById('taxagenttel').value = item.taxagenttel;
+              document.getElementById('taxagentsp').value = item.taxagentsp;
+              document.getElementById('taxaccnum').value = item.taxaccnum;
+              document.getElementById('agnertel1').value = item.agnertel1;
+              document.getElementById('agnertel2').value = item.agnertel2;
+              document.getElementById('emailadres').value = item.emailadres;
+              document.getElementById('ajongcd').value = item.ajongcd;
             }
           }
         })
@@ -363,7 +390,7 @@
       let $poppage = $(poppage);
       let searchcallback = function (items) {
         console.log('items : ',items);
-        document.getElementById('taxoffcode').value = items.compcode;
+        document.getElementById('comtaxoff').value = items.compcode;
         document.getElementById('taxArea').value = items.compname;
       };
 
@@ -371,19 +398,21 @@
     });
     // 사업장 삭제
     function deleteSpjang() {
-
+      let _this = this;
+      let url = '/api/workplace/delete'
+      let data = {
+        'spjangcd': document.getElementById('spjangcd').value,
+      }
+      let fnSuccess = function (result) {
+        Alert.alert('', '삭제되었습니다.');
+        fetchListData();
+        resetFormFields();
+      };
       Alert.confirm('', '삭제하시겠습니까?', function () {
-        let deleteCount = 0;
-        let completed = 0;
-        let papercd = '';
-        let personid = '';
         console.log("확인 버튼 눌림");
-
-            AjaxUtil.postAsyncData('/api/approval/delete', deleteNum, fnSuccess);
+        AjaxUtil.postAsyncData(url, data, fnSuccess);
       });
     }
-
-
     // 등록후 초기화
     function resetFormFields() {
       const fieldsToReset = [

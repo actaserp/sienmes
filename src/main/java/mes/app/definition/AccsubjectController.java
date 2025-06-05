@@ -34,9 +34,13 @@ public class AccsubjectController {
     AccmanageRepository accmanageRepository;
 
     @GetMapping("/read")
-    public AjaxResult getAccList(@RequestParam(value ="spjangcd") String spjangcd) {
+    public AjaxResult getAccList(@RequestParam(value ="spjangcd") String spjangcd,
+                                 @RequestParam(value ="acccd") String acccd,
+                                 @RequestParam(value ="accnm") String accnm,
+                                 @RequestParam(value ="useyn") String useyn
+                                 ) {
         AjaxResult result = new AjaxResult();
-        result.data = this.accSubjectService.getAccList(spjangcd);
+        result.data = this.accSubjectService.getAccList(spjangcd, acccd, accnm, useyn);
         return result;
     }
 
