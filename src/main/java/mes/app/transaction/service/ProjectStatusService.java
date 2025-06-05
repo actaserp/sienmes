@@ -28,10 +28,10 @@ public class ProjectStatusService {
         SELECT
           da003.projno,
           da003.projnm,
-          (SELECT SUM(COALESCE(s2."TotalAmount", 0))
-            FROM suju s2 
-            WHERE s2.project_id = da003.projno 
-            AND s2.spjangcd = da003.spjangcd ) AS suju_totalamt,
+          (SELECT COALESCE(SUM(s2."TotalAmount"), 0)
+            FROM suju s2
+            WHERE s2.project_id = da003.projno
+              AND s2.spjangcd = da003.spjangcd) AS suju_totalamt,
           (SELECT COALESCE(SUM(s.totalamt), 0)
            FROM tb_salesment s 
           WHERE s.projectcode = da003.projno 
