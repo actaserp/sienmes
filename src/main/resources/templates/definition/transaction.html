@@ -272,6 +272,16 @@
                         }
 
                     }
+                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                        const col = s.columns[e.col];
+                        const item = s.rows[e.row].dataItem;
+
+                        if (col.binding === "ioflag") {
+                            const isDeposit = (item.ioflag === 0 || item.ioflag === '0' || item.ioflag === '입금');
+                            e.cell.textContent = isDeposit ? '입금' : '출금';
+                            e.cell.style.backgroundColor = isDeposit ? '#d0f0c0' : '#fddde6'; // 연두색 or 연분홍색
+                        }
+                    }
                 });
 
                 new FlexGridContextMenu(this.grid);
