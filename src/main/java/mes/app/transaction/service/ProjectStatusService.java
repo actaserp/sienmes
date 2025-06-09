@@ -16,65 +16,97 @@ public class ProjectStatusService {
   @Autowired
   SqlRunner sqlRunner;
 
+
   public List<Map<String, Object>> getProjectStatusList(String spjangcd, String txtProjectName, String cboYear) {
 
     MapSqlParameterSource dicParam = new MapSqlParameterSource();
-
     dicParam.addValue("spjangcd", spjangcd);
-    dicParam.addValue("txtProjectName", txtProjectName);
-    dicParam.addValue("cboYear", cboYear);
 
     String sql = """
+        WITH
+        suju_sum AS (
+            SELECT
+                project_id,
+                spjangcd,
+                SUM(COALESCE("TotalAmount", 0)) AS suju_totalamt
+            FROM suju
+            GROUP BY project_id, spjangcd
+        ),
+        sales_sum AS (
+            SELECT
+                projectcode,
+                spjangcd,
+                SUM(COALESCE(totalamt, 0)) AS sales_totalamt
+            FROM tb_salesment
+            GROUP BY projectcode, spjangcd
+        ),
+        invo_sum AS (
+            SELECT
+                projcd,
+                spjangcd,
+                SUM(COALESCE(supplycost, 0) + COALESCE(taxtotal, 0)) AS invo_totalamt
+            FROM tb_invoicedetail
+            GROUP BY projcd, spjangcd
+        ),
+        accin_sum AS (
+            SELECT
+                projno,
+                spjangcd,
+                SUM(COALESCE(accin, 0)) AS total_accin
+            FROM tb_banktransit
+            WHERE ioflag = '0'
+            GROUP BY projno, spjangcd
+        ),
+        accout_sum AS (
+            SELECT
+                projno,
+                spjangcd,
+                SUM(COALESCE(accout, 0)) AS total_accout
+            FROM tb_banktransit
+            WHERE ioflag = '1'
+            GROUP BY projno, spjangcd
+        )
         SELECT
-          da003.projno,
-          da003.projnm,
-          (SELECT COALESCE(SUM(s2."TotalAmount"), 0)
-            FROM suju s2
-            WHERE s2.project_id = da003.projno
-              AND s2.spjangcd = da003.spjangcd) AS suju_totalamt,
-          (SELECT COALESCE(SUM(s.totalamt), 0)
-           FROM tb_salesment s 
-          WHERE s.projectcode = da003.projno 
-          AND s.spjangcd = da003.spjangcd ) AS sales_totalamt, 
-        (SELECT SUM(COALESCE(i.supplycost, 0) + COALESCE(i.taxtotal, 0))
-          FROM tb_invoicedetail i 
-          WHERE i.spjangcd = da003.spjangcd
-            AND i.projcd = da003.projno) AS invo_totalamt, 
-        (SELECT SUM(COALESCE(b.accin, 0))
-          FROM tb_banktransit b
-          WHERE b.ioflag = '0'
-            AND b.projno = da003.projno
-            AND b.spjangcd = da003.spjangcd) AS total_accin,
-        (SELECT SUM(COALESCE(b.accout, 0))
-          FROM tb_banktransit b
-          WHERE b.ioflag = '1'
-            AND b.projno = da003.projno
-            AND b.spjangcd = da003.spjangcd) AS total_accout,
-          TO_CHAR(TO_DATE(da003.contdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS contdate
+            da003.projno,
+            da003.projnm,
+            COALESCE(suju.suju_totalamt, 0) AS suju_totalamt,
+            COALESCE(sales.sales_totalamt, 0) AS sales_totalamt,
+            COALESCE(invo.invo_totalamt, 0) AS invo_totalamt,
+            COALESCE(accin.total_accin, 0) AS total_accin,
+            COALESCE(accout.total_accout, 0) AS total_accout,
+            TO_CHAR(TO_DATE(da003.contdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS contdate
         FROM tb_da003 da003
-        LEFT JOIN tb_salesment s ON s.projectcode = da003.projno AND s.spjangcd = da003.spjangcd
-        LEFT JOIN suju s2 ON s2.project_id = da003.projno  AND s2.spjangcd = da003.spjangcd
-        LEFT JOIN tb_banktransit b ON b.spjangcd = da003.spjangcd AND b.projno = da003.projno 
-        left join tb_invoicedetail i on da003.projno = i.projcd 
+        LEFT JOIN suju_sum suju 
+            ON suju.project_id = da003.projno AND suju.spjangcd = da003.spjangcd
+        LEFT JOIN sales_sum sales 
+            ON sales.projectcode = da003.projno AND sales.spjangcd = da003.spjangcd
+        LEFT JOIN invo_sum invo 
+            ON invo.projcd = da003.projno AND invo.spjangcd = da003.spjangcd
+        LEFT JOIN accin_sum accin 
+            ON accin.projno = da003.projno AND accin.spjangcd = da003.spjangcd
+        LEFT JOIN accout_sum accout 
+            ON accout.projno = da003.projno AND accout.spjangcd = da003.spjangcd
         WHERE da003.spjangcd = :spjangcd
         """;
+
+    // 조건: 프로젝트명 필터
     if (txtProjectName != null && !txtProjectName.isEmpty()) {
       sql += " AND da003.projnm LIKE :txtDescription ";
       dicParam.addValue("txtDescription", "%" + txtProjectName + "%");
     }
+
+    // 조건: 계약연도 필터
     if (cboYear != null && !cboYear.isEmpty()) {
       sql += " AND da003.contdate LIKE :cboYear ";
-      dicParam.addValue("cboYear", cboYear+"%");
+      dicParam.addValue("cboYear", cboYear + "%");
     }
-    sql += """
-        GROUP BY da003.projno, da003.projnm, da003.contdate, da003.spjangcd
-        """;
+
+    sql += " ORDER BY accin.projno ";
 
 //    log.info("프로젝트 현황 AllRead SQL: {}", sql);
 //    log.info("SQL Parameters: {}", dicParam.getValues());
-    List<Map<String, Object>> itmes = this.sqlRunner.getRows(sql, dicParam);
 
-    return itmes;
+    return this.sqlRunner.getRows(sql, dicParam);
   }
 
   //경비 사용내역
