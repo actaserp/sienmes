@@ -2,6 +2,7 @@ package mes.app.inventory;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -12,11 +13,13 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 import mes.domain.entity.*;
 import mes.domain.repository.*;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -36,6 +39,7 @@ import mes.app.inventory.service.MaterialInoutService;
 import mes.domain.model.AjaxResult;
 import mes.domain.services.CommonUtil;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/inventory/material_inout")
 public class MaterialInoutController {
@@ -63,7 +67,9 @@ public class MaterialInoutController {
 
 	@Autowired
 	BujuRepository bujuRepository;
-	
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
 	@GetMapping("/read")
 	public AjaxResult getMaterialInout(
 			@RequestParam(value = "srchStartDt", required=false) String srchStartDt,
@@ -89,6 +95,8 @@ public class MaterialInoutController {
 			@RequestParam("InoutType") String inoutType,
 			@RequestParam("Material_id") String materialId,
 			@RequestParam("StoreHouse_id") String storeHouseId,
+			@RequestParam("inoutDate") String inoutDateStr,
+			@RequestParam(value = "mio_pk", required = false) Integer mio_pk,
 			@RequestParam("cboMaterialGroup") String cboMaterialGroup,
 			@RequestParam("cboMaterialType") String cboMaterialType,
 			@RequestParam("type") String type,
@@ -98,25 +106,35 @@ public class MaterialInoutController {
 		User user = (User)auth.getPrincipal();
 		
 		AjaxResult result = new AjaxResult();
-		
-		// 현재 일자
-		LocalDate date = LocalDate.now();
-		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		
-		// 현재 시간
-		LocalTime time = LocalTime.now();
-		DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss");
-		
+
 		Integer matPk = Integer.parseInt(materialId);
 		String state = "confirmed";
 		String _status = "a";
-		Integer qty = Integer.parseInt(inoutQty);
+		int qty = Integer.parseInt(
+				inoutQty.replace(",", "").replaceAll("[^\\d-]", "")
+		);
 		
 		result.success = false;
-		
-		MaterialInout mi = new MaterialInout();
-		mi.setInoutDate(LocalDate.parse(date.format(dateFormat)));
-		mi.setInoutTime(LocalTime.parse(time.format(timeFormat)));
+
+		boolean isUpdate = false;
+		Integer oldId;
+
+		MaterialInout mi;
+		if (mio_pk != null) {
+			isUpdate = true;
+			oldId = mio_pk;
+			mi = matInoutRepository.findById(oldId)
+					.orElseThrow(() -> new RuntimeException("기존 데이터 없음: " + oldId));
+		} else {
+            oldId = null;
+            mi = new MaterialInout();
+		}
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+		LocalDateTime dateTime = LocalDateTime.parse(inoutDateStr, formatter);
+
+		mi.setInoutDate(dateTime.toLocalDate());
+		mi.setInoutTime(dateTime.toLocalTime());
 		mi.setMaterialId(matPk);
 		mi.setStoreHouseId(Integer.parseInt(storeHouseId));
 		
@@ -134,6 +152,16 @@ public class MaterialInoutController {
 			} else {
 				mi.setInputQty((float)qty);
 			}
+		} else if(type.equals("recall")){
+			mi.setInOut("recall");
+			mi.setOutputType(inoutType);
+			mi.setOutputQty((float)qty);
+
+		} else if(type.equals("return")){
+			mi.setInOut("return");
+			mi.setInputType(inoutType);
+			mi.setInputQty((float)qty);
+
 		} else  {
 			mi.setInOut("out");
 			mi.setOutputType(inoutType);
@@ -144,9 +172,59 @@ public class MaterialInoutController {
 		mi.set_status(_status);
 		mi.set_audit(user);
 		this.matInoutRepository.save(mi);
-		
+
+		Integer newId = mi.getId();
+
+		if (isUpdate) {
+			jdbcTemplate.query(
+					"SELECT sp_update_mat_in_house_by_inout(?, ?, ?)",
+					rs -> {},  // 결과 무시
+					"UPDATE", oldId, newId
+			);
+		} else {
+			jdbcTemplate.query(
+					"SELECT sp_update_mat_in_house_by_inout(?, ?, ?)",
+					rs -> {},  // 결과 무시
+					"INSERT", null, newId
+			);
+		}
+		log.debug("isUpdate: {}", isUpdate);
+		log.debug("materialId: {}, qty: {}, _status: {}", materialId, qty, _status);
+		log.debug("oldId: {}, newId: {}", oldId, newId);
+
+
 		result.success = true;
 		
+		return result;
+	}
+
+	@GetMapping("/matinout_detail")
+	public AjaxResult getMaterialInoutDetail(
+			@RequestParam(value = "mio_pk", required=false) Integer mio_pk) {
+
+		List<Map<String, Object>> items = materialInoutService.getMaterialInoutDetail(mio_pk);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
+		return result;
+	}
+
+	@PostMapping("/delete")
+	public AjaxResult getInoutDelete(@RequestBody Map<String, Object> body) {
+		Integer mio_pk = Integer.valueOf(body.get("mio_pk").toString());
+
+		AjaxResult result = new AjaxResult();
+
+        matInoutRepository.deleteById(mio_pk);
+        result.success = true;
+
+        jdbcTemplate.query(
+				"SELECT sp_update_mat_in_house_by_inout(?, ?, ?)",
+				rs -> {},  // 결과 무시
+				"DELETE", mio_pk, null
+		);
+
 		return result;
 	}
 	

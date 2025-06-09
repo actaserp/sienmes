@@ -90,6 +90,7 @@
             let data = {
                 'material_type': _this.$cboMaterialType.val(),
                 'keyword': _this.$keyword.val(),
+                spjangcd: sessionStorage.getItem('spjangcd')
             };
 
             let result = AjaxUtil.getSyncData(url, data);
@@ -115,7 +116,7 @@
 
             let content = tmpl('materialSearchTemplate', {});
             let $content = $(content);
-            this.modalContainer.open({ width: 640, height: 510, $content });
+            this.modalContainer.open({ width: 800, height: 510, $content });
 
             this.grid = new wijmo.grid.FlexGrid('#material-search-grid', {
                 selectionMode: wijmo.grid.SelectionMode.Row,
@@ -128,10 +129,11 @@
                     }
                 },
                 columns: [
-                    { binding: 'MaterialTypeName', header: '품목구분', width: 100, align: 'left' },
-                    { binding: 'group_name', header: '품목그룹', width: 110, align: 'left' },
-                    { binding: 'Code', header: '품목코드', width: 110, align: 'center' },
-                    { binding: 'Name', header: '품목명', width: 230, align: 'left' },
+                    {binding: 'group_name', header: '품목그룹', width: 120, align: 'left'},
+                    {binding: 'Code', header: '품목코드', width: 150, align: 'center'},
+                    {binding: 'Name', header: '품목명', width: 250, align: 'left'},
+                    {binding: 'unit_name', header: '단위', width: 60, align: 'center'},
+                    {binding: 'Spec', header: '규격', width: '*', align: 'left'}
                 ],
                 itemsSource: this.viewData,
             });

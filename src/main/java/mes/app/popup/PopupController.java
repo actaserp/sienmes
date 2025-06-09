@@ -83,6 +83,8 @@ public class PopupController {
             and (m."Name" ilike concat('%%',:keyword,'%%') or m."Code" ilike concat('%%',:keyword,'%%'))
             """;
 		}
+		;
+		sql += "order by mg.\"Name\" , m.\"Name\" ";
 
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("material_type", material_type);
