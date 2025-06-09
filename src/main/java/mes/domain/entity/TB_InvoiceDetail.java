@@ -37,6 +37,8 @@ public class TB_InvoiceDetail {
     private Integer materialId;
 
     private String spjangcd;
+
+    @Version
     private Integer vercode;
 
     private String artcd;

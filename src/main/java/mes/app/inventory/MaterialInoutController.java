@@ -117,16 +117,13 @@ public class MaterialInoutController {
 		result.success = false;
 
 		boolean isUpdate = false;
-		Integer oldId;
 
 		MaterialInout mi;
 		if (mio_pk != null) {
 			isUpdate = true;
-			oldId = mio_pk;
-			mi = matInoutRepository.findById(oldId)
-					.orElseThrow(() -> new RuntimeException("기존 데이터 없음: " + oldId));
+			mi = matInoutRepository.findById(mio_pk)
+					.orElseThrow(() -> new RuntimeException("기존 데이터 없음: " + mio_pk));
 		} else {
-            oldId = null;
             mi = new MaterialInout();
 		}
 
@@ -172,26 +169,14 @@ public class MaterialInoutController {
 		mi.set_status(_status);
 		mi.set_audit(user);
 		this.matInoutRepository.save(mi);
+		this.matInoutRepository.flush();
 
-		Integer newId = mi.getId();
 
-		if (isUpdate) {
-			jdbcTemplate.query(
-					"SELECT sp_update_mat_in_house_by_inout(?, ?, ?)",
-					rs -> {},  // 결과 무시
-					"UPDATE", oldId, newId
-			);
-		} else {
-			jdbcTemplate.query(
-					"SELECT sp_update_mat_in_house_by_inout(?, ?, ?)",
-					rs -> {},  // 결과 무시
-					"INSERT", null, newId
-			);
-		}
-		log.debug("isUpdate: {}", isUpdate);
-		log.debug("materialId: {}, qty: {}, _status: {}", materialId, qty, _status);
-		log.debug("oldId: {}, newId: {}", oldId, newId);
-
+		jdbcTemplate.query(
+				"SELECT sp_update_mat_in_house_by_inout(?, ?)",
+				rs -> {},  // 결과 무시
+				matPk, Integer.parseInt(storeHouseId)
+		);
 
 		result.success = true;
 		
@@ -216,14 +201,23 @@ public class MaterialInoutController {
 
 		AjaxResult result = new AjaxResult();
 
-        matInoutRepository.deleteById(mio_pk);
-        result.success = true;
+		MaterialInout mi = matInoutRepository.findById(mio_pk)
+					.orElseThrow(() -> new RuntimeException("기존 데이터 없음: " + mio_pk));
 
-        jdbcTemplate.query(
-				"SELECT sp_update_mat_in_house_by_inout(?, ?, ?)",
+		Integer matPk = mi.getMaterialId();
+		Integer storeHouseId = mi.getStoreHouseId();
+
+		matInoutRepository.deleteById(mio_pk);
+		this.matInoutRepository.flush();
+
+		jdbcTemplate.query(
+				"SELECT sp_update_mat_in_house_by_inout(?, ?)",
 				rs -> {},  // 결과 무시
-				"DELETE", mio_pk, null
+				matPk, storeHouseId
 		);
+
+
+		result.success = true;
 
 		return result;
 	}

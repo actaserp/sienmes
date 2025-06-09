@@ -37,7 +37,9 @@ public class TB_SalesDetail {
     private Integer materialId;
 
     private String spjangcd;
-    private String vercode;
+
+    @Version
+    private Integer vercode;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({

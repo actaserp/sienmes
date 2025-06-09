@@ -1691,7 +1691,7 @@ var i18n = {
         }
 
 
-        $labels = $('[data-commonCd]');
+        $labels = $popupContent.find('[data-commonCd]');
         $labels.each(function () {
             var $this = $(this);
             let labelcd = $this.data('commoncd');

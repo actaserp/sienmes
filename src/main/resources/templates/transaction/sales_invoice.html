@@ -1990,8 +1990,6 @@
 
                     }, 0);
 
-
-
                 }
                 const popInvoice = new PopInvoiceComponent();
                 let modalHeight = 600;
@@ -2008,6 +2006,7 @@
                 }, 0);
 
                 modalContainer.open({width: 1200, height: modalHeight, $content});
+
 
                 initializeDetailRows(data.detailList || []);
 
@@ -2386,8 +2385,8 @@
                 });
 
 
-                $('#btnCompanySearch').on('click keydown', function (e) {
-                    if (e.type === 'keydown' && (e.key === 'Enter' || e.keyCode === 13)) {
+                $('#btnCompanySearch').on('keydown', function (e) {
+                    if (e.key === 'Enter' || e.keyCode === 13) {
                         e.preventDefault();
 
                         const keyword = $('#btnCompanySearch').val().trim();
@@ -2538,6 +2537,7 @@
                 });
 
                 // Enter 키로 품목 선택 팝업 열기
+                $(document).off('keydown', 'textarea[id$=".ItemName"]');
                 $(document).on('keydown', 'textarea[id$=".ItemName"]', function (e) {
                     if (e.key !== 'Enter' && e.keyCode !== 13) return;
 
@@ -2580,7 +2580,6 @@
                         }, 50);
                     }
                 });
-
 
                 // 품목 추가 버튼
                 $(document).off('click', 'a[id^="btnViewItem_"]').on('click', 'a[id^="btnViewItem_"]', function (e) {
@@ -3484,8 +3483,8 @@
                 page.showShipListPopup();
             });
 
-            $('#btnCompanySearch').on('click keydown', function (e) {
-                if (e.type === 'keydown' && (e.key === 'Enter' || e.keyCode === 13)) {
+            $('#btnCompanySearch').on('keydown', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
                     e.preventDefault();
 
                     const keyword = $('#btnCompanySearch').val().trim();

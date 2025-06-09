@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import javax.persistence.OptimisticLockException;
 import java.io.FileInputStream;
 
 import java.io.*;
@@ -276,6 +278,10 @@ public class SalesInvoiceService {
             updateShipmentLinks(form, saved);
 
             result.success = true;
+
+        } catch (ObjectOptimisticLockingFailureException | OptimisticLockException e) {
+            result.success = false;
+            result.message = "다른 사용자에 의해 데이터가 수정되었습니다. 다시 조회 후 저장해주세요.";
         } catch (Exception e) {
             result.success = false;
 
@@ -304,6 +310,11 @@ public class SalesInvoiceService {
         if (isUpdate) {
             salesment = tb_salesmentRepository.findById(misnum)
                     .orElseThrow(() -> new RuntimeException("해당 misnum의 데이터가 존재하지 않습니다."));
+
+            Integer clientVercode = parseInt(form.get("vercode"));
+            if (!Objects.equals(salesment.getVercode(), clientVercode)) {
+                throw new OptimisticLockException("버전 불일치: 다른 사용자가 먼저 수정했습니다.");
+            }
         } else {
             salesment = new TB_Salesment();
         }
@@ -362,7 +373,7 @@ public class SalesInvoiceService {
         salesment.setIvertel(sanitizeNumericString(form.get("InvoiceeTEL1"))); // 담당자 연락처
         salesment.setIveremail((String) form.get("InvoiceeEmail1")); // 이메일
         String misdate = sanitizeNumericString(form.get("writeDate"));
-        salesment = tb_salesmentRepository.save(salesment);
+//        salesment = tb_salesmentRepository.save(salesment);
 
 
         salesment.setAccsubcode((String) form.get("account_codeHidden"));
@@ -645,6 +656,7 @@ public class SalesInvoiceService {
         String sql = """ 
                 SELECT\s
                 	m.misdate,
+                	m.vercode,
                 	TO_CHAR(TO_DATE(m.misdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS "writeDate",
                 	m.misdate AS "mowriteDate",
                 	m.misnum,
