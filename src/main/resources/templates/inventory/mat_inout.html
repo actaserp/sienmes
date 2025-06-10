@@ -1170,7 +1170,7 @@
                         console.log('edit BindDataForm data', data);
                         $content.find('#btnDelete').show();
                         $content.find('#btnSave span').text('수정');
-                    }, 300);
+                    }, 10);
 
                 }
 
@@ -1312,8 +1312,10 @@
                                 .map(row => row.dataItem);
 
                             items.forEach(item => {
-                                if (!item.inputQty && item.SujuQty) {
-                                    item.inputQty = item.SujuQty;
+                                if ((!item.inputQty || item.inputQty === '') && item.SujuQty) {
+                                    let sujuQty = parseFloat(item.SujuQty) || 0;
+                                    let sujuQty2 = parseFloat(item.SujuQty2) || 0;
+                                    item.inputQty = sujuQty - sujuQty2;
                                 }
                             });
 
