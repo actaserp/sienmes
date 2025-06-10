@@ -321,7 +321,7 @@ public class MaterialInoutService {
           , b."Description"
           , b."AvailableStock" as "AvailableStock"
           , b."ReservationStock" as "ReservationStock"
-          , b."SujuQty2" as "SujuQty2"
+          , COALESCE(mi."SujuQty2", 0) AS "SujuQty2"
           , fn_code_name('balju_state', b."State") as "StateName"
           , fn_code_name('shipment_state', b."ShipmentState") as "ShipmentStateName"
           , b."State"
@@ -332,6 +332,15 @@ public class MaterialInoutService {
           inner join mat_grp mg on mg.id = m."MaterialGroup_id"
           left join unit u on m."Unit_id" = u.id
           left join company c on c.id= b."Company_id"
+          LEFT JOIN (
+			   SELECT
+				   "SourceDataPk",
+				   SUM("InputQty") AS "SujuQty2"
+			   FROM mat_inout
+			   WHERE "SourceTableName" = 'balju'
+				 AND COALESCE("_status", 'a') = 'a'
+			   GROUP BY "SourceDataPk"
+		   ) mi ON mi."SourceDataPk" = b.id
           where 1 = 1
           and b."JumunDate" between :start and :end 
           and b."State" IN ('draft', 'partial')

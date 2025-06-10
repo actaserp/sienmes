@@ -172,11 +172,11 @@ public class MaterialInoutController {
 		this.matInoutRepository.flush();
 
 
-		jdbcTemplate.query(
-				"SELECT sp_update_mat_in_house_by_inout(?, ?)",
-				rs -> {},  // 결과 무시
-				matPk, Integer.parseInt(storeHouseId)
-		);
+//		jdbcTemplate.query(
+//				"SELECT sp_update_mat_in_house_by_inout(?, ?)",
+//				rs -> {},  // 결과 무시
+//				matPk, Integer.parseInt(storeHouseId)
+//		);
 
 		result.success = true;
 		
@@ -208,13 +208,13 @@ public class MaterialInoutController {
 		Integer storeHouseId = mi.getStoreHouseId();
 
 		matInoutRepository.deleteById(mio_pk);
-		this.matInoutRepository.flush();
+//		this.matInoutRepository.flush();
 
-		jdbcTemplate.query(
-				"SELECT sp_update_mat_in_house_by_inout(?, ?)",
-				rs -> {},  // 결과 무시
-				matPk, storeHouseId
-		);
+//		jdbcTemplate.query(
+//				"SELECT sp_update_mat_in_house_by_inout(?, ?)",
+//				rs -> {},  // 결과 무시
+//				matPk, storeHouseId
+//		);
 
 
 		result.success = true;
@@ -634,11 +634,18 @@ public class MaterialInoutController {
 				mi.setSourceTableName("balju");
 
 				Balju balju = this.bujuRepository.getBujuById(bal_pk);
-				double prevSujuQty2 = balju.getSujuQty2() != null ? balju.getSujuQty2() : 0.0;
-				balju.setSujuQty2(prevSujuQty2 + qty);
+
+				double sujuQty2 = jdbcTemplate.queryForObject("""
+					SELECT COALESCE(SUM("InputQty"), 0)
+					FROM mat_inout
+					WHERE "SourceDataPk" = ? 
+					  AND "SourceTableName" = 'balju'
+					  AND COALESCE("_status", 'a') = 'a'
+				""", Double.class, bal_pk);
+
 				balju.setShipmentState(storeHouseIdStr);
 
-				if (balju.getSujuQty() > balju.getSujuQty2()) {
+				if (balju.getSujuQty() > sujuQty2) {
 					balju.setState("partial");
 					mi.setInputType("발주 부분 입고");
 				} else {

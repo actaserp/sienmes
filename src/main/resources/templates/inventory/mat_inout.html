@@ -1285,18 +1285,25 @@
                 });
                 let selector = null;
                 this.baljuInputGrid.beginningEdit.addHandler((s, e) => {
-                    let col = s.columns[e.col]; // 현재 편집 중인 컬럼
-                    let row = e.row;            // 현재 편집 중인 행
+                    let col = s.columns[e.col];
+                    let row = e.row;
 
-                    // 편집 중인 컬럼이 'order_input_qty'인 경우
                     if (col.binding === 'inputQty') {
+                        let currentValue = s.getCellData(row, col.index, false);
 
-                        let baljuQtyValue = s.getCellData(row, s.columns.getColumn('SujuQty').index, false);
+                        // 현재 값이 null, undefined, 빈 문자열일 때만 수행
+                        if (currentValue === null || currentValue === undefined || currentValue === '') {
+                            let sujuQty = s.getCellData(row, s.columns.getColumn('SujuQty').index, false);
+                            let sujuQty2 = s.getCellData(row, s.columns.getColumn('SujuQty2').index, false);
 
-                        // 현재 편집 중인 셀에 SujuQty 값을 설정
-                        s.setCellData(row, col.index, baljuQtyValue);
+                            sujuQty = parseFloat(sujuQty) || 0;
+                            sujuQty2 = parseFloat(sujuQty2) || 0;
+
+                            s.setCellData(row, col.index, sujuQty - sujuQty2);
+                        }
                     }
                 });
+
                 _this.baljuInputGrid.hostElement.addEventListener('click', function (e) {
                     if (e.target?.type === 'checkbox') {
                         setTimeout(() => {
