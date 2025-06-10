@@ -104,7 +104,19 @@ public class DayMonthlyService {
                LPAD(p."Depart_id"::text, 2, '0') = :depart_id
                 )
               AND p.spjangcd =:spjangcd
-              AND p.rtflag = '0'
+              AND (
+                  p.rtflag = '0'
+                  OR (
+                    p.rtflag != '0'
+                    AND EXISTS (
+                      SELECT 1
+                      FROM tb_pb201 t2
+                      WHERE t2.personid = p.id
+                        AND t2.workym = :workym
+                        AND t2.workday = :workday
+                    )
+                  )
+                )
         """;
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);

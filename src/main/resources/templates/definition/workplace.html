@@ -383,6 +383,44 @@
         // 선택이 변경될 때, 현재 항목 업데이트
         new FlexGridContextMenu(theGrid);
         window.downloadFileName = '문서코드별 사원 리스트';
+
+        if (data2.length > 0 && theGrid) {
+          const item = data2[0];
+          const row = theGrid.rows[0];
+          theGrid.select(0, 0); // 첫번째 셀 선택
+
+          if(item != null && Object.keys(item).length > 0) {
+            document.getElementById('spjangcd').value = item.spjangcd;
+            document.getElementById('spjangnm').value = item.spjangnm;
+            document.querySelector(`input[name="custperclsf"][value="${item.custperclsf}"]`).checked = true;
+            document.getElementById('saupnum').value = item.saupnum;
+            document.getElementById('prenm').value = item.prenm;
+            document.getElementById('compnum').value = item.compnum;
+            document.getElementById('biztype').value = item.biztype;
+            document.getElementById('item').value = item.item;
+            document.getElementById('openymd').value = formatDateToInput(item.openymd);
+            document.getElementById('eddate').value = formatDateToInput(item.eddate);
+            document.getElementById('tel1').value = item.tel1;
+            document.getElementById('fax').value = item.fax;
+            document.getElementById('zipcd').value = item.zipcd;
+            document.getElementById('adresa').value = item.adresa;
+            document.getElementById('adresb').value = item.adresb;
+            document.getElementById('zipcd2').value = item.zipcd2;
+            document.getElementById('adres2a').value = item.adres2a;
+            document.getElementById('adres2b').value = item.adres2b;
+            document.getElementById('taxnm').value = item.taxnm;
+            document.getElementById('comtaxoff').value = item.comtaxoff;
+            document.getElementById('taxagentnm').value = item.taxagentnm;
+            document.getElementById('taxagentcd').value = item.taxagentcd;
+            document.getElementById('taxagenttel').value = item.taxagenttel;
+            document.getElementById('taxagentsp').value = item.taxagentsp;
+            document.getElementById('taxaccnum').value = item.taxaccnum;
+            document.getElementById('agnertel1').value = item.agnertel1;
+            document.getElementById('agnertel2').value = item.agnertel2;
+            document.getElementById('emailadres').value = item.emailadres;
+            document.getElementById('ajongcd').value = item.ajongcd;
+          }
+        }
       } else {
         // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
         theGrid.itemsSource = viewdata;

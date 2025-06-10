@@ -7,6 +7,7 @@ import mes.domain.model.AjaxResult;
 import mes.domain.repository.Tb_xa012Repository;
 import mes.domain.repository.mobile.TB_PB204Repository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +30,7 @@ public class WorkPlaceController {
             HttpServletRequest request,
             Authentication auth) {
         AjaxResult result = new AjaxResult();
-
-        List<Tb_xa012> tbXa012 = tbXa012Repository.findAll();
+        List<Tb_xa012> tbXa012 = tbXa012Repository.findAll(Sort.by(Sort.Direction.DESC, "spjangcd"));
         // 세무서명 조회(세무서 코드(comtaxoff) 와 세무서명(taxnm) 매핑)
         for (Tb_xa012 item : tbXa012) {
             if(item.getComtaxoff() != null) {
