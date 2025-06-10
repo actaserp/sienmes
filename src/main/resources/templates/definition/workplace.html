@@ -129,11 +129,11 @@
               <tr>
                 <th colspan="">개업일자</th>
                 <td colspan="4">
-                  <input type="date" id="openDate" name="openDate">
+                  <input type="date" id="openymd" name="openymd">
                 </td>
                 <th colspan="">폐업일자</th>
                 <td colspan="4">
-                  <input type="date" id="closeDate" name="closeDate">
+                  <input type="date" id="eddate" name="eddate">
                 </td>
               </tr>
               <tr>
@@ -164,7 +164,7 @@
               <tr>
                 <th>관할세무서</th>
                 <th>세무서명</th>
-                <td><input type="text" id="taxArea" name="taxArea" style="width:100px;"></td>
+                <td><input type="text" id="taxnm" name="taxnm" style="width:100px;"></td>
                 <th style="width: 70px;">코드</th>
                 <td><input type="text" id="comtaxoff" name="comtaxoff" style="width:100px;"></td>
                 <th rowspan="1">성명</th>
@@ -353,8 +353,8 @@
               document.getElementById('compnum').value = item.compnum;
               document.getElementById('biztype').value = item.biztype;
               document.getElementById('item').value = item.item;
-              document.getElementById('openDate').value = item.openDate;
-              document.getElementById('closeDate').value = item.closeDate;
+              document.getElementById('openymd').value = formatDateToInput(item.openymd);
+              document.getElementById('eddate').value = formatDateToInput(item.eddate);
               document.getElementById('tel1').value = item.tel1;
               document.getElementById('fax').value = item.fax;
               document.getElementById('zipcd').value = item.zipcd;
@@ -363,7 +363,7 @@
               document.getElementById('zipcd2').value = item.zipcd2;
               document.getElementById('adres2a').value = item.adres2a;
               document.getElementById('adres2b').value = item.adres2b;
-              document.getElementById('taxArea').value = item.taxArea;
+              document.getElementById('taxnm').value = item.taxnm;
               document.getElementById('comtaxoff').value = item.comtaxoff;
               document.getElementById('taxagentnm').value = item.taxagentnm;
               document.getElementById('taxagentcd').value = item.taxagentcd;
@@ -389,13 +389,13 @@
       }
     }
     // 관할세무서 조회 모달 출력
-    $('#taxArea').click(function () {
+    $('#taxnm').click(function () {
       let poppage = new PopTaxComponent();
       let $poppage = $(poppage);
       let searchcallback = function (items) {
         console.log('items : ',items);
-        document.getElementById('comtaxoff').value = items.compcode;
-        document.getElementById('taxArea').value = items.compname;
+        document.getElementById('comtaxoff').value = items.taxcd;
+        document.getElementById('taxnm').value = items.taxnm;
       };
 
       poppage.show(searchcallback);
@@ -421,8 +421,8 @@
     function resetFormFields() {
       const fieldsToReset = [
         'spjangcd', 'spjangnm', 'compnum', 'saupnum', 'prenm', 'biztype', 'item'
-        , 'openDate', 'closeDate', 'tel1', 'fax', 'zipcd', 'adresa', 'adresb', 'zipcd2'
-        , 'adres2a', 'adres2b', 'taxArea', 'comtaxoff', 'taxagentnm', 'taxagentcd', 'taxagenttel', 'taxagentsp'
+        , 'openymd', 'eddate', 'tel1', 'fax', 'zipcd', 'adresa', 'adresb', 'zipcd2'
+        , 'adres2a', 'adres2b', 'taxnm', 'comtaxoff', 'taxagentnm', 'taxagentcd', 'taxagenttel', 'taxagentsp'
         , 'taxaccnum', 'agnertel1', 'agnertel2', 'emailadres', 'ajongcd'
       ];
 
@@ -446,8 +446,10 @@
         formData.append('compnum', $('#compnum').val()); // 법인/주민등록번호
         formData.append('biztype', $('#biztype').val()); // 업태
         formData.append('item', $('#item').val()); // 업종
-        formData.append('openDate', $('#openDate').val()); // 개업일자
-        formData.append('closeDate', $('#closeDate').val()); // 폐업일자
+        const openymd = formatDateToYYYYMMDD($('#openymd').val());
+        const eddate = formatDateToYYYYMMDD($('#eddate').val());
+        formData.append('openymd', openymd); // 개업일자
+        formData.append('eddate', eddate); // 폐업일자
         formData.append('tel1', $('#tel1').val()); // 전화번호
         formData.append('fax', $('#fax').val()); // 팩스번호
         formData.append('zipcd', $('#zipcd').val()); // 사업장소재지 우편번호
@@ -456,7 +458,7 @@
         formData.append('zipcd2', $('#zipcd2').val()); // 공장소재지 우편번호
         formData.append('adres2a', $('#adres2a').val()); // 공장소재지 주소
         formData.append('adres2b', $('#adres2b').val()); // 공장소재지 상세주소
-        formData.append('taxArea', $('#taxArea').val()); // 세무서명
+        formData.append('taxnm', $('#taxnm').val()); // 세무서명
         formData.append('comtaxoff', $('#comtaxoff').val()); // 세무서코드
         formData.append('taxagentnm', $('#taxagentnm').val()); // 세무서 담당자
         formData.append('taxagentcd', $('#taxagentcd').val()); // 세무대리인 코드
@@ -498,6 +500,14 @@
         }
         sendAjaxRequest('/api/workplace/save');
       })
+    }
+    function formatDateToYYYYMMDD(dateString) {
+      if (!dateString) return "";
+      return dateString.replace(/-/g, "");  // "2025-06-09" → "20250609"
+    }
+    function formatDateToInput(dateStr) {
+      if (!dateStr || dateStr.length !== 8) return '';
+      return `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`;
     }
   </script>
 

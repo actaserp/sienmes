@@ -4,10 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Getter
 @Setter
@@ -77,6 +74,9 @@ public class Tb_xa012 {
     @Column(name = "comtaxoff", length = 10)
     private String comtaxoff;
 
+    @Transient
+    private String taxnm;
+
     @Column(name = "custperclsf", length = 1)
     private String custperclsf;
 
@@ -106,4 +106,10 @@ public class Tb_xa012 {
 
     @Column(name = "ajongcd", length = 3)
     private String ajongcd;
+
+    @Column(name = "openymd", length = 8)
+    private String openymd;
+
+    @Column(name = "eddate", length = 8)
+    private String eddate;
 }
