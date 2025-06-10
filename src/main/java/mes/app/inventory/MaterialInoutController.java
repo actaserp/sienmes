@@ -644,14 +644,8 @@ public class MaterialInoutController {
 				""", Double.class, bal_pk);
 
 				balju.setShipmentState(storeHouseIdStr);
+				mi.setInputType("order_in");
 
-				if (balju.getSujuQty() > sujuQty2) {
-					balju.setState("partial");
-					mi.setInputType("발주 부분 입고");
-				} else {
-					balju.setState("received");
-					mi.setInputType("발주 입고");
-				}
 				matInoutRepository.save(mi);
 				bujuRepository.save(balju);
 

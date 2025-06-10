@@ -343,7 +343,7 @@ public class MaterialInoutService {
 		   ) mi ON mi."SourceDataPk" = b.id
           where 1 = 1
           and b."JumunDate" between :start and :end 
-          and b."State" IN ('draft', 'partial')
+          AND COALESCE(mi."SujuQty2", 0) < b."SujuQty"
 			order by b."JumunDate" desc,  m."Name"
 			""";
 
