@@ -668,8 +668,6 @@
 
               $content.find('#unitPrice').prop('readonly', true).val(unitPrice);
               originalUnitPrice = unitPrice;
-
-              // 나머지 값 세팅
               $BaljuUnitPrice.val(unitPrice);
               $BaljuPrice.val(supplyPrice);
             } else {
@@ -679,7 +677,7 @@
 
               $BaljuUnitPrice.val('');
               $BaljuPrice.val('');
-              $BaljuVat.val('').prop('readonly', true); // 상태 원복
+              $BaljuVat.val('').prop('readonly', true);
             }
           });
         }
@@ -687,32 +685,30 @@
         // 저장버튼
         let $btnPopBaljuSave = $('#btnPopBaljuSave');
         // 중지 버튼
-        let $btnPopBaljuStop = $('#btnPopBaljuStop');
-
+        let $btnPopBaljuStop = $content.find('#btnPopBaljuStop');
+        // 상태 값 정리
+        const isCanceled = (data.State || '').toLowerCase() === 'canceled';
+        const isDraft = (data.State || '').toLowerCase() === 'draft';
+        const isFullyReceived = Number(data.SujuQty3 || 0) === 0;
+        // 등록 모드일 경우 → 버튼 숨김
         if (data.mode === 'new') {
           $btnProductSearch.removeAttr('disabled');
-          $btnPopBaljuStop.hide();  // 등록 모드 → 중지 버튼 숨김
+          $btnPopBaljuStop.hide();
         } else {
-          //미입고 수량 조건
-          if (Number(data.SujuQty3 || 0) === 0) {
-            console.log('SujuQty3 원본 값:', data.SujuQty3);
-            $btnPopBaljuStop.hide();
-          } else {
+          // 버튼 표시 여부
+          if (isCanceled || !isFullyReceived || isDraft) {
             $btnPopBaljuStop.show();
+            $btnPopBaljuStop.text(isCanceled ? '중지취소' : '중지');
+          } else {
+            $btnPopBaljuStop.hide();
           }
-
-          if (data.State && data.State !== 'draft') {
+          // 상태가 draft가 아니면 저장 버튼 숨기고 단가 읽기 전용
+          if (!isDraft) {
             $btnPopBaljuSave.hide();
             $BaljuUnitPrice.prop('readonly', true);
           }
         }
 
-        // 상태가 '중지'면 버튼 텍스트를 '중지취소'로 변경
-        if (data.State === 'canceled') {
-          $btnPopBaljuStop.text('중지취소');
-        } else {
-          $btnPopBaljuStop.text('중지');
-        }
         //발주구분
         AjaxUtil.fillSelectOptions($cboBaljuType, 'system_code', 'choose', null, 'Balju_type');
 
@@ -736,7 +732,6 @@
           $SujuQty.val(data.SujuQty.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
         }
 
-
         // 팝업 중지버튼 클릭
         $btnPopBaljuStop.click(function (e) {
           // 현재 버튼 텍스트로 상태 판단 (중지 / 중지취소)
@@ -754,7 +749,6 @@
               _this.searchMainData();
               modalContainer.close();
             };
-
             AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
           });
         });
