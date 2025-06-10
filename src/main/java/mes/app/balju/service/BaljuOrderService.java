@@ -41,6 +41,7 @@ public class BaljuOrderService {
           , m."Name" as product_name
           , u."Name" as unit
           , b."SujuQty" as "SujuQty"
+          , mi."SujuQty2" as "SujuQty2"
           , GREATEST((b."SujuQty" - b."SujuQty2"), 0) as "SujuQty3"
           , to_char(b."JumunDate", 'yyyy-mm-dd') as "JumunDate"
           , to_char(b."DueDate", 'yyyy-mm-dd') as "DueDate"
@@ -53,7 +54,6 @@ public class BaljuOrderService {
           , b."Description"
           , b."AvailableStock" as "AvailableStock"
           , b."ReservationStock" as "ReservationStock"
-          , b."SujuQty2" as "SujuQty2"
           , fn_code_name('balju_state', b."State") as "StateName"
           , sh."Name" as "ShipmentStateName"
           , b."State"
@@ -62,13 +62,16 @@ public class BaljuOrderService {
           , sum(b."Price"+ coalesce(b."Vat", 0)) as "BaljuTotalPrice"
           , b."Price" as "BaljuPrice"
           , to_char(b."_created", 'yyyy-mm-dd') as create_date
-          , case b."PlanTableName" when 'prod_week_term' then '주간계획' when 'bundle_head' then '임의계획' else b."PlanTableName" end as plan_state
           from balju b
           inner join material m on m.id = b."Material_id" and m.spjangcd = b.spjangcd
           inner join mat_grp mg on mg.id = m."MaterialGroup_id" and mg.spjangcd = b.spjangcd
           left join unit u on m."Unit_id" = u.id and u.spjangcd = b.spjangcd
           left join company c on c.id= b."Company_id" 
           left join store_house sh ON sh.id::varchar = b."ShipmentState" and sh.spjangcd = b.spjangcd
+          LEFT JOIN ( SELECT"SourceDataPk", SUM("InputQty") AS "SujuQty2"
+             FROM mat_inout
+             WHERE "SourceTableName" = 'balju'AND COALESCE("_status", 'a') = 'a'
+             GROUP BY "SourceDataPk") mi ON mi."SourceDataPk" = b.id
           where 1 = 1
 			""";
 
@@ -86,7 +89,7 @@ public class BaljuOrderService {
         group by
           b.id, b."JumunNumber", b."Material_id", mg."Name", mg.id,
           mg."MaterialType", m.id, m."Code", m."Name", u."Name",
-          b."SujuQty", b."SujuQty2", b."JumunDate", b."DueDate", b."CompanyName", 
+          b."SujuQty", mi."SujuQty2", b."JumunDate", b."DueDate", b."CompanyName", 
           b."Company_id", b."SujuType", b."ProductionPlanDate", b."ShipmentPlanDate",
           b."Description", b."AvailableStock", b."ReservationStock", 
           b."State", sh."Name", b."UnitPrice", b."Vat", b."Price", 
@@ -131,7 +134,7 @@ public class BaljuOrderService {
             , b."Description"
             , b."AvailableStock" as "AvailableStock"
             , b."ReservationStock" as "ReservationStock"
-            , b."SujuQty2" as "SujuQty2"
+            , mi."SujuQty2" as "SujuQty2"
             , b."State"
             , b."UnitPrice" as "BaljuUnitPrice"
             , b."Price" as "BaljuPrice"
@@ -145,11 +148,15 @@ public class BaljuOrderService {
             inner join mat_grp mg on mg.id = m."MaterialGroup_id" and mg.spjangcd = b.spjangcd
             left join unit u on m."Unit_id" = u.id and u.spjangcd = b.spjangcd
             left join company c on c.id= b."Company_id" 
+            LEFT JOIN ( SELECT"SourceDataPk", SUM("InputQty") AS "SujuQty2"
+             FROM mat_inout
+             WHERE "SourceTableName" = 'balju'AND COALESCE("_status", 'a') = 'a'
+             GROUP BY "SourceDataPk") mi ON mi."SourceDataPk" = b.id
             where b.id = :id
             group by
              b.id,b.spjangcd, b."JumunNumber", b."Material_id", mg."Name", mg.id,
              mg."MaterialType", m.id, m."Code", m."Name", u."Name",
-             b."SujuQty", b."SujuQty2", b."JumunDate", b."DueDate", b."CompanyName",
+             b."SujuQty",mi."SujuQty2", b."JumunDate", b."DueDate", b."CompanyName",
              b."Company_id", b."SujuType", b."ProductionPlanDate", b."ShipmentPlanDate",
              b."Description", b."AvailableStock", b."ReservationStock",
              b."State", b."UnitPrice", b."Vat", b."Price",
@@ -269,25 +276,41 @@ public class BaljuOrderService {
   }
 
   public List<Map<String, Object>> balju_stop(Integer id) {
-    // 1. 현재 상태 조회
-    String selectSql = "SELECT \"State\", \"SujuQty\", \"SujuQty2\" FROM balju WHERE id = :id;";
+    // 1. 현재 상태 조회 (입고 수량 포함)
+    String selectSql = """
+        SELECT b."State", b."SujuQty", mi."SujuQty2"
+        FROM balju b
+        LEFT JOIN (
+            SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+            FROM mat_inout
+            WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+            GROUP BY "SourceDataPk"
+        ) mi ON mi."SourceDataPk" = b.id
+        WHERE b.id = :id
+    """;
+
     MapSqlParameterSource selectParams = new MapSqlParameterSource().addValue("id", id);
 
     Map<String, Object> result = sqlRunner.queryForObject(selectSql, selectParams, (rs, rowNum) -> {
       Map<String, Object> map = new HashMap<>();
       map.put("State", rs.getString("State"));
       map.put("SujuQty", rs.getInt("SujuQty"));
-      map.put("SujuQty2", rs.getInt("SujuQty2"));
+
+      // SujuQty2는 null 가능 → 안전하게 처리
+      int sujuQty2 = rs.getInt("SujuQty2");
+      if (rs.wasNull()) sujuQty2 = 0;
+      map.put("SujuQty2", sujuQty2);
+
       return map;
     });
 
+    // 2. 현재 값 추출
     String currentState = (String) result.get("State");
     int sujuQty = (int) result.get("SujuQty");
     int sujuQty2 = (int) result.get("SujuQty2");
 
-    // 2. 새 상태값 결정
+    // 3. 새 상태값 결정
     String newState;
-
     if ("canceled".equalsIgnoreCase(currentState)) {
       // 중지 취소 → 입고량에 따라 상태 판단
       if (sujuQty2 == 0) {
@@ -298,11 +321,11 @@ public class BaljuOrderService {
         newState = "received";
       }
     } else {
-      // 상태가 중지가 아니면 → 중지로 변경
+      // 중지가 아니면 → 중지 처리
       newState = "canceled";
     }
 
-    // 3. 상태 업데이트
+    // 4. 상태 업데이트
     String updateSql = """
         UPDATE balju
         SET "State" = :state
@@ -315,10 +338,10 @@ public class BaljuOrderService {
 
     int affected = sqlRunner.execute(updateSql, updateParams);
 
+    // 5. 결과 반환
     return List.of(Map.of(
         "updatedRows", affected,
         "newState", newState
     ));
   }
-
 }

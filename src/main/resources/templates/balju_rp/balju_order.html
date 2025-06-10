@@ -91,7 +91,7 @@
         </div>
       </div>
       <div class="container-fluid">
-        <div id="theGrid" style="height: 730px;" ></div>
+        <div id="theGrid" style="height: 730px;"></div>
       </div>
       <!--        <div class="grid_box">-->
 
@@ -262,6 +262,7 @@
       let formatted = cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ',');// 쉼표 넣기
       $(targetSelector).val(formatted);// 값 넣기
     }
+
     // 수량 또는 단가가 입력되었을 때 → 공급가/부가세/총액 계산
     function updateBaljuPrice() {
       const qtyStr = $('#SujuQty').val().replace(/,/g, '');
@@ -280,7 +281,7 @@
         $('#BaljuVat')
           .val('면세')
           .prop('readonly', true)
-          .css({ 'background-color': '', 'color': '' });
+          .css({'background-color': '', 'color': ''});
         totalPrice = supplyPrice;
       } else {
         if (isVatIncluded) {
@@ -294,12 +295,13 @@
         $('#BaljuVat')
           .val(vat.toLocaleString())
           .prop('readonly', true)
-          .css({ 'background-color': '', 'color': '', 'text-align': '' });
+          .css({'background-color': '', 'color': '', 'text-align': ''});
       }
 
       $('#BaljuPrice').val(supplyPrice.toLocaleString());
       $('#BaljuTotalPrice').val(totalPrice.toLocaleString());
     }
+
     // 총액이 입력된 경우 → 공급가/부가세를 역산
     function calculateFromTotalPrice() {
       const totalStr = $('#BaljuTotalPrice').val().replace(/,/g, '');
@@ -334,6 +336,7 @@
       // 선택사항: 총액 필드 보정
       // $('#BaljuTotalPrice').val((supply + vat).toLocaleString());
     }
+
     // 공급가 입력 시 → 총액 및 부가세 계산
     function calculateFromSupplyPrice() {
       const supplyStr = $('#BaljuPrice').val().replace(/,/g, '');
@@ -350,7 +353,7 @@
         $('#BaljuVat')
           .val('면세')
           .prop('readonly', true)
-          .css({ 'background-color': '', 'color': '' });
+          .css({'background-color': '', 'color': ''});
 
         totalPrice = supplyPrice; // 총액은 공급가 그대로
       } else {
@@ -367,11 +370,12 @@
         $('#BaljuVat')
           .val(vat.toLocaleString())
           .prop('readonly', true)
-          .css({ 'background-color': '', 'color': '', 'text-align': '' });
+          .css({'background-color': '', 'color': '', 'text-align': ''});
       }
 
       // $('#BaljuTotalPrice').val(totalPrice.toLocaleString());
     }
+
     // 수량 변경 시 → 단가 × 수량 → 공급가 계산
     function numberSujuQty(x) {
       formatNumberInput(x, "#SujuQty");
@@ -597,11 +601,11 @@
             $isVatExempt = item.VatExemptionYN === 'Y';
             // 부가세 UI 처리
             if (item.VatExemptionYN === 'Y') {
-              $BaljuVat.prop('readonly', true).val('면세').css({ 'background-color': '', 'color': ''});
+              $BaljuVat.prop('readonly', true).val('면세').css({'background-color': '', 'color': ''});
               $('#VatExempt').val('Y');
             } else {
               $BaljuVat.prop('readonly', true).val('')
-                .css({ 'background-color': '', 'color': '', 'text-align': '' });
+                .css({'background-color': '', 'color': '', 'text-align': ''});
               $('#VatExempt').val('N');
             }
 
@@ -621,11 +625,11 @@
             $content.find('#CompanyName').val(items.compname);
             $isVatExempt = items.VatExemptionYN === 'Y';
             if (items.VatExemptionYN === 'Y') {
-              $BaljuVat.prop('readonly', true).val('면세').css({ 'background-color': '', 'color': ''});
+              $BaljuVat.prop('readonly', true).val('면세').css({'background-color': '', 'color': ''});
               $('#VatExempt').val('Y');
             } else {
               $BaljuVat.prop('readonly', true).val('')
-                .css({ 'background-color': '', 'color': '', 'text-align': '' });
+                .css({'background-color': '', 'color': '', 'text-align': ''});
               $('#VatExempt').val('N');
             }
 
@@ -839,12 +843,36 @@
             }
           });
         });
+
+        FormUtil.BindDataForm(data, $baljuForm);
+
+        // 숫자 입력 필드 자동 포맷
+        const numberFields = [
+          '#BaljuPrice',
+          '#BaljuUnitPrice',
+          '#BaljuVat',
+          '#BaljuTotalPrice',
+          '#SujuQty'
+        ];
+
+        numberFields.forEach(selector => {
+          $content.find(selector).off('keyup').on('keyup', function () {
+            formatNumberInput($(this).val(), selector);
+          });
+
+          // 값이 있다면 콤마 포맷 바로 적용
+          let value = $content.find(selector).val();
+          if (value) {
+            formatNumberInput(value, selector);
+          }
+        });
+
       }
 
       deleteSujuData(id, state) {
         let _this = this;
         let url = _this.url + '/delete';
-        let data = {'id':id, 'State': state}
+        let data = {'id': id, 'State': state}
         let fnsuccess = function (res) {
           if (res.success) {
             Notify.success('삭제되었습니다.');
