@@ -94,6 +94,7 @@ public class UserCodeService {
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("id", id);
+		dicParam.addValue("spjangcd", spjangcd);
 
 		Map<String, Object> item = this.sqlRunner.getRow(sql, dicParam);
 		return item;
