@@ -99,8 +99,10 @@ public class MobileMainController {
         // inOfficeTime에서 시간만 추출 지각 비교
         LocalTime sttimeParsed = LocalTime.parse(sttime, timeFormatter);
         LocalTime currentTime = inOfficeTime.toLocalTime();
+        // 기준시간에 +1분 더해서 지각판정
+        LocalTime lateTime = sttimeParsed.plusMinutes(1);
+        String jitFlag = currentTime.isBefore(lateTime) ? "0" : "1";
         String formattedCurrentTime = currentTime.format(timeFormatter); // "HH:mm" 형식으로 포맷
-        String jitFlag = currentTime.isAfter(sttimeParsed) ? "1" : "0";
         // 사내 / 외부 출근 확인
         String inFlag = "";
         if(office.equals("inOfficeIn")){
