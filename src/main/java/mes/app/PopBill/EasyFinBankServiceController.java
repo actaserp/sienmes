@@ -128,11 +128,13 @@ public class EasyFinBankServiceController {
             String CorpNum = UtilClass.getsaupnumInfoFromSession(form.getSpjangcd(), session);
 
 
-            Response response = easyFinBankService.registBankAccount(CorpNum, bankInfo);
+            //Response response = easyFinBankService.registBankAccount(CorpNum, bankInfo);
+            Response response = new Response();
 
-            if(response.getCode() == 1){
 
-                if(form.getAccountid() == null){
+            if(1 == 1){
+
+                if(form.getAccountid() != null){
                     easyFinBankCustomService.saveRegistAccount(form);
                 }
                 result.success = true;

@@ -108,7 +108,7 @@ public class EasyFinBankCustomService {
                 entity.setRemark2(map.getRemark2());
                 entity.setRemark3(map.getRemark3());
                 entity.setRemark4(map.getRemark4());
-                entity.setRegdt( map.getRegDT());
+                entity.setRegdt(map.getRegDT());
                 entity.setJobid(jobID);
                 entity.setIotype("0");
                 entity.setMemo(map.getMemo());
@@ -266,26 +266,12 @@ public class EasyFinBankCustomService {
         return result;
     }
 
-    public Map<String, Integer> convertToRemarkCltcdMap(List<Map<String, Object>> list){
-        Map<String, Integer> result = new HashMap<>();
-
-        for(Map<String, Object> row : list){
-            String remark = (String) row.get("remark1");
-            Integer cltcdObj = UtilClass.parseInteger(row.get("cltcd"));
-
-            if(remark != null && cltcdObj != null){
-                result.put(remark, cltcdObj);
-
-            }
-        }
-        return result;
-    }
 
     @Transactional
     public void saveRegistAccount(EasyFinBankAccountFormDto form){
 
         try{
-            TB_XBANK bank = tb_xbankRepository.findByBankPopCd("0004");
+            TB_XBANK bank = tb_xbankRepository.findByBankPopCd(form.getBankName());
 
             TB_ACCOUNT account = new TB_ACCOUNT();
             String accountType = form.getAccountType();

@@ -11,11 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.sql.DataSource;
 import javax.validation.Valid;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/transaction/input")
@@ -25,6 +23,10 @@ public class TransactionInputController {
     @Autowired
     TransactionInputService transactionInputService;
 
+    @Autowired
+    DataSource dataSource;
+
+
     @DecryptField(columns = {"accountnumber", "paymentpw", "onlinebankpw", "viewpw"}, masks = {4, 2, 2, 2})
     @GetMapping("/registerAccount")
     public AjaxResult registerAccount(@RequestParam String spjangcd){
@@ -32,6 +34,9 @@ public class TransactionInputController {
         AjaxResult result = new AjaxResult();
 
         result.data = transactionInputService.getAccountList(spjangcd);
+
+        Map<String, Object> status = new LinkedHashMap<>();
+
 
         return  result;
 
@@ -45,7 +50,7 @@ public class TransactionInputController {
                                          @RequestParam String spjangcd,
                                          @RequestParam(required = false) String accountNameHidden,
                                          @RequestParam(required = false) String cltflag,
-                                         @RequestParam(required = false) String cboCompanyHidden){
+                                         @RequestParam(required = false) String cboCompanyHidden) throws InterruptedException {
         long start = System.currentTimeMillis();
 
         AjaxResult result = new AjaxResult();
@@ -162,4 +167,6 @@ public class TransactionInputController {
         return  result;
 
     }
+
+
 }
