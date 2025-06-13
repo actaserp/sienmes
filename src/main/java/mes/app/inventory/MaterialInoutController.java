@@ -77,9 +77,10 @@ public class MaterialInoutController {
 			@RequestParam(value = "house_pk", required=false) String housePk,
 			@RequestParam(value = "mat_type", required=false) String matType,
 			@RequestParam(value = "mat_grp_pk", required=false) String matGrpPk,
+			@RequestParam(value = "spjangcd", required=false) String spjangcd,
 			@RequestParam(value = "keyword", required=false) String keyword) {
 		
-        List<Map<String, Object>> items = this.materialInoutService.getMaterialInout(srchStartDt,srchEndDt,housePk,matType,matGrpPk,keyword);      
+        List<Map<String, Object>> items = this.materialInoutService.getMaterialInout(srchStartDt,srchEndDt,housePk,matType,matGrpPk,keyword,spjangcd);
    		
         AjaxResult result = new AjaxResult();
         result.data = items;        				
@@ -100,6 +101,7 @@ public class MaterialInoutController {
 			@RequestParam("cboMaterialGroup") String cboMaterialGroup,
 			@RequestParam("cboMaterialType") String cboMaterialType,
 			@RequestParam("type") String type,
+			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -142,32 +144,42 @@ public class MaterialInoutController {
 		if (type.equals("in")) {
 			mi.setInOut("in");
 			mi.setInputType(inoutType);
-			if(testYn.equals("Y")) {
+			if(testYn.equals("Y") && !isUpdate) {
 				mi.setPotentialInputQty((float)qty);
 				state = "waiting";
 				_status = "t";
 			} else {
 				mi.setInputQty((float)qty);
+				mi.setOutputQty(0f);
+				mi.setOutputType("");
 			}
 		} else if(type.equals("recall")){
 			mi.setInOut("recall");
 			mi.setOutputType(inoutType);
 			mi.setOutputQty((float)qty);
+			mi.setInputQty(0f);
+			mi.setInputType("");
 
 		} else if(type.equals("return")){
 			mi.setInOut("return");
 			mi.setInputType(inoutType);
 			mi.setInputQty((float)qty);
+			mi.setOutputQty(0f);
+			mi.setOutputType("");
 
 		} else  {
 			mi.setInOut("out");
 			mi.setOutputType(inoutType);
 			mi.setOutputQty((float)qty);
+			mi.setInputQty(0f);
+			mi.setInputType("");
 		}
 		mi.setDescription(description);
 		mi.setState(state);
 		mi.set_status(_status);
 		mi.set_audit(user);
+		mi.setSpjangcd(spjangcd);
+
 		this.matInoutRepository.save(mi);
 		this.matInoutRepository.flush();
 
@@ -262,6 +274,7 @@ public class MaterialInoutController {
 			@RequestParam MultiValueMap<String,Object> Q,
 			@RequestParam("StoreHouse_id") String storeHouseId,
 			@RequestParam("type") String type,
+			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -299,7 +312,7 @@ public class MaterialInoutController {
 			mi.setInoutTime(LocalTime.parse(time.format(timeFormat)));
 			mi.setCompanyId(CommonUtil.tryIntNull(companyId));
 			mi.setStoreHouseId(Integer.parseInt(storeHouseId));
-			
+
 			if (type.equals("in")) {
 				mi.setInOut("in");
 				mi.setInputType(inoutType);
@@ -309,19 +322,35 @@ public class MaterialInoutController {
 					_status = "t";
 				} else {
 					mi.setInputQty((float)qty);
-					state = "confirmed";
-					_status = "a";
+					mi.setOutputQty(0f);
+					mi.setOutputType("");
 				}
-			} else {
+			} else if(type.equals("recall")){
+				mi.setInOut("recall");
+				mi.setOutputType(inoutType);
+				mi.setOutputQty((float)qty);
+				mi.setInputQty(0f);
+				mi.setInputType("");
+
+			} else if(type.equals("return")){
+				mi.setInOut("return");
+				mi.setInputType(inoutType);
+				mi.setInputQty((float)qty);
+				mi.setOutputQty(0f);
+				mi.setOutputType("");
+
+			} else  {
 				mi.setInOut("out");
 				mi.setOutputType(inoutType);
 				mi.setOutputQty((float)qty);
+				mi.setInputQty(0f);
+				mi.setInputType("");
 			}
 			mi.setState(state);
 			mi.set_status(_status);
 			mi.set_audit(user);
-			mi = this.matInoutRepository.save(mi);
-			
+			mi.setSpjangcd(spjangcd);
+			this.matInoutRepository.save(mi);
 			
 		}
 		result.success = true;
@@ -390,6 +419,7 @@ public class MaterialInoutController {
 			@RequestParam("Material_id") String materialId,
 			@RequestParam("StoreHouse_id") Integer storeHouseId,
 			@RequestParam("mio_id") String mioId,
+			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -411,6 +441,7 @@ public class MaterialInoutController {
 				if (data.get(i).get("Description") != null) {
 					ml.setDescription(data.get(i).get("Description").toString());
 				}
+				ml.setSpjangcd(spjangcd);
 				this.matLotRepository.save(ml);
 			} else {
 				LotNumber = this.lotService.make_lot_in_number();
@@ -429,6 +460,7 @@ public class MaterialInoutController {
 				}
 				ml.setStoreHouseId(storeHouseId);
 				ml.set_audit(user);
+				ml.setSpjangcd(spjangcd);
 				ml = this.matLotRepository.save(ml);
 			}
 			
@@ -450,6 +482,7 @@ public class MaterialInoutController {
 			@RequestParam(value = "test_date", required = false) String test_date,
 			@RequestParam(value = "effective_date", required = false) String effectiveDate,
 			@RequestParam(value = "mio_id", required = false) Integer mioId,
+			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -486,6 +519,7 @@ public class MaterialInoutController {
 		tr.setTestMasterId(Integer.parseInt(testMastId));
 		tr.setTestDateTime(testDate);
 		tr.set_audit(user);
+		tr.setSpjangcd(spjangcd);
 		
 		this.testResultRepository.saveAndFlush(tr);
 		
@@ -505,7 +539,7 @@ public class MaterialInoutController {
 				tir.setChar1(data.get(i).get("result1").toString());
 			}
 			tir.set_audit(user);
-			
+			tir.setSpjangcd(spjangcd);
 			this.testItemResultRepository.save(tir);
 		}
 		
@@ -568,6 +602,7 @@ public class MaterialInoutController {
 	public AjaxResult getbaljuList(
 			@RequestParam(value="start", required=false) String start_date,
 			@RequestParam(value="end", required=false) String end_date,
+			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request) {
 
 		start_date = start_date + " 00:00:00";
@@ -576,7 +611,7 @@ public class MaterialInoutController {
 		Timestamp start = Timestamp.valueOf(start_date);
 		Timestamp end = Timestamp.valueOf(end_date);
 
-		List<Map<String, Object>> items = this.materialInoutService.getBaljuList(start, end);
+		List<Map<String, Object>> items = this.materialInoutService.getBaljuList(start, end, spjangcd);
 
 		AjaxResult result = new AjaxResult();
 		result.data = items;

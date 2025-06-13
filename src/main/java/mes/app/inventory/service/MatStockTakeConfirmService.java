@@ -17,11 +17,12 @@ public class MatStockTakeConfirmService {
 	SqlRunner sqlRunner;
 
 	// 조회
-	public List<Map<String, Object>> getMatStockTakeConfirmList(Integer house_pk, String mat_name) {
+	public List<Map<String, Object>> getMatStockTakeConfirmList(Integer house_pk, String mat_name, String spjangcd) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("house_pk", house_pk);
 		paramMap.addValue("mat_name", mat_name);
+		paramMap.addValue("spjangcd", spjangcd);
 		
         String sql = """
         		select st.id 
@@ -49,6 +50,7 @@ public class MatStockTakeConfirmService {
                 inner join store_house sh on sh.id = st."StoreHouse_id"
                 where st."State" = 'taked'
                 and (m."LotUseYN" != 'Y' or m."LotUseYN" is null)
+                and m.spjangcd = :spjangcd
 	            """;
         
         if (house_pk != null) {

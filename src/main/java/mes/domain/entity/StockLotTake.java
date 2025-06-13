@@ -61,5 +61,7 @@ public class StockLotTake extends AbstractAuditModel {
 	
 	@Column(name = "\"ConfirmDateTime\"")
 	Timestamp confirmDateTime;
+
+	String spjangcd;
 	
 }

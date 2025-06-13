@@ -18,7 +18,7 @@ public class MaterialInoutService {
 	SqlRunner sqlRunner;
 	
 	public List<Map<String, Object>> getMaterialInout(String srchStartDt, String srchEndDt, String housePk,
-			String matType, String matGrpPk, String keyword) {
+			String matType, String matGrpPk, String keyword, String spjangcd) {
 		
 		MapSqlParameterSource param = new MapSqlParameterSource();
 		param.addValue("srchStartDt", srchStartDt);
@@ -27,6 +27,7 @@ public class MaterialInoutService {
 		param.addValue("matType", matType);
 		param.addValue("matGrpPk", matGrpPk);
 		param.addValue("keyword", keyword);
+		param.addValue("spjangcd", spjangcd);
 		
 		String sql = """
 					select distinct mi.id as mio_pk
@@ -85,6 +86,7 @@ public class MaterialInoutService {
                     and m."Useyn" = '0'
                     --and sh."HouseType" = 'material'
                     and mi."InoutDate" between cast(:srchStartDt as date) and cast(:srchEndDt as date)
+                    and mi.spjangcd = :spjangcd
 				""";
 		
 		if (StringUtils.isEmpty(housePk)==false) sql +=" and sh.id = cast(:housePk as Integer) ";
@@ -292,11 +294,12 @@ public class MaterialInoutService {
 		return items;
 	}
 
-	public List<Map<String, Object>> getBaljuList(Timestamp start, Timestamp end) {
+	public List<Map<String, Object>> getBaljuList(Timestamp start, Timestamp end, String spjangcd) {
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("start", start);
 		dicParam.addValue("end", end);
+		dicParam.addValue("spjangcd", spjangcd);
 
 		String sql = """
         select b.id
@@ -344,6 +347,7 @@ public class MaterialInoutService {
           where 1 = 1
           and b."JumunDate" between :start and :end 
           AND COALESCE(mi."SujuQty2", 0) < b."SujuQty"
+          and b.spjangcd = :spjangcd
 			order by b."JumunDate" desc,  m."Name"
 			""";
 

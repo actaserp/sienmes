@@ -65,4 +65,6 @@ public class TestResult extends AbstractAuditModel {
 	
 	@Column(name = "\"TestMaster_id\"")
 	Integer testMasterId;
+
+	String spjangcd;
 }

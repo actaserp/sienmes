@@ -16,13 +16,14 @@ public class SujuSummaryService {
 	SqlRunner sqlRunner;
 
 	public List<Map<String, Object>> getList(String srchStartDt, String srchEndDt, Integer cboCompany,
-			Integer cboMatGrp, String sujuState) {
+			Integer cboMatGrp, String sujuState, String spjangcd) {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("srchStartDt", srchStartDt);
 		paramMap.addValue("srchEndDt", srchEndDt);
 		paramMap.addValue("cboCompany", cboCompany);
 		paramMap.addValue("cboMatGrp", cboMatGrp);
 		paramMap.addValue("sujuState", sujuState);
+		paramMap.addValue("spjangcd", spjangcd);
 		
 		
 		String sql ="""
@@ -33,6 +34,7 @@ public class SujuSummaryService {
 	        from suju s
             inner join material m on m.id = s."Material_id"
 	        where s."JumunDate" between cast(:srchStartDt as date) and cast(:srchEndDt as date)
+	        and s.spjangcd = :spjangcd
 				""";
 		
 		if(cboCompany != null) {

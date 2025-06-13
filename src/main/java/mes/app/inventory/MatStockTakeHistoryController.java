@@ -28,9 +28,10 @@ public class MatStockTakeHistoryController {
 			@RequestParam(value = "mat_name", required = false) String mat_name,
 			@RequestParam(value = "mat_type", required = false) String mat_type,
 			@RequestParam(value = "manage_level", required = false) String manage_level,
+			@RequestParam("spjangcd") String spjangcd,
 			@RequestParam(value = "mat_group_pk", required = false) Integer mat_group_pk) {
 		        
-		List<Map<String, Object>> items = this.matStockTakeHistoryService.getMatStockTakeHistoryList(date_from, date_to, house_pk, mat_name, mat_type, manage_level, mat_group_pk);
+		List<Map<String, Object>> items = this.matStockTakeHistoryService.getMatStockTakeHistoryList(date_from, date_to, house_pk, mat_name, mat_type, manage_level, mat_group_pk, spjangcd);
 		 
 		AjaxResult result = new AjaxResult();
 		result.data = items;

@@ -35,10 +35,11 @@ public class MaterialMoveController {
 	public AjaxResult getMaterialMoveList(
 			@RequestParam(value="storehouse_id", required = false) Integer storehouse_id,
 			@RequestParam(value="material_id", required = false) Integer material_id,
+			@RequestParam("spjangcd") String spjangcd,
 			@RequestParam(value="keyword", required = false) String keyword) {
 
         AjaxResult result = new AjaxResult();
-        result.data = this.materialMoveService.getMaterialMoveList(storehouse_id, material_id, keyword);
+        result.data = this.materialMoveService.getMaterialMoveList(storehouse_id, material_id, keyword, spjangcd);
 		return result;
 	}
 
@@ -46,10 +47,11 @@ public class MaterialMoveController {
 	public AjaxResult getHouseMoveList(
 			@RequestParam(value="storehouse_id", required = false) Integer storehouse_id,
 			@RequestParam(value="mat_grp_pk", required = false) Integer mat_grp_pk,
+			@RequestParam("spjangcd") String spjangcd,
 			@RequestParam(value="keyword", required = false) String keyword) {
 
 		AjaxResult result = new AjaxResult();
-		result.data = this.materialMoveService.getHouseMoveList(storehouse_id, mat_grp_pk, keyword);
+		result.data = this.materialMoveService.getHouseMoveList(storehouse_id, mat_grp_pk, keyword, spjangcd);
 		return result;
 	}
 	

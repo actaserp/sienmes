@@ -103,4 +103,6 @@ public class Suju extends AbstractAuditModel {
 	@Column(name="\"project_id\"")
 	String project_id;
 
+	String spjangcd;
+
 }

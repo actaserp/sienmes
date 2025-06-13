@@ -40,9 +40,10 @@ public class MatStockTakeConfirmController {
 	@GetMapping("/read")
 	public AjaxResult getMatStockTakeConfirmList(
 			@RequestParam(value = "store_house_id", required = false) Integer house_pk,
+			@RequestParam("spjangcd") String spjangcd,
 			@RequestParam(value = "material_name", required = false) String mat_name) {
         
-		List<Map<String, Object>> items = this.matStockTakeConfirmService.getMatStockTakeConfirmList(house_pk, mat_name);
+		List<Map<String, Object>> items = this.matStockTakeConfirmService.getMatStockTakeConfirmList(house_pk, mat_name, spjangcd);
 
 		AjaxResult result = new AjaxResult();
 		result.data = items;

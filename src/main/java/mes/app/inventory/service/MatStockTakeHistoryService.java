@@ -18,7 +18,7 @@ public class MatStockTakeHistoryService {
 	SqlRunner sqlRunner;
 
 	// 조회
-	public List<Map<String, Object>> getMatStockTakeHistoryList(String date_from, String date_to, Integer house_pk, String mat_name, String mat_type, String manage_level, Integer mat_group_pk) {
+	public List<Map<String, Object>> getMatStockTakeHistoryList(String date_from, String date_to, Integer house_pk, String mat_name, String mat_type, String manage_level, Integer mat_group_pk, String spjangcd) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("date_from", Date.valueOf(date_from));
@@ -28,6 +28,7 @@ public class MatStockTakeHistoryService {
 		paramMap.addValue("mat_type", mat_type);
 		paramMap.addValue("manage_level", manage_level);
 		paramMap.addValue("mat_group_pk", mat_group_pk);
+		paramMap.addValue("spjangcd", spjangcd);
         
         String sql = """
         		select st.id
@@ -58,6 +59,7 @@ public class MatStockTakeHistoryService {
                 left join user_profile up2 on up2."User_id" = st."Confirmer_id" 
                 where st."TakeDate" between :date_from and :date_to
                 and (m."LotUseYN" != 'Y' or m."LotUseYN" is null)
+                and st.spjangcd = :spjangcd
 	            """;
         
         if (house_pk != null) {

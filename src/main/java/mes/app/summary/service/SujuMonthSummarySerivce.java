@@ -15,12 +15,13 @@ public class SujuMonthSummarySerivce {
 	@Autowired
 	SqlRunner sqlRunner;
 
-	public List<Map<String, Object>> getList(String cboYear,Integer cboCompany,Integer cboMatGrp,String cboDataDiv) {
+	public List<Map<String, Object>> getList(String cboYear,Integer cboCompany,Integer cboMatGrp,String cboDataDiv,String spjangcd) {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("cboYear", cboYear);
 		paramMap.addValue("cboCompany", cboCompany);
 		paramMap.addValue("cboMatGrp", cboMatGrp);
 		paramMap.addValue("cboDataDiv", cboDataDiv);
+		paramMap.addValue("spjangcd", spjangcd);
 		
 		
 		
@@ -52,6 +53,7 @@ public class SujuMonthSummarySerivce {
 	            from suju s
                 inner join material m on m.id = s."Material_id"
 	            where s."JumunDate" between cast(:date_form as date) and cast(:date_to as date)
+	            and s.spjangcd = :spjangcd
 				""";
 		if(cboCompany != null) {
 			sql += """

@@ -109,5 +109,7 @@ public class MaterialInout extends AbstractAuditModel {
 	
 	@Column(name = "\"EffectiveDate\"")
 	Timestamp effectiveDate;
+
+	String spjangcd;
 	
 }

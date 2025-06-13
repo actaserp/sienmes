@@ -25,10 +25,11 @@ public class SujuMonthSummaryController {
 			@RequestParam(value="cboYear",required=false) String cboYear,
 			@RequestParam(value="cboCompany",required=false) Integer cboCompany,
 			@RequestParam(value="cboMatGrp",required=false) Integer cboMatGrp,
-			@RequestParam(value="cboDataDiv",required=false) String cboDataDiv
+			@RequestParam(value="cboDataDiv",required=false) String cboDataDiv,
+			@RequestParam(value="spjangcd",required=false) String spjangcd
 			) {
 		
-		List<Map<String,Object>> items = this.sujuMonthSummarySerivce.getList(cboYear,cboCompany,cboMatGrp,cboDataDiv);
+		List<Map<String,Object>> items = this.sujuMonthSummarySerivce.getList(cboYear,cboCompany,cboMatGrp,cboDataDiv,spjangcd);
 		
 		
 		AjaxResult result = new AjaxResult();

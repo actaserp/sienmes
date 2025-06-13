@@ -27,12 +27,13 @@ public class SujuService {
 	
 	
 	// 수주 내역 조회 
-	public List<Map<String, Object>> getSujuList(String date_kind, Timestamp start, Timestamp end) {
+	public List<Map<String, Object>> getSujuList(String date_kind, Timestamp start, Timestamp end, String spjangcd) {
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("date_kind", date_kind);
 		dicParam.addValue("start", start);
 		dicParam.addValue("end", end);
+		dicParam.addValue("spjangcd", spjangcd);
 		
 		String sql = """
 			select s.id
@@ -85,6 +86,7 @@ public class SujuService {
 				 GROUP BY "SourceDataPk"
 			 ) sh ON sh."SourceDataPk" = s.id
             where 1 = 1
+            and s.spjangcd = :spjangcd
 			""";
 		
 		if (date_kind.equals("sales")) {

@@ -77,4 +77,6 @@ public class TestItemResult extends AbstractAuditModel {
 	
 	@Column(name = "\"SourceDataPk\"")
 	Integer sourceDataPk;
+
+	String spjangcd;
 }

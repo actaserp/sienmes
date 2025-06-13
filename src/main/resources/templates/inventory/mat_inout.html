@@ -488,6 +488,7 @@
                         <div class="tab-item" id="tab_copy_text" style="display:block; border-top-left-radius: 0;">
                             <div class="section-top" style="margin-bottom:10px; height:30px;" >
                                 <span class="left_align lpt">품목코드+수량을 엑셀에서 붙여넣으세요.</span>
+                                <span class="left_align lpt">그리고 그리드 탭으로 이동후 변환 버튼을 누르세요.</span>
                             </div>
                             <textarea class="form-control2" id="txtCopyText" name="txtCopyText" rows="20" style="height:200px;"></textarea>
                         </div>
@@ -1730,6 +1731,12 @@
                 $InoutDate.val(item.InoutDate);
                 $InoutTime.val(item.InoutTime);
                 $inputQty.val(item.potentialInputQty);
+
+                if (parseFloat($inputQty.val()) === 0) {
+                    $btnTestSave.hide();
+                } else {
+                    $btnTestSave.show();
+                }
 
                 if (item.ValidDays) {
                     let valDate = CommonUtil.getYYYYMMDD(item.ValidDays);

@@ -45,9 +45,10 @@ public class MatStockTakeController {
 			@RequestParam(value = "material_type", required = false) String mat_type,
 			@RequestParam(value = "material_group", required = false) Integer mat_grp,
 			@RequestParam(value = "material_name", required = false) String mat_name,
+			@RequestParam("spjangcd") String spjangcd,
 			@RequestParam(value = "manage_level", required = false) String manage_level) {
         
-		List<Map<String, Object>> items = this.matStockTakeService.getMatStockTakeList(house_pk, mat_type, mat_grp, mat_name, manage_level);
+		List<Map<String, Object>> items = this.matStockTakeService.getMatStockTakeList(house_pk, mat_type, mat_grp, mat_name, manage_level, spjangcd);
 
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -65,6 +66,7 @@ public class MatStockTakeController {
 			@RequestParam(value="real_stock", required=false) float real_stock,
 			@RequestParam(value="gap", required=false) float gap,
 			@RequestParam(value="description", required=false) String description,
+			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 
@@ -106,6 +108,7 @@ public class MatStockTakeController {
         stockTake.setTaker_id(user.getId());
         stockTake.setState("taked");
         stockTake.set_audit(user);
+		stockTake.setSpjangcd(spjangcd);
         
         stockTake = this.stockTakeRepository.save(stockTake);
         

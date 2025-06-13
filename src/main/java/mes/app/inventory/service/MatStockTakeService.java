@@ -17,13 +17,14 @@ public class MatStockTakeService {
 	SqlRunner sqlRunner;
 
 	// 조회
-	public List<Map<String, Object>> getMatStockTakeList(Integer house_pk, String mat_type, Integer mat_grp, String mat_name, String manage_level) {
+	public List<Map<String, Object>> getMatStockTakeList(Integer house_pk, String mat_type, Integer mat_grp, String mat_name, String manage_level, String spjangcd) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("house_pk", house_pk);
 		paramMap.addValue("mat_type", mat_type);
 		paramMap.addValue("mat_grp", mat_grp);
 		paramMap.addValue("mat_name", mat_name);
+		paramMap.addValue("spjangcd", spjangcd);
 		paramMap.addValue("manage_level", manage_level);
 		
         String sql = """
@@ -42,7 +43,8 @@ public class MatStockTakeService {
                     where 1 = 1
                     and mih."StoreHouse_id" = :house_pk
                     and (m."LotUseYN" = 'N' or m."LotUseYN" is null)
-                    and "Useyn" = '0'
+                    and m."Useyn" = '0'
+                    and m.spjangcd = :spjangcd
 	            """;
         
         if (StringUtils.isEmpty(mat_type) == false) {

@@ -38,6 +38,7 @@ public class SujuController {
 			@RequestParam(value="date_kind", required=false) String date_kind,
 			@RequestParam(value="start", required=false) String start_date,
 			@RequestParam(value="end", required=false) String end_date,
+			@RequestParam(value="spjangcd") String spjangcd,
 			HttpServletRequest request) {
 		
 		start_date = start_date + " 00:00:00";
@@ -46,7 +47,7 @@ public class SujuController {
 		Timestamp start = Timestamp.valueOf(start_date);
 		Timestamp end = Timestamp.valueOf(end_date);
 		
-		List<Map<String, Object>> items = this.sujuService.getSujuList(date_kind, start, end);
+		List<Map<String, Object>> items = this.sujuService.getSujuList(date_kind, start, end, spjangcd);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -99,6 +100,7 @@ public class SujuController {
 			@RequestParam(value="totalAmount") String totalAmountStr,
 			@RequestParam(value="invatyn") String invatyn,
 			@RequestParam(value="projectHidden") String project_id,
+			@RequestParam(value="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth	) {
 		User user = (User)auth.getPrincipal();
@@ -138,6 +140,7 @@ public class SujuController {
 		suju.setInVatYN(invatyn);
 		suju.setTotalAmount(totalAmount);
 		suju.setProject_id(project_id);
+		suju.setSpjangcd(spjangcd);
 
 		suju = this.SujuRepository.save(suju);
 		

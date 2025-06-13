@@ -38,13 +38,14 @@ public class SujuUploadService {
 	
 	
 	// 수주 업로드 내역 조회 
-	public List<Map<String, Object>> getSujuUploadList(String date_kind, String start, String end) {
+	public List<Map<String, Object>> getSujuUploadList(String date_kind, String start, String end, String spjangcd) {
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		// data_kind : 'sales', 'delivery'
 		dicParam.addValue("date_kind", date_kind);
 		dicParam.addValue("start", start);
 		dicParam.addValue("end", end);
+		dicParam.addValue("spjangcd", spjangcd);
 		
 		String sql = """
 			select 
@@ -64,6 +65,7 @@ public class SujuUploadService {
             --inner join material m on m.id = sb.id
             inner join unit u on u.id = m."Unit_id"
             where 1 = 1
+            and sb.spjangcd = :spjangcd
 			""";
 		
 		if (date_kind.equals("sales")) {

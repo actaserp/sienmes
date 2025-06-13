@@ -18,7 +18,7 @@ public class LotStockTakeService {
 	@Autowired
 	SqlRunner sqlRunner;
 
-	public List<Map<String, Object>> getMaterialStockList(String mat_type, Integer mat_grp, Integer company_id, String keyword)	
+	public List<Map<String, Object>> getMaterialStockList(String mat_type, Integer mat_grp, Integer company_id, String keyword, String spjangcd)
 	{
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();  
@@ -26,6 +26,7 @@ public class LotStockTakeService {
 		paramMap.addValue("mat_grp", mat_grp);
 		paramMap.addValue("keyword", keyword);
 		paramMap.addValue("company_id", company_id);
+		paramMap.addValue("spjangcd", spjangcd);
 		
 		
 		String sql ="""
@@ -81,6 +82,7 @@ public class LotStockTakeService {
         left join mat_lot ml on ml."Material_id" = m.id
         where 1=1 and m."LotUseYN"='Y'
         and "Useyn" = '0'
+        and m.spjangcd = :spjangcd
 		""";
 
 		if(StringUtils.hasText(mat_type)) {
@@ -232,10 +234,11 @@ public class LotStockTakeService {
 	}
 	
 	
-	public List<Map<String, Object>> getLotAdjustConfirmList(Integer storehouse_id, String keyword){
+	public List<Map<String, Object>> getLotAdjustConfirmList(Integer storehouse_id, String keyword, String spjangcd){
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("storehouse_id", storehouse_id);
 		paramMap.addValue("keyword", keyword);
+		paramMap.addValue("spjangcd", spjangcd);
 
 		String sql = """
         select slt.id 
@@ -265,6 +268,7 @@ public class LotStockTakeService {
         inner join store_house sh on sh.id = slt."StoreHouse_id"
         where 1=1
         and slt."State" = 'taked'
+        and slt.spjangcd = :spjangcd
         """;
 		if(storehouse_id != null) {
 			sql+="""
@@ -284,7 +288,7 @@ public class LotStockTakeService {
 	}
 	
 	
-	public List<Map<String, Object>> getSotckLotTakeHistoryList(String strDateFrom, String strDateTo, Integer storehouse_id, String mat_type, Integer mat_grp_pk, String keyword){
+	public List<Map<String, Object>> getSotckLotTakeHistoryList(String strDateFrom, String strDateTo, Integer storehouse_id, String mat_type, Integer mat_grp_pk, String keyword, String spjangcd){
 
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		Date date_from = CommonUtil.trySqlDate(strDateFrom);
@@ -295,6 +299,7 @@ public class LotStockTakeService {
 		paramMap.addValue("mat_type", mat_type);
 		paramMap.addValue("mat_grp_pk", mat_grp_pk);
 		paramMap.addValue("keyword", keyword);
+		paramMap.addValue("spjangcd", spjangcd);
 		
 		String sql = """
         select slt.id  
@@ -325,6 +330,7 @@ public class LotStockTakeService {
         left join user_profile up on up."User_id" = slt."Taker_id" 
         left join user_profile up2 on up2."User_id" = slt."Confirmer_id" 
         where slt."TakeDate" between :date_from and :date_to
+        and slt.spjangcd = :spjangcd
 		""";
 		
 		if (storehouse_id!=null) {

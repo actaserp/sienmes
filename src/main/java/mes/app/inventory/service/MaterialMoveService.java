@@ -16,11 +16,12 @@ public class MaterialMoveService {
 	@Autowired
 	SqlRunner sqlRunner;
 	
-	public List<Map<String, Object>> getMaterialMoveList(Integer storehouse_id, Integer material_id, String keyword) {
+	public List<Map<String, Object>> getMaterialMoveList(Integer storehouse_id, Integer material_id, String keyword, String spjangcd) {
 		MapSqlParameterSource param = new MapSqlParameterSource();		
 		param.addValue("storehouse_id", storehouse_id);
 		param.addValue("material_id", material_id);
 		param.addValue("keyword", keyword);
+		param.addValue("spjangcd", spjangcd);
 		
 		String sql = """
         with AA as(
@@ -28,6 +29,7 @@ public class MaterialMoveService {
         from material m 
         left join mat_lot ml on m.id = ml."Material_id"
         where 1=1
+        and m.spjangcd = :spjangcd
         group by m.id
         )
         select m.id as mat_id
@@ -78,11 +80,12 @@ public class MaterialMoveService {
         return items;
 	}
 
-	public List<Map<String, Object>> getHouseMoveList(Integer storehouse_id, Integer mat_grp_pk, String keyword) {
+	public List<Map<String, Object>> getHouseMoveList(Integer storehouse_id, Integer mat_grp_pk, String keyword, String spjangcd) {
 		MapSqlParameterSource param = new MapSqlParameterSource();
 		param.addValue("storehouse_id", storehouse_id);
 		param.addValue("mat_grp_pk", mat_grp_pk);
 		param.addValue("keyword", keyword);
+		param.addValue("spjangcd", spjangcd);
 
 		String sql = """
         with AA as(
@@ -90,6 +93,7 @@ public class MaterialMoveService {
         from material m 
         left join mat_lot ml on m.id = ml."Material_id"
         where 1=1
+        and m.spjangcd = :spjangcd
         """;
 		if(storehouse_id!=null) {
 			sql+="""

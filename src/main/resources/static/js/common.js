@@ -790,6 +790,10 @@ let AjaxUtil = {
     },
     getSyncData: function (url, p_data, fn_failure) {
         let items = null;
+
+        p_data = p_data || {};
+        p_data.spjangcd = sessionStorage.getItem('spjangcd');
+
         $.ajax({
             async: false,
             dataType: 'json',
@@ -811,6 +815,9 @@ let AjaxUtil = {
         return items;
     },
     getAsyncData: function (url, param_data, fn_success, fn_failure) {
+        param_data = param_data || {};
+        param_data.spjangcd = sessionStorage.getItem('spjangcd');
+        console.log('sessionStorage.getItem(\'spjangcd\')', sessionStorage.getItem('spjangcd'));
         $.ajax({
             async: true,
             dataType: 'json',
@@ -838,6 +845,7 @@ let AjaxUtil = {
 
         if (param_data != null && typeof param_data === 'object') {
             param_data['_csrf'] = csrf;
+            param_data['spjangcd'] = sessionStorage.getItem('spjangcd');
         }
         
         $.ajax({
@@ -867,6 +875,7 @@ let AjaxUtil = {
                 let csrf = $('[name=_csrf]').val();
                 param_data['_csrf'] = csrf;
             }
+            param_data['spjangcd'] = sessionStorage.getItem('spjangcd');
         }
 
         $.ajax({
@@ -890,6 +899,9 @@ let AjaxUtil = {
     },
     postJsonData: function (url, param_data, fn_success, fn_failure) {
         let csrf = $('[name=_csrf]').val();
+
+        param_data = param_data || {};
+        param_data.spjangcd = sessionStorage.getItem('spjangcd');
 
         $.ajax({
             async: true,
@@ -917,6 +929,9 @@ let AjaxUtil = {
     },
     postJsonDataUTF: function (url, param_data, fn_success, fn_failure) {
         let csrf = $('[name=_csrf]').val();
+
+        param_data = param_data || {};
+        param_data.spjangcd = sessionStorage.getItem('spjangcd');
 
         $.ajax({
             async: true,
@@ -947,6 +962,9 @@ let AjaxUtil = {
 
         let csrf = $('[name=_csrf]').val();
 
+        data = data || {};
+        data.spjangcd = sessionStorage.getItem('spjangcd');
+
         $.ajax({
             async: true,
             dataType: 'json',
@@ -974,6 +992,9 @@ let AjaxUtil = {
         let result = null;
 
         let csrf = $('[name=_csrf]').val();
+
+        data = data || {};
+        data.spjangcd = sessionStorage.getItem('spjangcd');
 
         $.ajax({
             async: false,
@@ -1005,6 +1026,7 @@ let AjaxUtil = {
         if (form_data != null && typeof form_data === 'object') {
             let csrf = $('[name=_csrf]').val();
             form_data.append("_csrf", csrf);
+            form_data.append("spjangcd", sessionStorage.getItem('spjangcd'));
         }
         
         $.ajax({

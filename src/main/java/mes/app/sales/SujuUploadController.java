@@ -66,6 +66,7 @@ public class SujuUploadController {
 			@RequestParam(value="date_kind", required=false, defaultValue="sales") String date_kind,
 			@RequestParam(value="start", required=false) String start_date,
 			@RequestParam(value="end", required=false) String end_date,
+			@RequestParam(value="spjangcd", required=false) String spjangcd,
 			HttpServletRequest request) {
 		
 //		start_date = start_date + " 00:00:00";
@@ -73,7 +74,7 @@ public class SujuUploadController {
 //		Timestamp start = Timestamp.valueOf(start_date);
 //		Timestamp end = Timestamp.valueOf(end_date);
 		
-		List<Map<String, Object>> items = this.sujuUploadService.getSujuUploadList(date_kind, start_date, end_date);
+		List<Map<String, Object>> items = this.sujuUploadService.getSujuUploadList(date_kind, start_date, end_date, spjangcd);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -107,6 +108,7 @@ public class SujuUploadController {
 	@PostMapping("/upload_save")
 	public AjaxResult saveSujuBulkData(
 			@RequestParam(value="data_date") String data_date,
+			@RequestParam(value="spjangcd") String spjangcd,
 			@RequestParam(value="upload_file") MultipartFile upload_file,
 			MultipartHttpServletRequest multipartRequest,
 			Authentication auth) throws FileNotFoundException, IOException  {
@@ -188,12 +190,13 @@ public class SujuUploadController {
 				paramMap.addValue("quantity", quantity);
 				paramMap.addValue("due_date", due_date);
 				paramMap.addValue("creator_id", user.getId());
+				paramMap.addValue("spjangcd", spjangcd);
 
 			    String sql =
 			        "INSERT INTO public.suju_bulk(" +
-			            "\"JumunNumber\", \"JumunDate\", \"CompCode\", \"CompanyName\", \"ProductCode\", \"ProductName\", \"Quantity\", \"DueDate\", _created, _status, _creater_id" +
+			            "\"JumunNumber\", \"JumunDate\", \"CompCode\", \"CompanyName\", \"ProductCode\", \"ProductName\", \"Quantity\", \"DueDate\", _created, _status, _creater_id, spjangcd" +
 			        ") VALUES (" +
-			            ":jumun_number, :jumun_date, :company_code, :company_name, :prod_code, :prod_name, :quantity, :due_date, now(), 'Excel', :creator_id" +
+			            ":jumun_number, :jumun_date, :company_code, :company_name, :prod_code, :prod_name, :quantity, :due_date, now(), 'Excel', :creator_id, :spjangcd "+
 			        ")";
 			    
 			    String log_data =

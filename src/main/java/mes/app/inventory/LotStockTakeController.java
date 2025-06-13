@@ -47,10 +47,11 @@ public class LotStockTakeController {
 			@RequestParam(value="mat_type", required=false) String matType,
 			@RequestParam(value="mat_grp", required=false) Integer matGroup,
 			@RequestParam(value="company_id", required=false) Integer companyId,
+			@RequestParam("spjangcd") String spjangcd,
 			@RequestParam(value="keyword", required=false) String keyword
 			) {
 		AjaxResult result = new AjaxResult();
-		result.data = this.lotStockTakeService.getMaterialStockList(matType, matGroup, companyId, keyword);
+		result.data = this.lotStockTakeService.getMaterialStockList(matType, matGroup, companyId, keyword, spjangcd);
 		return result;
 	}
 	
@@ -72,6 +73,7 @@ public class LotStockTakeController {
 			@RequestParam(value="real_stock", required=true) float real_stock,
 			@RequestParam(value="gap", required=true) float gap,
 			@RequestParam(value="gap_description", required=false) String description,
+			@RequestParam(value="spjangcd", required=false) String spjangcd,
 			Authentication auth
 			) {
 		
@@ -103,6 +105,7 @@ public class LotStockTakeController {
 				stockLotTake.setDescription(description);
 				stockLotTake.setState("taked");
 				stockLotTake.set_audit(user);
+				stockLotTake.setSpjangcd(spjangcd);
 				this.stockLotTakeRepository.save(stockLotTake);
 				
 				result.data = stockLotTake.getId();
@@ -132,10 +135,11 @@ public class LotStockTakeController {
 	@GetMapping("/lot_adjust_confirm_list")
 	public AjaxResult getLotAdjustConfirmList(
 			@RequestParam(value="storehouse_id", required=false) Integer storehouse_id,
-			@RequestParam(value="keyword", required=false) String keyword
+			@RequestParam(value="keyword", required=false) String keyword,
+			@RequestParam("spjangcd") String spjangcd
 			) {
 		AjaxResult result = new AjaxResult();
-		result.data = this.lotStockTakeService.getLotAdjustConfirmList(storehouse_id, keyword);
+		result.data = this.lotStockTakeService.getLotAdjustConfirmList(storehouse_id, keyword, spjangcd);
 		return result;
 	}
 	
@@ -178,10 +182,11 @@ public class LotStockTakeController {
 			@RequestParam(value="storehouse_id", required=false) Integer storehouse_id,
 			@RequestParam(value="mat_type", required=false) String mat_type,
 			@RequestParam(value="mat_grp_pk", required=false) Integer mat_grp_pk,
+			@RequestParam("spjangcd") String spjangcd,
 			@RequestParam(value="keyword", required=false) String keyword
 		)	{
 		AjaxResult result = new AjaxResult();
-		result.data = this.lotStockTakeService.getSotckLotTakeHistoryList(date_from, date_to, storehouse_id, mat_type, mat_grp_pk, keyword);
+		result.data = this.lotStockTakeService.getSotckLotTakeHistoryList(date_from, date_to, storehouse_id, mat_type, mat_grp_pk, keyword, spjangcd);
 		return result;
 	}
 }

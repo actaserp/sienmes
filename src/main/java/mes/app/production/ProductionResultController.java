@@ -308,6 +308,13 @@ public class ProductionResultController {
         Timestamp start_time = Timestamp.valueOf(prodDate + ' ' + startTime + ":00");
         Timestamp end_time = null;
 
+        long runningCount = this.equRunRepository.countByEquipmentIdAndRunState(equipmentId, "run");
+        if (runningCount > 0) {
+            result.success = false;
+            result.message = "해당 설비는 이미 작업 중입니다.";
+            return result;
+        }
+
         if (!endTime.equals("")) {
             end_time = Timestamp.valueOf(prodDate + ' ' + endTime + ":00");
         } else {
@@ -1713,6 +1720,13 @@ public class ProductionResultController {
             jobResRepository.updateStateById(jr_pk, "stopped");
             return result;
         } else {
+            long runningCount = equRunRepository.countByEquipmentIdAndRunState(Equipment_id, "run");
+            if (runningCount > 0) {
+                result.success = false;
+                result.message = "해당 설비는 이미 작업 중입니다. 재가동할 수 없습니다.";
+                return result;
+            }
+
             EquRun er = new EquRun();
             er.setEquipmentId(Equipment_id);
             er.setStartDate(now);
