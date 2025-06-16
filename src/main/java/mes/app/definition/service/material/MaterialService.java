@@ -195,13 +195,13 @@ public class MaterialService {
 		if(data.containsKey("mtyn")) {
 			dicParam.addValue("mtyn", data.getFirst("mtyn").toString());
 		} else {
-			dicParam.addValue("mtyn", null);
+			dicParam.addValue("mtyn", 0);
 		}
 
 		if(data.containsKey("useyn")) {
 			dicParam.addValue("useyn", data.getFirst("useyn").toString());
 		} else {
-			dicParam.addValue("useyn", null);
+			dicParam.addValue("useyn", 0);
 		}
 		dicParam.addValue("avrqty", CommonUtil.tryString(data.getFirst("avrqty")));
 

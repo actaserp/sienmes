@@ -142,7 +142,7 @@ public class CompanyController {
 		company.setZipCode(zipCode);
 		company.setAddress(address);
 		company.setDescription(description);
-		company.setRelyn(relyn);
+		company.setRelyn(String.valueOf("1".equals(relyn) ? 1 : 0));
 		//관리정보
 		company.setOurManager(ourManager);
 		company.setSalesManager(salesManager);
