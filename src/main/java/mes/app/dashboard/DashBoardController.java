@@ -23,9 +23,11 @@ public class DashBoardController {
 	private DashBoardService dashBoardService;
 	
 	@GetMapping("/today_week_prod")
-	private AjaxResult todayWeekProd() {
+	private AjaxResult todayWeekProd(
+			@RequestParam("spjangcd") String spjangcd
+	) {
 		
-		List<Map<String, Object>> items = this.dashBoardService.todayWeekProd();
+		List<Map<String, Object>> items = this.dashBoardService.todayWeekProd(spjangcd);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -34,9 +36,11 @@ public class DashBoardController {
 	}
 
 	@GetMapping("/today_prod")
-	private AjaxResult todayProd() {
+	private AjaxResult todayProd(
+			@RequestParam("spjangcd") String spjangcd
+	) {
 		
-		List<Map<String, Object>> items = this.dashBoardService.todayProd();
+		List<Map<String, Object>> items = this.dashBoardService.todayProd(spjangcd);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -45,9 +49,11 @@ public class DashBoardController {
 	}
 	
 	@GetMapping("/year_def_prod")
-	private AjaxResult yearDefProd() {
+	private AjaxResult yearDefProd(
+			@RequestParam("spjangcd") String spjangcd
+	) {
 		
-		List<Map<String, Object>> items = this.dashBoardService.yearDefProd();
+		List<Map<String, Object>> items = this.dashBoardService.yearDefProd(spjangcd);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -56,9 +62,11 @@ public class DashBoardController {
 	}
 	
 	@GetMapping("/mat_stock")
-	private AjaxResult matStock() {
+	private AjaxResult matStock(
+			@RequestParam("spjangcd") String spjangcd
+	) {
 		
-		List<Map<String, Object>> items = this.dashBoardService.matStock();
+		List<Map<String, Object>> items = this.dashBoardService.matStock(spjangcd);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;
@@ -67,9 +75,11 @@ public class DashBoardController {
 	}
 	
 	@GetMapping("/custom_order")
-	private AjaxResult customOrder() {
+	private AjaxResult customOrder(
+			@RequestParam("spjangcd") String spjangcd
+	) {
 		
-		List<Map<String, Object>> items = this.dashBoardService.customOrder();
+		List<Map<String, Object>> items = this.dashBoardService.customOrder(spjangcd);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = items;

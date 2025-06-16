@@ -17,7 +17,7 @@ public class ProdOrderAService {
 	SqlRunner sqlRunner;
 
 	public List<Map<String, Object>> getProdOrderA(String dateFrom, String dateTo, String matGrpPk, String keyword,
-			String matType, String workcenterPk) {
+			String matType, String workcenterPk, String spjangcd) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("dateFrom", dateFrom);
@@ -26,6 +26,7 @@ public class ProdOrderAService {
 		paramMap.addValue("matType", matType);
 		paramMap.addValue("workcenterPk", workcenterPk);
 		paramMap.addValue("keyword", keyword);
+		paramMap.addValue("spjangcd", spjangcd);
 		
 		String sql = """
 		        select jr.id
@@ -53,6 +54,7 @@ public class ProdOrderAService {
 	            left join shift sh on sh."Code" = jr."ShiftCode"
                 left join user_profile up on up."User_id" = jr."_creater_id"
                 where jr."ProductionDate" between cast(:dateFrom as date) and cast(:dateTo as date)
+                and jr.spjangcd = :spjangcd
 				""";
 		if (StringUtils.isEmpty(workcenterPk) == false) sql += " and jr.\"WorkCenter_id\" = cast(:workcenterPk as Integer) ";
 		if (StringUtils.isEmpty(matGrpPk) == false) {

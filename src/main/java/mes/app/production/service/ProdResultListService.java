@@ -18,13 +18,14 @@ public class ProdResultListService {
 	SqlRunner sqlRunner;	
 	
 	// 작업목록
-	public List<Map<String, Object>> getProdResultList(String date_from, String date_to, String shift_code, Integer workcenter_pk){
+	public List<Map<String, Object>> getProdResultList(String date_from, String date_to, String shift_code, Integer workcenter_pk, String spjangcd){
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource(); 
 		dicParam.addValue("date_from", Timestamp.valueOf(date_from + " 00:00:00"));
 		dicParam.addValue("date_to", Timestamp.valueOf(date_to + " 23:59:59"));
 		dicParam.addValue("shift_code", shift_code);
 		dicParam.addValue("workcenter_pk", workcenter_pk);
+		dicParam.addValue("spjangcd", spjangcd);
 		
         String sql = """
 	            select jr.id as pk
@@ -58,6 +59,7 @@ public class ProdResultListService {
 	            left join shift sh on sh."Code" = mp."ShiftCode"
 	            where jr."ProductionDate" between :date_from and :date_to
 	            and jr."State" = 'finished'
+	            and jr.spjangcd = :spjangcd
             """;
         if (StringUtils.isEmpty(shift_code)==false) 
         	sql += " and mp.\"ShiftCode\" = :shift_code ";

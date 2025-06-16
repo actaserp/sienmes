@@ -18,12 +18,13 @@ public class ProdPrepareService {
 	SqlRunner sqlRunner;
 	
 	// 작업지시내역 조회
-	public List<Map<String, Object>> jobOrderSearch(String data_date, String shift_code, Integer workcenter_pk) {
+	public List<Map<String, Object>> jobOrderSearch(String data_date, String shift_code, Integer workcenter_pk, String spjangcd) {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();        
 		paramMap.addValue("data_date", Date.valueOf(data_date));  
 		paramMap.addValue("shift_code", shift_code);  
 		paramMap.addValue("workcenter_pk", workcenter_pk);
+		paramMap.addValue("spjangcd", spjangcd);
 		
         String sql = """
         		select jr.id
@@ -50,6 +51,7 @@ public class ProdPrepareService {
                 left join equ e on e.id = jr."Equipment_id"
                 left join shift sh on sh."Code" = jr."ShiftCode"
                 where jr."ProductionDate" = :data_date and jr."State" = 'ordered'
+                and jr.spjangcd = :spjangcd
         		""";
   		
 	    if (StringUtils.isEmpty(shift_code) == false) {

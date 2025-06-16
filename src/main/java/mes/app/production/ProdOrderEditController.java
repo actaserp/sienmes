@@ -54,9 +54,10 @@ public class ProdOrderEditController {
 			@RequestParam(value="end", required=false) String end,
 			@RequestParam(value="mat_group", required=false) Integer mat_group,
 			@RequestParam(value="mat_name", required=false) String mat_name,
+			@RequestParam("spjangcd") String spjangcd,
 			@RequestParam(value="not_flag", required=false) String not_flag) {
 
-		List<Map<String, Object>> items = this.prodOrderEditService.getSujuList(date_kind, start, end, mat_group, mat_name, not_flag);
+		List<Map<String, Object>> items = this.prodOrderEditService.getSujuList(date_kind, start, end, mat_group, mat_name, not_flag, spjangcd);
 		
         AjaxResult result = new AjaxResult();
         result.data = items;
@@ -131,6 +132,7 @@ public class ProdOrderEditController {
 			@RequestParam(value="workcenter_id", required=false) Integer workcenterId,
 			@RequestParam(value="equ_id", required=false) Integer equipmentId,
 			@RequestParam(value="AdditionalQty", required=false) Float additionalQty,
+			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -179,7 +181,8 @@ public class ProdOrderEditController {
 		jr.setStoreHouse_id(locPk);
 		jr.set_audit(user);
 		jr.setWorkIndex(1);
-		
+		jr.setSpjangcd(spjangcd);
+
 		if (workShift != null) {
 			jr.setShiftCode(workShift);
 		}

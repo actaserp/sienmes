@@ -47,4 +47,6 @@ public class MatLotCons extends AbstractAuditModel {
 	
 	@Column(name = "\"CurrentStock\"")
 	Float currentStock;
+
+	String spjangcd;
 }

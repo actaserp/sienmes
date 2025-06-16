@@ -66,4 +66,6 @@ public class MaterialConsume extends AbstractAuditModel{
 	@Column(name = "\"LotNumber\"")
 	String lotNumber;
 
+	String spjangcd;
+
 }

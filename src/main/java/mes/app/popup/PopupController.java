@@ -405,7 +405,7 @@ public class PopupController {
 		String sql = """
             select *
             from tb_accsubject
-            WHERE spjangcd = :spjangcd
+            WHERE 1=1
             and "useyn" = 'Y'
 			""";
 
@@ -464,19 +464,20 @@ public class PopupController {
 	@RequestMapping("/search_deduction")
 	public AjaxResult getSearchDeduction(
 			@RequestParam(value = "srchCode", required = false) String srchCode,
-			@RequestParam(value = "srchName", required = false) String srchName,
-			@RequestParam(value = "spjangcd") String spjangcd){
+			@RequestParam(value = "srchName", required = false) String srchName
+//			@RequestParam(value = "spjangcd") String spjangcd
+	){
 
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("srchCode", srchCode);
 		paramMap.addValue("srchName", srchName);
-		paramMap.addValue("spjangcd", spjangcd);
+//		paramMap.addValue("spjangcd", spjangcd);
 		AjaxResult result = new AjaxResult();
 
 		String sql = """
             select *
             from vat_deduction_type
-            WHERE spjangcd = :spjangcd
+            where 1=1
 			""";
 
 		if (srchCode != null && !srchCode.isEmpty()) {
@@ -516,7 +517,7 @@ public class PopupController {
 			 LEFT JOIN sys_code sc
 				 ON sc."CodeType" = 'gartcd'
 				AND sc."Code" = tc.gartcd
-			   where tc.spjangcd = :spjangcd
+			   where 1=1
 			""";
 
 		if (srchCode != null && !srchCode.isEmpty()) {

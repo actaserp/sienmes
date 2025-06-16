@@ -49,9 +49,10 @@ public class ProdOrderAController {
 			@RequestParam("workcenter_pk") String workcenterPk,
 			@RequestParam("mat_type") String matType,
 			@RequestParam("mat_grp_pk") String matGrpPk,
-			@RequestParam("keyword") String keyword
+			@RequestParam("keyword") String keyword,
+			@RequestParam("spjangcd") String spjangcd
 			){
-		List<Map<String, Object>> items = this.prodOrderAService.getProdOrderA(dateFrom,dateTo,matGrpPk,keyword,matType,workcenterPk);
+		List<Map<String, Object>> items = this.prodOrderAService.getProdOrderA(dateFrom,dateTo,matGrpPk,keyword,matType,workcenterPk,spjangcd);
 		AjaxResult result = new AjaxResult();
 		result.data = items;
 		return result;
@@ -93,6 +94,7 @@ public class ProdOrderAController {
 			@RequestParam("txtDescription") String txtDescription,
 			@RequestParam("txtOrderQty") Integer txtOrderQty,
 			@RequestParam("txtUnit") String txtUnit,
+			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 		
@@ -148,6 +150,7 @@ public class ProdOrderAController {
 		jr.setWorkIndex(1);
 		jr.setLotCount(1);
 		jr.setState("ordered");
+		jr.setSpjangcd(spjangcd);
 		
 		jr = this.jobResRepository.save(jr);	
 		

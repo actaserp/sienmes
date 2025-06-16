@@ -18,13 +18,14 @@ public class ProdOrderEditService {
 	SqlRunner sqlRunner;
 	
 	// 수주 목록 조회
-	public List<Map<String, Object>> getSujuList(String date_kind, String start, String end, Integer mat_group, String mat_name, String not_flag) {
+	public List<Map<String, Object>> getSujuList(String date_kind, String start, String end, Integer mat_group, String mat_name, String not_flag, String spjangcd) {
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("start", Timestamp.valueOf(start + " 00:00:00"));
 		dicParam.addValue("end", Timestamp.valueOf(end + " 23:59:59"));
 		dicParam.addValue("mat_group", mat_group);
 		dicParam.addValue("mat_name", mat_name);
+		dicParam.addValue("spjangcd", spjangcd);
 		
 		if (StringUtils.isEmpty(date_kind)) {
 			date_kind = "sales";
@@ -54,6 +55,7 @@ public class ProdOrderEditService {
 	                inner join mat_grp mg on mg.id = m."MaterialGroup_id"
 	                left join unit u on m."Unit_id" = u.id
 	                where 1 = 1 and mg."MaterialType"!='sangpum'
+	                and s.spjangcd = :spjangcd
         		""";
         
         if ("suju_date".equals(date_kind)) {

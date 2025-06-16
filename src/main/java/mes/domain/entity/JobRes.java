@@ -117,4 +117,6 @@ public class JobRes extends AbstractAuditModel {
 	
 	@Column(name = "\"EndDate\"")
 	Date endDate;
+
+	String spjangcd;
 }

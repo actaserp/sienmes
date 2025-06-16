@@ -116,9 +116,10 @@ public class ProductionResultController {
             @RequestParam(value = "shift_code", required = false) String shiftCode,
             @RequestParam(value = "workcenter_pk", required = false) String workcenterPk,
             @RequestParam(value = "mat_type", required = false) String mat_type,
-            @RequestParam(value = "is_include_comp", required = false) String isIncludeComp) {
+            @RequestParam(value = "is_include_comp", required = false) String isIncludeComp,
+            @RequestParam("spjangcd") String spjangcd) {
 
-        List<Map<String, Object>> items = this.productionResultService.getProdResult(dateFrom, dateTo, shiftCode, workcenterPk, mat_type, isIncludeComp);
+        List<Map<String, Object>> items = this.productionResultService.getProdResult(dateFrom, dateTo, shiftCode, workcenterPk, mat_type, isIncludeComp, spjangcd);
 
         AjaxResult result = new AjaxResult();
         result.data = items;
@@ -298,6 +299,7 @@ public class ProductionResultController {
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "mat_pk", required = false) Integer matPk,
             @RequestParam(value = "order_num", required = false) String order_num,
+            @RequestParam("spjangcd") String spjangcd,
             HttpServletRequest request,
             Authentication auth) {
 
@@ -363,6 +365,7 @@ public class ProductionResultController {
         er.setWorkOrderNumber(order_num);
         er.setRunState("run");
         er.set_audit(user);
+        er.setSpjangcd(spjangcd);
 
         this.equRunRepository.save(er);
 
@@ -376,6 +379,7 @@ public class ProductionResultController {
     @Transactional
     public AjaxResult defectSave(
             @RequestParam(value = "jr_pk", required = false) Integer jrPk,
+            @RequestParam("spjangcd") String spjangcd,
             @RequestBody MultiValueMap<String, Object> defect_list,
             HttpServletRequest request,
             Authentication auth) {
@@ -407,12 +411,14 @@ public class ProductionResultController {
                 jrd.setProcessOrder(0);
                 jrd.setLotIndex(0);
                 jrd.set_audit(user);
+                jrd.setSpjangcd(spjangcd);
                 this.jobResDefectRepository.save(jrd);
 
             } else {
                 jrd.setDefectQty(defectQty);
                 jrd.setDescription(defectRemark);
                 jrd.set_audit(user);
+                jrd.setSpjangcd(spjangcd);
                 this.jobResDefectRepository.save(jrd);
 
             }
@@ -860,6 +866,7 @@ public class ProductionResultController {
     public AjaxResult chasuAdd(
             @RequestParam(value = "jr_pk", required = false) Integer jrPk,
             @RequestParam(value = "good_qty", required = false) float goodQty,
+            @RequestParam("spjangcd") String spjangcd,
             HttpServletRequest request,
             Authentication auth) {
 
@@ -934,6 +941,7 @@ public class ProductionResultController {
         mp.set_audit(user);
         mp.setLastProcessYN("Y");
         mp.setLotNumber(lotNumber);
+        mp.setSpjangcd(spjangcd);
         mp = this.matProduceRepository.save(mp); // mat_prod 생성
 
         // 2.생산품 mat_lot 생성
@@ -948,6 +956,7 @@ public class ProductionResultController {
         ml.setSourceTableName("mat_produce");
         ml.setStoreHouseId(mp.getStoreHouseId());
         ml.set_audit(user);
+        ml.setSpjangcd(spjangcd);
         ml = this.matLotRepository.save(ml); // materialLot 저장
 
         // 차수생산량 만큼 good_qty량 만큼 BOM 수량조회
@@ -1016,7 +1025,7 @@ public class ProductionResultController {
                     mlc.setSourceTableName("mat_produce");
                     mlc.set_audit(user);
                     mlc.setCurrentStock(ml.getCurrentStock()); // 당시 재고량
-
+                    mlc.setSpjangcd(spjangcd);
                     if (currentStock >= remainQty) {
                         // 해당로트의현재수량 가능
                         mlc.setOutputQty(remainQty);
@@ -1080,6 +1089,7 @@ public class ProductionResultController {
             mc.setState("finished");
             mc.set_status("a");
             mc.setStoreHouseId(consMat.getStoreHouseId());
+            mc.setSpjangcd(spjangcd);
             mc = this.matConsuRepository.save(mc);
 
             //1. mat_inout 생성=> BOM 수량만큼 재고를 차감한다.
@@ -1099,6 +1109,7 @@ public class ProductionResultController {
             mic.set_status("a");
             mic.setDescription("차수생산 투입재고 차감");
             mic.set_audit(user);
+            mic.setSpjangcd(spjangcd);
 
             mic = this.matInoutRepository.save(mic);
         } // for문 끝
@@ -1120,6 +1131,7 @@ public class ProductionResultController {
         mip.set_status("a");
         mip.setDescription("차수생산입고");
         mip.set_audit(user);
+        mip.setSpjangcd(spjangcd);
 
         mip = this.matInoutRepository.save(mip);
 

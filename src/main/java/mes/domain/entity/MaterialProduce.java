@@ -95,4 +95,6 @@ public class MaterialProduce extends AbstractAuditModel {
 
 	@Column(name = "\"BomOutputAmount\"")
 	Float bomOutputAmount;
+
+	String spjangcd;
 }

@@ -232,7 +232,7 @@ public class ProductionResultService {
     }
 
     public List<Map<String, Object>> getProdResult(String dateFrom, String dateTo, String shiftCode,
-                                                   String workcenterPk, String matType, String isIncludeComp) {
+                                                   String workcenterPk, String matType, String isIncludeComp, String spjangcd) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("dateFrom", dateFrom);
@@ -241,6 +241,7 @@ public class ProductionResultService {
         dicParam.addValue("workcenterPk", workcenterPk);
         dicParam.addValue("matType", matType);
         dicParam.addValue("isIncludeComp", isIncludeComp);
+		dicParam.addValue("spjangcd", spjangcd);
 
         String sql = """
                 select jr.id
@@ -279,6 +280,7 @@ public class ProductionResultService {
                          left join shift sh on sh."Code" = jr."ShiftCode"
                          where jr."ProductionDate" between cast(:dateFrom as date) and cast(:dateTo as date)
                          and jr."Routing_id" is null 
+                         and jr.spjangcd = :spjangcd
                 	""";
         if (StringUtils.isEmpty(matType) == false) sql += "and mg.\"MaterialType\" = :matType ";
         if (!shiftCode.equals("")) sql += " and jr.\"ShiftCode\" = :shiftCode ";

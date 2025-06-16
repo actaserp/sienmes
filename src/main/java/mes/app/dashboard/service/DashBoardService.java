@@ -18,13 +18,16 @@ public class DashBoardService {
 	@Autowired
 	SqlRunner sqlRunner;
 	
-	public List<Map<String, Object>> todayWeekProd() {
-		
+	public List<Map<String, Object>> todayWeekProd(String spjangcd) {
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("spjangcd", spjangcd);
+
 		String sql = """
 				with aa as (
 						select * from job_res jr
 						-- 금일
-						where jr."ProductionDate" = current_date 
+						where jr."ProductionDate" = current_date
+						and jr."spjangcd" = :spjangcd
 						), a1 as (
 							-- 지시량
 						     select sum(aa."OrderQty") as total_qty from aa where aa."State" !='canceled' 
@@ -38,6 +41,7 @@ public class DashBoardService {
 						select * from job_res jr
 						-- 전일
 						where jr."ProductionDate" = current_date - 1
+						and jr."spjangcd" = :spjangcd
 						), b1 as (
 						     select sum(bb."OrderQty") as total_qty from bb where bb."State" !='canceled' 
 						), b2 as(
@@ -48,6 +52,7 @@ public class DashBoardService {
 						select * from job_res jr
 						-- 금주
 						where jr."ProductionDate" between  date_trunc('week', current_date)::date and date_trunc('week', current_date)::date + 6
+						and jr."spjangcd" = :spjangcd
 						), c1 as (
 						     select sum(cc."OrderQty") as total_qty from cc where cc."State" !='canceled' 
 						), c2 as(
@@ -58,6 +63,7 @@ public class DashBoardService {
 						select * from job_res jr
 						-- 전주
 						where jr."ProductionDate" between date_trunc('week', current_date - 7)::date and date_trunc('week', current_date - 7)::date + 6
+						and jr."spjangcd" = :spjangcd
 						), d1 as (
 						     select sum(dd."OrderQty") as total_qty from dd where dd."State" !='canceled' 
 						), d2 as(
@@ -102,12 +108,15 @@ public class DashBoardService {
 						left join d3 on 1=1
 					""";
 		
-		List<Map<String,Object>> items = this.sqlRunner.getRows(sql, null);
+		List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
 		
 		return items;
 	}
 
-	public List<Map<String, Object>> todayProd() {
+	public List<Map<String, Object>> todayProd(String spjangcd) {
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("spjangcd", spjangcd);
+
 		String sql = """
 					select m."Name" as prod, mg."Name" as prod_grp
 					, sum(case when jr."State" != 'canceled' then jr."OrderQty" else 0 end) as ord
@@ -119,18 +128,22 @@ public class DashBoardService {
 					from job_res jr 
 					inner join material m on jr."Material_id"  = m.id
 					inner join mat_grp mg on m."MaterialGroup_id"  = mg.id
-					where jr."ProductionDate"  = current_date 
+					where jr."ProductionDate"  = current_date
+					and jr."spjangcd" = :spjangcd 
 					group by m."Name", mg."Name" 
 					order by ord desc
 					limit 5
 				""";
 		
-		List<Map<String,Object>> items = this.sqlRunner.getRows(sql, null);
+		List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
 		
 		return items;
 	}
 
-	public List<Map<String, Object>> yearDefProd() {
+	public List<Map<String, Object>> yearDefProd(String spjangcd) {
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("spjangcd", spjangcd);
+
 		String sql = """
 			select mg."Name" as prod_grp , m."Name" as prod , coalesce(m."UnitPrice",0) as unitp
 			,coalesce(sum(jrd."DefectQty") * m."UnitPrice",0) as dep
@@ -140,18 +153,22 @@ public class DashBoardService {
 			left join material m on jr."Material_id"  = m.id
 			left join mat_grp mg on m."MaterialGroup_id"  = mg.id
 			where to_char(jr."ProductionDate",'YYYY') = to_char(current_date,'YYYY')
+			and jr."spjangcd" = :spjangcd
 			group by mg."Name" , m."Name" , m."UnitPrice"
 			having coalesce(sum(jrd."DefectQty"),0) > 0
 			order by coalesce(sum(jr."DefectQty") * m."UnitPrice",0) desc
 			limit 5
 			""";
 	
-	List<Map<String,Object>> items = this.sqlRunner.getRows(sql, null);
+	List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
 	
 	return items;
 	}
 
-	public List<Map<String, Object>> matStock() {
+	public List<Map<String, Object>> matStock(String spjangcd) {
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("spjangcd", spjangcd);
+
 		String sql = """
 				select m."Name" as prod ,mg."Name" as prod_grp
 				,coalesce(m."UnitPrice",0) as unitp
@@ -160,31 +177,35 @@ public class DashBoardService {
 				from material m 
 				inner join mat_grp mg  on mg.id = m."MaterialGroup_id" 
 				where m."CurrentStock" > 0
+				and m."spjangcd" = :spjangcd
 				group by m."Name" , mg."Name" , m."UnitPrice" 
 				order by coalesce(sum(m."CurrentStock") * m."UnitPrice",0) desc
 				limit 5
 				""";
 		
-	List<Map<String,Object>> items = this.sqlRunner.getRows(sql, null);
+	List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
 	
 	return items;
 	}
 
-	public List<Map<String, Object>> customOrder() {
-		
+	public List<Map<String, Object>> customOrder(String spjangcd) {
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("spjangcd", spjangcd);
+
 		String sql = """
 				select mg."Name" as prod_grp, fn_code_name('mat_type', mg."MaterialType" ) as mat_type_name, m."Name" as prod,m."Code" as prod_code ,coalesce(sum(s."SujuQty") * m."UnitPrice" ,0) as sujup
 				from suju s
 				inner join material m on m.id = s."Material_id" 
 				inner join mat_grp mg on mg.id = m."MaterialGroup_id" 
 				where to_char(s."JumunDate", 'YYYY') = to_char(current_date, 'YYYY') 
+				and m."spjangcd" = :spjangcd
 				group by m."Name" , mg."Name" ,m."UnitPrice", m."Code" , mg."MaterialType"
 				having coalesce(sum(s."SujuQty") * m."UnitPrice" ,0) > 0
 				order by sujup desc
 				limit 10
 				""";
 		
-	List<Map<String,Object>> items = this.sqlRunner.getRows(sql, null);
+	List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
 	
 	return items;
 	}

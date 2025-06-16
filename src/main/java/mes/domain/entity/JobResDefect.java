@@ -45,4 +45,6 @@ public class JobResDefect extends AbstractAuditModel{
 	
 	@Column(name = "\"DetailTableName\"")
 	String detailTableName;
+
+	String spjangcd;
 }

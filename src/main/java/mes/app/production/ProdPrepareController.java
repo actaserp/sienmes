@@ -62,9 +62,10 @@ public class ProdPrepareController {
     		@RequestParam(value="data_date", required=false) String data_date,
     		@RequestParam(value="shift_code", required=false) String shift_code,
     		@RequestParam(value="workcenter_pk", required=false) Integer workcenter_pk,
+			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request) {
 		
-        List<Map<String, Object>> items = this.prodPrepareService.jobOrderSearch(data_date, shift_code, workcenter_pk);      
+        List<Map<String, Object>> items = this.prodPrepareService.jobOrderSearch(data_date, shift_code, workcenter_pk, spjangcd);
         AjaxResult result = new AjaxResult();
         result.data = items;        
 		return result;
