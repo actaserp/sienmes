@@ -32,12 +32,12 @@ public class UserGroupService {
 				
 			
 		if (super_user == false) {
-			sql += "and \"Code\" <> 'dev' ";
+			sql += " and \"Code\" <> 'dev' ";
 		}
 			
 		
 		sql += " order by \"Name\" ";
-		List<Map<String,Object>> items = this.sqlRunner.getRows(sql, null);
+		List<Map<String,Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		return items;
 		
 	}

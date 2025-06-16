@@ -2,6 +2,7 @@ package mes.app.system;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -43,7 +44,7 @@ public class UserGroupController{
 		Boolean super_user = user.getSuperUser();
 		
 		if (super_user == false ) {
-			super_user = user.getUserProfile().getUserGroup().getCode() == "dev" ;
+			super_user = Objects.equals(user.getUserProfile().getUserGroup().getCode(), "dev");
 		}			
 				
 		
