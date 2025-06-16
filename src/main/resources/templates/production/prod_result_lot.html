@@ -1526,12 +1526,13 @@
                         $('#btnWorkStop').text('일시중지');
 
                     } else if (state === 'finished') {
-                        $('#btnWorkStop').attr('disabled', 'disabled');
+                        $('#btnWorkStart').attr('disabled', 'disabled');
+                        $('#btnWorkStop').attr('disabled', 'disabled').text('일시중지');
                         $('#btnLOTbarcode').attr('disabled', false);
                         $('#btnConsumedSave').attr('disabled', 'disabled');
                         $('#btnDel').attr('disabled', 'disabled');
+                        $('#btnWorkFinish').attr('disabled', 'disabled');
                         $('#btnFinishCancel').removeAttr('disabled');
-                        $('#btnWorkStop').text('일시중지');
                     } else {
                         $('#btnWorkStart').removeAttr('disabled');
                         $('#btnSave').removeAttr('disabled');
@@ -3053,6 +3054,7 @@
 
                 let fnLoadStopList = function (order_num) {
                     let fnsuccess = function (result) {
+                        console.log('result', result);
                         if (result.data !== null) {
                             _this.stopGrid.itemsSource = new wijmo.collections.CollectionView(result.data);
                         }

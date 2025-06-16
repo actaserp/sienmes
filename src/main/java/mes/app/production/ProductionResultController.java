@@ -3,8 +3,10 @@ package mes.app.production;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -484,8 +486,18 @@ public class ProductionResultController {
 
         User user = (User) auth.getPrincipal();
 
-        Timestamp start_time = Timestamp.valueOf(prodDate + ' ' + startTime + ":00");
-        Timestamp end_time = Timestamp.valueOf(prodDate + ' ' + endTime + ":00");
+        // 현재 시간의 초를 가져옴
+        int currentSecond = LocalDateTime.now().getSecond();
+        String secondStr = String.format(":%02d", currentSecond);
+
+        // start_time 조합
+        String startTimeStr = prodDate + " " + startTime + secondStr;
+        Timestamp start_time = Timestamp.valueOf(startTimeStr);
+
+        // end_time 조합
+        String endTimeStr = prodDate + " " + endTime + secondStr;
+        Timestamp end_time = Timestamp.valueOf(endTimeStr);
+
         Timestamp prod_date = CommonUtil.tryTimestamp(prodDate);
 
         List<MaterialConsume> mcList = this.matConsuRepository.findByJobResponseId(jrPk);
@@ -577,11 +589,14 @@ public class ProductionResultController {
             equ.setDescription("완료 취소");
             equRunRepository.save(equ);
 
+            Timestamp nowWithCurrentSecond = Timestamp.valueOf(LocalDateTime.now());
+
+
             // 그리고 새로운 run 상태로 재시작
             EquRun newRun = new EquRun();
             newRun.setEquipmentId(jr.getEquipment_id());
             newRun.setWorkOrderNumber(jr.getWorkOrderNumber());
-            newRun.setStartDate(DateUtil.getNowTimeStamp()); // 지금 시각
+            newRun.setStartDate(nowWithCurrentSecond);
             newRun.setRunState("run");
             newRun.set_audit(user);
 
@@ -1716,7 +1731,16 @@ public class ProductionResultController {
 
         User user = (User) auth.getPrincipal();
 
-        Timestamp stop_time = Timestamp.valueOf(stop_date + ' ' + stopTime + ":00");
+
+        // 현재 시간의 초를 구함
+        int currentSecond = LocalDateTime.now().getSecond();
+
+        // stopTime (예: "10:32")에 초를 붙임 → "10:32:47"
+        String fullStopTime = stopTime + ":" + String.format("%02d", currentSecond);
+
+        // 최종 Timestamp 생성
+        Timestamp stop_time = Timestamp.valueOf(stop_date + " " + fullStopTime);
+
         Timestamp now = DateUtil.getNowTimeStamp();
         Optional<EquRun> runningRunOpt = equRunRepository.findLatestRunningByEquipmentAndOrder(Equipment_id, WorkOrderNumber);
         if (runningRunOpt.isPresent()) {
