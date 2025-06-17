@@ -104,8 +104,8 @@ public class CompanyController {
 			@RequestParam("account_manager") String accountManager,
 			@RequestParam("account_manager_phone") String accountManagerPhone,
 			@RequestParam("last_trading_day") String lastTradingDay,
-			@RequestParam("receivable_amount") String receivableAmount,     
-			@RequestParam("unpaid_amount") String unpaidAmount,             
+			@RequestParam(value = "receivable_amount", required = false) String receivableAmount,
+			@RequestParam(value = "unpaid_amount", required = false) String unpaidAmount,
 			/*@RequestParam("credit_limit_amount") String creditLimitAmount,*/
 			@RequestParam("tranding_bank") String trandingBank,
 			@RequestParam("account_holder") String accountHolder,

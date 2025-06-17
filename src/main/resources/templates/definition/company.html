@@ -189,7 +189,7 @@
                                         </th>
                                         <td colspan="2">
                                             <input type="text" style="width: 100%;" id="business_number"
-                                                   name="business_number">
+                                                   name="business_number" maxlength="15" oninput="formatNumber(this)">
                                         </td>
 
                                         <th>
@@ -727,9 +727,7 @@
                         let item = s.rows[e.row].dataItem;
 
                         if (col.binding === "business_number" && item.business_number) {
-                            // 사업자번호 형식 변환 (앞 3자리-중간 2자리-끝 5자리)
-                            let bn = item.business_number.replace(/(\d{3})(\d{2})(\d{5})/, "$1-$2-$3");
-                            e.cell.textContent = bn;
+                            e.cell.textContent = formatBusinessNumber(item.business_number);
                         }
 
                         if (col.binding === "comp_code2" && item.comp_code2) {
@@ -789,8 +787,14 @@
                         let row = hitTest.row;
                         let selectedItem = this.grid.rows[row].dataItem;
                         _this.showPriceList(selectedItem.id)
+                        setBusinessNumberToInput(selectedItem.business_number);
                     }
                 });
+                function setBusinessNumberToInput(businessNumber) {
+                    const input = document.getElementById("business_number");
+                    input.value = businessNumber;
+                    formatNumber(input); // 포맷 적용
+                }
 
 
                 /*let config1 = {
@@ -1754,6 +1758,35 @@
             page.searchMainData1();
 
         });
+        // 등록시 input 사업자번호 및 주민번호 포맷팅 함수
+        function formatNumber(input) {
+            let value = input.value.replace(/[^0-9]/g, ""); // 숫자만
+            if (value.length === 10) {
+                // 사업자번호: 000-00-00000
+                value = value.replace(/^(\d{3})(\d{2})(\d{5})$/, "$1-$2-$3");
+            } else if (value.length === 13) {
+                // 주민번호: 000000-0000000
+                value = value.replace(/^(\d{6})(\d{7})$/, "$1-$2");
+            }
+            input.value = value;
+        }
+        // 그리드 바인드시 포맷팅 함수
+        function formatBusinessNumber(num) {
+            if (!num) return "";
+            let value = num.replace(/[^0-9]/g, ""); // 숫자만 추출
+
+            if (value.length === 10) {
+                // 사업자번호
+                return value.replace(/^(\d{3})(\d{2})(\d{5})$/, "$1-$2-$3");
+            } else if (value.length === 13) {
+                // 주민번호
+                return value.replace(/^(\d{6})(\d{7})$/, "$1-$2");
+            } else {
+                // 그 외: 숫자 그대로
+                return value;
+            }
+        }
+
     </script>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script>
