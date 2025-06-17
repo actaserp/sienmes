@@ -35,7 +35,9 @@ public class ApprovalListService {//결재목록
                      e080.title,
                      e080.indate,
                      ps."Value" as papercd_name,
-                     ac."Value" as appgubun_display
+                     ac."Value" as appgubun_display,
+                     tb204.remark
+                     -- 파일 추가될 경우 주석부분 추가작업 필요
          --          CASE
          --               WHEN EXISTS (
          --                    SELECT 1 FROM TB_AA010ATCH
@@ -57,6 +59,7 @@ public class ApprovalListService {//결재목록
                 LEFT JOIN user_code uc ON uc."Code"= e080.appgubun
                 LEFT JOIN sys_code ps ON ps."Code" = e080.papercd AND ps."CodeType" = 'appr_doc'
                 LEFT JOIN sys_code ac ON ac."Code" = e080.appgubun AND ac."CodeType" = 'approval_status'
+                LEFT JOIN tb_pb204 tb204 ON e080.appnum = tb204.appnum
                 -- LEFT JOIN tb_ca510 ca510
                 --     ON ca510.com_cls = '620'
                 --    AND ca510.com_code = e080.papercd

@@ -38,11 +38,14 @@ public class PaymentDetailService {
                      e080.appnum,
                      e080.personid,
                      e080.title,
-                     e080.indate
+                     e080.indate,
+                     pb204.remark
                      -- files.fileListJson
                  FROM tb_e080 e080
                  LEFT JOIN sys_code sc ON sc."Code" = e080.appgubun AND sc."CodeType" = 'approval_status'
                  LEFT JOIN sys_code scd ON scd."Code" = e080.papercd AND scd."CodeType" = 'appr_doc'
+                 -- 휴가신청서 join
+                 LEFT JOIN tb_pb204 pb204 ON e080.appnum = pb204.appnum
                  -- LEFT JOIN tb_ca510 ca510 ON ca510.com_cls = '620' AND ca510.com_code = e080.papercd
                  -- LEFT JOIN LATERAL (
                  -- SELECT json_agg(row_to_json(f)) AS fileListJson
