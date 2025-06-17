@@ -186,7 +186,7 @@ public class WeatherService {
 			uri = new URI(apiEndpoint + servicePath +
 					"?serviceKey=" + apiKey +
 					"&pageNo=1" +
-					"&numOfRows=10" +
+					"&numOfRows=100" +
 					"&dataType=json" +
 					"&base_date=" + date +
 					"&base_time=" + time +

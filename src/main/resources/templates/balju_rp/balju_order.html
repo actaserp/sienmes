@@ -668,10 +668,14 @@
 
               $content.find('#unitPrice').prop('readonly', true).val(unitPrice);
               originalUnitPrice = unitPrice;
+
               $BaljuUnitPrice.val(unitPrice);
+              formatNumberInput(unitPrice.toString(), '#BaljuUnitPrice'); // 콤마 포맷 적용
+
               $BaljuPrice.val(supplyPrice);
+              formatNumberInput(supplyPrice.toString(), '#BaljuPrice');   // 콤마 포맷 적용
+
             } else {
-              // 데이터 없을 때 초기화
               $content.find('#unitPrice').val('0');
               originalUnitPrice = '0';
 

@@ -331,13 +331,19 @@ public class AccountsPayableListService {
             x.date,
             x.summary,
             COALESCE(x.amount, x.totalamt, x.accout) AS total_amount,
-            SUM(
-              COALESCE(x.amount, 0) + COALESCE(x.totalamt, 0) - COALESCE(x.accout, 0)
-            ) OVER (
-              PARTITION BY x.cltcd
-              ORDER BY x.date, x.remaksseq, x.itemnm
-              ROWS UNBOUNDED PRECEDING
-            ) AS balance,        
+            SUM(COALESCE(x.amount, 0) + COALESCE(x.totalamt, 0) - COALESCE(x.accout, 0)
+            ) OVER ( 
+            PARTITION BY x.cltcd
+            ORDER BY x.date,
+               CASE 
+                 WHEN x.summary = '전잔액' THEN 0
+                 WHEN x.summary = '매입' THEN 1
+                 WHEN x.summary = '지급' THEN 2
+                 ELSE 99
+               END,
+               x.remaksseq,
+               x.itemnm
+            ROWS UNBOUNDED PRECEDING) AS balance,        
             x.accout,
             x.totalamt,
             x.itemnm,
@@ -351,7 +357,17 @@ public class AccountsPayableListService {
             x.memo,
             x.remark1
         FROM union_data x
-        ORDER BY x.cltcd, x.date, x.remaksseq
+        ORDER BY
+            x.cltcd,
+            x.date,
+            CASE
+                WHEN x.summary = '전잔액' THEN 0
+                WHEN x.summary = '매입' THEN 1
+                WHEN x.summary = '지급' THEN 2
+                ELSE 99
+            END,
+            x.remaksseq,
+            x.itemnm
         """;
 
     List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
