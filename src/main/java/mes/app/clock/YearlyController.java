@@ -45,7 +45,15 @@ public class YearlyController {
 
 
         List<Map<String, Object>> items = this.clockYearlyService.getYearlyList(year,name,spjangcd,startdate,rtflag);
-
+        for(Map<String, Object> item : items){
+            Object rtdateObj = item.get("rtdate");
+            if (rtdateObj != null && rtdateObj.toString().length() == 8) {
+                String rtdate = rtdateObj.toString();
+                // yyyy-mm-dd 변환
+                String formatted = rtdate.substring(0, 4) + "-" + rtdate.substring(4, 6) + "-" + rtdate.substring(6, 8);
+                item.put("rtdate", formatted);
+            }
+        }
         AjaxResult result = new AjaxResult();
         result.data = items;
 
@@ -224,7 +232,29 @@ public class YearlyController {
         AjaxResult result = new AjaxResult();
 
         List<Map<String, Object>> item = this.clockYearlyService.getYearlyDetail(id,year);
-
+        for(Map<String, Object> detail : item){
+            Object reqdateObj = detail.get("reqdate");
+            Object frdateObj = detail.get("frdate");
+            Object todateObj = detail.get("todate");
+            if (reqdateObj != null && reqdateObj.toString().length() == 8) {
+                String reqdate = reqdateObj.toString();
+                // yyyy-mm-dd 변환
+                String formatted = reqdate.substring(0, 4) + "-" + reqdate.substring(4, 6) + "-" + reqdate.substring(6, 8);
+                detail.put("reqdate", formatted);
+            }
+            if (frdateObj != null && frdateObj.toString().length() == 8) {
+                String frdate = frdateObj.toString();
+                // yyyy-mm-dd 변환
+                String formatted = frdate.substring(0, 4) + "-" + frdate.substring(4, 6) + "-" + frdate.substring(6, 8);
+                detail.put("frdate", formatted);
+            }
+            if (todateObj != null && todateObj.toString().length() == 8) {
+                String todate = todateObj.toString();
+                // yyyy-mm-dd 변환
+                String formatted = todate.substring(0, 4) + "-" + todate.substring(4, 6) + "-" + todate.substring(6, 8);
+                detail.put("todate", formatted);
+            }
+        }
         result.data = item;
         return result;
     }

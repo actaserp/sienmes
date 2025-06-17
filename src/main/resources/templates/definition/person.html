@@ -48,6 +48,36 @@
                             </div>
                         </dd>
                     </dl>
+                    <dl>
+                        <dt>
+                            <label>재직여부</label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="searchRtflag" name="searchRtflag"></select>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label>부서</label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="searchDepart" name="searchDepart"></select>
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <label>근무조</label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <select id="searchShift" name="searchShift"></select>
+                            </div>
+                        </dd>
+                    </dl>
 
                     <dl>
                         <dt><span class="eq"></span></dt>
@@ -262,6 +292,9 @@
 
             let worker_name = $('#txtName').val();
             let workcenter_id = $('#cboWcType').val();
+            let searchRtflag = $('#searchRtflag').val();
+            let searchDepart = $('#searchDepart').val();
+            let searchShift = $('#searchShift').val();
 
             $.ajax({
                 url: '/api/definition/person/read',
@@ -269,6 +302,9 @@
                 data: {
                     'worker_name': worker_name,
                     'workcenter_id': workcenter_id,
+                    'searchRtflag' : searchRtflag,
+                    'searchDepart' : searchDepart,
+                    'searchShift' : searchShift,
                     spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
@@ -314,6 +350,18 @@
                 columns: columns,
                 isReadOnly: true,
                 itemsSource: viewdata
+            });
+            // 퇴직 색 부여
+            theGrid.formatItem.addHandler(function(s, e) {
+                if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                    let col = s.columns[e.col];
+                    let item = s.rows[e.row].dataItem;
+
+                    // 부서 컬럼 && 값이 '퇴직'이면
+                    if (col.binding === 'rtflag' && item.rtflag === '퇴직') {
+                        e.cell.style.backgroundColor = '#ffe5e5'; // 연한 빨강
+                    }
+                }
             });
 
 
@@ -376,6 +424,9 @@ console.log(selectedItem);
         function searchMainData() {
             let worker_name = $('#txtName').val();
             let workcenter_id = $('#cboWcType').val();
+            let searchRtflag = $('#searchRtflag').val();
+            let searchDepart = $('#searchDepart').val();
+            let searchShift = $('#searchShift').val();
 
             $.ajax({
                 url: '/api/definition/person/read',
@@ -383,6 +434,9 @@ console.log(selectedItem);
                 data: {
                     'worker_name': worker_name,
                     'workcenter_id': workcenter_id,
+                    'searchRtflag' : searchRtflag,
+                    'searchDepart' : searchDepart,
+                    'searchShift' : searchShift,
                     spjangcd: sessionStorage.getItem('spjangcd'),
                 },
                 async: false,
@@ -579,8 +633,11 @@ console.log(selectedItem);
             AjaxUtil.fillSelectOptions($('#WorkCenter_id'), 'workcenter', 'choose', false);
             AjaxUtil.fillSelectOptions($('#Factory_id'), 'factory', '', false);
             AjaxUtil.fillSelectOptions($('#ShiftCode'), 'shift', 'choose', false);
+            AjaxUtil.fillSelectOptions($('#searchShift'), 'shift', 'choose', false);
             AjaxUtil.fillSelectOptions($('#Depart_id'), 'depart', 'choose', false);
+            AjaxUtil.fillSelectOptions($('#searchDepart'), 'depart', 'all', false);
             AjaxUtil.fillSelectOptions($('#rtflag'), 'system_code', 'choose', '', 'rtflag_type');
+            AjaxUtil.fillSelectOptions($('#searchRtflag'), 'system_code', 'all', '', 'rtflag_type');
             AjaxUtil.fillSelectOptions($('#work_division'), 'system_code', 'choose', '', 'work_division');
             AjaxUtil.fillSelectOptions($('#jik_id'), 'system_code', 'choose','', 'jik_type');
 

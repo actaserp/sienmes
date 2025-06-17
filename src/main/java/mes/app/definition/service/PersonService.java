@@ -16,12 +16,15 @@ public class PersonService {
 	@Autowired
 	SqlRunner sqlRunner;
 	
-	public List<Map<String, Object>> getPersonList(String workerName, String workcenterId,String spjangcd) {
+	public List<Map<String, Object>> getPersonList(String workerName, String workcenterId, String spjangcd, String searchRtflag, Integer searchDepart, String searchShift) {
 		
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();        
         dicParam.addValue("workerName", workerName);
         dicParam.addValue("workcenterId", workcenterId);
 		dicParam.addValue("spjangcd", spjangcd);
+		dicParam.addValue("searchRtflag", searchRtflag);
+		dicParam.addValue("searchDepart", searchDepart);
+		dicParam.addValue("searchShift", searchShift);
         
         String sql = """
         		SELECT p.id
@@ -61,6 +64,9 @@ public class PersonService {
         		""";
         if (StringUtils.isEmpty(workerName)==false) sql +=" and upper(p.\"Name\") like concat('%%',upper(:workerName),'%%') ";
         if (StringUtils.isEmpty(workcenterId)==false) sql +=" and p.\"WorkCenter_id\" = cast(:workcenterId as Integer) ";
+		if (StringUtils.isEmpty(searchRtflag)==false) sql +=" and p.rtflag = :searchRtflag ";
+		if (searchDepart != null) sql +=" and p.\"Depart_id\" = :searchDepart ";
+		if (StringUtils.isEmpty(searchShift)==false) sql +=" and p.\"ShiftCode\" = :searchShift ";
         
         sql += " order by p.id ";
         

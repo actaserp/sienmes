@@ -34,9 +34,17 @@ public class PersonController {
 			@RequestParam("worker_name") String workerName,
 			@RequestParam("workcenter_id") String workcenterId,
 			@RequestParam(value ="spjangcd") String spjangcd,
+			@RequestParam(value ="searchRtflag", required = false) String searchRtflag,
+			@RequestParam(value ="searchDepart", required = false) Integer searchDepart,
+			@RequestParam(value ="searchShift", required = false) String searchShift,
     		HttpServletRequest request) {
        
-        List<Map<String, Object>> items = this.personService.getPersonList(workerName,workcenterId,spjangcd);
+        List<Map<String, Object>> items = this.personService.getPersonList(workerName
+				, workcenterId
+				, spjangcd
+				, searchRtflag
+				, searchDepart
+				, searchShift);
                		
         AjaxResult result = new AjaxResult();
         result.data = items;        				
