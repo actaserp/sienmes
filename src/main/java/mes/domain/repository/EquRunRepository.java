@@ -22,4 +22,5 @@ public interface EquRunRepository extends JpaRepository<EquRun, Integer>{
 	Optional<EquRun> findLatestCompleteByEquipmentAndOrder(@Param("equipmentId") Integer equipmentId, @Param("orderNum") String orderNum);
 
 	long countByEquipmentIdAndRunState(Integer equipmentId, String runState);
+
 }

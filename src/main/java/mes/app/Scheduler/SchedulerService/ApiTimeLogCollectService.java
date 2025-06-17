@@ -10,7 +10,6 @@ import mes.app.Scheduler.LogProcessor.LogFileReader;
 import mes.app.Scheduler.LogProcessor.LogParserStrategy;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +17,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@Deprecated
 public class ApiTimeLogCollectService {
 
     private final LogParserStrategy logParserStrategy;
@@ -32,8 +32,8 @@ public class ApiTimeLogCollectService {
 
         try {
 
-            LocalDateTime now = LocalDateTime.now().minusHours(1);
-            String formatted = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH"));
+            LocalDateTime now = LocalDateTime.now().minusDays(1);
+            String formatted = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             String logPath = "logs/api-time/api_time." + formatted + ".log";
 
             LogFileReader reader = new LogFileReader(logParserStrategy);

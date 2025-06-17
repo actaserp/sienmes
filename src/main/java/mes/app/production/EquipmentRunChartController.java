@@ -1,11 +1,9 @@
 package mes.app.production;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,73 +44,69 @@ public class EquipmentRunChartController {
     		@RequestParam(value="date_to", required=false) String date_to,
     		@RequestParam(value="id", required=false) Integer id,
     		@RequestParam(value="runType", required=false) String runType,
-			HttpServletRequest request) {
+			@RequestParam String spjangcd) {
 
-
-
-		List<Map<String, Object>> items = this.equipmentRunChartService.getEquipmentRunChart(date_from, date_to, id, runType);      
-
-		Map<String, List<Map<String, Object>>> groupedItems = items.stream()
-				.collect(Collectors.groupingBy(item -> item.get("Name").toString(), LinkedHashMap::new, Collectors.toList()));
-
+		List<Map<String, Object>> items = this.equipmentRunChartService.getEquipmentRunChart(date_from, date_to, id, runType, spjangcd);
 		List<Map<String, Object>> result = new ArrayList<>();
 
-		for(Map.Entry<String, List<Map<String, Object>>> entry : groupedItems.entrySet()){
+		Map<String, List<Map<String, Object>>> GroupByNameItems = items.stream()
+				.filter(item -> item.get("Name") != null)
+				.collect(Collectors.groupingBy(item -> item.get("Name").toString()));
 
-			String name = entry.getKey();
+		for(Map.Entry<String, List<Map<String, Object>>> entry : GroupByNameItems.entrySet()){
 
-			List<Map<String, Object>> itemList = entry.getValue();
+			List<Map<String, Object>> groupItems = entry.getValue();
 
+			for (int i = 0; i < groupItems.size(); i++) {
+				Map<String, Object> uptime = groupItems.get(i);
 
-			for(int i=0; i < itemList.size(); i++){
-				Map<String, Object> current = itemList.get(i);
-				String StopCause = current.get("StopCauseName") == null ? "" : current.get("StopCauseName").toString();
+				Map<String, Object> Downtime = new HashMap<>(); //비가동시간
 
-				current.put("StopCauseName", "");
-				current.put("RunState", "run");
+				//uptime.get("")
+				Object endDate = uptime.get("end_date");
+				Object endTime = uptime.get("EndTime");
+				Object EquipmentName = uptime.get("Name");
+				Object Equipment_id = uptime.get("Equipment_id");
+				Object StopCause = uptime.get("StopCauseName");
 
-				result.add(current);
+				Timestamp StartDate = (Timestamp) uptime.get("StartDate");
+				Timestamp EndDate = (Timestamp) uptime.get("EndDate");
 
-				Timestamp endDate = (Timestamp) current.get("EndDate");
-
-				if(endDate == null){
-					continue;
+				if(EndDate != null){
+					long diffMillis = EndDate.getTime() - StartDate.getTime();
+					long diffMinutes = (diffMillis / 1000) / 60;
+					uptime.put("Runtime", String.valueOf(diffMinutes));
 				}
-				Map<String, Object> idleRow = new LinkedCaseInsensitiveMap<>();
 
-				if(i < itemList.size() - 1){
+				uptime.put("RunState", "run");
+				uptime.put("StopCauseName", "");
 
-					Map<String, Object> next = itemList.get(i + 1);
+				Map<String, Object> nextItem = (i + 1 < groupItems.size()) ? groupItems.get(i + 1) : null;
 
-					if(!current.get("Name").equals(next.get("Name"))) continue;
+				result.add(uptime);
+				if (EndDate == null) continue;
 
+				Downtime.put("RunState", "stop");
+				Downtime.put("Name", EquipmentName);
+				Downtime.put("Equipment_id", Equipment_id);
+				Downtime.put("start_date", endDate);
+				Downtime.put("StartTime", endTime);
+				Downtime.put("StopCauseName", StopCause);
+				if(nextItem == null){
+					Downtime.put("end_date", "");
+					Downtime.put("EndTime", "");
+					Downtime.put("Runtime", "");
+				}else{
+					Downtime.put("end_date", nextItem.get("start_date"));
+					Downtime.put("EndTime", nextItem.get("StartTime"));
 
-					Timestamp nextStart = (Timestamp) next.get("StartDate");
+					Timestamp DownTimeEndDate = (Timestamp) nextItem.get("StartDate"); //비가동의 종료시간
+					long diffMillis = DownTimeEndDate.getTime() - EndDate.getTime(); //가동되지 않았던 시간
+					long diffMinutes = (diffMillis / 1000) / 60;
 
-					long idleMinutes = Duration.between(endDate.toInstant(), nextStart.toInstant()).toMinutes();
-
-
-					idleRow.put("Name", current.get("Name"));
-					idleRow.put("GapTime", idleMinutes);
-					idleRow.put("RunState", "stop");
-					idleRow.put("start_date", current.get("end_date"));
-					idleRow.put("StartTime", current.get("EndTime"));
-					idleRow.put("end_date", next.get("start_date"));
-					idleRow.put("EndTime", next.get("StartTime"));
-					idleRow.put("StopCauseName", StopCause);
-
-					result.add(idleRow);
-
-				}else if(i == itemList.size() - 1){
-
-					idleRow.put("Name", current.get("Name"));
-					idleRow.put("RunState", "stop");
-					idleRow.put("start_date", current.get("end_date"));
-					idleRow.put("StartTime", current.get("EndTime"));
-					idleRow.put("StopCauseName", StopCause);
-
-					result.add(idleRow);
+					Downtime.put("GapTime", diffMinutes);
 				}
+				result.add(Downtime);
 			}
 		}
 
@@ -121,7 +115,7 @@ public class EquipmentRunChartController {
 		return result2;
 	}
 	
-	// 차트 fillData
+	/*// 차트 fillData
 	@GetMapping("/readData")
 	public AjaxResult getEquipmentRunChart(
     		@RequestParam(value="id", required=false) Integer id,
@@ -132,12 +126,13 @@ public class EquipmentRunChartController {
         AjaxResult result = new AjaxResult();
         result.data = items;        
 		return result;
-	}
+	}*/
 	
 	// saveData
 	@PostMapping("/addData")
 	public AjaxResult addDataEquipmentRunChart (
 			@RequestParam(value="id", required=false) Integer id,
+			@RequestParam(value="spjangcd") String spjangcd,
 			@RequestParam(value="Equipment_id", required=false) Integer Equipment_id,
 			@RequestParam(value="start_date", required=false) String start_date,
 			@RequestParam(value="StartTime", required=false) String StartTime,
@@ -153,12 +148,30 @@ public class EquipmentRunChartController {
 
 		User user = (User)auth.getPrincipal();
 		
-		Timestamp startDate = Timestamp.valueOf(start_date + ' ' + StartTime + ":00");
-		Timestamp endDate = Timestamp.valueOf(end_date + ' ' + EndTime + ":00");
+		Timestamp startDate = Timestamp.valueOf(start_date + ' ' + StartTime + ":59");
+		Timestamp endDate = Timestamp.valueOf(end_date + ' ' + EndTime + ":59");
 		
 		EquRun er = null;
-		
-		if (id==null) {
+
+		List<Map<String, Object>> overlappinged = equipmentRunChartService.OverlappingTimeQuery(startDate, endDate, Equipment_id, spjangcd);//현재 겹치는 시간은 안됨. 설비가 겹치는 시간대로 가동되는건 말이 안되기 때문
+
+
+		if(!overlappinged.isEmpty()){
+			boolean hasMultipleRecords = overlappinged.size() != 1;
+			boolean hasEndDate = overlappinged.get(0).get("EndDate") != null;
+
+			if(hasMultipleRecords || hasEndDate){
+				result.success = false;
+				result.message = "해당 시간대에 이미 가동 중인 기록이 있습니다.";
+				return result;
+			}
+		}
+
+		result.success = true;
+		result.message = "성공!";
+		return result;
+
+		/*if (id==null) {
 			er = new EquRun();
 		} else {
 			er = this.equRunRepository.getEquRunById(id);
@@ -171,12 +184,14 @@ public class EquipmentRunChartController {
 		er.setDescription(Description);
 		er.setStopCauseId(StopCause_id);
 		er.set_audit(user);
+		er.setSpjangcd(spjangcd);
+
 		this.equRunRepository.save(er);
 		
 		result.success = true;
 		result.message = "저장하였습니다.";
 		result.data = er.getId();
-	    return result;
+	    return result;*/
 	}
 	
 	// delDataBind

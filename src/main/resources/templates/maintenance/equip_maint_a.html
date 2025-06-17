@@ -14,7 +14,7 @@
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
-                <h2>설비 정비 내역</h2>
+                <h2>설비유지보수관리</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
@@ -330,6 +330,10 @@
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
     <script type="text/javascript">
+
+        let isInitialLoad = true; // 초기 상태 플래그
+
+
         class StopCausePage {
             constructor() {
                 this.grid = null;
@@ -381,7 +385,6 @@
                         this.grid.select(-1, -1); // 선택 상태 초기화
                     }, 0); // 비동기로 처리하여 초기 선택 해제
                 });
-                let isInitialLoad = true; // 초기 상태 플래그
 
                 this.grid.selectionChanged.addHandler((s, e) => {
                     if (isInitialLoad) {
@@ -513,6 +516,10 @@
                 let result = AjaxUtil.getSyncData(_this.baseUrl + '/read', param);
 
                 if (result.data != null) {
+
+                    isInitialLoad = true;
+                    $('#editForm')[0].reset();
+
                     console.log(result.data);
                     _this.viewData.sourceCollection = result.data;
                 }

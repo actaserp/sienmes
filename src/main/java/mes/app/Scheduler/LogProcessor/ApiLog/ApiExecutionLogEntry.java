@@ -4,11 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 import mes.app.Scheduler.LogProcessor.LogEntry;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 public class ApiExecutionLogEntry implements LogEntry {
 
-    private String occurrenceTime;
+    private LocalDateTime occurrenceTime;
     private String method;
     private String apiAddress;
     private Double durationSecond;

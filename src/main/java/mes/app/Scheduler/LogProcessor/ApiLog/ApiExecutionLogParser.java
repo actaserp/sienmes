@@ -23,7 +23,7 @@ public class ApiExecutionLogParser implements LogParserStrategy {
 
         if (matcher.find()) {
             ApiExecutionLogEntry entry = new ApiExecutionLogEntry();
-            entry.setOccurrenceTime(matcher.group(1));
+            //entry.setOccurrenceTime(matcher.group(1));
             entry.setMethod(matcher.group(2));
             entry.setApiAddress(matcher.group(3));
             entry.setDurationSecond(Double.parseDouble(matcher.group(4)));

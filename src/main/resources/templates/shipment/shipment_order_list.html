@@ -143,6 +143,7 @@
     <script type="text/javascript">
 
         let $content;
+        let isInitialLoad = true; // 초기 상태 플래그
 
         class ShipmentOrderPage {
             constructor() {
@@ -211,7 +212,6 @@
                         this.grid1.select(-1, -1); // 선택 상태 초기화
                     }, 0); // 비동기로 처리하여 초기 선택 해제
                 });
-                let isInitialLoad = true; // 초기 상태 플래그
 
                 this.grid1.selectionChanged.addHandler((s, e) => {
                     if (isInitialLoad) {
@@ -303,9 +303,12 @@
                 let data = FormUtil.extractForm($('#searchForm'));
 
                 let result = AjaxUtil.getSyncData(this.gUrl + '/order_list', data);
+                this.grid2.itemsSource = new wijmo.collections.CollectionView([]);
 
 
                 if (result != null) {
+                    isInitialLoad = true; // 초기 상태 플래그
+
                     this.viewData.sourceCollection = result.data;
                 }
 

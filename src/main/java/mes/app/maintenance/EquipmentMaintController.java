@@ -122,8 +122,8 @@ public class EquipmentMaintController {
 		
 		Timestamp failStartDate = fail_start_date != null ? CommonUtil.tryTimestamp(fail_start_date) : null;
 		Timestamp failEndDate = fail_end_date != null ? CommonUtil.tryTimestamp(fail_end_date) : null;
-		LocalTime failStartTime = fail_start_time != null ? LocalTime.parse(fail_start_time) : null;
-		LocalTime failEndTime = fail_end_time != null ? LocalTime.parse(fail_end_time) : null;
+		LocalTime failStartTime = fail_start_time != null && !fail_start_time.isEmpty() ? LocalTime.parse(fail_start_time) : null;
+		LocalTime failEndTime = fail_end_time != null && !fail_end_time.isEmpty() ? LocalTime.parse(fail_end_time) : null;
 		
 		Timestamp today = new Timestamp(System.currentTimeMillis());
 		
