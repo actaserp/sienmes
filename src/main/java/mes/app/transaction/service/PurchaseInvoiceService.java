@@ -87,67 +87,70 @@ public class PurchaseInvoiceService {
 
         String sql = """
                 WITH detail_summary AS (
-                    SELECT DISTINCT ON (misnum)
+                    SELECT
                         misnum,
-                        itemnm AS first_itemnm,
-                        COUNT(*) OVER (PARTITION BY misnum) AS item_count
+                        MIN(itemnm) AS first_itemnm,
+                        COUNT(*) AS item_count
                     FROM tb_invoicedetail
-                    ORDER BY misnum, misseq
+                    GROUP BY misnum
+                ),
+                clt_unified AS (
+                    SELECT id, '0' AS flag, "Code", "Name" AS name, NULL AS accnum, NULL AS accname, NULL AS cardnum, NULL AS cardnm FROM company
+                    UNION ALL
+                    SELECT id, '1' AS flag, "Code", "Name", NULL, NULL, NULL, NULL FROM person
+                    UNION ALL
+                    SELECT accid AS id, '2', NULL, NULL, accnum, accname, NULL, NULL FROM tb_account
+                    UNION ALL
+                    SELECT id, '3', NULL, NULL, NULL, null, cardnum, cardnm FROM tb_iz010
+                ),
+                payclt_unified AS (
+                    SELECT id, '0' AS flag, "Code", "Name" AS name, NULL AS accnum, NULL AS accname, NULL AS cardnum, NULL AS cardnm FROM company
+                    UNION ALL
+                    SELECT id, '1', "Code", "Name", NULL, NULL, NULL, NULL FROM person
+                    UNION ALL
+                    SELECT accid AS id, '2', NULL, NULL, accnum, accname, NULL, NULL FROM tb_account
+                    UNION ALL
+                    SELECT id, '3', NULL, NULL, NULL, null, cardnum, cardnm FROM tb_iz010
                 )
-                 
+                                
                 SELECT
                     TO_CHAR(TO_DATE(m.misdate, 'YYYYMMDD'), 'YYYY-MM-DD') AS misdate,
                     m.misnum,
                     m.misgubun,
-                    purchase_type_code."Value" AS misgubun_name,  -- fn_code_name 제거
+                    purchase_type_code."Value" AS misgubun_name,
                     m.paycltcd,
                     m.cltcd,
-                    c."Name" AS cltnm,
-                    c2."Name" AS paycltnm,
+                    COALESCE(cu.name, cu.accnum, cu.cardnum) AS cltnm,
+                	COALESCE(cu.accname, cu.cardnm, cu."Code") AS cltnmsub,
+                    COALESCE(pcu.name, pcu.accnum, pcu.cardnum) AS paycltnm,
+                	COALESCE(pcu.accname, pcu.cardnm, pcu."Code") AS paycltnmsub,
                     m.totalamt,
                     m.supplycost,
                     m.taxtotal,
                     m.title,
-                	m.deductioncd,
-                	de.name AS dedunm,
-                	m.depart_id,
-                	dp."Name" AS dpName,
-                	m.card_id,
-                	iz.cardnum,
+                    m.deductioncd,
+                    de.name AS dedunm,
+                    m.depart_id,
+                    dp."Name" AS dpName,
+                    m.card_id,
+                    iz.cardnum AS incardnum,
                     CASE
                         WHEN ds.item_count > 1 THEN ds.first_itemnm || ' 외 ' || (ds.item_count - 1) || '개'
                         WHEN ds.item_count = 1 THEN ds.first_itemnm
                         ELSE NULL
                     END AS item_summary
-                 
-                FROM tb_invoicement m
-                 
-                  LEFT JOIN tb_invoicedetail d
-                   ON m.misnum = d.misnum
-                 
-                  LEFT JOIN detail_summary ds
-                   ON m.misnum = ds.misnum
-                   
-                    LEFT JOIN company c
-                   ON m.cltcd = c.id
-                
-                LEFT JOIN company c2
-                   ON m.paycltcd = c2.id
                                 
-                LEFT JOIN vat_deduction_type de
-                   ON m.deductioncd = de.code
-                        
-                LEFT JOIN depart dp
-                   ON m.depart_id = dp.id
-                        
-                LEFT JOIN tb_iz010 iz
-                   ON m.card_id = iz.id
-                  LEFT JOIN sys_code purchase_type_code
-                   ON purchase_type_code."CodeType" = 'purchase_type'
-                   AND purchase_type_code."Code" = m.misgubun
-                
-                  WHERE 1 = 1
-                  and m.spjangcd = :spjangcd 
+                FROM tb_invoicement m
+                LEFT JOIN detail_summary ds ON m.misnum = ds.misnum
+                LEFT JOIN clt_unified cu ON m.cltcd = cu.id AND m.cltflag = cu.flag
+                LEFT JOIN payclt_unified pcu ON m.paycltcd = pcu.id AND m.paycltflag = pcu.flag
+                LEFT JOIN vat_deduction_type de ON m.deductioncd = de.code
+                LEFT JOIN depart dp ON m.depart_id = dp.id
+                LEFT JOIN tb_iz010 iz ON m.card_id = iz.id
+                LEFT JOIN sys_code purchase_type_code ON purchase_type_code."CodeType" = 'purchase_type'
+                    AND purchase_type_code."Code" = m.misgubun
+                WHERE 1=1
+                and m.spjangcd = :spjangcd 
                      """; // 조건은 아래에서 붙임
 
         if (invoice_kind != null && !invoice_kind.isEmpty()) {
@@ -161,16 +164,6 @@ public class PurchaseInvoiceService {
         if (start != null && end != null) {
             sql += " and to_date(m.misdate, 'YYYYMMDD') between :start and :end ";
         }
-
-        sql += """
-                GROUP BY
-                    m.misdate, m.misnum, m.misgubun, purchase_type_code."Value",
-                    m.paycltcd, m.cltcd, c."Name", c2."Name",
-                    m.totalamt, m.supplycost, m.taxtotal,
-                    m.title, m.deductioncd, de.name,
-                    m.depart_id, dp."Name", m.card_id, iz.cardnum,
-                    ds.first_itemnm, ds.item_count
-                      """;
 
         return this.sqlRunner.getRows(sql, dicParam);
     }
@@ -222,6 +215,8 @@ public class PurchaseInvoiceService {
         invoicement.setMisdate(misdate);
         invoicement.setMisgubun((String)form.get("purchase_type"));
         invoicement.setCltcd(parseInt(form.get("InvoicerID")));
+        invoicement.setCltflag((String) form.get("cltflag"));
+        invoicement.setPaycltflag((String) form.get("paycltflag"));
         invoicement.setPaycltcd(parseInt(form.get("PaymentCorpID")));
         invoicement.setTitle((String)form.get("title"));
         invoicement.setDeductioncd((String) form.get("tax_codeHidden"));
@@ -338,9 +333,20 @@ public class PurchaseInvoiceService {
                     purchase_type_code."Value" AS misgubun_name,  -- fn_code_name 제거
                     m.paycltcd as "PaymentCorpID",
                     m.cltcd as "InvoicerID",
-                    c."Name" AS "InvoicerCorpName",
-                    c2."Name" AS "PaymentCorpName",
-                    
+                    case
+                         when m.cltflag = '0' then c."Name"
+                         when m.cltflag = '1' then p."Name"
+                         when m.cltflag = '2' then d.accnum
+                         when m.cltflag = '3' then i.cardnum
+                         ELSE NULL
+                    END as "InvoicerCorpName",
+                    case
+                         when m.paycltflag = '0' then c2."Name"
+                         when m.paycltflag = '1' then p2."Name"
+                         when m.paycltflag = '2' then d2.accnum
+                         when m.paycltflag = '3' then i2.cardnum
+                         ELSE NULL
+                    END as "PaymentCorpName",
                     m.title,
                 	m.deductioncd as "tax_codeHidden",
                 	de.name as "tax_code",
@@ -358,12 +364,6 @@ public class PurchaseInvoiceService {
                  
                 FROM tb_invoicement m
                    
-                LEFT JOIN company c
-                    ON m.cltcd = c.id
-                
-                LEFT JOIN company c2
-                   ON m.paycltcd = c2.id
-                                
                 LEFT JOIN vat_deduction_type de
                    ON m.deductioncd = de.code
                         
@@ -376,7 +376,15 @@ public class PurchaseInvoiceService {
                 LEFT JOIN sys_code purchase_type_code
                    ON purchase_type_code."CodeType" = 'purchase_type'
                    AND purchase_type_code."Code" = m.misgubun
-                
+                   
+                left join company c on c.id = m.cltcd
+                left join person p on p.id = m.cltcd
+                left join tb_account d on d.accid = m.cltcd
+                left join tb_iz010 i on i.id = m.cltcd
+                left join company c2 on c2.id = m.paycltcd
+                left join person p2 on p2.id = m.paycltcd
+                left join tb_account d2 on d2.accid = m.paycltcd
+                left join tb_iz010 i2 on i2.id = m.paycltcd
                 WHERE m.misnum = :misnum
                 """;
 
@@ -419,6 +427,8 @@ public class PurchaseInvoiceService {
         List<Map<String, Object>> detailList = this.sqlRunner.getRows(detailSql, paramMap);
 
         UtilClass.decryptItem(master, "card_code", 0);
+        UtilClass.decryptItem(master, "InvoicerCorpName", 0);
+        UtilClass.decryptItem(master, "PaymentCorpName", 0);
 
         master.put("detailList", detailList);
         return master;

@@ -2097,152 +2097,146 @@
                 $content.find('#btnSelectInvoicee').click(function () {
                     let poppage = new PopCompComponent();
 
-                    let searchcallback = function (items) {
-                        const businessNumber = items.business_number.replace(/-/g, '');
-                        const compid = items.id;
+                    let searchcallback = function (item) {
+                        const businessNumber = item.business_number.replace(/-/g, '');
+                        const compid = item.id;
 
-                        // 거래처유형 확인 (사업자 / 개인 / 외국인)
-                        const invoiceeType = $content.find('input[name="InvoiceeType"]:checked').val();
+                        // 사업자 등록번호 길이에 따라 구분
+                        if (businessNumber.length === 10) {
+                            // 사업자
+                            $content.find('input[name="InvoiceeType"][value="사업자"]').prop('checked', true).trigger('change');
 
-                        // 사업자가 아닌 경우 API 호출 없이 기본 값만 채우기 또는 무시
-                        if (invoiceeType !== '사업자') {
+                            let data = {
+                                b_no: businessNumber,
+                                compid: compid,
+                            };
 
-                            $content.find('#InvoiceeID').val(items.id).trigger('change');
-                            $content.find('#InvoiceeCorpNum').val(items.business_number).trigger('input');
-                            $content.find('#InvoiceeTaxRegID').val(items.invoiceetaxregid);
-                            $content.find('#InvoiceeCorpName').val(items.compname);
-                            $content.find('#InvoiceeCEOName').val(items.invoiceeceoname);
-                            $content.find('#InvoiceeAddr').val(items.invoiceeaddr);
-                            $content.find('#InvoiceeBizType').val(items.invoiceebiztype);
-                            $content.find('#InvoiceeBizClass').val(items.invoiceebizclass);
-                            $content.find('#InvoiceeContactName1').val(items.invoiceecontactname1);
-                            $content.find('#InvoiceeTEL1').val(items.invoiceetel1).trigger('input');
-                            $content.find('#InvoiceeEmail1').val(items.invoiceeemail1);
-                            oldBusinessNumber = items.business_number;
-                            $content.find('#InvoiceeCorpNum').prop('readonly', true);
-                            return;
-                        }
+                            let url = _this.url + '/invoicee_check';
 
-                        let data = {
-                            b_no: businessNumber,
-                            compid: compid,
-                        }
-                        // 사업자 진위 여부 확인
-                        let url = _this.url + '/invoicee_check';
-
-                        const fnSaveSuccess = function (result) {
-                            if (result.success) {
-                                const data = result.data;
-                                if (data.b_stt_cd === '01') {
-                                    $content.find('#InvoiceeID').val(item.id).trigger('change');
-                                    $content.find('#InvoiceeCorpNum').val(item.business_number).trigger('input');
-                                    $content.find('#InvoiceeTaxRegID').val(item.invoiceetaxregid);
-                                    $content.find('#InvoiceeCorpName').val(item.compname);
-                                    $content.find('#InvoiceeCEOName').val(item.invoiceeceoname);
-                                    $content.find('#InvoiceeAddr').val(item.invoiceeaddr);
-                                    $content.find('#InvoiceeBizType').val(item.invoiceebiztype);
-                                    $content.find('#InvoiceeBizClass').val(item.invoiceebizclass);
-                                    $content.find('#InvoiceeContactName1').val(item.invoiceecontactname1);
-                                    $content.find('#InvoiceeTEL1').val(item.invoiceetel1).trigger('input');
-                                    $content.find('#InvoiceeEmail1').val(item.invoiceeemail1);
-                                    oldBusinessNumber = item.business_number;
-                                    $content.find('#InvoiceeCorpNum').prop('readonly', true);
+                            const fnSaveSuccess = function (result) {
+                                if (result.success) {
+                                    const data = result.data;
+                                    if (data.b_stt_cd === '01') {
+                                        bindInvoiceeData(item);
+                                    } else {
+                                        Alert.alert('', result.message);
+                                    }
+                                } else if (result.code === 'STOP_CONFIRM') {
+                                    Alert.confirm('', result.message, function () {
+                                        AjaxUtil.postAsyncData(_this.url + '/invoicee_stop', { compid: compid }, function (res) {
+                                            Alert.alert('', res.message);
+                                        });
+                                    });
                                 } else {
                                     Alert.alert('', result.message);
                                 }
-                            } else if (result.code === 'STOP_CONFIRM') {
-                                Alert.confirm('', result.message, function () {
-                                    AjaxUtil.postAsyncData(_this.url + '/invoicee_stop', {compid: compid}, function (res) {
-                                        Alert.alert('', res.message);
-                                    });
-                                });
-                            } else {
-                                Alert.alert('', result.message);
-                            }
-                        };
-                        AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
+                            };
+
+                            AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
+
+                        } else if (businessNumber.length === 13) {
+                            // 개인
+                            $content.find('input[name="InvoiceeType"][value="개인"]').prop('checked', true).trigger('change');
+                            bindInvoiceeData(item);
+                        } else {
+                            Alert.alert('', '유효하지 않은 사업자 번호 형식입니다.');
+                        }
+                    };
+
+                    const bindInvoiceeData = function (item) {
+                        $content.find('#InvoiceeID').val(item.id).trigger('change');
+                        $content.find('#InvoiceeCorpNum').val(item.business_number).trigger('input');
+                        $content.find('#InvoiceeTaxRegID').val(item.invoiceetaxregid);
+                        $content.find('#InvoiceeCorpName').val(item.compname);
+                        $content.find('#InvoiceeCEOName').val(item.invoiceeceoname);
+                        $content.find('#InvoiceeAddr').val(item.invoiceeaddr);
+                        $content.find('#InvoiceeBizType').val(item.invoiceebiztype);
+                        $content.find('#InvoiceeBizClass').val(item.invoiceebizclass);
+                        $content.find('#InvoiceeContactName1').val(item.invoiceecontactname1);
+                        $content.find('#InvoiceeTEL1').val(item.invoiceetel1).trigger('input');
+                        $content.find('#InvoiceeEmail1').val(item.invoiceeemail1);
+                        oldBusinessNumber = item.business_number;
+                        $content.find('#InvoiceeCorpNum').prop('readonly', true);
                     };
 
                     poppage.show(searchcallback);
                 });
 
-                // 등록번호에서 엔터
-                $content.find('#InvoiceeCorpNum').on('keydown', function (e) {
-                    if (e.type === 'keydown' && (e.key !== 'Enter' && e.keyCode !== 13)) return;
+                function determineInvoiceeTypeAndBind(item) {
+                    const businessNumber = item.business_number.replace(/-/g, '');
+                    const compid = item.id;
 
-                    e.preventDefault();
+                    if (businessNumber.length === 13) {
+                        $content.find('input[name="InvoiceeType"][value="개인"]').prop('checked', true).trigger('change');
+                        bindInvoiceeData(item);
+                        return;
+                    }
 
-                    const keyword = $content.find('#InvoiceeCorpNum').val().trim(); // 검색 키워드는 등록번호
-                    const invoiceeType = $content.find('input[name="InvoiceeType"]:checked').val();
-                    const poppage = new PopCompComponent();
+                    if (businessNumber.length === 10) {
+                        $content.find('input[name="InvoiceeType"][value="사업자"]').prop('checked', true).trigger('change');
 
-                    const searchcallback = function (item) {
-                        const businessNumber = item.business_number.replace(/-/g, '');
-                        const compid = item.id;
-
-                        if (invoiceeType !== '사업자') {
-                            $content.find('#InvoiceeID').val(items.id).trigger('change');
-                            $content.find('#InvoiceeCorpNum').val(items.business_number).trigger('input');
-                            $content.find('#InvoiceeTaxRegID').val(items.invoiceetaxregid);
-                            $content.find('#InvoiceeCorpName').val(items.compname);
-                            $content.find('#InvoiceeCEOName').val(items.invoiceeceoname);
-                            $content.find('#InvoiceeAddr').val(items.invoiceeaddr);
-                            $content.find('#InvoiceeBizType').val(items.invoiceebiztype);
-                            $content.find('#InvoiceeBizClass').val(items.invoiceebizclass);
-                            $content.find('#InvoiceeContactName1').val(items.invoiceecontactname1);
-                            $content.find('#InvoiceeTEL1').val(items.invoiceetel1).trigger('input');
-                            $content.find('#InvoiceeEmail1').val(items.invoiceeemail1);
-                            oldBusinessNumber = items.business_number;
-                            $content.find('#InvoiceeCorpNum').prop('readonly', true);
-                            return;
-                        }
-
-                        const data = {b_no: businessNumber, compid: compid};
+                        const data = { b_no: businessNumber, compid };
                         const url = _this.url + '/invoicee_check';
 
-                        const fnSaveSuccess = function (result) {
+                        AjaxUtil.postAsyncData(url, data, function (result) {
                             if (result.success) {
                                 const data = result.data;
                                 if (data.b_stt_cd === '01') {
-                                    $content.find('#InvoiceeID').val(item.id).trigger('change');
-                                    $content.find('#InvoiceeCorpNum').val(item.business_number).trigger('input');
-                                    $content.find('#InvoiceeTaxRegID').val(item.invoiceetaxregid);
-                                    $content.find('#InvoiceeCorpName').val(item.compname);
-                                    $content.find('#InvoiceeCEOName').val(item.invoiceeceoname);
-                                    $content.find('#InvoiceeAddr').val(item.invoiceeaddr);
-                                    $content.find('#InvoiceeBizType').val(item.invoiceebiztype);
-                                    $content.find('#InvoiceeBizClass').val(item.invoiceebizclass);
-                                    $content.find('#InvoiceeContactName1').val(item.invoiceecontactname1);
-                                    $content.find('#InvoiceeTEL1').val(item.invoiceetel1).trigger('input');
-                                    $content.find('#InvoiceeEmail1').val(item.invoiceeemail1);
-                                    oldBusinessNumber = item.business_number;
-                                    $content.find('#InvoiceeCorpNum').prop('readonly', true);
+                                    bindInvoiceeData(item);
                                 } else {
                                     Alert.alert('', result.message);
                                 }
                             } else if (result.code === 'STOP_CONFIRM') {
                                 Alert.confirm('', result.message,
                                     function onYes() {
-                                        // 확인 눌렀을 때 로직
-                                        AjaxUtil.postAsyncData(_this.url + '/invoicee_stop', { compid: compid }, function (res) {
+                                        AjaxUtil.postAsyncData(_this.url + '/invoicee_stop', { compid }, function (res) {
                                             Alert.alert('', res.message);
                                         });
                                     },
                                     function onCancel() {
-                                        // 취소 눌렀을 때 포커스 이동
                                         $content.find('#InvoiceeCorpName').focus();
                                     }
                                 );
                             } else {
                                 Alert.alert('', result.message);
                             }
-                        };
+                        });
+                    } else {
+                        Alert.alert('', '유효하지 않은 사업자 번호입니다.');
+                    }
+                }
 
-                        AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
+                function bindInvoiceeData(item) {
+                    $content.find('#InvoiceeID').val(item.id).trigger('change');
+                    $content.find('#InvoiceeCorpNum').val(item.business_number).trigger('input');
+                    $content.find('#InvoiceeTaxRegID').val(item.invoiceetaxregid);
+                    $content.find('#InvoiceeCorpName').val(item.compname);
+                    $content.find('#InvoiceeCEOName').val(item.invoiceeceoname);
+                    $content.find('#InvoiceeAddr').val(item.invoiceeaddr);
+                    $content.find('#InvoiceeBizType').val(item.invoiceebiztype);
+                    $content.find('#InvoiceeBizClass').val(item.invoiceebizclass);
+                    $content.find('#InvoiceeContactName1').val(item.invoiceecontactname1);
+                    $content.find('#InvoiceeTEL1').val(item.invoiceetel1).trigger('input');
+                    $content.find('#InvoiceeEmail1').val(item.invoiceeemail1);
+                    oldBusinessNumber = item.business_number;
+                    $content.find('#InvoiceeCorpNum').prop('readonly', true);
 
-                        setTimeout(() => {
-                            $content.find('#Remark1').focus();
-                        }, 0);
+                    setTimeout(() => {
+                        $content.find('#Remark1').focus();
+                    }, 0);
+                }
+
+
+                // 등록번호에서 엔터
+                $content.find('#InvoiceeCorpNum').on('keydown', function (e) {
+                    if (e.key !== 'Enter' && e.keyCode !== 13) return;
+
+                    e.preventDefault();
+                    const keyword = $content.find('#InvoiceeCorpNum').val().trim();
+                    const poppage = new PopCompComponent();
+
+                    const searchcallback = function (item) {
+                        determineInvoiceeTypeAndBind(item);
                     };
 
                     if (!keyword) {
@@ -2251,13 +2245,11 @@
                         return;
                     }
 
-                    const $popupContent = $(tmpl('popup_compSearchTemplate', {}));
-                    const data = {
+                    const result = AjaxUtil.getSyncData('/api/popup/search_Comp', {
                         compCode: '',
                         compName: '',
                         business_number: keyword
-                    };
-                    const result = AjaxUtil.getSyncData('/api/popup/search_Comp', data);
+                    });
                     const rows = result?.data || [];
 
                     if (rows.length === 1) {
@@ -2271,91 +2263,17 @@
                     }
                 });
 
+
                 // 상호에서 엔터
                 $content.find('#InvoiceeCorpName').on('keydown', function (e) {
-                    if (e.type === 'keydown' && (e.key !== 'Enter' && e.keyCode !== 13)) return;
+                    if (e.key !== 'Enter' && e.keyCode !== 13) return;
 
                     e.preventDefault();
-
-                    const keyword = $content.find('#InvoiceeCorpName').val().trim(); // 검색 키워드는 등록번호
-                    const invoiceeType = $content.find('input[name="InvoiceeType"]:checked').val();
+                    const keyword = $content.find('#InvoiceeCorpName').val().trim();
                     const poppage = new PopCompComponent();
 
                     const searchcallback = function (item) {
-                        const businessNumber = item.business_number.replace(/-/g, '');
-                        const compid = item.id;
-
-                        if (invoiceeType !== '사업자') {
-
-                            $content.find('#InvoiceeID').val(item.id).trigger('change');
-                            $content.find('#InvoiceeCorpNum').val(item.business_number).trigger('input');
-                            $content.find('#InvoiceeTaxRegID').val(item.invoiceetaxregid);
-                            $content.find('#InvoiceeCorpName').val(item.compname);
-                            $content.find('#InvoiceeCEOName').val(item.invoiceeceoname);
-                            $content.find('#InvoiceeAddr').val(item.invoiceeaddr);
-                            $content.find('#InvoiceeBizType').val(item.invoiceebiztype);
-                            $content.find('#InvoiceeBizClass').val(item.invoiceebizclass);
-                            $content.find('#InvoiceeContactName1').val(item.invoiceecontactname1);
-                            $content.find('#InvoiceeTEL1').val(item.invoiceetel1).trigger('input');
-                            $content.find('#InvoiceeEmail1').val(item.invoiceeemail1);
-                            oldBusinessNumber = item.business_number;
-                            $content.find('#InvoiceeCorpNum').prop('readonly', true);
-
-                            setTimeout(() => {
-                                $content.find('#Remark1').focus();
-                            }, 0);
-
-                            return;
-                        }
-
-                        const data = {b_no: businessNumber, compid: compid};
-                        const url = _this.url + '/invoicee_check';
-
-                        const fnSaveSuccess = function (result) {
-                            if (result.success) {
-                                const data = result.data;
-                                if (data.b_stt_cd === '01') {
-                                    $content.find('#InvoiceeID').val(item.id).trigger('change');
-                                    $content.find('#InvoiceeCorpNum').val(item.business_number).trigger('input');
-                                    $content.find('#InvoiceeTaxRegID').val(item.invoiceetaxregid);
-                                    $content.find('#InvoiceeCorpName').val(item.compname);
-                                    $content.find('#InvoiceeCEOName').val(item.invoiceeceoname);
-                                    $content.find('#InvoiceeAddr').val(item.invoiceeaddr);
-                                    $content.find('#InvoiceeBizType').val(item.invoiceebiztype);
-                                    $content.find('#InvoiceeBizClass').val(item.invoiceebizclass);
-                                    $content.find('#InvoiceeContactName1').val(item.invoiceecontactname1);
-                                    $content.find('#InvoiceeTEL1').val(item.invoiceetel1).trigger('input');
-                                    $content.find('#InvoiceeEmail1').val(item.invoiceeemail1);
-                                    oldBusinessNumber = item.business_number;
-                                    $content.find('#InvoiceeCorpNum').prop('readonly', true);
-
-                                    setTimeout(() => {
-                                        $content.find('#Remark1').focus();
-                                    }, 0);
-                                } else {
-                                    Alert.alert('', result.message);
-                                }
-                            } else if (result.code === 'STOP_CONFIRM') {
-                                Alert.confirm('', result.message,
-                                    function onYes() {
-                                        // 확인 눌렀을 때 로직
-                                        AjaxUtil.postAsyncData(_this.url + '/invoicee_stop', { compid: compid }, function (res) {
-                                            Alert.alert('', res.message);
-                                        });
-                                    },
-                                    function onCancel() {
-                                        // 취소 눌렀을 때 포커스 이동
-                                        $content.find('#InvoiceeCorpName').focus();
-                                    }
-                                );
-
-                            } else {
-                                Alert.alert('', result.message);
-                            }
-                        };
-
-                        AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
-
+                        determineInvoiceeTypeAndBind(item);
                     };
 
                     if (!keyword) {
@@ -2364,13 +2282,11 @@
                         return;
                     }
 
-                    const $popupContent = $(tmpl('popup_compSearchTemplate', {}));
-                    const data = {
+                    const result = AjaxUtil.getSyncData('/api/popup/search_Comp', {
                         compCode: '',
                         compName: keyword,
                         business_number: ''
-                    };
-                    const result = AjaxUtil.getSyncData('/api/popup/search_Comp', data);
+                    });
                     const rows = result?.data || [];
 
                     if (rows.length === 1) {
@@ -2383,6 +2299,7 @@
                         }, 50);
                     }
                 });
+
 
 
                 $('#btnCompanySearch').on('keydown', function (e) {
@@ -2651,6 +2568,21 @@
                             });
                             return;
                         }
+                    }
+
+                    let hasItemName = false;
+                    $taxForm.find('textarea[name^="detailList["][name$="].ItemName"]').each(function () {
+                        if ($(this).val()?.trim()) {
+                            hasItemName = true;
+                            return false; // 하나라도 있으면 종료
+                        }
+                    });
+
+                    if (!hasItemName) {
+                        Alert.alert('', '품목을 하나 이상 입력해주세요.', () => {
+                            $taxForm.find('textarea[name^="detailList["][name$="].ItemName"]').first().focus();
+                        });
+                        return;
                     }
 
                     for (let i = 0; i < 20; i++) {

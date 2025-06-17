@@ -61,7 +61,7 @@
                     </dl>
                     <dl>
                         <dt>
-                            <label for="btnCompanySearch">
+                            <label>
                                 매입 거래처
                             </label>
                         </dt>
@@ -69,6 +69,7 @@
                             <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="거래처명 입력후 엔터"
                                    style="width: 140px;" autocomplete="off" tabindex="3">
                             <input type="hidden" id="cboCompanyHidden">
+                            <input type="hidden"  id="cltflag" name="cltflag"  />
                         </dd>
                     </dl>
                     <dl>
@@ -173,8 +174,9 @@
 
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
-    <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+<!--    <th:block th:replace="/common/popup_company :: popup_company"></th:block>-->
     <th:block th:replace="/common/popup_purchase_invoice :: popup_purchase_invoice"></th:block>
+    <th:block th:replace="/common/popup_company_employee_bank_card.html :: popup_company"></th:block>
     <script type="text/javascript">
         class PurchaseInvoicePage {
             constructor() {
@@ -228,17 +230,17 @@
                     columns: [
                         {binding: 'misdate', header: '매입일자', width: 100, align: 'center', isReadOnly: true},
                         {binding: 'misnum', header: '번호', width: 90, visible: false},
-                        {binding: 'cltnm', header: '매입 거래처', width: 120, isReadOnly: true},
-                        {binding: 'paycltnm', header: '지급 거래처', width: 120, isReadOnly: true},
-                        {binding: 'title', header: '제목', width: '*', isReadOnly: true},
+                        {binding: 'cltnm_full', header: '매입 거래처', width: 170, isReadOnly: true},
+                        {binding: 'paycltnm_full', header: '지급 거래처', width: 170, isReadOnly: true},
+                        {binding: 'title', header: '제목', width: 150, isReadOnly: true},
                         {binding: 'item_summary', header: '품명', width: 160, isReadOnly: true},
                         {binding: 'totalamt', header: '합계금액', width: 110, isReadOnly: true, align: 'right', format: 'n0'},
                         {binding: 'supplycost', header: '공급가액', width: 110, isReadOnly: true, align: 'right', format: 'n0'},
                         {binding: 'taxtotal', header: '세액', width: 100, align: 'right', format: 'n0', isReadOnly: true},
                         {binding: 'misgubun_name', header: '증빙 구분', width: 80, align: 'center', isReadOnly: true},
                         {binding: 'dedunm', header: '세액 공제', width: 150, align: 'center', isReadOnly: true},
-                        {binding: 'dpname', header: '부서명', width: 120, align: 'center', isReadOnly: true},
-                        {binding: 'cardnum', header: '카드 번호', width: 150, align: 'center', isReadOnly: true},
+                        {binding: 'dpname', header: '부서명', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'incardnum', header: '카드 번호', width: 150, align: 'center', isReadOnly: true},
 
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
@@ -399,7 +401,7 @@
                 let $taxForm = $content.find('#taxForm');
                 // 매출 구분
                 let $purchaseType = $content.find('#purchase_type');
-                AjaxUtil.fillSelectedOptions($purchaseType, 'system_code', 'choose', false, 'purchase_type');
+                AjaxUtil.fillSelectedOptions($purchaseType, 'system_code', 'choose', 'purchase_tax', 'purchase_type');
 
 
                 // 발행 목적
@@ -557,30 +559,45 @@
 
                 // 검색 버튼(매입 거래처 조회)
                 $content.find('#btnSelectInvoicer').click(function () {
-                    let poppage = new PopCompComponent();
+
+                    let poppage = new PopCompComponentCustom();
+                    let result = AjaxUtil.getSyncData('/api/popup/search_Comp_Custom', {spjangcd : getSpjangcdFromSession() });
 
                     let searchcallback = function (items) {
 
                         $content.find('#InvoicerID').val(items.id).trigger('change');
-                        $content.find('#InvoicerCorpName').val(items.compname);
+                        $content.find('#InvoicerCorpName').val(items.item2);
+                        $content.find('#cltflag').val(items.cltflag);
                         $content.find('#PaymentCorpID').val(items.id);
-                        $content.find('#PaymentCorpName').val(items.compname);
+                        $content.find('#PaymentCorpName').val(items.item2);
+                        $content.find('#paycltflag').val(items.cltflag);
                     };
 
-                    poppage.show(searchcallback);
+                    if(result && result.data.length === 1){
+                        searchcallback(result.data[0]);   ``
+                        return;
+                    }
+
+                    poppage.show(searchcallback, result.data);
                 });
 
                 // 검색 버튼(지급 거래처 조회)
                 $content.find('#btnSelectPaymentCorp').click(function () {
-                    let poppage = new PopCompComponent();
+                    let poppage = new PopCompComponentCustom();
+                    let result = AjaxUtil.getSyncData('/api/popup/search_Comp_Custom', { spjangcd : getSpjangcdFromSession() });
 
                     let searchcallback = function (items) {
-
-                        $content.find('#PaymentCorpID').val(items.id).trigger('change');
-                        $content.find('#PaymentCorpName').val(items.compname);
+                        $content.find('#PaymentCorpID').val(items.id);
+                        $content.find('#PaymentCorpName').val(items.item2);
+                        $content.find('#paycltflag').val(items.cltflag);
                     };
 
-                    poppage.show(searchcallback);
+                    if(result && result.data.length === 1){
+                        searchcallback(result.data[0]);   ``
+                        return;
+                    }
+
+                    poppage.show(searchcallback, result.data);
                 });
 
                 // 매입 거래처에서 엔터
@@ -589,45 +606,26 @@
 
                     e.preventDefault();
 
-                    const keyword = $content.find('#InvoicerCorpName').val().trim(); // 검색 키워드는 등록번호
-                    const poppage = new PopCompComponent();
+                    const value = $content.find('#InvoicerCorpName').val();
+                    let poppage = new PopCompComponentCustom(value);
+                    let result = AjaxUtil.getSyncData('/api/popup/search_Comp_Custom', { item2 : value, spjangcd : getSpjangcdFromSession() });
 
-                    const searchcallback = function (item) {
+                    let searchcallback = function (items) {
 
-                        $content.find('#InvoicerID').val(item.id).trigger('change');
-                        $content.find('#InvoicerCorpName').val(item.compname);
-                        $content.find('#PaymentCorpID').val(item.id).trigger('change');
-                        $content.find('#PaymentCorpName').val(item.compname);
-
-                        setTimeout(() => {
-                            $content.find('#PaymentCorpName').focus();
-                        }, 0);
+                        $content.find('#InvoicerID').val(items.id).trigger('change');
+                        $content.find('#InvoicerCorpName').val(items.item2);
+                        $content.find('#cltflag').val(items.cltflag);
+                        $content.find('#PaymentCorpID').val(items.id);
+                        $content.find('#PaymentCorpName').val(items.item2);
+                        $content.find('#paycltflag').val(items.cltflag);
                     };
 
-                    if (!keyword) {
-                        poppage.focusAfterClose = $content.find('#InvoicerCorpName')[0];
-                        poppage.show(searchcallback);
+                    if(result && result.data.length === 1){
+                        searchcallback(result.data[0]);   ``
                         return;
                     }
 
-                    const $popupContent = $(tmpl('popup_compSearchTemplate', {}));
-                    const data = {
-                        compCode: '',
-                        compName: keyword,
-                        business_number: ''
-                    };
-                    const result = AjaxUtil.getSyncData('/api/popup/search_Comp', data);
-                    const rows = result?.data || [];
-
-                    if (rows.length === 1) {
-                        searchcallback(rows[0]);
-                    } else {
-                        poppage.show(searchcallback);
-                        setTimeout(() => {
-                            poppage.$compName.val(keyword);
-                            poppage.$btnCompSearch.trigger('click');
-                        }, 50);
-                    }
+                    poppage.show(searchcallback, result.data);
                 });
 
                 // 지급 거래처에서 엔터
@@ -636,102 +634,25 @@
 
                     e.preventDefault();
 
-                    const keyword = $content.find('#PaymentCorpName').val().trim(); // 검색 키워드는 등록번호
-                    const poppage = new PopCompComponent();
+                    const value = $content.find('#PaymentCorpName').val();
+                    let poppage = new PopCompComponentCustom(value);
+                    let result = AjaxUtil.getSyncData('/api/popup/search_Comp_Custom', { item2 : value, spjangcd : getSpjangcdFromSession() });
 
-                    const searchcallback = function (item) {
+                    let searchcallback = function (items) {
 
-                        $content.find('#PaymentCorpID').val(item.id).trigger('change');
-                        $content.find('#PaymentCorpName').val(item.compname);
-
-                        setTimeout(() => {
-                            $content.find('#title').focus();
-                        }, 0);
+                        $content.find('#PaymentCorpID').val(items.id);
+                        $content.find('#PaymentCorpName').val(items.item2);
+                        $content.find('#paycltflag').val(items.cltflag);
                     };
 
-                    if (!keyword) {
-                        poppage.focusAfterClose = $content.find('#PaymentCorpName')[0];
-                        poppage.show(searchcallback);
+                    if(result && result.data.length === 1){
+                        searchcallback(result.data[0]);   ``
                         return;
                     }
 
-                    const $popupContent = $(tmpl('popup_compSearchTemplate', {}));
-                    const data = {
-                        compCode: '',
-                        compName: keyword,
-                        business_number: ''
-                    };
-                    const result = AjaxUtil.getSyncData('/api/popup/search_Comp', data);
-                    const rows = result?.data || [];
-
-                    if (rows.length === 1) {
-                        searchcallback(rows[0]);
-                    } else {
-                        poppage.show(searchcallback);
-                        setTimeout(() => {
-                            poppage.$compName.val(keyword);
-                            poppage.$btnCompSearch.trigger('click');
-                        }, 50);
-                    }
+                    poppage.show(searchcallback, result.data);
                 });
 
-
-                $('#btnCompanySearch').on('keydown', function (e) {
-                    if (e.key === 'Enter' || e.keyCode === 13) {
-                        e.preventDefault();
-
-                        const keyword = $('#btnCompanySearch').val().trim();
-
-                        let poppage = new PopCompComponent();
-
-                        // 콜백 공통 처리
-                        const callback = function (item) {
-                            $('#btnCompanySearch').val(item.compname);
-                            $('#cboCompanyHidden').val(item.id);
-                            $('#btnCompanySearch').trigger('input');
-
-                            setTimeout(() => {
-                                $('#btnSearch').focus();
-                            }, 0);
-                        };
-
-                        if (!keyword) {
-                            // 버튼 포커스 콜백
-                            poppage.focusAfterClose = document.getElementById('btnCompanySearch');
-                            // 빈 값이면 바로 모달 오픈
-                            poppage.show(callback);
-                            return;
-                        }
-
-                        // 임시 DOM으로 검색 템플릿 렌더링
-                        const $content = $(tmpl('popup_compSearchTemplate', {}));
-                        const $compName = $content.find('#compName');
-                        $compName.val(keyword);
-
-                        const data = {
-                            compCode: '',
-                            compName: keyword,
-                            business_number: ''
-                        };
-
-                        const result = AjaxUtil.getSyncData('/api/popup/search_Comp', data);
-                        const rows = result?.data || [];
-
-                        if (rows.length === 1) {
-                            // 검색 결과 1건이면 자동 선택
-                            callback(rows[0]);
-
-                        } else {
-                            // 0건이거나 2건 이상이면 모달 열고 검색 실행
-                            poppage.show(callback);
-                            setTimeout(() => {
-                                poppage.$compName.val(keyword);
-                                poppage.$btnCompSearch.trigger('click');
-                            }, 50);
-
-                        }
-                    }
-                });
 
                 // 품목 추가 버튼
                 $(document).off('click', 'a[id^="btnViewItem_"]').on('click', 'a[id^="btnViewItem_"]', function (e) {
@@ -769,6 +690,48 @@
 
                 function saveInvoice($taxForm, modalContainer, skipConfirm = false) {
                     let data = FormUtil.extractForm($taxForm);
+
+                    if (!data.InvoicerCorpName?.trim()) {
+                        Alert.alert('', '매입 거래처를 입력해주세요.', () => {
+                            $taxForm.find('#InvoicerCorpName').focus();
+                        });
+                        return;
+                    }
+
+                    if (!data.PaymentCorpName?.trim()) {
+                        Alert.alert('', '지급 거래처 입력해주세요.', () => {
+                            $taxForm.find('#PaymentCorpName').focus();
+                        });
+                        return;
+                    }
+
+                    if (!data.title?.trim()) {
+                        Alert.alert('', '제목을 입력해주세요.', () => {
+                            $taxForm.find('#title').focus();
+                        });
+                        return;
+                    }
+
+                    if (!data.TotalAmount || data.TotalAmount === '0') {
+
+                        Alert.alert('', '금액이 없습니다.');
+                        return;
+                    }
+
+                    let hasItemName = false;
+                    $taxForm.find('textarea[name^="detailList["][name$="].ItemName"]').each(function () {
+                        if ($(this).val()?.trim()) {
+                            hasItemName = true;
+                            return false; // 하나라도 있으면 종료
+                        }
+                    });
+
+                    if (!hasItemName) {
+                        Alert.alert('', '품목을 하나 이상 입력해주세요.', () => {
+                            $taxForm.find('textarea[name^="detailList["][name$="].ItemName"]').first().focus();
+                        });
+                        return;
+                    }
 
                     for (let i = 0; i < 20; i++) {
                         const itemName = data[`detailList[${i}].ItemName`];
@@ -870,8 +833,28 @@
 
                 let fnsuccess = function (result) {
                     if (result != null && result.data) {
+                        result.data.forEach(row => {
+                            if (row.cltnm && row.cltnmsub) {
+                                row.cltnm_full = `${row.cltnm} (${row.cltnmsub})`;
+                            } else if (row.cltnm) {
+                                row.cltnm_full = row.cltnm;
+                            } else if (row.cltnmsub) {
+                                row.cltnm_full = row.cltnmsub;
+                            } else {
+                                row.cltnm_full = ''; // 모두 없을 경우
+                            }
+
+                            if (row.paycltnm && row.paycltnmsub) {
+                                row.paycltnm_full = `${row.paycltnm} (${row.paycltnmsub})`;
+                            } else if (row.paycltnm) {
+                                row.paycltnm_full = row.paycltnm;
+                            } else if (row.paycltnmsub) {
+                                row.paycltnm_full = row.paycltnmsub;
+                            } else {
+                                row.paycltnm_full = '';
+                            }
+                        });
                         _this.grid.itemsSource = result.data;
-                        console.log('result.data', result.data);
                         _this.updateFooter();
                     }
                 };
@@ -879,6 +862,30 @@
                 AjaxUtil.getAsyncData(url, data, fnsuccess);
             }
 
+        }
+
+        function companyPopupOpenCustom(intputId, hiddenid, hiddenflag){
+
+            const value = document.getElementById(intputId).value;
+
+            let poppage = new PopCompComponentCustom(value);
+
+            let result = AjaxUtil.getSyncData('/api/popup/search_Comp_Custom', { item2 : value, spjangcd : getSpjangcdFromSession() });
+
+            let searchcallback = function (items) {
+
+                document.getElementById(intputId).focus();
+
+                document.getElementById(intputId).value = items.item2;
+                document.getElementById(hiddenid).value = items.id;
+                document.getElementById(hiddenflag).value = items.cltflag;
+            };
+            if(result && result.data.length === 1){
+                searchcallback(result.data[0]);   ``
+                return;
+            }
+
+            poppage.show(searchcallback, result.data);
         }
 
         let page = null;
@@ -912,56 +919,7 @@
                 if (e.type === 'keydown' && (e.key === 'Enter' || e.keyCode === 13)) {
                     e.preventDefault();
 
-                    const keyword = $('#btnCompanySearch').val().trim();
-
-                    let poppage = new PopCompComponent();
-
-                    // 콜백 공통 처리
-                    const callback = function (item) {
-                        $('#btnCompanySearch').val(item.compname);
-                        $('#cboCompanyHidden').val(item.id);
-                        $('#btnCompanySearch').trigger('input');
-
-                        setTimeout(() => {
-                            $('#btnSearch').focus();
-                        }, 0);
-                    };
-
-                    if (!keyword) {
-                        // 버튼 포커스 콜백
-                        poppage.focusAfterClose = document.getElementById('btnCompanySearch');
-                        // 빈 값이면 바로 모달 오픈
-                        poppage.show(callback);
-                        return;
-                    }
-
-                    // 임시 DOM으로 검색 템플릿 렌더링
-                    const $content = $(tmpl('popup_compSearchTemplate', {}));
-                    const $compName = $content.find('#compName');
-                    $compName.val(keyword);
-
-                    const data = {
-                        compCode: '',
-                        compName: keyword,
-                        business_number: ''
-                    };
-
-                    const result = AjaxUtil.getSyncData('/api/popup/search_Comp', data);
-                    const rows = result?.data || [];
-
-                    if (rows.length === 1) {
-                        // 검색 결과 1건이면 자동 선택
-                        callback(rows[0]);
-
-                    } else {
-                        // 0건이거나 2건 이상이면 모달 열고 검색 실행
-                        poppage.show(callback);
-                        setTimeout(() => {
-                            poppage.$compName.val(keyword);
-                            poppage.$btnCompSearch.trigger('click');
-                        }, 50);
-
-                    }
+                    companyPopupOpenCustom('btnCompanySearch', 'cboCompanyHidden', 'cltflag');
                 }
             });
 

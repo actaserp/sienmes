@@ -48,7 +48,7 @@ public class PurchaseInvoiceController {
 	}
 
 	// 검색
-	@DecryptField(columns = {"cardnum"}, masks = 0)
+	@DecryptField(columns = {"incardnum", "paycltnm", "cltnm"}, masks = {0, 0, 0})
 	@GetMapping("/read")
 	public AjaxResult getInvoiceList(
 			@RequestParam(value="invoice_kind", required=false) String invoice_kind,

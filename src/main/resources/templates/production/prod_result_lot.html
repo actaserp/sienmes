@@ -441,11 +441,11 @@
                                         <th><label for="prod_date">생산시간</label></th>
                                         <td colspan="7">
                                             <div class="input-group" id="prod_datepicker">
-                                                <input type="date" id="prod_date" name="prod_date"/>
-                                                <input type="time" id="start_time" name="start_time" disabled/>
+                                                <input type="date" id="prod_date" name="prod_date" style="background-color: #EDEFF5;" readonly/>
+                                                <input type="time" id="start_time" name="start_time" readonly/>
                                                 <span class="slow_sign">~</span>
-                                                <input type="date" id="end_date" name="end_date"/>
-                                                <input type="time" id="end_time" name="end_time" disabled/>
+                                                <input type="date" id="end_date" name="end_date" style="background-color: #EDEFF5;" readonly/>
+                                                <input type="time" id="end_time" name="end_time" readonly/>
                                             </div>
 
                                         </td>
@@ -1463,20 +1463,7 @@
             // 버튼 활성화 설정
             setButtonState() {
                 let pk = $('#tabBasic').find('#id').val();
-                let $buttons = $('.tab-content').find('button');
 
-                //$buttons.each(function () {
-                //    if (!$(this).is(':disabled')) {
-                //        $(this).attr('disabled', 'disabled');
-                //    }
-                //});
-
-
-                $('#btnGridSetting2').removeAttr('disabled');
-                $('#btnGridSetting3').removeAttr('disabled');
-
-                $('#btnExcel2').removeAttr('disabled');
-                $('#btnExcel3').removeAttr('disabled');
                 let chasu = this.chasuGrid.selectedItems;
                 if (chasu.length > 0) {
                     chasu = chasu[0].chasu;
@@ -1755,6 +1742,7 @@
             delBasicInfo() {
                 let _this = this;
                 let url = this.baseUrl + '/del';
+                let previousIndex = _this.selectedIndex;
 
                 let data = FormUtil.extractForm($('#basicForm'));
 
@@ -1762,7 +1750,11 @@
                     if (res.success) {
                         Notify.success('취소되었습니다.');
                         _this.searchMainData();
-                        _this.setButtonState();
+                        // _this.setButtonState();
+                        setTimeout(() => {
+                            _this.grid.select(previousIndex, 0);
+                            console.log('취소 다시 클릭')
+                        }, 100);
                     } else {
                         Alert.alert('작업지시 취소', res.message);
                     }
@@ -1824,12 +1816,10 @@
                     return;
                 }
 
-                // 시작시간 없을 시 자동 세팅
-                if (!data.start_time) {
-                    let now = new Date();
-                    let now_time = ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2);
-                    data.start_time = now_time;
-                }
+
+                let now = new Date();
+                let now_time = ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2);
+                data.start_time = now_time;
 
                 AjaxUtil.postAsyncData(url, data, fnSuccess);
             }

@@ -562,6 +562,7 @@ public class ProductionResultController {
     @Transactional
     public AjaxResult finishCancel(
             @RequestParam(value = "jr_pk", required = false) Integer jrPk,
+            @RequestParam(value = "spjangcd", required = false) String spjangcd,
             HttpServletRequest request,
             Authentication auth) {
 
@@ -587,6 +588,7 @@ public class ProductionResultController {
             equ.setRunState("complete_cancel");
             equ.set_audit(user);
             equ.setDescription("완료 취소");
+            equ.setSpjangcd(spjangcd);
             equRunRepository.save(equ);
 
             Timestamp nowWithCurrentSecond = Timestamp.valueOf(LocalDateTime.now());
@@ -598,6 +600,7 @@ public class ProductionResultController {
             newRun.setWorkOrderNumber(jr.getWorkOrderNumber());
             newRun.setStartDate(nowWithCurrentSecond);
             newRun.setRunState("run");
+            newRun.setSpjangcd(spjangcd);
             newRun.set_audit(user);
 
             equRunRepository.save(newRun);
@@ -1575,7 +1578,7 @@ public class ProductionResultController {
                 equ.setEndDate(now); // 중지 시각
                 equ.setRunState("stop");
             }
-            equ.setType("작지 취소");
+            equ.setDescription("작지 취소");
             equ.set_audit(user);
 
             equRunRepository.save(equ);
@@ -1724,6 +1727,7 @@ public class ProductionResultController {
             @RequestParam(value = "Equipment_id", required = false) Integer Equipment_id,
             @RequestParam(value = "StopCause_id", required = false) Integer StopCause_id,
             @RequestParam(value = "jr_pk", required = false) Integer jr_pk,
+            @RequestParam("spjangcd") String spjangcd,
             HttpServletRequest request,
             Authentication auth) {
 
@@ -1750,6 +1754,7 @@ public class ProductionResultController {
             equ.setStopCauseId(StopCause_id);
             equ.setDescription(Description);
             equ.set_audit(user);
+            equ.setSpjangcd(spjangcd);
 
             equRunRepository.save(equ);
 
@@ -1769,6 +1774,7 @@ public class ProductionResultController {
             er.setWorkOrderNumber(WorkOrderNumber);
             er.setRunState("run");
             er.set_audit(user);
+            er.setSpjangcd(spjangcd);
 
             this.equRunRepository.save(er);
 

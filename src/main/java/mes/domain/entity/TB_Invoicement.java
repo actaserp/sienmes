@@ -37,6 +37,8 @@ public class TB_Invoicement {
     private Integer card_id;
     private String title;
     private String spjangcd;
+    private String cltflag;
+    private String paycltflag;
 
     @Version
     private Integer vercode;
