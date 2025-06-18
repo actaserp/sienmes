@@ -417,6 +417,7 @@
                         x: {
                             format: 'yyyy-MM-dd TT hh:mm',
                         },
+
                     },
                 };
                 this.chart = new ApexCharts(document.querySelector("#chart"), this.options);
@@ -598,11 +599,13 @@
 
                     if (result.data.length != 0) {
                         // 차트 데이터 생성    default data 는 차트 형식 잡아주는데 사용
-                        var series = [
+                        let series = [
                             {
                                 data: []
                             }
                         ];
+
+                        console.log('data', result.data);
 
                         result.data.forEach(function (e, idx) {
                             var color = '#008FFB';
@@ -618,7 +621,7 @@
                                     x: e.Name,
                                     y: [
                                         Date.parse(e.StartDate),
-                                        Date.parse(e.EndDate)
+                                        e.EndDate ? Date.parse(e.EndDate) : Date.now()
                                     ],
                                     fillColor: color
                                 }
