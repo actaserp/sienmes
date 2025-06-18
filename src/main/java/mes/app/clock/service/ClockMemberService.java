@@ -40,7 +40,8 @@ public class ClockMemberService {
               tb210.yearflag as yearflag,
               tb210.worknm as worknm,
               p."Name" as first_name,
-              s."Value" as jik_id
+              s."Value" as jik_id,
+              sc."Value" as appgubunnm
           from tb_pb204 t
             LEFT JOIN person p ON p.id = t.personid
             LEFT JOIN (
@@ -48,6 +49,11 @@ public class ClockMemberService {
                  FROM sys_code
                  WHERE "CodeType" = 'jik_type'
              ) s ON s."Code" = p.jik_id
+             LEFT JOIN (
+                 SELECT "Code", "Value"
+                 FROM sys_code
+                 WHERE "CodeType" = 'approval_status'
+             ) sc ON sc."Code" = t.appgubun
              LEFT JOIN tb_pb210 tb210 ON tb210.workcd = t.workcd
           WHERE t.reqdate between :start_date and :end_date
           AND t.spjangcd = :spjangcd

@@ -296,6 +296,7 @@ public class PaymentDetailController {
     Integer userid = user.getPersonid();
     String appnum = (String) request.get("appnum");
     String appgubun = (String) request.get("appgubun");
+    // action = 결재변경 상태값
     String action = (String) request.get("action");
     String remark = (String) request.get("remark");
     Integer appperid = userid;
