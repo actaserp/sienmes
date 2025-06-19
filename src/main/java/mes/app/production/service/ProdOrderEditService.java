@@ -56,6 +56,7 @@ public class ProdOrderEditService {
 	                left join unit u on m."Unit_id" = u.id
 	                where 1 = 1 and mg."MaterialType"!='sangpum'
 	                and s.spjangcd = :spjangcd
+	                and s.confirm = '1'
         		""";
         
         if ("suju_date".equals(date_kind)) {
