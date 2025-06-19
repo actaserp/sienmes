@@ -24,14 +24,15 @@
               거래처
             </dt>
             <dd>
-              <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
+              <input type="text" id="cboCompany" name="cboCompany" placeholder="입력 후 엔터를 눌러 검색하세요.">
               <input type="hidden" id="cboCompanyHidden">
               <input type="hidden" id="spjangcdHidden">
+              <input type="hidden" id="clientFlag">
               &nbsp;
-              <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+             <!-- <a class="btn btn-delete" title="검색" id="btnCompanySearch">
                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                 업체 검색
-              </a>
+              </a>-->
             </dd>
           </dl>
           <dl>
@@ -89,7 +90,7 @@
 <th:block layout:fragment="scripts">
   <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
   <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
-  <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+  <th:block th:replace="/common/popup_company_employee_bank_card.html :: popup_company"></th:block>
   <script type="text/javascript">
     class AccountsReceivableListPage {
       constructor() {
@@ -287,6 +288,30 @@
 
     let page = null;
 
+    function companyPopupOpenCustom(intputId, hiddenid, hiddenflag){
+
+      const value = document.getElementById(intputId).value;
+
+      let poppage = new PopCompComponentCustom(value);
+
+      let result = AjaxUtil.getSyncData('/api/popup/search_Comp_Custom', { item2 : value, spjangcd : getSpjangcdFromSession() });
+
+      let searchcallback = function (items) {
+
+        document.getElementById(intputId).focus();
+
+        document.getElementById(intputId).value = items.item2;
+        document.getElementById(hiddenid).value = items.id;
+        document.getElementById(hiddenflag).value = items.cltflag;
+      };
+      if(result && result.data.length === 1){
+        searchcallback(result.data[0]);   ``
+        return;
+      }
+
+      poppage.show(searchcallback, result.data);
+    }
+
     $(document).ready(function (e) {
       const spjangcd = sessionStorage.getItem('spjangcd');
       if (spjangcd) {
@@ -331,16 +356,11 @@
           'fix_cols': fix_cols
         });
       });
-      $('#btnCompanySearch').click(function () {
-        let poppage = new PopCompComponent();
-        let $poppage = $(poppage);
-        let searchcallback = function (items) {
-          console.log('items : ', items);
-          document.getElementById('cboCompany').value = items.compname;
-          document.getElementById('cboCompanyHidden').value = items.id;
-        };
 
-        poppage.show(searchcallback);
+      $('#cboCompany').on('keydown', function(e){
+        if(e.key === 'Enter' || e.keyCode === 13){
+          companyPopupOpenCustom('cboCompany', 'cboCompanyHidden', 'clientFlag');
+        }
       });
 
       $('#cboCompany').on('input', function () {
