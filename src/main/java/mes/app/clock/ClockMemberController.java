@@ -5,8 +5,10 @@ import mes.domain.entity.Tb_pb203;
 import mes.domain.entity.Tb_pb203Id;
 import mes.domain.entity.User;
 import mes.domain.entity.commute.TB_PB201;
+import mes.domain.entity.commute.TB_PB201_PK;
 import mes.domain.entity.mobile.TB_PB204;
 import mes.domain.model.AjaxResult;
+import mes.domain.repository.commute.TB_PB201Repository;
 import mes.domain.repository.mobile.TB_PB204Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +33,9 @@ public class ClockMemberController {
 
     @Autowired
     TB_PB204Repository tbPb204Repository;
+
+    @Autowired
+    TB_PB201Repository tbPb201Repository;
 
     @GetMapping("/read")
     public AjaxResult getMemberList(
@@ -82,9 +89,41 @@ public class ClockMemberController {
             if (optional.isPresent()) {
                 TB_PB204 tbpb204 = optional.get();
                 tbpb204.setFixflag("1");
-
-
                 tbpb204List.add(tbpb204);
+
+                // 1. 날짜 범위 파싱
+                String frdateStr = tbpb204.getFrdate(); // "yyyyMMdd"
+                String todateStr = tbpb204.getTodate();
+                if(frdateStr == null || todateStr == null) continue;
+
+                LocalDate frdate = LocalDate.parse(frdateStr, DateTimeFormatter.ofPattern("yyyyMMdd"));
+                LocalDate todate = LocalDate.parse(todateStr, DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+                for (LocalDate date = frdate; !date.isAfter(todate); date = date.plusDays(1)) {
+                    String workym = date.format(DateTimeFormatter.ofPattern("yyyyMM"));
+                    String workday = date.format(DateTimeFormatter.ofPattern("dd"));
+
+                    TB_PB201_PK pk = new TB_PB201_PK();
+                    pk.setSpjangcd(spjangcd);
+                    pk.setWorkym(workym);
+                    pk.setWorkday(workday);
+                    pk.setPersonid(tbpb204.getPersonid());
+
+                    // 이미 있으면 update, 없으면 insert
+                    Optional<TB_PB201> existed = tbPb201Repository.findById(pk);
+                    TB_PB201 entity;
+                    if(existed.isPresent()) {
+                        entity = existed.get();
+                    } else {
+                        entity = new TB_PB201();
+                        entity.setId(pk);
+                    }
+                    // 연차 근태값 세팅
+                    entity.setWorkcd(tbpb204.getWorkcd()); // 연차 코드
+                    entity.setRemark("연차 자동반영"); // 필요시
+
+                    tbPb201Repository.save(entity);
+                }
             }
         }
 
