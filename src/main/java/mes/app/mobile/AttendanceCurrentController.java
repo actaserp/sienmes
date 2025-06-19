@@ -7,6 +7,7 @@ import mes.domain.entity.approval.TB_E080;
 import mes.domain.entity.approval.TB_E080_PK;
 import mes.domain.entity.mobile.TB_PB204;
 import mes.domain.model.AjaxResult;
+import mes.domain.repository.mobile.TB_E080Repository;
 import mes.domain.repository.mobile.TB_PB204Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,8 @@ public class AttendanceCurrentController {
     AttendanceCurrentService attendanceCurrentService;
     @Autowired
     TB_PB204Repository tbPb204Repository;
+    @Autowired
+    TB_E080Repository tbE080Repository;
     // 개인별 휴가 현황 조회
     @GetMapping("/read")
     public AjaxResult getUserInfo(
@@ -103,6 +106,38 @@ public class AttendanceCurrentController {
             savedtbPb204.setYearflag(isAnnual); // 연차여부
             result.data = tbPb204Repository.save(savedtbPb204);
             result.message = "휴가수정이 완료되었습니다.";
+        } else {
+            System.out.println("해당 ID로 데이터를 찾을 수 없습니다.");
+        }
+        return result;
+    }
+    // 휴가정보 삭제
+    @PostMapping("/deleteAttendance")
+    public AjaxResult deleteAttendance(
+            @RequestParam(value="vacId", required=false) Integer vacId,
+            HttpServletRequest request,
+            Authentication auth) {
+        AjaxResult result = new AjaxResult();
+        User user = (User)auth.getPrincipal();
+        String spjangcd = user.getSpjangcd();
+        Integer personid = user.getPersonid();
+
+        // 기존 휴가 데이터 조회
+        Optional<TB_PB204> optionalTbPb204 = tbPb204Repository.findById(vacId);
+
+        if (optionalTbPb204.isPresent()) {
+            TB_PB204 savedtbPb204 = optionalTbPb204.get();
+            Map<String, Object> tb080 = attendanceCurrentService.getAppInfo(savedtbPb204.getAppnum());
+            if(!tb080.isEmpty()) {
+                TB_E080_PK tbE080Pk = new TB_E080_PK();
+                tbE080Pk.setSeq(tb080.get("seq").toString());
+                tbE080Pk.setPersonid((Integer) tb080.get("personid"));
+                tbE080Pk.setAppnum(tb080.get("appnum").toString());
+                tbE080Pk.setSpjangcd(spjangcd); 
+                tbE080Repository.deleteById(tbE080Pk);
+            }
+            tbPb204Repository.delete(savedtbPb204);
+            result.message = "휴가삭제가 완료되었습니다.";
         } else {
             System.out.println("해당 ID로 데이터를 찾을 수 없습니다.");
         }

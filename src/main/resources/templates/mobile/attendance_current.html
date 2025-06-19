@@ -212,7 +212,8 @@
                 </div>
 
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="submitEditVacation()">저장하기</button>
+                    <button onclick="submitEditVacation()" style="background-color: #56a0fd; color: #FFFFFF">수정</button>
+                    <button onclick="deleteVacation()">삭제</button>
                     <button onclick="closeEditModal()">닫기</button>
                 </div>
             </div>
@@ -458,6 +459,28 @@
                     Alert.alert('', result.message, reloadWindow);
                 } else {
                     Alert.alert('',"휴가 수정에 실패하였습니다.");
+                }
+            } else {
+                Alert.alert('',"오류가 발생하였습니다.");
+            }
+        };
+
+        AjaxUtil.postAsyncData(url, data, fnsuccess);
+    }
+
+    // 휴가데이터 삭제
+    function deleteVacation() {
+        let url = '/api/attendance_current/deleteAttendance';
+        let data = {
+            'vacId': document.getElementById('vacId').value
+        };
+
+        let fnsuccess = function (result) {
+            if (result != null) {
+                if (result.success) {
+                    Alert.alert('', result.message, reloadWindow);
+                } else {
+                    Alert.alert('',"휴가 삭제에 실패하였습니다.");
                 }
             } else {
                 Alert.alert('',"오류가 발생하였습니다.");

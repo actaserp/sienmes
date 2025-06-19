@@ -1,5 +1,6 @@
 package mes.app.mobile.Service;
 
+import mes.domain.entity.approval.TB_E080_PK;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -72,5 +73,21 @@ public class AttendanceCurrentService {
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 
         return items;
+    }
+    // 휴가결재데이터 조회(appnum)
+    public Map<String, Object> getAppInfo(String appnum) {
+
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        dicParam.addValue("appnum", appnum);
+
+        String sql = """
+                SELECT *
+                FROM tb_e080
+                WHERE appnum = :appnum
+        		""";
+
+        Map<String, Object> item = this.sqlRunner.getRow(sql, dicParam);
+
+        return item;
     }
 }

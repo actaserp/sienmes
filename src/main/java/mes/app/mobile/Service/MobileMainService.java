@@ -80,7 +80,8 @@ public class MobileMainService {
                 LEFT JOIN tb_pb201 t
                 ON t.personid = a.personid
                 WHERE a.username = :username
-                AND LPAD(EXTRACT(DAY FROM CURRENT_DATE)::TEXT, 2, '0') = workday;
+                AND LPAD(EXTRACT(DAY FROM CURRENT_DATE)::TEXT, 2, '0') = workday
+                AND TO_CHAR(CURRENT_DATE, 'YYYYMM') = workym;
         		""";
 
 
