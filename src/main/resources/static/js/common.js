@@ -962,9 +962,16 @@ let AjaxUtil = {
 
         let csrf = $('[name=_csrf]').val();
 
-        data = data || {};
-        data.spjangcd = sessionStorage.getItem('spjangcd');
+        let spjangcd = sessionStorage.getItem('spjangcd');
 
+        data = data || [];
+
+        if (Array.isArray(data)) {
+            data = data.map(item => ({
+                ...item,
+                spjangcd: spjangcd
+            }));
+        }
         $.ajax({
             async: true,
             dataType: 'json',
@@ -993,8 +1000,16 @@ let AjaxUtil = {
 
         let csrf = $('[name=_csrf]').val();
 
-        data = data || {};
-        data.spjangcd = sessionStorage.getItem('spjangcd');
+        let spjangcd = sessionStorage.getItem('spjangcd');
+
+        data = data || [];
+
+        if (Array.isArray(data)) {
+            data = data.map(item => ({
+                ...item,
+                spjangcd: spjangcd
+            }));
+        }
 
         $.ajax({
             async: false,

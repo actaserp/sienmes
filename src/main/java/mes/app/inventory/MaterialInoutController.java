@@ -70,6 +70,7 @@ public class MaterialInoutController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+	// 입출고 전체 리스트
 	@GetMapping("/read")
 	public AjaxResult getMaterialInout(
 			@RequestParam(value = "srchStartDt", required=false) String srchStartDt,
@@ -88,6 +89,45 @@ public class MaterialInoutController {
 		return result;
 	}
 
+	// 입출고 전체 리스트
+	@GetMapping("/read_receipt")
+	public AjaxResult getMaterialInout_receipt(
+			@RequestParam(value = "srchStartDt", required=false) String srchStartDt,
+			@RequestParam(value = "srchEndDt", required=false) String srchEndDt,
+			@RequestParam(value = "house_pk", required=false) String housePk,
+			@RequestParam(value = "mat_type", required=false) String matType,
+			@RequestParam(value = "mat_grp_pk", required=false) String matGrpPk,
+			@RequestParam(value = "spjangcd", required=false) String spjangcd,
+			@RequestParam(value = "keyword", required=false) String keyword) {
+
+		List<Map<String, Object>> items = this.materialInoutService.getMaterialInoutReceipt(srchStartDt,srchEndDt,housePk,matType,matGrpPk,keyword,spjangcd);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
+		return result;
+	}
+
+	// 불출 리스트
+	@GetMapping("/read_issue")
+	public AjaxResult getMaterialInout_issue(
+			@RequestParam(value = "srchStartDt", required=false) String srchStartDt,
+			@RequestParam(value = "srchEndDt", required=false) String srchEndDt,
+			@RequestParam(value = "house_pk", required=false) String housePk,
+			@RequestParam(value = "mat_type", required=false) String matType,
+			@RequestParam(value = "mat_grp_pk", required=false) String matGrpPk,
+			@RequestParam(value = "spjangcd", required=false) String spjangcd,
+			@RequestParam(value = "keyword", required=false) String keyword) {
+
+		List<Map<String, Object>> items = this.materialInoutService.getMaterialInoutIssue(srchStartDt,srchEndDt,housePk,matType,matGrpPk,keyword,spjangcd);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
+		return result;
+	}
+
+	// 폐기 리스트
 	@GetMapping("/read_disposal")
 	public AjaxResult getMaterialInout_disposal(
 			@RequestParam(value = "srchStartDt", required=false) String srchStartDt,
@@ -219,7 +259,7 @@ public class MaterialInoutController {
 			@RequestParam("Description") String description,
 			@RequestParam("InoutQty") String inoutQty,
 			@RequestParam("InoutType_hidden") String inoutType,
-			@RequestParam("cboCompany") Integer companyId,
+			@RequestParam(value="cboCompany", required = false) Integer companyId,
 			@RequestParam("Material_id") String materialId,
 			@RequestParam("StoreHouse_id") String storeHouseId,
 			@RequestParam("inoutDate") String inoutDateStr,
@@ -859,6 +899,29 @@ public class MaterialInoutController {
 		return result;
 	}
 
+	@GetMapping("/read_balju_in")
+	public AjaxResult getbaljuInList(
+			@RequestParam(value="start", required=false) String start_date,
+			@RequestParam(value="end", required=false) String end_date,
+			@RequestParam(value="cboCompanyHidden", required=false) Integer cboCompany,
+			@RequestParam(value = "keyword", required=false) String keyword,
+			@RequestParam("spjangcd") String spjangcd,
+			HttpServletRequest request) {
+
+		start_date = start_date + " 00:00:00";
+		end_date = end_date + " 23:59:59";
+
+		Timestamp start = Timestamp.valueOf(start_date);
+		Timestamp end = Timestamp.valueOf(end_date);
+
+		List<Map<String, Object>> items = this.materialInoutService.getBaljuInList(start, end, spjangcd, cboCompany, keyword);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
+		return result;
+	}
+
 	@PostMapping("/save_balju")
 	@Transactional
 	public AjaxResult saveBaljuInout(
@@ -907,6 +970,8 @@ public class MaterialInoutController {
 				mi.set_audit(user);
 				mi.setSourceDataPk(bal_pk);
 				mi.setSourceTableName("balju");
+				mi.setSpjangcd((String) item.get("spjangcd"));
+				mi.setCompanyId((Integer) item.get("Company_id"));
 
 				Balju balju = this.bujuRepository.getBujuById(bal_pk);
 
@@ -920,6 +985,74 @@ public class MaterialInoutController {
 
 				balju.setShipmentState(storeHouseIdStr);
 				mi.setInputType("order_in");
+
+				matInoutRepository.save(mi);
+				bujuRepository.save(balju);
+
+			} catch (Exception e) {
+				result.success = false;
+				result.message = "처리 중 오류 발생: " + e.getMessage();
+				return result;
+			}
+		}
+		result.success = true;
+
+		return result;
+	}
+
+	@PostMapping("/save_balju_return")
+	@Transactional
+	public AjaxResult saveBaljuReturn(
+			@RequestBody List<Map<String, Object>> baljuList,
+			HttpServletRequest request,
+			Authentication auth) {
+
+		User user = (User)auth.getPrincipal();
+		AjaxResult result = new AjaxResult();
+
+		for (Map<String, Object> item : baljuList) {
+			try {
+				Integer bal_pk = (Integer) item.get("id");
+				String description = (String) item.get("Description2");
+				if (description == null || description.trim().isEmpty()) {
+					description = "발주 반품";
+				}
+				String inoutQtyStr = String.valueOf(item.get("returnQty")); // '반품 수량'
+				String materialIdStr = String.valueOf(item.get("Material_id"));
+				String storeHouseIdStr = String.valueOf(item.get("StoreHouse_id"));
+
+				Integer matPk = Integer.parseInt(materialIdStr);
+				Integer qty = Integer.parseInt(inoutQtyStr);
+
+				MaterialInout mi = new MaterialInout();
+				mi.setInoutDate(LocalDate.now());
+				mi.setInoutTime(LocalTime.now());
+				mi.setMaterialId(matPk);
+				mi.setStoreHouseId(Integer.parseInt(storeHouseIdStr));
+
+				mi.setInputQty((float) qty);
+				mi.setState("confirmed");
+				mi.set_status("a");
+				mi.setDescription(description);
+				mi.setInOut("return");
+				mi.set_audit(user);
+				mi.setSourceDataPk(bal_pk);
+				mi.setSourceTableName("balju");
+				mi.setSpjangcd((String) item.get("spjangcd"));
+				mi.setCompanyId((Integer) item.get("Company_id"));
+
+				Balju balju = this.bujuRepository.getBujuById(bal_pk);
+
+				double sujuQty2 = jdbcTemplate.queryForObject("""
+					SELECT COALESCE(SUM("InputQty"), 0)
+					FROM mat_inout
+					WHERE "SourceDataPk" = ? 
+					  AND "SourceTableName" = 'balju'
+					  AND COALESCE("_status", 'a') = 'a'
+				""", Double.class, bal_pk);
+
+				balju.setShipmentState(storeHouseIdStr);
+				mi.setInputType("balju_return");
 
 				matInoutRepository.save(mi);
 				bujuRepository.save(balju);

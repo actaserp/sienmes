@@ -37,6 +37,10 @@
             gap: 16px;
         }
 
+        #btnCompanySearchB::placeholder {
+            font-size: 13px; /* 원하는 크기로 */
+        }
+
     </style>
     <style id="print_css">
         @media print {
@@ -601,8 +605,31 @@
                       </ul>
                     </dd>
                   </dl>
-
+                    <dl>
+                        <dt style="text-align:left;">
+                            <label>
+                                구매처
+                            </label>
+                        </dt>
+                        <dd>
+                            <input type="text" id="btnCompanySearchB" name="btnCompanySearchB" placeholder="구매처명 입력후 엔터"
+                                   style="width: 140px;" autocomplete="off" tabindex="3">
+                            <input type="hidden" id="cboCompanyHidden">
+                        </dd>
+                    </dl>
                   <dl>
+                        <dt style="text-align:left;">
+                            <label for="txtMatNameB">
+                                품명
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input style="width: 140px;" id="txtMatNameB" name="txtMatNameB"/>
+                            </div>
+                        </dd>
+                  </dl>
+                    <dl>
                     <dt>&nbsp;</dt>
                     <dd>
                       <li>
@@ -620,7 +647,7 @@
                 </div>
             </div>
             <div class="popup-button">
-                <button type="button" class="btn-popup" id="btnBaljuSave" ><span data-labelCd="발주 반품">발주 반품</span></button>
+                <button type="button" class="btn-popup" id="btnBaljuReturnSave" ><span data-labelCd="발주 반품">발주 반품</span></button>
                 <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
             </div>
         </div>
@@ -634,7 +661,7 @@
                 <form id="mat_multi_input_form">
                     <table class="write-table">
                         <tbody>
-                            <tr>
+                            <tr style="display:none;">
                                 <th style="text-align: center">
                                     <label for="InoutType">구분</label>
                                 </th>
@@ -1126,7 +1153,7 @@
                         {binding: 'InoutTime', header: '시간', width: 60, align: 'center'},
                         {binding: 'potentialInputQty', header: '가입고량', width: 80, align: 'right', format: 'n0'},
                         {binding: 'InputQty', header: '입고량', width: 80, align: 'right', format: 'n0'},
-                        {binding: 'OutputQty', header: '출고량', width: 80, align: 'right', format: 'n0'},
+                        // {binding: 'OutputQty', header: '출고량', width: 80, align: 'right', format: 'n0'},
                         {binding: 'HouseStock', header: '창고재고', width: 80, align: 'right', format: 'n0'},
                         {binding: 'lot_count', header: '로트개수', width: 80, align: 'center'},
                         {binding: 'CurrentStock', header: '전체재고', width: 80, align: 'right', format: 'n0'},
@@ -1227,7 +1254,7 @@
                     'keyword': txtMatName
                 };
 
-                let result = AjaxUtil.getSyncData(this.url + "/read", data);
+                let result = AjaxUtil.getSyncData(this.url + "/read_receipt", data);
                 if (result.data != null) {
                     _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
                 }
@@ -1275,7 +1302,7 @@
 
                     if (type === 'in') {
                         AjaxUtil.fillSelectOptions(
-                            $content.find('#InoutType'), 'system_code', '', 'order_in', 'input_type'
+                            $content.find('#InoutType'), 'system_code', '', 'etc_in', 'input_type'
                         );
                     } else if (type === 'out') {
                         AjaxUtil.fillSelectOptions(
@@ -1391,15 +1418,6 @@
                 }
 
                 $content.find('#btnSave').on('click', function () {
-                    if (!$('#cboMaterialGroup').val()) {
-                        Alert.alert('', '품목그룹을 선택하세요.');
-                        return false;
-                    }
-
-                    if (!$('#cboCompany').val()) {
-                        Alert.alert('', '구매처를 선택하세요.');
-                        return false;
-                    }
 
                     if (!$('#Material_id').val()) {
                         Alert.alert('', '품목을 선택하세요.');
@@ -1453,8 +1471,7 @@
                 let modalContainer = null;
                 modalContainer = new PopupDraggable('입고 반품');
 
-
-                modalContainer.open({width: 1000, height: 700, $content});
+                modalContainer.open({width: 1100, height: 700, $content});
                 popup = new materialInoutPopup();
                 //AjaxUtil.fillSelectOptions($content.find('#StoreHouse_id'), 'store_house', 'choose', 3);    // 3:자재창고
                 AjaxUtil.fillSelectOptions($content.find('#StoreHouse_id'), 'store_house', 'choose', '');    // 3:자재창고
@@ -1482,7 +1499,7 @@
 
                     if (type === 'in') {
                         AjaxUtil.fillSelectOptions(
-                            $content.find('#InoutType'), 'system_code', '', 'order_in', 'input_type'
+                            $content.find('#InoutType'), 'system_code', '', 'etc_in', 'input_type'
                         );
                     } else if (type === 'out') {
                         AjaxUtil.fillSelectOptions(
@@ -1580,11 +1597,6 @@
                 });
 
                 $content.find('#btnSave').on('click', function () {
-                    if (!$('#cboMaterialGroup').val()) {
-                        Alert.alert('', '품목그룹을 선택하세요.');
-                        return false;
-                    }
-
                     if (!$('#cboCompany').val()) {
                         Alert.alert('', '구매처를 선택하세요.');
                         return false;
@@ -1609,6 +1621,15 @@
                     modalContainer.modal.close();
                 });
 
+                this.storeHouseOptions = AjaxUtil.getSelectDataWithNull('store_house', 'choose');
+
+                let dicStoreHouse = {};
+                $.each(this.storeHouseOptions, function (idx, item) {
+                    dicStoreHouse[item.value] = item.text;
+                });
+
+                let storeHouseMap = new wijmo.grid.DataMap(this.storeHouseOptions, 'value', 'text');
+
                 this.baljuReturnGrid = new wijmo.grid.FlexGrid('#balju-return-grid', {
                     autoGenerateColumns: false,
                     selectionMode: wijmo.grid.SelectionMode.Row,
@@ -1623,79 +1644,191 @@
 
                             const binding = s.columns[e.col].binding;
 
-                            if (binding === 'StoreHouse_id' || binding === 'inputQty' || binding === 'Description2') {
+                            if (binding === 'StoreHouse_id' || binding === 'returnQty' || binding === 'Description2') {
                                 e.cell.style.color = '#5567ff'; // 글자 색 적용
                             }
                         }
                     },
                     columns: [
                         {binding: 'CompanyName', header: '구매처', width: 100, align: 'left', isReadOnly: true},
-                        {binding: 'JumunDate', header: '발주일', width: 120, align: 'center', isReadOnly: true},
-                        {binding: 'JumunNumber', header: '발주번호', width: 140, align: 'center', isReadOnly: true},
+                        {binding: 'Company_id', visible:false},
+                        {binding: 'JumunDate', header: '발주일', width: 110, align: 'center', isReadOnly: true},
+                        {binding: 'JumunNumber', header: '발주번호', width: 130, align: 'center', isReadOnly: true},
                         {binding: 'product_code', header: '제품코드', width: 100, align: 'left', isReadOnly: true},
                         {binding: 'product_name', header: '제품명', width: 150, align: 'left', isReadOnly: true},
                         {binding: 'unit', header: '단위', width: 60, align: 'center', isReadOnly: true},
                         {binding: 'SujuQty', header: '발주 수량', width: 80, align: 'right', format: 'n0', isReadOnly: true},
-                        {binding: 'SujuQty2', header: '기입고 수량', width: 90, align: 'right', isReadOnly: true},
-                        {binding: 'DueDate', header: '납기예정일', width: 100, align: 'center', isReadOnly: true},
-                        {binding: 'StoreHouse_id', header: '납품 창고', width: 90, align: 'center', isReadOnly: false},
-                        {binding: 'inputQty', header: '입고 수량', width: 100, align: 'right', isReadOnly: false,
+                        {binding: 'SujuQty2', header: '입고 수량', width: 90, align: 'right', isReadOnly: true},
+                        {binding: 'ReturnQty', header: '반품된 수량', width: 90, align: 'right', isReadOnly: true},
+                        {binding: 'StoreHouse_id', header: '반품 창고', width: 90, align: 'center',dataMap: storeHouseMap, isReadOnly: false},
+                        {
+                            binding: 'returnQty',
+                            header: '반품 수량',
+                            width: 100,
+                            align: 'right',
+                            isReadOnly: false,
                             editor: new wijmo.input.InputNumber(document.createElement('div'), {
-                                format: 'n0', // 정수 형식
-                                min: 0,       // 최소값 설정
-                                max: 99999,   // 최대값 설정
-                                step: 1       // 증가/감소 단위
+                                format: 'n0',
+                                min: -99999,
+                                max: 0,
+                                step: 1,
+                                valueChanged: function (sender) {
+                                    let val = sender.value;
+                                    if (val > 0) {
+                                        sender.value = -val;  // 양수 입력 시 자동 음수 변환
+                                    }
+                                }
                             })
                         },
-                        {binding: 'Description2', header: '사유', align: 'left', width: 120, isReadOnly: false},
-                        {binding: 'Description', header: '발주 메모', align: 'left', width: 120, isReadOnly: true}
+                        {binding: 'Description2', header: '사유', align: 'left', width: 120, isReadOnly: false}
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
                 });
                 let selector = null;
-                this.baljuReturnGrid.beginningEdit.addHandler((s, e) => {
-                    let col = s.columns[e.col];
-                    let row = e.row;
 
-                    if (col.binding === 'inputQty') {
-                        let currentValue = s.getCellData(row, col.index, false);
+                new FlexGridContextMenu(this.baljuReturnGrid);
+                this.baljuReturnGrid.downloadFileName = '발주 내역';
 
-                        // 현재 값이 null, undefined, 빈 문자열일 때만 수행
-                        if (currentValue === null || currentValue === undefined || currentValue === '') {
-                            let sujuQty = s.getCellData(row, s.columns.getColumn('SujuQty').index, false);
-                            let sujuQty2 = s.getCellData(row, s.columns.getColumn('SujuQty2').index, false);
+                $content.find('#btnSearch').on('click', function () {
+                    fnLoadBaljuInList();
+                });
 
-                            sujuQty = parseFloat(sujuQty) || 0;
-                            sujuQty2 = parseFloat(sujuQty2) || 0;
+                let start = $content.find('#srchStartDt');
+                let end = $content.find('#srchEndDt');
 
-                            s.setCellData(row, col.index, sujuQty - sujuQty2);
+                start.val(CommonUtil.getYYYYMMDD(-7));
+                end.val(CommonUtil.getYYYYMMDD());
+
+                let fnLoadBaljuInList = function () {
+                    let fnsuccess = function (result) {
+                        if (result.data !== null) {
+                            result.data.forEach(item => {
+                                if (!item.StoreHouse_id) {
+                                    item.StoreHouse_id = _this.storeHouseOptions[0].value; // 첫 번째 옵션의 value
+                                }
+                            });
+                            _this.baljuReturnGrid.itemsSource = new wijmo.collections.CollectionView(result.data);
+                            selector = new wijmo.grid.selector.Selector(_this.baljuReturnGrid);
+
+                        }
+                    };
+                    let baljuParam = {
+                        'start': start.val(),
+                        'end': end.val(),
+                        'action': 'read',
+                        'cboCompanyHidden': $content.find('#cboCompanyHidden').val(),
+                        'keyword': $content.find('#txtMatNameB').val(),
+
+                    };
+                    AjaxUtil.getAsyncData(_this.url + '/read_balju_in', baljuParam, fnsuccess);
+
+                };
+
+                fnLoadBaljuInList();
+
+                $content.find('#btnCompanySearchB').on('keydown', function (e) {
+                    if (e.key === 'Enter' || e.keyCode === 13) {
+                        e.preventDefault();
+
+                        const keyword = $content.find('#btnCompanySearchB').val().trim();
+
+                        let poppage = new PopCompComponent();
+
+                        // 콜백 공통 처리
+                        const callback = function (item) {
+                            $content.find('#btnCompanySearchB').val(item.compname);
+                            $content.find('#cboCompanyHidden').val(item.id);
+                            $content.find('#btnCompanySearchB').trigger('input');
+
+                            setTimeout(() => {
+                                $content.find('#btnSearch').focus();
+                            }, 0);
+                        };
+
+                        if (!keyword) {
+                            // 버튼 포커스 콜백
+                            poppage.focusAfterClose = document.getElementById('btnCompanySearchB');
+                            // 빈 값이면 바로 모달 오픈
+                            poppage.show(callback);
+                            return;
+                        }
+
+                        // 임시 DOM으로 검색 템플릿 렌더링
+                        const $content1 = $(tmpl('popup_compSearchTemplate', {}));
+                        const $compName = $content1.find('#compName');
+                        $compName.val(keyword);
+
+                        const data = {
+                            compCode: '',
+                            compName: keyword,
+                            business_number: ''
+                        };
+
+                        const result = AjaxUtil.getSyncData('/api/popup/search_Comp', data);
+                        const rows = result?.data || [];
+
+                        if (rows.length === 1) {
+                            // 검색 결과 1건이면 자동 선택
+                            callback(rows[0]);
+
+                        } else {
+                            // 0건이거나 2건 이상이면 모달 열고 검색 실행
+                            poppage.show(callback);
+                            setTimeout(() => {
+                                poppage.$compName.val(keyword);
+                                poppage.$btnCompSearch.trigger('click');
+                            }, 50);
+
                         }
                     }
                 });
 
-                _this.baljuReturnGrid.hostElement.addEventListener('click', function (e) {
-                    if (e.target?.type === 'checkbox') {
-                        setTimeout(() => {
-                            let items = _this.baljuReturnGrid.rows
-                                .filter(row => row.isSelected)
-                                .map(row => row.dataItem);
+                $content.find('#btnBaljuReturnSave').on('click', function () {
 
-                            items.forEach(item => {
-                                if ((!item.inputQty || item.inputQty === '') && item.SujuQty) {
-                                    let sujuQty = parseFloat(item.SujuQty) || 0;
-                                    let sujuQty2 = parseFloat(item.SujuQty2) || 0;
-                                    item.inputQty = sujuQty - sujuQty2;
-                                }
-                            });
+                    let url = _this.url + '/save_balju_return';
+                    let items = _this.baljuReturnGrid.rows
+                        .filter(row => row.isSelected)
+                        .map(row => row.dataItem);
 
-                            _this.baljuReturnGrid.refresh();
-                        }, 0);
+                    console.log(items);
+
+                    if (!items || items.length === 0) {
+                        Alert.alert('', '반품할 항목을 선택하세요.');
+                        return;
                     }
+
+                    for (let i = 0; i < items.length; i++) {
+                        const row = items[i];
+
+                        if (!row.StoreHouse_id) {
+                            Alert.alert('', '반품 창고를 선택하세요.');
+                            return;
+                        }
+
+                        if (row.returnQty === null || row.returnQty === undefined || row.returnQty === '') {
+                            Alert.alert('', '반품 수량을 입력하세요.');
+                            return;
+                        }
+
+                        // 수정: 음수만 허용되도록 체크
+                        if (isNaN(row.returnQty) || Number(row.returnQty) >= 0) {
+                            Alert.alert('', '반품 수량은 0보다 작은 숫자여야 합니다.');
+                            return;
+                        }
+                    }
+
+                    let fnSuccess = function (res) {
+                        if (!res.success) {
+                            Alert.alert('', res.message);
+                        } else {
+                            Notify.success('반품 저장되었습니다');
+                            page.searchDataBind();
+                            modalContainer.modal.close();
+                        }
+                    };
+
+                    AjaxUtil.postJsonAsyncData(url, items, fnSuccess);
                 });
-
-
-                new FlexGridContextMenu(this.baljuReturnGrid);
-                this.baljuReturnGrid.downloadFileName = '발주 반품';
 
             }
 
@@ -1738,6 +1871,7 @@
                     },
                     columns: [
                         {binding: 'CompanyName', header: '구매처', width: 100, align: 'left', isReadOnly: true},
+                        {binding: 'Company_id', visible:false, isReadOnly: true},
                         {binding: 'JumunDate', header: '발주일', width: 120, align: 'center', isReadOnly: true},
                         {binding: 'JumunNumber', header: '발주번호', width: 140, align: 'center', isReadOnly: true},
                         {binding: 'product_code', header: '제품코드', width: 100, align: 'left', isReadOnly: true},
@@ -2435,7 +2569,7 @@
                     },
                     columns: [
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'center'},
-                        {binding: 'mat_name', header: '품목명', width: 200, align: 'left'},
+                        {binding: 'mat_name', header: '품목명', width: '*', align: 'left'},
                         {binding: 'input_qty', header: '수량', width: 100, align: 'right', format: 'n0'}
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
@@ -2456,7 +2590,7 @@
 
                 AjaxUtil.fillSelectOptions($content.find('#StoreHouse_id'), 'store_house', 'choose', 3);    // 3:자재창고
                 $content.find('#dialog_title').innerHTML = '품목입고 등록';
-                AjaxUtil.fillSelectOptions($content.find('#InoutType'), 'system_code', '', 'order_in', 'input_type');
+                AjaxUtil.fillSelectOptions($content.find('#InoutType'), 'system_code', '', 'etc_in', 'input_type');
                 AjaxUtil.fillSelectOptions($content.find('#Company_id'), 'company', 'choose', '', 'purchase');
                 $content.find('#cboMaterialGroup').on('change', function (e) {
                     let mat_group = $content.find('#cboMaterialGroup').val();
@@ -2534,6 +2668,11 @@
                     if (!value.mat_name)
                         bad_count++;
                 });
+                if (!$('#Company_id').val()) {
+                    Alert.alert('', '업체를 선택하세요.');
+                    return false;
+                }
+
                 if (bad_count > 0) {
                     Alert.alert('품목코드 확인', '품목명 없는 품목코드가 있습니다.');
                     return false;
@@ -2838,6 +2977,18 @@
             $('#searchForm').on('submit', function (e) {
                 e.preventDefault(); // 기본 제출 막기
                 $('#btnSearch').click(); // 검색 버튼 트리거
+            });
+
+            $(document).on('input', '#btnCompanySearchB', function () {
+                let $clearBtn = $(this).closest('.input-clear').find('.btn-clear');
+                let value = $(this).val().trim();
+
+                if (value) {
+                    $clearBtn.show();
+                } else {
+                    $clearBtn.hide();
+                    $('#cboCompanyHidden').val('');
+                }
             });
 
 
