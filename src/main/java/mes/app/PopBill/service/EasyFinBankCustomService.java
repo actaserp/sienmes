@@ -268,12 +268,12 @@ public class EasyFinBankCustomService {
 
 
     @Transactional
-    public void saveRegistAccount(EasyFinBankAccountFormDto form){
+    public void saveRegistAccount(EasyFinBankAccountFormDto form, TB_ACCOUNT account){
 
         try{
             TB_XBANK bank = tb_xbankRepository.findByBankPopCd(form.getBankName());
 
-            TB_ACCOUNT account = new TB_ACCOUNT();
+
             String accountType = form.getAccountType();
             String accountnum = form.getAccountNumber();
             String accountPw = form.getPaymentPw();

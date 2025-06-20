@@ -27,7 +27,7 @@ public class TransactionInputController {
     DataSource dataSource;
 
 
-    @DecryptField(columns = {"accountnumber", "paymentpw", "onlinebankpw", "viewpw"}, masks = {4, 2, 2, 2})
+    @DecryptField(columns = {"accountnumber", "paymentpw", "onlinebankpw", "viewpw"}, masks = {0, 2, 2, 2})
     @GetMapping("/registerAccount")
     public AjaxResult registerAccount(@RequestParam String spjangcd){
 
