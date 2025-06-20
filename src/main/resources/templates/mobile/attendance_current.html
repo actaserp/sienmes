@@ -344,6 +344,7 @@
                         <td style="display: none;">${vacInfo.workcd || ''}</td>
                         <td style="display: none;">${vacInfo.id || ''}</td>
                         <td style="display: none;">${vacInfo.appgubun || ''}</td>
+                        <td style="display: none;">${vacInfo.fixflag || ''}</td>
                     </tr>
                 `;
                 });
@@ -387,12 +388,17 @@
         if (!targetRow) return;
         const cells = targetRow.querySelectorAll('td');
         const gubunValue = cells[11].innerText;
+        const fixflag = cells[12].innerText;
         const isEmptyRow = Array.from(cells).every(cell => cell.innerText.trim() === "");
         if (isEmptyRow) return;
         if (gubunValue !== '001'){
             Alert.alert('',  '해당 항목은 결재처리되었습니다.')
             return
+        }else if (fixflag !== '0'){
+            Alert.alert('',  '해당 항목은 확인처리되었습니다.')
+            return
         }
+
         openEditModal(targetRow);
     });
     function openEditModal(targetRow) {
