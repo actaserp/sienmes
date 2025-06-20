@@ -124,7 +124,6 @@
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
-
                         // 날짜 포맷 처리
                         if (e.panel.cellType === wijmo.grid.CellType.Cell) {
                             let col = sender.columns[e.col];
@@ -144,6 +143,17 @@
                                     ? '<span style="color: black;">✔</span>'
                                     : '';
                                 e.cell.style.textAlign = 'center';
+                            }
+                        }
+                        // 기간 소수점1자리까지만
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            // daynum/ restnum 컬럼에만 적용
+                            const col = sender.columns[e.col];
+                            if (col.binding === 'daynum') {
+                                const value = sender.getCellData(e.row, e.col, false);
+                                if (typeof value === 'number') {
+                                    e.cell.innerHTML = (value % 1 === 0) ? value.toString() : value.toFixed(1);
+                                }
                             }
                         }
                     },
