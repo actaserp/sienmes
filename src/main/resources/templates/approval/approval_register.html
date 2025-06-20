@@ -437,6 +437,10 @@
 
         SelectItem.forEach(selectedRow => {
           const selectedData = selectedRow.dataItem;
+          // no 또는 kcpersonid 등 주요 필드가 없으면 skip
+          if (!selectedData || !selectedData.no) {
+            return;
+          }
           if (selectedData.no !== "") {
             const deleteNum = {
               kcpersonid: selectedData.kcpersonid,

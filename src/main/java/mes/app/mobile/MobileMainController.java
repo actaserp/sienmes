@@ -112,6 +112,9 @@ public class MobileMainController {
 
         if(searchtb201.isPresent()){
             // 기존 출근데이터가 존재(연차 or 반차로 인한 데이터) - workcd(반차 등) 그대로 유지
+            TB_PB201 origin = searchtb201.get();
+            // 기존 데이터를 복사
+            tbPb201 = origin;
             // 사내 / 외부 출근 확인
             if (office.equals("inOfficeIn")) {
                 inFlag = "0";
@@ -209,11 +212,10 @@ public class MobileMainController {
             // 이미 workcd 있으면 변경하지 않음
         }
 
-        // jotime(조퇴) 판단: 반차면 무조건 0, 아니면 정상퇴근시간 이전=1(조퇴), 이후=0(정상)
-        // 반차코드 예시: "02" (필요시 여러코드로 or, equalsIgnoreCase 등 조합)
-        boolean isBancha = "04".equals(entity.getWorkcd());
+        // jotime(조퇴) 판단: 반차("04")/연차("08")면 무조건 0, 그 외엔 정상퇴근시간 이전=1(조퇴), 이후=0(정상)
+        boolean isBanchaOrYeoncha = "04".equals(entity.getWorkcd()) || "08".equals(entity.getWorkcd());
         int jotFlag = 0;
-        if (isBancha) {
+        if (isBanchaOrYeoncha) {
             jotFlag = 0;
         } else {
             jotFlag = currentTime.isAfter(endtimeParsed) ? 0 : 1;
