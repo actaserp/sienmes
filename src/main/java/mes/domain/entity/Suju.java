@@ -105,4 +105,7 @@ public class Suju extends AbstractAuditModel {
 
 	String spjangcd;
 
+	@Column(name="confirm")
+	String confirm;
+
 }
