@@ -196,15 +196,15 @@
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
-                <h2>수불 전표 등록</h2>
+                <h2>자재 폐기</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>발주관리</li>
-                <li>수불 전표 등록</li>
+                <li>재고 관리</li>
+                <li>자재 폐기</li>
             </ul>
         </div>
         <section class="section">
@@ -214,7 +214,7 @@
                         <div class="search-wrap">
                             <dl>
                                 <dt>
-                                    입출일
+                                    폐기일
                                 </dt>
                                 <dd>
                                     <ul class="date-box">
@@ -296,58 +296,58 @@
                                 </dd>
                             </dl>
                         </div>
-<!--                        <div class="button-wrap" style="white-space: nowrap;">-->
-<!--                            <ul>-->
-<!--                                <li>-->
-<!--                                    <a class="btn" title="품목 입고" id="btnInput" style="background-color: #03428E; color: white;">-->
-<!--                                        입출고 등록-->
-<!--                                    </a>-->
-<!--                                </li>-->
-<!--                            </ul>-->
-<!--                        </div>-->
+                        <div class="button-wrap" style="white-space: nowrap;">
+                            <ul>
+                                <li>
+                                    <a class="btn" title="품목 입고" id="btnInput" style="background-color: #03428E; color: white;">
+                                        폐기 등록
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </form>
-                <div class="button-wrap">
-                    <ul>
+<!--                <div class="button-wrap">-->
+<!--                    <ul>-->
 <!--                        <li>-->
 <!--                            <a class="btn" title="등록" id="btnShowMovePopup">-->
 <!--                                창고 이동-->
 <!--                            </a>-->
 <!--                        </li>-->
-                        <li>
-                            <a class="btn" title="입고검사" id="btnInputTest">
-                                입고검사
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn" title="품목 입고" id="btnBaljuInput">
-                                발주 입고
-                            </a>
-                        </li>
+<!--                        <li>-->
+<!--                            <a class="btn" title="입고검사" id="btnInputTest">-->
+<!--                                입고검사-->
+<!--                            </a>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <a class="btn" title="품목 입고" id="btnBaljuInput">-->
+<!--                                발주 입고-->
+<!--                            </a>-->
+<!--                        </li>-->
 
-                        <li>
-                            <a class="btn" title="미발주 입고" id="btnInput">
-                                미발주 입고
-                            </a>
-                        </li>
+<!--                        <li>-->
+<!--                            <a class="btn" title="미발주 입고" id="btnInput">-->
+<!--                                미발주 입고-->
+<!--                            </a>-->
+<!--                        </li>-->
 
-                        <li>
-                            <a class="btn" title="입고 반품" id="btnInputReturn">
-                                입고 반품
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn" title="다중 입고" id="btnMultiInput">
-                                다중 입고
-                            </a>
-                        </li>
+<!--                        <li>-->
+<!--                            <a class="btn" title="입고 반품" id="btnInputReturn">-->
+<!--                                입고 반품-->
+<!--                            </a>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <a class="btn" title="다중 입고" id="btnMultiInput">-->
+<!--                                다중 입고-->
+<!--                            </a>-->
+<!--                        </li>-->
 <!--                        <li>-->
 <!--                            <a class="btn" title="로트 입고 등록" id="btnLotInput">-->
 <!--                                로트 입고 등록-->
 <!--                            </a>-->
 <!--                        </li>-->
-                    </ul>
-                </div>
+<!--                    </ul>-->
+<!--                </div>-->
             </div>
             <div class="container-fluid">
                 <div id="material-storehouse-grid" style="height: 680px;"></div>
@@ -374,27 +374,12 @@
                                 </th>
                                 <td>
                                     <select id="inoutSelect" name="inoutSelect" disabled>
-                                        <option value="in" selected>품목 입고</option>
-                                        <option value="out">품목 출고</option>
+                                        <option value="in" >품목 입고</option>
+                                        <option value="out" selected>품목 출고</option>
                                         <option value="return">입고 반품</option>
                                         <option value="recall">출고 회수</option>
                                     </select>
                                     <input type="hidden" id="inoutSelect_hidden" name="inoutSelect_hidden">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="cboCompany">구매처</label>
-                                </th>
-                                <td colspan="3">
-                                    <input id="cboCompany" name="cboCompany" type="hidden">
-                                    <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
-                                     placeholder="검색버튼을 클릭하여 구매처를 검색하세요" readonly/>
-                                    &nbsp;
-                                    <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                        구매처 검색
-                                    </a>
                                 </td>
                             </tr>
                             <tr>
@@ -620,7 +605,6 @@
                 </div>
             </div>
             <div class="popup-button">
-                <button type="button" class="btn-popup" id="btnBaljuSave" ><span data-labelCd="발주 반품">발주 반품</span></button>
                 <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
             </div>
         </div>
@@ -1180,9 +1164,9 @@
                 // });
 
                 // 입고검사 버튼 클릭
-                document.getElementById('btnInputTest').addEventListener('click', () => {
-                    this.showInputTestPopup();
-                });
+                // document.getElementById('btnInputTest').addEventListener('click', () => {
+                //     this.showInputTestPopup();
+                // });
             }
 
             modify(selectedItem) {
@@ -1227,7 +1211,7 @@
                     'keyword': txtMatName
                 };
 
-                let result = AjaxUtil.getSyncData(this.url + "/read", data);
+                let result = AjaxUtil.getSyncData(this.url + "/read_disposal", data);
                 if (result.data != null) {
                     _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
                 }
@@ -1241,13 +1225,12 @@
 
                 let modalContainer = null;
                 if(!data){
-                    modalContainer = new PopupDraggable('미발주 입고');
+                    modalContainer = new PopupDraggable('자재 폐기');
                 } else{
                     modalContainer = new PopupDraggable('수정');
                 }
 
-
-                modalContainer.open({width: 1000, height: 480, $content});
+                modalContainer.open({width: 1000, height: 440, $content});
                 popup = new materialInoutPopup();
                 //AjaxUtil.fillSelectOptions($content.find('#StoreHouse_id'), 'store_house', 'choose', 3);    // 3:자재창고
                 AjaxUtil.fillSelectOptions($content.find('#StoreHouse_id'), 'store_house', 'choose', '');    // 3:자재창고
@@ -1279,7 +1262,7 @@
                         );
                     } else if (type === 'out') {
                         AjaxUtil.fillSelectOptions(
-                            $content.find('#InoutType'), 'system_code', '', 'etc_out', 'output_type'
+                            $content.find('#InoutType'), 'system_code', '', 'disposal_out', 'output_type'
                         );
                     } else if (type === 'return') {
                         AjaxUtil.fillSelectOptions(
@@ -1393,11 +1376,6 @@
                 $content.find('#btnSave').on('click', function () {
                     if (!$('#cboMaterialGroup').val()) {
                         Alert.alert('', '품목그룹을 선택하세요.');
-                        return false;
-                    }
-
-                    if (!$('#cboCompany').val()) {
-                        Alert.alert('', '구매처를 선택하세요.');
                         return false;
                     }
 
@@ -2391,7 +2369,7 @@
 
             saveData(type, form) {
 
-                let url = '/api/inventory/material_inout/save';
+                let url = '/api/inventory/material_inout/save_nocomp';
                 let data = FormUtil.extractForm($('#materialInoutForm'));
                 data['type'] = type;
                 let fnSuccess = function (res) {

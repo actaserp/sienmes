@@ -196,15 +196,15 @@
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
-                <h2>수불 전표 등록</h2>
+                <h2>자재 불출</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>발주관리</li>
-                <li>수불 전표 등록</li>
+                <li>재고 관리</li>
+                <li>자재 불출</li>
             </ul>
         </div>
         <section class="section">
@@ -214,7 +214,7 @@
                         <div class="search-wrap">
                             <dl>
                                 <dt>
-                                    입출일
+                                    불출일
                                 </dt>
                                 <dd>
                                     <ul class="date-box">
@@ -296,58 +296,58 @@
                                 </dd>
                             </dl>
                         </div>
-<!--                        <div class="button-wrap" style="white-space: nowrap;">-->
-<!--                            <ul>-->
-<!--                                <li>-->
-<!--                                    <a class="btn" title="품목 입고" id="btnInput" style="background-color: #03428E; color: white;">-->
-<!--                                        입출고 등록-->
-<!--                                    </a>-->
-<!--                                </li>-->
-<!--                            </ul>-->
-<!--                        </div>-->
+                        <div class="button-wrap" style="white-space: nowrap;">
+                            <ul>
+                                <li>
+                                    <a class="btn" title="불출 입고" id="btnInput" style="background-color: #03428E; color: white;">
+                                        불출 등록
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </form>
-                <div class="button-wrap">
-                    <ul>
+<!--                <div class="button-wrap">-->
+<!--                    <ul>-->
 <!--                        <li>-->
 <!--                            <a class="btn" title="등록" id="btnShowMovePopup">-->
 <!--                                창고 이동-->
 <!--                            </a>-->
 <!--                        </li>-->
-                        <li>
-                            <a class="btn" title="입고검사" id="btnInputTest">
-                                입고검사
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn" title="품목 입고" id="btnBaljuInput">
-                                발주 입고
-                            </a>
-                        </li>
+<!--                        <li>-->
+<!--                            <a class="btn" title="입고검사" id="btnInputTest">-->
+<!--                                입고검사-->
+<!--                            </a>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <a class="btn" title="품목 입고" id="btnBaljuInput">-->
+<!--                                발주 입고-->
+<!--                            </a>-->
+<!--                        </li>-->
 
-                        <li>
-                            <a class="btn" title="미발주 입고" id="btnInput">
-                                미발주 입고
-                            </a>
-                        </li>
+<!--                        <li>-->
+<!--                            <a class="btn" title="미발주 입고" id="btnInput">-->
+<!--                                미발주 입고-->
+<!--                            </a>-->
+<!--                        </li>-->
 
-                        <li>
-                            <a class="btn" title="입고 반품" id="btnInputReturn">
-                                입고 반품
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn" title="다중 입고" id="btnMultiInput">
-                                다중 입고
-                            </a>
-                        </li>
+<!--                        <li>-->
+<!--                            <a class="btn" title="입고 반품" id="btnInputReturn">-->
+<!--                                입고 반품-->
+<!--                            </a>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <a class="btn" title="다중 입고" id="btnMultiInput">-->
+<!--                                다중 입고-->
+<!--                            </a>-->
+<!--                        </li>-->
 <!--                        <li>-->
 <!--                            <a class="btn" title="로트 입고 등록" id="btnLotInput">-->
 <!--                                로트 입고 등록-->
 <!--                            </a>-->
 <!--                        </li>-->
-                    </ul>
-                </div>
+<!--                    </ul>-->
+<!--                </div>-->
             </div>
             <div class="container-fluid">
                 <div id="material-storehouse-grid" style="height: 680px;"></div>
@@ -364,7 +364,7 @@
                         <tbody>
                             <tr>
                                 <th style="text-align: center">
-                                    <label for="inoutDate">입고일</label>
+                                    <label for="inoutDate">불출일</label>
                                 </th>
                                 <td>
                                     <input class="form-control2" id="inoutDate" name="inoutDate" type="datetime-local">
@@ -374,10 +374,10 @@
                                 </th>
                                 <td>
                                     <select id="inoutSelect" name="inoutSelect" disabled>
-                                        <option value="in" selected>품목 입고</option>
-                                        <option value="out">품목 출고</option>
-                                        <option value="return">입고 반품</option>
-                                        <option value="recall">출고 회수</option>
+<!--                                        <option value="in" >품목 입고</option>-->
+                                        <option value="out" selected>품목 출고</option>
+<!--                                        <option value="return">입고 반품</option>-->
+<!--                                        <option value="recall">출고 회수</option>-->
                                     </select>
                                     <input type="hidden" id="inoutSelect_hidden" name="inoutSelect_hidden">
                                 </td>
@@ -472,161 +472,6 @@
         </div>
 
     </script>
-
-    <script type="text/x-tmpl" id="returnDataPopup">
-        <div class="content_wrap popup">
-            <div class="table-wrap">
-                <form id="materialInoutForm">
-                    <input type="hidden" id="mio_pk" name="mio_pk">
-                    <table class="write-table">
-                        <tbody>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="inoutDate">반품일</label>
-                                </th>
-                                <td>
-                                    <input class="form-control2" id="inoutDate" name="inoutDate" type="datetime-local">
-                                </td>
-                                <th style="text-align: center">
-                                    <label for="inoutSelect">입출 구분</label>
-                                </th>
-                                <td>
-                                    <select id="inoutSelect" name="inoutSelect" disabled>
-                                        <option value="in">품목 입고</option>
-                                        <option value="out">품목 출고</option>
-                                        <option value="return" selected>입고 반품</option>
-                                        <option value="recall">출고 회수</option>
-                                    </select>
-                                    <input type="hidden" id="inoutSelect_hidden" name="inoutSelect_hidden">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="cboCompany">구매처</label>
-                                </th>
-                                <td colspan="3">
-                                    <input id="cboCompany" name="cboCompany" type="hidden">
-                                    <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
-                                     placeholder="검색버튼을 클릭하여 구매처를 검색하세요" readonly/>
-                                    &nbsp;
-                                    <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                        구매처 검색
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="cboMaterialType">품목유형</label>
-                                </th>
-                                <td>
-                                    <input class="form-control2" id="cboMaterialType" name="cboMaterialType" readonly type="hidden"/>
-                                    <input class="form-control2" id="cboMaterialTypeName" name="cboMaterialTypeName" readonly />
-                                </td>
-                                <th style="text-align: center">
-                                    <label for="cboMaterialGroup">품목그룹</label>
-                                </th>
-                                <td>
-                                    <input id="cboMaterialGroup" name="cboMaterialGroup" readonly type="hidden"/>
-                                    <input id="cboMaterialGroupName" name="cboMaterialGroupName" readonly />
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="Material_id">품목</label>
-                                </th>
-                                <td colspan="3">
-                                    <input id="Material_id" name="Material_id" readonly type="hidden" />
-                                    <input id="Material_name" name="Material_name" readonly placeholder="품목 조회 버튼을 클릭하여 선택하세요." />
-                                    &nbsp;
-                                    <a class="btn" title="품목 조회" id="btnMaterial">
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                        품목조회
-                                    </a>
-
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="InoutQty">수량</label>
-                                </th>
-                                <td>
-                                    <input id="InoutQty" name="InoutQty" />
-                                </td>
-                                <th style="text-align: center">
-                                    <label for="StoreHouse_id">창고지정</label>
-                                </th>
-                                <td>
-                                    <select id="StoreHouse_id" name="StoreHouse_id"  />
-                                </td>
-                            </tr>
-                            <tr style="display:none;">
-                                <th style="text-align: center">
-                                    <label for="InoutType">구분</label>
-                                </th>
-                                <td colspan="3">
-                                    <select id="InoutType" name="InoutType" disabled></select>
-                                    <input id="InoutType_hidden" name="InoutType_hidden" type="hidden">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="Description">비고</label>
-                                </th>
-                                <td colspan="3">
-                                    <textarea style="width:700px; height:45px; vertical-align:middle;" id="Description" name="Description"></textarea>
-                                    <button type="button" style="float: right; margin-top:4px;" class="btn-popup" id="btnSave" ><span data-labelCd="반품하기">반품하기</span></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
-            <div style="margin-top:20px;">
-                <div class="search-wrap" style="justify-content: flex-start;">
-                  <dl>
-                    <dt style="display:flex;">
-                      조회기간
-                    </dt>
-                    <dd>
-                      <ul class="date-box">
-                        <li>
-                          <input type="date" id="srchStartDt" name="srchStartDt">
-                          <label for="srchStartDt" class="hide">시작일</label>
-                        </li>
-                        <li>
-                          <input type="date" id="srchEndDt" name="srchEndDt">
-                          <label for="srchEndDt" class="hide">종료일</label>
-                        </li>
-                      </ul>
-                    </dd>
-                  </dl>
-
-                  <dl>
-                    <dt>&nbsp;</dt>
-                    <dd>
-                      <li>
-                        <a class="btn btn-delete" title="검색" id="btnSearch">
-                          <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                          <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                          검색
-                        </a>
-                      </li>
-                    </dd>
-                  </dl>
-                </div>
-                <div class="container-fluid">
-                    <div id="balju-return-grid" style="height: 200px;"></div>
-                </div>
-            </div>
-            <div class="popup-button">
-                <button type="button" class="btn-popup" id="btnBaljuSave" ><span data-labelCd="발주 반품">발주 반품</span></button>
-                <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
-            </div>
-        </div>
-
-    </script>
-
 
     <script type="text/x-tmpl" id="addMultiDataPopup">
         <div class="content_wrap popup">
@@ -1180,9 +1025,9 @@
                 // });
 
                 // 입고검사 버튼 클릭
-                document.getElementById('btnInputTest').addEventListener('click', () => {
-                    this.showInputTestPopup();
-                });
+                // document.getElementById('btnInputTest').addEventListener('click', () => {
+                //     this.showInputTestPopup();
+                // });
             }
 
             modify(selectedItem) {
@@ -1241,7 +1086,7 @@
 
                 let modalContainer = null;
                 if(!data){
-                    modalContainer = new PopupDraggable('미발주 입고');
+                    modalContainer = new PopupDraggable('불출 등록');
                 } else{
                     modalContainer = new PopupDraggable('수정');
                 }

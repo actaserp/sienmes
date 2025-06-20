@@ -87,13 +87,139 @@ public class MaterialInoutController {
         
 		return result;
 	}
+
+	@GetMapping("/read_disposal")
+	public AjaxResult getMaterialInout_disposal(
+			@RequestParam(value = "srchStartDt", required=false) String srchStartDt,
+			@RequestParam(value = "srchEndDt", required=false) String srchEndDt,
+			@RequestParam(value = "house_pk", required=false) String housePk,
+			@RequestParam(value = "mat_type", required=false) String matType,
+			@RequestParam(value = "mat_grp_pk", required=false) String matGrpPk,
+			@RequestParam(value = "spjangcd", required=false) String spjangcd,
+			@RequestParam(value = "keyword", required=false) String keyword) {
+
+		List<Map<String, Object>> items = this.materialInoutService.getMaterialInoutDisposal(srchStartDt,srchEndDt,housePk,matType,matGrpPk,keyword,spjangcd);
+
+		AjaxResult result = new AjaxResult();
+		result.data = items;
+
+		return result;
+	}
 	
+//	@PostMapping("/save")
+//	@Transactional
+//	public AjaxResult saveMaterialInout(
+//			@RequestParam("Description") String description,
+//			@RequestParam("InoutQty") String inoutQty,
+//			@RequestParam("InoutType") String inoutType,
+//			@RequestParam("Material_id") String materialId,
+//			@RequestParam("StoreHouse_id") String storeHouseId,
+//			@RequestParam("inoutDate") String inoutDateStr,
+//			@RequestParam(value = "mio_pk", required = false) Integer mio_pk,
+//			@RequestParam("cboMaterialGroup") String cboMaterialGroup,
+//			@RequestParam("cboMaterialType") String cboMaterialType,
+//			@RequestParam("type") String type,
+//			@RequestParam("spjangcd") String spjangcd,
+//			HttpServletRequest request,
+//			Authentication auth) {
+//
+//		User user = (User)auth.getPrincipal();
+//
+//		AjaxResult result = new AjaxResult();
+//
+//		Integer matPk = Integer.parseInt(materialId);
+//		String state = "confirmed";
+//		String _status = "a";
+//		int qty = Integer.parseInt(
+//				inoutQty.replace(",", "").replaceAll("[^\\d-]", "")
+//		);
+//
+//		result.success = false;
+//
+//		boolean isUpdate = false;
+//
+//		MaterialInout mi;
+//		if (mio_pk != null) {
+//			isUpdate = true;
+//			mi = matInoutRepository.findById(mio_pk)
+//					.orElseThrow(() -> new RuntimeException("기존 데이터 없음: " + mio_pk));
+//		} else {
+//            mi = new MaterialInout();
+//		}
+//
+//		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+//		LocalDateTime dateTime = LocalDateTime.parse(inoutDateStr, formatter);
+//
+//		mi.setInoutDate(dateTime.toLocalDate());
+//		mi.setInoutTime(dateTime.toLocalTime());
+//		mi.setMaterialId(matPk);
+//		mi.setStoreHouseId(Integer.parseInt(storeHouseId));
+//
+//		Material m = this.materialRepository.getMaterialById(matPk);
+//
+//		String testYn = m.getInTestYN() != null ? m.getInTestYN() : "";
+//
+//		if (type.equals("in")) {
+//			mi.setInOut("in");
+//			mi.setInputType(inoutType);
+//			if(testYn.equals("Y") && !isUpdate) {
+//				mi.setPotentialInputQty((float)qty);
+//				state = "waiting";
+//				_status = "t";
+//			} else {
+//				mi.setInputQty((float)qty);
+//				mi.setOutputQty(0f);
+//				mi.setOutputType("");
+//			}
+//		} else if(type.equals("recall")){
+//			mi.setInOut("recall");
+//			mi.setOutputType(inoutType);
+//			mi.setOutputQty((float)qty);
+//			mi.setInputQty(0f);
+//			mi.setInputType("");
+//
+//		} else if(type.equals("return")){
+//			mi.setInOut("return");
+//			mi.setInputType(inoutType);
+//			mi.setInputQty((float)qty);
+//			mi.setOutputQty(0f);
+//			mi.setOutputType("");
+//
+//		} else  {
+//			mi.setInOut("out");
+//			mi.setOutputType(inoutType);
+//			mi.setOutputQty((float)qty);
+//			mi.setInputQty(0f);
+//			mi.setInputType("");
+//		}
+//		mi.setDescription(description);
+//		mi.setState(state);
+//		mi.set_status(_status);
+//		mi.set_audit(user);
+//		mi.setSpjangcd(spjangcd);
+//
+//		this.matInoutRepository.save(mi);
+//		this.matInoutRepository.flush();
+//
+//
+////		jdbcTemplate.query(
+////				"SELECT sp_update_mat_in_house_by_inout(?, ?)",
+////				rs -> {},  // 결과 무시
+////				matPk, Integer.parseInt(storeHouseId)
+////		);
+//
+//		result.success = true;
+//
+//		return result;
+//	}
+
 	@PostMapping("/save")
 	@Transactional
 	public AjaxResult saveMaterialInout(
 			@RequestParam("Description") String description,
 			@RequestParam("InoutQty") String inoutQty,
-			@RequestParam("InoutType") String inoutType,
+			@RequestParam("InoutType_hidden") String inoutType,
+			@RequestParam("cboCompany") Integer companyId,
 			@RequestParam("Material_id") String materialId,
 			@RequestParam("StoreHouse_id") String storeHouseId,
 			@RequestParam("inoutDate") String inoutDateStr,
@@ -104,9 +230,9 @@ public class MaterialInoutController {
 			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		User user = (User)auth.getPrincipal();
-		
+
 		AjaxResult result = new AjaxResult();
 
 		Integer matPk = Integer.parseInt(materialId);
@@ -115,7 +241,7 @@ public class MaterialInoutController {
 		int qty = Integer.parseInt(
 				inoutQty.replace(",", "").replaceAll("[^\\d-]", "")
 		);
-		
+
 		result.success = false;
 
 		boolean isUpdate = false;
@@ -126,7 +252,7 @@ public class MaterialInoutController {
 			mi = matInoutRepository.findById(mio_pk)
 					.orElseThrow(() -> new RuntimeException("기존 데이터 없음: " + mio_pk));
 		} else {
-            mi = new MaterialInout();
+			mi = new MaterialInout();
 		}
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
@@ -134,17 +260,21 @@ public class MaterialInoutController {
 
 		mi.setInoutDate(dateTime.toLocalDate());
 		mi.setInoutTime(dateTime.toLocalTime());
+		mi.setCompanyId(companyId);
 		mi.setMaterialId(matPk);
 		mi.setStoreHouseId(Integer.parseInt(storeHouseId));
-		
+
 		Material m = this.materialRepository.getMaterialById(matPk);
-		
+
 		String testYn = m.getInTestYN() != null ? m.getInTestYN() : "";
-		
+
 		if (type.equals("in")) {
 			mi.setInOut("in");
 			mi.setInputType(inoutType);
-			if(testYn.equals("Y") && !isUpdate) {
+
+			boolean isWaiting = mi.getState() != null && mi.getState().equals("waiting");
+
+			if(testYn.equals("Y") && isWaiting) {
 				mi.setPotentialInputQty((float)qty);
 				state = "waiting";
 				_status = "t";
@@ -191,7 +321,117 @@ public class MaterialInoutController {
 //		);
 
 		result.success = true;
-		
+
+		return result;
+	}
+
+	@PostMapping("/save_nocomp")
+	@Transactional
+	public AjaxResult saveMaterialInout_noComp(
+			@RequestParam("Description") String description,
+			@RequestParam("InoutQty") String inoutQty,
+			@RequestParam("InoutType_hidden") String inoutType,
+			@RequestParam("Material_id") String materialId,
+			@RequestParam("StoreHouse_id") String storeHouseId,
+			@RequestParam("inoutDate") String inoutDateStr,
+			@RequestParam(value = "mio_pk", required = false) Integer mio_pk,
+			@RequestParam("cboMaterialGroup") String cboMaterialGroup,
+			@RequestParam("cboMaterialType") String cboMaterialType,
+			@RequestParam("type") String type,
+			@RequestParam("spjangcd") String spjangcd,
+			HttpServletRequest request,
+			Authentication auth) {
+
+		User user = (User)auth.getPrincipal();
+
+		AjaxResult result = new AjaxResult();
+
+		Integer matPk = Integer.parseInt(materialId);
+		String state = "confirmed";
+		String _status = "a";
+		int qty = Integer.parseInt(
+				inoutQty.replace(",", "").replaceAll("[^\\d-]", "")
+		);
+
+		result.success = false;
+
+		boolean isUpdate = false;
+
+		MaterialInout mi;
+		if (mio_pk != null) {
+			isUpdate = true;
+			mi = matInoutRepository.findById(mio_pk)
+					.orElseThrow(() -> new RuntimeException("기존 데이터 없음: " + mio_pk));
+		} else {
+			mi = new MaterialInout();
+		}
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+		LocalDateTime dateTime = LocalDateTime.parse(inoutDateStr, formatter);
+
+		mi.setInoutDate(dateTime.toLocalDate());
+		mi.setInoutTime(dateTime.toLocalTime());
+		mi.setMaterialId(matPk);
+		mi.setStoreHouseId(Integer.parseInt(storeHouseId));
+
+		Material m = this.materialRepository.getMaterialById(matPk);
+
+		String testYn = m.getInTestYN() != null ? m.getInTestYN() : "";
+
+		if (type.equals("in")) {
+			mi.setInOut("in");
+			mi.setInputType(inoutType);
+
+			boolean isWaiting = mi.getState() != null && mi.getState().equals("waiting");
+
+			if(testYn.equals("Y") && isWaiting) {
+				mi.setPotentialInputQty((float)qty);
+				state = "waiting";
+				_status = "t";
+			} else {
+				mi.setInputQty((float)qty);
+				mi.setOutputQty(0f);
+				mi.setOutputType("");
+			}
+		} else if(type.equals("recall")){
+			mi.setInOut("recall");
+			mi.setOutputType(inoutType);
+			mi.setOutputQty((float)qty);
+			mi.setInputQty(0f);
+			mi.setInputType("");
+
+		} else if(type.equals("return")){
+			mi.setInOut("return");
+			mi.setInputType(inoutType);
+			mi.setInputQty((float)qty);
+			mi.setOutputQty(0f);
+			mi.setOutputType("");
+
+		} else  {
+			mi.setInOut("out");
+			mi.setOutputType(inoutType);
+			mi.setOutputQty((float)qty);
+			mi.setInputQty(0f);
+			mi.setInputType("");
+		}
+		mi.setDescription(description);
+		mi.setState(state);
+		mi.set_status(_status);
+		mi.set_audit(user);
+		mi.setSpjangcd(spjangcd);
+
+		this.matInoutRepository.save(mi);
+		this.matInoutRepository.flush();
+
+
+//		jdbcTemplate.query(
+//				"SELECT sp_update_mat_in_house_by_inout(?, ?)",
+//				rs -> {},  // 결과 무시
+//				matPk, Integer.parseInt(storeHouseId)
+//		);
+
+		result.success = true;
+
 		return result;
 	}
 

@@ -101,6 +101,88 @@ public class MaterialInoutService {
         return items;
 	}
 
+	public List<Map<String, Object>> getMaterialInoutDisposal(String srchStartDt, String srchEndDt, String housePk,
+													  String matType, String matGrpPk, String keyword, String spjangcd) {
+
+		MapSqlParameterSource param = new MapSqlParameterSource();
+		param.addValue("srchStartDt", srchStartDt);
+		param.addValue("srchEndDt", srchEndDt);
+		param.addValue("housePk", housePk);
+		param.addValue("matType", matType);
+		param.addValue("matGrpPk", matGrpPk);
+		param.addValue("keyword", keyword);
+		param.addValue("spjangcd", spjangcd);
+
+		String sql = """
+					select distinct mi.id as mio_pk
+                    , fn_code_name('inout_type', mi."InOut") as inout
+                    , mi."Material_id"
+                    , mi."InputType" 
+                    , mi."OutputType" 
+                    , case when mi."InOut" = 'in' then fn_code_name('input_type', mi."InputType") 
+	                    when mi."InOut" = 'out' then fn_code_name('output_type', mi."OutputType") 
+	                    when mi."InOut" = 'recall' then fn_code_name('recall_type', mi."OutputType")
+	                    when mi."InOut" = 'return' then fn_code_name('return_type', mi."InputType")
+	                    end as inout_type
+                    , to_char(mi."InoutDate",'yyyy-mm-dd ') as "InoutDate"
+                    , to_char(mi."InoutTime", 'hh24:mi') as "InoutTime"
+                    , sh."Name" as "store_house_name"
+                    , m."Code" as "material_code"
+                    , m."Name" as "material_name"
+                    , m."CurrentStock" 
+                    , m."ValidDays"
+                    , m."LotSize"
+                    , m."PackingUnitQty"
+                    , mi."StoreHouse_id"
+                    , mih2."CurrentStock" as "HouseStock"
+                    , m."SafetyStock" 
+                    , coalesce(mi."InputQty", 0) as "InputQty"
+                    , coalesce(mi."OutputQty", 0) as "OutputQty"
+                    , u2."Name" as "unit_name"
+                    , mi."Description" 
+                    , fn_code_name('mat_type', mg."MaterialType") as material_type
+                    --, coalesce(lot_cnt.lot_count,0) as lot_count
+                    , (select count(ml."LotNumber") as lot_count 
+                        from mat_lot ml 
+                        where ml."SourceTableName" ='mat_inout' 
+                        and ml."SourceDataPk" = mi.id
+                        )  as lot_count 
+                    , coalesce(mi."PotentialInputQty",0) as "potentialInputQty"
+                    , fn_code_name('inout_state', mi."State" ) as "inout_state"
+                    , var."StateName" as "state_name"
+                    , tir."JudgeCode" as judge_code
+                    , m."LotUseYN" as lot_use
+                    from mat_inout mi 
+                    inner join material m on mi."Material_id" = m.id
+                    left join mat_grp mg on mg.id = m."MaterialGroup_id"
+                    inner join store_house sh on mi."StoreHouse_id" = sh.id
+                    left join unit u2 on m."Unit_id" = u2.id 
+                    left join mat_in_house mih2 on mih2."Material_id"  = m.id
+                    and mih2."StoreHouse_id" = mi."StoreHouse_id"
+                    left join rela_data rd on mi.id = rd."DataPk2" and rd."RelationName" = 'mat_inout_test_result' and rd."TableName2"  = 'mat_inout'
+                    left join bundle_head bh on bh.id = rd."DataPk1" and rd."RelationName" = 'mat_inout_test_result' and rd."TableName1"  = 'bundle_head'
+                    left join v_appr_result var on var."SourceDataPk" = bh.id and var."SourceTableName" ='bundle_head'
+                    left join test_result tr on tr."SourceDataPk"  = mi.id and tr."SourceTableName" = 'mat_inout'
+                    left join test_item_result tir on tr.id = tir."TestResult_id"
+                    where 1 = 1
+                    and m."Useyn" = '0'
+                    and mi."OutputType" = 'disposal_out'
+                    and mi."InoutDate" between cast(:srchStartDt as date) and cast(:srchEndDt as date)
+                    and mi.spjangcd = :spjangcd
+				""";
+
+		if (StringUtils.isEmpty(housePk)==false) sql +=" and sh.id = cast(:housePk as Integer) ";
+		if (StringUtils.isEmpty(matType)==false) sql +=" and mg.\"MaterialType\" = :matType ";
+		if (StringUtils.isEmpty(matGrpPk)==false) sql +=" and m.\"MaterialGroup_id\" = cast(:matGrpPk as Integer) ";
+		if (StringUtils.isEmpty(keyword)==false) sql +=" and upper(m.\"Name\") like concat('%%',upper(:keyword),'%%') ";
+
+		sql += " order by \"InoutDate\" desc, \"InoutTime\" desc, mi.id desc ";
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, param);
+
+		return items;
+	}
+
 	public List<Map<String, Object>> getMaterialInoutDetail(Integer mio_pk) {
 
 		MapSqlParameterSource param = new MapSqlParameterSource();
@@ -114,7 +196,12 @@ public class MaterialInoutService {
 					, mg."id" as "cboMaterialGroup"
 					, COALESCE(NULLIF(mi."InputType", ''), NULLIF(mi."OutputType", '')) AS "InoutType"
 					, to_char(mi."InoutDate", 'yyyy-mm-dd') || 'T' || to_char(mi."InoutTime", 'hh24:mi') as "inoutDate"
-					, coalesce(NULLIF(mi."InputQty", 0), mi."OutputQty", 0) as "InoutQty"
+					,COALESCE(
+						   NULLIF(mi."InputQty", 0),
+						   NULLIF(mi."OutputQty", 0),
+						   NULLIF(mi."PotentialInputQty", 0),
+						   0
+						 ) AS "InoutQty"
 					, mg."MaterialType" as "cboMaterialType"
                     , mi."Material_id"
                     , mi."InputType" 
@@ -145,6 +232,8 @@ public class MaterialInoutService {
                     , var."StateName" as "state_name"
                     , tir."JudgeCode" as judge_code
                     , m."LotUseYN" as lot_use
+                    , mi."Company_id" as "cboCompany"
+                    , c."Name" as "CompanyName"
                     from mat_inout mi 
                     inner join material m on mi."Material_id" = m.id
                     left join mat_grp mg on mg.id = m."MaterialGroup_id"
@@ -157,6 +246,7 @@ public class MaterialInoutService {
                     left join v_appr_result var on var."SourceDataPk" = bh.id and var."SourceTableName" ='bundle_head'
                     left join test_result tr on tr."SourceDataPk"  = mi.id and tr."SourceTableName" = 'mat_inout'
                     left join test_item_result tir on tr.id = tir."TestResult_id"
+                    left join company c on c.id= mi."Company_id"
                     where 1 = 1
                     and m."Useyn" = '0'
 					and mi.id = :mio_pk
