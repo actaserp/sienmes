@@ -156,16 +156,27 @@
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+                        //소수점1자리까지만
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            // daynum/ restnum 컬럼에만 적용
+                            const col = sender.columns[e.col];
+                            if (col.binding === 'daynum' || col.binding === 'restnum' || col.binding === 'ewolnum') {
+                                const value = sender.getCellData(e.row, e.col, false);
+                                if (typeof value === 'number') {
+                                    e.cell.innerHTML = (value % 1 === 0) ? value.toString() : value.toFixed(1);
+                                }
+                            }
+                        }
                     },
                     columns: [
                         {binding: 'rownum', header: '순번', width: 100, align: 'center'},
                         {binding: 'person_name', header: '사원명', width: 120, align: 'center'},
                         {binding: 'jik_id', header: '직위', width: 100, align: 'center'},
                         {binding: 'rtdate', header: '입사일', width: 140, align: 'center'},
-                        {binding: 'ewolnum', header: '이월일', width: 140, align: 'center', format: 'n1'},
+                        {binding: 'ewolnum', header: '이월일', width: 140, align: 'center'},
                         {binding: 'holinum', header: '연차일수', width: 140, align: 'center'},
-                        {binding: 'daynum', header: '사용일', width: 120, align: 'center', format: 'n1'},
-                        {binding: 'restnum', header: '잔여일', width: 100, align: 'center', format: 'n1'},
+                        {binding: 'daynum', header: '사용일', width: 120, align: 'center'},
+                        {binding: 'restnum', header: '잔여일', width: 100, align: 'center'},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });

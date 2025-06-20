@@ -55,7 +55,8 @@ public class AttendanceCurrentService {
                     t.todate,
                     t.daynum,
                     t.remark,
-                    t.appgubun
+                    t.appgubun,
+                    t.fixflag
                 FROM tb_pb204 t
                 LEFT JOIN tb_pb210 i ON t.workcd = i.workcd 
                 WHERE personid = :personid

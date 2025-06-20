@@ -91,7 +91,7 @@
             </dt>
             <dd>
               <div class="srch-box">
-                <input class="form-control2" type="text" id="txtMatName" name="txtMatName"/>
+                <input class="form-control2" type="text" id="txtMatName" name="txtMatName" placeholder="제품명"/>
               </div>
             </dd>
           </dl>
@@ -207,7 +207,7 @@
         this.semiGrid = null;
         this.jobResGrid = null;
         this.semiJobResGrid = null;
-        this.$cboMatType = null;
+        //this.$cboMatType = null;
         this.$cboMatGroup = null;
         this.workshifOptions = [];
         this.workcenterOptions = [];
@@ -286,19 +286,6 @@
         new FlexGridContextMenu(this.grid);
         this.grid.downloadFileName = '작업 지시 목록';
 
-     /*   // FlexGrid 이벤트 설정
-        this.grid.selectionChanged.addHandler((s, e) => {
-          let selectedRow = s.selection.row;
-          if (selectedRow < 0) return;
-
-          let item = s.rows[selectedRow]?.dataItem;
-
-          // 항상 현재 선택된 데이터 로딩
-          _this.loadJobResList(item);
-          _this.loadSemiJobResList(item);
-          _this.semiJobRes();
-        });*/
-
         _this.grid.formatItem.addHandler(function (s, e) {
           if (e.panel.cellType === wijmo.grid.CellType.Cell) {
             let col = s.columns[e.col];
@@ -339,7 +326,7 @@
 
         //품목유형
         // product, semi 만
-        AjaxUtil.fillSelectOptions(this.$cboMatType, 'system_code', 'all', false, 'mat_type', 'product, semi');
+        AjaxUtil.fillSelectOptions(this.$cboMatType, 'system_code', 'all', false, 'mat_type', 'product,semi');
 
         //품목그룹
         AjaxUtil.fillSelectOptions(this.$cboMatGroup, 'material_group', 'all', false);
@@ -358,18 +345,15 @@
         $('#btnMainSearch').on('click', function (e) {
           _this.sujuSearch();
         });
-
-
       }
 
-      // 작업지시 생성
       makeOrder(data) {
         let _this = this;
-        let url = _this.url + '/make_prod_order';
+        let url = _this.url + '/plane_confirm';
 
         let fnsuccess = function (result) {
           if (result.success) {
-            Alert.alert('', '생성되었습니다.');
+            Alert.alert('', '작업 계획이 확정 되었습니다.');
             _this.sujuSearch();
           }
         };
