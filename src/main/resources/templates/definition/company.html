@@ -753,41 +753,29 @@
                         this.grid.select(-1, -1); // 선택 상태 초기화
                     }, 0); // 비동기로 처리하여 초기 선택 해제
                 });
-                let isInitialLoad = true; // 초기 상태 플래그
-
-                this.grid.selectionChanged.addHandler((s, e) => {
-                    if (isInitialLoad) {
-                        isInitialLoad = false; // 초기 로드 이후 플래그 해제
-                        return;
-                    }
-
-                    let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
-                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
-                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
-                        let id = selectedRowData.id; // 품목 ID 가져오기
-                        /*console.log(selectedRowData);*/
-
-                        _this.showDetail(id);
-
-                        $('#priceForm')[0].reset();
-                        page.setPriceButtonState();
-
-                        // company_type_name 값에 따라 select 값 변경
-                        if (selectedRowData.company_type_name === "매출처") {
-                            $("#type").val("02").change(); // 매출 선택 후 change 이벤트 트리거
-                        } else if (selectedRowData.company_type_name === "매입처") {
-                            $("#type").val("01").change(); // 매입 선택 후 change 이벤트 트리거
-                        }
-                    }
-                });
-
                 this.grid.hostElement.addEventListener('dblclick', (e) => {
                     let hitTest = this.grid.hitTest(e);
                     if (hitTest.cellType === wijmo.grid.CellType.Cell) {
                         let row = hitTest.row;
                         let selectedItem = this.grid.rows[row].dataItem;
-                        _this.showPriceList(selectedItem.id)
+
+                        // 상세 정보 보기
+                        _this.showDetail(selectedItem.id);
+
+                        // 가격 리스트 및 사업자번호 입력
+                        _this.showPriceList(selectedItem.id);
                         setBusinessNumberToInput(selectedItem.business_number);
+
+                        // 입력폼 초기화, 버튼 상태 세팅
+                        $('#priceForm')[0].reset();
+                        page.setPriceButtonState();
+
+                        // company_type_name에 따른 select값 변경
+                        if (selectedItem.company_type_name === "매출처") {
+                            $("#type").val("02").change();
+                        } else if (selectedItem.company_type_name === "매입처") {
+                            $("#type").val("01").change();
+                        }
                     }
                 });
                 function setBusinessNumberToInput(businessNumber) {
