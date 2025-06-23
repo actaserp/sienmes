@@ -44,7 +44,7 @@ public class MonthlyPurchaseListController {    //월별 매입 현황
         @RequestParam(value="cboCompany",required=false) Integer cboCompany,
         @RequestParam(value = "spjangcd") String spjangcd
     ) {
-        //log.info("월별 매입현황(지급) read : cboYear:{}, cboCompany:{} , spjangcd:{} ", cboYear, cboCompany, spjangcd);
+//        log.info("월별 매입현황(지급) read : cboYear:{}, cboCompany:{} , spjangcd:{} ", cboYear, cboCompany, spjangcd);
         List<Map<String,Object>> items = this.monthlyPurchaseListService.getProvisionList(cboYear,cboCompany, spjangcd);
 
         AjaxResult result = new AjaxResult();
@@ -56,10 +56,11 @@ public class MonthlyPurchaseListController {    //월별 매입 현황
     public AjaxResult getMonthReceivableList(
         @RequestParam(value="cboYear",required=false) String cboYear,
         @RequestParam(value="cboCompany",required=false) Integer cboCompany,
-        @RequestParam(value = "spjangcd") String spjangcd
+        @RequestParam(value = "spjangcd") String spjangcd,
+        @RequestParam(value = "cltflag") String cltflag
     ) {
-        //log.info("월별 매입현황(미지급금) read : cboYear:{}, cboCompany:{} , spjangcd:{} ", cboYear, cboCompany,spjangcd);
-        List<Map<String,Object>> items = this.monthlyPurchaseListService.getMonthPayableList(cboYear,cboCompany, spjangcd);
+//        log.info("월별 매입현황(미지급금) read : cboYear:{}, cboCompany:{} , spjangcd:{}, cltflag:{} ", cboYear, cboCompany,spjangcd, cltflag);
+        List<Map<String,Object>> items = this.monthlyPurchaseListService.getMonthPayableList(cboYear,cboCompany, spjangcd, cltflag);
 
         AjaxResult result = new AjaxResult();
         result.data = items;
@@ -86,10 +87,11 @@ public class MonthlyPurchaseListController {    //월별 매입 현황
     public AjaxResult getPaymentDetail(
         @RequestParam(value="cboYear",required=false) String cboYear,
         @RequestParam(value="cltcd",required=false) Integer cltcd,
-        @RequestParam(value = "spjangcd") String spjangcd
+        @RequestParam(value = "spjangcd") String spjangcd,
+        @RequestParam(value = "cltflag") String cltflag
     ) {
 //    log.info("월별 매입현황(지급)__지급 상세내역 read : cboYear:{}, cboCompany:{} , spjangcd:{} ", cboYear, cltcd, spjangcd);
-        List<Map<String,Object>> items = this.monthlyPurchaseListService.getPaymentDetail(cboYear,cltcd, spjangcd);
+        List<Map<String,Object>> items = this.monthlyPurchaseListService.getPaymentDetail(cboYear,cltcd, spjangcd, cltflag);
 
         AjaxResult result = new AjaxResult();
         result.data = items;

@@ -30,10 +30,11 @@ public class AccountsPayableListController {
             @RequestParam(value="srchEndDt", required=false) String end,
             @RequestParam(value="companyCode", required=false) Integer company,
             @RequestParam(value = "spjangcd") String spjangcd,
+            @RequestParam(value = "cltflag") String cltflag,
             HttpServletRequest request) {
         AjaxResult result = new AjaxResult();
-        //log.info("미지급금 현황 --- start:{}, end:{} ,company:{}, spjangcd:{} ", start, end, company, spjangcd);
-        result.data = accountsPayableListService.getPayableList(start, end, company,spjangcd);
+//        log.info("미지급금 현황 --- start:{}, end:{} ,company:{}, spjangcd:{}, cltflag:{} ", start, end, company, spjangcd, cltflag);
+        result.data = accountsPayableListService.getPayableList(start, end, company,spjangcd, cltflag);
 
         return result;
     }
@@ -46,10 +47,11 @@ public class AccountsPayableListController {
             @RequestParam(value="srchEndDt", required=false) String end,
             @RequestParam(value = "code", required=false) String company,
             @RequestParam(value = "spjangcd") String spjangcd,
+            @RequestParam(value = "cltflag") String cltflag,
             HttpServletRequest request) {
         AjaxResult result = new AjaxResult();
 
-        result.data = accountsPayableListService.getPayableDetailList(start, end, company,spjangcd);
+        result.data = accountsPayableListService.getPayableDetailList(start, end, company,spjangcd, cltflag);
 
         return result;
     }

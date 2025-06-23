@@ -52,25 +52,15 @@
                         </dd>
                     </dl>
 
-                    <dl>
+                    <dl id="searchComArea">
                         <dt>
-                            <label>거래처ID</label>
+                            거래처
                         </dt>
                         <dd>
-                            <div class="srch-box">
-                                <input type="text" class="form-control2" id="searchId" name="searchId">
-                            </div>
-                        </dd>
-                    </dl>
-
-                    <dl>
-                        <dt>
-                            <label>거래처명</label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <input type="text" class="form-control2" id="searchname" name="searchname">
-                            </div>
+                            <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="입력 후 엔터를 눌러 검색하세요."/>
+                            <input type="hidden" id="cboCompanyHidden">
+                            <input type="hidden"  id="cltflag" name="cltflag"/>
+                            <input type="hidden" id="spjangcdHidden">
                         </dd>
                     </dl>
 
@@ -123,6 +113,7 @@
 
 </th:block>
 <th:block layout:fragment="scripts">
+    <th:block th:replace="/common/popup_company_employee_bank_card.html :: popup_company"></th:block>
     <script type="text/javascript">
         class YearamtPage {
             constructor() {
@@ -149,10 +140,12 @@
                         }
                     },
                     columns: [
-                        {binding: 'id', header: '거래처ID', width: 100, align: 'center'},
-                        {binding: 'company_name', header: '거래처명', width: 270, align: 'center'},
-                        {binding: 'ioflag', header: '매출/매입구분', width: 120, align: 'center'},
-                        {binding: 'yyyymm', header: '마감년월', width: 130, align: 'center'},
+                        {binding: 'id', header: '거래처ID', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'cltflag', header: '거래처구분', width: 100, visible: false },
+                        //{binding: 'cltflagnm', header: '거래처구분', width: 100, align: 'center'},
+                        {binding: 'company_name', header: '거래처명', width: 270, align: 'center', isReadOnly: true},
+                        {binding: 'ioflag', header: '매출/매입구분', width: 120, align: 'center', isReadOnly: true},
+                        {binding: 'yyyymm', header: '마감년월', width: 130, align: 'center', isReadOnly: true},
                         {binding: 'balance', header: '마감금액', width: 250, align: 'right'},
                         {binding: 'endyn', header: '마감유무', width: 130, align: 'center', dataType: 'Boolean'},
                         {binding: '', header: '', width: "*", align: 'left'},
@@ -243,8 +236,8 @@
                 let param = {
                     'cboYear': $('#cboYear').val(),
                     'ioflag': $('#ioflag').val(),
-                    'searchId': $('#searchId').val(),
-                    'searchname': $('#searchname').val(),
+                    'searchId': $('#cboCompanyHidden').val(),
+                    'searchname': $('#btnCompanySearch').val(),
                     spjangcd: sessionStorage.getItem('spjangcd'),
                 }
 
@@ -325,6 +318,30 @@
 
         }
 
+        function companyPopupOpenCustom(intputId, hiddenid, hiddenflag){
+
+            const value = document.getElementById(intputId).value;
+
+            let poppage = new PopCompComponentCustom(value);
+
+            let result = AjaxUtil.getSyncData('/api/popup/search_Comp_Custom', { item2 : value, spjangcd : getSpjangcdFromSession() });
+
+            let searchcallback = function (items) {
+
+                document.getElementById(intputId).focus();
+
+                document.getElementById(intputId).value = items.item2;
+                document.getElementById(hiddenid).value = items.id;
+                document.getElementById(hiddenflag).value = items.cltflag;
+            };
+            if(result && result.data.length === 1){
+                searchcallback(result.data[0]);   ``
+                return;
+            }
+
+            poppage.show(searchcallback, result.data);
+        }
+
         let page = null;
 
         $(document.body).ready(function (e) {
@@ -339,6 +356,21 @@
             //검색
             $('#btnSearch').click(function (e) {
                 page.searchMainData();
+            });
+
+            $('#btnCompanySearch').on('click keydown', function (e) {
+                if (e.type === 'keydown' && (e.key === 'Enter' || e.keyCode === 13)) {
+                    e.preventDefault();
+
+                    companyPopupOpenCustom('btnCompanySearch', 'cboCompanyHidden', 'cltflag');
+                }
+            });
+            $('#btnCompanySearch').on('input', function () {
+                const val = $(this).val();
+                if (val === '') {
+                    $('#cboCompanyHidden').val('');
+                    $('#cltflag').val('');
+                }
             });
 
             $('#btnSave').click(function (e) {
@@ -399,6 +431,19 @@
                 if (event.keyCode == 13) {
                     page.searchMainData();
                 }
+            });
+
+            // .btn-clear 클릭 후 input 이벤트 강제 발생
+            $(document).on('click', '.btn-clear', function () {
+                const $input = $(this).siblings('input[type="text"]');
+                $input.val('');
+                $input.trigger('input'); // 🔥 input 이벤트 강제 발생
+            });
+            // 초기화 버튼 클릭 이벤트
+            $('#btnClear').click(function () {
+
+                document.getElementById('cboCompany').value = '';
+                document.getElementById('cboCompanyHidden').value = '';
             });
 
         });
