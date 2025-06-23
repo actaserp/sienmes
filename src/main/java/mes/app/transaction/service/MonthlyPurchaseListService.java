@@ -13,14 +13,16 @@ import java.util.Map;
 @Slf4j
 @Service
 public class MonthlyPurchaseListService {
-    @Autowired
-    SqlRunner sqlRunner;
 
-  public List<Map<String, Object>> getMonthDepositList(String cboYear, Integer cboCompany, String spjangcd) {
+  @Autowired
+  SqlRunner sqlRunner;
+
+  public List<Map<String, Object>> getMonthDepositList(String cboYear, Integer cboCompany, String spjangcd, String cltflag) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
     paramMap.addValue("cboYear", cboYear);
     paramMap.addValue("cboCompany", cboCompany);
     paramMap.addValue("spjangcd", spjangcd);
+    paramMap.addValue("cboCltFlag", cltflag);
 
     String data_year = cboYear;
     paramMap.addValue("date_form", data_year + "0101");
@@ -28,63 +30,87 @@ public class MonthlyPurchaseListService {
 
     StringBuilder sql = new StringBuilder();
 
-    // CTE: parsed_sales
     sql.append("""
-        WITH parsed_sales AS (
-            SELECT
-                ts.*,
-                TO_CHAR(TO_DATE(ts.misdate, 'YYYYMMDD'), 'MM') AS sales_month
-            FROM tb_invoicement ts
-            WHERE ts.misdate BETWEEN :date_form AND :date_to 
-            and ts.spjangcd = :spjangcd
-        """);
-// and ts.spjangcd = :spjangcd
-    // 회사 필터 조건을 CTE 내부에 삽입
-    if (cboCompany != null) {
-      sql.append(" AND ts.cltcd = :cboCompany");
+    WITH client AS (
+        SELECT id, '0' AS cltflag, "Name" AS cltname FROM company WHERE spjangcd = :spjangcd
+        UNION ALL
+        SELECT id, '1' AS cltflag, "Name" AS cltname FROM person WHERE spjangcd = :spjangcd
+        UNION ALL
+        SELECT bankid AS id, '2' AS cltflag, banknm AS cltname FROM tb_xbank WHERE spjangcd = :spjangcd
+        UNION ALL
+        SELECT id, '3' AS cltflag, cardnm AS cltname FROM tb_iz010 WHERE spjangcd = :spjangcd
+    ),
+    invoicedata AS (
+      SELECT 
+          i.cltcd,
+          i.cltflag,
+          i.misgubun,
+          s."Value" AS misgubun2,
+          i.depart_id,
+          d."Name" AS depart_name,
+          i.misdate,
+          i.misnum,
+          c."AccountManager" as account_manager, 
+          TO_CHAR(TO_DATE(i.misdate, 'YYYYMMDD'), 'MM') AS sale_month,
+          COALESCE(tid.supplycost, 0) AS supplycost,
+          COALESCE(tid.taxtotal, 0) AS taxtotal,
+          COALESCE(tid.supplycost, 0) + COALESCE(tid.taxtotal, 0) AS totalamt
+      FROM tb_invoicement i
+      LEFT JOIN tb_invoicedetail tid 
+          ON i.misdate = tid.misdate 
+         AND i.misnum = tid.misnum 
+         AND i.spjangcd = tid.spjangcd
+      LEFT JOIN depart d 
+          ON d.id = i.depart_id
+      LEFT JOIN sys_code s 
+          ON s."Code" = i.misgubun AND s."CodeType" = 'purchase_type'
+      LEFT JOIN company c on c.id = i.cltcd 
+      WHERE i.misdate BETWEEN :date_form AND :date_to
+        AND i.spjangcd = :spjangcd
+    """);
+
+    if (cboCompany != null && cltflag != null) {
+      sql.append(" AND i.cltcd = :cboCompany AND i.cltflag = :cboCltFlag");
     }
 
-    sql.append(")\n");
-
-    // SELECT 본문
     sql.append("""
-        SELECT
-            ps.cltcd,
-            c."Name" AS comp_name,
-            c."AccountManager"  as account_manager,
-            ps.depart_id ,
-            dp."Name" AS dp_name,
-            MAX(sc."Value") AS misgubun
-        """);
+    )
+    SELECT
+        i.cltcd,
+        i.cltflag,
+        c.cltname,
+        i.misgubun,
+        i.misgubun2 AS misgubun_name,
+        i.depart_id,
+        i.depart_name,
+        i.misdate,
+        i.misnum,
+        i.account_manager
+    """);
 
-    // 월별 합계 컬럼 추가 (mon_1 ~ mon_12)
     for (int i = 1; i <= 12; i++) {
       String month = String.format("%02d", i);
-      sql.append(",\n  SUM(CASE WHEN sales_month = '").append(month)
-          .append("' THEN COALESCE(ps.totalamt, 0) ELSE 0 END) AS mon_")
-          .append(i);
+      sql.append(",\n  SUM(CASE WHEN sale_month = '").append(month)
+          .append("' THEN totalamt ELSE 0 END) AS mon_").append(i);
     }
 
-    // 총합계 컬럼
-    sql.append(",\n  SUM(COALESCE(ps.totalamt, 0)) AS total_sum\n");
+    sql.append(",\n  SUM(totalamt) AS total_sum\n");
 
-    // FROM, JOIN, GROUP BY, ORDER BY 절
     sql.append("""
-        FROM parsed_sales ps
-        LEFT JOIN company c ON c.id = ps.cltcd
-        LEFT JOIN sys_code sc ON sc."Code" = ps.misgubun::text
-        LEFT JOIN depart dp ON ps.depart_id = dp.id
-        GROUP BY c."Name", ps.cltcd, c."AccountManager", ps.depart_id, dp."Name"
-        ORDER BY c."Name"
-        """);
+    FROM invoicedata i
+    LEFT JOIN client c ON c.id = i.cltcd AND c.cltflag = i.cltflag
+    GROUP BY 
+        i.cltcd, i.cltflag, c.cltname,
+        i.misgubun, i.misgubun2,
+        i.depart_id, i.depart_name,
+        i.misdate, i.misnum, i.account_manager
+    ORDER BY i.misdate DESC, i.misnum DESC
+    """);
 
-    // 로그 출력
 //    log.info("월별 매입현황 SQL: {}", sql);
-//    log.info("SQL Parameters: {}", paramMap.getValues());
+//    log.info("SQL 월별 매입현황 Parameters: {}", paramMap.getValues());
 
-    // 실행 및 반환
-    List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), paramMap);
-    return items;
+    return this.sqlRunner.getRows(sql.toString(), paramMap);
   }
 
   public List<Map<String, Object>> getProvisionList(String cboYear, Integer cboCompany, String spjangcd) {
@@ -305,10 +331,11 @@ public class MonthlyPurchaseListService {
     return this.sqlRunner.getRows(sql.toString(), paramMap);
   }
 
-  public List<Map<String, Object>> getPurchaseDetail(String cboYear, Integer cltcd, String spjangcd,Integer depart_id) {
+  public List<Map<String, Object>> getPurchaseDetail(String cboYear, Integer cltcd, String spjangcd, Integer depart_id, String cltflag) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
     paramMap.addValue("cboYear", cboYear);
     paramMap.addValue("cltcd", cltcd);
+    paramMap.addValue("cltflag", cltflag);
     paramMap.addValue("spjangcd", spjangcd);
     paramMap.addValue("depart_id", depart_id);
 
@@ -338,10 +365,13 @@ public class MonthlyPurchaseListService {
         WHERE s.spjangcd = :spjangcd
           AND s.cltcd = :cltcd
           and s.depart_id = :depart_id
+          and s.cltflag = :cltflag
           AND s.misdate BETWEEN :date_form AND :date_to
           ORDER BY s.misnum ,d.misseq 
        """);
 
+//    log.warn("매입 상세 내역 SQL: {}", sql);
+//    log.info("SQL 매입 상세 내역 Parameters: {}", paramMap.getValues());
     return this.sqlRunner.getRows(sql.toString(), paramMap);
   }
 

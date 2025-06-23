@@ -34,8 +34,9 @@
               거래처
             </dt>
             <dd>
-              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="해당 칸을 클릭해서 검색하세요.">
+              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="입력 후 엔터를 눌러 검색하세요."/>
               <input type="hidden" id="cboCompanyHidden">
+              <input type="hidden"  id="cltflag" name="cltflag"/>
               <input type="hidden" id="spjangcdHidden">
             </dd>
           </dl>
@@ -111,6 +112,7 @@
   <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
   <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
   <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+  <th:block th:replace="/common/popup_company_employee_bank_card.html :: popup_company"></th:block>
   <script type="text/javascript">
     class MonthlyPurchaseListPage {
       constructor() {
@@ -139,7 +141,7 @@
         });
 
         this.grid = new wijmo.grid.FlexGrid('#theGrid', {
-          frozenColumns: 4,
+          frozenColumns: 7,
           frozenRows: 0,
           allowSorting: wijmo.grid.AllowSorting.MultiColumn,
           selectionMode: wijmo.grid.SelectionMode.Row,
@@ -153,10 +155,12 @@
             }
           },
           columns: [
-            {binding: 'comp_name', header: '거래처명', width: 250, align: 'center', allowMerging: false},
-            {binding: 'misgubun', header: '매출구분', width: 90, align: 'center', allowMerging: false},
+            {binding: 'cltcd', header: '거래처 코드', width: 250, align: 'center', visible: false},
+            {binding: 'cltflag', header: '거래처구분', width: 250, align: 'center', visible: false},
+            {binding: 'cltname', header: '거래처명', width: 250, align: 'center', allowMerging: false},
+            {binding: 'misgubun_name', header: '매출구분', width: 90, align: 'center', allowMerging: false},
             {binding: 'depart_id', header: '부서 코드', width: 90, align: 'center', visible: false},
-            {binding: 'dp_name', header: '부서', width: 90, align: 'center', allowMerging: false},
+            {binding: 'depart_name', header: '부서', width: 90, align: 'center', allowMerging: false},
             {binding: 'account_manager', header: '담당자', width: 100, align: 'center', allowSorting: false},
             ...monthColumns,  //여기에서 월별 컬럼을 삽입
             {binding: 'total_sum', header: '합계', width: 120, align: 'right', allowSorting: false},
@@ -298,7 +302,8 @@
         let data = {
           'cboYear': $("#cboYear").val(),
           'cboCompany': $("#cboCompanyHidden").val(),
-          spjangcd: this.spjangcd.val()
+          spjangcd: this.spjangcd.val(),
+          'cltflag' : $("#cltflag").val()
         }
         //매입 내역
         AjaxUtil.getAsyncData(url + '/PurchaseDetails', data, function (result) {
@@ -320,17 +325,19 @@
         });
       }
 
+      //매입 상세
       openPurchaseDetailPopup(data) {
         let _this = this;
         const cltcd = data.cltcd;
         const depart_id = data.depart_id;
-        const compName = data.comp_name;
+        const compName = data.cltname;
+        const cltflag = data.cltflag;
 
         let content = tmpl('PurchaseDetailPopup', {});
         let $content = $(content);
 
-        let modal = new PopupDraggable(`[${compName}] 매입 상세`);
-        modal.open({width: 800, height: 500, $content});
+        let modal = new PopupDraggable(`[${compName}] 매입 상세 내용`);
+        modal.open({width: 1000, height: 500, $content});
 
         //그룹용 CollectionView 생성 (빈 상태)
         this.viewData = new wijmo.collections.CollectionView();
@@ -373,9 +380,9 @@
           columns: [
             {binding: 'misdate', header: '일자', width: 120, align: 'center'},
             {binding: 'misgubun', header: '매출구분', width: 80, align: 'center'},
-            {binding: 'itemnm', header: '품목', width: '*', align: 'center'},
-            {binding: 'spec', header: '규격', width: 70, align: 'center'},
-            {binding: 'qty', header: '수량', width: 70, align: 'center'},
+            {binding: 'itemnm', header: '품목', width: 120, align: 'center'},
+            {binding: 'spec', header: '규격', width: 120, align: 'center'},
+            {binding: 'qty', header: '수량', width: 80, align: 'center'},
             {binding: 'supplycost', header: '공급가액', width: '*', align: 'right', format: 'n0'},
             {binding: 'taxtotal', header: '세액', width: '*', align: 'right', format: 'n0'},
             {binding: 'totalamt', header: '합계', width: '*', align: 'right', format: 'n0'},
@@ -410,9 +417,10 @@
           method: 'GET',
           data: {
             cltcd: cltcd,
-            depart_id: depart_id,
+            depart_id: depart_id, //부서 코드
             cboYear: $("#cboYear").val(),
-            spjangcd: this.spjangcd.val()
+            spjangcd: this.spjangcd.val(),
+            cltflag : cltflag
           },
           dataType: 'json',
           success: function (response) {
@@ -428,7 +436,7 @@
             }
           },
           error: function () {
-            alert('매출 상세 데이터를 불러오는 데 실패했습니다.');
+            Alert.alert('','매입 상세 데이터를 불러오는 데 실패했습니다.');
           }
         });
       }
@@ -437,6 +445,7 @@
         let _this = this;
         const cltcd = data.cltcd;
         const compName = data.comp_name;
+        const cltflag = data.cltflag;
 
         // 템플릿 삽입
         let content = tmpl('popup_Payment', {});
@@ -444,7 +453,7 @@
 
         // 팝업 컨테이너 생성 (조회 전용)
         let modal = new PopupDraggable(`[${compName}] 지급 상세`);
-        modal.open({width: 800, height: 500, $content});
+        modal.open({width: 1000, height: 500, $content});
 
         // 그리드 초기화
         _this.PaymentGrid = new wijmo.grid.FlexGrid('#PaymentGrid', {
@@ -502,7 +511,8 @@
           data: {
             cltcd: cltcd,
             cboYear: $("#cboYear").val(),
-            spjangcd: this.spjangcd.val()
+            spjangcd: this.spjangcd.val(),
+            cltflag:cltflag
           },
           dataType: 'json',
           success: function (response) {
@@ -526,6 +536,29 @@
           }
         });
       }
+    }
+    function companyPopupOpenCustom(intputId, hiddenid, hiddenflag){
+
+      const value = document.getElementById(intputId).value;
+
+      let poppage = new PopCompComponentCustom(value);
+
+      let result = AjaxUtil.getSyncData('/api/popup/search_Comp_Custom', { item2 : value, spjangcd : getSpjangcdFromSession() });
+
+      let searchcallback = function (items) {
+
+        document.getElementById(intputId).focus();
+
+        document.getElementById(intputId).value = items.item2;
+        document.getElementById(hiddenid).value = items.id;
+        document.getElementById(hiddenflag).value = items.cltflag;
+      };
+      if(result && result.data.length === 1){
+        searchcallback(result.data[0]);   ``
+        return;
+      }
+
+      poppage.show(searchcallback, result.data);
     }
 
     let page = null;
@@ -555,7 +588,14 @@
         }
       });
 
-      $('#btnCompanySearch').click(function () {
+      $('#btnCompanySearch').on('click keydown', function (e) {
+        if (e.type === 'keydown' && (e.key === 'Enter' || e.keyCode === 13)) {
+          e.preventDefault();
+
+          companyPopupOpenCustom('btnCompanySearch', 'cboCompanyHidden', 'cltflag');
+        }
+      });
+      /*$('#btnCompanySearch').click(function () {
         let poppage = new PopCompComponent();
         let $poppage = $(poppage);
         let searchcallback = function (items) {
@@ -565,7 +605,7 @@
         };
 
         poppage.show(searchcallback);
-      });
+      });*/
 
       $('#btnCompanySearch').on('input', function () {
         const val = $(this).val();
@@ -573,6 +613,7 @@
           $('#cboCompanyHidden').val('');
         }
       });
+
       // .btn-clear 클릭 후 input 이벤트 강제 발생
       $(document).on('click', '.btn-clear', function () {
         const $input = $(this).siblings('input[type="text"]');

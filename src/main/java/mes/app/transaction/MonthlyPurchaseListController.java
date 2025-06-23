@@ -16,7 +16,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/transaction/monthly_purchase_list")
-public class MonthlyPurchaseListController {
+public class MonthlyPurchaseListController {    //월별 매입 현황
     @Autowired
     SqlRunner sqlRunner;
 
@@ -27,10 +27,11 @@ public class MonthlyPurchaseListController {
     public AjaxResult getMonthlyPurchaseList(
         @RequestParam(value="cboYear",required=false) String cboYear,
         @RequestParam(value="cboCompany",required=false) Integer cboCompany,
-        @RequestParam(value = "spjangcd") String spjangcd
+        @RequestParam(value = "spjangcd") String spjangcd,
+        @RequestParam(value = "cltflag") String cltflag
     ) {
-        //log.info("월별 매입현황(매입)read : cboYear:{}, cboCompany:{} , spjangcd:{}", cboYear, cboCompany,spjangcd);
-        List<Map<String,Object>> items = this.monthlyPurchaseListService.getMonthDepositList(cboYear,cboCompany, spjangcd);
+//        log.info("월별 매입현황(매입)read : cboYear:{}, cboCompany:{} , spjangcd:{},cltflag:{}", cboYear, cboCompany,spjangcd,cltflag);
+        List<Map<String,Object>> items = this.monthlyPurchaseListService.getMonthDepositList(cboYear,cboCompany, spjangcd, cltflag);
 
         AjaxResult result = new AjaxResult();
         result.data = items;
@@ -70,10 +71,11 @@ public class MonthlyPurchaseListController {
         @RequestParam(value = "depart_id") Integer departId,
         @RequestParam(value="cboYear",required=false) String cboYear,
         @RequestParam(value="cltcd",required=false) Integer cltcd,
-        @RequestParam(value = "spjangcd") String spjangcd
+        @RequestParam(value = "spjangcd") String spjangcd,
+        @RequestParam(value = "cltflag") String cltflag
     ) {
-//    log.info("월별 매입현황 상세 read : cboYear:{}, cboCompany:{} , spjangcd:{}", cboYear, cltcd,spjangcd);
-        List<Map<String,Object>> items = this.monthlyPurchaseListService.getPurchaseDetail(cboYear,cltcd, spjangcd, departId);
+//    log.info("월별 매입현황 상세 read : cboYear:{}, cboCompany:{} , spjangcd:{}, cltflag:{}", cboYear, cltcd,spjangcd, cltflag);
+        List<Map<String,Object>> items = this.monthlyPurchaseListService.getPurchaseDetail(cboYear,cltcd, spjangcd, departId, cltflag);
 
         AjaxResult result = new AjaxResult();
         result.data = items;
