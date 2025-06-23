@@ -1,7 +1,6 @@
 package mes.app.production;
 
 import lombok.extern.slf4j.Slf4j;
-import mes.app.production.service.ProdOrderEditService;
 import mes.app.production.service.ProdPlanServicr;
 import mes.domain.entity.JobRes;
 import mes.domain.entity.Material;
@@ -54,8 +53,8 @@ public class ProdPlanController {
       @RequestParam(value="mat_name", required=false) String mat_name,
       @RequestParam("spjangcd") String spjangcd,
       @RequestParam(value="not_flag", required=false) String not_flag) {
-    log.info("작업계회 등록 목록: date_kind:{}, start:{}, end:{}, mat_group:{},mat_name:{}, spjangcd:{}, not_flag:{}",
-        date_kind, start, end, mat_group, mat_name, spjangcd, not_flag);
+    /*log.info("작업계회 등록 목록: date_kind:{}, start:{}, end:{}, mat_group:{},mat_name:{}, spjangcd:{}, not_flag:{}",
+        date_kind, start, end, mat_group, mat_name, spjangcd, not_flag);*/
     List<Map<String, Object>> items = this.prodPlanServicr.getSujuList(date_kind, start, end, mat_group, mat_name, not_flag, spjangcd);
 
     AjaxResult result = new AjaxResult();

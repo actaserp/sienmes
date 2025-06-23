@@ -141,6 +141,7 @@ public class SujuController {
 		suju.setTotalAmount(totalAmount);
 		suju.setProject_id(project_id);
 		suju.setSpjangcd(spjangcd);
+		suju.setConfirm("0");
 
 		suju = this.SujuRepository.save(suju);
 		
