@@ -24,14 +24,10 @@
               거래처
             </dt>
             <dd>
-              <input type="text" id="cboCompany" name="cboCompany" placeholder="업체검색버튼으로 검색하세요.">
+              <input type="text" id="btnCompanySearch" name="btnCompanySearch" placeholder="입력 후 엔터를 눌러 검색하세요."/>
               <input type="hidden" id="cboCompanyHidden">
+              <input type="hidden"  id="cltflag" name="cltflag"/>
               <input type="hidden" id="spjangcdHidden">
-              &nbsp;
-              <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                업체 검색
-              </a>
             </dd>
           </dl>
           <dl>
@@ -90,6 +86,7 @@
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
     <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+  <th:block th:replace="/common/popup_company_employee_bank_card.html :: popup_company"></th:block>
     <script type="text/javascript">
       class production_require {
         constructor() {
@@ -117,7 +114,8 @@
             },
             columns: [
               {binding: 'cltcd', header: '코드', width: 130, align: 'center'},
-              {binding: 'clt_name', header: '거래처명', width: 320, align: 'center'},
+              {binding: 'cltflag', header: '거래처구분 코드', width: 130, visible: false},
+              {binding: 'cltname', header: '거래처명', width: 320, align: 'center'},
               {binding: 'payable', header: '전잔액', width: 220, align: 'right'},
               {binding: 'purchase', header: '매입액', width: 200, align: 'right'},
               {binding: 'AmountPaid', header: '지급액', width: 200, align: 'right'},
@@ -136,14 +134,16 @@
             }
 
             const code = selectedItem.code || selectedItem.cltcd;
-            const name = selectedItem.clt_name || selectedItem.cltName;
+            const name = selectedItem.clt_name || selectedItem.cltname;
+            const cltflag = selectedItem.cltflag || selectedItem.cltflag;
 
             // ✅ input에 값 설정
             document.getElementById('cboCompanyHidden').value = code;
-            document.getElementById('cboCompany').value = name;
+            document.getElementById('cltflag').value = cltflag;
+            document.getElementById('btnCompanySearch').value = name;
 
             // 상세 데이터 다시 조회
-            _this.loadDetailData(code);
+            _this.loadDetailData(code, cltflag);
 
             // 탭 전환
             _this.switchToDetailTab();
@@ -250,6 +250,7 @@
             'srchStartDt': $("#srchStartDt").val(),
             'srchEndDt': $("#srchEndDt").val(),
             'companyCode': cboCompany,
+            'cltflag' : $("#cltflag").val(),
             spjangcd: this.spjangcd.val()
           };
           let result = AjaxUtil.getSyncData(url + "/read", data);
@@ -259,7 +260,7 @@
           }
         }
 
-        loadDetailData(code) {
+        loadDetailData(code, cltflag) {
           let _this = this;
           let url = '/api/transaction/accounts_payable_list/DetailList';
           let param = {
@@ -267,6 +268,7 @@
             'srchEndDt': $("#srchEndDt").val(),
             'cboCompany': $("#cboCompanyHidden").val(),
             'code': code, // 🔥 여기 코드 필터
+            'cltflag':cltflag,
             spjangcd: this.spjangcd.val()
           };
 
@@ -282,6 +284,30 @@
           $('a[href="#tabs_portion_detail"]').click();
         }
 
+      }
+
+      function companyPopupOpenCustom(intputId, hiddenid, hiddenflag){
+
+        const value = document.getElementById(intputId).value;
+
+        let poppage = new PopCompComponentCustom(value);
+
+        let result = AjaxUtil.getSyncData('/api/popup/search_Comp_Custom', { item2 : value, spjangcd : getSpjangcdFromSession() });
+
+        let searchcallback = function (items) {
+
+          document.getElementById(intputId).focus();
+
+          document.getElementById(intputId).value = items.item2;
+          document.getElementById(hiddenid).value = items.id;
+          document.getElementById(hiddenflag).value = items.cltflag;
+        };
+        if(result && result.data.length === 1){
+          searchcallback(result.data[0]);   ``
+          return;
+        }
+
+        poppage.show(searchcallback, result.data);
       }
 
       let page = null;
@@ -307,13 +333,12 @@
         // 검색
         $('#btnSearch').click(function (e) {
           const companyCode = $('#cboCompanyHidden').val();
-
-          if (companyCode === '' && $('#cboCompany').val() !== '') {
-            Alert.alert('', '업체명은 업체검색 버튼을 통해서 \n 검색해주세요');
-            return;
-          }
+          if ($('#cboCompany').val() !== '' && $('#cboCompanyHidden').val() === '') {
           // 집계 조회
           page.searchMainData();
+          } else {
+            page.searchMainData();
+          }
           //상세 데이터도 같이 조회
           if (companyCode !== '') {
             page.loadDetailData(companyCode);
@@ -322,45 +347,36 @@
             page.grid3.itemsSource = [];
           }
         });
-        $('#btnGridSetting').click(function (e) {
-          let _this = this;
-          let fix_cols = page.grid_config.frozenColumnIndex;
-          page.popColSetting.show(gui.gui_code, gui.template_key, 'grid', page.grid_config.columns, page.grid, {
-            'order_fix': false,
-            'fix_cols': fix_cols
-          });
-        });
-        $('#btnCompanySearch').click(function () {
-          let poppage = new PopCompComponent();
-          let $poppage = $(poppage);
-          let searchcallback = function (items) {
-            console.log('items : ', items);
-            document.getElementById('cboCompany').value = items.compname;
-            document.getElementById('cboCompanyHidden').value = items.id;
-          };
 
-          poppage.show(searchcallback);
+        $('#btnCompanySearch').on('click keydown', function (e) {
+          if (e.type === 'keydown' && (e.key === 'Enter' || e.keyCode === 13)) {
+            e.preventDefault();
+
+            companyPopupOpenCustom('btnCompanySearch', 'cboCompanyHidden', 'cltflag');
+          }
         });
 
-        $('#cboCompany').on('input', function () {
+        $('#btnCompanySearch').on('input', function () {
           const val = $(this).val();
           if (val === '') {
             $('#cboCompanyHidden').val('');
+            $('#cltflag').val('');
           }
         });
+
         // .btn-clear 클릭 후 input 이벤트 강제 발생
         $(document).on('click', '.btn-clear', function () {
           const $input = $(this).siblings('input[type="text"]');
           $input.val('');
           $input.trigger('input'); // 🔥 input 이벤트 강제 발생
         });
+
         // 초기화 버튼 클릭 이벤트
         $('#btnClear').click(function () {
 
           document.getElementById('cboCompany').value = '';
           document.getElementById('cboCompanyHidden').value = '';
         });
-
       })
     </script>
 

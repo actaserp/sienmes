@@ -212,7 +212,8 @@
             }
           },
           columns: [
-            {binding: 'cltcd', header: '커래처 코드', width: 250, visible: false},
+            {binding: 'cltcd', header: '거래처 코드', width: 250, visible: false},
+            {binding: 'cltflag', header: '거래처구분코드', width: 250, visible: false},
             {binding: 'comp_name', header: '거래처명', width: 250, align: 'center', allowMerging: false},
             ...monthColumns,
             {binding: 'total_sum', header: '합계', width: 120, align: 'right', allowSorting: false},
@@ -227,7 +228,7 @@
           if (ht.cellType === wijmo.grid.CellType.Cell) {
             const row = this.grid3.rows[ht.row];
             const data = row.dataItem;
-            this.openPaymentPopup(data);  //입금 상세 팝업 함수 실행
+            this.openPaymentPopup(data);  //월별매입현황(지급)상세 팝업 함수 실행
           }
         });
         new FlexGridContextMenu(this.grid3);
@@ -265,6 +266,7 @@
             }
           },
           columns: [
+            {binding: 'cltcd', header: '거래처 코드', width: 250, visible: false},
             {binding: 'comp_name', header: '거래처명', width: 170, align: 'center', allowMerging: true},
             {binding: 'amount', header: '전잔액', width: 110, align: 'right'},
             /* { binding: 'misgubun', header: '매출구분', width: 100, align: 'center', allowMerging: true },
@@ -532,7 +534,7 @@
             }
           },
           error: function () {
-            alert('매출 상세 데이터를 불러오는 데 실패했습니다.');
+            alert('지급 상세 데이터를 불러오는 데 실패했습니다.');
           }
         });
       }
@@ -595,22 +597,12 @@
           companyPopupOpenCustom('btnCompanySearch', 'cboCompanyHidden', 'cltflag');
         }
       });
-      /*$('#btnCompanySearch').click(function () {
-        let poppage = new PopCompComponent();
-        let $poppage = $(poppage);
-        let searchcallback = function (items) {
-          //console.log('items : ',items);
-          document.getElementById('btnCompanySearch').value = items.compname;
-          document.getElementById('cboCompanyHidden').value = items.id;
-        };
-
-        poppage.show(searchcallback);
-      });*/
 
       $('#btnCompanySearch').on('input', function () {
         const val = $(this).val();
         if (val === '') {
           $('#cboCompanyHidden').val('');
+          $('#cltflag').val('');
         }
       });
 

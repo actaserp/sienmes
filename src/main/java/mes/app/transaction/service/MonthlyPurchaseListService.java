@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 
+import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
@@ -125,59 +126,78 @@ public class MonthlyPurchaseListService {
 
     StringBuilder sql = new StringBuilder();
 
-    // CTE: parsed_deposit
+    // CTE: client + parsed_deposit
     sql.append("""
-        WITH parsed_deposit AS (
+        WITH client AS (
+            SELECT id, '0' AS cltflag, "Name" AS cltname
+            FROM company
+            WHERE spjangcd = :spjangcd
+
+            UNION ALL
+
+            SELECT id, '1' AS cltflag, "Name" AS cltname
+            FROM person
+            WHERE spjangcd = :spjangcd
+
+            UNION ALL
+
+            SELECT bankid AS id, '2' AS cltflag, banknm AS cltname
+            FROM tb_xbank
+            WHERE spjangcd = :spjangcd
+
+            UNION ALL
+
+            SELECT id, '3' AS cltflag, cardnm AS cltname
+            FROM tb_iz010
+            WHERE spjangcd = :spjangcd
+        ),
+        parsed_deposit AS (
             SELECT
                 tb.*,
                 TO_CHAR(TO_DATE(tb.trdate, 'YYYYMMDD'), 'MM') AS deposit_month
             FROM tb_banktransit tb
             WHERE tb.ioflag = '1'
               AND tb.trdate BETWEEN :date_form AND :date_to
-              AND tb.spjangcd =:spjangcd
+              AND tb.spjangcd = :spjangcd
         """);
 
-    // 회사 필터 조건을 CTE 내부에 삽입
     if (cboCompany != null) {
       sql.append(" AND tb.cltcd = :cboCompany");
     }
 
     sql.append(")\n");
 
-    // SELECT 본문 시작
+    // SELECT 절
     sql.append("""
         SELECT
             pd.cltcd,
-            c."Name" AS comp_name
+            pd.cltflag,
+            c.cltname AS comp_name
         """);
 
-    // 월별 합계 컬럼 (mon_1 ~ mon_12)
     for (int i = 1; i <= 12; i++) {
       String month = String.format("%02d", i);
       sql.append(",\n  SUM(CASE WHEN deposit_month = '").append(month)
           .append("' THEN COALESCE(pd.accout, 0) ELSE 0 END) AS mon_").append(i);
     }
 
-    // 총합 컬럼
     sql.append(",\n  SUM(COALESCE(pd.accout, 0)) AS total_sum\n");
 
-    // FROM, JOIN, GROUP BY, ORDER BY
     sql.append("""
         FROM parsed_deposit pd
-        LEFT JOIN company c ON c.id = pd.cltcd
-        GROUP BY c."Name", pd.cltcd
-        ORDER BY c."Name"
+        LEFT JOIN client c ON c.id = pd.cltcd AND c.cltflag = pd.cltflag
+        GROUP BY pd.cltcd, pd.cltflag, c.cltname
+        ORDER BY c.cltname
         """);
 
 //    log.info("월별 지급현황 SQL: {}", sql);
 //    log.info("SQL Parameters: {}", paramMap.getValues());
 
-    List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), paramMap);
-    return items;
+    return this.sqlRunner.getRows(sql.toString(), paramMap);
   }
 
   // 미지급
-  public List<Map<String, Object>> getMonthPayableList(String cboYear, Integer cboCompany, String spjangcd) {
+  public List<Map<String, Object>> getMonthPayableList(String cboYear, Integer cboCompany, String spjangcd, String cltflag) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
     paramMap.addValue("cboYear", cboYear);
     paramMap.addValue("cboCompany", cboCompany);
@@ -194,87 +214,107 @@ public class MonthlyPurchaseListService {
     paramMap.addValue("year", cboYear);
     paramMap.addValue("prevYear", String.valueOf(Integer.parseInt(cboYear) - 1));
 
+    if (cltflag != null && !cltflag.isBlank()) {
+      paramMap.addValue("cltflag", cltflag);
+    } else {
+      paramMap.addValue("cltflag", null, Types.VARCHAR);
+    }
+
     StringBuilder sql = new StringBuilder();
 
     sql.append("""
-        WITH lastym AS (
-            SELECT cltcd, MAX(yyyymm) AS yyyymm
-            FROM tb_yearamt
-            WHERE yyyymm < :baseYm
-              AND ioflag = '1'
-              AND spjangcd = :spjangcd
-            GROUP BY cltcd
-        ),
-        lasttbl AS (
-            SELECT y.cltcd, y.yearamt, y.yyyymm, y.spjangcd
-            FROM tb_yearamt y
-            JOIN lastym m ON y.cltcd = m.cltcd AND y.yyyymm = m.yyyymm
-            WHERE y.ioflag = '1'
-              AND y.spjangcd = :spjangcd
-        ),
-        purchasetbl AS (
-            SELECT s.cltcd, SUM(s.totalamt) AS totpurchase, s.spjangcd
-            FROM tb_invoicement s
-            WHERE s.misdate BETWEEN :date_form AND :date_to
-              AND s.spjangcd = :spjangcd
-            GROUP BY s.cltcd, s.spjangcd
-        ),
-        paytbl AS (
-            SELECT s.cltcd, SUM(s.accout) AS totpayment, s.spjangcd
-            FROM tb_banktransit s
-            WHERE s.trdate BETWEEN :date_form AND :date_to
-              AND s.spjangcd = :spjangcd
-              AND s.ioflag = '1'
-            GROUP BY s.cltcd, s.spjangcd
-        ),
-        union_data_raw AS (
-            SELECT
-                c.id AS id,
-                c."Name" AS comp_name,
-                TO_DATE(:prevYear || '1231', 'YYYYMMDD') AS date,
-                '전잔액' AS summary,
-                COALESCE(h.yearamt, 0) AS amount,
-                NULL::numeric AS accout,
-                NULL::numeric AS totalamt,
-                0 AS remaksseq
-            FROM company c
-            LEFT JOIN lasttbl h ON c.id = h.cltcd AND c.spjangcd = h.spjangcd
-            LEFT JOIN purchasetbl p ON c.id = p.cltcd AND c.spjangcd = p.spjangcd
-            LEFT JOIN paytbl q ON c.id = q.cltcd AND c.spjangcd = q.spjangcd
-            WHERE c.spjangcd = :spjangcd
-            UNION ALL
-            SELECT
-                s.cltcd AS id,
-                c."Name" AS comp_name,
-                TO_DATE(s.misdate, 'YYYYMMDD'),
-                '매입',
-                NULL::numeric AS amount,
-                NULL::numeric AS accout,
-                s.totalamt AS totalamt,
-                1 AS remaksseq
-            FROM tb_invoicement s
-            JOIN company c ON c.id = s.cltcd AND c.spjangcd = s.spjangcd
-            WHERE s.misdate BETWEEN :date_form AND :date_to
-              AND s.spjangcd = :spjangcd
-            UNION ALL
-            SELECT
-                b.cltcd AS id,
-                c."Name" AS comp_name,
-                TO_DATE(b.trdate, 'YYYYMMDD'),
-                '지급액',
-                NULL::numeric AS amount,
-                b.accout,
-                NULL::numeric AS totalamt,
-                2 AS remaksseq
-            FROM tb_banktransit b
-            JOIN company c ON c.id = b.cltcd 
-            WHERE TO_DATE(b.trdate, 'YYYYMMDD') BETWEEN TO_DATE(:date_form, 'YYYYMMDD') AND TO_DATE(:date_to, 'YYYYMMDD')
-              AND b.spjangcd = :spjangcd
-              AND b.ioflag = '1'
-        ),
-        union_data AS (
-            SELECT * FROM union_data_raw
-            WHERE 1 = 1
+        WITH client AS (
+                SELECT id, '0' AS cltflag, "Name" AS cltname FROM company WHERE spjangcd = :spjangcd
+                UNION ALL
+                SELECT id, '1' AS cltflag, "Name" AS cltname FROM person WHERE spjangcd = :spjangcd
+                UNION ALL
+                SELECT bankid AS id, '2' AS cltflag, banknm AS cltname FROM tb_xbank WHERE spjangcd = :spjangcd
+                UNION ALL
+                SELECT id, '3' AS cltflag, cardnm AS cltname FROM tb_iz010 WHERE spjangcd = :spjangcd
+            ),
+            lastym AS (
+                SELECT cltcd, MAX(yyyymm) AS yyyymm
+                FROM tb_yearamt
+                WHERE yyyymm < :baseYm
+                  AND ioflag = '1'
+                  AND spjangcd = :spjangcd
+                GROUP BY cltcd
+            ),
+            lasttbl AS (
+                SELECT y.cltcd, y.yearamt, y.yyyymm, y.spjangcd
+                FROM tb_yearamt y
+                JOIN lastym m ON y.cltcd = m.cltcd AND y.yyyymm = m.yyyymm
+                WHERE y.ioflag = '1'
+                  AND y.spjangcd = :spjangcd
+            ),
+            purchasetbl AS (
+                SELECT s.cltcd, SUM(s.totalamt) AS totpurchase, s.spjangcd
+                FROM tb_invoicement s
+                WHERE s.misdate BETWEEN :date_form AND :date_to
+                  AND s.spjangcd = :spjangcd
+                GROUP BY s.cltcd, s.spjangcd
+            ),
+            paytbl AS (
+                SELECT s.cltcd, SUM(s.accout) AS totpayment, s.spjangcd
+                FROM tb_banktransit s
+                WHERE s.trdate BETWEEN :date_form AND :date_to
+                  AND s.spjangcd = :spjangcd
+                  AND s.ioflag = '1'
+                GROUP BY s.cltcd, s.spjangcd
+            ),
+            union_data_raw AS (
+                SELECT
+                    c.id AS id,
+                    c.cltflag,
+                    c.cltname AS comp_name,
+                    TO_DATE(:prevYear || '1231', 'YYYYMMDD') AS date,
+                    '전잔액' AS summary,
+                    COALESCE(h.yearamt, 0) AS amount,
+                    NULL::numeric AS accout,
+                    NULL::numeric AS totalamt,
+                    0 AS remaksseq
+                FROM client c
+                LEFT JOIN lasttbl h ON c.id = h.cltcd AND h.spjangcd = :spjangcd
+                LEFT JOIN purchasetbl p ON c.id = p.cltcd AND p.spjangcd = :spjangcd
+                LEFT JOIN paytbl q ON c.id = q.cltcd AND q.spjangcd = :spjangcd
+                WHERE (:cltflag IS NULL OR c.cltflag = :cltflag)
+                UNION ALL
+                SELECT
+                    s.cltcd AS id,
+                    c.cltflag,
+                    c.cltname AS comp_name,
+                    TO_DATE(s.misdate, 'YYYYMMDD'),
+                    '매입',
+                    NULL::numeric AS amount,
+                    NULL::numeric AS accout,
+                    s.totalamt AS totalamt,
+                    1 AS remaksseq
+                FROM tb_invoicement s
+                JOIN client c ON c.id = s.cltcd
+                WHERE s.misdate BETWEEN :date_form AND :date_to
+                  AND s.spjangcd = :spjangcd
+                  AND (:cltflag IS NULL OR c.cltflag = :cltflag)
+                UNION ALL
+                SELECT
+                    b.cltcd AS id,
+                    c.cltflag,
+                    c.cltname AS comp_name,
+                    TO_DATE(b.trdate, 'YYYYMMDD'),
+                    '지급액',
+                    NULL::numeric AS amount,
+                    b.accout,
+                    NULL::numeric AS totalamt,
+                    2 AS remaksseq
+                FROM tb_banktransit b
+                JOIN client c ON c.id = b.cltcd
+                WHERE TO_DATE(b.trdate, 'YYYYMMDD') BETWEEN TO_DATE(:date_form, 'YYYYMMDD') AND TO_DATE(:date_to, 'YYYYMMDD')
+                  AND b.spjangcd = :spjangcd
+                  AND b.ioflag = '1'
+                  AND (:cltflag IS NULL OR c.cltflag = :cltflag)
+            ),
+            union_data AS (
+                SELECT * FROM union_data_raw
+                WHERE 1 = 1
     """);
 
     if (cboCompany != null) {
@@ -286,6 +326,7 @@ public class MonthlyPurchaseListService {
         running_balance AS (
             SELECT
                 id,
+                cltflag,
                 comp_name,
                 amount,
                 TO_CHAR(date, 'YYYY-MM') AS yyyymm,
@@ -309,6 +350,7 @@ public class MonthlyPurchaseListService {
         )
         SELECT
             id AS cltid,
+            cltflag,
             comp_name,
             amount
     """);
@@ -321,10 +363,10 @@ public class MonthlyPurchaseListService {
     }
 
     sql.append("""
-        FROM running_balance
-        GROUP BY id, comp_name, amount
-        HAVING SUM(balance) <> 0
-        ORDER BY comp_name;
+      FROM running_balance
+       GROUP BY id, cltflag, comp_name, amount
+       HAVING SUM(balance) <> 0
+       ORDER BY comp_name
     """);
 //    log.info("미지급금 월별 현황 SQL: {}", sql);
 //    log.info("SQL Parameters: {}", paramMap.getValues());
@@ -376,11 +418,12 @@ public class MonthlyPurchaseListService {
   }
 
   @DecryptField(columns  = {"accnum"})
-  public List<Map<String, Object>> getPaymentDetail(String cboYear, Integer cltcd, String spjangcd) {
+  public List<Map<String, Object>> getPaymentDetail(String cboYear, Integer cltcd, String spjangcd, String cltflag) {
     MapSqlParameterSource paramMap = new MapSqlParameterSource();
     paramMap.addValue("cboYear", cboYear);
     paramMap.addValue("cltcd", cltcd);
     paramMap.addValue("spjangcd", spjangcd);
+    paramMap.addValue("cltflag", cltflag);
 
     String data_year = cboYear;
     paramMap.addValue("start", data_year + "0101");
@@ -415,6 +458,7 @@ public class MonthlyPurchaseListService {
            AND TO_DATE(tb.trdate, 'YYYYMMDD') 
           BETWEEN TO_DATE(:start, 'YYYYMMDD') AND TO_DATE(:end, 'YYYYMMDD')
            AND tb.spjangcd =  :spjangcd
+            and tb.cltflag = :cltflag
           AND tb.cltcd = :cltcd
        """);
 
