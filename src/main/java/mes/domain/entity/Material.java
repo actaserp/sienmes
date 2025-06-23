@@ -31,6 +31,9 @@ public class Material extends AbstractAuditModel {
 	
 	@Column(name = "\"StoreHouseLoc\"")
 	String storeHouseLoc;
+
+	@Column(name = "\"Factory_id\"")
+	Integer Factory_id;
 	
 	@Column(name = "\"Thickness\"")
 	Float thickness;

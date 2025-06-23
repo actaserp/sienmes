@@ -84,7 +84,7 @@ public class SujuUploadController {
 	
 	/**
 	 * 엑셀 컬럼 순서
-       주문번호 - 주문일- 업체코드 - 업체명 - 제품코드 - 제품명 - 수량 - 납기일
+       사업부 - 프로젝트 - 발주번호 - 자재번호 - 품명 - 규격 - 수량 - 단가 - 금액 - 단위 - 발주일 - 요청일
 	  	#jumun_number_col = 0   # 주문번호
 	    #prod_code_col = 1      # 제품코드
 	    #prod_name_col = 2      # 제품명
@@ -101,8 +101,7 @@ public class SujuUploadController {
 	    #prod_code_col = 4      # 제품코드
 	    #prod_name_col = 5      # 제품명
 	    #due_date_col = 7       # 납기일
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
+
 	 **/
 	// 수주 엑셀 업로드
 	@PostMapping("/upload_save")

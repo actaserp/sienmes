@@ -21,4 +21,6 @@ public interface MaterialRepository extends JpaRepository<Material, Integer>{
 
     List<Material> findByIdIn(Collection<Integer> matIds);
 
+	List<Material> findBySpjangcd(String spjangcd);
+
 }
