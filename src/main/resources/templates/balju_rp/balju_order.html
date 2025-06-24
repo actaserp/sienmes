@@ -99,7 +99,7 @@
         <div id="theGrid" style="height: 730px;"></div>
       </div>
     </section>
-    </div>
+  </div>
   </div>
 
   <script type="text/x-tmpl" id="baljuTemplate">
@@ -254,7 +254,7 @@
               <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
                      placeholder="검색버튼을 클릭하여 구매처를 검색하세요" readonly/>
               &nbsp;
-              <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+              <a class="btn btn-delete" title="구매처검색" id="btnCompanySearch">
                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                 구매처 검색
               </a>
@@ -284,10 +284,10 @@
           </tr>
           <tr>
               <th style="text-align: center">
-                  <label for="AllTotalAmount">총 발주액</label>
+                  <label for="BaljuTotalPrice">총 발주액</label>
               </th>
               <td colspan="8">
-                  <input id="AllTotalAmount" name="AllTotalAmount" style="width: 100%;" readonly ></input>
+                  <input id="BaljuTotalPrice" name="BaljuTotalPrice" style="width: 100%;" readonly ></input>
               </td>
           </tr>
         </table>
@@ -327,22 +327,22 @@
                   <input type="hidden" name="MaterialGroupName" />
                   <input type="hidden" name="Material_id" />
                   <input type="hidden" name="product_code" />
-                  <a class="btn in_btn" title="검색">
+                  <a class="btn in_btn" title="품목 검색" id="btnProductSearch" >
                     <img src="/images/icon/btn-srch-black.svg" alt="검색 아이콘" />
                   </a>
                 </div>
               </td>
-              <td><input type="text" name="quantity" min="1" value="1" placeholder="수량" /></td>
+              <td><input type="text" name="quantity" placeholder="수량" /></td>
               <td>
                 <div class="input-with-checkbox">
-                  <input type="text" name="price" min="0" placeholder="단가" />
+                  <input type="text" name="BaljuUnitPrice" min="0" placeholder="단가" />
                   <input type="checkbox" id="VatIncluded" name="VatIncluded" checked />
                 </div>
               </td>
-              <td><input type="text" name="supplyAmount" readonly /></td>
-              <td><input type="text" name="totalAmount" readonly /></td>
-              <td><input type="text" name="VatAmount" readonly /></td>
-              <td><input type="text" name="remark" /></td>
+              <td><input type="text" name="BaljuPrice" readonly /></td>
+              <td><input type="text" name="BaljuVat" readonly /></td>
+                <td><input type="text" name="totalAmount" readonly /></td>
+              <td><input type="text" name="description" /></td>
               <td class="al_c item_border">
                 <a class="btn in_btn" title="삭제" onclick="removeItemRow(this)">
                   <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘" />
@@ -590,10 +590,7 @@
           let searchcallback = function (items) {
             console.log('btnCompanySearch', items);
             $content.find('#cboCompany').val(items.id);
-            $content.find('#CompanyName').val(items.compname);//거래처이름
-            $content.find('#').val(items.invoiceeaddr); //주소
-            $content.find('#').val(items.tel_number); //전화번호
-
+            $content.find('#CompanyName').val(items.compname);
             $isVatExempt = items.VatExemptionYN === 'Y';
             if (items.VatExemptionYN === 'Y') {
               $BaljuVat.prop('readonly', true).val('면세').css({'background-color': '', 'color': ''});
@@ -605,7 +602,7 @@
             }
 
             if ($Material_id.val() && $cboCompany.val()) {
-              tryShowBaljuPrice();// 단가 검색
+              tryShowBaljuPrice();
             }
           };
 
@@ -616,6 +613,8 @@
 
         //단가 검색
         function tryShowBaljuPrice() {
+          console.log("🔍 [tryShowBaljuPrice] 단가 검색 함수 호출됨");
+
           const mat_pk = $content.find('#Material_id').val();
           const company_id = $content.find('#cboCompany').val();
           const JumunDate = $content.find('#JumunDate').val();
@@ -630,7 +629,7 @@
           };
 
           AjaxUtil.getAsyncData(url, data, function (result) {
-            //console.log('[Ajax 응답 데이터]', result);
+            console.log('단가 검색 응답 데이터 : ', result);
             if (result && result.data && result.data.length > 0) {
               const item = result.data[0];
               const unitPrice = item.UnitPrice || 0;
@@ -815,31 +814,97 @@
 
         FormUtil.BindDataForm(data, $baljuForm);
 
-        // 숫자 입력 필드 자동 포맷
-        const numberFields = [
-          '#BaljuPrice',
-          '#BaljuUnitPrice',
-          '#BaljuVat',
-          '#BaljuTotalPrice',
-          '#SujuQty'
-        ];
+        // 팝업 동적 부분
+        let itemIndex = 1;
 
-        numberFields.forEach(selector => {
-          $content.find(selector).off('keyup').on('keyup', function () {
-            formatNumberInput($(this).val(), selector);
-          });
+        const ProductInputHandler = {
+          bind: function ({rowSelector}) {
+            const $row = $(rowSelector);
 
-          // 값이 있다면 콤마 포맷 바로 적용
-          let value = $content.find(selector).val();
-          if (value) {
-            formatNumberInput(value, selector);
+            // 숫자 포맷 적용 대상 필드들
+            const formatFields = [
+              'input[name^="quantity_"]',
+              'input[name^="BaljuUnitPrice_"]',
+              'input[name^="BaljuPrice_"]',
+              'input[name^="BaljuVat_"]',
+              'input[name^="totalAmount_"]'
+            ];
+
+            formatFields.forEach(selector => {
+              $row.find(selector).off('keyup').on('keyup', function () {
+                formatNumberInput($(this).val(), this);
+              });
+
+              $row.find(selector).each(function () {
+                if ($(this).val()) {
+                  formatNumberInput($(this).val(), this);
+                }
+              });
+            });
+
+            // 🔁 계산 이벤트 바인딩
+            $row.find('input[name^="quantity_"], input[name^="BaljuUnitPrice_"]').off('keyup change').on('keyup change', function () {
+              calculateAmount({ row: $row });
+            });
+
+            $row.find('input[name^="VatIncluded"]').off('change').on('change', function () {
+              calculateAmount({ row: $row });
+            });
+
+            // 🔍 제품 검색 기능 (기존 그대로 유지)
+            const $input = $row.find('input[name^="txtProductName_"]');
+            const $id = $row.find('input[name^="Material_id_"]');
+            const $code = $row.find('input[name^="product_code_"]');
+            const $group = $row.find('input[name^="MaterialGroupName_"]');
+            const $next = $row.find('input[name^="quantity_"]');
+
+            function set(item) {
+              $input.val(item.Name);
+              $id.val(item.id);
+              $code.val(item.Code);
+              $group.val(item.group_name);
+
+              setTimeout(() => {
+                $next.focus().select();
+              }, 10);
+            }
+
+            $input.off('keydown').on('keydown', function (e) {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                const keyword = $input.val();
+                const spjangcd = sessionStorage.getItem('spjangcd');
+
+                if (!keyword) return showPopup();
+
+                $.get('/api/popup/search_material', { keyword, spjangcd }, function (res) {
+                  if (res.data?.length === 1) {
+                    set(res.data[0]);
+                  } else {
+                    showPopup();
+                  }
+                });
+
+                function showPopup() {
+                  const pop = new PopMatComponent();
+                  pop.material_type = 'product,sangpum';
+
+                  pop.show(set, keyword);
+
+                  setTimeout(() => {
+                    if (pop.$keyword) {
+                      pop.$keyword.val(keyword);
+                      if (pop.$cboMaterialGrp) pop.$cboMaterialGrp.val('');
+                      pop.searchDataBind();
+                    }
+                  }, 100);
+                }
+              }
+            });
           }
-        });
+        };
 
-
-        // 팝업 동적 처리
-        let itemIndex = 1; // 기존 기본 0번 행 이후부터 시작
-
+        // 행 추가
         $content.find('#addRemark').click(function () {
           const $tbody = $content.find('.item-table tbody');
           const $template = $tbody.find('.item-template-row');
@@ -847,7 +912,6 @@
           for (let i = 0; i < 3; i++) {
             const $newRow = $template.clone().removeClass('item-template-row').show();
 
-            // name 속성 인덱싱
             $newRow.find('input').each(function () {
               const baseName = $(this).attr('name');
               if (baseName) {
@@ -855,17 +919,18 @@
               }
             });
 
-            // 삭제 버튼 ID 부여 (선택적)
             $newRow.find('a[title="삭제"]').attr('id', `btnDelItem_${itemIndex}`);
 
             $tbody.append($newRow);
+            ProductInputHandler.bind({rowSelector: $newRow});
+
             itemIndex++;
           }
         });
-        // 1. "검색" 버튼 클릭 시 팝업 열기
-        $content.on('click', 'a[title="검색"]', function (e) {
-          const $btn = $(this);
-          const $row = $btn.closest('tr');
+
+        // 검색 버튼 클릭 시 팝업
+        $content.on('click', 'a[title="품목 검색"]', function () {
+          const $row = $(this).closest('tr');
 
           const $productInput = $row.find('input[name^="txtProductName_"]');
           const $productId = $row.find('input[name^="Material_id_"]');
@@ -874,6 +939,7 @@
 
           const pop = new PopMatComponent();
           pop.material_type = 'product,sangpum';
+
           pop.show(function (item) {
             $productInput.val(item.Name);
             $productId.val(item.id);
@@ -881,75 +947,37 @@
             $materialGroup.val(item.group_name);
           });
         });
-
-        // 2. 엔터 입력 시도 시에도 동일하게 팝업 열기
-        $content.on('keydown', 'input[name^="txtProductName_"]', function (e) {
-          if (e.key === 'Enter' || e.keyCode === 13) {
-            e.preventDefault();
-
-            const $input = $(this);
-            const keyword = $input.val();
-            const $row = $input.closest('tr');
-
-            const $productInput = $row.find('input[name^="txtProductName_"]');
-            const $productId = $row.find('input[name^="Material_id_"]');
-            const $productCode = $row.find('input[name^="product_code_"]');
-            const $materialGroup = $row.find('input[name^="MaterialGroupName_"]');
-            const $nextInput = $row.find('input[name^="quantity_"]'); // ✅ 다음 포커스 위치 (예: 수량)
-
-            const pop = new PopMatComponent();
-            pop.material_type = 'product,sangpum';
-
-            pop.show(function (item) {
-              $productInput.val(item.Name);
-              $productId.val(item.id);
-              $productCode.val(item.Code);
-              $materialGroup.val(item.group_name);
-
-              // ✅ 포커스를 다음 칸으로 이동
-              setTimeout(() => {
-                $nextInput.focus().select(); // 선택도 같이 하면 사용자 편함
-              }, 10);
-            });
-
-            // 팝업 검색 자동 실행
-            setTimeout(() => {
-              if (pop.$keyword) {
-                pop.$keyword.val(keyword);
-                pop.searchDataBind();
-              }
-            }, 100);
-          }
-        });
-
-        setTimeout(() => {
-          $content.find('#addRemark').trigger('click');
-        }, 10);
-
+        // 포커스 자동 이동
         $content.on('keydown', 'input', function (e) {
           if (e.key !== 'Enter') return;
-
           e.preventDefault();
 
           const $input = $(this);
           const $row = $input.closest('tr');
-
           const nameAttr = $input.attr('name') || '';
 
-          if (nameAttr.startsWith('txtProductName_')) {
-            $row.find('input[name^="quantity_"]').focus().select();
-          } else if (nameAttr.startsWith('quantity_')) {
-            $row.find('input[name^="price_"]').focus().select();
-          } else if (nameAttr.startsWith('price_')) {
-            $row.find('input[name^="remark_"]').focus().select();
-          } else if (nameAttr.startsWith('remark_')) {
+          if (nameAttr.startsWith('quantity_')) {
+            $row.find('input[name^="BaljuUnitPrice_"]').focus().select();
+          } else if (nameAttr.startsWith('BaljuUnitPrice_')) {
+            $row.find('input[name^="description_"]').focus().select();
+          } else if (
+            nameAttr.startsWith('BaljuPrice') ||
+            nameAttr.startsWith('BaljuVat') ||
+            nameAttr.startsWith('totalAmount')
+
+          ) {
+            $row.find('input[name^="description_"]').focus().select();
+          } else if (nameAttr.startsWith('description_')) {
             const $nextRow = $row.nextAll('tr:visible').first();
             const $nextInput = $nextRow.find('input[name^="txtProductName_"]');
-            if ($nextInput.length) {
-              $nextInput.focus().select();
-            }
+            if ($nextInput.length) $nextInput.focus().select();
           }
         });
+
+        // 초기 행 3개 추가
+        setTimeout(() => {
+          $content.find('#addRemark').trigger('click');
+        }, 10);
 
       }
 
@@ -994,6 +1022,7 @@
       }
     }
 
+    //행 삭제 함수
     function removeItemRow(el) {
       const $tbody = $(el).closest('tbody');
       const $rows = $tbody.find('tr:not(.item-template-row)');
@@ -1135,6 +1164,37 @@
           .css({'background-color': '', 'color': '', 'text-align': ''});
       }
     }
+
+    function calculateAmount({ row }) {
+      const $row = $(row);
+      const qty = parseFloat($row.find('input[name^="quantity_"]').val().replace(/,/g, '') || '0');
+      const unitPrice = parseFloat($row.find('input[name^="BaljuUnitPrice_"]').val().replace(/,/g, '') || '0');
+      const isVatIncluded = $row.find('input[name^="VatIncluded"]').prop('checked');
+
+      const $unitPrice = $row.find('input[name^="BaljuUnitPrice_"]');
+      const $supply = $row.find('input[name^="BaljuPrice_"]');
+      const $vat = $row.find('input[name^="BaljuVat_"]');
+      const $total = $row.find('input[name^="totalAmount_"]');
+
+      let supplyPrice = 0, vat = 0, totalPrice = 0;
+
+      if (isVatIncluded) {
+        totalPrice = unitPrice * qty;
+        supplyPrice = Math.round(totalPrice * 10 / 11);
+        vat = totalPrice - supplyPrice;
+      } else {
+        supplyPrice = unitPrice * qty;
+        vat = Math.round(supplyPrice * 0.1);
+        totalPrice = supplyPrice + vat;
+      }
+
+      $unitPrice.val(unitPrice);
+      formatNumberInput(unitPrice.toString(), $unitPrice);
+      $supply.val(supplyPrice).trigger('keyup');
+      $vat.val(vat).trigger('keyup');
+      $total.val(totalPrice).trigger('keyup');
+    }
+
 
     let page = null;
     var picker = new ax5.ui.picker();
