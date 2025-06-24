@@ -369,17 +369,24 @@
                                 <td>
                                     <input class="form-control2" id="inoutDate" name="inoutDate" type="datetime-local">
                                 </td>
-                                <th style="text-align: center">
+                                <th style="text-align: center; display:none;">
                                     <label for="inoutSelect">입출 구분</label>
                                 </th>
-                                <td>
+                                <td style="display:none;">
                                     <select id="inoutSelect" name="inoutSelect" disabled>
-                                        <option value="in" >품목 입고</option>
+                                        <option value="in" selected>품목 입고</option>
                                         <option value="out" selected>품목 출고</option>
                                         <option value="return">입고 반품</option>
                                         <option value="recall">출고 회수</option>
                                     </select>
                                     <input type="hidden" id="inoutSelect_hidden" name="inoutSelect_hidden">
+                                </td>
+                                <th style="text-align: center">
+                                    <label for="InoutType">구분</label>
+                                </th>
+                                <td colspan="3">
+                                    <select class="select_input" id="InoutType" name="InoutType" disabled></select>
+                                    <input id="InoutType_hidden" name="InoutType_hidden" type="hidden">
                                 </td>
                             </tr>
                             <tr>
@@ -425,15 +432,6 @@
                                 </th>
                                 <td>
                                     <select id="StoreHouse_id" name="StoreHouse_id"  />
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="InoutType">구분</label>
-                                </th>
-                                <td colspan="3">
-                                    <select id="InoutType" name="InoutType" disabled></select>
-                                    <input id="InoutType_hidden" name="InoutType_hidden" type="hidden">
                                 </td>
                             </tr>
                             <tr>
@@ -1230,7 +1228,7 @@
                     modalContainer = new PopupDraggable('수정');
                 }
 
-                modalContainer.open({width: 1000, height: 440, $content});
+                modalContainer.open({width: 1000, height: 400, $content});
                 popup = new materialInoutPopup();
                 //AjaxUtil.fillSelectOptions($content.find('#StoreHouse_id'), 'store_house', 'choose', 3);    // 3:자재창고
                 AjaxUtil.fillSelectOptions($content.find('#StoreHouse_id'), 'store_house', 'choose', '');    // 3:자재창고

@@ -23,11 +23,15 @@ public class UserGroupService {
 			select id, "Code" as code 
             , "Name" as name 
             , "Description" as description 
-            , "Disabled" as disabled 
-            , to_char("_created" ,'yyyy-mm-dd hh24:mi:ss') as created
+            , "Disabled" as disabled
+            , case when exists (select 1 FROM user_profile up WHERE up."UserGroup_id" = ug.id) THEN 'Y' else 'N' end as flag
+            , "gmenu" as gmenu 
+            , mi."MenuName" as gmenuname
+            , to_char(ug."_created" ,'yyyy-mm-dd hh24:mi:ss') as created
             from user_group ug 
+            left join menu_item mi
+			on mi."MenuCode" = ug.gmenu
             where 1 = 1
-            AND ug.spjangcd = :spjangcd
 			""";
 				
 			

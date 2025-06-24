@@ -44,4 +44,6 @@ public class UserGroup extends AbstractAuditModel implements Serializable {
 	@Column(name="spjangcd")
 	String spjangcd;
 
+	String gmenu;
+
 }

@@ -88,9 +88,18 @@
                             <th>
                                 <label for="description">설명</label>
                             </th>
-                            <td colspan="3">
-                               <!-- <textarea id="description" name="description"></textarea>-->
+                            <td>
                                 <input type="text" id="description" name="description" style="width: 100%;">
+                            </td>
+                            <th>
+                                <label for="name">
+                                    기본화면
+                                </label>
+                            </th>
+                            <td>
+                                <select class="mg-r5" id="gmenu" name="gmenu" style="width: 100%">
+                                    <option></option>
+                                </select>
                             </td>
                         </tr>
                         </tbody>
@@ -122,6 +131,8 @@
             {binding: 'code', header: '코드', width: 120, align: 'center'},
             {binding: 'name', header: '그룹명', width: 250, align: 'center',},
             {binding: 'description', header: '설명', width: '*', align: 'center',},
+            { binding: 'gmenu', header: 'Dashboard', width: '*', align: 'center', visible: false },
+            { binding: 'gmenuname', header: 'Dashboard', width: '*', align: 'center' },
             /*{binding: '', header: '', width: "*", align: 'left'},*/
             //{ binding: 'created', label: '생성일', width: 150, align: 'center', sortable: false },
         ];
@@ -165,6 +176,7 @@
                 document.getElementById('code').value = selectedItem.code;
                 document.getElementById('description').value = selectedItem.description;
                 document.getElementById('name').value = selectedItem.name;
+                document.getElementById('gmenu').value = selectedItem.gmenu;
 
                 setButtonState();
             });
@@ -264,7 +276,8 @@
                 id: item.id,
                 code: item.code,
                 name: item.name,
-                description: item.description
+                description: item.description,
+                gmenu: item.gmenu
             }));
 
             if (typeof theGrid === 'undefined' || typeof viewdata === 'undefined') {
@@ -353,6 +366,7 @@
 
         $(document).ready(function (e) {
 
+            AjaxUtil.fillSelectOptions($('#gmenu'), 'menu_item', '', '');
 
             $('#btn_search').click(function (ex) {
                 searchDataBind();

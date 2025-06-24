@@ -54,10 +54,7 @@ public class UserGroupController{
 		return result;
 		
 	}
-	
-	
-	
-	
+
 	@GetMapping("/detail")
 	public AjaxResult getUserGroup(@RequestParam("id") int id) {
 	
@@ -68,15 +65,13 @@ public class UserGroupController{
 		return result;
 	}
 	
-	
-	
-	
 	@PostMapping("/save")
 	public AjaxResult saveUserGroup(
 			@RequestParam(value="id", required= false) Integer id,
 			@RequestParam("code") String code,
 			@RequestParam("name") String name,
 			@RequestParam ("description") String description,
+			@RequestParam ("gmenu") String gmenu,
 			@RequestParam(value ="spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
@@ -95,8 +90,8 @@ public class UserGroupController{
 			ug.setDescription(description);
 			ug.set_audit(user);
 			ug.setSpjangcd(spjangcd);
+			ug.setGmenu(gmenu);
 
-			
 			ug = this.userGroupRepository.save(ug);
 			
 			AjaxResult result = new AjaxResult();
