@@ -248,7 +248,7 @@
                     columns: [
                         {binding: 'fixflag',header: '마감', width: 70, align: 'center',visible: false},
                         {binding: 'row_num', header: '순번', width: 60, align: 'center'},
-                        {binding: 'workymd', header: '일자', width: 100, align: 'center' },
+                        {binding: 'workymd', header: '일자', width: 100, align: 'center', isReadOnly: true },
                         {binding: 'first_name', header: '사원명', width: 100, align: 'center' },
                         {binding: 'jik_id', header: '직위', width: 100, align: 'center' },
                         {binding: 'starttime', header: '출근', width: 100, align: 'center' },
@@ -591,6 +591,26 @@
                     Alert.alert('', '선택된 행이 없습니다.');
                     return;
                 }
+                // 만약 workymd(일자) 컬럼이 빈 값이면, 좌측 달력(grid2)에서 선택된 날짜로 채움
+                // 선택된 일자가 없다면 오늘날자
+                let selRow = this.grid2.selection.row;
+                let dateVal = '';
+                if (selRow >= 0) {
+                    dateVal = this.grid2.getCellData(selRow, this.grid2.columns.getColumn('date').index, false);
+                }else {
+                    // 오늘 날짜 (YYYY-MM-DD)
+                    const today = new Date();
+                    const year = today.getFullYear();
+                    const month = ('0' + (today.getMonth() + 1)).slice(-2);
+                    const day = ('0' + today.getDate()).slice(-2);
+                    dateVal = `${year}-${month}-${day}`;
+                }
+                selectedItems.forEach(item => {
+                    if (!item.workymd || item.workymd === '') {
+                        item.workymd = dateVal;
+                    }
+                });
+
 
                 // 서버로 전송할 데이터
                 let data = {
