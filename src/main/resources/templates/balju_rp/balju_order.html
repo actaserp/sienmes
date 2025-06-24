@@ -1,7 +1,6 @@
 <html layout:decorate="~{layout_page}">
 
 <th:block layout:fragment="content">
-
   <div class="layout-contents">
     <div class="page-title-wrap">
       <div class="left">
@@ -70,6 +69,12 @@
         <div class="button-wrap">
           <ul>
             <li>
+              <a class="btn btn-excell" title="등록" id="btnMail">
+                <img src="/images/icon/ico-mail.svg" alt="메일 아이콘">
+                메일 전송
+              </a>
+            </li>
+            <li>
               <a class="btn btn-excell" title="등록" id="btnAddNew">
                 <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
                 등록
@@ -93,159 +98,265 @@
       <div class="container-fluid">
         <div id="theGrid" style="height: 730px;"></div>
       </div>
-      <!--        <div class="grid_box">-->
-
-      <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
-      <!--        </div>-->
     </section>
+    </div>
   </div>
-  <script type="text/x-tmpl" id="baljuTemplate">
-    <div class="content_wrap popup" id="div_excel_upload">
-        <div class="table-wrap">
-        <form id="baljuForm">
-            <table class="write-table">
-                <caption>주문등록 테이블</caption>
-                <input type="hidden" id="id" name="id">
-                <input type="hidden" id="spjangcdHidden" name="spjangcd"/>
-                <tbody>
-                    <tr>
-                        <th style="text-align: center">
-                            <label for="JumunDate">발주일</label>
-                        </th>
-                        <td>
-                            <input type="date" id="JumunDate" name="JumunDate">
-                        </td>
-                        <th style="text-align: center">
-                            <label for="DueDate">납기예정일</label>
-                        </th>
-                        <td>
-                            <input type="date" id="DueDate" name="DueDate">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: center">
-                            <label for="cboCompany">구매처*</label>
-                        </th>
-                        <td colspan="3">
-                            <input id="cboCompany" name="Company_id" type="hidden">
-                            <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
-                             placeholder="검색버튼을 클릭하여 구매처를 검색하세요" readonly/>
-                            &nbsp;
-                            <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                구매처 검색
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: center">
-                            <label for="MaterialGroupName">제품그룹</label>
-                        </th>
-                        <td>
-                            <input type="text" id="MaterialGroupName" name="MaterialGroupName" readonly>
-                        </td>
-                        <th style="text-align: center">
-                            <label for="product_code">품목코드</label>
-                        </th>
-                        <td>
-                            <input type="text" id="product_code" name="product_code" readonly>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: center">
-                            <label for="txtProductName">품목명</label>
-                        </th>
-                        <td colspan="3">
-                            <input type="text" id="txtProductName" name="product_name"
-                                   placeholder="검색버튼을 클릭하여 제품을 검색하세요" readonly>
-                            <input type="hidden" id="Material_id" name="Material_id">
-                            &nbsp;
-                            <a class="btn btn-delete" title="검색" id="btnProductSearch">
-                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                제품 검색
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: center">
-                            <label for="SujuQty">발주량*</label>
-                        </th>
-                        <td>
-                            <input class="form-control2 tar" type="text" id="SujuQty" name="SujuQty" onkeyup="numberSujuQty(this.value)">
-                        </td>
-                        <th style="text-align: center">
-                            <label for="cboBaljuType">발주구분</label>
-                        </th>
-                        <td>
-                            <select id="cboBaljuType" name="SujuType"></select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: center">
-                            <label for="BaljuUnitPrice">단가 *</label>
-                        </th>
-                        <td style="display: flex; align-items: center; gap: 10px;">
-                            <input class="form-control2 tar" type="text" id="BaljuUnitPrice" name="BaljuUnitPrice"
-                                   onkeyup="numberUnitPrice(this.value)" style="width:50%;">
-                            <label style="margin: 0; display: flex; align-items: center;">
-                              <input type="checkbox" id="VatIncluded" name="VatIncluded" checked>
-                              <span style="margin-left: 5px;">부가세 포함</span>
-                            </label>
-                          </td>
-                        <th style="text-align: center">
-                            <label for="BaljuPrice"> 공급가액</label>
-                        </th>
-                        <td>
-                            <input class="form-control2 tar" type="text" id="BaljuPrice" name="BaljuPrice" onkeyup="numberBaljuQty(this.value)" >
-                        </td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: center">
-                            <label for="BaljuVat">부가세액</label>
-                        </th>
-                        <td>
-                            <input class="form-control2 tar" type="text" id="BaljuVat" name="BaljuVat" onkeyup="numberBaljuQty(this.value)" readonly>
-                            <input type="hidden" id="VatExempt" name="VatExempt" value="false">
-                       </td>
-                        <th style="text-align: center">
-                            <label for="BaljuTotalPrice">총액(발주액)</label>
-                        </th>
-                        <td>
-                            <input class="form-control2 tar" type="text" id="BaljuTotalPrice" name="BaljuTotalPrice" onkeyup="tTotalBaljuPrice(this.value)">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: center">
-                            <label for="description">비고</label>
-                        </th>
-                        <td colspan="3">
-                            <textarea id="description" name="Description"></textarea>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: center">
-                            <label for="unit">단위</label>
-                        </th>
-                        <td>
-                            <input type="text" id="unit" name="unit" readonly>
-                        </td>
-                        <th style="text-align: center">
-                            <label for="StateName">상태</label>
-                        </th>
-                        <td>
-                            <input type="text" id="StateName" name="StateName" readonly disabled>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            </form>
-        </div>
 
-        <div class="popup-button">
-                <button type="button" class="btn-popup y_write_auth" id="btnPopBaljuStop">중지</button>
-                <button type="button" class="btn-popup y_write_auth" id="btnPopBaljuSave">저장</button>
-                <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
-        </div>
+  <script type="text/x-tmpl" id="baljuTemplate">
+    <style>
+
+  /* 아이템 테이블 전체 설정 */
+  .item-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-top: 10px;
+  }
+
+  /* 헤더 셀 스타일 */
+  .item-table th {
+    background-color: #EDEFF5;
+    text-align: center;
+    font-weight: bold;
+    padding: 8px;
+    border: 1px solid #ccc;
+  }
+
+  /* 바디 셀 스타일 */
+  .item-table td {
+    padding: 6px;
+    text-align: center;
+    border: 1px solid #ccc;
+  }
+
+  /* 입력 필드 기본 스타일 */
+  .item-table input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px;
+  }
+
+  /* 품목 & 비고 왼쪽 정렬 */
+  .item-table td:first-child,
+  .item-table td:nth-child(6) {
+    text-align: left;
+  }
+
+  /* 공통 버튼 스타일 */
+  .item-table .btn.in_btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    padding: 0;
+    border: 1px solid #B3B3B3;
+    background-color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    line-height: 0;
+  }
+
+  /* + 버튼 전용 스타일 */
+  .item-table .btn.in_btn.plus img {
+    width: 10px;
+    height: 10px;
+    display: block;
+  }
+
+  /* 공통 아이콘 버튼 이미지 (삭제, 검색 포함) */
+  .item-table .btn.in_btn img {
+    width: 12px;
+    height: 12px;
+    display: block;
+    margin-right:5px;
+  }
+  .input-with-button {
+    display: flex;
+    gap: 4px; /* 버튼과 input 사이 여백 */
+    align-items: center;
+  }
+
+  .input-with-button input {
+    flex: 1; /* 나머지 영역 차지 */
+    min-width: 0;
+    padding: 4px;
+  }
+
+  .input-with-button .btn.in_btn {
+    flex-shrink: 0;
+  }
+    .content_wrap.popup {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .table-wrap {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    .popup-button {
+      flex-shrink: 0;
+      padding: 10px;
+      background: #fff;
+      border-top: 1px solid #ddd;
+    }
+    .input-with-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .input-with-checkbox input[type="number"] {
+      flex: 1;
+      min-width: 0;
+      padding: 4px;
+    }
+
+    .input-with-checkbox input[type="checkbox"] {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+    }
+    </style>
+
+    <div class="content_wrap popup" id="div_excel_upload">
+    <div class="table-wrap">
+      <form id="baljuForm">
+        <table class="write-table">
+          <caption>발주등록 테이블</caption>
+          <input type="hidden" id="id" name="id">
+          <input type="hidden" id="spjangcdHidden" name="spjangcd"/>
+          <tbody>
+          <tr>
+            <th style="text-align: center">
+              <label for="JumunDate">발주일</label>
+            </th>
+            <td>
+              <input type="date" id="JumunDate" name="JumunDate">
+            </td>
+            <th style="text-align: center">
+              <label for="DueDate">납기예정일</label>
+            </th>
+            <td>
+              <input type="date" id="DueDate" name="DueDate">
+            </td>
+          </tr>
+          <tr>
+            <th style="text-align: center">
+              <label for="cboCompany">구매처*</label>
+            </th>
+            <td colspan="3">
+              <input id="cboCompany" name="Company_id" type="hidden">
+              <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
+                     placeholder="검색버튼을 클릭하여 구매처를 검색하세요" readonly/>
+              &nbsp;
+              <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                구매처 검색
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <th style="text-align: center">
+              <label for="cboBaljuType">발주구분</label>
+            </th>
+            <td>
+              <select id="cboBaljuType" name="SujuType"></select>
+            </td>
+            <th style="text-align: center">
+              <label for="StateName">상태</label>
+            </th>
+            <td>
+              <input type="text" id="StateName" name="StateName" readonly disabled>
+            </td>
+          </tr>
+          <tr>
+            <th style="text-align: center">
+              <label for="special_note">특이사항</label>
+            </th>
+            <td colspan="3">
+              <textarea id="special_note" name="special_note" style="height: 90px"></textarea>
+            </td>
+          </tr>
+          <tr>
+              <th style="text-align: center">
+                  <label for="AllTotalAmount">총 발주액</label>
+              </th>
+              <td colspan="8">
+                  <input id="AllTotalAmount" name="AllTotalAmount" style="width: 100%;" readonly ></input>
+              </td>
+          </tr>
+        </table>
+
+        <table class="item-table">
+
+            <colgroup>
+              <col style="width: 25%">
+              <col style="width: 5%">
+              <col style="width: 20%">
+              <col style="width: 12%">
+              <col style="width: 12%">
+              <col style="width: 12%">
+              <col style="width: 15%">
+              <col style="width: 5%">
+            </colgroup>
+            <thead>
+              <tr id="itemHeaderRow">
+                <th>품목</th>
+                <th>수량</th>
+                <th>단가 (체크박스 선택시 부과세 포함)</th>
+                <th>공급가액</th>
+                <th>부과세</th>
+                <th>합계</th>
+                <th>비고</th>
+                <th>
+                  <a class="btn in_btn plus" id="addRemark" title="추가">
+                    <img src="/images/icon/ico-plus.svg" alt="등록 아이콘" />
+                  </a>
+                </th>
+              </tr>
+            </thead>
+            <tr class="item-template-row" style="display: none;">
+              <td>
+                <div class="input-with-button">
+                  <input type="text" name="txtProductName" placeholder="입력 후 엔터" />
+                  <input type="hidden" name="MaterialGroupName" />
+                  <input type="hidden" name="Material_id" />
+                  <input type="hidden" name="product_code" />
+                  <a class="btn in_btn" title="검색">
+                    <img src="/images/icon/btn-srch-black.svg" alt="검색 아이콘" />
+                  </a>
+                </div>
+              </td>
+              <td><input type="text" name="quantity" min="1" value="1" placeholder="수량" /></td>
+              <td>
+                <div class="input-with-checkbox">
+                  <input type="text" name="price" min="0" placeholder="단가" />
+                  <input type="checkbox" id="VatIncluded" name="VatIncluded" checked />
+                </div>
+              </td>
+              <td><input type="text" name="supplyAmount" readonly /></td>
+              <td><input type="text" name="totalAmount" readonly /></td>
+              <td><input type="text" name="VatAmount" readonly /></td>
+              <td><input type="text" name="remark" /></td>
+              <td class="al_c item_border">
+                <a class="btn in_btn" title="삭제" onclick="removeItemRow(this)">
+                  <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘" />
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+    </div>
+    <div class="popup-button">
+      <button type="button" class="btn-popup y_write_auth" id="btnPopBaljuStop">중지</button>
+      <button type="button" class="btn-popup y_write_auth" id="btnPopBaljuSave">저장</button>
+      <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
     </div>
   </script>
 
@@ -255,151 +366,7 @@
   <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
   <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
   <th:block th:replace="/common/popup_company :: popup_company"></th:block>
-
   <script type="text/javascript">
-    function formatNumberInput(inputValue, targetSelector) {
-      let cleaned = inputValue.replace(/[^0-9]/g, '').replace(/,/g, '');// 숫자만 남기기
-      let formatted = cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ',');// 쉼표 넣기
-      $(targetSelector).val(formatted);// 값 넣기
-    }
-
-    // 수량 또는 단가가 입력되었을 때 → 공급가/부가세/총액 계산
-    function updateBaljuPrice() {
-      const qtyStr = $('#SujuQty').val().replace(/,/g, '');
-      const unitStr = $('#BaljuUnitPrice').val().replace(/,/g, '');
-      const isVatIncluded = $('#VatIncluded').is(':checked');
-      const isVatExempt = $('#VatExempt').val() === 'Y';
-
-      const qty = parseFloat(qtyStr || 0);
-      const unitPrice = parseFloat(unitStr || 0);
-      const supplyPrice = qty * unitPrice;
-
-      let vat = 0;
-      let totalPrice = supplyPrice;
-
-      if (isVatExempt) {
-        $('#BaljuVat')
-          .val('면세')
-          .prop('readonly', true)
-          .css({'background-color': '', 'color': ''});
-        totalPrice = supplyPrice;
-      } else {
-        if (isVatIncluded) {
-          vat = Math.round(supplyPrice * 10 / 110);
-          totalPrice = supplyPrice;
-        } else {
-          vat = Math.round(supplyPrice * 0.1);
-          totalPrice = supplyPrice + vat;
-        }
-
-        $('#BaljuVat')
-          .val(vat.toLocaleString())
-          .prop('readonly', true)
-          .css({'background-color': '', 'color': '', 'text-align': ''});
-      }
-
-      $('#BaljuPrice').val(supplyPrice.toLocaleString());
-      $('#BaljuTotalPrice').val(totalPrice.toLocaleString());
-    }
-
-    // 총액이 입력된 경우 → 공급가/부가세를 역산
-    function calculateFromTotalPrice() {
-      const totalStr = $('#BaljuTotalPrice').val().replace(/,/g, '');
-      const total = parseFloat(totalStr || 0);
-
-      const isVatIncluded = $('#VatIncluded').is(':checked');
-      const isVatExempt = $('#VatExempt').val() === 'Y';
-
-      let supply = total;
-      let vat = 0;
-
-      if (isVatExempt) {
-        vat = '면세';
-        supply = total;
-      } else {
-        if (isVatIncluded) {
-          // 총액이 부가세 포함된 금액일 경우 → 공급가 역산
-          supply = Math.round(total / 1.1);
-          vat = total - supply;
-        } else {
-          // 총액 = 공급가 + 부가세 (부가세 별도이므로 역산 필요)
-          supply = Math.round(total / 1.1);
-          vat = total - supply;
-        }
-      }
-
-      $('#BaljuPrice').val(supply.toLocaleString());
-      $('#BaljuVat').val(
-        isVatExempt ? '면세' : vat.toLocaleString()
-      );
-
-      // 선택사항: 총액 필드 보정
-      // $('#BaljuTotalPrice').val((supply + vat).toLocaleString());
-    }
-
-    // 공급가 입력 시 → 총액 및 부가세 계산
-    function calculateFromSupplyPrice() {
-      const supplyStr = $('#BaljuPrice').val().replace(/,/g, '');
-      const isVatExempt = $('#VatExempt').val() === 'Y';
-      const isVatIncluded = $('#VatIncluded').is(':checked');
-
-      const supplyPrice = parseFloat(supplyStr || 0);
-
-      let vat = 0;
-      let totalPrice = supplyPrice;
-
-      if (isVatExempt) {
-        // 면세일 경우
-        $('#BaljuVat')
-          .val('면세')
-          .prop('readonly', true)
-          .css({'background-color': '', 'color': ''});
-
-        totalPrice = supplyPrice; // 총액은 공급가 그대로
-      } else {
-        if (isVatIncluded) {
-          // 부가세 포함 → 공급가 = 총액, 부가세를 역산
-          vat = Math.round(supplyPrice * 10 / 110); // 공급가의 10/110 계산
-          totalPrice = supplyPrice; // 총액은 입력한 공급가 그대로
-        } else {
-          // 부가세 별도 → 공급가에 부가세 추가
-          vat = Math.round(supplyPrice * 0.1);
-          totalPrice = supplyPrice + vat;
-        }
-
-        $('#BaljuVat')
-          .val(vat.toLocaleString())
-          .prop('readonly', true)
-          .css({'background-color': '', 'color': '', 'text-align': ''});
-      }
-
-      // $('#BaljuTotalPrice').val(totalPrice.toLocaleString());
-    }
-
-    // 수량 변경 시 → 단가 × 수량 → 공급가 계산
-    function numberSujuQty(x) {
-      formatNumberInput(x, "#SujuQty");
-      updateBaljuPrice();
-    }
-
-    // 단가 변경 시 → 단가 × 수량 → 공급가 계산
-    function numberUnitPrice(x) {
-      formatNumberInput(x, "#BaljuUnitPrice");
-      updateBaljuPrice();
-    }
-
-    // 공급가 변경 시 → 부가세/총액 계산
-    function numberBaljuQty(x) {
-      formatNumberInput(x, "#BaljuPrice");
-      calculateFromSupplyPrice();
-    }
-
-    // 총액 변경 시 → 공급가/부가세 역산
-    function tTotalBaljuPrice(x) {
-      formatNumberInput(x, "#BaljuTotalPrice");
-      calculateFromTotalPrice();
-    }
-
     class SujuUploadPage {
       constructor() {
         this.url = '/api/balju/balju_order';
@@ -543,7 +510,8 @@
           modalContainer = new PopupDraggable('발주 수정');
         }
 
-        modalContainer.open({width: 1050, height: 630, $content});
+        //모달 크기
+        modalContainer.open({width: 1250, height: 630, $content});
         $('#popSrchDt1').ax5DatePicker({direction: 'top'});
         $('#popSrchDt2').ax5DatePicker({direction: 'top'});
 
@@ -622,7 +590,10 @@
           let searchcallback = function (items) {
             console.log('btnCompanySearch', items);
             $content.find('#cboCompany').val(items.id);
-            $content.find('#CompanyName').val(items.compname);
+            $content.find('#CompanyName').val(items.compname);//거래처이름
+            $content.find('#').val(items.invoiceeaddr); //주소
+            $content.find('#').val(items.tel_number); //전화번호
+
             $isVatExempt = items.VatExemptionYN === 'Y';
             if (items.VatExemptionYN === 'Y') {
               $BaljuVat.prop('readonly', true).val('면세').css({'background-color': '', 'color': ''});
@@ -634,7 +605,7 @@
             }
 
             if ($Material_id.val() && $cboCompany.val()) {
-              tryShowBaljuPrice();
+              tryShowBaljuPrice();// 단가 검색
             }
           };
 
@@ -713,8 +684,8 @@
           }
         }
 
-        //발주구분
-        AjaxUtil.fillSelectOptions($cboBaljuType, 'system_code', 'choose', null, 'Balju_type');
+        //발주구분(정기를 디폴트로)
+        AjaxUtil.fillSelectOptions($cboBaljuType, 'system_code', 'choose', 'Regular', 'Balju_type');
 
         //팝업타이틀 설정
         let $popTitle = $content.find('#popTitle');
@@ -865,7 +836,123 @@
           }
         });
 
+
+        // 팝업 동적 처리
+        let itemIndex = 1; // 기존 기본 0번 행 이후부터 시작
+
+        $content.find('#addRemark').click(function () {
+          const $tbody = $content.find('.item-table tbody');
+          const $template = $tbody.find('.item-template-row');
+
+          for (let i = 0; i < 3; i++) {
+            const $newRow = $template.clone().removeClass('item-template-row').show();
+
+            // name 속성 인덱싱
+            $newRow.find('input').each(function () {
+              const baseName = $(this).attr('name');
+              if (baseName) {
+                $(this).attr('name', `${baseName}_${itemIndex}`);
+              }
+            });
+
+            // 삭제 버튼 ID 부여 (선택적)
+            $newRow.find('a[title="삭제"]').attr('id', `btnDelItem_${itemIndex}`);
+
+            $tbody.append($newRow);
+            itemIndex++;
+          }
+        });
+        // 1. "검색" 버튼 클릭 시 팝업 열기
+        $content.on('click', 'a[title="검색"]', function (e) {
+          const $btn = $(this);
+          const $row = $btn.closest('tr');
+
+          const $productInput = $row.find('input[name^="txtProductName_"]');
+          const $productId = $row.find('input[name^="Material_id_"]');
+          const $productCode = $row.find('input[name^="product_code_"]');
+          const $materialGroup = $row.find('input[name^="MaterialGroupName_"]');
+
+          const pop = new PopMatComponent();
+          pop.material_type = 'product,sangpum';
+          pop.show(function (item) {
+            $productInput.val(item.Name);
+            $productId.val(item.id);
+            $productCode.val(item.Code);
+            $materialGroup.val(item.group_name);
+          });
+        });
+
+        // 2. 엔터 입력 시도 시에도 동일하게 팝업 열기
+        $content.on('keydown', 'input[name^="txtProductName_"]', function (e) {
+          if (e.key === 'Enter' || e.keyCode === 13) {
+            e.preventDefault();
+
+            const $input = $(this);
+            const keyword = $input.val();
+            const $row = $input.closest('tr');
+
+            const $productInput = $row.find('input[name^="txtProductName_"]');
+            const $productId = $row.find('input[name^="Material_id_"]');
+            const $productCode = $row.find('input[name^="product_code_"]');
+            const $materialGroup = $row.find('input[name^="MaterialGroupName_"]');
+            const $nextInput = $row.find('input[name^="quantity_"]'); // ✅ 다음 포커스 위치 (예: 수량)
+
+            const pop = new PopMatComponent();
+            pop.material_type = 'product,sangpum';
+
+            pop.show(function (item) {
+              $productInput.val(item.Name);
+              $productId.val(item.id);
+              $productCode.val(item.Code);
+              $materialGroup.val(item.group_name);
+
+              // ✅ 포커스를 다음 칸으로 이동
+              setTimeout(() => {
+                $nextInput.focus().select(); // 선택도 같이 하면 사용자 편함
+              }, 10);
+            });
+
+            // 팝업 검색 자동 실행
+            setTimeout(() => {
+              if (pop.$keyword) {
+                pop.$keyword.val(keyword);
+                pop.searchDataBind();
+              }
+            }, 100);
+          }
+        });
+
+        setTimeout(() => {
+          $content.find('#addRemark').trigger('click');
+        }, 10);
+
+        $content.on('keydown', 'input', function (e) {
+          if (e.key !== 'Enter') return;
+
+          e.preventDefault();
+
+          const $input = $(this);
+          const $row = $input.closest('tr');
+
+          const nameAttr = $input.attr('name') || '';
+
+          if (nameAttr.startsWith('txtProductName_')) {
+            $row.find('input[name^="quantity_"]').focus().select();
+          } else if (nameAttr.startsWith('quantity_')) {
+            $row.find('input[name^="price_"]').focus().select();
+          } else if (nameAttr.startsWith('price_')) {
+            $row.find('input[name^="remark_"]').focus().select();
+          } else if (nameAttr.startsWith('remark_')) {
+            const $nextRow = $row.nextAll('tr:visible').first();
+            const $nextInput = $nextRow.find('input[name^="txtProductName_"]');
+            if ($nextInput.length) {
+              $nextInput.focus().select();
+            }
+          }
+        });
+
       }
+
 
       deleteSujuData(id, state) {
         let _this = this;
@@ -904,6 +991,148 @@
           }
         };
         AjaxUtil.getAsyncData(url, data, fnsuccess);
+      }
+    }
+
+    function removeItemRow(el) {
+      const $tbody = $(el).closest('tbody');
+      const $rows = $tbody.find('tr:not(.item-template-row)');
+      const $targetRow = $(el).closest('tr');
+
+      if ($rows.length <= 3) {
+        // 입력값이 있으면 초기화만 하고 리턴
+        const hasData = $targetRow.find('input[type="text"], input[type="number"]').filter(function () {
+          return $(this).val().trim() !== '';
+        }).length > 0;
+
+        if (hasData) {
+          $targetRow.find('input[type="text"], input[type="number"]').val('');
+          // hidden 값도 초기화하고 싶다면 아래 추가
+          $targetRow.find('input[type="hidden"]').val('');
+        }
+
+        return;
+      }
+
+      // 4개 이상이면 정상 삭제
+      $targetRow.remove();
+    }
+
+
+    function formatNumberInput(inputValue, targetSelector) {
+      let cleaned = inputValue.replace(/[^0-9]/g, '').replace(/,/g, '');// 숫자만 남기기
+      let formatted = cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ',');// 쉼표 넣기
+      $(targetSelector).val(formatted);// 값 넣기
+    }
+
+    // 수량 또는 단가가 입력되었을 때 → 공급가/부가세/총액 계산
+    function updateBaljuPrice() {
+      const qtyStr = $('#SujuQty').val().replace(/,/g, '');
+      const unitStr = $('#BaljuUnitPrice').val().replace(/,/g, '');
+      const isVatIncluded = $('#VatIncluded').is(':checked');
+      const isVatExempt = $('#VatExempt').val() === 'Y';
+
+      const qty = parseFloat(qtyStr || 0);
+      const unitPrice = parseFloat(unitStr || 0);
+      const supplyPrice = qty * unitPrice;
+
+      let vat = 0;
+      let totalPrice = supplyPrice;
+
+      if (isVatExempt) {
+        $('#BaljuVat')
+          .val('면세')
+          .prop('readonly', true)
+          .css({'background-color': '', 'color': ''});
+        totalPrice = supplyPrice;
+      } else {
+        if (isVatIncluded) {
+          vat = Math.round(supplyPrice * 10 / 110);
+          totalPrice = supplyPrice;
+        } else {
+          vat = Math.round(supplyPrice * 0.1);
+          totalPrice = supplyPrice + vat;
+        }
+
+        $('#BaljuVat')
+          .val(vat.toLocaleString())
+          .prop('readonly', true)
+          .css({'background-color': '', 'color': '', 'text-align': ''});
+      }
+
+      $('#BaljuPrice').val(supplyPrice.toLocaleString());
+      $('#BaljuTotalPrice').val(totalPrice.toLocaleString());
+    }
+
+    // 총액이 입력된 경우 → 공급가/부가세를 역산
+    function calculateFromTotalPrice() {
+      const totalStr = $('#BaljuTotalPrice').val().replace(/,/g, '');
+      const total = parseFloat(totalStr || 0);
+
+      const isVatIncluded = $('#VatIncluded').is(':checked');
+      const isVatExempt = $('#VatExempt').val() === 'Y';
+
+      let supply = total;
+      let vat = 0;
+
+      if (isVatExempt) {
+        vat = '면세';
+        supply = total;
+      } else {
+        if (isVatIncluded) {
+          // 총액이 부가세 포함된 금액일 경우 → 공급가 역산
+          supply = Math.round(total / 1.1);
+          vat = total - supply;
+        } else {
+          // 총액 = 공급가 + 부가세 (부가세 별도이므로 역산 필요)
+          supply = Math.round(total / 1.1);
+          vat = total - supply;
+        }
+      }
+
+      $('#BaljuPrice').val(supply.toLocaleString());
+      $('#BaljuVat').val(
+        isVatExempt ? '면세' : vat.toLocaleString()
+      );
+
+      // 선택사항: 총액 필드 보정
+      // $('#BaljuTotalPrice').val((supply + vat).toLocaleString());
+    }
+
+    // 공급가 입력 시 → 총액 및 부가세 계산
+    function calculateFromSupplyPrice() {
+      const supplyStr = $('#BaljuPrice').val().replace(/,/g, '');
+      const isVatExempt = $('#VatExempt').val() === 'Y';
+      const isVatIncluded = $('#VatIncluded').is(':checked');
+
+      const supplyPrice = parseFloat(supplyStr || 0);
+
+      let vat = 0;
+      let totalPrice = supplyPrice;
+
+      if (isVatExempt) {
+        // 면세일 경우
+        $('#BaljuVat')
+          .val('면세')
+          .prop('readonly', true)
+          .css({'background-color': '', 'color': ''});
+
+        totalPrice = supplyPrice; // 총액은 공급가 그대로
+      } else {
+        if (isVatIncluded) {
+          // 부가세 포함 → 공급가 = 총액, 부가세를 역산
+          vat = Math.round(supplyPrice * 10 / 110); // 공급가의 10/110 계산
+          totalPrice = supplyPrice; // 총액은 입력한 공급가 그대로
+        } else {
+          // 부가세 별도 → 공급가에 부가세 추가
+          vat = Math.round(supplyPrice * 0.1);
+          totalPrice = supplyPrice + vat;
+        }
+
+        $('#BaljuVat')
+          .val(vat.toLocaleString())
+          .prop('readonly', true)
+          .css({'background-color': '', 'color': '', 'text-align': ''});
       }
     }
 
