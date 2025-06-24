@@ -33,7 +33,7 @@ public class WorkPlaceController {
         List<Tb_xa012> tbXa012 = tbXa012Repository.findAll(Sort.by(Sort.Direction.DESC, "spjangcd"));
         // 세무서명 조회(세무서 코드(comtaxoff) 와 세무서명(taxnm) 매핑)
         for (Tb_xa012 item : tbXa012) {
-            if(item.getComtaxoff() != null) {
+            if(item.getComtaxoff() != null && !item.getComtaxoff().isEmpty()) {
                 item.setTaxnm(workPlaceService.getTaxnm(item.getComtaxoff()));
             }
         }
@@ -64,10 +64,11 @@ public class WorkPlaceController {
     // 사업장 삭제
     @PostMapping("/delete")
     public AjaxResult deleteSpjangInfo(
-            @RequestParam String spjangcd,
+            @RequestBody Map<String, Object> param,
             HttpServletRequest request,
             Authentication auth) {
         AjaxResult result = new AjaxResult();
+        String spjangcd = (String) param.get("spjangcd");
         try {
             tbXa012Repository.deleteById(spjangcd);
             result.success = true;

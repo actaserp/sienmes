@@ -250,53 +250,19 @@
                                             <input type="text" style="width: 100%;" id="CustomerBarcode"
                                                    name="CustomerBarcode">
                                         </td>
-
                                         <th>
-                                            <label for="Thickness">두께(mm)</label>
+                                            <label for="Standard1">규격1</label>
                                         </th>
                                         <td>
-                                            <input type="number" style="width: 100%;" id="Thickness"
-                                                   name="Thickness">
-                                        </td>
-                                        <th>
-                                            <label for="Width">폭(mm)</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" id="Width" name="Width"
+                                            <input type="text" id="Standard1" name="Standard1"
                                                    style="width: 100%;">
                                         </td>
                                         <th>
-                                            <label for="Length">길이(mm)</label>
+                                            <label for="Standard2">규격2</label>
                                         </th>
                                         <td>
-                                            <input type="number" id="Length" name="Length"
-                                                   style="width: 100%;">
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>
-                                            <label for="Height">높이(mm)</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" style="width: 100%;" id="Height"
-                                                   name="Height">
-                                        </td>
-
-                                        <th>
-                                            <label for="Weight">중량</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" style="width: 100%;" id="Weight"
-                                                   name="Weight">
-                                        </td>
-
-                                        <th>
-                                            <label for="Color">Color</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="Color" name="Color"
-                                                   style="width: 100%;">
+                                            <input type="text" style="width: 100%;" id="Standard2"
+                                                   name="Standard2">
                                         </td>
                                         <th>
                                             <label for="Class1">분류1</label>
@@ -305,9 +271,54 @@
                                             <input type="text" id="Class1" name="Class1"
                                                    style="width: 100%;">
                                         </td>
+
+<!--                                        <th>-->
+<!--                                            <label for="Thickness">두께(mm)</label>-->
+<!--                                        </th>-->
+<!--                                        <td>-->
+<!--                                            <input type="number" style="width: 100%;" id="Thickness"-->
+<!--                                                   name="Thickness">-->
+<!--                                        </td>-->
+<!--                                        <th>-->
+<!--                                            <label for="Width">폭(mm)</label>-->
+<!--                                        </th>-->
+<!--                                        <td>-->
+<!--                                            <input type="number" id="Width" name="Width"-->
+<!--                                                   style="width: 100%;">-->
+<!--                                        </td>-->
+<!--                                        <th>-->
+<!--                                            <label for="Length">길이(mm)</label>-->
+<!--                                        </th>-->
+<!--                                        <td>-->
+<!--                                            <input type="number" id="Length" name="Length"-->
+<!--                                                   style="width: 100%;">-->
+<!--                                        </td>-->
                                     </tr>
 
                                     <tr>
+<!--                                        <th>-->
+<!--                                            <label for="Height">높이(mm)</label>-->
+<!--                                        </th>-->
+<!--                                        <td>-->
+<!--                                            <input type="number" style="width: 100%;" id="Height"-->
+<!--                                                   name="Height">-->
+<!--                                        </td>-->
+
+<!--                                        <th>-->
+<!--                                            <label for="Weight">중량</label>-->
+<!--                                        </th>-->
+<!--                                        <td>-->
+<!--                                            <input type="number" style="width: 100%;" id="Weight"-->
+<!--                                                   name="Weight">-->
+<!--                                        </td>-->
+
+<!--                                        <th>-->
+<!--                                            <label for="Color">Color</label>-->
+<!--                                        </th>-->
+<!--                                        <td>-->
+<!--                                            <input type="text" id="Color" name="Color"-->
+<!--                                                   style="width: 100%;">-->
+<!--                                        </td>-->
                                         <th>
                                             <label for="Class2">분류2</label>
                                         </th>
@@ -315,7 +326,6 @@
                                             <input type="text" style="width: 100%;" id="Class2"
                                                    name="Class2">
                                         </td>
-
                                         <th>
                                             <label for="Class3">분류3</label>
                                         </th>
@@ -326,33 +336,18 @@
                                         <th>
                                             <label for="Usage">용도</label>
                                         </th>
-                                        <td>
+                                        <td colspan="3">
                                             <input type="text" id="Usage" name="Usage"
                                                    style="width: 100%;">
                                         </td>
-                                        <th>
-                                            <label for="Standard1">규격1</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="Standard1" name="Standard1"
-                                                   style="width: 100%;">
-                                        </td>
-
                                     </tr>
-
                                     <tr>
-                                        <th>
-                                            <label for="Standard2">규격2</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="Standard2"
-                                                   name="Standard2">
-                                        </td>
+
 
                                         <th>
                                             <label for="Description">비고</label>
                                         </th>
-                                        <td colspan="5">
+                                        <td colspan="7">
                                             <!--<textarea id="Description" name="Description"></textarea>-->
                                             <input type="text" id="Description" name="Description"
                                                    style="width: 100%;">
@@ -728,6 +723,8 @@
                                                     <select id="type" name="type" class="wp100">
                                                         <option value="01">매입</option>
                                                         <option value="02">매출</option>
+                                                        <option value="03">단가정보</option>
+                                                        <option value="04">가공비</option>
                                                     </select>
                                                 </td>
                                             </tr>
@@ -919,42 +916,43 @@
                         {binding: 'lotUseYn', header: 'LOT관리 유무', width: 150, align: 'center'},
                         {binding: 'lot_size', header: '로트사이즈', width: 100, align: 'right',},
                         {binding: 'customer_barcode', header: '고객바코드', width: 100, align: 'left'},
-                        {binding: 'thickness', header: '두께', width: 100, align: 'right'},
-                        {binding: 'width', header: '폭', width: 100, align: 'right',},
-                        {binding: 'length', header: '길이', width: 100, align: 'right',},
-                        {binding: 'height', header: '높이', width: 100, align: 'right',},
-                        {binding: 'color', header: 'Color', width: 100, align: 'center'},
-                        {binding: 'usage', header: '용도', width: 100, align: 'left'},
+                        // {binding: 'thickness', header: '두께', width: 100, align: 'right'},
+                        // {binding: 'width', header: '폭', width: 100, align: 'right',},
+                        // {binding: 'length', header: '길이', width: 100, align: 'right',},
+                        // {binding: 'height', header: '높이', width: 100, align: 'right',},
+                        // {binding: 'color', header: 'Color', width: 100, align: 'center'},
+                        {binding: 'starndard1', header: '규격1', width: 150, align: 'right'},
+                        {binding: 'standard2', header: '규격2', width: 150, align: 'right'},
                         {binding: 'class1', header: '분류1', width: 100, align: 'left'},
                         {binding: 'class2', header: '분류2', width: 100, align: 'left'},
                         {binding: 'class3', header: '분류3', width: 100, align: 'left'},
-                        {binding: 'starndard1', header: '규격1', width: 150, align: 'right'},
-                        {binding: 'standard2', header: '규격2', width: 150, align: 'right'},
-                        {binding: 'description', header: '설명', width: 200, align: 'left'},
-                        {binding: 'workcenter_name', header: '기본워크센터', width: 150, align: 'left'},
-                        {binding: 'standard_time', header: '표준생산시간', width: 150, align: 'right'},
-                        {binding: 'input_man_count', header: '기본작업자수', width: 150, align: 'right'},
-                        {binding: 'input_man_hour', header: '기본ManHour', width: 150, align: 'right'},
-                        {binding: 'vat_exempt_yn', header: '부가세면제', width: 150, align: 'center'},
-                        {binding: 'purchase_order_standard', header: '발주기준', width: 100, align: 'center'},
-                        {binding: 'leadtime', header: '리드타임(일)', width: 150, align: 'right'},
-                        {binding: 'min_order', header: '최소발주량', width: 100, align: 'right',},
-                        {binding: 'avrqty', header: '적정재고수량', width: 100, align: 'center'},
-                        {binding: 'max_order', header: '최대발주량', width: 100, align: 'right',},
-                        {binding: 'storehouse_name', header: '기본재고창고', width: 150, align: 'left'},
-                        {binding: 'storehouse_loc', header: '창고내위치', width: 120, align: 'left'},
-                        {binding: 'manage_level', header: '자재관리등급', width: 150, align: 'left'},
-                        {binding: 'packing_unit_qty', header: '포장수량', width: 100, align: 'right',},
-                        {binding: 'packing_unit_name', header: '포장단위', width: 100, align: 'right'},
-                        {binding: 'safety_stock', header: '안전재고', width: 100, align: 'right',},
-                        {binding: 'max_stock', header: '최대재고', width: 100, align: 'right',},
-                        {binding: 'process_safety_stock', header: '공정안전재고', width: 150, align: 'right',},
-                        {binding: 'unit_price', header: '평균단가', width: 100, align: 'right',},
-                        {binding: 'valid_days', header: '사용기한(일)', width: 100, align: 'right',},
-                        {binding: 'intest_yn', header: '수입검사필수', width: 150, align: 'center'},
-                        {binding: 'outtest_yn', header: '출하검사필수', width: 150, align: 'center'},
-                        {binding: 'routing_name', header: '라우팅', width: 100, align: 'left'},
-                        {binding: '_created', header: '등록일', width: 150, align: 'center'},
+                        {binding: 'usage', header: '용도', width: 150, align: 'left'},
+                        {binding: 'description', header: '비고', width: 250, align: 'left'},
+                        // {binding: 'description', header: '설명', width: 200, align: 'left'},
+                        // {binding: 'workcenter_name', header: '기본워크센터', width: 150, align: 'left'},
+                        // {binding: 'standard_time', header: '표준생산시간', width: 150, align: 'right'},
+                        // {binding: 'input_man_count', header: '기본작업자수', width: 150, align: 'right'},
+                        // {binding: 'input_man_hour', header: '기본ManHour', width: 150, align: 'right'},
+                        // {binding: 'vat_exempt_yn', header: '부가세면제', width: 150, align: 'center'},
+                        // {binding: 'purchase_order_standard', header: '발주기준', width: 100, align: 'center'},
+                        // {binding: 'leadtime', header: '리드타임(일)', width: 150, align: 'right'},
+                        // {binding: 'min_order', header: '최소발주량', width: 100, align: 'right',},
+                        // {binding: 'avrqty', header: '적정재고수량', width: 100, align: 'center'},
+                        // {binding: 'max_order', header: '최대발주량', width: 100, align: 'right',},
+                        // {binding: 'storehouse_name', header: '기본재고창고', width: 150, align: 'left'},
+                        // {binding: 'storehouse_loc', header: '창고내위치', width: 120, align: 'left'},
+                        // {binding: 'manage_level', header: '자재관리등급', width: 150, align: 'left'},
+                        // {binding: 'packing_unit_qty', header: '포장수량', width: 100, align: 'right',},
+                        // {binding: 'packing_unit_name', header: '포장단위', width: 100, align: 'right'},
+                        // {binding: 'safety_stock', header: '안전재고', width: 100, align: 'right',},
+                        // {binding: 'max_stock', header: '최대재고', width: 100, align: 'right',},
+                        // {binding: 'process_safety_stock', header: '공정안전재고', width: 150, align: 'right',},
+                        // {binding: 'unit_price', header: '평균단가', width: 100, align: 'right',},
+                        // {binding: 'valid_days', header: '사용기한(일)', width: 100, align: 'right',},
+                        // {binding: 'intest_yn', header: '수입검사필수', width: 150, align: 'center'},
+                        // {binding: 'outtest_yn', header: '출하검사필수', width: 150, align: 'center'},
+                        // {binding: 'routing_name', header: '라우팅', width: 100, align: 'left'},
+                        // {binding: '_created', header: '등록일', width: 150, align: 'center'},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
@@ -1216,7 +1214,13 @@
                         let item = s.rows[e.row].dataItem;
 
                         if (col.binding === "type") {
-                            e.cell.textContent = (item.type === '01') ? '매입' : '매출';
+                            const typeMap = {
+                                '01': '매입',
+                                '02': '매출',
+                                '03': '단가정보',
+                                '04': '가공비'
+                            };
+                            e.cell.textContent = typeMap[item.type] || item.type;
                         }
                     }
                 });

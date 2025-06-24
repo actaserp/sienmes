@@ -149,12 +149,12 @@ public class EquipmentController {
 		
 		if (Name.equals(equip.getName())==false && name_chk == false) {
 			result.success = false;
-			result.message="중복된 설비코드가 존재합니다.";
+			result.message="중복된 설비명이 존재합니다.";
 			return result;
 		}
 		if (Code.equals(equip.getCode())==false && code_chk == false) {
 			result.success = false;
-			result.message="중복된 설비명이 존재합니다.";
+			result.message="중복된 설비코드가 존재합니다.";
 			return result;
 		}
 		

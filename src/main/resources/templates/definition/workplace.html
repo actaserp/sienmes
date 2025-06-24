@@ -88,7 +88,7 @@
               <tbody>
               <tr>
                 <th>사업장코드</th>
-                <td colspan="4"><input type="text" id="spjangcd" name="spjangcd"></td>
+                <td colspan="4"><input type="text" id="spjangcd2" name="spjangcd2"></td>
                 <th>사업장명</th>
                 <td colspan="4"><input type="text" id="spjangnm" name="spjangnm"></td>
               </tr>
@@ -293,6 +293,7 @@
     }
 
     // 사업장 리스트
+    let isFirstLoad = true;
     function fetchListData() {
       let data2 = [];
 
@@ -345,7 +346,8 @@
             let item = theGrid.rows[row].dataItem;
             if(item != null && Object.keys(item).length > 0) {
 
-              document.getElementById('spjangcd').value = item.spjangcd;
+              document.getElementById('spjangcd2').value = item.spjangcd;
+              console.log('binded spjangcd2 : ', item.spjangcd);
               document.getElementById('spjangnm').value = item.spjangnm;
               document.querySelector(`input[name="custperclsf"][value="${item.custperclsf}"]`).checked = true;
               document.getElementById('saupnum').value = item.saupnum;
@@ -384,13 +386,12 @@
         new FlexGridContextMenu(theGrid);
         window.downloadFileName = '문서코드별 사원 리스트';
 
-        if (data2.length > 0 && theGrid) {
+        if (isFirstLoad && data2.length > 0 && theGrid) {
           const item = data2[0];
-          const row = theGrid.rows[0];
-          theGrid.select(0, 0); // 첫번째 셀 선택
+          theGrid.select(0, 0);
 
           if(item != null && Object.keys(item).length > 0) {
-            document.getElementById('spjangcd').value = item.spjangcd;
+            document.getElementById('spjangcd2').value = item.spjangcd;
             document.getElementById('spjangnm').value = item.spjangnm;
             document.querySelector(`input[name="custperclsf"][value="${item.custperclsf}"]`).checked = true;
             document.getElementById('saupnum').value = item.saupnum;
@@ -420,6 +421,7 @@
             document.getElementById('emailadres').value = item.emailadres;
             document.getElementById('ajongcd').value = item.ajongcd;
           }
+          isFirstLoad = false;
         }
       } else {
         // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
@@ -442,23 +444,40 @@
     function deleteSpjang() {
       let _this = this;
       let url = '/api/workplace/delete'
-      let data = {
-        'spjangcd': document.getElementById('spjangcd').value,
-      }
-      let fnSuccess = function (result) {
-        Alert.alert('', '삭제되었습니다.');
-        fetchListData();
-        resetFormFields();
-      };
       Alert.confirm('', '삭제하시겠습니까?', function () {
-        console.log("확인 버튼 눌림");
-        AjaxUtil.postAsyncData(url, data, fnSuccess);
+        sendAjaxRequest(url)
       });
+      function sendAjaxRequest(url) {
+        $.ajax({
+          url: url,
+          type: 'POST',
+          data: JSON.stringify({'spjangcd': document.getElementById('spjangcd2').value}),
+          contentType: 'application/json',
+          headers: {
+            'X-CSRF-Token': $('[name=_csrf]').val()
+          },
+          success: handleAjaxResponse,
+          error: function () {
+            Alert.alert('', '에러가발생하였습니다.');
+          }
+        });
+      }
+
+      function handleAjaxResponse(response) {
+        if (response.success) {
+          Alert.alert('', response.message, function () {
+            fetchListData();
+            resetFormFields();
+          });
+        } else {
+          Alert.alert('', '삭제에 실패했습니다.');
+        }
+      }
     }
     // 등록후 초기화
     function resetFormFields() {
       const fieldsToReset = [
-        'spjangcd', 'spjangnm', 'compnum', 'saupnum', 'prenm', 'biztype', 'item'
+        'spjangcd2', 'spjangnm', 'compnum', 'saupnum', 'prenm', 'biztype', 'item'
         , 'openymd', 'eddate', 'tel1', 'fax', 'zipcd', 'adresa', 'adresb', 'zipcd2'
         , 'adres2a', 'adres2b', 'taxnm', 'comtaxoff', 'taxagentnm', 'taxagentcd', 'taxagenttel', 'taxagentsp'
         , 'taxaccnum', 'agnertel1', 'agnertel2', 'emailadres', 'ajongcd'
@@ -476,7 +495,7 @@
         // 주문번호 생성
         let formData = new FormData();
         // 다른 데이터를 FormData에 추가합니다.
-        formData.append('spjangcd', $('#spjangcd').val()); // 사업장코드
+        formData.append('spjangcd', $('#spjangcd2').val()); // 사업장코드
         formData.append('spjangnm', $('#spjangnm').val()); // 사업장명
         formData.append('custperclsf', $('.custperclsf:checked').val()); // 사업형태
         formData.append('saupnum', $('#saupnum').val()); // 사업자등록번호
