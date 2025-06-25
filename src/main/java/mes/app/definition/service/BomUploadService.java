@@ -1,16 +1,8 @@
-package mes.app.sales.service;
+package mes.app.definition.service;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import mes.domain.entity.Company;
-import mes.domain.entity.Material;
-import mes.domain.repository.CompanyRepository;
-import mes.domain.repository.MaterialRepository;
+import mes.domain.repository.BomRepository;
+import mes.domain.services.CommonUtil;
+import mes.domain.services.SqlRunner;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -21,18 +13,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 
-import mes.domain.repository.SujuRepository;
-import mes.domain.services.CommonUtil;
-import mes.domain.services.SqlRunner;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
-public class SujuUploadService {
+public class BomUploadService {
 
 	@Autowired
 	SqlRunner sqlRunner;
 	
 	@Autowired
-	SujuRepository SujuRepository;
+	BomRepository bomRepository;
 
 
 	
