@@ -110,6 +110,9 @@
                     <button type="button" class="btn-excellt btn-default y_write_auth" id="btnBomRevision" data-labelCd="개정"
                             style="width: 90px; height: 36px; float: none;">
                     </button>
+                    <a class="btn" title="엑셀 업로드" id="btnShowUpload" style="width: 86px;">
+                        엑셀 업로드
+                    </a>
                 </div>
             </div>
 
@@ -152,6 +155,7 @@
                                             class="fas fa-edit"></i>수정
                                     </button>
                                 </li>
+
                                 <!--<li>
                                     <button type="button" class="btn-default" id="btnCompUp" title="순서 조정-위로"
                                             style="width: 150px; height: 36px;"><i
@@ -339,6 +343,51 @@
         </div>
 </div>
 </script>
+<!--    엑셀 등록 스크립트-->
+    <script type="text/x-tmpl" id="excelUploadTemplate">
+        <div class="content_wrap popup" id="div_excel_upload">
+
+            <div class="table-wrap">
+                <form id="excelUploadForm">
+                <table class="write-table">
+                    <colgroup>
+                        <col style="width: 25%;">
+                        <col style="width: 75%;">
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <th style="text-align: center">
+                                <label>일자</label>
+                            </th>
+                            <td>
+                                <input style="width:300px;" type="date" id="data_date" name="data_date" value=""  />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                <label>첨부파일</label>
+                            </th>
+                            <td>
+                                <input style="width:300px; height: 44px;" type="file" id="upload_file" name="upload_file" enctype="multipart/form-data" accept=".xls, .xlsx"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </form>
+            </div>
+            <div class="pt-2">
+                <span style="padding-top:30px;">*미리 등록된 거래처만 엑셀 업로드가 가능합니다.</span>
+                <textarea id="upload_message" style='display:none;width:100%;height:150px;'></textarea>
+            </div>
+
+            </section>
+
+            <div class="popup-button">
+                <button type="button" class="btn-popup y_write_auth" id="btn_excel_save" >저장</button>
+                <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
+            </div>
+        </div>
+    </script>
 
 
     <!-- 구성품목 등록 스크립트 -->
@@ -563,16 +612,16 @@
                         }
                     },
                     columns: [
-                        {binding: 'id', header: '번호', width: 100, align: 'left'},
-                        {binding: 'mat_type', header: '품목구분', width: 110, align: 'center'},
-                        {binding: 'mat_group_name', header: '품목그룹', width: 140, align: 'left'},
-                        {binding: 'mat_code', header: '(반)제품코드', width: '*', align: 'left'},
-                        {binding: 'mat_name', header: '(반)제품명', width: 150, align: 'left'},
-                        {binding: 'bom_type_name', header: 'BOM종류', width: 120, align: 'center'},
-                        {binding: 'Name', header: 'BOM명', width: 160, align: 'left'},
-                        {binding: 'OutputAmount', header: '기준수량', width: 110, align: 'right'},
-                        {binding: 'unit', header: '단위', width: 110, align: 'center'},
-                        {binding: 'Version', header: 'Ver.', width: 110, align: 'center'},
+                        {binding: 'id', header: '번호', width: 70, align: 'center'},
+                        {binding: 'mat_type', header: '품목구분', width: 85, align: 'center'},
+                        {binding: 'mat_group_name', header: '품목그룹', width: 85, align: 'left'},
+                        {binding: 'mat_code', header: '(반)제품코드', width: 110, align: 'left'},
+                        {binding: 'mat_name', header: '(반)제품명', width: 300, align: 'left'},
+                        {binding: 'bom_type_name', header: 'BOM종류', width: 110, align: 'center'},
+                        {binding: 'Name', header: 'BOM명', width: '*', align: 'left'},
+                        {binding: 'OutputAmount', header: '기준수량', width: 80, align: 'right'},
+                        {binding: 'unit', header: '단위', width: 100, align: 'center'},
+                        {binding: 'Version', header: 'Ver.', width: 60, align: 'center'},
                         {binding: 'StartDate', header: '적용시작일', width: 130, align: 'center'},
                         {binding: 'EndDate', header: '적용종료일', width: 130, align: 'center'},
                     ],
@@ -1435,6 +1484,62 @@
                 AjaxUtil.postAsyncData(url, data, fnsuccess);
             }
 
+            // 엑셀 업로드 버튼
+            showPopupExcelUpload(data) {
+                let _this = this;
+                let content = tmpl('excelUploadTemplate', data);
+                let $content = $(content);
+                $content.find('#data_date').val(data.data_date);
+                $content.find('#day_index').val(data.day_index);
+
+                //팝업공통모듈
+                let modalContainer = new PopupDraggable('엑셀 업로드');
+                modalContainer.open({ width: 440, height: 220, $content });
+
+
+
+                $content.find('#btn_excel_save').on('click', function () {
+                    let $form = $content.find('#excelUploadForm');
+                    Alert.confirm('',
+                        '저장하시겠습니까?',
+                        function () {
+                            _this.saveBomBulkData($form, modalContainer);
+                            //modalContainer.close();
+                        },
+                        function () { }
+                    );
+                });
+            }
+
+            // 엑셀 업로드 저장
+            saveBomBulkData($form, modalContainer) {
+                let _this = this;
+                var form = $('#excelUploadForm')[0];
+                var formData = new FormData(form);
+
+                formData['data_date'] = $('#srchStartDt').val();
+                formData.append("uploadfile", $('#upload_file')[0].files[0].name);
+
+                let result = AjaxUtil.postFileSyncData('/api/definition/bom' + '/upload_save', formData);
+
+                if (result) {
+                    let message = '저장되었습니다.';
+                    if (result.success) {
+                        Notify.success(message);
+                        _this.searchMainData();
+                        modalContainer.close();
+                    } else {
+
+                        Alert.alert('', result.message);
+
+                        /*let $divMessage = modalContainer.$content.find('#upload_message');
+                        $divMessage.text(JSON.stringify(result.error_items));
+                        $divMessage.show();*/
+                    }
+                }
+
+            }
+
 
         }
 
@@ -1807,8 +1912,19 @@
             });
 
             //page.searchBomList();
+            // 엑셀 업로드 버튼
+            $('#btnShowUpload').click(function (e) {
+                let data = {
+                    'id': '',
+                    'data_date': CommonUtil.getYYYYMMDD(),
+                };
+                page.showPopupExcelUpload(data);
+            });
+
+
 
         });
+
     </script>
 
 
