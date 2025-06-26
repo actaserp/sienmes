@@ -75,6 +75,7 @@ public class ProdPlanController {
       Suju suju = sujuRepository.getSujuById(sujuId);  // 수주 엔티티 조회
       if (suju != null) {
         suju.setConfirm("1");             // 확정 처리
+        suju.setState("planned");
         sujuRepository.save(suju);      // 저장
 
         result.success = true;
