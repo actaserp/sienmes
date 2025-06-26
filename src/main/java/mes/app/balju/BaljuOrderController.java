@@ -20,6 +20,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -93,13 +94,13 @@ public class BaljuOrderController {
       head = new BaljuHead();
       head.setCreated(new Timestamp(System.currentTimeMillis()));
       head.setCreaterId(user.getId());
-      head.setState("draft"); // 신규일 때만 상태 설정
       head.set_status("manual");
       String jumunNumber = baljuOrderService.makeJumunNumber(jumunDate);
       head.setJumunNumber(jumunNumber);
     }
 
     // 공통 필드 설정
+    head.setSujuType(sujuType);
     head.setJumunDate(jumunDate);
     head.setDeliveryDate(dueDate);
     head.setCompanyId(companyId);
@@ -187,23 +188,43 @@ public class BaljuOrderController {
 
   // 발주 삭제
   @PostMapping("/delete")
+  @Transactional
   public AjaxResult deleteSuju(
       @RequestParam("id") Integer id,
       @RequestParam("State") String State) {
 
     AjaxResult result = new AjaxResult();
 
-    if (State.equals("draft")==false) {
-      // draft 아닌것만
+    if (!"draft".equalsIgnoreCase(State)) {
       result.success = false;
       result.message = "미입고 상태일 때만 삭제할 수 있습니다.";
       return result;
     }
 
-    this.bujuRepository.deleteById(id);
+    Optional<BaljuHead> optionalHead = balJuHeadRepository.findById(id);
+    if (!optionalHead.isPresent()) {
+      result.success = false;
+      result.message = "해당 발주 정보가 존재하지 않습니다.";
+      return result;
+    }
 
+    BaljuHead head = optionalHead.get();
+
+    // 1. 기준 정보 추출
+    String jumunNumber = head.getJumunNumber();
+    Date jumunDate = head.getJumunDate();
+    String spjangcd = head.getSpjangcd();
+
+    // 2. 해당 기준으로 balju 삭제
+    bujuRepository.deleteByJumunNumberAndJumunDateAndSpjangcd(jumunNumber, jumunDate, spjangcd);
+
+    // 3. balju_head 삭제
+    balJuHeadRepository.deleteById(id);
+
+    result.success = true;
     return result;
   }
+
 
   //중지 처리
   @PostMapping("/balju_stop")

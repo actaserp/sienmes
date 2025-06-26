@@ -362,7 +362,6 @@
       </form>
     </div>
     <div class="popup-button">
-      <button type="button" class="btn-popup y_write_auth" id="btnPopBaljuStop">중지</button>
       <button type="button" class="btn-popup y_write_auth" id="btnPopBaljuSave">저장</button>
       <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
     </div>
@@ -376,7 +375,7 @@
   <th:block th:replace="/common/popup_company :: popup_company"></th:block>
   <script type="text/javascript">
     const ProductInputHandler = {
-      bind: function ({rowSelector}) {
+      bind: function ({rowSelector, $content, tryShowBaljuPrice}) {
         const $row = $(rowSelector);
 
         // 숫자 포맷 적용 대상 필드들
@@ -422,6 +421,7 @@
           $id.val(item.id);
           $code.val(item.Code);
           $group.val(item.group_name);
+          tryShowBaljuPrice($row);
 
           setTimeout(() => {
             $next.focus().select();
@@ -492,15 +492,15 @@
             {binding: 'BaljuTypeName', header: '구분', width: 70, align: 'center'},
             {binding: 'JumunDate', header: '발주일', width: 120, align: 'center'},
             {binding: 'MaterialGroupName', header: '제품그룹', width: 120},
-            {binding: 'product_code', header: '제품코드', width: 120},
-            {binding: 'product_name', header: '제품명', width: 120},
+            {binding: 'product_code', header: '제품코드', width: 100},
+            {binding: 'product_name', header: '제품명', width: 150},
             {binding: 'unit', header: '단위', width: 60, align: 'center'},
             {binding: 'SujuQty', header: '수량', width: 60, align: 'right', format: 'n0'},
             {binding: 'BaljuUnitPrice', header: '단가', width: 100, align: 'right'},
             {binding: 'BaljuPrice', header: '공급가', width: 100, align: 'right'},
             {binding: 'BaljuVat', header: '부과세', width: 100, align: 'right'},
             {binding: 'BaljuTotalPrice', header: '발주액', width: 100, align: 'right'},
-            {binding: 'StateName', header: '상태', width: 80, align: 'center'},
+            {binding: 'bh_StateName', header: '상태', width: 80, align: 'center'},
             {binding: 'SujuQty2', header: '기입고수량', width: 100, align: 'right'},
             {binding: 'SujuQty3', header: '미입고수량', width: 100, align: 'right'},
             {binding: 'ShipmentStateName', header: '납품장소', width: 100, align: 'center'},
@@ -550,7 +550,7 @@
               SujuQty3: selected.SujuQty3,
               action: 'detail'
             };
-            console.info("가지고 가는 데이터", data);
+            // console.info("가지고 가는 데이터", data);
             let fnsuccess = function (result) {
               if (!result || !result.data) {
                 Alert.alert('오류', '상세 데이터를 불러올 수 없습니다.');
@@ -560,7 +560,7 @@
               result.data['mode'] = 'edit';
               result.data['SujuQty3'] = selected.SujuQty3;
               _this.showBaljuForm(result.data);
-              console.log("팝업 응답 JSON:", JSON.stringify(result.data, null, 2));
+              // console.log("팝업 응답 JSON:", JSON.stringify(result.data, null, 2));
             };
             AjaxUtil.getAsyncData(_this.url + '/detail', data, fnsuccess);
           } else if (items.length > 1) {
@@ -575,15 +575,19 @@
         $('#btnDelete').click(function (e) {
           let items = _this.grid.selectedItems;
           if (items.length > 0) {
+            let id = items[0].bh_id;
+            let state = (items[0].BalJuHeadType || '').toLowerCase();  // 상태 값 확인
+
+            if (state !== 'draft') {
+              Alert.alert('', '미입고 상태일 때만 삭제할 수 있습니다.');
+              return;
+            }
+
             Alert.confirm('', '삭제하시겠습니까?',
               function () {
-                let id = items[0].id;
-                let state = items[0].State;
-
                 _this.deleteSujuData(id, state);
               },
-              function () {
-              }
+              function () {}
             );
           } else {
             Alert.alert('', '삭제할 항목을 선택해주세요.', function () {
@@ -591,6 +595,7 @@
             });
           }
         });
+
 
         // 엔터키 검색
         $('#keyword').on('keypress', function (e) {
@@ -747,33 +752,24 @@
             }
           });
         }
-
         // 저장버튼
         let $btnPopBaljuSave = $('#btnPopBaljuSave');
-        // 중지 버튼
-        let $btnPopBaljuStop = $content.find('#btnPopBaljuStop');
+
         // 상태 값 정리
-        const isCanceled = (data.State || '').toLowerCase() === 'canceled';
         const isDraft = (data.State || '').toLowerCase() === 'draft';
         const isFullyReceived = Number(data.SujuQty3 || 0) === 0;
+
         // 등록 모드일 경우 → 버튼 숨김
         if (data.mode === 'new') {
           $btnProductSearch.removeAttr('disabled');
-          $btnPopBaljuStop.hide();
         } else {
-          // 버튼 표시 여부
-          if (isCanceled || !isFullyReceived || isDraft) {
-            $btnPopBaljuStop.show();
-            $btnPopBaljuStop.text(isCanceled ? '중지취소' : '중지');
-          } else {
-            $btnPopBaljuStop.hide();
-          }
           // 상태가 draft가 아니면 저장 버튼 숨기고 단가 읽기 전용
           if (!isDraft) {
             $btnPopBaljuSave.hide();
             $BaljuUnitPrice.prop('readonly', true);
           }
         }
+
 
         //팝업타이틀 설정
         let $popTitle = $content.find('#popTitle');
@@ -794,26 +790,6 @@
           $SujuQty.val(data.SujuQty.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
         }
 
-        // 팝업 중지버튼 클릭
-        $btnPopBaljuStop.click(function (e) {
-          // 현재 버튼 텍스트로 상태 판단 (중지 / 중지취소)
-          const isCanceled = $btnPopBaljuStop.text() === '중지취소';
-          const confirmMsg = isCanceled ? '중지취소 하시겠습니까?' : '중지 하시겠습니까?';
-          const notifyMsg = isCanceled ? '발주가 중지취소 되었습니다.' : '발주가 중지 되었습니다.';
-
-          Alert.confirm('', confirmMsg, function () {
-            let url = _this.url + '/balju_stop';
-
-            console.log("📤 전송될 발주정지 데이터:", data);
-
-            let fnSaveSuccess = function (result) {
-              Notify.success(notifyMsg);
-              _this.searchMainData();
-              modalContainer.close();
-            };
-            AjaxUtil.postAsyncData(url, data, fnSaveSuccess);
-          });
-        });
 
         // 발주등록 팝업 저장버튼 클릭
         $btnPopBaljuSave.click(function (e) {
@@ -953,6 +929,7 @@
         if (data.mode === 'edit' && Array.isArray(data.items)) {
           const $tbody = $content.find('.item-table tbody');
           const $template = $tbody.find('.item-template-row');
+          const isDraft = data.State === 'draft';
 
           for (let i = 0; i < data.items.length; i++) {
             const item = data.items[i];
@@ -965,8 +942,6 @@
                 $(this).attr('name', `${baseName}_${itemIndex}`);
               }
             });
-            // 상태 값 가져오기
-            const state = item.State;
 
             // 데이터 바인딩
             $newRow.find('input[name^="txtProductName_"]').val(item.product_name);
@@ -982,23 +957,38 @@
             $newRow.find('input[name^="balju_StateName_"]').val(item.balju_StateName);
             $newRow.find('input[name^="VatIncluded"]').prop('checked', item.vatIncluded === 'Y');
 
-            //상태가 draft가 아니면 input들 비활성화
-            if (state !== 'draft') {
+            if (!isDraft) {
               $newRow.find('input').prop('readonly', true);
               $newRow.find('input[type="checkbox"]').prop('disabled', true);
-              $newRow.find('a.btn').hide(); // 검색, 삭제 버튼 숨김
+              $newRow.find('a.btn').hide();
             }
 
-            ProductInputHandler.bind({ rowSelector: $newRow }); // 이벤트 및 계산식 적용
-
+            ProductInputHandler.bind({ rowSelector: $newRow, $content: $content, tryShowBaljuPrice });
             $tbody.append($newRow);
             itemIndex++;
           }
 
-          updateBaljuTotalPrice($content); // 총합 업데이트
+          // ✅ 부족한 행 추가: 3줄은 기본 보장
+          const minRows = 3;
+          const existingRows = data.items.length;
+          const additionalRows = Math.max(0, minRows - existingRows);
+
+          for (let j = 0; j < additionalRows; j++) {
+            const $emptyRow = $template.clone().removeClass('item-template-row').show();
+
+            $emptyRow.find('input').each(function () {
+              const baseName = $(this).attr('name');
+              if (baseName) {
+                $(this).attr('name', `${baseName}_${itemIndex}`);
+              }
+            });
+
+            ProductInputHandler.bind({ rowSelector: $emptyRow, $content, tryShowBaljuPrice });
+            $tbody.append($emptyRow);
+            itemIndex++;
+          }
+          updateBaljuTotalPrice($content);
         }
-
-
 
         // 행 추가
         $content.find('#addRemark').click(function () {
@@ -1016,7 +1006,7 @@
             });
 
             $tbody.append($newRow);
-            ProductInputHandler.bind({rowSelector: $newRow});
+            ProductInputHandler.bind({ rowSelector: $newRow, $content: $content, tryShowBaljuPrice });
 
             itemIndex++;
           }
@@ -1091,15 +1081,14 @@
             $targetRow.remove();
           }
 
-          updateBaljuTotalPrice($content); // ✅ 총합 갱신 함수 호출
+          updateBaljuTotalPrice($content); //총합 갱신 함수 호출
         });
 
-
-        // 초기 행 3개 추가
-        setTimeout(() => {
-          $content.find('#addRemark').trigger('click');
-        }, 10);
-
+        if (data.mode === 'new') {
+          setTimeout(() => {
+            $content.find('#addRemark').trigger('click');
+          }, 10);
+        }
       }
 
 

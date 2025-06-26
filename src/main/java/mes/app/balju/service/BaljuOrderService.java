@@ -32,45 +32,72 @@ public class BaljuOrderService {
     dicParam.addValue("spjangcd", spjangcd);
 
     String sql = """
-              WITH base_data AS (
-                SELECT
-                  bh.id AS bh_id,
-                  bh."Company_id",
-                  b."CompanyName",
-                  b."BaljuHead_id",
-                  bh."JumunDate",
-                  bh."JumunNumber",
-                  mg."Name" AS "MaterialGroupName",
-                  fn_code_name('Balju_type', b."SujuType") AS "BaljuTypeName",
-                  b.id AS balju_id,
-                  m."Code" AS product_code,
-                  m."Name" AS product_name,
-                  u."Name" AS unit,
-                  b."SujuQty",
-                  b."UnitPrice",
-                  b."Price",
-                  b."Vat",
-                  (b."Price" + COALESCE(b."Vat", 0)) AS "BaljuTotalPrice",
-                  fn_code_name('balju_state', bh."State") AS "StateName",
-                  mi."SujuQty2" AS "SujuQty2",
-                  GREATEST((b."SujuQty" - mi."SujuQty2"), 0) AS "SujuQty3",
-                  sh."Name" AS "ShipmentStateName",
-                  bh."DeliveryDate",
-                  b."Description",
-                  ROW_NUMBER() OVER (PARTITION BY bh."JumunNumber" ORDER BY b.id ASC) AS rn
-                FROM balju_head bh
-                LEFT JOIN balju b ON b."BaljuHead_id" = bh.id AND b.spjangcd = bh.spjangcd AND b."JumunNumber" = bh."JumunNumber"
-                INNER JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
-                INNER JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
-                LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
-                LEFT JOIN store_house sh ON sh.id::varchar = b."ShipmentState" AND sh.spjangcd = b.spjangcd
-                LEFT JOIN (
-                  SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
-                  FROM mat_inout
-                  WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
-                  GROUP BY "SourceDataPk"
-                ) mi ON mi."SourceDataPk" = b.id
-          WHERE bh.spjangcd = :spjangcd
+WITH base_data AS (
+    SELECT
+      bh.id AS bh_id,
+      bh."Company_id",
+      b."CompanyName",
+      b."BaljuHead_id",
+      bh."JumunDate",
+      bh."JumunNumber",
+      mg."Name" AS "MaterialGroupName",
+      fn_code_name('Balju_type', bh."SujuType") AS "BaljuTypeName",
+      b.id AS balju_id,
+      m."Code" AS product_code,
+      m."Name" AS product_name,
+      u."Name" AS unit,
+      b."SujuQty",
+      b."UnitPrice",
+      b."Price",
+      b."Vat",
+      (b."Price" + COALESCE(b."Vat", 0)) AS "BaljuTotalPrice",
+      fn_code_name('balju_state', bh."State") AS "StateName",
+      mi."SujuQty2" AS "SujuQty2",
+      GREATEST((b."SujuQty" - mi."SujuQty2"), 0) AS "SujuQty3",
+      sh."Name" AS "ShipmentStateName",
+      bh."DeliveryDate",
+      b."Description",
+      --  동적 계산된 헤더 상태
+      (
+        SELECT
+          CASE
+            WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
+            WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
+            WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
+            ELSE 'partial'
+          END
+        FROM balju b2
+        WHERE b2."BaljuHead_id" = bh.id
+      ) AS "BalJuHeadType",
+      --  상태명
+      fn_code_name(
+        'balju_state',
+        (
+          SELECT
+            CASE
+              WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
+              WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
+              WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
+              ELSE 'partial'
+            END
+          FROM balju b2
+          WHERE b2."BaljuHead_id" = bh.id
+        )
+      ) AS "bh_StateName",
+      ROW_NUMBER() OVER (PARTITION BY bh."JumunNumber" ORDER BY b.id ASC) AS rn
+    FROM balju_head bh
+    LEFT JOIN balju b ON b."BaljuHead_id" = bh.id AND b.spjangcd = bh.spjangcd AND b."JumunNumber" = bh."JumunNumber"
+    INNER JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
+    INNER JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
+    LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
+    LEFT JOIN store_house sh ON sh.id::varchar = b."ShipmentState" AND sh.spjangcd = b.spjangcd
+    LEFT JOIN (
+      SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+      FROM mat_inout
+      WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+      GROUP BY "SourceDataPk"
+    ) mi ON mi."SourceDataPk" = b.id
+    WHERE bh.spjangcd = :spjangcd
         """;
 
     if (date_kind.equals("sales")) {
@@ -80,33 +107,35 @@ public class BaljuOrderService {
     }
 
     sql += """
-          )
-            SELECT
-              bh_id,
-              "JumunNumber",
-              MAX("Company_id") AS "Company_id",
-              MAX("CompanyName") AS "CompanyName",
-              MAX("BaljuHead_id") AS "BaljuHead_id",
-              MAX("JumunDate") AS "JumunDate",
-              MAX("MaterialGroupName") AS "MaterialGroupName",
-              MAX("BaljuTypeName") AS "BaljuTypeName",
-              MAX(CASE WHEN rn = 1 THEN product_code END) AS product_code,
-              MAX(CASE WHEN rn = 1 THEN product_name END) AS product_name,
-              MAX(CASE WHEN rn = 1 THEN unit END) AS unit,
-              SUM("SujuQty") AS "SujuQty",
-              sum("UnitPrice") as "BaljuUnitPrice",
-              SUM("Price") AS "BaljuPrice",
-              SUM("Vat") AS "BaljuVat",
-              SUM("Price") + SUM("Vat") AS "BaljuTotalPrice",
-              MAX("StateName") AS "StateName",
-              SUM("SujuQty2") AS "SujuQty2",
-              SUM("SujuQty3") AS "SujuQty3",
-              MAX("ShipmentStateName") AS "ShipmentStateName",
-              MAX("DeliveryDate") AS "DueDate",
-              MAX("Description") AS "Description"
-            FROM base_data
-            GROUP BY "JumunNumber", bh_id
-            ORDER BY MAX("DeliveryDate") DESC, bh_id
+        )
+        SELECT
+          bh_id,
+          "JumunNumber",
+          MAX("Company_id") AS "Company_id",
+          MAX("CompanyName") AS "CompanyName",
+          MAX("BaljuHead_id") AS "BaljuHead_id",
+          MAX("JumunDate") AS "JumunDate",
+          MAX("MaterialGroupName") AS "MaterialGroupName",
+          MAX("BaljuTypeName") AS "BaljuTypeName",
+          MAX(CASE WHEN rn = 1 THEN product_code END) AS product_code,
+          MAX(CASE WHEN rn = 1 THEN product_name END) AS product_name,
+          MAX(CASE WHEN rn = 1 THEN unit END) AS unit,
+          SUM("SujuQty") AS "SujuQty",
+          SUM("UnitPrice") AS "BaljuUnitPrice",
+          SUM("Price") AS "BaljuPrice",
+          SUM("Vat") AS "BaljuVat",
+          SUM("Price") + SUM("Vat") AS "BaljuTotalPrice",
+          MAX("StateName") AS "StateName",
+          MAX("BalJuHeadType") AS "BalJuHeadType",
+          MAX("bh_StateName") AS "bh_StateName",
+          SUM("SujuQty2") AS "SujuQty2",
+          SUM("SujuQty3") AS "SujuQty3",
+          MAX("ShipmentStateName") AS "ShipmentStateName",
+          MAX("DeliveryDate") AS "DueDate",
+          MAX("Description") AS "Description"
+        FROM base_data
+        GROUP BY "JumunNumber", bh_id
+        ORDER BY MAX("DeliveryDate") DESC, bh_id
         """;
 
 //    log.info("발주 read SQL: {}", sql);
@@ -119,16 +148,16 @@ public class BaljuOrderService {
     paramMap.addValue("id", id);
 
     String sql = """
-         SELECT
+        SELECT
             bh.id AS bh_id,
             bh."Company_id",
             c."Name" AS "CompanyName",
             bh."JumunDate",
-            bh."DeliveryDate" as "DueDate" ,
+            bh."DeliveryDate",
             bh.special_note,
             bh."JumunNumber",
             b.id AS balju_id,
-            b."Material_id" AS "Material_id",
+            b."Material_id",
             COALESCE(m."Code", '') AS product_code,
             COALESCE(m."Name", '') AS product_name,
             COALESCE(mg."Name", '') AS "MaterialGroupName",
@@ -148,9 +177,35 @@ public class BaljuOrderService {
             b."AvailableStock",
             b."ReservationStock",
             mi."SujuQty2",
-            bh."State" as "BalJuHeadType",
-            fn_code_name('balju_state', bh."State") AS "bh_StateName",
-            b."State" as "BalJuType",
+            --  동적 계산된 Head 상태
+            (
+              SELECT
+                CASE
+                  WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
+                  WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
+                  WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
+                  ELSE 'partial'
+                END
+              FROM balju b2
+              WHERE b2."BaljuHead_id" = bh.id
+            ) AS "BalJuHeadType",
+            --  Head 상태명
+            fn_code_name(
+              'balju_state',
+              (
+                SELECT
+                  CASE
+                    WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
+                    WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
+                    WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
+                    ELSE 'partial'
+                  END
+                FROM balju b2
+                WHERE b2."BaljuHead_id" = bh.id
+              )
+            ) AS "bh_StateName",
+            --  개별 balju 상태
+            b."State" AS "BalJuType",
             fn_code_name('balju_state', b."State") AS "balju_StateName",
             TO_CHAR(b."_created", 'yyyy-mm-dd') AS create_date
         FROM balju_head bh
@@ -258,7 +313,7 @@ public class BaljuOrderService {
 
     // 4. 주문번호 조립
     String jumunNumber = baseDate + "-" + String.format("%04d", currVal);
-    log.info("✅ 최종 생성된 주문번호: {}", jumunNumber);
+    //log.info(" 최종 생성된 주문번호: {}", jumunNumber);
     return jumunNumber;
   }
 

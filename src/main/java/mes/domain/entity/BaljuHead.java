@@ -66,4 +66,6 @@ public class BaljuHead {
   @Column(name = "special_note")
   private String specialNote;
 
+  @Column(name ="\"SujuType\"")
+  String sujuType;
 }
