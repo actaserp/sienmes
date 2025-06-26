@@ -77,12 +77,12 @@ public class DefectTypeController {
 		boolean check_name = this.DefectTypeRepository.findByName(defectTypeName).isEmpty();
 		boolean check_code = this.DefectTypeRepository.findByCode(defectTypeCode).isEmpty();
 		
-		if (!check_name) {
+		if (!check_name && id == null) {
 			result.success = false;
 			result.message="중복된 부적합유형명이 존재합니다.";
 			return result;
 		}
-		if (!check_code) {
+		if (!check_code && id == null) {
 			result.success = false;
 			result.message="중복된 코드가 존재합니다.";
 			return result;
