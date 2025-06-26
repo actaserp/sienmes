@@ -63,7 +63,7 @@ public class AttendanceCurrentController {
             if("1".equals(yearflag)) {
                 vacDetail.put("yearflag","O");
             }else{
-                vacDetail.put("yearflag","");
+                vacDetail.put("yearflag","-");
             }
         }
         Map<String, Object> resultMap = new HashMap<String, Object>();
