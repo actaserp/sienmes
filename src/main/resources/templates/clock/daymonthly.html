@@ -105,6 +105,12 @@
                                         마감취소
                                     </a>
                                 </li>
+                                <li>
+                                    <button type="button" class="btn-delete btn-danger" id="btnDataDelete"
+                                            style="width: 115px; height: 36px;">
+                                        <i class="fas fa-trash"></i>삭제
+                                    </button>
+                                </li>
                             </ul>
                         </div>
                     </div> <!--//section-top end -->
@@ -654,7 +660,7 @@
 
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Alert.alert('','저장되었습니다'); // Notification
+                        Alert.alert('','삭제되었습니다'); // Notification
                         _this.searchMainData();
                     }  else if (!res.success) {
                         Alert.alert('', res.message);
@@ -890,6 +896,39 @@
                 AjaxUtil.postJsonData(url, data, fnSuccess);
             }
 
+            deletedata() {
+                let _this = this;
+                let url = '/api/clock/DayMonthly/deletedata';
+
+
+                // 선택된 행들 가져오기
+                let selectedItems = _this.grid.rows
+                    .filter(row => row.isSelected)  // Selector에서 체크된 행
+                    .map(row => row.dataItem);
+
+                // 유효성 체크
+                if (selectedItems.length === 0) {
+                    Alert.alert('', '선택된 행이 없습니다.');
+                    return;
+                }
+                // 서버로 전송할 데이터
+                let data = {
+                    list: selectedItems,
+                    spjangcd: sessionStorage.getItem('spjangcd')
+                };
+
+
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Alert.alert('','삭제되었습니다'); // Notification
+                        _this.searchMainData();
+                    }  else if (!res.success) {
+                        Alert.alert('', res.message);
+                    }
+                };
+                AjaxUtil.postJsonData(url, data, fnSuccess);
+            }
+
 
         }
 
@@ -972,6 +1011,14 @@
                     '',
                     "마감취소하시겠습니까?",
                     function () { page.Monthlycancel() },
+                    function () { }
+                );
+            });
+
+            $('#btnDataDelete').click(function (e) {
+                Alert.confirm('',
+                    "삭제하시겠습니까?",
+                    function () { page.deletedata() },
                     function () { }
                 );
             });

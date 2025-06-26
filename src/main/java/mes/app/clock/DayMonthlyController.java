@@ -752,6 +752,74 @@ public class DayMonthlyController {
     }
 
 
+    @PostMapping("/deletedata")
+    @Transactional
+    public AjaxResult deleteDataList(
+            @RequestBody Map<String, Object> requestData,
+            HttpServletRequest request,
+            Authentication auth) {
+
+        AjaxResult result = new AjaxResult();
+        User user = (User)auth.getPrincipal();
+
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) requestData.get("list");
+        String spjangcd = (String) requestData.get("spjangcd");
+
+        if (dataList == null || dataList.isEmpty()) {
+            result.success=false;
+            result.message="삭제할 데이터가 없습니다.";
+            return result;
+        }
+        int deleteCount = 0;
+
+        List<TB_PB201> tbpb201List = new ArrayList<>();
+
+        for (Map<String, Object> item : dataList) {
+            Object fixflagObj = item.get("fixflag");
+            String fixflag = fixflagObj != null ? String.valueOf(fixflagObj) : null;
+
+            // fixflag가 "0" 또는 null일 때만 삭제
+            if (fixflag == null || "0".equals(fixflag) || "null".equalsIgnoreCase(fixflag)) {
+                String workymd = (String) item.get("workymd");
+                Object idObj = item.get("id");
+                if (workymd == null || workymd.length() < 10 || idObj == null) {
+                    // 필수값 누락된 경우, 다음 item으로 skip
+                    continue;
+                }
+                String workym = workymd.substring(0, 4) + workymd.substring(5, 7);
+                String workday = workymd.substring(8, 10);
+
+                Integer id;
+                try {
+                    id = ((Number) idObj).intValue();
+                } catch (Exception e) {
+                    continue; // 숫자 변환 실패시 skip
+                }
+
+                TB_PB201_PK pk = new TB_PB201_PK();
+                pk.setSpjangcd(spjangcd);
+                pk.setWorkym(workym);
+                pk.setWorkday(workday);
+                pk.setPersonid(id);
+
+                if(tbPb201Repository.existsById(pk)) {
+                    tbPb201Repository.deleteById(pk);
+                    deleteCount++;
+                }
+            }
+        }
+
+
+        if (deleteCount > 0) {
+            result.success = true;
+            result.message = deleteCount + "건이 삭제되었습니다.";
+        } else {
+            result.success = false;
+            result.message = "삭제할 데이터가 없습니다. \n(마감된 데이터는 삭제되지 않습니다)";
+        }
+
+        return result;
+    }
 
 
 
