@@ -267,7 +267,7 @@ public class DayMonthlyController {
             String workym = (String) item.get("workym");
             String workday = (String) item.get("workday");
             Integer personid = ((Number) item.get("id")).intValue();
-            String workcd = (String) item.get("worknm");
+            String workcd = (String) item.get("workcd");
 
             String starttimeStr = (String) item.get("starttime"); // "09:30"
             String endtimeStr = (String) item.get("endtime");

@@ -250,6 +250,20 @@
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+                        // 근무시간 소수점1자리까지만
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            // daynum/ restnum 컬럼에만 적용
+                            const col = sender.columns[e.col];
+                            if (col.binding === 'nomaltime'
+                                || col.binding === 'worktime'
+                                || col.binding === 'overtime'
+                                || col.binding === 'nighttime' ) {
+                                const value = sender.getCellData(e.row, e.col, false);
+                                if (typeof value === 'number') {
+                                    e.cell.innerHTML = (value % 1 === 0) ? value.toString() : value.toFixed(1);
+                                }
+                            }
+                        }
                     },
                     columns: [
                         {binding: 'fixflag',header: '마감', width: 70, align: 'center',visible: false},
@@ -277,7 +291,7 @@
                         {binding: 'yuntime', header: '휴가', width: 50, align: 'center'},
                         {binding: 'abtime', header: '결근', width: 50, align: 'center'},
                         {binding: 'holitime', header: '특근', width: 50, align: 'center'},
-                        {binding: 'address', header: '외부출근지역', width: 250, align: 'left'},
+                        {binding: 'address', header: '비고', width: 250, align: 'left'},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
@@ -660,7 +674,7 @@
 
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Alert.alert('','삭제되었습니다'); // Notification
+                        Alert.alert('','마감처리가 완료되었습니다'); // Notification
                         _this.searchMainData();
                     }  else if (!res.success) {
                         Alert.alert('', res.message);
