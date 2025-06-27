@@ -2,7 +2,10 @@ package mes.domain.repository;
 
 //import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import mes.domain.entity.Suju;
@@ -19,4 +22,8 @@ public interface SujuRepository extends JpaRepository<Suju, Integer>{
 
 	@Transactional(readOnly = true)
     List<Suju> findByIdIn(List<Integer> ids);
+
+	@Modifying
+	@Query("DELETE FROM Suju s WHERE s.sujuHeadId = :sujuHeadId")
+	void deleteBySujuHeadId(@Param("sujuHeadId") Integer sujuHeadId);
 }

@@ -36,71 +36,105 @@ public class SujuService {
 		dicParam.addValue("spjangcd", spjangcd);
 		
 		String sql = """
-			select s.id
-            , s."JumunNumber"
-            , s."Material_id" as "Material_id"
-            , mg."Name" as "MaterialGroupName"
-            , mg.id as "MaterialGroup_id"
-            , fn_code_name('mat_type', mg."MaterialType") as "MaterialTypeName"
-            , m.id as "Material_id"
-            , m."Code" as product_code
-            , m."Name" as product_name
-            , u."Name" as unit
-            , s."SujuQty" as "SujuQty"
-            , to_char(s."JumunDate", 'yyyy-mm-dd') as "JumunDate"
-            , to_char(s."DueDate", 'yyyy-mm-dd') as "DueDate"
-            , s."CompanyName"
-            , s."Company_id"
-            , s."SujuType"
-            , s."Price"
-            , s."UnitPrice" as "unitPrice"
-            , s."Vat"
-            , s."TotalAmount" as "totalAmount"
-            , fn_code_name('suju_type', s."SujuType") as "SujuTypeName"
-            , to_char(s."ProductionPlanDate", 'yyyy-mm-dd') as production_plan_date
-            , to_char(s."ShipmentPlanDate", 'yyyy-mm-dd') as shiment_plan_date
-            , s."Description"
-            , s."AvailableStock" as "AvailableStock"
-            , s."ReservationStock" as "ReservationStock"
-            , case
-				 when sh.shippedQty = 0 then ''
-				 else sh.shippedQty::text
-			 end as "ShippedQty"
-            , fn_code_name('suju_state', s."State") as "StateName"
-            , case
-            	WHEN sh.shippedQty = 0 THEN '출하지시'
-				when sh.shippedQty is not null and sh.shippedQty >= s."SujuQty" then '출하'
-				when sh.shippedQty is not null and sh.shippedQty < s."SujuQty" then '부분출하'
-			end as "ShipmentStateName"
-            , s."State"
-            , to_char(s."_created", 'yyyy-mm-dd') as create_date
-            , case s."PlanTableName" when 'prod_week_term' then '주간계획' when 'bundle_head' then '임의계획' else s."PlanTableName" end as plan_state
-            from suju s
-            inner join material m on m.id = s."Material_id"
-            inner join mat_grp mg on mg.id = m."MaterialGroup_id"
-            left join unit u on m."Unit_id" = u.id
-            left join company c on c.id= s."Company_id"
-            LEFT JOIN (
-				 SELECT "SourceDataPk", SUM("Qty") as shippedQty
-				 FROM shipment
-				 GROUP BY "SourceDataPk"
-			 ) sh ON sh."SourceDataPk" = s.id
+			WITH suju_state_summary AS (
+			  SELECT
+				sh.id AS suju_head_id,
+				-- 상태 요약 계산
+				CASE
+				  WHEN COUNT(DISTINCT s."State") = 1 THEN MIN(s."State")
+				  WHEN BOOL_AND(s."State" IN ('received', 'planned')) AND BOOL_OR(s."State" = 'planned') THEN 'part_planned'
+				  WHEN BOOL_AND(s."State" IN ('received', 'ordered', 'planned')) AND BOOL_OR(s."State" = 'ordered') THEN 'part_ordered'
+				  ELSE '기타'
+				END AS summary_state
+			   
+			  FROM suju_head sh
+			  JOIN suju s ON s."SujuHead_id" = sh.id
+			   
+			  GROUP BY sh.id
+			)
+			   
+			SELECT
+			  sh.id,
+			  sh."JumunNumber",
+			  to_char(sh."JumunDate", 'yyyy-mm-dd') AS "JumunDate",
+			  to_char(sh."DeliveryDate", 'yyyy-mm-dd') AS "DueDate",
+			  sh."Company_id",
+			  c."Name" AS "CompanyName",
+			  sh."TotalPrice",
+			  sh."Description",
+			  sc_state."Value" AS "StateName",
+			  sc_type."Value" AS "SujuTypeName",
+			   
+			  -- 대표 제품명 + 외 N개
+			  CASE
+				WHEN COUNT(DISTINCT s."Material_id") = 1 THEN MAX(m."Name")
+				ELSE CONCAT(MAX(m."Name"), ' 외 ', COUNT(DISTINCT s."Material_id") - 1, '개')
+			  END AS product_name,
+			   
+			  sss.summary_state AS "State",
+			   
+			  -- 출하 상태
+			  CASE
+				WHEN COALESCE(SUM(COALESCE(shp."shippedQty", 0)), 0) = 0 THEN ''
+				WHEN COALESCE(SUM(COALESCE(shp."shippedQty", 0)), 0) >= SUM(s."SujuQty") THEN '출하'
+				ELSE '부분출하'
+			  END AS "ShipmentStateName"
+			   
+			FROM suju_head sh
+			JOIN suju s ON s."SujuHead_id" = sh.id
+			JOIN material m ON m.id = s."Material_id"
+			LEFT JOIN (
+			  SELECT "SourceDataPk", SUM("Qty") AS "shippedQty"
+			  FROM shipment
+			  GROUP BY "SourceDataPk"
+			) shp ON shp."SourceDataPk" = s.id
+			LEFT JOIN company c ON c.id = sh."Company_id"
+			LEFT JOIN suju_state_summary sss ON sss.suju_head_id = sh.id
+			LEFT JOIN sys_code sc_state ON sc_state."Code" = sss.summary_state AND sc_state."CodeType" = 'suju_state'
+			LEFT JOIN sys_code sc_type ON sc_type."Code" = sh."SujuType" AND sc_type."CodeType" = 'suju_type'
             where 1 = 1
-            and s.spjangcd = :spjangcd
+            and sh.spjangcd = :spjangcd
 			""";
-		
+
 		if (date_kind.equals("sales")) {
 			sql += """
-				and s."JumunDate" between :start and :end 
-		        order by s."JumunDate" desc,  m."Name"
-				""";
+        		and sh."JumunDate" between :start and :end
+				group by
+					 sh.id,
+					 sh."JumunNumber",
+					 sh."JumunDate",
+					 sh."DeliveryDate",
+					 sh."Company_id",
+					 c."Name",
+					 sh."TotalPrice",
+					 sh."Description",
+					 sh."SujuType",
+					 sss.summary_state,
+					 sc_state."Value",
+					 sc_type."Value"
+				order by sh."JumunDate" desc,  max(m."Name")
+			""";
 		} else {
-			sql +="""
-				and s."DueDate" between :start and :end
-		        order by s."DueDate" desc,  m."Name"
-				""";
+			sql += """
+				and sh."DeliveryDate" between :start and :end
+				group by
+					 sh.id,
+					 sh."JumunNumber",
+					 sh."JumunDate",
+					 sh."DeliveryDate",
+					 sh."Company_id",
+					 c."Name",
+					 sh."TotalPrice",
+					 sh."Description",
+					 sh."SujuType",
+					 sss.summary_state,
+					 sc_state."Value",
+					 sc_type."Value"
+				order by sh."DeliveryDate" desc,  max(m."Name")
+			""";
 		}
-		
+
+
 		List<Map<String, Object>> itmes = this.sqlRunner.getRows(sql, dicParam);
 		
 		return itmes;
@@ -111,62 +145,67 @@ public class SujuService {
 		
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("id", id);
+
+		String sql = """ 
+			SELECT
+				sh.id,
+				sh."JumunNumber",
+				to_char(sh."JumunDate", 'yyyy-mm-dd') AS "JumunDate",
+				to_char(sh."DeliveryDate", 'yyyy-mm-dd') AS "DueDate",
+				sh."Company_id",
+				c."Name" AS "CompanyName",
+				sh."TotalPrice",
+				sh."Description",
+				sh."SujuType",
+				fn_code_name('suju_type', sh."SujuType") AS "SujuTypeName"
+			FROM suju_head sh
+			LEFT JOIN company c ON c.id = sh."Company_id"
+			WHERE sh.id = :id
+		""";
+
+		String detailSql = """ 
+			SELECT
+			   s.id as "suju_id",
+			   s."SujuHead_id",
+			   s."Material_id",
+			   m."Code" AS product_code,
+			   m."Name" AS "txtProductName",
+			   mg."Name" AS "MaterialGroupName",
+			   mg.id AS "MaterialGroup_id",
+			   u."Name" AS unit,
+			   s."SujuQty" as quantity,
+			   to_char(s."JumunDate", 'yyyy-mm-dd') AS "JumunDate",
+			   to_char(s."DueDate", 'yyyy-mm-dd') AS "DueDate",
+			   s."CompanyName",
+			   s."Company_id",
+			   s."SujuType",
+			   s."UnitPrice" AS "unitPrice",
+			   s."Vat" AS "VatAmount",
+			   s."Price" AS "supplyAmount",
+			   s."TotalAmount" AS "totalAmount",
+			   s."State",
+			   s."InVatYN" AS "invatyn",
+			   s."SujuQty2",
+			   s."AvailableStock",
+			   s."ReservationStock",
+			   to_char(s."_created", 'yyyy-mm-dd') AS create_date,
+				s.project_id AS "projectHidden",
+				p.projnm AS "project",
+				s."Description" as "description"
+		   FROM suju s
+		   INNER JOIN material m ON m.id = s."Material_id"
+		   INNER JOIN mat_grp mg ON mg.id = m."MaterialGroup_id"
+		   LEFT JOIN unit u ON m."Unit_id" = u.id
+		   LEFT JOIN TB_DA003 p ON p."projno" = s.project_id
+		   WHERE s."SujuHead_id" = :id
+		""";
+
+		Map<String, Object> sujuHead = this.sqlRunner.getRow(sql, paramMap);
+		List<Map<String, Object>> sujuList = this.sqlRunner.getRows(detailSql, paramMap);
+
+		sujuHead.put("sujuList", sujuList);
 		
-		String sql = """
-			select s.id
-            , s."JumunNumber"
-            , s."Material_id" as "Material_id"
-            , mg."Name" as "MaterialGroupName"
-            , mg.id as "MaterialGroup_id"
-            , fn_code_name('mat_type', mg."MaterialType") as "MaterialTypeName"
-            , m.id as "Material_id"
-            , m."Code" as product_code
-            , m."Name" as product_name
-            , u."Name" as unit
-            , s."SujuQty" as "SujuQty"
-            , to_char(s."JumunDate", 'yyyy-mm-dd') as "JumunDate"
-            , to_char(s."DueDate", 'yyyy-mm-dd') as "DueDate"
-            , s."CompanyName"
-            , s."Company_id"
-            , s."SujuType"
-            , s."UnitPrice" as "unitPrice"
-            , s."Vat" as "vat"
-            , s."Price" as "price"
-            , s."TotalAmount" as "totalAmount"
-            , fn_code_name('suju_type', s."SujuType") as "SujuTypeName"
-            , to_char(s."ProductionPlanDate", 'yyyy-mm-dd') as production_plan_date
-            , to_char(s."ShipmentPlanDate", 'yyyy-mm-dd') as shiment_plan_date
-            , s."Description"
-            , s."AvailableStock" as "AvailableStock"
-            , s."ReservationStock" as "ReservationStock"
-            , s."SujuQty2" as "SujuQty2"
-            , s."State"
-            , s."InVatYN" as "invatyn"
-            , fn_code_name('suju_state', s."State") as "StateName"
-            , to_char(s."_created", 'yyyy-mm-dd') as create_date
-            , s.project_id AS "projectHidden"
-			, sc4.projnm AS "project"
-            , case
-				when sh.shippedQty is not null and sh.shippedQty = s."SujuQty" then '출하'
-				when sh.shippedQty is not null and sh.shippedQty < s."SujuQty" then '부분출하'
-				end as "ShipmentStateName"
-            from suju s
-            inner join material m on m.id = s."Material_id"
-            inner join mat_grp mg on mg.id = m."MaterialGroup_id"
-            left join unit u on m."Unit_id" = u.id
-            left join company c on c.id= s."Company_id"
-            LEFT JOIN TB_DA003 sc4 ON sc4."projno" = s.project_id
-            LEFT JOIN (
-				 SELECT "SourceDataPk", SUM("Qty") as shippedQty
-				 FROM shipment
-				 GROUP BY "SourceDataPk"
-			 ) sh ON sh."SourceDataPk" = s.id
-            where s.id = :id
-			""";
-		
-		Map<String,Object> item = this.sqlRunner.getRow(sql, paramMap);
-		
-		return item;
+		return sujuHead;
 	}
 	
 	// 제품 정보 조회

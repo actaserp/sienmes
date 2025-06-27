@@ -646,6 +646,106 @@ let FormUtil = {
             }
         });
     },
+    BindDataSujuForm : function (_resultSet, $form) {
+        page.resetSujuListIndex();
+        $.each(_resultSet, function (key, value) {
+            if (key === '') value = null;
+            if (value === '') value = null;
+
+            var $frmCtl = $form.find('[name=' + key + ']');
+            if ($frmCtl.length == 0) return true;
+
+            let object = $frmCtl[0];
+            var tagName = object === undefined ? '' : object.tagName.toUpperCase();
+            var tagClassName = object === undefined ? '' : object.className.toUpperCase();
+            let type_name = object.type;
+
+            if (tagName == 'SELECT') {
+                if ($frmCtl.is(':disabled')) { $frmCtl.removeAttr('disabled'); }
+                $frmCtl.val(value);
+            } else if (tagName == 'INPUT' || tagName == 'TEXTAREA') {
+                if ($frmCtl.is(':disabled')) { $frmCtl.removeAttr('disabled'); }
+
+                if (type_name == 'checkbox') {
+                    let checkValue = $frmCtl.val();
+                    if (checkValue != undefined)
+                        $frmCtl.prop('checked', value == checkValue);
+                    else
+                        $frmCtl.prop('checked', value);
+                } else if (type_name == 'radio') {
+                    $frmCtl.removeAttr('checked');
+                    var $radioCtl = $('input:radio[name=' + key + ']:input[value=' + value + ']');
+                    $radioCtl.prop('checked', true);
+                    $radioCtl.attr('checked', true);
+                } else {
+                    if ($.isNumeric(value) || value === null) {
+                        let numberFields = ['unitPrice', 'vat', 'price', 'totalAmount'];
+                        if (numberFields.includes(key)) {
+                            $frmCtl.val(Number(value).toLocaleString());
+                        } else {
+                            $frmCtl.val(value);
+                        }
+                    } else {
+                        $frmCtl.val(value.replace('&amp;', '&'));
+                    }
+                }
+            } else if (tagName == 'SPAN') {
+                if (tagClassName == 'DATE') {
+                    var ddspan = new Date(value);
+                    $frmCtl.text(ddspan.toLocaleString());
+                } else {
+                    $frmCtl.text(value);
+                }
+            }
+        });
+
+        // sujuList 바인딩
+        const sujuList = _resultSet.sujuList ?? [];
+        const sujuListCount = sujuList.length;
+        const minRowCount = 3;
+
+        const $tbody = $form.find('.item-table tbody');
+        const $template = $tbody.find('.item-template-row');
+
+        // 1. 실데이터 바인딩
+        sujuList.forEach(item => {
+            const $newRow = $template.clone().removeClass('item-template-row').show();
+            const index = page.nextSujuListIndex();
+            $newRow.find('input').each(function () {
+                const $input = $(this);
+                const baseName = $input.attr('name');
+                if (baseName) {
+                    $(this).attr('name', `${baseName}_${index}`);
+                    if (item.hasOwnProperty(baseName)) {
+                        if ($input.attr('type') === 'checkbox') {
+                            $input.prop('checked', item[baseName] === true || item[baseName] === 'Y');
+                        } else {
+                            $input.val(item[baseName]);
+                        }
+                    }
+                }
+            });
+
+            $newRow.find('a[title="삭제"]').attr('id', `btnDelItem_${index}`);
+            $tbody.append($newRow);
+        });
+
+        // 2. 부족한 줄 만큼 빈 행 추가
+        const additionalCount = Math.max(minRowCount - sujuListCount, 0);
+
+        for (let i = 0; i < additionalCount; i++) {
+            const $newRow = $template.clone().removeClass('item-template-row').show();
+            const index = page.nextSujuListIndex();
+            $newRow.find('input').each(function () {
+                const baseName = $(this).attr('name');
+                if (baseName) {
+                    $(this).attr('name', `${baseName}_${index}`);
+                }
+            });
+            $newRow.find('a[title="삭제"]').attr('id', `btnDelItem_${index}`);
+            $tbody.append($newRow);
+        }
+    },
     BindInvoiceDataForm: function (_resultSet, $form) {
         $.each(_resultSet, function (key, value) {
             // 빈스트링으로 오는 값은 반드시 null 값으로 치환한다. 또는 json 에서 null 로 넘겨준다

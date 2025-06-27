@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -27,15 +28,12 @@ import mes.domain.repository.*;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import mes.app.sales.service.SujuService;
 import mes.domain.model.AjaxResult;
@@ -135,74 +133,143 @@ public class SujuController {
 	
 	// 수주 등록 
 	@PostMapping("/manual_save")
-	public AjaxResult SujuSave(
-			@RequestParam(value="id", required=false) Integer id,
-			@RequestParam(value="SujuQty") Integer sujuQty,
-			@RequestParam(value="Company_id") Integer companyId,
-			@RequestParam(value="CompanyName") String companyName,
-			@RequestParam(value="Description", required=false) String description,
-			@RequestParam(value="DueDate") String dueDate,
-			@RequestParam(value="JumunDate") String jumunDate,
-			@RequestParam(value="Material_id") Integer materialId,
-			@RequestParam(value="AvailableStock", required=false) Float availableStock,
-			@RequestParam(value="SujuType") String sujuType,
-			@RequestParam(value="unitPrice") String unitPriceStr,
-			@RequestParam(value="price") String priceStr,
-			@RequestParam(value="vat") String vatStr,
-			@RequestParam(value="totalAmount") String totalAmountStr,
-			@RequestParam(value="invatyn") String invatyn,
-			@RequestParam(value="projectHidden") String project_id,
-			@RequestParam(value="spjangcd") String spjangcd,
-			HttpServletRequest request,
-			Authentication auth	) {
-		User user = (User)auth.getPrincipal();
-		
-		Suju suju = null;
-		
-		if (id!=null) {
-			suju = this.SujuRepository.getSujuById(id);
-		}else {
-			suju = new Suju();
-			suju.setState("received");
-		}
-		
-		availableStock = availableStock==null?0:availableStock;
-		Date due_Date = CommonUtil.trySqlDate(dueDate);
-		Date jumun_Date = CommonUtil.trySqlDate(jumunDate);
-		int unitPrice = Integer.parseInt(unitPriceStr.replace(",", ""));
-		int price = Integer.parseInt(priceStr.replace(",", ""));
-		int totalAmount = Integer.parseInt(totalAmountStr.replace(",", ""));
-		int vat = "면세".equals(vatStr) ? 0 : Integer.parseInt(vatStr.replace(",", ""));
-		
-		suju.setSujuQty(sujuQty);
-		suju.setSujuQty2(sujuQty);
-		suju.setCompanyId(companyId);
-		suju.setCompanyName(companyName);
-		suju.setDescription(description);
-		suju.setDueDate(due_Date);
-		suju.setJumunDate(jumun_Date);
-		suju.setMaterialId(materialId);
-		suju.setAvailableStock(availableStock); // 없으면 0으로 보내기 추가
-		suju.setSujuType(sujuType);
-		suju.set_status("manual");
-		suju.set_audit(user);
-		suju.setUnitPrice(unitPrice);
-		suju.setPrice(price);
-		suju.setVat(vat);
-		suju.setInVatYN(invatyn);
-		suju.setTotalAmount(totalAmount);
-		suju.setProject_id(project_id);
-		suju.setSpjangcd(spjangcd);
-		suju.setConfirm("0");
+	@Transactional
+	public AjaxResult SujuSave(@RequestBody Map<String, Object> payload, Authentication auth) {
+		User user = (User) auth.getPrincipal();
 
-		suju = this.SujuRepository.save(suju);
-		
+		String jumunDateStr = (String) payload.get("JumunDate");
+		String dueDateStr = (String) payload.get("DueDate");
+
+		Date jumunDate = CommonUtil.trySqlDate(jumunDateStr);
+		Date dueDate = CommonUtil.trySqlDate(dueDateStr);
+
+		String companyName = (String) payload.get("CompanyName");
+		Integer companyId = Integer.parseInt(payload.get("Company_id").toString());
+		String sujuType = (String) payload.get("SujuType");
+		String description = (String) payload.get("Description");
+		String projectId = (String) payload.get("projectHidden");
+		String spjangcd = (String) payload.get("spjangcd");
+		String amountStr = payload.get("totalAmountSum").toString().replace(",", "");
+		double totalAmount = Double.parseDouble(amountStr);
+		List<Map<String, Object>> items = (List<Map<String, Object>>) payload.get("items");
+
+		SujuHead head;
+
+		// ✅ suju_head 수정 여부 확인
+		if (payload.containsKey("id") && payload.get("id") != null && !payload.get("id").toString().isEmpty()) {
+			Integer headId = Integer.parseInt(payload.get("id").toString());
+			head = sujuHeadRepository.findById(headId).orElse(new SujuHead());
+		} else {
+			head = new SujuHead();
+			head.setJumunNumber(generateJumunNumber(jumunDate));
+		}
+
+		head.setJumunDate(jumunDate);
+		head.setDeliveryDate(dueDate);
+		head.setCompany_id(companyId);
+		head.setSpjangcd(spjangcd);
+		head.set_audit(user);
+		head.setSujuType(sujuType);
+		head.setTotalPrice(totalAmount);
+		head.setDescription(description);
+		head.set_status("manual");
+		head = sujuHeadRepository.save(head);
+
+		for (Map<String, Object> item : items) {
+			Suju suju;
+
+			// ✅ 수정인지 확인
+			if (item.containsKey("suju_id") && item.get("suju_id") != null && !item.get("suju_id").toString().isEmpty()) {
+				Integer sujuId = Integer.parseInt(item.get("suju_id").toString());
+				suju = SujuRepository.findById(sujuId).orElse(new Suju());
+			} else {
+				suju = new Suju(); // 신규일 경우
+				suju.setJumunNumber(head.getJumunNumber());
+			}
+
+			// 공통 필드 설정
+			suju.setSujuHeadId(head.getId());
+			suju.setJumunDate(jumunDate);
+			suju.setDueDate(dueDate);
+			suju.setCompanyId(companyId);
+			suju.setCompanyName(companyName);
+			suju.setSpjangcd(spjangcd);
+			suju.setProject_id(projectId);
+			suju.set_status("manual");
+			suju.setState("received");
+			suju.set_audit(user);
+
+			String invatyn = item.get("VatIncluded").toString();
+
+			suju.setMaterialId(Integer.parseInt(item.get("Material_id").toString()));
+			suju.setSujuQty(Integer.parseInt(item.get("quantity").toString()));
+			suju.setSujuQty2(Integer.parseInt(item.get("quantity").toString()));
+			suju.setUnitPrice(Integer.parseInt(item.get("unitPrice").toString()));
+			suju.setPrice(Integer.parseInt(item.get("supplyAmount").toString()));
+			suju.setVat(Integer.parseInt(item.get("VatAmount").toString()));
+			suju.setTotalAmount(Integer.parseInt(item.get("totalAmount").toString()));
+			suju.setProject_id(item.get("projectHidden").toString());
+			suju.setInVatYN(invatyn);
+			suju.setDescription((String) item.get("description"));
+			suju.setConfirm("0");
+
+			// 단가 변경 시 처리
+			Boolean unitPriceChanged = (Boolean) item.get("unitPriceChanged");
+			if (unitPriceChanged != null && unitPriceChanged) {
+				MultiValueMap<String, Object> priceData = new LinkedMultiValueMap<>();
+				priceData.add("Material_id", suju.getMaterialId());
+				priceData.add("Company_id", companyId);
+				priceData.add("UnitPrice", suju.getUnitPrice());
+				priceData.add("ApplyStartDate", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+				priceData.add("type", "02");
+				priceData.add("ChangerName", user.getUsername());
+				priceData.add("user_id", user.getId());
+
+				unitPriceService.saveCompanyUnitPrice(priceData);
+			}
+
+			SujuRepository.save(suju);
+		}
+
+
 		AjaxResult result = new AjaxResult();
-		result.data=suju;
+		result.success = true;
 		return result;
 	}
-	
+
+
+	public String generateJumunNumber(Date jumunDate) {
+		String dateStr = new SimpleDateFormat("yyyyMMdd").format(jumunDate);
+
+		String sql = """
+			WITH upsert AS (
+				INSERT INTO seq_maker ("Code", "BaseDate", "CurrVal", "_modified")
+				SELECT 'JumunNumber', '20250626', 1, now()
+				WHERE NOT EXISTS (
+					SELECT 1 FROM seq_maker WHERE "Code" = 'JumunNumber' AND "BaseDate" = '20250626'
+				)
+				RETURNING "CurrVal"
+			),
+			updated AS (
+				UPDATE seq_maker
+				SET "CurrVal" = "CurrVal" + 1, "_modified" = now()
+				WHERE "Code" = 'JumunNumber' AND "BaseDate" = '20250626'
+				RETURNING "CurrVal"
+			)
+			SELECT * FROM updated
+			UNION ALL
+			SELECT * FROM upsert;
+        """;
+
+		MapSqlParameterSource param = new MapSqlParameterSource();
+		param.addValue("date", dateStr);
+
+		Integer nextVal = this.sqlRunner.queryForObject(sql, param, (rs, rowNum) -> rs.getInt(1) );
+		return dateStr + "-" + String.format("%04d", nextVal);
+	}
+
 	// 수주 삭제
+	@Transactional
 	@PostMapping("/delete")
 	public AjaxResult deleteSuju(
 			@RequestParam("id") Integer id,
@@ -222,8 +289,9 @@ public class SujuController {
 			result.message = "출하된 수주는 삭제할 수 없습니다";
 			return result;
 		}
-		
-		this.SujuRepository.deleteById(id);
+
+		SujuRepository.deleteBySujuHeadId(id);
+		sujuHeadRepository.deleteById(id);
 		
 		return result;
 	}
@@ -361,8 +429,6 @@ public class SujuController {
 			Float unit_price = tryFloat(row.get(prod_unit_price_col));
 			Float total_price = tryFloat(row.get(total_price_col));
 			String raw = row.get(total_price_col);
-			System.out.println("raw total_price_col value: " + raw);
-			System.out.println("total_price"+ total_price);
 			String unit_name = row.get(unit_name_col).trim();
 
 			LocalDate jumun_date = parseFlexibleDate(row.get(jumnun_date_col).trim());
@@ -463,6 +529,7 @@ public class SujuController {
 							SujuHead newHead = new SujuHead();
 							newHead.setCompany_id(company.getId());   // 해당 행 기준
 							newHead.setJumunDate(Date.valueOf(jumun_date));
+							newHead.setDeliveryDate(Date.valueOf(due_date));
 							newHead.setSpjangcd(spjangcd);
 							newHead.setJumunNumber(jumun_number);
 							newHead.set_audit(user);

@@ -48,4 +48,10 @@ public class SujuHead extends AbstractAuditModel {
 
 	String spjangcd;
 
+	@Column(name="\"SujuType\"")
+	String SujuType;
+
+	@Column(name="\"Description\"")
+	String Description;
+
 }
