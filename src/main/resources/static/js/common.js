@@ -711,17 +711,32 @@ let FormUtil = {
         sujuList.forEach(item => {
             const $newRow = $template.clone().removeClass('item-template-row').show();
             const index = page.nextSujuListIndex();
+
             $newRow.find('input').each(function () {
                 const $input = $(this);
-                const baseName = $input.attr('name');
-                if (baseName) {
-                    $(this).attr('name', `${baseName}_${index}`);
-                    if (item.hasOwnProperty(baseName)) {
-                        if ($input.attr('type') === 'checkbox') {
-                            $input.prop('checked', item[baseName] === true || item[baseName] === 'Y');
-                        } else {
-                            $input.val(item[baseName]);
-                        }
+                let baseName = $input.attr('name');
+
+                if (!baseName) return;
+
+                // name 속성 업데이트 (예: unitPrice_0)
+                const nameWithoutIndex = baseName.replace(/_\d+$/, '');
+                const newName = `${nameWithoutIndex}_${index}`;
+                $input.attr('name', newName);
+
+                if (nameWithoutIndex === 'VatIncluded') {
+                    if (String(item.invatyn).toUpperCase() === 'N') {
+                        $input.prop('checked', false);
+                    } else {
+                        $input.prop('checked', true);
+                    }
+                }
+                // 일반 필드 처리
+                else if (item.hasOwnProperty(nameWithoutIndex)) {
+                    if ($input.attr('type') === 'checkbox') {
+                        const isChecked = item[nameWithoutIndex] === true || item[nameWithoutIndex] === 'Y';
+                        $input.prop('checked', isChecked);
+                    } else {
+                        $input.val(item[nameWithoutIndex]);
                     }
                 }
             });
@@ -737,9 +752,17 @@ let FormUtil = {
             const $newRow = $template.clone().removeClass('item-template-row').show();
             const index = page.nextSujuListIndex();
             $newRow.find('input').each(function () {
-                const baseName = $(this).attr('name');
-                if (baseName) {
-                    $(this).attr('name', `${baseName}_${index}`);
+                const $input = $(this);
+                const baseName = $input.attr('name');
+
+                if (!baseName) return;
+
+                const nameWithoutIndex = baseName.replace(/_\d+$/, '');
+                const newName = `${nameWithoutIndex}_${index}`;
+                $input.attr('name', newName);
+
+                if (nameWithoutIndex === 'VatIncluded') {
+                    $input.prop('checked', true);
                 }
             });
             $newRow.find('a[title="삭제"]').attr('id', `btnDelItem_${index}`);

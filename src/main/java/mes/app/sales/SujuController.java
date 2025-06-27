@@ -548,6 +548,7 @@ public class SujuController {
 			suju.setCompanyName(company_name);
 			suju.setDueDate(Date.valueOf(due_date));
 			suju.setJumunDate(Date.valueOf(jumun_date));
+			suju.setJumunNumber(jumun_number);
 			suju.setMaterialId(material.getId());
 			suju.setAvailableStock((float) 0); // 없으면 0으로 보내기 추가
 			suju.set_status("manual");

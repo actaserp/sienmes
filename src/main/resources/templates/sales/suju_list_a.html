@@ -372,7 +372,7 @@
                             <div class="input-with-checkbox">
                                 <input type="text" name="unitPrice" placeholder="단가" />
                                 <input type="hidden" name="originalUnitPrice" />
-                                <input type="checkbox" id="VatIncluded" name="VatIncluded" checked />
+                                <input type="checkbox" name="VatIncluded" />
                             </div>
                         </td>
                         <td><input type="text" name="supplyAmount" /></td>
@@ -607,31 +607,13 @@
 
                 // 제품검색
                 let $btnProductSearch = $content.find('#btnProductSearch');
-                let $btnCompanySearch = $content.find('#btnCompanySearch');
-                let $MaterialGroupName = $content.find('#MaterialGroupName');
-                let $product_code = $content.find('#product_code');
-                let $txtProductName = $content.find('#txtProductName');
-                let $Material_id = $content.find('#Material_id');
-
                 let $sujuForm = $content.find('#sujuForm');
 
                 let $cboSujuType = $content.find('#cboSujuType');
-                let $cboMaterial = $content.find('#cboMaterial');
-                let $JumunDate = $content.find('#JumunDate');
-                let $DueDate = $content.find('#DueDate');
-
-                let $AvailableStock = $('#AvailableStock');
-                let $unit = $('#unit');
-                let $cboCompany = $('#cboCompany');
-                let $CompanyName = $('#CompanyName');
-                let $quantity = $('#quantity');
                 let $SujuQty = $('#SujuQty');
-                let isVatExempt = false;
-                let $vatCheck = $content.find('#VatIncluded');
 
                 if (data.mode === 'new') {
                     $btnProductSearch.removeAttr('disabled');
-
                 }
 
                 $content.find('#btnCompanySearch').click(function () {
@@ -649,20 +631,8 @@
                     poppage.show(searchcallback);
                 });
 
-                // $content.find('#btnSelect_project').click(function () {
-                //     let poppage = new PopProjectComponent();
-                //     let searchcallback = function (items) {
-                //         $(document).find('#project').val(items.projnm);
-                //         $(document).find('#projectHidden').val(items.projno);
-                //
-                //     };
-                //
-                //     poppage.show(searchcallback);
-                // });
-
                 // 저장버튼
                 let $btnPopSujuSave = $('#btnPopSujuSave');
-
 
                 //수주구분
                 AjaxUtil.fillSelectOptions($cboSujuType, 'system_code', 'choose', 'sales', 'suju_type');
