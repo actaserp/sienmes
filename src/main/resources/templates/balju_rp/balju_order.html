@@ -228,7 +228,7 @@
       <form id="baljuForm">
         <table class="write-table">
           <caption>발주등록 테이블</caption>
-          <input type="hidden" id="bh_id" name="id">
+          <input type="hidden" id="bh_id" name="bh_id">
           <input type="hidden" id="spjangcdHidden" name="spjangcd"/>
           <tbody>
           <tr>
@@ -265,7 +265,7 @@
               <label for="cboBaljuType">발주구분</label>
             </th>
             <td>
-              <select id="cboBaljuType" name="BalJuHeadType"></select>
+              <select id="cboBaljuType" name="cboBaljuType">
             </td>
             <th style="text-align: center">
               <label for="StateName">상태</label>
@@ -343,9 +343,12 @@
                   <input type="checkbox" id="VatIncluded" name="VatIncluded" checked />
                 </div>
               </td>
-              <td><input type="text" name="BaljuPrice" readonly /></td>
-              <td><input type="text" name="BaljuVat" readonly /></td>
-                <td><input type="text" name="totalAmount" readonly /></td>
+              <td><input type="text" name="BaljuPrice"  /></td>
+              <td><input type="text" name="BaljuVat"  /></td>
+                <td>
+                  <input type="text" name="totalAmount" />
+                  <input type="hidden" name="totalEdited" value="N" />
+                </td>
               <td><input type="text" name="description" /></td>
               <td>
               <input type="hidden" name="State"/>
@@ -367,6 +370,48 @@
     </div>
   </script>
 
+  <script type="text/x-tmpl" id="BalJuMailTemplate">
+    <div class="content_wrap popup" id="div_excel_upload">
+       <div class="table-wrap">
+         <form id="BalJuMailForm">
+           <table class="write-table">
+             <tbody>
+             <tr>
+               <th style="text-align: center">
+                 <label for="Recipient">받는사람</label>
+               </th>
+               <td colspan="8">
+                 <input id="Recipient" name="Recipient" style="width: 100%;"></input>
+               </td>
+             </tr>
+
+             <tr>
+               <th style="text-align: center">
+                 <label for="MailTitle">제목</label>
+               </th>
+               <td colspan="8">
+                 <input id="MailTitle" name="MailTitle" style="width: 100%;"></input>
+               </td>
+             </tr>
+
+             <tr>
+               <th style="text-align: center">
+                 <label for="MailContent">내용</label>
+               </th>
+               <td colspan="8">
+                 <input id="MailContent" name="MailContent" style="width: 100%;"></input>
+               </td>
+             </tr>
+             </tbody>
+           </table>
+         </form>
+       </div>
+       <div class="popup-button">
+         <button type="button" class="btn-popup y_write_auth" id="btnPopBalJuMail">전송</button>
+         <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
+       </div>
+     </div>
+  </script>
 </th:block>
 
 <th:block layout:fragment="scripts">
@@ -401,12 +446,39 @@
 
         // 계산 이벤트 바인딩
         $row.find('input[name^="quantity_"], input[name^="BaljuUnitPrice_"]').off('keyup change').on('keyup change', function () {
-          calculateAmount({ row: $row });
+          calculateAmount({ row: $row, $content });
           updateBaljuTotalPrice($content);
         });
 
         $row.find('input[name^="VatIncluded"]').off('change').on('change', function () {
-          calculateAmount({ row: $row });
+          $row.data('supplyEdited', false);  // ✅ 플래그 초기화
+          $row.data('vatEdited', false);     // ✅ 플래그 초기화
+          calculateAmount({ row: $row, $content });
+          updateBaljuTotalPrice($content);
+        });
+        // ✅ 공급가 수동 입력 시 플래그 추가하고 계산
+        $row.find('input[name^="BaljuPrice_"]').off('input').on('input', function () {
+          $row.data('supplyEdited', false);  // ✅ 플래그 초기화
+          $row.data('vatEdited', false);     // ✅ 플래그 초기화
+          $row.data('supplyEdited', true);
+          calculateAmount({ row: $row, $content });
+          updateBaljuTotalPrice($content);
+        });
+
+        // ✅ 부가세 수동 입력 시 플래그 추가하고 계산
+        $row.find('input[name^="BaljuVat_"]').off('input').on('input', function () {
+          $row.data('supplyEdited', false);  // ✅ 플래그 초기화
+          $row.data('vatEdited', false);     // ✅ 플래그 초기화
+          $row.data('vatEdited', true);
+          calculateAmount({ row: $row, $content });
+          updateBaljuTotalPrice($content);
+        });
+
+        $row.find('input[name^="totalAmount_"]').off('input').on('input', function () {
+          const $this = $(this);
+          const $edited = $row.find('input[name^="totalEdited_"]');
+          $edited.val('Y'); // ✅ 수동입력 표시
+          updateBaljuTotalPrice($content);
         });
 
         // 제품 검색 기능 (기존 그대로 유지)
@@ -468,6 +540,7 @@
         this.grid = null;
         this.$btnEdit = $('#btnEdit');
         this.$btnAddNew = $('#btnAddNew');
+        this.$btnMail = $('#btnMail');
         this.spjangcd = $('#spjangcdHidden');
         this.viewData = new wijmo.collections.CollectionView();
         this.init();
@@ -537,6 +610,33 @@
           _this.showBaljuForm(defaultData);
         });
 
+        //메일 팝업
+        this.$btnMail.click(function (e) {
+          let selectedItems = _this.grid.selectedItems;
+
+          if (selectedItems.length === 1) {
+            let selected = selectedItems[0];
+            let param = {
+              id: selected.bh_id
+            };
+
+            // 필요한 데이터 구성
+            let result = {
+              data: {
+                id: selected.bh_id,
+                mode: 'mail',
+                recipient: '', // 초기값 필요 시
+                title: '',
+                content: ''
+              }
+            };
+
+            _this.showBalJuMailForm(result.data);
+          } else {
+            alert("하나의 항목만 선택해주세요.");
+          }
+        });
+
         // 발주 수정 클릭
         this.$btnEdit.click(function (e) {
           let selectedItems = _this.grid.selectedItems;
@@ -560,7 +660,7 @@
               result.data['mode'] = 'edit';
               result.data['SujuQty3'] = selected.SujuQty3;
               _this.showBaljuForm(result.data);
-              // console.log("팝업 응답 JSON:", JSON.stringify(result.data, null, 2));
+              console.log("팝업 응답 JSON:", JSON.stringify(result.data, null, 2));
             };
             AjaxUtil.getAsyncData(_this.url + '/detail', data, fnsuccess);
           } else if (items.length > 1) {
@@ -605,6 +705,57 @@
         });
       }
 
+      showBalJuMailForm(data) {
+        let _this = this;
+        let content = tmpl('BalJuMailTemplate', data);
+        let $content = $(content);
+        let csrfToken = $("[name=_csrf]").val();
+
+        let modalContainer = null;
+        if (data.mode === 'mail') {
+          modalContainer = new PopupDraggable('발주서 발송');
+        }
+
+        modalContainer.open({width: 1000, height: 300, $content});
+
+        // 전송 버튼 클릭 시
+        $content.find('#btnPopBalJuMail').on('click', function () {
+          let recipient = $content.find('#Recipient').val().trim();
+          let title = $content.find('#MailTitle').val().trim();
+          let mailContent = $content.find('#MailContent').val().trim();
+
+          if (!recipient || !title || !mailContent) {
+            Alert.alert('','받는 사람, 제목, 내용을 모두 입력해주세요.');
+            return;
+          }
+
+          // Ajax로 전송
+          $.ajax({
+            url: '/api/balju/balju_order/sendBalJuMail',
+            type: 'POST',
+            contentType: 'application/json',
+            headers: {
+              'X-CSRF-TOKEN': csrfToken
+            },
+            data: JSON.stringify({
+              recipient: recipient, //d
+              title: title,
+              content: mailContent,
+              bhId: data.id
+            }),
+            success: function (response) {
+              Alert.alert('','메일이 성공적으로 전송되었습니다.');
+              modalContainer.close();
+            },
+            error: function () {
+              Alert.alert('','메일 전송 중 오류가 발생했습니다.');
+            }
+          });
+        });
+
+      }//showBalJuMailForm
+
+
       showBaljuForm(data) {
         //baljuTemplate
         let _this = this;
@@ -648,7 +799,7 @@
         let $BaljuUnitPrice = $content.find('#BaljuUnitPrice');
         let $BaljuPrice = $content.find('#BaljuPrice');
         let $BaljuVat = $content.find('#BaljuVat');
-        let $isVatExempt = false;
+        let $isVatExempt = $content.find('#VatExempt').val() === 'Y';
         let $BaljuTotalPrice = $content.find('#BaljuTotalPrice');
         let $vatCheck = $content.find('#VatIncluded');
 
@@ -697,21 +848,26 @@
 
         $content.find('.item-table tbody tr:not(.item-template-row)').each(function () {
           const $row = $(this);
-
+          $row.find('input[name^="totalEdited_"]').val('N');
           const item = {
+            id: $row.find('input[name^="balju_id"]').val(),
             productName: $row.find('input[name^="txtProductName_"]').val(),
             Material_id: $row.find('input[name^="Material_id_"]').val(),
             quantity: $row.find('input[name^="quantity_"]').val().replace(/,/g, ''),
             unitPrice: $row.find('input[name^="BaljuUnitPrice_"]').val().replace(/,/g, ''),
             supplyPrice: $row.find('input[name^="BaljuPrice_"]').val().replace(/,/g, ''),
             vat: $row.find('input[name^="BaljuVat_"]').val().replace(/,/g, ''),
-            totalAmount: $row.find('input[name^="totalAmount_"]').val().replace(/,/g, ''),
+            total_price: $row.find('input[name^="totalAmount_"]').val().replace(/,/g, ''),
+            totalEdited: $row.find('input[name^="totalEdited_"]').val() === 'Y',
             description: $row.find('input[name^="description_"]').val(),
-            vatIncluded: $row.find('input[name^="VatIncluded"]').prop('checked') ? 'Y' : 'N'
+            vatIncluded: $row.find('input[name^="VatIncluded"]').prop('checked') ? 'Y' : 'N',
+            cboBaljuType: $row.find('input[name^="BalJuHeadType"]').val()
           };
 
+          console.log("🔍 저장될 항목:", item);
           itemList.push(item);
         });
+
 
         //단가 검색
         function tryShowBaljuPrice(row) {
@@ -798,6 +954,7 @@
           let formData = FormUtil.extractForm($baljuForm); // 상단 정보
           formData.invatyn = isVat ? 'Y' : 'N';
           formData.spjangcd = $('#spjangcdHidden').val();
+          formData.bh_id = $baljuForm.find('input[name="bh_id"]').val();
 
           let itemRows = [];
           let priceSaveList = []; // 변경된 단가만 저장
@@ -807,6 +964,7 @@
             const $row = $(this);
 
             const materialId = $row.find('input[name^="Material_id_"]').val();
+            const baljuId = $row.find('input[name^="balju_id_"]').val();
             const qty = $row.find('input[name^="quantity_"]').val();
 
             if (!materialId || !qty) return; // 필수값 없으면 skip
@@ -830,6 +988,8 @@
             }
 
             const item = {
+              bh_id: bh_id,
+              baljuId: baljuId,
               Material_id: materialId,
               product_code: $row.find('input[name^="product_code_"]').val(),
               product_name: $row.find('input[name^="txtProductName_"]').val(),
@@ -838,11 +998,15 @@
               supply_price: $row.find('input[name^="BaljuPrice_"]').val().replace(/,/g, ''),
               vat: $row.find('input[name^="BaljuVat_"]').val().replace(/,/g, ''),
               total_price: $row.find('input[name^="totalAmount_"]').val().replace(/,/g, ''),
+              totalEdited: $row.find('input[name^="totalEdited_"]').val() === 'Y',  // ✅ 이 줄 반드시 추가
               description: $row.find('input[name^="description_"]').val(),
-              vatIncluded: $row.find('input[name^="VatIncluded"]').prop('checked') ? 'Y' : 'N'
+              vatIncluded: $row.find('input[name^="VatIncluded"]').prop('checked') ? 'Y' : 'N',
+              cboBaljuType: $row.find('input[name^="BalJuHeadType"]').val()
             };
 
             itemRows.push(item);
+            console.log("📦 저장할 itemRows:", itemRows);
+
           });
 
           if (!formData.Company_id || itemRows.length === 0) {
@@ -956,6 +1120,9 @@
             $newRow.find('input[name^="State_"]').val(item.State);
             $newRow.find('input[name^="balju_StateName_"]').val(item.balju_StateName);
             $newRow.find('input[name^="VatIncluded"]').prop('checked', item.vatIncluded === 'Y');
+            $newRow.find('input[name^="balju_id_"]').val(item.balju_id);
+            $baljuForm.find('input[name="bh_id"]').val(data.id);
+            $baljuForm.find('input[name^="DueDate"]').val(data.DeliveryDate);
 
             if (!isDraft) {
               $newRow.find('input').prop('readonly', true);
@@ -1044,18 +1211,27 @@
           const $row = $input.closest('tr');
           const nameAttr = $input.attr('name') || '';
 
-          if (nameAttr.startsWith('quantity_')) {
-            $row.find('input[name^="BaljuUnitPrice_"]').focus().select();
-          } else if (nameAttr.startsWith('BaljuUnitPrice_')) {
-            $row.find('input[name^="description_"]').focus().select();
-          } else if (
-            nameAttr.startsWith('BaljuPrice') ||
-            nameAttr.startsWith('BaljuVat') ||
-            nameAttr.startsWith('totalAmount')
+          // 다음 필드 순서대로 배열 정의
+          const focusOrder = [
+            'txtProductName_',
+            'quantity_',
+            'BaljuUnitPrice_',
+            'BaljuPrice_',
+            'BaljuVat_',
+            'totalAmount_',
+            'description_'
+          ];
 
-          ) {
-            $row.find('input[name^="description_"]').focus().select();
+          // 현재 필드 index 찾기
+          const currentIndex = focusOrder.findIndex(prefix => nameAttr.startsWith(prefix));
+          if (currentIndex !== -1 && currentIndex < focusOrder.length - 1) {
+            const nextPrefix = focusOrder[currentIndex + 1];
+            const $nextInput = $row.find(`input[name^="${nextPrefix}"]`);
+            if ($nextInput.length) {
+              $nextInput.focus().select();
+            }
           } else if (nameAttr.startsWith('description_')) {
+            // 마지막 입력 필드면 다음 행으로 이동
             const $nextRow = $row.nextAll('tr:visible').first();
             const $nextInput = $nextRow.find('input[name^="txtProductName_"]');
             if ($nextInput.length) $nextInput.focus().select();
@@ -1076,12 +1252,18 @@
             if (hasData) {
               $targetRow.find('input[type="text"], input[type="number"]').val('');
               $targetRow.find('input[type="hidden"]').val('');
+              $targetRow.find('input[name^="totalAmount_"]').val('0'); // totalAmount 초기화
             }
           } else {
             $targetRow.remove();
           }
 
-          updateBaljuTotalPrice($content); //총합 갱신 함수 호출
+          // 🔥 모든 행 다시 계산
+          $content.find('.item-table tbody tr:not(.item-template-row)').each(function () {
+            calculateAmount({ row: $(this), $content });
+          });
+
+          updateBaljuTotalPrice($content);
         });
 
         if (data.mode === 'new') {
@@ -1164,11 +1346,11 @@
       $(targetSelector).val(formatted);// 값 넣기
     }
 
-    function calculateAmount({ row }) {
-      const $row = $(row);
+    function calculateAmount({ row: $row, $content }) {
       const qty = parseFloat($row.find('input[name^="quantity_"]').val().replace(/,/g, '') || '0');
       const unitPrice = parseFloat($row.find('input[name^="BaljuUnitPrice_"]').val().replace(/,/g, '') || '0');
       const isVatIncluded = $row.find('input[name^="VatIncluded"]').prop('checked');
+      const isVatExempt = $content.find('#VatExempt').val() === 'Y';
 
       const $unitPrice = $row.find('input[name^="BaljuUnitPrice_"]');
       const $supply = $row.find('input[name^="BaljuPrice_"]');
@@ -1177,21 +1359,61 @@
 
       let supplyPrice = 0, vat = 0, totalPrice = 0;
 
-      if (isVatIncluded) {
-        totalPrice = unitPrice * qty;
-        supplyPrice = Math.round(totalPrice * 10 / 11);
-        vat = totalPrice - supplyPrice;
+      const isSupplyEdited = $row.data('supplyEdited') === true;
+      const isVatEdited = $row.data('vatEdited') === true;
+
+      if (isSupplyEdited || isVatEdited) {
+        const sVal = parseFloat($supply.val().replace(/,/g, '') || '0');
+        let vVal = $vat.val() === '면세' ? 0 : parseFloat($vat.val().replace(/,/g, '') || '0');
+
+        if (!isVatExempt && isVatIncluded && !isVatEdited) {
+          // 공급가만 입력했는데 부가세 포함이면 자동 계산
+          vat = Math.round(sVal * 0.1);
+          supplyPrice = sVal;
+          totalPrice = supplyPrice + vat;
+        } else if (!isVatExempt && !isVatIncluded && !isVatEdited) {
+          // 공급가만 입력, 부가세 별도 계산
+          vat = Math.round(sVal * 0.1);
+          supplyPrice = sVal;
+          totalPrice = supplyPrice + vat;
+        } else {
+          // 수동 입력 우선 처리
+          supplyPrice = sVal;
+          vat = vVal;
+          totalPrice = supplyPrice + vat;
+        }
       } else {
-        supplyPrice = unitPrice * qty;
-        vat = Math.round(supplyPrice * 0.1);
-        totalPrice = supplyPrice + vat;
+        // 자동 계산
+        if (isVatExempt) {
+          supplyPrice = unitPrice * qty;
+          vat = 0;
+          totalPrice = supplyPrice;
+        } else if (isVatIncluded) {
+          totalPrice = unitPrice * qty;
+          supplyPrice = Math.round(totalPrice * 10 / 11);
+          vat = totalPrice - supplyPrice;
+        } else {
+          supplyPrice = unitPrice * qty;
+          vat = Math.round(supplyPrice * 0.1);
+          totalPrice = supplyPrice + vat;
+        }
       }
 
+      // 값 반영 및 포맷
       $unitPrice.val(unitPrice);
       formatNumberInput(unitPrice.toString(), $unitPrice);
-      $supply.val(supplyPrice).trigger('keyup');
-      $vat.val(vat).trigger('keyup');
-      $total.val(totalPrice).trigger('keyup');
+
+      $supply.val(supplyPrice);
+      formatNumberInput(supplyPrice.toString(), $supply);
+
+      $vat.val(vat === 0 && isVatExempt ? '면세' : vat);
+      if (!isVatExempt) formatNumberInput(vat.toString(), $vat);
+
+      if ($row.data('totalEdited') !== true) {
+        $total.val(totalPrice);
+        formatNumberInput(totalPrice.toString(), $total);
+      }
+
     }
 
     function updateBaljuTotalPrice($content) {

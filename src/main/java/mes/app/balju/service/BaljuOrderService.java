@@ -32,72 +32,70 @@ public class BaljuOrderService {
     dicParam.addValue("spjangcd", spjangcd);
 
     String sql = """
-WITH base_data AS (
-    SELECT
-      bh.id AS bh_id,
-      bh."Company_id",
-      b."CompanyName",
-      b."BaljuHead_id",
-      bh."JumunDate",
-      bh."JumunNumber",
-      mg."Name" AS "MaterialGroupName",
-      fn_code_name('Balju_type', bh."SujuType") AS "BaljuTypeName",
-      b.id AS balju_id,
-      m."Code" AS product_code,
-      m."Name" AS product_name,
-      u."Name" AS unit,
-      b."SujuQty",
-      b."UnitPrice",
-      b."Price",
-      b."Vat",
-      (b."Price" + COALESCE(b."Vat", 0)) AS "BaljuTotalPrice",
-      fn_code_name('balju_state', bh."State") AS "StateName",
-      mi."SujuQty2" AS "SujuQty2",
-      GREATEST((b."SujuQty" - mi."SujuQty2"), 0) AS "SujuQty3",
-      sh."Name" AS "ShipmentStateName",
-      bh."DeliveryDate",
-      b."Description",
-      --  동적 계산된 헤더 상태
-      (
-        SELECT
-          CASE
-            WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
-            WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
-            WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
-            ELSE 'partial'
-          END
-        FROM balju b2
-        WHERE b2."BaljuHead_id" = bh.id
-      ) AS "BalJuHeadType",
-      --  상태명
-      fn_code_name(
-        'balju_state',
-        (
-          SELECT
-            CASE
-              WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
-              WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
-              WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
-              ELSE 'partial'
-            END
-          FROM balju b2
-          WHERE b2."BaljuHead_id" = bh.id
-        )
-      ) AS "bh_StateName",
-      ROW_NUMBER() OVER (PARTITION BY bh."JumunNumber" ORDER BY b.id ASC) AS rn
-    FROM balju_head bh
-    LEFT JOIN balju b ON b."BaljuHead_id" = bh.id AND b.spjangcd = bh.spjangcd AND b."JumunNumber" = bh."JumunNumber"
-    INNER JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
-    INNER JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
-    LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
-    LEFT JOIN store_house sh ON sh.id::varchar = b."ShipmentState" AND sh.spjangcd = b.spjangcd
-    LEFT JOIN (
-      SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
-      FROM mat_inout
-      WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
-      GROUP BY "SourceDataPk"
-    ) mi ON mi."SourceDataPk" = b.id
-    WHERE bh.spjangcd = :spjangcd
+        WITH base_data AS (
+           SELECT
+             bh.id AS bh_id,
+             bh."Company_id",
+             b."CompanyName",
+             b."BaljuHead_id",
+             bh."JumunDate",
+             bh."JumunNumber",
+             mg."Name" AS "MaterialGroupName",
+             fn_code_name('Balju_type', bh."SujuType") AS "BaljuTypeName",
+             b.id AS balju_id,
+             m."Code" AS product_code,
+             m."Name" AS product_name,
+             u."Name" AS unit,
+             b."SujuQty",
+             b."UnitPrice",
+             b."Price",
+             b."Vat",
+             b."TotalAmount",
+             fn_code_name('balju_state', bh."State") AS "StateName",
+             mi."SujuQty2" AS "SujuQty2",
+             GREATEST((b."SujuQty" - mi."SujuQty2"), 0) AS "SujuQty3",
+             sh."Name" AS "ShipmentStateName",
+             bh."DeliveryDate",
+             b."Description",
+             (
+               SELECT
+                 CASE
+                   WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
+                   WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
+                   WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
+                   ELSE 'partial'
+                 END
+               FROM balju b2
+               WHERE b2."BaljuHead_id" = bh.id
+             ) AS "BalJuHeadType",
+             fn_code_name(
+               'balju_state',
+               (
+                 SELECT
+                   CASE
+                     WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
+                     WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
+                     WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
+                     ELSE 'partial'
+                   END
+                 FROM balju b2
+                 WHERE b2."BaljuHead_id" = bh.id
+               )
+             ) AS "bh_StateName",
+             ROW_NUMBER() OVER (PARTITION BY bh."JumunNumber" ORDER BY b.id ASC) AS rn
+           FROM balju_head bh
+           LEFT JOIN balju b ON b."BaljuHead_id" = bh.id AND b.spjangcd = bh.spjangcd AND b."JumunNumber" = bh."JumunNumber"
+           INNER JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
+           INNER JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
+           LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
+           LEFT JOIN store_house sh ON sh.id::varchar = b."ShipmentState" AND sh.spjangcd = b.spjangcd
+           LEFT JOIN (
+             SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+             FROM mat_inout
+             WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+             GROUP BY "SourceDataPk"
+           ) mi ON mi."SourceDataPk" = b.id
+           WHERE bh.spjangcd = :spjangcd
         """;
 
     if (date_kind.equals("sales")) {
@@ -124,7 +122,7 @@ WITH base_data AS (
           SUM("UnitPrice") AS "BaljuUnitPrice",
           SUM("Price") AS "BaljuPrice",
           SUM("Vat") AS "BaljuVat",
-          SUM("Price") + SUM("Vat") AS "BaljuTotalPrice",
+         SUM("TotalAmount") AS "BaljuTotalPrice",
           MAX("StateName") AS "StateName",
           MAX("BalJuHeadType") AS "BalJuHeadType",
           MAX("bh_StateName") AS "bh_StateName",
@@ -148,6 +146,13 @@ WITH base_data AS (
     paramMap.addValue("id", id);
 
     String sql = """
+        WITH balju_total AS (
+            SELECT 
+                "BaljuHead_id" AS bh_id,
+                SUM(COALESCE("TotalAmount", 0)) AS total_amount_sum
+            FROM balju
+            GROUP BY "BaljuHead_id"
+        )
         SELECT
             bh.id AS bh_id,
             bh."Company_id",
@@ -163,48 +168,48 @@ WITH base_data AS (
             COALESCE(mg."Name", '') AS "MaterialGroupName",
             COALESCE(mg.id, 0) AS "MaterialGroup_id",
             fn_code_name('mat_type', mg."MaterialType") AS "MaterialTypeName",
-            fn_code_name('Balju_type', b."SujuType") AS "SujuTypeName",
+            s."Value" as "BaljuTypeName",
             b."SujuQty",
             u."Name" AS unit,
             b."UnitPrice" AS "BaljuUnitPrice",
             b."Price" AS "BaljuPrice",
             b."Vat" AS "BaljuVat",
             b."InVatYN",
-            (b."Price" + COALESCE(b."Vat", 0)) AS "BaljuTotalPrice",
+            COALESCE(bt.total_amount_sum, 0) AS "BaljuTotalPrice", 
             TO_CHAR(b."ProductionPlanDate", 'yyyy-mm-dd') AS production_plan_date,
             TO_CHAR(b."ShipmentPlanDate", 'yyyy-mm-dd') AS shiment_plan_date,
             b."Description",
             b."AvailableStock",
             b."ReservationStock",
             mi."SujuQty2",
-            --  동적 계산된 Head 상태
+            -- 동적 계산된 Head 상태
             (
-              SELECT
-                CASE
-                  WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
-                  WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
-                  WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
-                  ELSE 'partial'
-                END
-              FROM balju b2
-              WHERE b2."BaljuHead_id" = bh.id
-            ) AS "BalJuHeadType",
-            --  Head 상태명
-            fn_code_name(
-              'balju_state',
-              (
                 SELECT
-                  CASE
-                    WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
-                    WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
-                    WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
-                    ELSE 'partial'
-                  END
+                    CASE
+                        WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
+                        WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
+                        WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
+                        ELSE 'partial'
+                    END
                 FROM balju b2
                 WHERE b2."BaljuHead_id" = bh.id
-              )
+            ) AS "BalJuHeadType",
+            -- Head 상태명
+            fn_code_name(
+                'balju_state',
+                (
+                    SELECT
+                        CASE
+                            WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
+                            WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
+                            WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
+                            ELSE 'partial'
+                        END
+                    FROM balju b2
+                    WHERE b2."BaljuHead_id" = bh.id
+                )
             ) AS "bh_StateName",
-            --  개별 balju 상태
+            -- 개별 balju 상태
             b."State" AS "BalJuType",
             fn_code_name('balju_state', b."State") AS "balju_StateName",
             TO_CHAR(b."_created", 'yyyy-mm-dd') AS create_date
@@ -214,12 +219,14 @@ WITH base_data AS (
         LEFT JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
         LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
         LEFT JOIN company c ON c.id = b."Company_id"
+        left join sys_code s on bh."SujuType" = s."Code" and s."CodeType" = 'Balju_type'
         LEFT JOIN (
             SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
             FROM mat_inout
             WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
             GROUP BY "SourceDataPk"
         ) mi ON mi."SourceDataPk" = b.id
+        LEFT JOIN balju_total bt ON bt.bh_id = bh.id
         WHERE bh.id = :id
         """;
 //    log.info("발주상세 데이터 SQL: {}", sql);
@@ -237,7 +244,7 @@ WITH base_data AS (
     header.put("Company_id", first.get("Company_id"));
     header.put("CompanyName", first.get("CompanyName"));
     header.put("JumunDate", first.get("JumunDate"));
-    header.put("DueDate", first.get("DueDate"));
+    header.put("DeliveryDate", first.get("DeliveryDate"));
     header.put("State", first.get("BalJuHeadType"));
     header.put("StateName", first.get("bh_StateName"));
     header.put("special_note", first.get("special_note"));
@@ -514,5 +521,42 @@ WITH base_data AS (
         """;
 
     return this.sqlRunner.execute(sql, dicParam);
+  }
+
+  //FROM 데이터 조회용
+  public Map<String, Object> getSenderInfo(String userid) {
+    MapSqlParameterSource paramMap = new MapSqlParameterSource();
+    paramMap.addValue("userid", userid);
+
+    String sql = """
+        select
+        au.spjangcd ,
+        x.spjangnm ,
+        x.tel1 ,
+        x.adresa
+        from auth_user au 
+        left join tb_xa012 x on x.spjangcd = au.spjangcd 
+        where au.username =:userid
+        """;
+//    log.info("FROM (발신자) SQL: {}", sql);
+//    log.info("FROM (발신자)데이터: {}", paramMap.getValues());
+    return this.sqlRunner.getRow(sql, paramMap);
+  }
+
+  public Map<String, Object> getReceiverInfo(Integer companyId) {
+    MapSqlParameterSource paramMap = new MapSqlParameterSource();
+    paramMap.addValue("companyId", companyId);
+
+    String sql = """
+        SELECT
+            c."Name" AS company_name,
+            c."TelNumber"  AS tel,
+            c."Address" AS address
+        FROM company c
+        WHERE c.id = :companyId 
+        """;
+//    log.info("TO (수신처) SQL: {}", sql);
+//    log.info("TO (수신처) 데이터: {}", paramMap.getValues());
+    return this.sqlRunner.getRow(sql, paramMap);
   }
 }

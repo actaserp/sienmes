@@ -2,6 +2,7 @@ package mes.app;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -35,6 +36,23 @@ public class MailService {
         mailSender.send(message);
     }
 
+    public void sendMailWithAttachment(String recipient, String subject, String body, File attachment, String attachmentFileName) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
+            helper.setTo(recipient);
+            helper.setSubject(subject);
+            helper.setText(body, true);
+
+            FileSystemResource file = new FileSystemResource(attachment);
+            helper.addAttachment(attachmentFileName, file);
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            throw new RuntimeException("메일 전송 실패");
+        }
+    }
 
 }

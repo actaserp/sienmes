@@ -1,6 +1,7 @@
 package mes.app.balju;
 
 import lombok.extern.slf4j.Slf4j;
+import mes.app.MailService;
 import mes.app.balju.service.BaljuOrderService;
 import mes.domain.entity.Balju;
 import mes.domain.entity.BaljuHead;
@@ -9,6 +10,9 @@ import mes.domain.model.AjaxResult;
 import mes.domain.repository.BalJuHeadRepository;
 import mes.domain.repository.BujuRepository;
 import mes.domain.services.CommonUtil;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,11 +20,20 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -35,6 +48,9 @@ public class BaljuOrderController {
 
   @Autowired
   BalJuHeadRepository balJuHeadRepository;
+
+  @Autowired
+  MailService mailService;
 
   // 발주 목록 조회
   @GetMapping("/read")
@@ -76,33 +92,40 @@ public class BaljuOrderController {
     String spjangcd = (String) payload.get("spjangcd");
     String isVat = (String) payload.get("invatyn");
     String specialNote = (String) payload.get("special_note");
-    String sujuType = (String) payload.get("SujuType") ;
+    String sujuType = (String) payload.get("cboBaljuType") ;
 
     Date jumunDate = CommonUtil.trySqlDate(jumunDateStr);
     Date dueDate = CommonUtil.trySqlDate(dueDateStr);
 
-    Integer headId = CommonUtil.tryIntNull(payload.get("id")); // 발주 헤더 ID
+    Integer headId = CommonUtil.tryIntNull(payload.get("bh_id")); // 발주 헤더 ID
+    log.info("Balju Info => JumunDate: {}, DueDate: {}, CompanyId: {}, CompanyName: {}, Spjangcd: {}, InVatYN: {}, SpecialNote: {}, SujuType: {}" ,
+        jumunDateStr, dueDateStr, companyId, CompanyName, spjangcd, isVat, specialNote, sujuType);
 
     BaljuHead head;
 
     if (headId != null) {
-      //log.info("🔄 기존 발주 수정 - headId: {}", headId);
-      head = balJuHeadRepository.findById(headId).orElseThrow(() -> new RuntimeException("발주 헤더 없음"));
-
+//      log.info("🔄 기존 발주 수정 - headId: {}", headId);
+      head = balJuHeadRepository.findById(headId)
+          .orElseThrow(() -> new RuntimeException("발주 헤더 없음"));
+      head.setModified(new Timestamp(System.currentTimeMillis()));
+      head.setModifierId(user.getId());
+      head.setDeliveryDate(dueDate);
+      head.setSujuType(sujuType);
     } else {
-      //log.info("신규 발주 생성");
+//      log.info("신규 발주 생성");
       head = new BaljuHead();
       head.setCreated(new Timestamp(System.currentTimeMillis()));
       head.setCreaterId(user.getId());
       head.set_status("manual");
       String jumunNumber = baljuOrderService.makeJumunNumber(jumunDate);
       head.setJumunNumber(jumunNumber);
+      head.setSujuType(sujuType);
+      head.setDeliveryDate(dueDate);
     }
 
     // 공통 필드 설정
     head.setSujuType(sujuType);
     head.setJumunDate(jumunDate);
-    head.setDeliveryDate(dueDate);
     head.setCompanyId(companyId);
     head.setSpjangcd(spjangcd);
     head.setSpecialNote(specialNote);
@@ -114,34 +137,57 @@ public class BaljuOrderController {
     List<Map<String, Object>> items = (List<Map<String, Object>>) payload.get("items");
     double totalPriceSum = 0;
 
+    if (headId != null) {
+      Set<Integer> incomingIds = items.stream()
+          .map(i -> CommonUtil.tryIntNull(i.get("baljuId")))
+          .filter(Objects::nonNull)
+          .collect(Collectors.toSet());
+
+      List<Balju> existingDetails = bujuRepository.findByBaljuHeadId(headId);
+      for (Balju detail : existingDetails) {
+        if (!incomingIds.contains(detail.getId())) {
+//          log.info("🗑️ 삭제 대상 발주 상세 ID: {}", detail.getId());
+          bujuRepository.delete(detail);
+        }
+      }
+    }
+
     for (Map<String, Object> item : items) {
-      Integer baljuId = CommonUtil.tryIntNull(item.get("id")); // id가 전달되면 수정
+      Integer baljuId = CommonUtil.tryIntNull(item.get("baljuId"));
 
       Integer materialId = Integer.parseInt(item.get("Material_id").toString());
       Double qty = Double.parseDouble(item.get("quantity").toString());
       Double unitPrice = Double.parseDouble(item.get("unit_price").toString());
-      Double totalAmount = Double.parseDouble(item.get("total_price").toString());
       Double supply_price = Double.parseDouble(item.get("supply_price").toString());
       Double vat = Double.parseDouble(item.get("vat").toString());
 
       Balju detail;
 
       if (baljuId != null) {
-        // 수정인 경우
         detail = bujuRepository.findById(baljuId)
             .orElseThrow(() -> new RuntimeException("상세 항목 없음"));
         detail._modified = new Timestamp(System.currentTimeMillis());
-        detail._modifier_id = user.getId(); // 로그인한 사용자 ID
+        detail._modifier_id = user.getId();
       } else {
-        // 신규 등록인 경우
         detail = new Balju();
         detail._created = new Timestamp(System.currentTimeMillis());
         detail._creater_id = user.getId();
         detail.setBaljuHeadId(head.getId());
         detail.setJumunNumber(head.getJumunNumber());
+        detail.setDueDate(dueDate);
+      }
+      String editedFlag = String.valueOf(item.get("totalEdited")).toUpperCase();
+      boolean isManual = "TRUE".equals(editedFlag) || "Y".equals(editedFlag);
+
+      if (isManual) {
+        detail.setTotalAmount(Double.parseDouble(item.get("total_price").toString()));
+        log.info("✅ 수기입력 적용: total_price = {}", item.get("total_price"));
+      } else {
+        detail.setTotalAmount(supply_price + vat);
+        log.info("⚙️ 자동계산 적용: supply + vat = {}", supply_price + vat);
       }
 
-      // 공통 필드 세팅
+
       detail.setMaterialId(materialId);
       detail.setCompanyId(companyId);
       detail.setCompanyName(CompanyName);
@@ -149,7 +195,6 @@ public class BaljuOrderController {
       detail.setUnitPrice(unitPrice);
       detail.setPrice(supply_price);
       detail.setVat(vat);
-      detail.setTotalAmount(totalAmount);
       detail.setDescription(CommonUtil.tryString(item.get("description")));
       detail.setSpjangcd(spjangcd);
       detail.setJumunDate(jumunDate);
@@ -241,7 +286,7 @@ public class BaljuOrderController {
   public AjaxResult BaljuPrice(@RequestParam("mat_pk") int materialId,
                                @RequestParam("JumunDate") String jumunDate,
                                @RequestParam("company_id") int companyId){
-    //log.info("발주단가 찾기 --- matPk:{}, ApplyStartDate:{},company_id:{} ",materialId,jumunDate , companyId);
+    log.info("발주단가 찾기 --- matPk:{}, ApplyStartDate:{},company_id:{} ",materialId,jumunDate , companyId);
     List<Map<String, Object>> items = this.baljuOrderService.getBaljuPrice(materialId, jumunDate, companyId);
     AjaxResult result = new AjaxResult();
     result.data = items;
@@ -271,6 +316,267 @@ public class BaljuOrderController {
     }
 
     return result;
+  }
+
+  //메일
+  @PostMapping("/sendBalJuMail")
+  public AjaxResult getMailData(@RequestBody Map<String, Object> payload, Authentication auth) throws IOException {
+      String recipient = (String) payload.get("recipient");
+      String title = (String) payload.get("title");
+      String content = (String) payload.get("content");
+      Integer bhId = (Integer) payload.get("bhId");
+    // 1. 로그인 사용자 정보 추출
+    User user = (User) auth.getPrincipal();
+    String userid = user.getUsername();
+
+    // 2. 발주서 데이터 및 발신자 정보 조회
+    Map<String, Object> baljuData = baljuOrderService.getBaljuDetail(bhId);
+    Map<String, Object> senderInfo = baljuOrderService.getSenderInfo(userid);
+
+    Integer companyId = (Integer) baljuData.get("Company_id");
+    Map<String, Object> receiverInfo = baljuOrderService.getReceiverInfo(companyId);
+    // 3. 파일명 구성: "2025-07-01_동영전자_발주서.xlsx"
+    Object jumunDateObj = baljuData.get("JumunDate");
+    String jumunDate;
+    if (jumunDateObj instanceof java.sql.Date) {
+      jumunDate = ((java.sql.Date) jumunDateObj).toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    } else {
+      jumunDate = String.valueOf(jumunDateObj);
+    }
+
+    String companyName = (String) baljuData.get("CompanyName");
+    String JumunNumber = (String) baljuData.get("JumunNumber");
+    String safeCompanyName = companyName.replaceAll("[\\\\/:*?\"<>|]", "");
+    String fileName = String.format("%s_%s_발주서.xlsx", jumunDate, safeCompanyName);
+
+    // 4. 엑셀 템플릿 기반 파일 생성
+    // 새 경로: C:/Temp/mes21/{파일명}에 직접 저장
+    Path tempXlsx = Paths.get("C:/Temp/mes21/" + fileName);
+    Files.createDirectories(tempXlsx.getParent()); // 상위 디렉터리 없으면 생성
+    Files.deleteIfExists(tempXlsx);               // 중복 방지
+    Files.createFile(tempXlsx);                   // 새 파일 생성
+
+
+    try (FileInputStream fis = new FileInputStream("C:/Temp/mes21/문서/BaljuTemplate.xlsx");
+         Workbook workbook = new XSSFWorkbook(fis);
+         FileOutputStream fos = new FileOutputStream(tempXlsx.toFile())) {
+
+      // 시트 열기 및 이름 변경
+      Sheet sheet = workbook.getSheetAt(0);
+      workbook.setSheetName(workbook.getSheetIndex(sheet), "발주서");
+
+      // 데이터 채우기
+      Map<String, Object> header = baljuData;
+      List<Map<String, Object>> items = (List<Map<String, Object>>) header.get("items");
+
+      safeAddMergedRegion(sheet, 2, 2, 1, 2);  // B3:C3
+      setCell(sheet, 2, 1, (String) receiverInfo.get("company_name"));
+      safeAddMergedRegion(sheet, 4, 4, 1, 3);  // B5:D5
+      setCell(sheet, 4, 1, (String) receiverInfo.get("tel"));
+      safeAddMergedRegion(sheet, 5, 6, 1, 3);  // B6:D7
+      setCell(sheet, 5, 1, (String) receiverInfo.get("address"));
+
+
+      // 발신자 (FROM.)
+      safeAddMergedRegion(sheet, 2, 2, 5, 6);  // F3:G3
+      setCell(sheet, 2, 5, (String) senderInfo.get("spjangnm"));
+      safeAddMergedRegion(sheet, 4, 4, 5, 6);  // F5:G5
+      setCell(sheet, 4, 5, (String) senderInfo.get("tel1"));
+      safeAddMergedRegion(sheet, 5, 6, 5, 7);  // F6:H7
+      setCell(sheet, 5, 5, (String) senderInfo.get("adresa"));
+
+      // 날짜 출력
+      String rawDate = String.valueOf(baljuData.get("JumunDate"));
+      LocalDate date = LocalDate.parse(rawDate);
+      String formattedDate = date.format(DateTimeFormatter.ofPattern("yy.MM.dd"));
+      setCell(sheet, 11, 3, formattedDate);  // D12 셀에 날짜만 넣기
+
+      // 자재 행 삽입
+      int startRow = 14;
+      int templateRowCount = 7;
+      Row styleTemplateRow = sheet.getRow(startRow); // 14행 (기본 스타일 참조)
+
+      CellStyle[] cachedStyles = new CellStyle[7]; // 인덱스: 1~6 (열 번호)
+      CellStyle[] cachedLastRowStyles = new CellStyle[7]; // 마지막 행용 스타일
+
+      int lastRowIndex = startRow + items.size() - 1;
+
+      for (int i = 0; i < items.size(); i++) {
+        Map<String, Object> item = items.get(i);
+        int currentRowIndex = startRow + i;
+
+        Row row = sheet.getRow(currentRowIndex);
+        if (row == null) row = sheet.createRow(currentRowIndex);
+
+        for (int col = 1; col <= 6; col++) {
+          Cell cell = row.getCell(col);
+          if (cell == null) cell = row.createCell(col);
+
+          if (styleTemplateRow != null && styleTemplateRow.getCell(col) != null) {
+            CellStyle baseStyle = styleTemplateRow.getCell(col).getCellStyle();
+
+            if (i == items.size() - 1) {
+              // 마지막 행: 굵은 아래 테두리 스타일 캐싱
+              if (cachedLastRowStyles[col] == null) {
+                CellStyle boldBottomStyle = workbook.createCellStyle();
+                boldBottomStyle.cloneStyleFrom(baseStyle);
+                boldBottomStyle.setBorderBottom(BorderStyle.THICK); // 굵은 하단
+                cachedLastRowStyles[col] = boldBottomStyle;
+              }
+              cell.setCellStyle(cachedLastRowStyles[col]);
+            } else {
+              // 일반 행: 기본 스타일 캐싱
+              if (cachedStyles[col] == null) {
+                CellStyle normalStyle = workbook.createCellStyle();
+                normalStyle.cloneStyleFrom(baseStyle);
+                cachedStyles[col] = normalStyle;
+              }
+              cell.setCellStyle(cachedStyles[col]);
+            }
+          }
+        }
+
+        // 값 설정
+        row.getCell(1).setCellValue(i + 1); // NO
+        row.getCell(2).setCellValue((String) item.get("product_name")); // 자재명
+        row.getCell(4).setCellValue(((Number) item.get("quantity")).doubleValue()); // 수량
+        row.getCell(5).setCellValue(((Number) item.get("unit_price")).doubleValue()); // 단가
+        row.getCell(6).setCellValue((String) item.get("description")); // 비고
+      }
+
+      // 특이사항 처리 시작
+      // 1. 특이사항 행 위치 계산
+      int lastItemRow = startRow + items.size();
+      int baseSpecialNoteRow = 22;
+      int specialNoteStartRow = Math.max(lastItemRow + 2, baseSpecialNoteRow);
+
+      // 2. 병합 범위 계산 (B~G 열, 3행 병합)
+      CellRangeAddress specialNoteRegion = new CellRangeAddress(
+          specialNoteStartRow,
+          specialNoteStartRow + 2,
+          1,
+          6
+      );
+
+      // 3. 기존 병합과 충돌하는 것 제거
+      for (int i = sheet.getNumMergedRegions() - 1; i >= 0; i--) {
+        if (sheet.getMergedRegion(i).intersects(specialNoteRegion)) {
+          sheet.removeMergedRegion(i);
+        }
+      }
+
+      // 4. 병합 적용
+      sheet.addMergedRegion(specialNoteRegion);
+
+      // 5. 셀 스타일 정의
+      CellStyle borderStyle = workbook.createCellStyle();
+      borderStyle.setWrapText(true);
+      borderStyle.setVerticalAlignment(VerticalAlignment.TOP);
+      borderStyle.setAlignment(HorizontalAlignment.LEFT);
+      borderStyle.setVerticalAlignment(VerticalAlignment.CENTER); // ← 세로 가운데 정렬
+
+    // 바깥쪽만 굵은 테두리 → 내부 셀도 같이 반복
+      for (int rowIdx = specialNoteStartRow; rowIdx <= specialNoteStartRow + 2; rowIdx++) {
+        Row row = sheet.getRow(rowIdx);
+        if (row == null) row = sheet.createRow(rowIdx);
+
+        for (int colIdx = 1; colIdx <= 6; colIdx++) {
+          Cell cell = row.getCell(colIdx);
+          if (cell == null) cell = row.createCell(colIdx);
+          cell.setCellStyle(borderStyle);
+        }
+      }
+
+      // 바깥쪽 테두리만 굵게 따로 지정
+      for (int col = 1; col <= 6; col++) {
+        // 위쪽
+        Cell topCell = sheet.getRow(specialNoteStartRow).getCell(col);
+        topCell.getCellStyle().setBorderTop(BorderStyle.THICK);
+
+        // 아래쪽
+        Cell bottomCell = sheet.getRow(specialNoteStartRow + 2).getCell(col);
+        bottomCell.getCellStyle().setBorderBottom(BorderStyle.THICK);
+      }
+
+      // 왼쪽/오른쪽 테두리는 각 행 첫 번째, 마지막 열에서
+      for (int rowIdx = specialNoteStartRow; rowIdx <= specialNoteStartRow + 2; rowIdx++) {
+        Row row = sheet.getRow(rowIdx);
+        row.getCell(1).getCellStyle().setBorderLeft(BorderStyle.THICK);  // B열
+        row.getCell(6).getCellStyle().setBorderRight(BorderStyle.THICK); // G열
+      }
+
+      // 6. 병합 시작 셀에 값 설정
+      Row noteRow = sheet.getRow(specialNoteStartRow);
+      Cell noteCell = noteRow.getCell(1);
+      noteCell.setCellValue("***특이사항 : " + header.get("special_note"));
+
+      //파일 생성 후 저장
+      workbook.write(fos);
+
+      // 로그 출력
+//      log.info("▶ 생성된 발주서 파일 경로: {}", tempXlsx.toAbsolutePath());
+      if (Files.exists(tempXlsx)) {
+//        log.info("✅ 발주서 파일이 성공적으로 생성되었습니다: {}", tempXlsx.toAbsolutePath());
+      } else {
+        log.warn("❌ 발주서 파일 생성 실패!");
+      }
+
+     /* //메일 전송
+      mailService.sendMailWithAttachment(
+          recipient,
+          title,
+          content,
+          tempXlsx.toFile(),
+          fileName
+      );*/
+
+      // 임시 파일 삭제 예약
+      Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+        try {
+          Files.deleteIfExists(tempXlsx);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }, 5, TimeUnit.MINUTES);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    // 5. 결과 데이터 구성
+    Map<String, Object> response = new HashMap<>();
+    response.put("baljuData", baljuData);
+    response.put("senderInfo", senderInfo);
+    response.put("filePath", tempXlsx.toString());
+    response.put("fileName", fileName);
+
+    AjaxResult result = new AjaxResult();
+    result.data = response;
+
+    return result;
+  }
+
+
+  public static void setCell(Sheet sheet, int rowIdx, int colIdx, String value) {
+    Row row = sheet.getRow(rowIdx);
+    if (row == null) row = sheet.createRow(rowIdx);
+    Cell cell = row.getCell(colIdx);
+    if (cell == null) cell = row.createCell(colIdx);
+    cell.setCellValue(value);
+  }
+
+  private void safeAddMergedRegion(Sheet sheet, int firstRow, int lastRow, int firstCol, int lastCol) {
+    CellRangeAddress newRegion = new CellRangeAddress(firstRow, lastRow, firstCol, lastCol);
+
+    // 기존 병합 영역 중 겹치는 것 제거
+    for (int i = sheet.getNumMergedRegions() - 1; i >= 0; i--) {
+      CellRangeAddress existing = sheet.getMergedRegion(i);
+      if (existing.intersects(newRegion)) {
+        sheet.removeMergedRegion(i);
+      }
+    }
+
+    sheet.addMergedRegion(newRegion);
   }
 
 
