@@ -74,8 +74,12 @@ public class BomController {
 
 	@Autowired
 	UnitPriceService unitPriceService;
+
     @Autowired
     private BomRepository bomRepository;
+
+    @Autowired
+    private BomComponentRepository bomComponentRepository;
 
 	@RequestMapping("/read")
 	public AjaxResult getMaterialList(
@@ -307,36 +311,34 @@ public class BomController {
 		return this.bomService.bomRevision(bom_id, user);
 	}
 
-	// BOM 엑셀 업로드
 	@Transactional
 	@PostMapping("/upload_save")
 	public AjaxResult saveBomBulkData(
-			@RequestParam(value="data_date") String data_date,
-			@RequestParam(value="spjangcd") String spjangcd,
-			@RequestParam(value="upload_file") MultipartFile upload_file,
-			MultipartHttpServletRequest multipartRequest,
+			@RequestParam("data_date") String data_date,
+			@RequestParam("spjangcd") String spjangcd,
+			@RequestParam("upload_file") MultipartFile upload_file,
 			Authentication auth) throws IOException {
 
 		User user = (User)auth.getPrincipal();
+		Integer userId = user.getId();
 		AjaxResult result = new AjaxResult();
 
-		// 1. 파일 저장
+		// 파일 저장
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 		String formattedDate = dtf.format(LocalDateTime.now());
-		String upload_filename = settings.getProperty("file_temp_upload_path") + formattedDate + "_" + upload_file.getOriginalFilename();
-
+		String upload_filename = settings.getProperty("c:\\temp\\mes21\\upload_temp\\") + formattedDate + "_" + upload_file.getOriginalFilename();
 		File file = new File(upload_filename);
 		if (file.exists()) file.delete();
 		try (FileOutputStream destination = new FileOutputStream(upload_filename)) {
 			destination.write(upload_file.getBytes());
 		}
 
-		// 2. 엑셀 전체 rows 읽기
+		// 1. 엑셀 읽기
 		List<List<String>> all_rows = this.bomUploadService.excel_read(upload_filename);
 
-		// 3. 제품명 추출 (2행, 13열~)
+		// 2. 제품명 추출
 		List<String> productNames = new ArrayList<>();
-		List<String> productRow = all_rows.get(1); // 2번째 행 (index 1)
+		List<String> productRow = all_rows.get(0); // 1번째 행 (index 0)
 		int productStartCol = 12; // 13번째 열 (M열, index 12)
 		for (int col = productStartCol; col < productRow.size(); col++) {
 			String name = productRow.get(col);
@@ -344,23 +346,87 @@ public class BomController {
 			productNames.add(name.trim());
 		}
 
-		// 4. 자재명 추출 (12행~, J열)
+		// 3. 자재명 추출 (2행~, J열)
 		List<String> materialNames = new ArrayList<>();
-		int materialStartRow = 11; // 12번째 행 (index 11)
+		int materialStartRow = 1; // 2번째 행 (index 1)
 		int materialNameCol = 9;   // J열 (index 9)
+		String lastMaterialName = null;
 		for (int rowIdx = materialStartRow; rowIdx < all_rows.size(); rowIdx++) {
 			List<String> row = all_rows.get(rowIdx);
 			if (row.size() <= materialNameCol) break;
 			String matName = row.get(materialNameCol);
-			if (matName == null || matName.trim().isEmpty()) break;
+
+			// 줄바꿈 처리
+			if (matName != null) {
+				matName = matName.replaceAll("[\\r\\n]+", " ").trim();
+			}
+			if (matName == null || matName.trim().isEmpty()) {
+				matName = lastMaterialName;
+			} else {
+				lastMaterialName = matName.trim();
+			}
 			materialNames.add(matName.trim());
 		}
 
-		// 5. 교점 데이터 추출 (필요자재수량)
-		List<BomDetail> bomDetails = new ArrayList<>();
-		for (int mIdx = 0; mIdx < materialNames.size(); mIdx++) {
-			List<String> row = all_rows.get(materialStartRow + mIdx);
-			for (int pIdx = 0; pIdx < productNames.size(); pIdx++) {
+		// 4. 제품/자재 id 등록
+		Map<String, Integer> productNameToId = new HashMap<>();
+		for (String pname : productNames) {
+			productNameToId.put(pname, getOrCreateProductId(pname, spjangcd));
+		}
+		Map<String, Integer> materialNameToId = new HashMap<>();
+		for (String mname : materialNames) {
+			materialNameToId.put(mname, getOrCreateMaterialId(mname, spjangcd));
+		}
+
+		// 5. BOM + BOM_COMP 생성
+		List<Bom> bomList = new ArrayList<>();
+		List<BomComponent> bomCompList = new ArrayList<>();
+		LocalDateTime now = LocalDateTime.now();
+		Timestamp startDate = Timestamp.valueOf(now);
+//		Timestamp endDate = Timestamp.valueOf(now.plusYears(1));
+		Timestamp endDate = Timestamp.valueOf("2100-12-31 00:00:00");
+
+		for (int pIdx = 0; pIdx < productNames.size(); pIdx++) {
+			String productName = productNames.get(pIdx);
+			Integer productId = productNameToId.get(productName);
+
+			Bom existingBom = bomRepository.findByMaterialIdAndBomTypeAndVersion(
+					productId, "manufacturing", "1.0");
+
+			if (existingBom != null) {
+				// 이미 존재 → 필요시 값만 update, 아니면 skip
+				// existingBom.setOutputAmount(1F); // 예시
+				// bomRepository.save(existingBom); // or skip
+//				bomList.add(existingBom);
+			} else {
+				// 신규
+				Bom bom = new Bom();
+				bom.setName(productName);
+				bom.setMaterialId(productId);
+				bom.setBomType("manufacturing");
+				bom.setVersion("1.0");
+				bom.setStartDate(startDate);
+				bom.setOutputAmount(1F);
+				bom.setEndDate(endDate);
+				bom.setSpjangcd(spjangcd);
+				bom.set_creater_id(userId);
+				bom.set_created(startDate);
+				bomList.add(bom);
+			}
+		}
+		bomRepository.saveAll(bomList); // PK(id) 자동생성
+
+		// BOM id 매핑
+		List<Bom> savedBoms = bomRepository.findAllByStartDate(startDate); // 또는 위에서 save한 리스트 사용
+
+		// BOM_COMP 등록
+		for (int pIdx = 0; pIdx < productNames.size(); pIdx++) {
+			Bom bom = bomList.get(pIdx);
+			String productName = productNames.get(pIdx);
+			Integer productId = productNameToId.get(productName);
+
+			for (int mIdx = 0; mIdx < materialNames.size(); mIdx++) {
+				List<String> row = all_rows.get(materialStartRow + mIdx);
 				int cellIdx = productStartCol + pIdx;
 				if (row.size() <= cellIdx) continue;
 				String qtyStr = row.get(cellIdx);
@@ -368,34 +434,97 @@ public class BomController {
 				try {
 					double qty = Double.parseDouble(qtyStr.trim());
 					if (qty > 0) {
-						BomDetail detail = new BomDetail(productNames.get(pIdx), materialNames.get(mIdx), qty);
-						bomDetails.add(detail);
+						String materialName = materialNames.get(mIdx);
+						Integer materialId = materialNameToId.get(materialName);
+						BomComponent bomComp = new BomComponent();
+						bomComp.setBomId(bom.getId());
+						bomComp.setMaterialId(materialId);
+						bomComp.setAmount((float) qty);
+						bomComp.set_creater_id(userId);
+						bomComp.set_created(startDate);
+						bomComp.set_order(1);
+						bomComp.setSpjangcd(spjangcd);
+						bomCompList.add(bomComp);
 					}
 				} catch (Exception ignore) {}
 			}
 		}
-
-		// 6. 추출된 데이터를 원하는 방식으로 저장 (예시)
-		for (BomDetail detail : bomDetails) {
-			// 1. 제품, 자재, 수량 정보로 엔티티/테이블 저장 처리
-			// 예: bomRepository.save(...), sujuList.add(...) 등
-			// ... 사용자 기존 로직 삽입 ...
-		}
+		bomComponentRepository.saveAll(bomCompList);
 
 		result.success = true;
-		result.data = bomDetails; // 디버깅용. 실제 서비스 시 삭제 가능
+		result.data = bomList;
 		return result;
 	}
 
-	// DTO 예시
-	public class BomDetail {
-		private String productName;
-		private String materialName;
-		private double quantity;
+	@Transactional
+	public Integer getOrCreateProductId(String productName, String spjangcd) {
+		Material prod = materialRepository.findByName(productName);
 
-		public BomDetail(String s, String s1, double qty) {
-		}
-		// 생성자/Getter/Setter...
+		if (prod != null) return prod.getId();
+
+		// 신규 등록: 제품 (materialGroupId=46, Code 자동)
+		Material newProd = new Material();
+		newProd.setName(productName);
+		newProd.setMaterialGroupId(46);
+		newProd.setCode(getNextMaterialCode()); // '4000' + N
+		newProd.set_created(Timestamp.valueOf(LocalDateTime.now()));
+		newProd.setFactory_id(1);
+		newProd.setUnitId(3);
+		newProd.setLotUseYn("0");
+		newProd.setMtyn("1");
+		newProd.setUseyn("0");
+		newProd.setSpjangcd(spjangcd);
+		newProd.setWorkCenterId(39);
+		newProd.setStoreHouseId(4);
+		newProd.setMaterialGroupId(46);
+		newProd.setFactory_id(1);
+		newProd = materialRepository.save(newProd);
+		return newProd.getId();
 	}
+
+	@Transactional
+	public Integer getOrCreateMaterialId(String materialName, String spjangcd) {
+		Material mat = materialRepository.findByName(materialName);
+		if (mat != null) return mat.getId();
+
+		// 신규 등록: 자재 (materialGroupId=50, Code 자동)
+		Material newMat = new Material();
+		newMat.setName(materialName);
+		newMat.setMaterialGroupId(50);
+		newMat.setCode(getNextMaterialCode()); // '4000' + N
+		newMat.set_created(Timestamp.valueOf(LocalDateTime.now()));
+		newMat.setFactory_id(1);
+		newMat.setUnitId(3);
+		newMat.setSpjangcd(spjangcd);
+		newMat.setLotUseYn("0");
+		newMat.setMtyn("1");
+		newMat.setUseyn("0");
+		newMat.setWorkCenterId(39);
+		newMat.setStoreHouseId(3);
+		newMat.setMaterialGroupId(50);
+		newMat.setFactory_id(1);
+		newMat = materialRepository.save(newMat);
+		return newMat.getId();
+	}
+
+	/** material.code의 다음 '4000'+N 값을 생성하는 메서드 (실제 구현 필요!) */
+	public String getNextMaterialCode() {
+		String maxCode = materialRepository.findMaxCodeBy4000Prefix();
+		int nextNumber = 4000;
+		if (maxCode != null && !maxCode.isEmpty()) {
+			try {
+				int codeNum = Integer.parseInt(maxCode);
+				nextNumber = codeNum + 1;
+			} catch (NumberFormatException ignore) {}
+		}
+
+		// 최종 insert 직전 중복 체크
+		while (materialRepository.existsByCode(String.valueOf(nextNumber))) {
+			nextNumber++;
+		}
+		return String.valueOf(nextNumber);
+	}
+
+
 
 }

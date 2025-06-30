@@ -970,27 +970,61 @@
                 });
                 let isInitialLoad = true; // 초기 상태 플래그
 
-                this.grid.selectionChanged.addHandler((s, e) => {
-                    if (isInitialLoad) {
-                        isInitialLoad = false; // 초기 로드 이후 플래그 해제
-                        return;
-                    }
+                // this.grid.selectionChanged.addHandler((s, e) => {
+                //     if (isInitialLoad) {
+                //         isInitialLoad = false; // 초기 로드 이후 플래그 해제
+                //         return;
+                //     }
+                //
+                //     let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
+                //     if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
+                //         let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
+                //         let mat_pk = selectedRowData.id; // 품목 ID 가져오기
+                //         /*console.log(selectedRowData);*/
+                //
+                //         // 상세 정보 표시
+                //         _this.showDetail(mat_pk);
+                //
+                //         /* // 기존 데이터 초기화
+                //          _this.price_grid.setData([]);
+                //          $('#companyPriceForm')[0].reset();
+                //          _this.test_grid.setData([]);
+                //          _this.setPriceButtonState();*/
+                //
+                //         // 현재 활성화된 탭에 따라 추가 기능 실행
+                //         if (_this.current_tab == 'tab_unitcost') {
+                //             _this.showPriceList(mat_pk);
+                //         } else if (_this.current_tab == 'tab_bom') {
+                //             if (mat_pk) page.showBomList(mat_pk);
+                //         } else if (_this.current_tab == 'tab_bom_reverse') {
+                //             if (mat_pk) page.showBomReverseList(mat_pk);
+                //         } else if (_this.current_tab == 'tab_routing') {
+                //             let routing_pk = $('#Routing_id').val();
+                //             if (routing_pk) page.showRoutingProcessList(routing_pk);
+                //         } else if (_this.current_tab == 'tab_test_master') {
+                //             if (mat_pk) page.showTestList(mat_pk);
+                //         }
+                //
+                //         /*console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
+                //         console.log('선택된 행 데이터:', selectedRowData);*/
+                //     }
+                // });
 
-                    let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
-                    if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
-                        let selectedRowData = s.rows[selectedRowIndex].dataItem; // 선택된 행의 데이터
-                        let mat_pk = selectedRowData.id; // 품목 ID 가져오기
-                        /*console.log(selectedRowData);*/
+                this.grid.hostElement.addEventListener('dblclick', (e) => {
+                    let hitTest = this.grid.hitTest(e);
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        let row = hitTest.row;
+                        let selectedItem = this.grid.rows[row].dataItem;
+                        let mat_pk = selectedItem.id;
 
-                        // 상세 정보 표시
+                        // 상세정보 및 모든 탭별 호출
                         _this.showDetail(mat_pk);
-
-                        /* // 기존 데이터 초기화
-                         _this.price_grid.setData([]);
-                         $('#companyPriceForm')[0].reset();
-                         _this.test_grid.setData([]);
-                         _this.setPriceButtonState();*/
-
+                        _this.showPriceList(mat_pk);
+                        _this.showBomList(mat_pk);
+                        _this.showBomReverseList(mat_pk);
+                        _this.showTestList(mat_pk);
+                        _this.showRoutingProcessList(mat_pk);
+                        // 필요시 추가
                         // 현재 활성화된 탭에 따라 추가 기능 실행
                         if (_this.current_tab == 'tab_unitcost') {
                             _this.showPriceList(mat_pk);
@@ -1004,24 +1038,6 @@
                         } else if (_this.current_tab == 'tab_test_master') {
                             if (mat_pk) page.showTestList(mat_pk);
                         }
-
-                        /*console.log(`선택된 행 인덱스: ${selectedRowIndex}`);
-                        console.log('선택된 행 데이터:', selectedRowData);*/
-                    }
-                });
-
-                this.grid.hostElement.addEventListener('dblclick', (e) => {
-                    let hitTest = this.grid.hitTest(e);
-                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
-                        let row = hitTest.row;
-                        let selectedItem = this.grid.rows[row].dataItem;
-                        _this.showBomList(selectedItem.id)
-                        _this.showBomReverseList(selectedItem.id)
-                        _this.showTestList(selectedItem.id)
-                        _this.showRoutingProcessList(selectedItem.id)
-                        /*_this.showPriceHistoryList(selectedItem.id)*/
-                        _this.showPriceList(selectedItem.id)
-                        /* _this.showBomCompTreeList(selectedItem.id)*/
                     }
                 });
 
@@ -1730,6 +1746,10 @@
                     let detailData = result.data;
                     FormUtil.BindDataForm(detailData, $('#matBasicForm'));
                     FormUtil.BindDataForm(detailData, $('#matProductionForm'));
+                    let group_pk = $('#WorkCenter_id').val();
+                    if (group_pk) {
+                        AjaxUtil.fillSelectOptions($('#Equipment_id'), 'equipment_code', 'choose', detailData.Equipment_id, group_pk);
+                    }
                     FormUtil.BindDataForm(detailData, $('#matStockForm'));
                     FormUtil.BindDataForm(detailData, $('#matTestForm'));
                     FormUtil.BindDataForm(detailData, $('#priceForm'));

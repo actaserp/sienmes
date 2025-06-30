@@ -79,43 +79,42 @@ public class BomUploadService {
 		
 		return itmes;
 	}
-	
-	public List<List<String>> excel_read(String filename) throws IOException{
+
+	// 엑셀파일 파싱
+	public List<List<String>> excel_read(String filename) throws IOException {
 		List<List<String>> all_rows = new ArrayList<>();
-		
 		FileInputStream file = new FileInputStream(filename);
-	    XSSFWorkbook wb = new XSSFWorkbook(file);
-	    XSSFSheet sheet = wb.getSheetAt(0);
-	    XSSFCell jumunNumCell = null;
+		XSSFWorkbook wb = new XSSFWorkbook(file);
+		XSSFSheet sheet = wb.getSheetAt(0);
 
-	    for (int i=1; i<=sheet.getLastRowNum(); i++) {
-	        XSSFRow row = sheet.getRow(i);
-	        List<String> value_list = new ArrayList<>();
+		for (int i = 0; i <= sheet.getLastRowNum(); i++) {
+			XSSFRow row = sheet.getRow(i);
+			if (row == null) continue; // 완전 빈행 skip
 
-	        for (int j=0; j<row.getLastCellNum(); j++) {
-	            XSSFCell cell = row.getCell(j);
-	            jumunNumCell = row.getCell(0);
-	            
-	            if (jumunNumCell == null || jumunNumCell.getCellType() == CellType.BLANK)
-	            	break;
+			XSSFCell jumunNumCell = row.getCell(0);
+			if (jumunNumCell == null || jumunNumCell.getCellType() == CellType.BLANK) {
+				continue; // 빈행 skip, 전체 데이터는 계속
+			}
 
-	            if(cell != null) {
-		            if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
-		                value_list.add(new SimpleDateFormat("yyyy-MM-dd").format(cell.getDateCellValue()).strip());
-		            } else if(cell.getCellType() == CellType.NUMERIC){
-		            	value_list.add(CommonUtil.tryString(cell.getNumericCellValue()).strip() );
-		            }else {
-		                value_list.add(cell.getStringCellValue().strip());
-		            }
-	            }
-	        }
-	        if (jumunNumCell == null || jumunNumCell.getCellType() == CellType.BLANK)
-            	break;
-	        all_rows.add(value_list);
-	    }
+			List<String> value_list = new ArrayList<>();
+			for (int j = 0; j < row.getLastCellNum(); j++) {
+				XSSFCell cell = row.getCell(j);
+				if (cell != null) {
+					if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+						value_list.add(new SimpleDateFormat("yyyy-MM-dd").format(cell.getDateCellValue()).strip());
+					} else if (cell.getCellType() == CellType.NUMERIC) {
+						value_list.add(CommonUtil.tryString(cell.getNumericCellValue()).strip());
+					} else {
+						value_list.add(cell.getStringCellValue().strip());
+					}
+				} else {
+					value_list.add(""); // 셀이 null이면 빈값으로 넣기(셀누락 방지)
+				}
+			}
+			all_rows.add(value_list);
+		}
 
-	    wb.close();
-		
+		wb.close();
 		return all_rows;
 	}
 

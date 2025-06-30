@@ -46,10 +46,10 @@ public class Bom extends AbstractAuditModel{
 	String bomType="manufacturing";	
 	
 	@Column(name = "\"StartDate\"")
-	Timestamp StartDate;
+	Timestamp startDate;
 	
 	@Column(name = "\"EndDate\"")
-	Timestamp EndDate;
+	Timestamp endDate;
 
 	@Column(name="spjangcd")
 	String spjangcd;

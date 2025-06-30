@@ -197,6 +197,11 @@ public class Material extends AbstractAuditModel {
 	@Column(name = "spjangcd")
 	String spjangcd;
 
+	@Column(name = "\"Unit_id\"")
+	Integer unitId;
+
+	@Column(name = "\"WorkCenter_id\"")
+	Integer workCenterId;
 
 
 	//Entity 생성 후 활성화

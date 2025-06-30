@@ -40,12 +40,17 @@ public class BomComponent extends AbstractAuditModel {
 
 	@Column(name = "\"Amount\"")
 	float amount;
-	
-	
+
+	@Column(name = "_creater_id")
+	Integer _creater_id;
+
 	@Column(name = "\"Description\"")
 	String description;	
 	
 	@Column(name = "\"_order\"")
 	Integer _order;
+
+	@Column(name = "spjangcd")
+	String spjangcd;
 	
 }
