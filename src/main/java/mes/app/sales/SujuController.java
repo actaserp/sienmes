@@ -81,7 +81,9 @@ public class SujuController {
 
 	@Autowired
 	UnitRepository unitRepository;
-	
+    @Autowired
+    private SujuRepository sujuRepository;
+
 	// 수주 목록 조회 
 	@GetMapping("/read")
 	public AjaxResult getSujuList(
@@ -720,6 +722,15 @@ public class SujuController {
 //		item.put("error_items", error_items);
 //
 //		result.data=item;
+		return result;
+	}
+
+	@PostMapping("/force-complete")
+	public AjaxResult forceCompleteSuju(@RequestBody Map<String, List<Integer>> payload) {
+		AjaxResult result = new AjaxResult();
+
+		List<Integer> sujuPkList = payload.get("sujuPkList");
+		sujuRepository.forceCompleteSujuList(sujuPkList);
 		return result;
 	}
 

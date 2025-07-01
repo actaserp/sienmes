@@ -329,24 +329,26 @@
                     <colgroup>
                         <col style="width: 22%">
                         <col style="width: 5%">
-                        <col style="width: 16%">
-                        <col style="width: 10%">
-                        <col style="width: 10%">
-                        <col style="width: 10%">
-                        <col style="width: 10%">
                         <col style="width: 13%">
+                        <col style="width: 9%">
+                        <col style="width: 9%">
+                        <col style="width: 9%">
+                        <col style="width: 10%">
+                        <col style="width: 11%">
+                        <col style="width: 8%">
                         <col style="width: 4%">
                     </colgroup>
                     <thead>
                     <tr id="itemHeaderRow">
                         <th>품목</th>
                         <th>수량</th>
-                        <th>단가 <span style="font-size: 13px;">(체크박스 선택시 부가세 포함)</span></th>
+                        <th>단가 <span style="font-size: 13px;">(선택시 부가세 포함)</span></th>
                         <th>공급가액</th>
                         <th>부가세</th>
                         <th>합계</th>
                         <th>프로젝트</th>
                         <th>비고</th>
+                        <th>상태</th>
                         <th>
                             <a class="btn in_btn plus" id="addRemark" title="추가">
                                 <img src="/images/icon/ico-plus.svg" alt="등록 아이콘" />
@@ -383,6 +385,10 @@
                             <input type="text" name="project" placeholder="입력 후 엔터">
                         </td>
                         <td><input type="text" name="description" /></td>
+                         <td>
+                            <input type="hidden" name="State"/>
+                            <input type="text" name="suju_StateName" readonly />
+                        </td>
                         <td class="al_c item_border">
                             <a class="btn in_btn" title="삭제" onclick="removeItemRow(this)">
                                 <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘" />
@@ -610,7 +616,6 @@
                 let $sujuForm = $content.find('#sujuForm');
 
                 let $cboSujuType = $content.find('#cboSujuType');
-                let $SujuQty = $('#SujuQty');
 
                 if (data.mode === 'new') {
                     $btnProductSearch.removeAttr('disabled');
@@ -663,20 +668,40 @@
                     let data = FormUtil.extractForm($sujuForm);
                     console.log('data', data);
 
-                    // if ((data.Material_id == null) || (data.Material_id === '')) {
-                    //     Alert.alert('', '제품을 선택하세요.');
-                    //     return;
-                    // }
-                    //
-                    // if (($CompanyName.val() == null) || ($CompanyName.val() === '')) {
-                    //     Alert.alert('', '판매처를 선택하세요.');
-                    //     return;
-                    // }
-                    //
-                    // if ($SujuQty.val() === '') {
-                    //     Alert.alert('', '수주량을 입력하세요.');
-                    //     return;
-                    // }
+                    if (!$('#cboCompany').val()) {
+                        Alert.alert('', '판매처를 선택하세요.');
+                        return;
+                    }
+
+                    if (!data.Material_id_0) {
+                        Alert.alert('', '품목을 선택하세요.');
+                        return;
+                    }
+
+                    // 2. 각 행의 유효성 체크
+                    let index = 0;
+                    while (true) {
+                        const materialId = data[`Material_id_${index}`];
+
+                        if (materialId === undefined) break; // 끝까지 체크
+
+                        if (materialId !== null && materialId !== '') {
+                            const qty = data[`quantity_${index}`];
+                            const price = data[`unitPrice_${index}`];
+
+                            if (!qty) {
+                                Alert.alert('', `(${index + 1}번째 행) 수량을 입력하세요.`);
+                                return;
+                            }
+                            if (!price) {
+                                Alert.alert('', `(${index + 1}번째 행) 단가를 입력하세요.`);
+                                return;
+                            }
+                        }
+
+                        index++;
+                    }
+
                     Alert.confirm('', '저장하시겠습니까?', function () {
                         const items = [];
                         console.log('page.sujuListIndex', page.sujuListIndex);

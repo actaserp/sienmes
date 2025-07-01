@@ -51,6 +51,25 @@ public class SujuService {
 			  JOIN suju s ON s."SujuHead_id" = sh.id
 			   
 			  GROUP BY sh.id
+			),
+			shipment_summary AS (
+				SELECT
+					s."SujuHead_id",
+					SUM(s."SujuQty") AS total_qty,
+					COALESCE(SUM(shp."shippedQty"), 0) AS total_shipped,
+					CASE
+					  WHEN COUNT(shp."shippedQty") = 0 THEN ''
+					  WHEN SUM(shp."shippedQty") >= SUM(s."SujuQty") THEN 'shipped'
+					  WHEN SUM(shp."shippedQty") < SUM(s."SujuQty") THEN 'partial'
+					ELSE ''
+					END AS shipment_state
+				  FROM suju s
+				  LEFT JOIN (
+					SELECT "SourceDataPk", SUM("Qty") AS "shippedQty"
+					FROM shipment
+					GROUP BY "SourceDataPk"
+				  ) shp ON shp."SourceDataPk" = s.id
+				  GROUP BY s."SujuHead_id"
 			)
 			   
 			SELECT
@@ -72,13 +91,7 @@ public class SujuService {
 			  END AS product_name,
 			   
 			  sss.summary_state AS "State",
-			   
-			  -- 출하 상태
-			  CASE
-				WHEN COALESCE(SUM(COALESCE(shp."shippedQty", 0)), 0) = 0 THEN ''
-				WHEN COALESCE(SUM(COALESCE(shp."shippedQty", 0)), 0) >= SUM(s."SujuQty") THEN '출하'
-				ELSE '부분출하'
-			  END AS "ShipmentStateName"
+			  sc_ship."Value" AS "ShipmentStateName"
 			   
 			FROM suju_head sh
 			JOIN suju s ON s."SujuHead_id" = sh.id
@@ -89,9 +102,11 @@ public class SujuService {
 			  GROUP BY "SourceDataPk"
 			) shp ON shp."SourceDataPk" = s.id
 			LEFT JOIN company c ON c.id = sh."Company_id"
+			LEFT JOIN shipment_summary ss ON ss."SujuHead_id" = sh.id
 			LEFT JOIN suju_state_summary sss ON sss.suju_head_id = sh.id
 			LEFT JOIN sys_code sc_state ON sc_state."Code" = sss.summary_state AND sc_state."CodeType" = 'suju_state'
 			LEFT JOIN sys_code sc_type ON sc_type."Code" = sh."SujuType" AND sc_type."CodeType" = 'suju_type'
+			LEFT JOIN sys_code sc_ship ON sc_ship."Code" = ss.shipment_state AND sc_ship."CodeType" = 'shipment_state'
             where 1 = 1
             and sh.spjangcd = :spjangcd
 			""";
@@ -111,7 +126,8 @@ public class SujuService {
 					 sh."SujuType",
 					 sss.summary_state,
 					 sc_state."Value",
-					 sc_type."Value"
+					 sc_type."Value",
+					 sc_ship."Value"
 				order by sh."JumunDate" desc,  max(m."Name")
 			""";
 		} else {
@@ -129,7 +145,8 @@ public class SujuService {
 					 sh."SujuType",
 					 sss.summary_state,
 					 sc_state."Value",
-					 sc_type."Value"
+					 sc_type."Value",
+					 sc_ship."Value"
 				order by sh."DeliveryDate" desc,  max(m."Name")
 			""";
 		}
@@ -164,40 +181,99 @@ public class SujuService {
 		""";
 
 		String detailSql = """ 
-			SELECT
-			   s.id as "suju_id",
-			   s."SujuHead_id",
-			   s."Material_id",
-			   m."Code" AS product_code,
-			   m."Name" AS "txtProductName",
-			   mg."Name" AS "MaterialGroupName",
-			   mg.id AS "MaterialGroup_id",
-			   u."Name" AS unit,
-			   s."SujuQty" as quantity,
-			   to_char(s."JumunDate", 'yyyy-mm-dd') AS "JumunDate",
-			   to_char(s."DueDate", 'yyyy-mm-dd') AS "DueDate",
-			   s."CompanyName",
-			   s."Company_id",
-			   s."SujuType",
-			   s."UnitPrice" AS "unitPrice",
-			   s."Vat" AS "VatAmount",
-			   s."Price" AS "supplyAmount",
-			   s."TotalAmount" AS "totalAmount",
-			   s."State",
-			   s."InVatYN" AS "invatyn",
-			   s."SujuQty2",
-			   s."AvailableStock",
-			   s."ReservationStock",
-			   to_char(s."_created", 'yyyy-mm-dd') AS create_date,
-				s.project_id AS "projectHidden",
-				p.projnm AS "project",
-				s."Description" as "description"
-		   FROM suju s
-		   INNER JOIN material m ON m.id = s."Material_id"
-		   INNER JOIN mat_grp mg ON mg.id = m."MaterialGroup_id"
-		   LEFT JOIN unit u ON m."Unit_id" = u.id
-		   LEFT JOIN TB_DA003 p ON p."projno" = s.project_id
-		   WHERE s."SujuHead_id" = :id
+			WITH shipment_status AS (
+				     SELECT "SourceDataPk", SUM("Qty") AS shipped_qty
+				     FROM shipment
+				     WHERE "SourceTableName" = 'rela_data'
+				     GROUP BY "SourceDataPk"
+				 ),
+				 suju_with_state AS (
+				     SELECT
+				         s.id AS suju_id,
+				         s."SujuHead_id",
+				         s."Material_id",
+				         m."Code" AS "product_code",
+				         m."Name" AS "txtProductName",
+				         mg."Name" AS "MaterialGroupName",
+				         mg.id AS "MaterialGroup_id",
+				         u."Name" AS "unit",
+				         s."SujuQty" AS "quantity",
+				         to_char(s."JumunDate", 'yyyy-mm-dd') AS "JumunDate",
+				         to_char(s."DueDate", 'yyyy-mm-dd') AS "DueDate",
+				         s."CompanyName",
+				         s."Company_id",
+				         s."SujuType",
+				         s."UnitPrice" AS "unitPrice",
+				         s."Vat" AS "VatAmount",
+				         s."Price" AS "supplyAmount",
+				         s."TotalAmount" AS "totalAmount",
+				         to_char(s."_created", 'yyyy-mm-dd') AS "create_date",
+				         s.project_id AS "projectHidden",
+				         p.projnm AS "project",
+				         s."Description" AS "description",
+				         s."InVatYN" AS "invatyn",
+				         s."SujuQty2",
+				         s."AvailableStock",
+				         s."ReservationStock",
+				         s."State" AS "original_state",
+				         COALESCE(sh.shipped_qty, -1) AS "shipped_qty",
+				         
+				         CASE
+				             WHEN sh.shipped_qty = -1 THEN s."State"
+				             WHEN sh.shipped_qty = 0 THEN 'force_complement'
+				             WHEN sh.shipped_qty >= s."SujuQty" THEN 'shipped'
+				             WHEN sh.shipped_qty < s."SujuQty" THEN 'partial'
+				             ELSE s."State"
+				         END AS final_state
+				 
+				     FROM suju s
+				     INNER JOIN material m ON m.id = s."Material_id"
+				     INNER JOIN mat_grp mg ON mg.id = m."MaterialGroup_id"
+				     LEFT JOIN unit u ON m."Unit_id" = u.id
+				     LEFT JOIN TB_DA003 p ON p."projno" = s.project_id
+				     LEFT JOIN shipment_status sh ON sh."SourceDataPk" = s.id
+				     WHERE s."SujuHead_id" = :id
+				 )
+				 
+				 SELECT
+				     s."suju_id",
+				     s."SujuHead_id",
+				     s."Material_id",
+				     s."product_code",
+				     s."txtProductName",
+				     s."MaterialGroupName",
+				     s."MaterialGroup_id",
+				     s."unit",
+				     s."quantity",
+				     s."JumunDate",
+				     s."DueDate",
+				     s."CompanyName",
+				     s."Company_id",
+				     s."SujuType",
+				     s."unitPrice",
+				     s."VatAmount",
+				     s."supplyAmount",
+				     s."totalAmount",
+				     s.final_state AS "State",
+				     
+				     COALESCE(sc_ship."Value", sc_suju."Value") AS "suju_StateName",
+				 
+				     s."invatyn",
+				     s."SujuQty2",
+				     s."AvailableStock",
+				     s."ReservationStock",
+				     s."create_date",
+				     s."projectHidden",
+				     s."project",
+				     s."description"
+				 
+				 FROM suju_with_state s
+				 LEFT JOIN sys_code sc_ship
+				     ON sc_ship."Code" = s.final_state AND sc_ship."CodeType" = 'shipment_state'
+				 LEFT JOIN sys_code sc_suju
+				     ON sc_suju."Code" = s.final_state AND sc_suju."CodeType" = 'suju_state'
+				 ORDER BY s."JumunDate";
+				 
 		""";
 
 		Map<String, Object> sujuHead = this.sqlRunner.getRow(sql, paramMap);
