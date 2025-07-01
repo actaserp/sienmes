@@ -175,6 +175,7 @@ public class BaljuOrderService {
             b."Price" AS "BaljuPrice",
             b."Vat" AS "BaljuVat",
             b."InVatYN",
+            b."TotalAmount" AS "LineTotalAmount",
             COALESCE(bt.total_amount_sum, 0) AS "BaljuTotalPrice", 
             TO_CHAR(b."ProductionPlanDate", 'yyyy-mm-dd') AS production_plan_date,
             TO_CHAR(b."ShipmentPlanDate", 'yyyy-mm-dd') AS shiment_plan_date,
@@ -248,6 +249,7 @@ public class BaljuOrderService {
     header.put("State", first.get("BalJuHeadType"));
     header.put("StateName", first.get("bh_StateName"));
     header.put("special_note", first.get("special_note"));
+    header.put("JumunNumber", first.get("JumunNumber"));
 
     List<Map<String, Object>> items = new ArrayList<>();
     for (Map<String, Object> row : rows) {
@@ -261,7 +263,7 @@ public class BaljuOrderService {
       item.put("unit_price", row.get("BaljuUnitPrice"));
       item.put("supply_price", row.get("BaljuPrice"));
       item.put("vat", row.get("BaljuVat"));
-      item.put("total_price", row.get("BaljuTotalPrice"));
+      item.put("total_price", row.get("LineTotalAmount"));
       item.put("description", row.get("Description"));
       item.put("vatIncluded", row.get("InVatYN"));
       item.put("State", row.get("BalJuType"));
@@ -559,4 +561,19 @@ public class BaljuOrderService {
 //    log.info("TO (수신처) 데이터: {}", paramMap.getValues());
     return this.sqlRunner.getRow(sql, paramMap);
   }
+
+  public String getReceiverEmail(Integer bhId) {
+    MapSqlParameterSource param = new MapSqlParameterSource();
+    param.addValue("bhId", bhId);
+
+    String sql = """
+        SELECT c."Email"
+        FROM balju_head bh
+        LEFT JOIN company c ON c.id = bh."Company_id"
+        WHERE bh.id = :bhId
+        """;
+
+    return this.sqlRunner.queryForObject(sql, param, (rs, rowNum) -> rs.getString("Email"));
+  }
+
 }

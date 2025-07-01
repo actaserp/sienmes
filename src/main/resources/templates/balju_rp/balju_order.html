@@ -371,46 +371,90 @@
   </script>
 
   <script type="text/x-tmpl" id="BalJuMailTemplate">
-    <div class="content_wrap popup" id="div_excel_upload">
-       <div class="table-wrap">
-         <form id="BalJuMailForm">
-           <table class="write-table">
-             <tbody>
-             <tr>
-               <th style="text-align: center">
-                 <label for="Recipient">받는사람</label>
-               </th>
-               <td colspan="8">
-                 <input id="Recipient" name="Recipient" style="width: 100%;"></input>
-               </td>
-             </tr>
+<style>
+/* + 아이콘 버튼 (추가용) */
+.btn.in_btn.plus img {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
 
-             <tr>
-               <th style="text-align: center">
-                 <label for="MailTitle">제목</label>
-               </th>
-               <td colspan="8">
-                 <input id="MailTitle" name="MailTitle" style="width: 100%;"></input>
-               </td>
-             </tr>
+/* 버튼 자체 크기와 정렬 */
+.btn.in_btn.plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 15px;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-left: 6px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
 
-             <tr>
-               <th style="text-align: center">
-                 <label for="MailContent">내용</label>
-               </th>
-               <td colspan="8">
-                 <input id="MailContent" name="MailContent" style="width: 100%;"></input>
-               </td>
-             </tr>
-             </tbody>
-           </table>
-         </form>
-       </div>
-       <div class="popup-button">
-         <button type="button" class="btn-popup y_write_auth" id="btnPopBalJuMail">전송</button>
-         <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
-       </div>
-     </div>
+.btn.in_btn.plus:hover {
+  background-color: #e0e0e0;
+}
+
+.input-with-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.input-with-button input {
+  flex: 1;
+  padding: 6px;
+}
+
+</style>
+<div class="content_wrap popup" id="div_excel_upload">
+   <div class="table-wrap">
+     <form id="BalJuMailForm">
+       <table class="write-table">
+         <tbody>
+         <tr>
+           <th style="text-align: center">
+             <label for="Recipient">받는사람</label>
+           </th>
+          <td colspan="8">
+            <div id="recipient-container">
+              <div class="input-with-button">
+                <input name="Recipient" style="width: 100%;" />
+                <a class="btn in_btn plus" id="addRecipient" title="추가">
+                  <img src="/images/icon/ico-plus.svg" alt="추가 아이콘" />
+                </a>
+              </div>
+            </div>
+          </td>
+         <tr>
+           <th style="text-align: center">
+             <label for="MailTitle">제목</label>
+           </th>
+           <td colspan="8">
+             <input id="MailTitle" name="MailTitle" style="width: 100%;"></input>
+           </td>
+         </tr>
+
+         <tr>
+           <th style="text-align: center">
+             <label for="MailContent">내용</label>
+           </th>
+           <td colspan="8">
+            <textarea id="MailContent" name="MailContent" style="width: 100%; height: 120px; resize: vertical;"></textarea>
+           </td>
+         </tr>
+         </tbody>
+       </table>
+     </form>
+   </div>
+   <div class="popup-button">
+     <button type="button" class="btn-popup y_write_auth" id="btnPopBalJuMail">전송</button>
+     <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
+   </div>
+ </div>
   </script>
 </th:block>
 
@@ -611,29 +655,37 @@
         });
 
         //메일 팝업
+        // 메일 팝업
         this.$btnMail.click(function (e) {
           let selectedItems = _this.grid.selectedItems;
 
           if (selectedItems.length === 1) {
             let selected = selectedItems[0];
-            let param = {
-              id: selected.bh_id
-            };
+            let bhId = selected.bh_id;
 
-            // 필요한 데이터 구성
-            let result = {
-              data: {
-                id: selected.bh_id,
-                mode: 'mail',
-                recipient: '', // 초기값 필요 시
-                title: '',
-                content: ''
+            // 거래처 이메일 요청 (다중 수신자 가정)
+            $.ajax({
+              url: '/api/balju/balju_order/receiverEmail',
+              type: 'GET',
+              data: { bhId: bhId },
+              success: function(response) {
+                const result = {
+                  id: bhId,
+                  mode: 'mail',
+                  recipients: response.data, // ✅ 반드시 배열이어야 함
+                  title: '',
+                  content: ''
+                };
+
+                _this.showBalJuMailForm(result);
+              },
+              error: function() {
+                Alert.alert('', '거래처 이메일 정보를 불러오는 데 실패했습니다.');
               }
-            };
+            });
 
-            _this.showBalJuMailForm(result.data);
           } else {
-            alert("하나의 항목만 선택해주세요.");
+            Alert.alert('', "하나의 항목만 선택해주세요.");
           }
         });
 
@@ -716,16 +768,71 @@
           modalContainer = new PopupDraggable('발주서 발송');
         }
 
-        modalContainer.open({width: 1000, height: 300, $content});
+        modalContainer.open({ width: 1000, height: 400, $content });
+
+        // 수신자 필드 렌더링
+        const recipientContainer = $content.find('#recipient-container');
+        if (Array.isArray(data.recipients)) {
+          data.recipients.forEach(email => {
+            const field = $(`
+        <div class="input-with-button" style="margin-top: 6px;">
+          <input name="Recipient" style="width: 100%; padding: 6px;" value="${email}"/>
+          <a class="btn in_btn del" title="삭제" onclick="this.parentElement.remove()" style="margin-left: 6px;">
+            <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘" style="width: 15px; height: 15px;" />
+          </a>
+        </div>
+      `);
+            recipientContainer.append(field);
+          });
+        }
+
+        // + 버튼으로 수신자 필드 추가 (최대 3개)
+        const addRecipientBtn = $content.find('#addRecipient');
+        addRecipientBtn.on('click', function () {
+          const currentCount = recipientContainer.find('input[name="Recipient"]').length;
+
+          if (currentCount >= 3) {
+            Alert.alert('', '받는 사람은 최대 3명까지 추가할 수 있습니다.');
+            return;
+          }
+
+          const newField = $(`
+      <div class="input-with-button" style="margin-top: 6px;">
+        <input name="Recipient" style="width: 100%; padding: 6px;" />
+        <a class="btn in_btn del" title="삭제" onclick="this.parentElement.remove()" style="margin-left: 6px;">
+          <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘" style="width: 15px; height: 15px;" />
+        </a>
+      </div>
+    `);
+          recipientContainer.append(newField);
+        });
 
         // 전송 버튼 클릭 시
         $content.find('#btnPopBalJuMail').on('click', function () {
-          let recipient = $content.find('#Recipient').val().trim();
-          let title = $content.find('#MailTitle').val().trim();
-          let mailContent = $content.find('#MailContent').val().trim();
+          const recipientInputs = recipientContainer.find('input[name="Recipient"]');
 
-          if (!recipient || !title || !mailContent) {
-            Alert.alert('','받는 사람, 제목, 내용을 모두 입력해주세요.');
+          const recipients = recipientInputs
+            .map(function () {
+              return $(this).val().trim();
+            })
+            .get()
+            .filter(email => email); // 빈 문자열 제거
+
+          const title = $content.find('#MailTitle').val().trim();
+          const mailContent = $content.find('#MailContent').val().trim();
+
+          if (recipients.length === 0) {
+            Alert.alert('', '받는 사람 이메일을 하나 이상 입력해주세요.');
+            return;
+          }
+
+          if (!title) {
+            Alert.alert('', '메일 제목을 입력해주세요.');
+            return;
+          }
+
+          if (!mailContent) {
+            Alert.alert('', '메일 내용을 입력해주세요.');
             return;
           }
 
@@ -738,17 +845,17 @@
               'X-CSRF-TOKEN': csrfToken
             },
             data: JSON.stringify({
-              recipient: recipient, //d
+              recipients: recipients,
               title: title,
               content: mailContent,
               bhId: data.id
             }),
             success: function (response) {
-              Alert.alert('','메일이 성공적으로 전송되었습니다.');
+              Alert.alert('', '메일이 성공적으로 전송되었습니다.');
               modalContainer.close();
             },
             error: function () {
-              Alert.alert('','메일 전송 중 오류가 발생했습니다.');
+              Alert.alert('', '메일 전송 중 오류가 발생했습니다.');
             }
           });
         });

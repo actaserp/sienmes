@@ -318,11 +318,23 @@ public class BaljuOrderController {
     return result;
   }
 
-  //메일
+  @GetMapping("/receiverEmail")
+  public AjaxResult getReceiverEmail(@RequestParam("bhId") Integer bhId) {
+    String email = this.baljuOrderService.getReceiverEmail(bhId);
+
+    AjaxResult result = new AjaxResult();
+    result.data = email;
+    return result;
+  }
+
+  //엑셀 만들기 + 메일 전송
   @PostMapping("/sendBalJuMail")
-  public AjaxResult getMailData(@RequestBody Map<String, Object> payload, Authentication auth) throws IOException {
-      String recipient = (String) payload.get("recipient");
-      String title = (String) payload.get("title");
+  public AjaxResult getMailData(@RequestBody Map<String, Object> payload, Authentication auth){
+    AjaxResult result = new AjaxResult();
+
+    try {
+    List<String> recipients = (List<String>) payload.get("recipients");
+    String title = (String) payload.get("title");
       String content = (String) payload.get("content");
       Integer bhId = (Integer) payload.get("bhId");
     // 1. 로그인 사용자 정보 추출
@@ -335,21 +347,15 @@ public class BaljuOrderController {
 
     Integer companyId = (Integer) baljuData.get("Company_id");
     Map<String, Object> receiverInfo = baljuOrderService.getReceiverInfo(companyId);
-    // 3. 파일명 구성: "2025-07-01_동영전자_발주서.xlsx"
-    Object jumunDateObj = baljuData.get("JumunDate");
-    String jumunDate;
-    if (jumunDateObj instanceof java.sql.Date) {
-      jumunDate = ((java.sql.Date) jumunDateObj).toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-    } else {
-      jumunDate = String.valueOf(jumunDateObj);
-    }
 
-    String companyName = (String) baljuData.get("CompanyName");
-    String JumunNumber = (String) baljuData.get("JumunNumber");
-    String safeCompanyName = companyName.replaceAll("[\\\\/:*?\"<>|]", "");
-    String fileName = String.format("%s_%s_발주서.xlsx", jumunDate, safeCompanyName);
+    // 3. 파일명 구성: "20250701-0011_동영전자_발주서.xlsx"
+    String jumunNumber = (String) baljuData.get("JumunNumber"); // 주문번호
+    String companyName = (String) baljuData.get("CompanyName"); // 구매처명
+    String safeCompanyName = companyName.replaceAll("[\\\\/:*?\"<>|]", ""); // 파일명에 쓸 수 없는 문자 제거
 
-    // 4. 엑셀 템플릿 기반 파일 생성
+    String fileName = String.format("%s_%s_발주서.xlsx", jumunNumber, safeCompanyName);
+
+      // 4. 엑셀 템플릿 기반 파일 생성
     // 새 경로: C:/Temp/mes21/{파일명}에 직접 저장
     Path tempXlsx = Paths.get("C:/Temp/mes21/" + fileName);
     Files.createDirectories(tempXlsx.getParent()); // 상위 디렉터리 없으면 생성
@@ -368,7 +374,7 @@ public class BaljuOrderController {
       // 데이터 채우기
       Map<String, Object> header = baljuData;
       List<Map<String, Object>> items = (List<Map<String, Object>>) header.get("items");
-
+      // 수신자 (TO.)
       safeAddMergedRegion(sheet, 2, 2, 1, 2);  // B3:C3
       setCell(sheet, 2, 1, (String) receiverInfo.get("company_name"));
       safeAddMergedRegion(sheet, 4, 4, 1, 3);  // B5:D5
@@ -521,15 +527,15 @@ public class BaljuOrderController {
         log.warn("❌ 발주서 파일 생성 실패!");
       }
 
-     /* //메일 전송
+      //메일 전송
       mailService.sendMailWithAttachment(
-          recipient,
+          recipients,
           title,
           content,
           tempXlsx.toFile(),
           fileName
-      );*/
-
+      );
+//      log.info("✅ 메일 전송 완료: 수신자={}", recipients);
       // 임시 파일 삭제 예약
       Executors.newSingleThreadScheduledExecutor().schedule(() -> {
         try {
@@ -550,12 +556,16 @@ public class BaljuOrderController {
     response.put("filePath", tempXlsx.toString());
     response.put("fileName", fileName);
 
-    AjaxResult result = new AjaxResult();
     result.data = response;
+    return result;
 
+  } catch (Exception e) {
+    log.error("❌ 메일 전송 중 서버에서 예외 발생: {}", e.getMessage(), e);
+    result.success = false;
+    result.message = "메일 전송 중 문제가 발생했습니다: " + e.getMessage();
     return result;
   }
-
+}
 
   public static void setCell(Sheet sheet, int rowIdx, int colIdx, String value) {
     Row row = sheet.getRow(rowIdx);

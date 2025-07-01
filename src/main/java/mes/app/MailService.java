@@ -1,17 +1,21 @@
 package mes.app;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
+import java.util.List;
 
+@Slf4j
 @Service
 public class MailService {
 
@@ -36,22 +40,33 @@ public class MailService {
         mailSender.send(message);
     }
 
-    public void sendMailWithAttachment(String recipient, String subject, String body, File attachment, String attachmentFileName) {
+    public void sendMailWithAttachment(List<String> recipients, String subject, String body, File attachment, String attachmentFileName) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setTo(recipient);
+            helper.setTo(recipients.toArray(new String[0]));
             helper.setSubject(subject);
             helper.setText(body, true);
+            // 이렇게 맞춰야 됨 (메일 전송 계정과 동일)
+            helper.setFrom("kimyouli0330@naver.com");
 
             FileSystemResource file = new FileSystemResource(attachment);
             helper.addAttachment(attachmentFileName, file);
 
             mailSender.send(message);
+
+            JavaMailSenderImpl impl = (JavaMailSenderImpl) mailSender;
+            /*log.info("📨 실제 연결 시도 host: {}", impl.getHost());
+            log.info("📨 실제 연결 시도 port: {}", impl.getPort());
+            log.info("✅ 메일 전송 성공");
+            log.info("📧 SMTP HOST : {}", impl.getHost());
+            log.info("📧 SMTP PORT : {}", impl.getPort());
+            log.info("📧 USERNAME   : {}", impl.getUsername());*/
+
         } catch (MessagingException e) {
-            e.printStackTrace();
-            throw new RuntimeException("메일 전송 실패");
+            log.error("❌ 메일 전송 실패", e);
+            throw new RuntimeException("메일 전송 실패", e);
         }
     }
 

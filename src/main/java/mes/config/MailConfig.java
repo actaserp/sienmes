@@ -20,19 +20,39 @@ public class MailConfig {
 
     private JavaMailSenderImpl mailSender;
 
+    @Bean
+    public JavaMailSender getJavaMailSender() {
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
+        mailSender.setHost("smtp.naver.com");
+        mailSender.setPort(465);
+        mailSender.setUsername("kimyouli0330@naver.com");
+        mailSender.setPassword("G5WKQC5MUHHJ"); // 반드시 앱 비밀번호
+
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.smtp.starttls.enable", "false");
+       // props.put("mail.debug", "true");
+
+        return mailSender;
+    }
+
+
+/*
     @Bean
     public JavaMailSender getJavaMailSender(){
 
 
         if(mailSender == null){
             mailSender = new JavaMailSenderImpl();
-            /*updateMailSender();*/
+            *//*updateMailSender();*//*
         }
 
         return mailSender;
 
-    }
+    }*/
 
    /* // SMTP 설정을 동적으로 업데이트하는 메서드
     public void updateMailSender() {
