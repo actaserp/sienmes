@@ -128,7 +128,7 @@ public class SujuService {
 					 sc_state."Value",
 					 sc_type."Value",
 					 sc_ship."Value"
-				order by sh."JumunDate" desc,  max(m."Name")
+				order by sh."JumunDate" desc,  sh.id desc
 			""";
 		} else {
 			sql += """
@@ -147,7 +147,7 @@ public class SujuService {
 					 sc_state."Value",
 					 sc_type."Value",
 					 sc_ship."Value"
-				order by sh."DeliveryDate" desc,  max(m."Name")
+				order by sh."DeliveryDate" desc,  sh.id desc
 			""";
 		}
 
