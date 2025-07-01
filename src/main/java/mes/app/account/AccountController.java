@@ -73,16 +73,16 @@ public class AccountController {
 
 		String serverName = request.getServerName();
 
-		if (isMobile && serverName.equalsIgnoreCase("actascld.co.kr")) {
-			String redirectUrl = "https://mes.actascld.co.kr";
-			try {
-				response.sendRedirect(redirectUrl);
-				return null; // redirect 했으므로 이후 처리 중단
-			} catch (IOException e) {
-				e.printStackTrace(); // 로그로 출력하거나, 에러 뷰로 포워딩도 가능
-				return new ModelAndView("error/redirect_error"); // 예외 시 fallback 처리
-			}
-		}
+//		if (isMobile && serverName.equalsIgnoreCase("actascld.co.kr")) {
+//			String redirectUrl = "https://mes.actascld.co.kr";
+//			try {
+//				response.sendRedirect(redirectUrl);
+//				return null; // redirect 했으므로 이후 처리 중단
+//			} catch (IOException e) {
+//				e.printStackTrace(); // 로그로 출력하거나, 에러 뷰로 포워딩도 가능
+//				return new ModelAndView("error/redirect_error"); // 예외 시 fallback 처리
+//			}
+//		}
 
 		// 세션을 이용해 모바일에서 한 번만 리디렉션되도록 설정
 		Boolean isMobileRedirected = (Boolean) session.getAttribute("isMobileRedirected");

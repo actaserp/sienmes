@@ -63,12 +63,13 @@ public class MatRequSimulationService {
         
         for (Map<String, Object> row : rows) {
             String matType = (String) row.get("mat_type");
-            
-            if (matType.equals("raw_mat") || matType.equals("sub_mat")) {
-                rawList.add(row);
-            } else if (matType.equals("semi")) {
-                banList.add(row);
-            }
+			rawList.add(row);
+
+//            if (matType.equals("raw_mat") || matType.equals("sub_mat")) {
+//                rawList.add(row);
+//            } else if (matType.equals("semi")) {
+//                banList.add(row);
+//            }
         }
         
         Map<String, Object> items = new HashMap<String, Object>();
