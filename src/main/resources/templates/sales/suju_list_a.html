@@ -360,7 +360,7 @@
                         <td>
                             <div class="input-with-button">
                                 <input type="hidden" name="suju_id" />
-                                <input type="text" name="txtProductName" placeholder="입력 후 엔터" />
+                                <input type="text" name="txtProductName" placeholder="입력 후 엔터" autocomplete="off" />
                                 <input type="hidden" name="MaterialGroupName" />
                                 <input type="hidden" name="Material_id" />
                                 <input type="hidden" name="product_code" />
@@ -642,7 +642,9 @@
                 //수주구분
                 AjaxUtil.fillSelectOptions($cboSujuType, 'system_code', 'choose', 'sales', 'suju_type');
 
-                FormUtil.BindDataSujuForm(data, $sujuForm);
+                setTimeout(() => {
+                    FormUtil.BindDataSujuForm(data, $sujuForm);
+                }, 100);
 
                 $content.find('tr:visible').each(function () {
                     calculateAmounts($(this), 'unit');
@@ -691,10 +693,6 @@
 
                             if (!qty) {
                                 Alert.alert('', `(${index + 1}번째 행) 수량을 입력하세요.`);
-                                return;
-                            }
-                            if (!price) {
-                                Alert.alert('', `(${index + 1}번째 행) 단가를 입력하세요.`);
                                 return;
                             }
                         }
