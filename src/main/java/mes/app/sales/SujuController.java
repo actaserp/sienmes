@@ -152,7 +152,14 @@ public class SujuController {
 		String projectId = (String) payload.get("projectHidden");
 		String spjangcd = (String) payload.get("spjangcd");
 		String amountStr = payload.get("totalAmountSum").toString().replace(",", "");
-		double totalAmount = Double.parseDouble(amountStr);
+		double totalAmount = 0.0;
+		try {
+			if (amountStr != null && !amountStr.trim().isEmpty()) {
+				totalAmount = Double.parseDouble(amountStr.trim().replace(",", ""));
+			}
+		} catch (NumberFormatException e) {
+			// 무시하고 0 유지
+		}
 		List<Map<String, Object>> items = (List<Map<String, Object>>) payload.get("items");
 
 		SujuHead head;
