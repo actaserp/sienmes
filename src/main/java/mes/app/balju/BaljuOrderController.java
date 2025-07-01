@@ -399,13 +399,10 @@ public class BaljuOrderController {
 
       // 자재 행 삽입
       int startRow = 14;
-      int templateRowCount = 7;
-      Row styleTemplateRow = sheet.getRow(startRow); // 14행 (기본 스타일 참조)
+      Row styleTemplateRow = sheet.getRow(startRow); // 14행 스타일 참조
 
-      CellStyle[] cachedStyles = new CellStyle[7]; // 인덱스: 1~6 (열 번호)
-      CellStyle[] cachedLastRowStyles = new CellStyle[7]; // 마지막 행용 스타일
-
-      int lastRowIndex = startRow + items.size() - 1;
+      CellStyle[] cachedStyles = new CellStyle[7];         // 일반 행용 스타일
+      CellStyle[] cachedLastRowStyles = new CellStyle[7];  // 마지막 행용 스타일
 
       for (int i = 0; i < items.size(); i++) {
         Map<String, Object> item = items.get(i);
@@ -422,16 +419,16 @@ public class BaljuOrderController {
             CellStyle baseStyle = styleTemplateRow.getCell(col).getCellStyle();
 
             if (i == items.size() - 1) {
-              // 마지막 행: 굵은 아래 테두리 스타일 캐싱
+              // 마지막 행: 굵은 아래 테두리
               if (cachedLastRowStyles[col] == null) {
                 CellStyle boldBottomStyle = workbook.createCellStyle();
                 boldBottomStyle.cloneStyleFrom(baseStyle);
-                boldBottomStyle.setBorderBottom(BorderStyle.THICK); // 굵은 하단
+                boldBottomStyle.setBorderBottom(BorderStyle.THICK);
                 cachedLastRowStyles[col] = boldBottomStyle;
               }
               cell.setCellStyle(cachedLastRowStyles[col]);
             } else {
-              // 일반 행: 기본 스타일 캐싱
+              // 일반 행: 기본 스타일
               if (cachedStyles[col] == null) {
                 CellStyle normalStyle = workbook.createCellStyle();
                 normalStyle.cloneStyleFrom(baseStyle);
@@ -441,6 +438,26 @@ public class BaljuOrderController {
             }
           }
         }
+
+        // ✅ 병합: C열(2) ~ D열(3), 중복 방지 로직 적용
+        CellRangeAddress mergedRegion = new CellRangeAddress(currentRowIndex, currentRowIndex, 2, 3);
+        boolean alreadyMerged = false;
+        for (int j = 0; j < sheet.getNumMergedRegions(); j++) {
+          if (sheet.getMergedRegion(j).equals(mergedRegion)) {
+            alreadyMerged = true;
+            break;
+          }
+        }
+        if (!alreadyMerged) {
+          sheet.addMergedRegion(mergedRegion);
+        }
+
+        // 가운데 정렬 스타일 (자재명 셀에만)
+        CellStyle centerStyle = workbook.createCellStyle();
+        centerStyle.cloneStyleFrom(styleTemplateRow.getCell(2).getCellStyle());
+        centerStyle.setAlignment(HorizontalAlignment.CENTER);
+        centerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        row.getCell(2).setCellStyle(centerStyle);
 
         // 값 설정
         row.getCell(1).setCellValue(i + 1); // NO
@@ -528,13 +545,13 @@ public class BaljuOrderController {
       }
 
       //메일 전송
-      mailService.sendMailWithAttachment(
+      /*mailService.sendMailWithAttachment(
           recipients,
           title,
           content,
           tempXlsx.toFile(),
           fileName
-      );
+      );*/
 //      log.info("✅ 메일 전송 완료: 수신자={}", recipients);
       // 임시 파일 삭제 예약
       Executors.newSingleThreadScheduledExecutor().schedule(() -> {
