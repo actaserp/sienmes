@@ -451,6 +451,16 @@ public class BomController {
 		}
 		bomComponentRepository.saveAll(bomCompList);
 
+		// 업로드 파일 삭제 (BOM 처리 이후)
+		File uploadedFile = new File(upload_filename);
+		if (uploadedFile.exists()) {
+			boolean deleted = uploadedFile.delete();
+			if (!deleted) {
+				// 필요하다면 로그 추가
+				System.err.println("업로드 파일 삭제 실패: " + upload_filename);
+			}
+		}
+
 		result.success = true;
 		result.data = bomList;
 		return result;
