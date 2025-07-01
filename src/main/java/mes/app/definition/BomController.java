@@ -382,7 +382,7 @@ public class BomController {
 		List<Bom> bomList = new ArrayList<>();
 		List<BomComponent> bomCompList = new ArrayList<>();
 		LocalDateTime now = LocalDateTime.now();
-		Timestamp startDate = Timestamp.valueOf(now);
+		Timestamp startDate = Timestamp.valueOf(LocalDate.now().atStartOfDay());
 //		Timestamp endDate = Timestamp.valueOf(now.plusYears(1));
 		Timestamp endDate = Timestamp.valueOf("2100-12-31 00:00:00");
 
