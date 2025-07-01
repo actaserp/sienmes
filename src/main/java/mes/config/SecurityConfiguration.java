@@ -17,6 +17,7 @@ import mes.domain.security.CustomAccessDeniedHandler;
 import mes.domain.security.CustomAuthenticationFailureHandler;
 import mes.domain.security.CustomAuthenticationManager;
 import mes.domain.security.CustomAuthenticationSuccessHandler;
+import org.springframework.beans.factory.annotation.Value;
 
 
 @Configuration
@@ -28,7 +29,9 @@ public class SecurityConfiguration {
 
 	@Autowired
 	private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
-	
+
+    @Value("${server.servlet.session.cookie.name}")
+    private String sessionCookieName;
 		
 	@Bean(name="authenticationManager")	
 	CustomAuthenticationManager authenticationManager() {
@@ -58,7 +61,7 @@ public class SecurityConfiguration {
         http.logout().logoutUrl("/logout")
         .logoutSuccessUrl("/login")
         .invalidateHttpSession(true)
-        .deleteCookies("mes21_jsessionid")
+        .deleteCookies(sessionCookieName)
         .clearAuthentication(true)
         .permitAll();
         
