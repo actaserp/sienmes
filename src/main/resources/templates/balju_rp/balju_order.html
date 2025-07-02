@@ -325,7 +325,7 @@
             <tr class="item-template-row" style="display: none;">
               <td>
                 <div class="input-with-button">
-                  <input type="text" name="txtProductName" placeholder="입력 후 엔터" />
+                  <input type="text" name="txtProductName" placeholder="입력 후 엔터" autocomplete="off" />
                   <input type="hidden" name="MaterialGroupName" />
                   <input type="hidden" name="Material_id" />
                   <input type="hidden" name="product_code" />
@@ -377,6 +377,7 @@
   width: 15px;
   height: 15px;
   display: block;
+  margin-right: 2px;
 }
 
 /* 버튼 자체 크기와 정렬 */
@@ -395,6 +396,32 @@
 }
 
 .btn.in_btn.plus:hover {
+  background-color: #e0e0e0;
+}
+/* 삭제 아이콘 크기 및 정렬 */
+.btn.in_btn.del img {
+  width: 15px;
+  height: 15px;
+  display: block;
+  margin-right: 2px;
+}
+
+/* 삭제 버튼 크기와 스타일 - plus 버튼과 동일 */
+.btn.in_btn.del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 15px;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-left: 6px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.btn.in_btn.del:hover {
   background-color: #e0e0e0;
 }
 
@@ -654,7 +681,6 @@
           _this.showBaljuForm(defaultData);
         });
 
-        //메일 팝업
         // 메일 팝업
         this.$btnMail.click(function (e) {
           let selectedItems = _this.grid.selectedItems;
@@ -669,10 +695,12 @@
               type: 'GET',
               data: { bhId: bhId },
               success: function(response) {
+                //console.log('서버로부터 받은 이메일 데이터:', response);
+
                 const result = {
                   id: bhId,
                   mode: 'mail',
-                  recipients: response.data, // ✅ 반드시 배열이어야 함
+                  recipients: Array.isArray(response.data) ? response.data : [response.data], // 반드시 배열이어야 함
                   title: '',
                   content: ''
                 };
@@ -768,22 +796,30 @@
           modalContainer = new PopupDraggable('발주서 발송');
         }
 
-        modalContainer.open({ width: 1000, height: 400, $content });
+        modalContainer.open({ width: 650, height: 410, $content });
 
         // 수신자 필드 렌더링
         const recipientContainer = $content.find('#recipient-container');
+
         if (Array.isArray(data.recipients)) {
-          data.recipients.forEach(email => {
-            const field = $(`
-        <div class="input-with-button" style="margin-top: 6px;">
-          <input name="Recipient" style="width: 100%; padding: 6px;" value="${email}"/>
-          <a class="btn in_btn del" title="삭제" onclick="this.parentElement.remove()" style="margin-left: 6px;">
-            <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘" style="width: 15px; height: 15px;" />
-          </a>
-        </div>
-      `);
-            recipientContainer.append(field);
-          });
+          if (data.recipients.length === 1) {
+            //템플릿 안의 첫 번째 input을 찾아서 value 세팅만!
+            recipientContainer.find('input[name="Recipient"]').val(data.recipients[0]);
+          } else {
+            //여러 개일 경우에는 기존 필드 비우고 다 만들어줌
+            recipientContainer.empty();
+            data.recipients.forEach(email => {
+              const field = $(`
+                <div class="input-with-button" style="margin-top: 6px;">
+                  <input name="Recipient" style="width: 100%; padding: 6px;" value="${email}"/>
+                  <a class="btn in_btn del" title="삭제" onclick="this.parentElement.remove()" style="margin-left: 6px;">
+                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘" style="width: 15px; height: 15px;" />
+                  </a>
+                </div>
+              `);
+              recipientContainer.append(field);
+            });
+          }
         }
 
         // + 버튼으로 수신자 필드 추가 (최대 3개)

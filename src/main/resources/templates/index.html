@@ -106,6 +106,8 @@
                                 <!--                            <p id="temperature"></p> &lt;!&ndash; 기존의 <span> 태그를 제거 -->
                                 <p id="temperature"></p>
                             </div>
+<!--                            <p id="lastUpdated" style="font-size: 12px; color: gray;"></p>-->
+                            <p id="lastUpdated" style="display: none;"></p>
                         </div>
                         <div class="wt-detail">
                             <ul>
@@ -755,7 +757,8 @@
 <script type="text/javascript">
     // 날씨 정보
     fetchWeatherData();
-
+    // 1시간마다 날씨 정보 자동 갱신
+    setInterval(fetchWeatherData, 3600000);
 
     function sseConnect(){
 
@@ -799,6 +802,11 @@
 
                 // 날씨 아이콘 업데이트
                 updateWeatherIcon(data.SKY, data.PTY);
+
+                const now = new Date();
+                const formatted = now.getHours().toString().padStart(2, '0') + ':' +
+                    now.getMinutes().toString().padStart(2, '0');
+                $('#lastUpdated').text(`업데이트: ${formatted}`);
             },
             error: function (error) {
                 console.error('Error fetching weather data:', error);

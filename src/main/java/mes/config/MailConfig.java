@@ -1,15 +1,13 @@
 package mes.config;
 
-
-import mes.domain.entity.User;
 import mes.domain.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
-import java.util.Optional;
 import java.util.Properties;
 
 @Configuration
@@ -17,6 +15,9 @@ public class MailConfig {
 
     @Autowired
     UserRepository userRepository;
+
+    @Value("${spring.mail.password}")
+    private String mailPassword;
 
     private JavaMailSenderImpl mailSender;
 
@@ -27,7 +28,7 @@ public class MailConfig {
         mailSender.setHost("smtp.naver.com");
         mailSender.setPort(465);
         mailSender.setUsername("kimyouli0330@naver.com");
-        mailSender.setPassword("G5WKQC5MUHHJ"); // 반드시 앱 비밀번호
+        mailSender.setPassword(mailPassword); // 반드시 앱 비밀번호
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
@@ -40,21 +41,21 @@ public class MailConfig {
     }
 
 
-/*
-    @Bean
-    public JavaMailSender getJavaMailSender(){
+
+    /*@Bean
+    public JavaMailSender getJavaMailSender2(){
 
 
         if(mailSender == null){
             mailSender = new JavaMailSenderImpl();
-            *//*updateMailSender();*//*
+//            updateMailSender();
         }
 
         return mailSender;
 
-    }*/
-
-   /* // SMTP 설정을 동적으로 업데이트하는 메서드
+    }
+*/
+    /*// SMTP 설정을 동적으로 업데이트하는 메서드
     public void updateMailSender() {
         Optional<User> byUsername = userRepository.findByUsername("admin");
 

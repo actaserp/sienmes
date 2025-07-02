@@ -418,13 +418,14 @@ public class BaljuOrderController {
           if (styleTemplateRow != null && styleTemplateRow.getCell(col) != null) {
             CellStyle baseStyle = styleTemplateRow.getCell(col).getCellStyle();
 
-            if (i == items.size() - 1) {
-              // 마지막 행: 굵은 아래 테두리
+            if (i == items.size() - 1 && col == 2) {
               if (cachedLastRowStyles[col] == null) {
-                CellStyle boldBottomStyle = workbook.createCellStyle();
-                boldBottomStyle.cloneStyleFrom(baseStyle);
-                boldBottomStyle.setBorderBottom(BorderStyle.THICK);
-                cachedLastRowStyles[col] = boldBottomStyle;
+                CellStyle style = workbook.createCellStyle();
+                style.cloneStyleFrom(baseStyle);
+                style.setBorderBottom(BorderStyle.THICK); // 굵은 아래 테두리
+                style.setAlignment(HorizontalAlignment.CENTER); // 가운데 정렬
+                style.setVerticalAlignment(VerticalAlignment.CENTER);
+                cachedLastRowStyles[col] = style;
               }
               cell.setCellStyle(cachedLastRowStyles[col]);
             } else {
@@ -545,13 +546,13 @@ public class BaljuOrderController {
       }
 
       //메일 전송
-      /*mailService.sendMailWithAttachment(
+      mailService.sendMailWithAttachment(
           recipients,
           title,
           content,
           tempXlsx.toFile(),
           fileName
-      );*/
+      );
 //      log.info("✅ 메일 전송 완료: 수신자={}", recipients);
       // 임시 파일 삭제 예약
       Executors.newSingleThreadScheduledExecutor().schedule(() -> {
