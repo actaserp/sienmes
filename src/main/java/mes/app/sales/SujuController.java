@@ -350,19 +350,19 @@ public class SujuController {
 
 		User user = (User)auth.getPrincipal();
 
-	 	int company_name_col = 0;
-		int depart_name_col = 1;
-	 	int project_name_col = 2;
-	 	int jumun_number_col = 3;
-	 	int prod_code_col = 4;
-	 	int prod_name_col = 5;
-		int prod_standard1_col = 6;
-		int qty_col = 7;
-		int prod_unit_price_col = 8;
-		int total_price_col = 9;
-		int unit_name_col = 10;
-		int jumnun_date_col = 11;
-		int due_date_col = 12;
+//	 	int company_name_col = 0;
+		int depart_name_col = 2;
+	 	int project_name_col = 4;
+	 	int jumun_number_col = 5;
+	 	int prod_code_col = 7;
+	 	int prod_name_col = 8;
+		int prod_standard1_col = 9;
+		int qty_col = 10;
+		int prod_unit_price_col = 12;
+		int total_price_col = 13;
+		int unit_name_col = 14;
+		int jumnun_date_col = 15;
+		int due_date_col = 16;
 
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 		LocalDateTime now = LocalDateTime.now();
@@ -415,7 +415,8 @@ public class SujuController {
 
 			List<String> row = suju_file.get(i);
 
-			String company_name = row.get(company_name_col).trim();
+//			String company_name = row.get(company_name_col).trim();
+			String company_name = "대양전기공업㈜";
 			String depart_name = row.get(depart_name_col).trim();
 			String rawProjectName = row.get(project_name_col).trim();
 			String project_name = rawProjectName.split("\\s+")[0];
@@ -542,6 +543,8 @@ public class SujuController {
 							newHead.setSpjangcd(spjangcd);
 							newHead.setJumunNumber(jumun_number);
 							newHead.set_audit(user);
+							newHead.set_audit(user);
+							newHead.setSujuType("sales");
 							return sujuHeadRepository.save(newHead);
 						});
 
