@@ -209,7 +209,7 @@
                                             <label for="Name">전화번호</label>
                                         </th>
                                         <td>
-                                            <input type="text" id="tel" name="tel" style="width: 100%;">
+                                            <input type="text" id="tel" name="tel" class="phone-format" style="width: 100%;">
                                         </td>
 
                                         <th>
@@ -404,8 +404,12 @@
     <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
     <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
     <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
+<!--  연락처 및 사업번호 등 포맷 js파일  -->
+    <script src="/js/InputFormat.js"></script>
     <script type="text/javascript">
-
+        attachTelFormatterAll('.phone-format'); // 연락처 포맷 메서드
+        attachBizNumberFormatterAll('.biz-number'); // 사업자번호 포맷 메서드
+        
         var theGrid;
         var viewdata;
         var theGrid2;

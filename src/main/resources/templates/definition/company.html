@@ -188,7 +188,7 @@
                                             <label for="business_number"><span class="eq">*</span>사업자번호</label>
                                         </th>
                                         <td colspan="2">
-                                            <input type="text" style="width: 100%;" id="business_number"
+                                            <input type="text" style="width: 100%;" id="business_number" class="biz-number"
                                                    name="business_number" maxlength="15" oninput="formatNumber(this)">
                                         </td>
 
@@ -222,7 +222,7 @@
                                             <label for="tel_number">연락처</label>
                                         </th>
                                         <td >
-                                            <input type="text" id="tel_number" name="tel_number"
+                                            <input type="text" id="tel_number" name="tel_number" class="phone-format"
                                                    style="width: 100%;">
                                         </td>
 
@@ -340,7 +340,7 @@
                                             <label for="sales_manager_phone">영업담당자연락처</label>
                                         </th>
                                         <td>
-                                            <input type="text" style="width: 100%;" id="sales_manager_phone"
+                                            <input type="text" style="width: 100%;" id="sales_manager_phone" class="phone-format"
                                                    name="sales_manager_phone">
                                         </td>
                                     </tr>
@@ -358,7 +358,7 @@
                                             <label for="account_manager_phone">계산서담당자연락처</label>
                                         </th>
                                         <td>
-                                            <input type="text" id="account_manager_phone" name="account_manager_phone"
+                                            <input type="text" id="account_manager_phone" name="account_manager_phone" class="phone-format"
                                                    style="width: 100%;">
                                         </td>
 
@@ -657,7 +657,8 @@
 <!-- input format 파일 불러오기 (연락처, 팩스, 우편번호 등 포맷 추가)-->
     <script src="/js/InputFormat.js"></script>
     <script type="text/javascript">
-        attachTelFormatter('#tel_number');
+        attachTelFormatterAll('.phone-format'); // 연락처 포맷 메서드
+        attachBizNumberFormatterAll('.biz-number'); // 사업자번호 포맷 메서드
         let optionMap = {};
 
         class CompanyPage {
