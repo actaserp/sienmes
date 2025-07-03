@@ -98,8 +98,8 @@ public class BaljuOrderController {
     Date dueDate = CommonUtil.trySqlDate(dueDateStr);
 
     Integer headId = CommonUtil.tryIntNull(payload.get("bh_id")); // 발주 헤더 ID
-    log.info("Balju Info => JumunDate: {}, DueDate: {}, CompanyId: {}, CompanyName: {}, Spjangcd: {}, InVatYN: {}, SpecialNote: {}, SujuType: {}" ,
-        jumunDateStr, dueDateStr, companyId, CompanyName, spjangcd, isVat, specialNote, sujuType);
+//    log.info("Balju Info => JumunDate: {}, DueDate: {}, CompanyId: {}, CompanyName: {}, Spjangcd: {}, InVatYN: {}, SpecialNote: {}, SujuType: {}" ,
+//        jumunDateStr, dueDateStr, companyId, CompanyName, spjangcd, isVat, specialNote, sujuType);
 
     BaljuHead head;
 
@@ -181,10 +181,10 @@ public class BaljuOrderController {
 
       if (isManual) {
         detail.setTotalAmount(Double.parseDouble(item.get("total_price").toString()));
-        log.info("✅ 수기입력 적용: total_price = {}", item.get("total_price"));
+        //log.info("✅ 수기입력 적용: total_price = {}", item.get("total_price"));
       } else {
         detail.setTotalAmount(supply_price + vat);
-        log.info("⚙️ 자동계산 적용: supply + vat = {}", supply_price + vat);
+        //log.info("⚙️ 자동계산 적용: supply + vat = {}", supply_price + vat);
       }
 
 
@@ -286,7 +286,7 @@ public class BaljuOrderController {
   public AjaxResult BaljuPrice(@RequestParam("mat_pk") int materialId,
                                @RequestParam("JumunDate") String jumunDate,
                                @RequestParam("company_id") int companyId){
-    log.info("발주단가 찾기 --- matPk:{}, ApplyStartDate:{},company_id:{} ",materialId,jumunDate , companyId);
+    //log.info("발주단가 찾기 --- matPk:{}, ApplyStartDate:{},company_id:{} ",materialId,jumunDate , companyId);
     List<Map<String, Object>> items = this.baljuOrderService.getBaljuPrice(materialId, jumunDate, companyId);
     AjaxResult result = new AjaxResult();
     result.data = items;

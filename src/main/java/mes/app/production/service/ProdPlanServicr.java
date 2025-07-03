@@ -115,9 +115,9 @@ public class ProdPlanServicr {
     }
 
     if ("suju_date".equals(date_kind)) {
-      sql += " order by s.\"DueDate\" desc, s.\"JumunNumber\" desc ";
+      sql += " order by s.\"JumunDate\" desc, s.\"JumunNumber\" ASC ";
     } else {
-      sql += " order by s.\"JumunDate\" desc, s.\"JumunNumber\" desc ";
+      sql += " order by s.\"JumunDate\"desc, s.\"JumunNumber\" ASC";
     }
 //    log.info("작업계획등록 read SQL: {}", sql);
 //    log.info("SQL Parameters: {}", dicParam.getValues());
