@@ -29,8 +29,11 @@ public interface MaterialRepository extends JpaRepository<Material, Integer>{
 
 	Material findByName(String matName);
 
-	@Query(value = "SELECT MAX(CAST(\"Code\" AS INTEGER)) FROM material WHERE \"Code\" LIKE '4000%'", nativeQuery = true)
+	@Query(value = "SELECT MAX(CAST(\"Code\" AS INTEGER)) FROM material WHERE LENGTH(\"Code\") = 4 AND \"Code\" ~ '^[0-9]{4}$'", nativeQuery = true)
 	String findMaxCodeBy4000Prefix();
+
+	@Query("SELECT m FROM Material m WHERE TRIM(m.name) = TRIM(:materialName)")
+	Material findByNameTrimmed(@Param("materialName") String materialName);
 
 	boolean existsByCode(String s);
 }
