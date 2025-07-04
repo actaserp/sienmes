@@ -383,14 +383,19 @@ public class BomController {
 				else lastMaterialName = matName.trim();
 				materialNames.add(matName.trim());
 			}
-
+			// 제품 material 등록/조회
 			Map<String, Integer> productNameToId = new HashMap<>();
 			for (String pname : productNames) {
 				productNameToId.put(pname, getOrCreateProductId(pname, spjangcd));
 			}
+			// 자재 material 등록/조회
 			Map<String, Integer> materialNameToId = new HashMap<>();
 			for (String mname : materialNames) {
-				materialNameToId.put(mname, getOrCreateMaterialId(mname, spjangcd));
+				if (!materialNameToId.containsKey(mname)) {
+					// 최초 등장한 자재명만 id 생성(중복 insert 방지)
+					Integer mid = getOrCreateMaterialId(mname, spjangcd);
+					materialNameToId.put(mname, mid);
+				}
 			}
 
 			List<Bom> bomList = new ArrayList<>();
@@ -414,47 +419,69 @@ public class BomController {
 			}
 			bomRepository.saveAll(bomList);
 
-			List<BomComponent> bomCompList = new ArrayList<>();
+			// BOM Component 중복(동일 materialId) 누적/합산
 			for (int pIdx = 0; pIdx < productNames.size(); pIdx++) {
 				Bom bom = bomList.get(pIdx);
-				String productName = productNames.get(pIdx);
-				Integer productId = productNameToId.get(productName);
+
+				// 중복 자재 합산 map
+				Map<Integer, BomComponent> bomCompMap = new HashMap<>();
 
 				for (int mIdx = 0; mIdx < materialNames.size(); mIdx++) {
 					List<String> row = all_rows.get(1 + mIdx);
 					int cellIdx = productStartCol + pIdx;
 					if (row.size() <= cellIdx) continue;
 					String qtyStr = row.get(cellIdx);
-					if (qtyStr == null || qtyStr.trim().isEmpty()) continue;
-					try {
-						double qty = Double.parseDouble(qtyStr.trim());
-						if (qty > 0) {
-							String materialName = materialNames.get(mIdx);
-							Integer materialId = materialNameToId.get(materialName);
-							String description = "";
-							if (row.size() > 10 && row.get(10) != null)
-								description = row.get(10).replaceAll("[\\r\\n]+", " ").trim();
+					double qty = 0;
+					try { qty = Double.parseDouble((qtyStr == null || qtyStr.trim().isEmpty()) ? "0" : qtyStr.trim()); }
+					catch (Exception ignore) { qty = 0; }
 
-							BomComponent bomComp = new BomComponent();
-							bomComp.setBomId(bom.getId());
-							bomComp.setMaterialId(materialId);
-							bomComp.setAmount((float) qty);
-							bomComp.set_creater_id(userId);
-							bomComp.set_created(startDate);
-							bomComp.set_order(1);
-							bomComp.setSpjangcd(spjangcd);
-							bomComp.setDescription(description);
+					String description = "";
+					if (row.size() > 10 && row.get(10) != null)
+						description = row.get(10).replaceAll("[\\r\\n]+", " ").trim();
 
-							bomCompList.add(bomComp);
+					String materialName = materialNames.get(mIdx);
+					Integer materialId = materialNameToId.get(materialName);
+
+					// 중복 자재 합산
+					BomComponent comp = bomCompMap.get(materialId);
+					if (comp == null) {
+						comp = new BomComponent();
+						comp.setBomId(bom.getId());
+						comp.setMaterialId(materialId);
+						comp.setAmount((float) qty);
+						comp.set_creater_id(userId);
+						comp.set_created(startDate);
+						comp.set_order(1);
+						comp.setSpjangcd(spjangcd);
+						comp.setDescription(description);
+						bomCompMap.put(materialId, comp);
+					} else {
+						comp.setAmount(comp.getAmount() + (float) qty);
+						// ---- description 병합 로직
+						Set<String> descSet = new LinkedHashSet<>();
+						// 기존
+						if (comp.getDescription() != null && !comp.getDescription().isEmpty()) {
+							for (String d : comp.getDescription().split(",")) {
+								String trimD = d.trim();
+								if (!trimD.isEmpty()) descSet.add(trimD);
+							}
 						}
-					} catch (Exception ignore) {}
+						// 새 description
+						if (description != null && !description.isEmpty()) {
+							for (String d : description.split(",")) {
+								String trimD = d.trim();
+								if (!trimD.isEmpty()) descSet.add(trimD);
+							}
+						}
+						comp.setDescription(String.join(", ", descSet));
+					}
 				}
+				bomComponentRepository.saveAll(bomCompMap.values());
 			}
-			bomComponentRepository.saveAll(bomCompList);
 			result.success = true;
 			result.data = bomList;
 
-		} else if ("01".equals(excelType)) {
+		}  else if ("01".equals(excelType)) {
 			// ===== 대양전기 =====
 			List<List<String>> all_rows = this.bomUploadService.excel_read(upload_filename);
 
@@ -478,7 +505,8 @@ public class BomController {
 				bom = bomRepository.save(bom);
 			}
 
-			List<BomComponent> bomCompList = new ArrayList<>();
+			Map<Integer, BomComponent> bomCompMap = new HashMap<>();
+			Map<String, Integer> materialNameToId = new HashMap<>(); // 자재명 → id 캐시
 			// 3번째 행(index=2)부터 끝까지 반복 (자재 정보)
 			for (int r = 2; r < all_rows.size(); r++) {
 				List<String> row = all_rows.get(r);
@@ -496,32 +524,57 @@ public class BomController {
 				String unitName = row.get(2) != null ? row.get(2).trim() : "";
 				int unitId = unitNameToIdMap.getOrDefault(unitName, 3);
 
+				// 자재 id 생성/조회
+				Integer materialId;
+				String key = materialName + "|" + materialGroupId + "|" + unitId;
+				if (materialNameToId.containsKey(key)) {
+					materialId = materialNameToId.get(key);
+				} else {
+					materialId = getOrCreateMaterialId_Daeyang(materialName, spjangcd, materialGroupId, unitId);
+					materialNameToId.put(key, materialId);
+				}
 				// 필요수량 수집
+				// 수량/설명
 				String qtyStr = row.get(3) != null ? row.get(3).trim() : "";
-				if (qtyStr.isEmpty()) continue;
 				float amount = 0f;
 				try { amount = Float.parseFloat(qtyStr); }
-				catch(Exception e) { continue; }
+				catch(Exception e) { amount = 0f; }
 
 				// 위치정보(비고) 수집
 				String location = row.size() > 5 && row.get(5) != null ? row.get(5).replaceAll("[\\r\\n]+", " ").trim() : "";
 
-
-				int materialId = getOrCreateMaterialId_Daeyang(materialName, spjangcd, materialGroupId, unitId);
-
-				BomComponent bomComp = new BomComponent();
-				bomComp.setBomId(bom.getId());
-				bomComp.setMaterialId(materialId);
-				bomComp.setAmount(amount);
-				bomComp.set_creater_id(userId);
-				bomComp.set_created(startDate);
-				bomComp.set_order(1);
-				bomComp.setSpjangcd(spjangcd);
-				bomComp.setDescription(location);
-
-				bomCompList.add(bomComp);
+				BomComponent comp = bomCompMap.get(materialId);
+				if (comp == null) {
+					comp = new BomComponent();
+					comp.setBomId(bom.getId());
+					comp.setMaterialId(materialId);
+					comp.setAmount(amount);
+					comp.set_creater_id(userId);
+					comp.set_created(startDate);
+					comp.set_order(1);
+					comp.setSpjangcd(spjangcd);
+					comp.setDescription(location);
+					bomCompMap.put(materialId, comp);
+				} else {
+					comp.setAmount(comp.getAmount() + amount);
+					// --- description(위치정보) 병합
+					Set<String> descSet = new LinkedHashSet<>();
+					if (comp.getDescription() != null && !comp.getDescription().isEmpty()) {
+						for (String d : comp.getDescription().split(",")) {
+							String trimD = d.trim();
+							if (!trimD.isEmpty()) descSet.add(trimD);
+						}
+					}
+					if (location != null && !location.isEmpty()) {
+						for (String d : location.split(",")) {
+							String trimD = d.trim();
+							if (!trimD.isEmpty()) descSet.add(trimD);
+						}
+					}
+					comp.setDescription(String.join(", ", descSet));
+				}
 			}
-			bomComponentRepository.saveAll(bomCompList);
+			bomComponentRepository.saveAll(bomCompMap.values());
 			result.success = true;
 			result.data = bom;
 		}
