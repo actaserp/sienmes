@@ -457,23 +457,13 @@ public class BomController {
 						bomCompMap.put(materialId, comp);
 					} else {
 						comp.setAmount(comp.getAmount() + (float) qty);
-						// ---- description 병합 로직
-						Set<String> descSet = new LinkedHashSet<>();
-						// 기존
-						if (comp.getDescription() != null && !comp.getDescription().isEmpty()) {
-							for (String d : comp.getDescription().split(",")) {
-								String trimD = d.trim();
-								if (!trimD.isEmpty()) descSet.add(trimD);
-							}
+						// 조건 없이 description 이어붙이기
+						if (description != null && !description.trim().isEmpty()) {
+							if (comp.getDescription() == null || comp.getDescription().trim().isEmpty())
+								comp.setDescription(description);
+							else
+								comp.setDescription(comp.getDescription() + ", " + description);
 						}
-						// 새 description
-						if (description != null && !description.isEmpty()) {
-							for (String d : description.split(",")) {
-								String trimD = d.trim();
-								if (!trimD.isEmpty()) descSet.add(trimD);
-							}
-						}
-						comp.setDescription(String.join(", ", descSet));
 					}
 				}
 				bomComponentRepository.saveAll(bomCompMap.values());
@@ -557,21 +547,13 @@ public class BomController {
 					bomCompMap.put(materialId, comp);
 				} else {
 					comp.setAmount(comp.getAmount() + amount);
-					// --- description(위치정보) 병합
-					Set<String> descSet = new LinkedHashSet<>();
-					if (comp.getDescription() != null && !comp.getDescription().isEmpty()) {
-						for (String d : comp.getDescription().split(",")) {
-							String trimD = d.trim();
-							if (!trimD.isEmpty()) descSet.add(trimD);
-						}
+					// 단순 이어붙이기 (중복 신경 안 씀)
+					if (location != null && !location.trim().isEmpty()) {
+						if (comp.getDescription() == null || comp.getDescription().trim().isEmpty())
+							comp.setDescription(location);
+						else
+							comp.setDescription(comp.getDescription() + ", " + location);
 					}
-					if (location != null && !location.isEmpty()) {
-						for (String d : location.split(",")) {
-							String trimD = d.trim();
-							if (!trimD.isEmpty()) descSet.add(trimD);
-						}
-					}
-					comp.setDescription(String.join(", ", descSet));
 				}
 			}
 			bomComponentRepository.saveAll(bomCompMap.values());
