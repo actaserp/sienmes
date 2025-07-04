@@ -96,7 +96,8 @@
 <th:block layout:fragment="scripts">
   <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
   <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
-  <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+<!--  <th:block th:replace="/common/popup_company :: popup_company"></th:block>-->
+  <th:block th:replace="/common/popup_company_Purchase :: popup_company_Purchase"></th:block>
   <script type="text/javascript">
     class BaljuOrderListPage {
       constructor() {
@@ -126,58 +127,58 @@
           },
           columns: [
             {binding: 'mat_grp_name', header: '제품그룹', width: 150, align: 'center' ,allowMerging: true},
-            {binding: 'mat_code', header: '제품코드', width: 170, align: 'center' ,allowMerging: true},
-            {binding: 'mat_name', header: '제품명', width: 150, align: 'left' ,allowMerging: true,},
+            {binding: 'mat_code', header: '제품코드', width: 120, align: 'center' ,allowMerging: true},
+            {binding: 'mat_name', header: '제품명', width: 270, align: 'left' ,allowMerging: true,},
             {binding: 'unit_name', header: '단위', width: 70, align: 'center', allowSorting: false },
             { binding: 'year_qty_sum', header: '연발주량', width: 100, align: 'right', format: 'n0', },
             { binding: 'year_money_sum', header: '연발주액', width: 100, align: 'right', format: 'n0', },
             {binding: 'company_name', header: '업체', width: 200, align: 'left', allowSorting: false },
             {
-             binding: 'mon_1', header: '1월', width: 80, align: 'right', allowSorting: false,
+             binding: 'mon_1', header: '1월', width: 95, align: 'right', allowSorting: false,
               format: 'n0',
             },
             {
-             binding: 'mon_2', header: '2월', width: 80, align: 'right', allowSorting: false,
+             binding: 'mon_2', header: '2월', width: 95, align: 'right', allowSorting: false,
               format: 'n0',
             },
             {
-             binding: 'mon_3', header: '3월', width: 80, align: 'right', allowSorting: false,
+             binding: 'mon_3', header: '3월', width: 95, align: 'right', allowSorting: false,
               format: 'n0',
             },
             {
-             binding: 'mon_4', header: '4월', width: 80, align: 'right', allowSorting: false,
+             binding: 'mon_4', header: '4월', width: 95, align: 'right', allowSorting: false,
               format: 'n0',
             },
             {
-             binding: 'mon_5', header: '5월', width: 80, align: 'right', allowSorting: false,
+             binding: 'mon_5', header: '5월', width: 95, align: 'right', allowSorting: false,
               format: 'n0',
             },
             {
-             binding: 'mon_6', header: '6월', width: 80, align: 'right', allowSorting: false,
+             binding: 'mon_6', header: '6월', width: 95, align: 'right', allowSorting: false,
               format: 'n0',
             },
             {
-             binding: 'mon_7', header: '7월', width: 80, align: 'right', allowSorting: false,
+             binding: 'mon_7', header: '7월', width: 95, align: 'right', allowSorting: false,
               format: 'n0',
             },
             {
-             binding: 'mon_8', header: '8월', width: 80, align: 'right', allowSorting: false,
+             binding: 'mon_8', header: '8월', width: 95, align: 'right', allowSorting: false,
               format: 'n0',
             },
             {
-             binding: 'mon_9', header: '9월', width: 80, align: 'right', allowSorting: false,
+             binding: 'mon_9', header: '9월', width: 95, align: 'right', allowSorting: false,
               format: 'n0',
             },
             {
-             binding: 'mon_10', header: '10월', width: 80, align: 'right', allowSorting: false,
+             binding: 'mon_10', header: '10월', width: 95, align: 'right', allowSorting: false,
               format: 'n0',
             },
             {
-             binding: 'mon_11', header: '11월', width: 80, align: 'right', allowSorting: false,
+             binding: 'mon_11', header: '11월', width: 95, align: 'right', allowSorting: false,
               format: 'n0',
             },
             {
-             binding: 'mon_12', header: '12월', width: 80, align: 'right', allowSorting: false,
+             binding: 'mon_12', header: '12월', width: 95, align: 'right', allowSorting: false,
               format: 'n0',
             },
           ],
@@ -211,7 +212,7 @@
             }
 
             //중앙 정렬 컬럼
-            if (['mat_grp_name', 'mat_code', 'mat_name', 'unit_name'].includes(colName)) {
+            if (['mat_grp_name', 'mat_code', 'unit_name'].includes(colName)) {
               cell.style.textAlign = 'center';
               cell.style.verticalAlign = 'middle';
               cell.style.display = 'flex';
@@ -276,7 +277,7 @@
       });
 
       $('#btnCompanySearch').click(function () {
-        let poppage = new PopCompComponent();
+        let poppage = new PopCompComponentPurchase();
         let $poppage = $(poppage);
         let searchcallback = function (items) {
           // $content.find('#cboCompany').val(items.id);

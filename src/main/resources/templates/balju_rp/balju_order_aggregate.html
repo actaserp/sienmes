@@ -86,6 +86,7 @@
 <th:block layout:fragment="scripts">
   <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
   <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+  <th:block th:replace="/common/popup_company_Purchase :: popup_company_Purchase"></th:block>
   <script type="text/javascript">
 
 
@@ -116,21 +117,21 @@
           },
           columns: [
             { binding: 'mat_grp_name', header: '제품그룹', width: 150 ,allowMerging: true },
-            { binding: 'mat_code', header: '제품코드', width: 200 ,allowMerging: true },
-            { binding: 'mat_name', header: '제품명', width: 250 ,allowMerging: true },
+            { binding: 'mat_code', header: '제품코드', width: 150 ,allowMerging: true },
+            { binding: 'mat_name', header: '제품명', width: '*', allowMerging: true , align: 'left'},
             { binding: 'unit_name', header: '단위', width: 70, allowSorting: false },
             { binding: 'tot_price_sum', header: '공급가액', width: 120, align: 'right', format: 'n0' },
             { binding: 'tot_vat_sum', header: '부과세액', width: 120, align: 'right', format: 'n0' },
             { binding: 'amount_sum', header: '발주액', width: 120, align: 'right', format: 'n0' },
             { binding: 'tot_suju_sum', header: '발주량', width: 120, align: 'right', format: 'n0' },
-            { binding: 'company_name', header: '업체', width: 250, allowSorting: false },
+            { binding: 'company_name', header: '업체', width: 150, allowSorting: false },
           ],
           itemsSource: this.viewData,
         });
         this.grid.itemFormatter = function (panel, row, col, cell) {
           if (panel.cellType === wijmo.grid.CellType.Cell) {
             let colName = panel.columns[col].binding;
-            if (['mat_grp_name', 'mat_code', 'mat_name', 'unit_name'].includes(colName)) {
+            if (['mat_grp_name', 'mat_code', 'unit_name'].includes(colName)) {
               cell.style.textAlign = 'center';          // 수평 가운데
               cell.style.verticalAlign = 'middle';      // 수직 가운데
               cell.style.display = 'flex';              // flex로 정렬
@@ -160,7 +161,7 @@
         });
 
         new FlexGridContextMenu(this.grid);
-        this.grid.downloadFileName = '수주량집계';
+        this.grid.downloadFileName = '발주량 집계';
       }
 
 
@@ -188,7 +189,7 @@
           includeColumnHeaders: true,
           includeCellStyles: false,
         }, (blob) => {
-          wijmo.saveFile(blob, '수주량.xlsx');
+          wijmo.saveFile(blob, '발주량 집계.xlsx');
         });
       }
     }
@@ -226,7 +227,7 @@
 
       $('#btnCompanySearch').click(function () {
 
-        let poppage = new PopCompComponent();
+        let poppage = new PopCompComponentPurchase();
         let $poppage = $(poppage);
         let searchcallback = function (items) {
           // $content.find('#cboCompany').val(items.id);

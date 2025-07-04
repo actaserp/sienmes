@@ -770,6 +770,58 @@ public class PopupController {
             OR "CompanyType" = 'sale-purchase')
             and "relyn" = '0'
 			""";
+		//relyn = 거래중지 여부
+		
+		if (compCode != null && !compCode.isEmpty()) {
+			sql += " AND \"Code\" ILIKE :compCode ";
+			paramMap.addValue("compCode", "%" + compCode + "%");
+		}
+
+		if (compName != null && !compName.isEmpty()) {
+			sql += " AND \"Name\" ILIKE :compName ";
+			paramMap.addValue("compName", "%" + compName + "%");
+		}
+
+		if (business_number != null && !business_number.isEmpty()) {
+			sql += " AND \"BusinessNumber\" ILIKE :business_number ";
+			paramMap.addValue("business_number", "%" + business_number + "%");
+		}
+
+		sql += " ORDER BY \"Name\" ASC ";
+
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+
+		return result;
+	}
+
+	@RequestMapping("/search_Comp_all")
+	public AjaxResult getSearchCompAll(
+			@RequestParam(value = "compCode", required = false) String compCode,
+			@RequestParam(value = "compName", required = false) String compName,
+			@RequestParam(value = "business_number", required = false) String business_number){
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("compCode", compCode);
+		paramMap.addValue("compName", compName);
+		paramMap.addValue("business_number", business_number);
+		AjaxResult result = new AjaxResult();
+
+		String sql = """
+            select id as id
+            , "Name" as compName
+            , "Code" as compCode
+            , "BusinessNumber" as business_number
+            , "TelNumber" as tel_number
+            , "CEOName" as invoiceeceoname
+            , "Address" as invoiceeaddr
+            , "BusinessType" as invoiceebiztype
+            , "BusinessItem" as invoiceebizclass
+            , "AccountManager" as invoiceecontactname1
+            , "AccountManagerPhone" as invoiceetel1
+            , "Email" as invoiceeemail1
+            from company
+            WHERE  "relyn" = '0'
+			""";
 
 		if (compCode != null && !compCode.isEmpty()) {
 			sql += " AND \"Code\" ILIKE :compCode ";
