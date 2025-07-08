@@ -341,8 +341,8 @@
                             </a>
                         </li>
                         <li>
-                            <a class="btn" title="다중 입고" id="btnMultiInput">
-                                다중 입고
+                            <a class="btn" title="엑셀업로드" id="btnMultiInput">
+                                엑셀업로드
                             </a>
                         </li>
 <!--                        <li>-->
@@ -477,174 +477,186 @@
 
     <script type="text/x-tmpl" id="returnDataPopup">
         <div class="content_wrap popup">
-            <div class="table-wrap">
-                <form id="materialInoutForm">
-                    <input type="hidden" id="mio_pk" name="mio_pk">
-                    <table class="write-table">
-                        <tbody>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="inoutDate">반품일</label>
-                                </th>
-                                <td>
-                                    <input class="form-control2" id="inoutDate" name="inoutDate" type="datetime-local">
-                                </td>
-
-                                <th style="text-align: center; display:none;">
-                                    <label for="inoutSelect">입출 구분</label>
-                                </th>
-                                <td style="display:none;">
-                                    <select id="inoutSelect" name="inoutSelect" disabled>
-                                        <option value="in">품목 입고</option>
-                                        <option value="out">품목 출고</option>
-                                        <option value="return" selected>입고 반품</option>
-                                        <option value="recall">출고 회수</option>
-                                    </select>
-                                    <input type="hidden" id="inoutSelect_hidden" name="inoutSelect_hidden">
-                                </td>
-                                <th style="text-align: center">
-                                    <label for="InoutType">구분</label>
-                                </th>
-                                <td colspan="3">
-                                    <select class="select_input" id="InoutType" name="InoutType" disabled></select>
-                                    <input id="InoutType_hidden" name="InoutType_hidden" type="hidden">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="cboCompany">구매처</label>
-                                </th>
-                                <td colspan="3">
-                                    <input id="cboCompany" name="cboCompany" type="hidden">
-                                    <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
-                                     placeholder="검색버튼을 클릭하여 구매처를 검색하세요" readonly/>
-                                    &nbsp;
-                                    <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                        구매처 검색
+            <div class="tab-wrap">
+                <ul class="tab-links">
+                    <li><a href="#tab1" style="border: 1px solid #E5E7EC; border-bottom: 0;">발주 반품</a></li>
+                    <li><a href="#tab2" style="border: 1px solid #E5E7EC; border-bottom: 0;">반품 등록</a></li>
+                </ul>
+                <div>
+                    <section class="tab-item" id="tab1" style="border-top-left-radius: 0;">
+                        <div style="margin-top:20px;">
+                            <div class="search-wrap" style="justify-content: flex-start;">
+                              <dl>
+                                <dt style="display:flex;">
+                                  조회기간
+                                </dt>
+                                <dd>
+                                  <ul class="date-box">
+                                    <li>
+                                      <input type="date" id="srchStartDt" name="srchStartDt">
+                                      <label for="srchStartDt" class="hide">시작일</label>
+                                    </li>
+                                    <li>
+                                      <input type="date" id="srchEndDt" name="srchEndDt">
+                                      <label for="srchEndDt" class="hide">종료일</label>
+                                    </li>
+                                  </ul>
+                                </dd>
+                              </dl>
+                                <dl>
+                                    <dt style="text-align:left;">
+                                        <label>
+                                            구매처
+                                        </label>
+                                    </dt>
+                                    <dd>
+                                        <input type="text" id="btnCompanySearchB" name="btnCompanySearchB" placeholder="구매처명 입력후 엔터"
+                                               style="width: 140px;" autocomplete="off" tabindex="3">
+                                        <input type="hidden" id="cboCompanyHidden">
+                                    </dd>
+                                </dl>
+                              <dl>
+                                    <dt style="text-align:left;">
+                                        <label for="txtMatNameB">
+                                            품명
+                                        </label>
+                                    </dt>
+                                    <dd>
+                                        <div class="srch-box">
+                                            <input style="width: 140px;" id="txtMatNameB" name="txtMatNameB"/>
+                                        </div>
+                                    </dd>
+                              </dl>
+                                <dl>
+                                <dt>&nbsp;</dt>
+                                <dd>
+                                  <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                      <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                      <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                      검색
                                     </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="cboMaterialType">품목유형</label>
-                                </th>
-                                <td>
-                                    <input class="form-control2" id="cboMaterialType" name="cboMaterialType" readonly type="hidden"/>
-                                    <input class="form-control2" id="cboMaterialTypeName" name="cboMaterialTypeName" readonly />
-                                </td>
-                                <th style="text-align: center">
-                                    <label for="cboMaterialGroup">품목그룹</label>
-                                </th>
-                                <td>
-                                    <input id="cboMaterialGroup" name="cboMaterialGroup" readonly type="hidden"/>
-                                    <input id="cboMaterialGroupName" name="cboMaterialGroupName" readonly />
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="Material_id">품목</label>
-                                </th>
-                                <td colspan="3">
-                                    <input id="Material_id" name="Material_id" readonly type="hidden" />
-                                    <input id="Material_name" name="Material_name" readonly placeholder="품목 조회 버튼을 클릭하여 선택하세요." />
-                                    &nbsp;
-                                    <a class="btn" title="품목 조회" id="btnMaterial">
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                        품목조회
-                                    </a>
-
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="InoutQty">수량</label>
-                                </th>
-                                <td>
-                                    <input id="InoutQty" name="InoutQty" />
-                                </td>
-                                <th style="text-align: center">
-                                    <label for="StoreHouse_id">창고지정</label>
-                                </th>
-                                <td>
-                                    <select id="StoreHouse_id" name="StoreHouse_id"  />
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
-                                    <label for="Description">비고</label>
-                                </th>
-                                <td colspan="3">
-                                    <textarea style="width:700px; height:45px; vertical-align:middle;" id="Description" name="Description"></textarea>
-                                    <button type="button" style="float: right; margin-top:4px;" class="btn-popup" id="btnSave" ><span data-labelCd="반품 등록">반품하기</span></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
-            <div style="margin-top:20px;">
-                <div class="search-wrap" style="justify-content: flex-start;">
-                  <dl>
-                    <dt style="display:flex;">
-                      조회기간
-                    </dt>
-                    <dd>
-                      <ul class="date-box">
-                        <li>
-                          <input type="date" id="srchStartDt" name="srchStartDt">
-                          <label for="srchStartDt" class="hide">시작일</label>
-                        </li>
-                        <li>
-                          <input type="date" id="srchEndDt" name="srchEndDt">
-                          <label for="srchEndDt" class="hide">종료일</label>
-                        </li>
-                      </ul>
-                    </dd>
-                  </dl>
-                    <dl>
-                        <dt style="text-align:left;">
-                            <label>
-                                구매처
-                            </label>
-                        </dt>
-                        <dd>
-                            <input type="text" id="btnCompanySearchB" name="btnCompanySearchB" placeholder="구매처명 입력후 엔터"
-                                   style="width: 140px;" autocomplete="off" tabindex="3">
-                            <input type="hidden" id="cboCompanyHidden">
-                        </dd>
-                    </dl>
-                  <dl>
-                        <dt style="text-align:left;">
-                            <label for="txtMatNameB">
-                                품명
-                            </label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <input style="width: 140px;" id="txtMatNameB" name="txtMatNameB"/>
+                                  </li>
+                                </dd>
+                              </dl>
                             </div>
-                        </dd>
-                  </dl>
-                    <dl>
-                    <dt>&nbsp;</dt>
-                    <dd>
-                      <li>
-                        <a class="btn btn-delete" title="검색" id="btnSearch">
-                          <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                          <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                          검색
-                        </a>
-                      </li>
-                    </dd>
-                  </dl>
-                </div>
-                <div class="container-fluid">
-                    <div id="balju-return-grid" style="height: 200px;"></div>
+                            <div class="container-fluid">
+                                <div id="balju-return-grid" style="height: 330px;"></div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="tab-item" id="tab2" style="border-top-left-radius: 0;">
+                        <div class="table-wrap" style="margin-top:20px;">
+                            <form id="materialInoutForm">
+                                <input type="hidden" id="mio_pk" name="mio_pk">
+                                <table class="write-table">
+                                    <tbody>
+                                        <tr>
+                                            <th style="text-align: center">
+                                                <label for="inoutDate">반품일</label>
+                                            </th>
+                                            <td>
+                                                <input class="form-control2" id="inoutDate" name="inoutDate" type="datetime-local">
+                                            </td>
+
+                                            <th style="text-align: center; display:none;">
+                                                <label for="inoutSelect">입출 구분</label>
+                                            </th>
+                                            <td style="display:none;">
+                                                <select id="inoutSelect" name="inoutSelect" disabled>
+                                                    <option value="in">품목 입고</option>
+                                                    <option value="out">품목 출고</option>
+                                                    <option value="return" selected>입고 반품</option>
+                                                    <option value="recall">출고 회수</option>
+                                                </select>
+                                                <input type="hidden" id="inoutSelect_hidden" name="inoutSelect_hidden">
+                                            </td>
+                                            <th style="text-align: center">
+                                                <label for="InoutType">구분</label>
+                                            </th>
+                                            <td colspan="3">
+                                                <select class="select_input" id="InoutType" name="InoutType" disabled></select>
+                                                <input id="InoutType_hidden" name="InoutType_hidden" type="hidden">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="text-align: center">
+                                                <label for="cboCompany">구매처</label>
+                                            </th>
+                                            <td colspan="3">
+                                                <input id="cboCompany" name="cboCompany" type="hidden">
+                                                <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
+                                                 placeholder="검색버튼을 클릭하여 구매처를 검색하세요" readonly/>
+                                                &nbsp;
+                                                <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                                    구매처 검색
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="text-align: center">
+                                                <label for="cboMaterialType">품목유형</label>
+                                            </th>
+                                            <td>
+                                                <input class="form-control2" id="cboMaterialType" name="cboMaterialType" readonly type="hidden"/>
+                                                <input class="form-control2" id="cboMaterialTypeName" name="cboMaterialTypeName" readonly />
+                                            </td>
+                                            <th style="text-align: center">
+                                                <label for="cboMaterialGroup">품목그룹</label>
+                                            </th>
+                                            <td>
+                                                <input id="cboMaterialGroup" name="cboMaterialGroup" readonly type="hidden"/>
+                                                <input id="cboMaterialGroupName" name="cboMaterialGroupName" readonly />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="text-align: center">
+                                                <label for="Material_id">품목</label>
+                                            </th>
+                                            <td colspan="3">
+                                                <input id="Material_id" name="Material_id" readonly type="hidden" />
+                                                <input id="Material_name" name="Material_name" readonly placeholder="품목 조회 버튼을 클릭하여 선택하세요." />
+                                                &nbsp;
+                                                <a class="btn" title="품목 조회" id="btnMaterial">
+                                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                                    품목조회
+                                                </a>
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="text-align: center">
+                                                <label for="InoutQty">수량</label>
+                                            </th>
+                                            <td>
+                                                <input id="InoutQty" name="InoutQty" />
+                                            </td>
+                                            <th style="text-align: center">
+                                                <label for="StoreHouse_id">창고지정</label>
+                                            </th>
+                                            <td>
+                                                <select id="StoreHouse_id" name="StoreHouse_id"  />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="text-align: center">
+                                                <label for="Description">비고</label>
+                                            </th>
+                                            <td colspan="3">
+                                                <textarea id="Description" name="Description"></textarea>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
+                    </section>
                 </div>
             </div>
             <div class="popup-button">
                 <button type="button" class="btn-popup" id="btnBaljuReturnSave" ><span data-labelCd="발주 반품">발주 반품</span></button>
+                <button type="button" class="btn-popup" id="btnSave" ><span data-labelCd="발주 반품">발주 반품</span></button>
                 <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
             </div>
         </div>
@@ -1471,7 +1483,37 @@
                 let modalContainer = null;
                 modalContainer = new PopupDraggable('입고 반품');
 
-                modalContainer.open({width: 1100, height: 690, $content});
+                $content.find('#tab1').show();
+                $content.find('#tab2').hide();
+                $content.find('.tab-links li').removeClass('active');
+                $content.find('.tab-links li a[href="#tab1"]').parent().addClass('active');
+                $content.find('#btnBaljuReturnSave').show();
+                $content.find('#btnSave').hide();
+
+                $content.find('.tab-links a').on('click', function (e) {
+                    e.preventDefault();
+
+                    const target = $(this).attr('href');
+
+                    // 탭 전환
+                    $content.find('.tab-item').hide();
+                    $content.find(target).show();
+                    $content.find('.tab-links li').removeClass('active');
+                    $(this).parent().addClass('active');
+
+                    // 버튼 표시 제어
+                    if (target === '#tab1') {
+                        $content.find('#btnBaljuReturnSave').show();
+                        $content.find('#btnSave').hide();
+                    } else if (target === '#tab2') {
+                        $content.find('#btnBaljuReturnSave').hide();
+                        $content.find('#btnSave').show();
+                    }
+                });
+
+
+
+                modalContainer.open({width: 1100, height: 570, $content});
                 popup = new materialInoutPopup();
                 //AjaxUtil.fillSelectOptions($content.find('#StoreHouse_id'), 'store_house', 'choose', 3);    // 3:자재창고
                 AjaxUtil.fillSelectOptions($content.find('#StoreHouse_id'), 'store_house', 'choose', '');    // 3:자재창고
