@@ -141,6 +141,9 @@
                     <a class="btn btn-delete" title="출하품목 추가" id="btnAddMat">
                         출하품목 추가
                     </a>
+                    <a class="btn btn-delete" title="강제 완료" id="btnCompletionMat">
+                        강제 완료
+                    </a>
                 </div>
             </div>
             <div class="grid_box" id="divList">
@@ -837,6 +840,41 @@
                     return;
                 }
                 page.addShipMat();
+
+            });
+
+            $("#cboSource").change(function () {
+                const source = $(this).val();
+
+                if (source === 'product') {
+                    $("#btnCompletionMat").hide();  // 숨김
+                } else {
+                    $("#btnCompletionMat").show();  // 표시
+                }
+            }).trigger("change"); // 페이지 로드시 초기 상태도 반영
+
+
+            // 강제 완료
+            $("#btnCompletionMat").click(function (e) {
+
+                if (($("#cboSource").val() == 'suju') && (SelectItem.length === 0 || SelectItem === undefined)) {
+                    Alert.alert('', '제품을 선택해 주세요.');
+                    return;
+                }
+
+                const sujuPkList = SelectItem.map(row => row._data.suju_pk);
+
+                let fnSuccess = function (res) {
+                    if (res.success) {
+                        Notify.success('강제 완료 성공.');
+                        page.searchMain();
+                    } else {
+                        const message = res.message ?? '강제 완료 실패';
+                        Alert.alert('', message);
+                    }
+                };
+
+                AjaxUtil.postJsonData('/api/sales/suju/force-complete', { sujuPkList }, fnSuccess);
 
             });
 

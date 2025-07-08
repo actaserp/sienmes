@@ -304,6 +304,7 @@
 
                 // 근무조
                 this.workshifOptions = AjaxUtil.getSelectDataWithNull('shift', 'choose');
+                console.log('workshifOptions', this.workshifOptions);
 
                 let dicWorkShift = {};
                 $.each(this.workshifOptions, function (idx, item) {
@@ -625,7 +626,8 @@
                         $.each(result.data, function (idx, item) {
                             item['prod_date'] = prod_date;
                             if (!item.workshift) {
-                                item.workshift = _this.workshifOptions.length > 0 ? _this.workshifOptions[1].value : null;
+                                // 주간조를 디폴트로 선택
+                                item.workshift = _this.workshifOptions.length > 0 ? _this.workshifOptions[2].value : null;
                             }
                         });
 

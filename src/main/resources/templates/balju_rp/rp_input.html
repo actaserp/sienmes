@@ -751,6 +751,9 @@
                           <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                           검색
                         </a>
+                        <a class="btn btn-delete" title="강제 완료" id="btnCompletionMat">
+                            강제 완료
+                        </a>
                       </li>
                     </dd>
                   </dl>
@@ -2015,6 +2018,34 @@
                     };
 
                     AjaxUtil.postJsonAsyncData(url, items, fnSuccess);
+                });
+
+                // 발주 강제 완료
+                $content.find('#btnCompletionMat').on('click', function () {
+                    let url = _this.url + '/force-complete';
+                    let items = _this.baljuInputGrid.rows
+                        .filter(row => row.isSelected)
+                        .map(row => row.dataItem);
+
+                    console.log(items);
+
+                    if (!items || items.length === 0) {
+                        Alert.alert('', '강제 완료할 항목을 선택하세요.');
+                        return;
+                    }
+
+                    const baljuPkList = items.map(item => item.id);
+
+                    let fnSuccess = function (res) {
+                        if (!res.success) {
+                            Alert.alert('', res.message);
+                        } else {
+                            Notify.success('저장되었습니다');
+                            fnLoadBaljuList();
+                        }
+                    };
+
+                    AjaxUtil.postJsonData(url, { baljuPkList }, fnSuccess);
                 });
 
             }

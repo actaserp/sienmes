@@ -1000,6 +1000,16 @@ public class MaterialInoutController {
 		return result;
 	}
 
+	@PostMapping("/force-complete")
+	@Transactional
+	public AjaxResult forceCompleteSuju(@RequestBody Map<String, Object> payload) {
+		AjaxResult result = new AjaxResult();
+
+		List<Integer> sujuPkList = (List<Integer>) payload.get("baljuPkList");
+		bujuRepository.forceCompleteBaljuList(sujuPkList);
+		return result;
+	}
+
 	@PostMapping("/save_balju_return")
 	@Transactional
 	public AjaxResult saveBaljuReturn(

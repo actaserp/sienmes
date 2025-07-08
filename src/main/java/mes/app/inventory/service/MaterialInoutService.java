@@ -603,6 +603,7 @@ public class MaterialInoutService {
           and b."JumunDate" between :start and :end 
           AND COALESCE(mi."SujuQty2", 0) < b."SujuQty"
           and b.spjangcd = :spjangcd
+          and "State" != 'force_completion'
 			order by b."JumunDate" desc,  m."Name"
 			""";
 
