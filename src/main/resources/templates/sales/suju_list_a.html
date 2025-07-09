@@ -327,7 +327,8 @@
                     <table class="item-table">
 
                     <colgroup>
-                        <col style="width: 22%">
+                        <col style="width: 6%">
+                        <col style="width: 18%">
                         <col style="width: 5%">
                         <col style="width: 13%">
                         <col style="width: 9%">
@@ -335,11 +336,12 @@
                         <col style="width: 9%">
                         <col style="width: 10%">
                         <col style="width: 11%">
-                        <col style="width: 8%">
+                        <col style="width: 6%">
                         <col style="width: 4%">
                     </colgroup>
                     <thead>
                     <tr id="itemHeaderRow">
+                        <th>코드</th>
                         <th>품목</th>
                         <th>수량</th>
                         <th>단가 <span style="font-size: 13px;">(선택시 부가세 포함)</span></th>
@@ -358,12 +360,14 @@
                     </thead>
                     <tr class="item-template-row" style="display: none;">
                         <td>
+                            <input type="text" name="product_code" readonly/>
+                        </td>
+                        <td>
                             <div class="input-with-button">
                                 <input type="hidden" name="suju_id" />
-                                <input type="text" name="txtProductName" placeholder="입력 후 엔터" autocomplete="off" />
+                                <input type="text" name="txtProductName" placeholder="코드 또는 품명 입력 후 엔터" autocomplete="off" />
                                 <input type="hidden" name="MaterialGroupName" />
                                 <input type="hidden" name="Material_id" />
-                                <input type="hidden" name="product_code" />
                                 <a class="btn in_btn" title="품목 검색" id="btnProductSearch" >
                                     <img src="/images/icon/btn-srch-black.svg" alt="검색 아이콘" />
                                 </a>
@@ -439,7 +443,6 @@
                 </form>
             </div>
             <div class="pt-2">
-                <span style="padding-top:30px;">*미리 등록된 거래처만 엑셀 업로드가 가능합니다.</span>
                 <textarea id="upload_message" style='display:none;width:100%;height:150px;'></textarea>
             </div>
 
@@ -978,7 +981,6 @@
                     const $productInput = $row.find('input[name^="txtProductName_"]');
                     const $productId = $row.find('input[name^="Material_id_"]');
                     const $productCode = $row.find('input[name^="product_code_"]');
-                    const $materialGroup = $row.find('input[name^="MaterialGroupName_"]');
 
                     const keyword = $field.val().trim();
                     const pop = new PopMatComponent();
@@ -987,7 +989,7 @@
                     const callback = function (item) {
                         $productId.val(item.id || '');
                         $productInput.val(item.Name || '');
-                        // $row.find('textarea[id$=".Spec"]').val(item.Spec || '');
+                        $productCode.val(item.Code || '');
                         tryShowPrice($row);
                     };
 
@@ -1015,6 +1017,22 @@
                         }, 50);
                     }
                 });
+
+                // 품목명 지우면 코드들도 같이 지워지게
+                $content.on('input', 'input[name^="txtProductName_"]', function () {
+                    const $field = $(this);
+                    const $row = $field.closest('tr');
+
+                    const $productId = $row.find('input[name^="Material_id_"]');
+                    const $productCode = $row.find('input[name^="product_code_"]');
+
+                    if ($field.val().trim() === '') {
+                        // 값이 비었을 경우 연관된 필드 초기화
+                        $productId.val('');
+                        $productCode.val('');
+                    }
+                });
+
 
                 // 프로젝트 팝업 열기
                 $content.on('keydown', 'input[name^="project_"]', function (e) {
@@ -1074,6 +1092,94 @@
 
                         $newRow.find('a[title="삭제"]').attr('id', `btnDelItem_${index}`);
                         $tbody.append($newRow);
+                    }
+                });
+
+                // 포커스 자동 이동: Enter + 방향키(←→↑↓)
+                $content.on('keydown', 'input', function (e) {
+                    const key = e.key;
+
+                    if (!['Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(key)) return;
+                    e.preventDefault();
+
+                    const $input = $(this);
+                    const $row = $input.closest('tr');
+                    const nameAttr = $input.attr('name') || '';
+
+                    const focusOrder = [
+                        'txtProductName_',
+                        'quantity_',
+                        'unitPrice_',
+                        'supplyAmount_',
+                        'VatAmount_',
+                        'totalAmount_',
+                        'project_',
+                        'description_',
+                    ];
+
+                    const currentIndex = focusOrder.findIndex(prefix => nameAttr.startsWith(prefix));
+                    if (currentIndex === -1) return;
+
+                    let $nextInput = null;
+
+                    // ↔️ 좌우 이동
+                    if (key === 'ArrowRight' && currentIndex < focusOrder.length - 1) {
+                        const nextPrefix = focusOrder[currentIndex + 1];
+                        $nextInput = $row.find(`input[name^="${nextPrefix}"]`);
+                    } else if (key === 'ArrowLeft' && currentIndex > 0) {
+                        const prevPrefix = focusOrder[currentIndex - 1];
+                        $nextInput = $row.find(`input[name^="${prevPrefix}"]`);
+                    }
+
+                    // ↕️ 상하 이동
+                    if (key === 'ArrowDown' || key === 'ArrowUp') {
+                        const $targetRow = key === 'ArrowDown'
+                            ? $row.nextAll('tr:visible').first()
+                            : $row.prevAll('tr:visible').first();
+
+                        const allowAutoAdd = ['txtProductName_', 'description_'];
+                        const isAllowedField = allowAutoAdd.some(prefix => nameAttr.startsWith(prefix));
+
+                        // ⬇️ 방향키 + 현재 행이 마지막 + 허용된 필드일 경우 → 행 자동 추가
+                        if (key === 'ArrowDown' && !$targetRow.length && isAllowedField) {
+                            $content.find('#addRemark').trigger('click');
+
+                            setTimeout(() => {
+                                const $rows = $content.find('.item-table tbody tr:visible').not('.item-template-row');
+                                const $newRow = $rows.last();
+                                const $newInput = $newRow.find('input[name^="txtProductName_"]');
+                                if ($newInput.length) $newInput.focus().select();
+                            }, 50);
+                            return;
+                        }
+                        // 일반 상하 이동
+                        $nextInput = $targetRow.find(`input[name^="${focusOrder[currentIndex]}"]`);
+                    }
+
+                    // ↵ Enter 키: 현재 행 내 다음 필드
+                    if (key === 'Enter' && currentIndex < focusOrder.length - 1) {
+                        const nextPrefix = focusOrder[currentIndex + 1];
+                        $nextInput = $row.find(`input[name^="${nextPrefix}"]`);
+                    } else if (key === 'Enter' && nameAttr.startsWith('description_')) {
+                        const $nextRow = $row.nextAll('tr:visible').first();
+                        if (!$nextRow.length) {
+                            //console.log('다음 행 없음. 행 자동 추가 트리거.');
+                            $content.find('#addRemark').trigger('click');
+
+                            setTimeout(() => {
+                                const $rows = $content.find('.item-table tbody tr:visible').not('.item-template-row');
+                                const $newRow = $rows.last();
+                                const $newInput = $newRow.find('input[name^="txtProductName_"]');
+                                if ($newInput.length) $newInput.focus().select();
+                            }, 50);
+                            return;
+                        } else {
+                            $nextInput = $nextRow.find('input[name^="txtProductName_"]');
+                        }
+                    }
+
+                    if ($nextInput && $nextInput.length) {
+                        $nextInput.focus().select();
                     }
                 });
 

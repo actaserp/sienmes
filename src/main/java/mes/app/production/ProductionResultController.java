@@ -880,7 +880,7 @@ public class ProductionResultController {
     }
 
     @PostMapping("/chasu_add")
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional
     public AjaxResult chasuAdd(
             @RequestParam(value = "jr_pk", required = false) Integer jrPk,
             @RequestParam(value = "good_qty", required = false) float goodQty,

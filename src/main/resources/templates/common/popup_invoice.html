@@ -1781,5 +1781,92 @@
             }
         });
 
+        // 포커스 자동 이동: Enter + 방향키(←→↑↓)
+        $(document).on('keydown', 'input, textarea', function (e) {
+            const key = e.key;
+
+            if (!['Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(key)) return;
+            e.preventDefault();
+
+            const $input = $(this);
+            const $row = $input.closest('tr');
+            const nameAttr = $input.attr('name') || '';
+
+            const focusOrder = [
+                'ItemName',
+                'Spec',
+                'Qty',
+                'UnitCost',
+                'SupplyCost',
+                'Tax',
+                'Remark'
+            ];
+
+            const currentIndex = focusOrder.findIndex(key => nameAttr.includes(key));
+            if (currentIndex === -1) return;
+
+            let $nextInput = null;
+
+            // ↔️ 좌우 이동
+            if (key === 'ArrowRight' && currentIndex < focusOrder.length - 1) {
+                const nextKey = focusOrder[currentIndex + 1];
+                $nextInput = $row.find(`[name*="${nextKey}"]`);
+            } else if (key === 'ArrowLeft' && currentIndex > 0) {
+                const prevKey = focusOrder[currentIndex - 1];
+                $nextInput = $row.find(`[name*="${prevKey}"]`);
+            }
+
+            // ↕️ 상하 이동
+            if (key === 'ArrowDown' || key === 'ArrowUp') {
+                const $targetRow = key === 'ArrowDown'
+                    ? $row.nextAll('tr:visible').first()
+                    : $row.prevAll('tr:visible').first();
+
+                const targetKey = focusOrder[currentIndex];
+
+                if (key === 'ArrowDown' && !$targetRow.length) {
+                    // 마지막 줄에서 ↓ 누른 경우 행 추가
+                    $('#btnAddFiveDetails').trigger('click');
+
+                    setTimeout(() => {
+                        const $rows = $('.item-table tbody tr:visible').not('.item-template-row');
+                        const $newRow = $rows.last();
+                        const $newInput = $newRow.find(`[name*="ItemName"]`);
+                        if ($newInput.length) $newInput.focus().select();
+                    }, 50);
+                    return;
+                }
+
+                $nextInput = $targetRow.find(`[name*="${targetKey}"]`);
+            }
+
+            // ↵ Enter: 현재 줄에서 다음 필드
+            if (key === 'Enter' && currentIndex < focusOrder.length - 1) {
+                const nextKey = focusOrder[currentIndex + 1];
+                $nextInput = $row.find(`[name*="${nextKey}"]`);
+            } else if (key === 'Enter' && nameAttr.includes('Remark')) {
+                const $nextRow = $row.nextAll('tr:visible').first();
+
+                if (!$nextRow.length) {
+                    $('#btnAddFiveDetails').trigger('click');
+
+                    setTimeout(() => {
+                        const $rows = $('.item-table tbody tr:visible').not('.item-template-row');
+                        const $newRow = $rows.last();
+                        const $newInput = $newRow.find(`[name*="ItemName"]`);
+                        if ($newInput.length) $newInput.focus().select();
+                    }, 50);
+                    return;
+                } else {
+                    $nextInput = $nextRow.find(`[name*="ItemName"]`);
+                }
+            }
+
+            if ($nextInput && $nextInput.length) {
+                $nextInput.focus().select();
+            }
+        });
+
+
 
     </script>

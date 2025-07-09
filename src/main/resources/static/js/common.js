@@ -886,6 +886,16 @@ let FormUtil = {
 
 
 let AjaxUtil = {
+    showLoading: function () {
+        try {
+            window.parent.$('#loader2').show(); // 여기만 바꾸면 됨
+        } catch (e) {}
+    },
+    hideLoading: function () {
+        try {
+            window.parent.$('#loader2').hide();
+        } catch (e) {}
+    },
     failureCallback: function (req, status, error) {
         let message = '에러가 발생했습니다.';
 
@@ -940,7 +950,8 @@ let AjaxUtil = {
     getAsyncData: function (url, param_data, fn_success, fn_failure) {
         param_data = param_data || {};
         param_data.spjangcd = sessionStorage.getItem('spjangcd');
-        console.log('sessionStorage.getItem(\'spjangcd\')', sessionStorage.getItem('spjangcd'));
+
+
         $.ajax({
             async: true,
             dataType: 'json',
@@ -970,7 +981,7 @@ let AjaxUtil = {
             param_data['_csrf'] = csrf;
             param_data['spjangcd'] = sessionStorage.getItem('spjangcd');
         }
-        
+        AjaxUtil.showLoading();
         $.ajax({
             async: false,
             dataType: 'json',
@@ -986,13 +997,16 @@ let AjaxUtil = {
                 } else {
                     AjaxUtil.failureCallback(req, status, error);
                 }
+            },
+            complete: function () {
+                AjaxUtil.hideLoading();
             }
         });
         return result;
     },
     postAsyncData: function (url, param_data, fn_success, fn_failure) {
         let result = null;
-
+        AjaxUtil.showLoading();
         if (param_data != null && typeof param_data === 'object') {
             if (param_data.hasOwnProperty('_csrf') == false) {
                 let csrf = $('[name=_csrf]').val();
@@ -1017,6 +1031,9 @@ let AjaxUtil = {
 
                     AjaxUtil.failureCallback(req, status, error);
                 }
+            },
+            complete: function () {
+                AjaxUtil.hideLoading();
             }
         });
     },
@@ -1025,7 +1042,7 @@ let AjaxUtil = {
 
         param_data = param_data || {};
         param_data.spjangcd = sessionStorage.getItem('spjangcd');
-
+        AjaxUtil.showLoading();
         $.ajax({
             async: true,
             dataType: 'json',
@@ -1047,6 +1064,9 @@ let AjaxUtil = {
                 } else {
                     AjaxUtil.failureCallback(req, status, error);
                 }
+            },
+            complete: function () {
+                AjaxUtil.hideLoading();
             }
         });
     },
@@ -1055,7 +1075,7 @@ let AjaxUtil = {
 
         param_data = param_data || {};
         param_data.spjangcd = sessionStorage.getItem('spjangcd');
-
+        AjaxUtil.showLoading();
         $.ajax({
             async: true,
             dataType: 'json',
@@ -1077,6 +1097,9 @@ let AjaxUtil = {
                 } else {
                     AjaxUtil.failureCallback(req, status, error);
                 }
+            },
+            complete: function () {
+                AjaxUtil.hideLoading();
             }
         });
     },
@@ -1095,6 +1118,8 @@ let AjaxUtil = {
                 spjangcd: spjangcd
             }));
         }
+
+        AjaxUtil.showLoading();
         $.ajax({
             async: true,
             dataType: 'json',
@@ -1115,6 +1140,9 @@ let AjaxUtil = {
 
                     AjaxUtil.failureCallback(req, status, error);
                 }
+            },
+            complete: function () {
+                AjaxUtil.hideLoading();
             }
         });
     },
@@ -1133,7 +1161,7 @@ let AjaxUtil = {
                 spjangcd: spjangcd
             }));
         }
-
+        AjaxUtil.showLoading();
         $.ajax({
             async: false,
             dataType: 'json',
@@ -1154,6 +1182,9 @@ let AjaxUtil = {
 
                     AjaxUtil.failureCallback(req, status, error);
                 }
+            },
+            complete: function () {
+                AjaxUtil.hideLoading();
             }
         });
         return result;
@@ -1166,7 +1197,7 @@ let AjaxUtil = {
             form_data.append("_csrf", csrf);
             form_data.append("spjangcd", sessionStorage.getItem('spjangcd'));
         }
-        
+        AjaxUtil.showLoading();
         $.ajax({
             async: false,
             type: 'POST',
@@ -1185,6 +1216,9 @@ let AjaxUtil = {
                     AjaxUtil.failureCallback(req, status, error);
                     console.log(req, status, error)
                 }
+            },
+            complete: function () {
+                AjaxUtil.hideLoading();
             }
         });
         return result;
@@ -1196,7 +1230,7 @@ let AjaxUtil = {
             let csrf = $('[name=_csrf]').val();
             form_data.append("_csrf", csrf);
         }
-
+        AjaxUtil.showLoading();
         $.ajax({
             async: true,
             type: 'POST',
@@ -1214,6 +1248,9 @@ let AjaxUtil = {
 
                     AjaxUtil.failureCallback(req, status, error);
                 }
+            },
+            complete: function () {
+                AjaxUtil.hideLoading();
             }
         });
     },
