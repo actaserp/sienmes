@@ -2,8 +2,6 @@ package mes.app.production;
 
 import lombok.extern.slf4j.Slf4j;
 import mes.app.production.service.ProdPlanServicr;
-import mes.domain.entity.JobRes;
-import mes.domain.entity.Material;
 import mes.domain.entity.Suju;
 import mes.domain.entity.User;
 import mes.domain.model.AjaxResult;
@@ -15,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
