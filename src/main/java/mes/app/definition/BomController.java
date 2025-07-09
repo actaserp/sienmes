@@ -184,7 +184,17 @@ public class BomController {
 		String sql = "delete from bom where id=:id ";
 		paramMap.addValue("id", id);		
 		int iRowEffected = this.sqlRunner.execute(sql, paramMap);
-		result.data = iRowEffected;
+		String compsql = "delete from bom_comp where \"BOM_id\"=:id ";
+		paramMap.addValue("id", id);
+		int iRowEffected2 = this.sqlRunner.execute(compsql, paramMap);
+		int totRowEffected;
+		if(iRowEffected == 1 && iRowEffected2 == 1) {
+			totRowEffected = 1;
+		}else{
+			totRowEffected = 0;
+		}
+
+		result.data = totRowEffected;
 		return result;
 	}
 	
@@ -240,13 +250,15 @@ public class BomController {
     	return result;
     }	
 	
-
+	// BOM 삭제
 	@PostMapping("/material_delete")
 	public AjaxResult deleteBomComponent(
 			@RequestParam(value="id") int id
 			) {
 		AjaxResult result = new AjaxResult();		
-		result.data = this.bomService.deleteBomComponent(id);		
+		result.data = this.bomService.deleteBomComponent(id);
+		// bom_comp 테이블 삭제
+
 		return result;		
 	}
 		
@@ -457,16 +469,22 @@ public class BomController {
 						bomCompMap.put(materialId, comp);
 					} else {
 						comp.setAmount(comp.getAmount() + (float) qty);
-						// 조건 없이 description 이어붙이기
-						if (description != null && !description.trim().isEmpty()) {
+						if (qty > 0 && description != null && !description.trim().isEmpty()) {
 							if (comp.getDescription() == null || comp.getDescription().trim().isEmpty())
 								comp.setDescription(description);
 							else
 								comp.setDescription(comp.getDescription() + ", " + description);
 						}
 					}
+
 				}
-				bomComponentRepository.saveAll(bomCompMap.values());
+				// 수량이 0 초과인 것만 저장
+				bomComponentRepository.saveAll(
+						bomCompMap.values().stream()
+								.filter(c -> Optional.ofNullable(c.getAmount()).orElse(0f) > 0)
+								.collect(Collectors.toList())
+				);
+
 			}
 			result.success = true;
 			result.data = bomList;
@@ -547,8 +565,7 @@ public class BomController {
 					bomCompMap.put(materialId, comp);
 				} else {
 					comp.setAmount(comp.getAmount() + amount);
-					// 단순 이어붙이기 (중복 신경 안 씀)
-					if (location != null && !location.trim().isEmpty()) {
+					if (amount > 0 && location != null && !location.trim().isEmpty()) {
 						if (comp.getDescription() == null || comp.getDescription().trim().isEmpty())
 							comp.setDescription(location);
 						else
@@ -556,7 +573,12 @@ public class BomController {
 					}
 				}
 			}
-			bomComponentRepository.saveAll(bomCompMap.values());
+			// 수량이 0 초과인 것만 저장
+			bomComponentRepository.saveAll(
+					bomCompMap.values().stream()
+							.filter(c -> Optional.ofNullable(c.getAmount()).orElse(0f) > 0)
+							.collect(Collectors.toList())
+			);
 			result.success = true;
 			result.data = bom;
 		}

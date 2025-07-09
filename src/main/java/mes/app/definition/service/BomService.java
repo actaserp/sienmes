@@ -271,7 +271,7 @@ public class BomService {
 		
 		return this.sqlRunner.getRow(sql, paramMap);		
 	}
-	
+
 	public int deleteBomComponent(int bc_id) {
 		int iRowEffected = 0;		
 		String sql ="""
@@ -283,7 +283,6 @@ public class BomService {
 		return iRowEffected;
 	}
 
-	
 	public List<Map<String, Object>> getBomComponentTreeList(int bomId){
 		
 		String sql = """
