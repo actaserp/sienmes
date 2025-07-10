@@ -368,7 +368,7 @@
       </form>
     </div>
     <div class="popup-button">
-      <button type="button" class="btn-popup y_write_auth" id="btnPopBaljuSave">저장</button>
+      <button type="button" class="btn-popup y_write_auth" id="btnPopBaljuSave">저장(Ctrl + S)</button>
       <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
     </div>
   </script>
@@ -491,7 +491,7 @@
 <th:block layout:fragment="scripts">
   <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
   <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
-  <th:block th:replace="/common/popup_company_Purchase :: popup_company_Purchase"></th:block>
+  <th:block th:replace="/common/popup_company_purchase :: popup_company_Purchase"></th:block>
   <script type="text/javascript">
     const ProductInputHandler = {
       bind: function ({rowSelector, $content, tryShowBaljuPrice}) {
@@ -1239,6 +1239,14 @@
                 Alert.alert('저장 오류', '서버 오류가 발생했습니다.\n' + xhr.responseText);
               }
             });
+          }
+        });
+
+        // Ctrl + S 로 저장 가능하게
+        $content.on('keydown', function (e) {
+          if (e.ctrlKey && e.key.toLowerCase() === 's') {
+            e.preventDefault();
+            $btnPopBaljuSave.trigger('click');
           }
         });
 
