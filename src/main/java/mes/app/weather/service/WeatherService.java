@@ -73,6 +73,19 @@ public class WeatherService {
 		}
 	}
 
+	private String determineUltraSrtBaseTime(LocalDateTime now) {
+		int minute = now.getMinute();
+		int roundedMinute = (minute / 10) * 10;
+		LocalDateTime baseTime = now.withMinute(roundedMinute).withSecond(0).withNano(0);
+
+		// 데이터 제공 지연 보정: 40분 이전이면 한 타임 전으로
+		if (minute < 40) {
+			baseTime = baseTime.minusMinutes(10);
+		}
+
+		return baseTime.format(DateTimeFormatter.ofPattern("HHmm"));
+	}
+
 	// getWeatherData 메서드 내에서 fetchWeatherData 호출 시 latitude와 longitude를 인자로 전달
 	public ResponseEntity<?> getWeatherData(String userId){
 
@@ -84,7 +97,8 @@ public class WeatherService {
 
 		LocalDateTime now = LocalDateTime.now();
 		String date = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-		String time = determineBaseTime(now);
+		String ultraSrtBaseTime = determineUltraSrtBaseTime(now); // 초단기실황용
+		String forecastBaseTime = determineBaseTime(now);         // 단기예보용
 
 		// 사용자 주소를 통해 좌표를 얻기
 		double[] coordinates = getCoordinates(address, geocoderKey);
@@ -94,9 +108,9 @@ public class WeatherService {
 		System.out.println("Longitude (경도): " + coordinates[1]);*/
 
 		// 초단기실황 조회
-		ResponseEntity<?> currentWeather = fetchWeatherData("/getUltraSrtNcst", date, time, "current", latitude, longitude);
+		ResponseEntity<?> currentWeather = fetchWeatherData("/getUltraSrtNcst", date, ultraSrtBaseTime, "current", latitude, longitude);
 		// 단기예보 조회
-		ResponseEntity<?> forecastData = fetchWeatherData("/getVilageFcst", date, time, "forecast", latitude, longitude);
+		ResponseEntity<?> forecastData = fetchWeatherData("/getVilageFcst", date, forecastBaseTime, "forecast", latitude, longitude);
 
 		return combineData(currentWeather, forecastData, address);
 	}
@@ -165,7 +179,7 @@ public class WeatherService {
 					"&ny=" + ny
 			);
 
-			//System.out.println("날씨 uri (현재 시간): " + uri);
+//			System.out.println("날씨 uri (현재 시간): " + uri);
 
 			String response = restTemplate.getForObject(uri, String.class);
 			ResponseEntity<?> parsedResponse = parseWeatherData(response, dataSource);
@@ -177,11 +191,18 @@ public class WeatherService {
 			// 데이터가 없는 경우, 이전 시간으로 조정하여 재요청
 			System.out.println("현재 시간의 데이터가 없어 이전 시간으로 조정 중...");
 
-			// 한 시간 이전으로 시간 조정
+			// 이전 시간으로 조정
 			LocalDateTime newDateTime = LocalDateTime.parse(date + time, DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
-			newDateTime = newDateTime.minusHours(1);
+
+			if ("current".equals(dataSource)) {
+				newDateTime = newDateTime.minusMinutes(10); // 초단기실황: 10분 전
+				time = newDateTime.format(DateTimeFormatter.ofPattern("HHmm"));
+			} else {
+				newDateTime = newDateTime.minusHours(3); // 단기예보: 3시간 전
+				time = newDateTime.format(DateTimeFormatter.ofPattern("HH00"));
+			}
+
 			date = newDateTime.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-			time = newDateTime.format(DateTimeFormatter.ofPattern("HH00"));
 
 			uri = new URI(apiEndpoint + servicePath +
 					"?serviceKey=" + apiKey +
@@ -242,21 +263,22 @@ public class WeatherService {
 			return ResponseEntity.badRequest().body("날씨 데이터 파싱 실패 또는 응답 오류 발생");
 		}
 
-		Map<String, String> weatherResult = (Map<String, String>) body1;
-		Map<String, String> forecastResult = (Map<String, String>) body2;
+		Map<String, String> weatherResult = (Map<String, String>) body1;     // 실황 (기온, 습도, 풍속 등)
+		Map<String, String> forecastResult = (Map<String, String>) body2;    // 예보 (POP, SKY, PTY 등)
 
-		// 예보 데이터와 실황 데이터를 병합
-		forecastResult.forEach((key, value) -> {
-			if (weatherResult.containsKey(key)) {
-				if (!value.isEmpty()) {
-					weatherResult.put(key, value);
-				}
-			} else {
+		// forecastData에서 필요한 항목만 병합 (POP, SKY, PTY만)
+		for (Map.Entry<String, String> entry : forecastResult.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
+
+			if (key.equals("POP") || key.equals("SKY") || key.equals("PTY")) {
 				weatherResult.put(key, value);
 			}
-		});
+		}
 
+		// 지역 주소 추가
 		weatherResult.put("address", address);
+
 		return ResponseEntity.ok(weatherResult);
 	}
 
@@ -304,6 +326,5 @@ public class WeatherService {
 			throw new RuntimeException("좌표를 가져오는 데 실패했습니다: " + e.getMessage(), e);
 		}
 	}
-
 
 }
