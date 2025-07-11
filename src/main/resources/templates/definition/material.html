@@ -1873,10 +1873,35 @@
                 let url = this.url + '/delete';
                 let id = $('#matBasicForm').find('#id').val()
                 let data = {id: id};
+
+                // 삭제 전 현재 선택된 행 정보 저장
+                let selectedRowIndex = this.grid.selection.row;
+                let selectedId = null;
+                if (selectedRowIndex >= 0) {
+                    let selectedItem = this.grid.rows[selectedRowIndex].dataItem;
+                    selectedId = selectedItem.id;
+                }
+
                 let fnSuccess = function (res) {
                     if (res.success) {
                         Alert.alert('', '삭제되었습니다'); // Notification
                         _this.searchDataBind();
+                        setTimeout(() => {
+                            let targetIndex = -1;
+                            for (let i = 0; i < _this.grid.rows.length; i++) { // ← 반드시 _this!
+                                if (_this.grid.rows[i].dataItem.id === selectedId) {
+                                    targetIndex = i;
+                                    break;
+                                }
+                            }
+                            if (targetIndex >= 0) {
+                                _this.grid.select(targetIndex, 0);
+                                _this.grid.scrollIntoView(targetIndex, 0);
+                            } else if (_this.grid.rows.length > 0) {
+                                _this.grid.select(0, 0);
+                                _this.grid.scrollIntoView(0, 0);
+                            }
+                        }, 0);
                     } else {
                         Alert.alert('', res.message);
                     }
