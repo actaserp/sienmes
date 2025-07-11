@@ -392,9 +392,9 @@
 
             _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
 
-            let restoreIndex = _this.selectedIndex || 0;
+           let restoreIndex = _this.selectedIndex || 0;
             _this.grid.selectedIndex = -1;
-            setTimeout(() => {
+            /*setTimeout(() => {
               _this.grid.select(restoreIndex, 0);
 
               let item = _this.grid.rows[restoreIndex]?.dataItem;
@@ -404,14 +404,14 @@
               }
               _this.semiJobRes();
               _this.selectedIndex = 0; // 초기화
-            }, 10);
+            }, 10);*/
           }
         };
 
         AjaxUtil.getAsyncData(this.url + '/suju_list', data, fnsuccess);
-        _this.jobResGrid.itemsSource = new wijmo.collections.CollectionView([]);
+        /*_this.jobResGrid.itemsSource = new wijmo.collections.CollectionView([]);
         _this.semiGrid.itemsSource = new wijmo.collections.CollectionView([]);
-        _this.semiJobResGrid.itemsSource = new wijmo.collections.CollectionView([]);
+        _this.semiJobResGrid.itemsSource = new wijmo.collections.CollectionView([]);*/
         $('#btnJobResDetail').attr('disabled', true);
         $('#btnSemiJobResDetail').attr('disabled', true);
       }//sujuSearch
