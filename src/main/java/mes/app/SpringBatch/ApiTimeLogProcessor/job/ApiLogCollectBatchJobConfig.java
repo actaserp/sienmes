@@ -3,6 +3,7 @@ package mes.app.SpringBatch.ApiTimeLogProcessor.job;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mes.app.Scheduler.LogProcessor.ApiLog.ApiExecutionLogEntry;
+import mes.app.SpringBatch.ApiTimeLogProcessor.ApiTimeLogProceesorStepListener;
 import mes.domain.services.SqlRunner;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -12,6 +13,8 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
@@ -41,25 +44,32 @@ public class ApiLogCollectBatchJobConfig {
 
     private final StepBuilderFactory stepBuilderFactory;
     private final PlatformTransactionManager transactionManager;
-
     private final SqlRunner sqlRunner;
 
-    private int CHUNK_SIZE = 10;
+
+    private int CHUNK_SIZE = 100;
+
 
     @Bean
-    public Job ApiTimeLogProcesserJob() {
+    public ApiTimeLogProceesorStepListener listener() {
+        return new ApiTimeLogProceesorStepListener(sqlRunner);
+    }
+
+    @Bean
+    public Job ApiTimeLogProcesserJob(ApiTimeLogProceesorStepListener listener) {
         return jobBuilderFactory.get("ApiTimeLogProcesserJob")
-                .start(readLogFileStep())
+                .start(readLogFileStep(listener))
                 .build();
     }
 
     @Bean
-    public Step readLogFileStep(){
+    public Step readLogFileStep(ApiTimeLogProceesorStepListener listener) {
         return stepBuilderFactory.get("readLogFileStep")
-                .<String, ApiExecutionLogEntry> chunk(CHUNK_SIZE)
+                .<String, ApiExecutionLogEntry>chunk(CHUNK_SIZE)
                 .reader(logFileItemReader())
                 .processor(logFileItemProcessor())
-                .writer(apiExecutionLogWriter())
+                .writer(apiExecutionLogWriter(listener))
+                .listener(listener)
                 .transactionManager(transactionManager)
                 .build();
     }
@@ -110,20 +120,22 @@ public class ApiLogCollectBatchJobConfig {
     }
 
     @Bean
-    public ItemWriter<ApiExecutionLogEntry> apiExecutionLogWriter(){
+    public ItemWriter<ApiExecutionLogEntry> apiExecutionLogWriter(ApiTimeLogProceesorStepListener listener){
 
 
         String sql = """
-                INSERT INTO api_log_summary (
-                    summary_date, api_address, request_count, avg_duration, max_duration, min_duration
-                ) VALUES (
-                    :summaryDate, :apiAddress, :requestCount, :avgDuration, :maxDuration, :minDuration
+                INSERT INTO api_log_entry (endpoint, avg_response_time_ms, max_response_time_ms, min_response_time_ms, avg_call_cnt)
+                    VALUES (
+                    :endpoint, :avg_response_time_ms, :max_response_time_ms, :min_response_time_ms, :avg_call_cnt
                 )
                 """;
 
         return items -> {
 
-            if(items.isEmpty()) return;
+            if(!items.isEmpty()){
+                listener.collect(new ArrayList<>(items));
+            }
+            /*if(items.isEmpty()) return;
 
             Map<String, List<ApiExecutionLogEntry>> grouped = items.stream()
                     .collect(Collectors.groupingBy(ApiExecutionLogEntry::getApiAddress));
@@ -135,27 +147,24 @@ public class ApiLogCollectBatchJobConfig {
                         .collect(Collectors.summarizingDouble(ApiExecutionLogEntry::getDurationSecond));
 
                 int count = (int) stats.getCount();
-                double avg = stats.getAverage();
-                double max = stats.getMax();
-                double min = stats.getMin();
+                double avg = BigDecimal.valueOf(stats.getAverage()).setScale(3, RoundingMode.HALF_UP).doubleValue();
+                double max = BigDecimal.valueOf(stats.getMax()).setScale(3, RoundingMode.HALF_UP).doubleValue();
+                double min = BigDecimal.valueOf(stats.getMin()).setScale(3, RoundingMode.HALF_UP).doubleValue();
 
-                /*MapSqlParameterSource param = new MapSqlParameterSource()
-                        .addValue("OccurrenceTime", grouped.get(api))
-                        .addValue("avg", )*/
-            });
-
-            for (ApiExecutionLogEntry item : items) {
-                /*System.out.printf("✔ 로그 저장 예정: [%s] %s %s (%.3f초)%n",*/
                 MapSqlParameterSource param = new MapSqlParameterSource()
-                                .addValue("OccurrenceTime", item.getOccurrenceTime())
-                                .addValue("method", item.getMethod())
-                                .addValue("durationSecond", item.getDurationSecond())
-                                .addValue("apiAddress", item.getApiAddress());
+                        .addValue("endpoint", api)
+                        .addValue("avg_response_time_ms", avg)
+                        .addValue("max_response_time_ms", max)
+                        .addValue("min_response_time_ms", min)
+                        .addValue("avg_call_cnt", count);
                 batchParams.add(param);
-            }
+
+
+            });
             log.info("[스프링 배치 쿼리 실행 - {}건]", batchParams.size());
 
-            sqlRunner.batchUpdate(sql, batchParams.toArray(new SqlParameterSource[0]));
+            sqlRunner.batchUpdate(sql, batchParams.toArray(new SqlParameterSource[0]));*/
         };
+
     }
 }

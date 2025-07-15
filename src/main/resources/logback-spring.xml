@@ -132,12 +132,12 @@
     <!-- 운영환경 (prod): 파일만 -->
     <springProfile name="prod">
         <root level="INFO">
+            <appender-ref ref="CONSOLE" />
             <appender-ref ref="ASYNC_INFO_WARN" />
             <appender-ref ref="ASYNC_ERROR_FILE" />
         </root>
         <logger name="API_EXEC_TIME_LOGGER" level="INFO" additivity="false">
             <appender-ref ref="ASYNC_API_TIME_FILE" />
-            <!--<appender-ref ref="CONSOLE" />-->
         </logger>
 
     </springProfile>

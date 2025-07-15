@@ -331,6 +331,7 @@ public class EasyFinBankServiceController {
         return result;
 
     }
+    @Deprecated
     @RequestMapping(value = "revokeCloseBankAccount", method = RequestMethod.GET)
     public String revokeCloseBankAccount(Model m) {
         /**
