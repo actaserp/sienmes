@@ -1,0 +1,41 @@
+name: Actas Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  Deploy:
+    runs-on: self-hosted #label명이 self-hosted
+    if: contains(github.event.head_commit.message, 'prod')
+    env:
+      RUNNER_TRACKING_ID: ""
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Maven 빌드
+        run: mvn clean package
+
+      - name: ShutDown Tomcat
+        shell: cmd
+        run: |
+          start "TOMCAT-mes-SHUTDOWN" /D "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\bin" shutdown.bat
+          
+      - name: Delete old WAR and folders
+        shell: cmd
+        run: |
+          del /Q "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\webapps\mes-0.0.1-SNAPSHOT.war"
+          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\webapps\mes-0.0.1-SNAPSHOT"
+          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\webapps\ROOT"      
+
+      - name: Copy War to Tomcat webapps
+        shell: cmd
+        run: |
+          copy /Y "C:\actions-runner\_work\haccpmes\haccpmes\target\mes-0.0.1-SNAPSHOT.war" "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\webapps\mes-0.0.1-SNAPSHOT.war"
+
+      - name: Start Tomcat
+        shell: cmd
+        run: |
+          start "TOMCAT-mes" /D "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\bin" startup.bat
