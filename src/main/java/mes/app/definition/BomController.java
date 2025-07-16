@@ -413,9 +413,9 @@ public class BomController {
 			List<Bom> bomList = new ArrayList<>();
 			for (String productName : productNames) {
 				Integer productId = productNameToId.get(productName);
-				Bom existingBom = bomRepository.findByMaterialIdAndBomTypeAndVersion(productId, "manufacturing", "1.0");
-				if (existingBom == null) {
-					Bom bom = new Bom();
+				Bom bom = bomRepository.findByMaterialIdAndBomTypeAndVersion(productId, "manufacturing", "1.0");
+				if (bom == null) {
+					bom = new Bom();
 					bom.setName(productName);
 					bom.setMaterialId(productId);
 					bom.setBomType("manufacturing");
@@ -426,10 +426,10 @@ public class BomController {
 					bom.setSpjangcd(spjangcd);
 					bom.set_creater_id(userId);
 					bom.set_created(startDate);
-					bomList.add(bom);
+					bom = bomRepository.save(bom);
 				}
+				bomList.add(bom); // **기존이든 신규든 무조건 추가! (이게 핵심)**
 			}
-			bomRepository.saveAll(bomList);
 
 			// BOM Component 중복(동일 materialId) 누적/합산
 			for (int pIdx = 0; pIdx < productNames.size(); pIdx++) {
@@ -480,12 +480,25 @@ public class BomController {
 					}
 
 				}
-				// 수량이 0 초과인 것만 저장
-				bomComponentRepository.saveAll(
-						bomCompMap.values().stream()
-								.filter(c -> Optional.ofNullable(c.getAmount()).orElse(0f) > 0)
-								.collect(Collectors.toList())
-				);
+				for (BomComponent comp : bomCompMap.values()) {
+					// 이미 DB에 (BOM_id, Material_id) 있는지 확인
+					Optional<BomComponent> dbCompOpt =
+							bomComponentRepository.findByBomIdAndMaterialId(comp.getBomId(), comp.getMaterialId());
+					if (dbCompOpt.isPresent()) {
+						BomComponent dbComp = dbCompOpt.get();
+						// 기존과 합산
+						dbComp.setAmount(dbComp.getAmount() + comp.getAmount());
+						if (comp.getDescription() != null && !comp.getDescription().isEmpty()) {
+							if (dbComp.getDescription() == null || dbComp.getDescription().isEmpty())
+								dbComp.setDescription(comp.getDescription());
+							else
+								dbComp.setDescription(dbComp.getDescription() + ", " + comp.getDescription());
+						}
+						bomComponentRepository.save(dbComp); // **update!**
+					} else {
+						bomComponentRepository.save(comp); // **insert!**
+					}
+				}
 
 			}
 			result.success = true;
