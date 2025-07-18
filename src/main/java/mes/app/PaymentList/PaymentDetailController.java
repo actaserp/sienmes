@@ -616,5 +616,4 @@ public class PaymentDetailController {
     if (cell == null) cell = row.createCell(colIdx);
     cell.setCellValue(value);
   }
-
 }
