@@ -13,7 +13,18 @@ public class DotenvEnvironmentPostProcessor implements EnvironmentPostProcessor 
                 .ignoreIfMissing()
                 .load();
 
+        Dotenv ServerInformDotenv = Dotenv.configure()
+                        .directory("C:/Temp/mes21/conf")
+                                .filename("server.env")
+                                        .ignoreIfMissing()
+                                                .load();
+
+
         dotenv.entries().forEach(entry -> {
+            System.setProperty(entry.getKey(), entry.getValue());
+        });
+
+        ServerInformDotenv.entries().forEach(entry -> {
             System.setProperty(entry.getKey(), entry.getValue());
         });
     }
