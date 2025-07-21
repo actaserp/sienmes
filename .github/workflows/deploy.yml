@@ -7,7 +7,7 @@ on:
 
 jobs:
   Deploy:
-    runs-on: self-hosted #label명이 self-hosted......
+    runs-on: self-hosted #label명이 self-hosted.......!!!
     if: contains(github.event.head_commit.message, 'prod')
     env:
       #APPLICATION_PROPERTIES_8030: ${{ secrets.APPLICATION_PROPERTIES_8030 }}
@@ -20,77 +20,99 @@ jobs:
         shell: cmd
         run: "C:\\maven\\apache-maven-3.9.10\\bin\\mvn.cmd clean package"
 
-      - name: 포트랑 인스턴스명 감지및 셋팅
-        id: set_vars
-        shell: cmd
-        run: |
-          @echo off
-          setlocal enabledelayedexpansion
-          
-          set COMMIT_MSG=${{ github.event.head_commit.message }}
-          echo Commit message: !COMMIT_MSG!
-          
-          set PORT=
-          set INSTANCE=
-          
-          echo !COMMIT_MSG! | findstr "8030" >nul
-          if !errorlevel! == 0 (
-            set PORT=8030
-            set INSTANCE=mes
-          )
-          
-          echo !COMMIT_MSG! | findstr "8031" >nul
-          if !errorlevel! == 0 (
-            set PORT=8031
-            set INSTANCE=dongyoung
-          )
-          
-          echo !COMMIT_MSG! | findstr "8032" >nul
-          if !errorlevel! == 0 (
-            set PORT=8032
-            set INSTANCE=actas
-          )
-          
-          rem 디버깅 로그
-          echo Detected PORT=!PORT!
-          echo Detected INSTANCE=!INSTANCE!
-          
-          if "!PORT!"=="" (
-            echo [ERROR] 유효한 포트가 커밋 메시지에 없습니다. 종료합니다.
-            exit /b 1
-          )
-          
-          echo PORT=!PORT!>> %GITHUB_ENV%
-          echo INSTANCE=!INSTANCE!>> %GITHUB_ENV%
-          
-
       #톰캣 8030 종료
-      - name: ShutDown Tomcat
-        if: env.PORT != ''
+      - name: ShutDown Tomcat 8030
+        if: contains(github.event_head_commit.message, '8030')
         shell: cmd
         run: |
-          start "TOMCAT-mes-SHUTDOWN" /D "C:\Program Files\Apache Software Foundation\tomcat-%INSTANCE%-%PORT%\bin" shutdown.bat
+          start "TOMCAT-mes-SHUTDOWN" /D "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\bin" shutdown.bat
+
+      #톰캣 8031 종료
+      - name: ShutDown Tomcat 8031
+        if: contains(github.event_head_commit.message, '8031')
+        shell: cmd
+        run: |
+          start "TOMCAT-dongyoung-SHUTDOWN" /D "C:\Program Files\Apache Software Foundation\tomcat-dongyoung-8031\bin" shutdown.bat
+
+      #톰캣 8032 종료
+      - name: ShutDown Tomcat 8032
+        if: contains(github.event_head_commit.message, '8032')
+        shell: cmd
+        run: |
+          start "TOMCAT-actas-SHUTDOWN" /D "C:\Program Files\Apache Software Foundation\tomcat-actas-8032\bin" shutdown.bat
 
 
-      #배포전 war 삭제
+
+
+      #배포전 war 삭제 (8030)
       - name: Delete old WAR and folders
-        if: env.PORT != ''
+        if: contains(github.event_head_commit.message, '8030')
         shell: cmd
         run: |
-          del /Q "C:\Program Files\Apache Software Foundation\tomcat-%INSTANCE%-%PORT%\webapps\mes-0.0.1-SNAPSHOT.war"
-          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-%INSTANCE%-%PORT%\webapps\mes-0.0.1-SNAPSHOT"
-          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-%INSTANCE%-%PORT%\webapps\ROOT"      
+          del /Q "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\webapps\mes-0.0.1-SNAPSHOT.war"
+          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\webapps\mes-0.0.1-SNAPSHOT"
+          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\webapps\ROOT"      
 
-      #복붙
+      #배포전 war 삭제 (8031)
+      - name: Delete old WAR and folders
+        if: contains(github.event_head_commit.message, '8031')
+        shell: cmd
+        run: |
+          del /Q "C:\Program Files\Apache Software Foundation\tomcat-dongyoung-8031\webapps\mes-0.0.1-SNAPSHOT.war"
+          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-dongyoung-8031\webapps\mes-0.0.1-SNAPSHOT"
+          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-dongyoung-8031\webapps\ROOT"      
+
+      #배포전 war 삭제 (8032)
+      - name: Delete old WAR and folders
+        if: contains(github.event_head_commit.message, '8032')
+        shell: cmd
+        run: |
+          del /Q "C:\Program Files\Apache Software Foundation\tomcat-actas-8032\webapps\mes-0.0.1-SNAPSHOT.war"
+          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-actas-8032\webapps\mes-0.0.1-SNAPSHOT"
+          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-actas-8032\webapps\ROOT"      
+
+
+
+      #복붙 8030
       - name: Copy War to Tomcat webapps
-        if: env.PORT != ''
+        if: contains(github.event_head_commit.message, '8030')
         shell: cmd
         run: |
-          copy /Y "C:\actions-runner\_work\haccpmes\haccpmes\target\mes-0.0.1-SNAPSHOT.war" "C:\Program Files\Apache Software Foundation\tomcat-%INSTANCE%-%PORT%\webapps\mes-0.0.1-SNAPSHOT.war"
+          copy /Y "C:\actions-runner\_work\haccpmes\haccpmes\target\mes-0.0.1-SNAPSHOT.war" "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\webapps\mes-0.0.1-SNAPSHOT.war"
 
-      #톰캣 시작
-      - name: Start Tomcat
-        if: env.PORT != ''
+      #복붙 8031
+      - name: Copy War to Tomcat webapps
+        if: contains(github.event_head_commit.message, '8031')
         shell: cmd
         run: |
-          start "TOMCAT-mes" /D "C:\Program Files\Apache Software Foundation\tomcat-%INSTANCE%-%PORT%\bin" startup.bat
+          copy /Y "C:\actions-runner\_work\haccpmes\haccpmes\target\mes-0.0.1-SNAPSHOT.war" "C:\Program Files\Apache Software Foundation\tomcat-dongyoung-8031\webapps\mes-0.0.1-SNAPSHOT.war"
+          
+      #복붙 8032
+      - name: Copy War to Tomcat webapps
+        if: contains(github.event_head_commit.message, '8032')
+        shell: cmd
+        run: |
+          copy /Y "C:\actions-runner\_work\haccpmes\haccpmes\target\mes-0.0.1-SNAPSHOT.war" "C:\Program Files\Apache Software Foundation\tomcat-actas-8032\webapps\mes-0.0.1-SNAPSHOT.war"
+      
+      
+
+      #톰캣 시작 8030
+      - name: Start Tomcat
+        if: contains(github.event_head_commit.message, '8030')
+        shell: cmd
+        run: |
+          start "TOMCAT-mes" /D "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\bin" startup.bat
+
+      #톰캣 시작 8031
+      - name: Start Tomcat
+        if: contains(github.event_head_commit.message, '8031')
+        shell: cmd
+        run: |
+          start "TOMCAT-dongyoung" /D "C:\Program Files\Apache Software Foundation\tomcat-dongyoung-8031\bin" startup.bat    
+          
+      #톰캣 시작 8032
+      - name: Start Tomcat
+        if: contains(github.event_head_commit.message, '8032')
+        shell: cmd
+        run: |
+          start "TOMCAT-actas" /D "C:\Program Files\Apache Software Foundation\tomcat-actas-8032\bin" startup.bat    
