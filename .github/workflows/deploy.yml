@@ -24,17 +24,44 @@ jobs:
         id: set_vars
         shell: cmd
         run: |
+          @echo off
+          setlocal enabledelayedexpansion
+          
           set COMMIT_MSG=${{ github.event.head_commit.message }}
-          echo Commit message: %COMMIT_MSG%
+          echo Commit message: !COMMIT_MSG!
+          
           set PORT=
           set INSTANCE=
           
-          echo %COMMIT_MSG% | findstr "8030" >nul && (set PORT=8030 && set INSTANCE=mes)
-          echo %COMMIT_MSG% | findstr "8031" >nul && (set PORT=8031 && set INSTANCE=dongyoung)
-          echo %COMMIT_MSG% | findstr "8032" >nul && (set PORT=8032 && set INSTANCE=actas)
+          echo !COMMIT_MSG! | findstr "8030" >nul
+          if !errorlevel! == 0 (
+            set PORT=8030
+            set INSTANCE=mes
+          )
           
-          echo PORT=%PORT%>> %GITHUB_ENV%
-          echo INSTANCE=%INSTANCE%>> %GITHUB_ENV%
+          echo !COMMIT_MSG! | findstr "8031" >nul
+          if !errorlevel! == 0 (
+            set PORT=8031
+            set INSTANCE=dongyoung
+          )
+          
+          echo !COMMIT_MSG! | findstr "8032" >nul
+          if !errorlevel! == 0 (
+            set PORT=8032
+            set INSTANCE=actas
+          )
+          
+          rem 디버깅 로그
+          echo Detected PORT=!PORT!
+          echo Detected INSTANCE=!INSTANCE!
+          
+          if "!PORT!"=="" (
+            echo [ERROR] 유효한 포트가 커밋 메시지에 없습니다. 종료합니다.
+            exit /b 1
+          )
+          
+          echo PORT=!PORT!>> %GITHUB_ENV%
+          echo INSTANCE=!INSTANCE!>> %GITHUB_ENV%
           
 
       #톰캣 8030 종료
