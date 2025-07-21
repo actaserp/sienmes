@@ -16,79 +16,83 @@
             </ul>
         </div>
 
-        <section class="section">
-            <div class="section-top" style="justify-content: flex-start;">
-                <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            기준일<span class="eq">*</span>
-                        </dt>
-                        <dd>
-                            <ul class="date-box">
-                                <li>
-                                    <input type="date" id="srchStartDt" name="srchStartDt">
-                                    <label for="srchStartDt" class="hide">기준일</label>
-                                </li>
-                            </ul>
-                        </dd>
-                    </dl>
+        <div style="display: flex; gap: 5px">
+            <section class="section" style="width: 50%; height: 100%;">
+                <div class="section-top" style="justify-content: flex-start;">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                BOM 적용기준일
+                            </dt>
+                            <dd>
+                                <ul class="date-box">
+                                    <li>
+                                        <input type="date" id="srchStartDt" name="srchStartDt">
+                                        <label for="srchStartDt" class="hide">기준일</label>
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="button-wrap" style=" margin-left: 20px">
+                        <ul>
+                            <li>
+                                <a class="btn btn-excell" title="등록" id="btnSearchItem">
+                                    제품 조회
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn btn-delete" title="삭제" id="btnExceptItem">
+                                    제품 제외
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn btn-excell" title="계산기" id="btnCalulation">
+                                    소요량 계산
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn btn-edit" title="수정" id="btnInitItem">
+                                    초기화
+                                </a>
+                            </li>
+<!--                            <li>-->
+<!--                                <a class="btn btn-delete" title="초기화" id="btnClear">-->
+<!--                                    소요량 초기화-->
+<!--                                </a>-->
+<!--                            </li>-->
+                        </ul>
+                    </div>
+                    <div class="button-wrap">
+                        <ul>
+                            <li>
+                                <span style="color: tomato">BOM 적용기준일은 반드시 BOM 적용시작일 이후여야만 검색이 됩니다.</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="button-wrap" style=" margin-left: 20px">
-                    <ul>
-                        <li>
-                            <a class="btn btn-excell" title="등록" id="btnSearchItem">
-                                제품 조회
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-delete" title="삭제" id="btnExceptItem">
-                                제품 제외
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-edit" title="수정" id="btnInitItem">
-                                초기화
-                            </a>
-                        </li>
-                    </ul>
+                <div class="container-fluid">
+                    <div id="prod-grid" style="height: 705px;"></div>
                 </div>
-            </div>
-            <div class="container-fluid">
-                <div id="prod-grid" style="height: 310px;"></div>
-            </div>
-            <div class="button-wrap" style="margin-top: 16px;margin-bottom:0;">
-                <ul>
-                    <li>
-                        <a class="btn btn-excell" title="계산기" id="btnCalulation">
-                            <i class="fas fa-calculator"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="btn btn-delete" title="초기화" id="btnClear">
-                            초기화
-                        </a>
-                    </li>
+            </section>
+            <div class="tab-wrap" style="width: 50%; height: 100%;">
+
+                <ul class="tab-links">
+                    <li><a href="#tab1">원부재료 소요량</a></li>
+                    <li><a href="#tab2">반제품 소요량</a></li>
                 </ul>
-            </div>
-
-        </section>
-        <div class="tab-wrap">
-
-            <ul class="tab-links">
-                <li><a href="#tab1">원부재료 소요량</a></li>
-                <li><a href="#tab2">반제품 소요량</a></li>
-            </ul>
-            <div>
-                <section class="tab-item" id="tab1" style="border-top-left-radius: 0;">
-                    <div class="section-top">
-                        <div id="raw-grid" style="height: 280px;"></div>
-                    </div>
-                </section>
-                <section class="tab-item" id="tab2" style="border-top-left-radius: 0;">
-                    <div class="section-top">
-                        <div id="ban-grid" style="height: 280px;"></div>
-                    </div>
-                </section>
+                <div>
+                    <section class="tab-item" id="tab1" style="border-top-left-radius: 0;">
+                        <div class="section-top">
+                            <div id="raw-grid" style="height: 777px;"></div>
+                        </div>
+                    </section>
+                    <section class="tab-item" id="tab2" style="border-top-left-radius: 0;">
+                        <div class="section-top">
+                            <div id="ban-grid" style="height: 777px;"></div>
+                        </div>
+                    </section>
+                </div>
             </div>
         </div>
     </div>
@@ -127,7 +131,7 @@
                         {binding: 'prod_id', header: '제품번호', width: 100, align: 'right', visible: false},
                         {binding: 'prod_group_name', header: '제품그룹', width: 150, align: 'center', isReadOnly: true},
                         {binding: 'prod_code', header: '제품코드', width: 100, align: 'center', isReadOnly: true},
-                        {binding: 'product_name', header: '제품명', width: 200, align: 'left', isReadOnly: true},
+                        {binding: 'product_name', header: '제품명', width: '*', align: 'left', isReadOnly: true},
                         {binding: 'unit', header: '단위', width: 100, align: 'center', isReadOnly: true},
                         {
                             binding: 'quantity',
@@ -165,13 +169,13 @@
                     },
                     columns: [
                         //{ key: 'mat_pk', label: '<span style="color:orange">품목번호</span>', width: 100, align: 'right' },
-                        {binding: 'mat_type_name', header: '품목구분', width: 100, align: 'center'},
+                        // {binding: 'mat_type_name', header: '품목구분', width: 100, align: 'center'},
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'center'},
-                        {binding: 'mat_name', header: '품목명', width: 300, align: 'left'},
-                        {binding: 'unit_name', header: '단위', width: 100, align: 'center'},
-                        {binding: 'requ_qty', header: '소요량', width: 100, align: 'right'},
-                        {binding: 'cur_stock', header: '현재고', width: 100, align: 'right'},
-                        {binding: 'available_stock', header: '가용재고', width: 100, align: 'right'},
+                        {binding: 'mat_name', header: '품목명', width: '*', align: 'left'},
+                        {binding: 'unit_name', header: '단위', width: 80, align: 'center'},
+                        {binding: 'requ_qty', header: '소요량', width: 80, align: 'right'},
+                        {binding: 'cur_stock', header: '현재고', width: 80, align: 'right'},
+                        {binding: 'available_stock', header: '가용재고', width: 80, align: 'right'},
                     ]
                 });
                 new FlexGridContextMenu(this.grid2);
@@ -190,13 +194,13 @@
                     },
                     columns: [
                         //{ key: 'mat_pk', label: '<span style="color:orange">품목번호</span>', width: 100, align: 'right' },
-                        {binding: 'mat_type_name', header: '품목구분', width: 100, align: 'center'},
+                        // {binding: 'mat_type_name', header: '품목구분', width: 100, align: 'center'},
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'center'},
-                        {binding: 'mat_name', header: '품목명', width: 300, align: 'left'},
-                        {binding: 'unit_name', header: '단위', width: 100, align: 'center'},
-                        {binding: 'requ_qty', header: '소요량', width: 100, align: 'right'},
-                        {binding: 'cur_stock', header: '현재고', width: 100, align: 'right'},
-                        {binding: 'available_stock', header: '가용재고', width: 100, align: 'right'},
+                        {binding: 'mat_name', header: '품목명', width: '*', align: 'left'},
+                        {binding: 'unit_name', header: '단위', width: 80, align: 'center'},
+                        {binding: 'requ_qty', header: '소요량', width: 80, align: 'right'},
+                        {binding: 'cur_stock', header: '현재고', width: 80, align: 'right'},
+                        {binding: 'available_stock', header: '가용재고', width: 80, align: 'right'},
                     ]
                 });
                 new FlexGridContextMenu(this.grid3);
@@ -307,14 +311,15 @@
             });
             $('#btnInitItem').on('click', function () {
                 pageProdSuju.grid1.itemsSource = new wijmo.collections.CollectionView([]);
+                pageProdSuju.grid2.itemsSource = new wijmo.collections.CollectionView([]);
+                pageProdSuju.grid3.itemsSource = new wijmo.collections.CollectionView([]);
                 //pageProdSuju.grid.selectAll();
                 //pageProdSuju.grid.deleteRow("selected");
                 //pageProdSuju.grid.init().repaint();
             });
 
             $('#btnClear').on('click', function () {
-                pageProdSuju.grid2.itemsSource = new wijmo.collections.CollectionView([]);
-                pageProdSuju.grid3.itemsSource = new wijmo.collections.CollectionView([]);
+
             });
 
             $('#btnCalulation').on('click', function () {
