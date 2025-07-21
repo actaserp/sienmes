@@ -20,24 +20,49 @@ jobs:
         shell: cmd
         run: "C:\\maven\\apache-maven-3.9.10\\bin\\mvn.cmd clean package"
 
-      - name: ShutDown Tomcat
-        shell: cmd
+      - name: 포트랑 인스턴스명 감지및 셋팅
+        id: set_vars
         run: |
-          start "TOMCAT-mes-SHUTDOWN" /D "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\bin" shutdown.bat
+          set COMMIT_MSG=${{ github.event.head_commit.message }}
+          echo Commit message: %COMMIT_MSG%
+          set PORT=
+          set INSTANCE=
           
+          echo %COMMIT_MSG% | findstr "8030" >nul && (set PORT=8030 && set INSTANCE=mes)
+          echo %COMMIT_MSG% | findstr "8031" >nul && (set PORT=8031 && set INSTANCE=dongyoung)
+          echo %COMMIT_MSG% | findstr "8032" >nul && (set PORT=8032 && set INSTANCE=actas)
+          
+          echo PORT=%PORT%>> %GITHUB_ENV%
+          echo INSTANCE=%INSTANCE%>> %GITHUB_ENV%
+          shell: cmd
+
+      #톰캣 8030 종료
+      - name: ShutDown Tomcat
+        if: env.PORT != ''
+        shell: cmd
+        run: |
+          start "TOMCAT-mes-SHUTDOWN" /D "C:\Program Files\Apache Software Foundation\tomcat-%INSTANCE%-%PORT%\bin" shutdown.bat
+
+
+      #배포전 war 삭제
       - name: Delete old WAR and folders
+        if: env.PORT != ''
         shell: cmd
         run: |
-          del /Q "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\webapps\mes-0.0.1-SNAPSHOT.war"
-          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\webapps\mes-0.0.1-SNAPSHOT"
-          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\webapps\ROOT"      
+          del /Q "C:\Program Files\Apache Software Foundation\tomcat-%INSTANCE%-%PORT%\webapps\mes-0.0.1-SNAPSHOT.war"
+          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-%INSTANCE%-%PORT%\webapps\mes-0.0.1-SNAPSHOT"
+          rmdir /S /Q "C:\Program Files\Apache Software Foundation\tomcat-%INSTANCE%-%PORT%\webapps\ROOT"      
 
+      #복붙
       - name: Copy War to Tomcat webapps
+        if: env.PORT != ''
         shell: cmd
         run: |
-          copy /Y "C:\actions-runner\_work\haccpmes\haccpmes\target\mes-0.0.1-SNAPSHOT.war" "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\webapps\mes-0.0.1-SNAPSHOT.war"
+          copy /Y "C:\actions-runner\_work\haccpmes\haccpmes\target\mes-0.0.1-SNAPSHOT.war" "C:\Program Files\Apache Software Foundation\tomcat-%INSTANCE%-%PORT%\webapps\mes-0.0.1-SNAPSHOT.war"
 
+      #톰캣 시작
       - name: Start Tomcat
+        if: env.PORT != ''
         shell: cmd
         run: |
-          start "TOMCAT-mes" /D "C:\Program Files\Apache Software Foundation\tomcat-mes-8030\bin" startup.bat
+          start "TOMCAT-mes" /D "C:\Program Files\Apache Software Foundation\tomcat-%INSTANCE%-%PORT%\bin" startup.bat
