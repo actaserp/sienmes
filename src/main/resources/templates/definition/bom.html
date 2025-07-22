@@ -37,187 +37,189 @@
         </div>
 
         <div style="display: flex; gap: 5px">
-        <section class="section" style="width: 50%; height: 680px;">
-            <div class="section-top">
-                <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            <label>BOM구분</label>
-                        </dt>
-                        <dd>
-                            <select class="form-control2" id="cboBOMType" name="cboBOMType"></select>
-                        </dd>
+            <section class="section" style="width: 50%;">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label>BOM구분</label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboBOMType" name="cboBOMType"></select>
+                            </dd>
 
-                    </dl>
-                    <dl>
-                        <dt>
-                            <label>품목구분</label>
-                        </dt>
-                        <dd>
-                            <select class="form-control2" id="cboMaterialType" name="cboMaterialType"></select>
-                        </dd>
-                    </dl>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label>품목구분</label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboMaterialType" name="cboMaterialType"></select>
+                            </dd>
+                        </dl>
 
-                    <dl>
-                        <dt>
-                            <label>품목그룹</label>
-                        </dt>
-                        <dd>
-                            <select class="form-control2" id="cboMaterialGroup" name="cboMaterialGroup"></select>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>
-                            <label>최종</label>
-                        </dt>
-                        <dd>
-                            <input class="form-control2" type="checkbox" id="not_past_flag" name="not_past_flag"
-                                   value="Y" checked/>
-                        </dd>
-                    </dl>
-                </div>
-                <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            <label>제품명</label>
-                        </dt>
-                        <dd>
-                            <input type="text" class="form-control2" id="txtMatName" name="txtMatName">
-                        </dd>
-                    </dl>
-
-                    <dl>
-                        <dt><span class="eq"></span></dt>
-                        <dd>
-                            <li>
-                                <a class="btn btn-delete" title="검색" id="btnSearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    검색
-                                </a>
-                            </li>
-                        </dd>
-                    </dl>
-                </div>
-                <div class="button-wrap">
-                    <button type="button" class="btn-excellt btn-default" id="btnBomNew"
-                            style="width: 90px; height: 36px; float: none;">등록</button>
-                    <button type="button" class="btn-danger y_write_auth" id="btnBomDelete"
-                            style="width: 90px; height: 36px; float: none;">삭제
-                    </button>
-                    <button type="button" class="btn-delete btn-edit btn-default" id="btnBomEdit"
-                            style="width: 90px; height: 36px; float: none;">수정</button>
-                    <button type="button" class="btn-excellt btn-default y_write_auth" id="btnBomReplicate" data-labelCd="복제"
-                            style="width: 90px; height: 36px; float: none;">
-                    </button>
-                    <button type="button" class="btn-excellt btn-default y_write_auth" id="btnBomRevision" data-labelCd="개정"
-                            style="width: 90px; height: 36px; float: none;">
-                    </button>
-                    <a class="btn" title="엑셀 업로드" id="btnShowUpload" style="width: 86px;">
-                        엑셀 업로드
-                    </a>
-                </div>
-            </div>
-
-            <!-- <div class="grid_box">
-                 <div class="h-280" data-ax5grid="bom-grid" ></div>
-             </div>-->
-            <div class="container-fluid">
-                <div id="bom-grid" style="height: 440px;"></div>
-            </div>
-        </section>
-        <section style="width: 50%;">
-        <div class="tab-wrap">
-            <ul class="tab-links">
-                <li><a href="#tab_basic" name="tabs_basic">1레벨</a></li>
-                <li><a href="#tab_tree" name="tab_tree">전체레벨</a></li>
-                <li><a href="#tab_copy_text" name="tab_copy_text">텍스트입력</a></li>
-            </ul>
-            <div>
-                <section class="tab-item" id="tab_basic" style="border-top-left-radius: 0;">
-                    <div class="section-top">
-                        <div class="button-wrap">
-                            <ul>
-                                <li>
-                                    <button type="button" class="btn-excellt btn-default" id="btnBomCompNew"
-                                            style="width: 115px; height: 36px;"><i
-                                            class="fas fa-plus"></i>등록
-                                    </button>
-                                </li>
-
-                                <li>
-                                    <button type="button" class="btn-delete btn-danger y_write_auth" id="btnBomCompDelete"
-                                            style="width: 115px; height: 36px;"><i
-                                            class="fas fa-trash"></i>삭제
-                                    </button>
-                                </li>
-
-                                <li>
-                                    <button type="button" class="btn-edit btn-default" id="btnBomCompEdit"
-                                            style="width: 115px; height: 36px;"><i
-                                            class="fas fa-edit"></i>수정
-                                    </button>
-                                </li>
-
-                                <!--<li>
-                                    <button type="button" class="btn-default" id="btnCompUp" title="순서 조정-위로"
-                                            style="width: 150px; height: 36px;"><i
-                                            class="fas fa-arrow-up"></i> 순서 조정-위로
-                                    </button>
-                                </li>
-                                <li>
-                                    <button type="button" class="btn-default" id="btnCompDown" title="순서 조정-아래로"
-                                            style="width: 150px; height: 36px;"><i
-                                            class="fas fa-arrow-down"></i> 순서 조정-아래로
-                                    </button>
-                                </li>
-                                <li>
-                                    <button type="button" class="btn-default y_write_auth" id="btnCompOrderSave"
-                                            style="width: 115px; height: 36px;"><span
-                                            data-labelCd="순서 저장">순서 저장</span></button>
-                                </li>-->
-                            </ul>
-                        </div>
+                        <dl>
+                            <dt>
+                                <label>품목그룹</label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboMaterialGroup" name="cboMaterialGroup"></select>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label>최종</label>
+                            </dt>
+                            <dd>
+                                <input class="form-control2" type="checkbox" id="not_past_flag" name="not_past_flag"
+                                       value="Y" checked/>
+                            </dd>
+                        </dl>
                     </div>
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label>제품명</label>
+                            </dt>
+                            <dd>
+                                <input type="text" class="form-control2" id="txtMatName" name="txtMatName">
+                            </dd>
+                        </dl>
+
+                        <dl>
+                            <dt><span class="eq"></span></dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="button-wrap">
+                        <button type="button" class="btn-excellt btn-default" id="btnBomNew"
+                                style="width: 90px; height: 36px; float: none;">등록
+                        </button>
+                        <button type="button" class="btn-danger y_write_auth" id="btnBomDelete"
+                                style="width: 90px; height: 36px; float: none;">삭제
+                        </button>
+                        <button type="button" class="btn-delete btn-edit btn-default" id="btnBomEdit"
+                                style="width: 90px; height: 36px; float: none;">수정
+                        </button>
+                        <button type="button" class="btn-excellt btn-default y_write_auth" id="btnBomReplicate"
+                                data-labelCd="복제"
+                                style="width: 90px; height: 36px; float: none;">
+                        </button>
+                        <button type="button" class="btn-excellt btn-default y_write_auth" id="btnBomRevision"
+                                data-labelCd="개정"
+                                style="width: 90px; height: 36px; float: none;">
+                        </button>
+                        <a class="btn" title="엑셀 업로드" id="btnShowUpload" style="width: 86px;">
+                            엑셀 업로드
+                        </a>
+                    </div>
+                </div>
+
+                <!-- <div class="grid_box">
+                     <div class="h-280" data-ax5grid="bom-grid" ></div>
+                 </div>-->
+                <div class="container-fluid">
+                    <div id="bom-grid"></div>
+                </div>
+            </section>
+            <section style="width: 50%;">
+                <div class="tab-wrap">
+                    <ul class="tab-links">
+                        <li><a href="#tab_basic" name="tabs_basic">1레벨</a></li>
+                        <li><a href="#tab_tree" name="tab_tree">전체레벨</a></li>
+                        <li><a href="#tab_copy_text" name="tab_copy_text">텍스트입력</a></li>
+                    </ul>
                     <div>
-                        <!-- <div class="grid_box">
-                             <div class="h-600" data-ax5grid="bomcomp-grid" ></div>
-                         </div>-->
-                        <div class="container-fluid">
-                            <div id="bomcomp-grid" style="height: 490px;"></div>
-                        </div>
+                        <section class="tab-item" id="tab_basic" style="border-top-left-radius: 0;">
+                            <div class="section-top">
+                                <div class="button-wrap">
+                                    <ul>
+                                        <li>
+                                            <button type="button" class="btn-excellt btn-default" id="btnBomCompNew"
+                                                    style="width: 115px; height: 36px;"><i
+                                                    class="fas fa-plus"></i>등록
+                                            </button>
+                                        </li>
+
+                                        <li>
+                                            <button type="button" class="btn-delete btn-danger y_write_auth"
+                                                    id="btnBomCompDelete"
+                                                    style="width: 115px; height: 36px;"><i
+                                                    class="fas fa-trash"></i>삭제
+                                            </button>
+                                        </li>
+
+                                        <li>
+                                            <button type="button" class="btn-edit btn-default" id="btnBomCompEdit"
+                                                    style="width: 115px; height: 36px;"><i
+                                                    class="fas fa-edit"></i>수정
+                                            </button>
+                                        </li>
+
+                                        <!--<li>
+                                            <button type="button" class="btn-default" id="btnCompUp" title="순서 조정-위로"
+                                                    style="width: 150px; height: 36px;"><i
+                                                    class="fas fa-arrow-up"></i> 순서 조정-위로
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="btn-default" id="btnCompDown" title="순서 조정-아래로"
+                                                    style="width: 150px; height: 36px;"><i
+                                                    class="fas fa-arrow-down"></i> 순서 조정-아래로
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="btn-default y_write_auth" id="btnCompOrderSave"
+                                                    style="width: 115px; height: 36px;"><span
+                                                    data-labelCd="순서 저장">순서 저장</span></button>
+                                        </li>-->
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- <div class="grid_box">
+                                 <div class="h-600" data-ax5grid="bomcomp-grid" ></div>
+                             </div>-->
+                            <div class="container-fluid">
+                                <div id="bomcomp-grid"></div>
+                            </div>
+                        </section>
+                        <!--section2-->
+                        <section class="tab-item" id="tab_tree" style="border-top-left-radius: 0;">
+                            <div class="container-fluid">
+                                <div id="bomtree-grid" ></div>
+                            </div>
+                        </section>
+                        <!--section3-->
+                        <section class="tab-item" id="tab_copy_text" style="border-top-left-radius: 0;">
+                            <div class="section-top">
+                                <div class="button-wrap">
+                                    <ul>
+                                        <li>
+                                            <button type="button" class="btn-excellt btn-default y_write_auth"
+                                                    id="btnSaveBomText"
+                                                    style="float:none"><i class="fas fa-save"></i></button>
+                                        </li>
+                                        <!--<span class="right_align lpt" >품목코드,수량,비고 순으로 엑셀에서 작성 후 붙여넣기 하세요. 기존 BOM구성은 모두 삭제되고 저장되니 주의해야 합니다.&nbsp;&nbsp;&nbsp;&nbsp;</span>-->
+                                    </ul>
+                                </div>
+                            </div>
+                            <div style="height: 240px;">
+                                <textarea id="txtCopyText" rows="15" style="height: 240px"></textarea>
+                            </div>
+                        </section>
                     </div>
-                </section>
-                <!--section2-->
-                <section class="tab-item" id="tab_tree" style="border-top-left-radius: 0;">
-                    <div>
-                        <div class="container-fluid">
-                            <div id="bomtree-grid" style="height: 490px;"></div>
-                        </div>
-                    </div>
-                </section>
-                <!--section3-->
-                <section class="tab-item" id="tab_copy_text" style="border-top-left-radius: 0;">
-                    <div class="section-top">
-                        <div class="button-wrap">
-                            <ul>
-                                <li>
-                                    <button type="button" class="btn-excellt btn-default y_write_auth" id="btnSaveBomText"
-                                            style="float:none"><i class="fas fa-save"></i></button>
-                                </li>
-                                <!--<span class="right_align lpt" >품목코드,수량,비고 순으로 엑셀에서 작성 후 붙여넣기 하세요. 기존 BOM구성은 모두 삭제되고 저장되니 주의해야 합니다.&nbsp;&nbsp;&nbsp;&nbsp;</span>-->
-                            </ul>
-                        </div>
-                    </div>
-                    <div style="height: 240px;">
-                        <textarea id="txtCopyText" rows="15" style="height: 240px"></textarea>
-                    </div>
-                </section>
-            </div>
-        </div>
-        </section>
+                </div>
+            </section>
         </div>
     </div>
-<!-- BOM 등록 스크립트 -->
+    <!-- BOM 등록 스크립트 -->
     <script type="text/x-tmpl" id="bomCreateTemplate">
         <div class="content_wrap popup">
             <!--<header>
@@ -346,8 +348,8 @@
           <button type="button" class="btn-popup" id="btnTest"><span data-labelCd="새로고침">새로고침</span></button>
         </div>
 </div>
-</script>
-<!--    엑셀 등록 스크립트-->
+    </script>
+    <!--    엑셀 등록 스크립트-->
     <script type="text/x-tmpl" id="excelUploadTemplate">
         <div class="content_wrap popup" id="div_excel_upload">
 
@@ -644,7 +646,7 @@
                         let selectedItem = this.grid.rows[row].dataItem;
                         _this.showBomCompList(selectedItem.id)
                         _this.showBomCompTreeList(selectedItem.id)
-                       /* _this.showBomCompTreeList(selectedItem.id)*/
+                        /* _this.showBomCompTreeList(selectedItem.id)*/
                     }
                 });
 
@@ -1097,7 +1099,6 @@
                 });
 
 
-
                 /*$content.find('#btnBomMaterialSave').on('click', function () {
                     let $form = $content.find('#materialForm');
                     Alert.confirm('',
@@ -1187,7 +1188,7 @@
             showBomCompTreeList(bom_id) {
                 let _this = this;
                 let url = '/api/definition/bom/material_tree_list';
-                let result = AjaxUtil.getSyncData(url, { 'id': bom_id });
+                let result = AjaxUtil.getSyncData(url, {'id': bom_id});
 
                 /*console.log("bom_id:", bom_id); // 디버깅용
                 console.log("API Response:", result); // 디버깅용*/
@@ -1219,7 +1220,7 @@
 
                 // 모든 데이터를 lookup 객체에 저장 (my_key를 키로 사용)
                 flatData.forEach(item => {
-                    lookup[item.my_key] = { ...item, children: [] };
+                    lookup[item.my_key] = {...item, children: []};
                 });
 
                 // 트리 구조로 변환
@@ -1237,8 +1238,6 @@
 
                 return tree;
             }
-
-
 
 
             searchBomList() {
@@ -1285,7 +1284,7 @@
 
                 let fnSuccess = function (result) {
                     if (result.success) {
-                        Alert.alert('','저장되었습니다');
+                        Alert.alert('', '저장되었습니다');
                         _this.searchBomList();
                     } else {
                         Notify.error(result.message);
@@ -1329,10 +1328,10 @@
                         }
                     }
 
-                   /* let items = page.gridBom.getList("selected");
-                    if (items.length > 0) {
-                        _this.showBomCompList(items[0].id);
-                    }*/
+                    /* let items = page.gridBom.getList("selected");
+                     if (items.length > 0) {
+                         _this.showBomCompList(items[0].id);
+                     }*/
 
                 };
                 AjaxUtil.postAsyncData(url, data, fnSuccess);
@@ -1346,13 +1345,14 @@
                 let data = {id: bom_id};
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Alert.alert('','복제되었습니다.');
+                        Alert.alert('', '복제되었습니다.');
                         _this.searchBomList();
                     }
                 };
 
                 AjaxUtil.postAsyncData(url, data, fnSuccess);
             }
+
 //개정
             revisionBOM(bom_id) {
                 let _this = this;
@@ -1361,7 +1361,7 @@
                 let data = {id: bom_id};
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Alert.alert('','개정되었습니다.');
+                        Alert.alert('', '개정되었습니다.');
                         _this.searchBomList();
                     }
                 };
@@ -1374,7 +1374,7 @@
                 let url = '/api/definition/bom/material_delete';
                 let fnsuccess = function (res) {
                     if (res.success) {
-                        Alert.alert('','삭제되었습니다');
+                        Alert.alert('', '삭제되었습니다');
 
                         let grid = wijmo.Control.getControl('#bomcomp-grid'); // 그리드 객체 가져오기
                         let selection = grid.selection; // 현재 선택된 셀의 정보 가져오기
@@ -1388,10 +1388,10 @@
                             }
                         }
 
-                      /*  let items = page.gridBom.getList("selected");
-                        if (items.length > 0) {
-                            _this.showBomCompList(items[0].id);
-                        }*/
+                        /*  let items = page.gridBom.getList("selected");
+                          if (items.length > 0) {
+                              _this.showBomCompList(items[0].id);
+                          }*/
                     } else {
                         Alert.alert('', res.message);
                     }
@@ -1406,7 +1406,7 @@
                 let data = {'id': id};
                 let fnDeleteSuccessCallback = function (res) {
                     if (res.success) {
-                        Alert.alert('','삭제되었습니다.');
+                        Alert.alert('', '삭제되었습니다.');
                         _this.searchBomList();
                     } else {
                         Alert.alert('', res.message);
@@ -1467,13 +1467,13 @@
                 let items = [];
                 $.each(grid.itemsSource, function (idx, item) {
                     if (item && item.id) {
-                        items.push({ id: item.id });
+                        items.push({id: item.id});
                     }
                 });
 
                 let url = '/api/definition/bom/save_bom_comp_order';
                 let strData = JSON.stringify(items);
-                let data = { Q: strData };
+                let data = {Q: strData};
                 let fnsuccess = function (result) {
                     if (result.success) {
                         Alert.alert('', '저장했습니다.');
@@ -1494,8 +1494,7 @@
 
                 //팝업공통모듈
                 let modalContainer = new PopupDraggable('엑셀 업로드');
-                modalContainer.open({ width: 440, height: 220, $content });
-
+                modalContainer.open({width: 440, height: 220, $content});
 
 
                 $content.find('#btn_excel_save').on('click', function () {
@@ -1503,7 +1502,7 @@
                     if (!$('#upload_file').val()) {
                         Alert.alert('', '파일을 선택하여 주십시오');
                         return;
-                    } else if($('#excelType').val() === ""){
+                    } else if ($('#excelType').val() === "") {
                         Alert.alert('', '엑셀양식을 선택하여 주십시오');
                         return;
                     }
@@ -1512,7 +1511,8 @@
                         function () {
                             _this.saveBomBulkData($form, modalContainer);
                         },
-                        function () { }
+                        function () {
+                        }
                     );
                 });
             }
@@ -1570,7 +1570,7 @@
             $('#btnBomNew').click(function (e) {
 
                 let start_date = CommonUtil.getYYYYMMDD();
-                let end_date =  '2100-12-31'
+                let end_date = '2100-12-31'
                 let data = {
                     'id': '',
                     'Material_id': '',
@@ -1587,7 +1587,7 @@
             });
 
             $('#btnBomReplicate').click(function () {
-              /*  let items = page.gridBom.getList("selected");*/
+                /*  let items = page.gridBom.getList("selected");*/
                 let grid = wijmo.Control.getControl('#bom-grid'); // 그리드 객체 가져오기
                 let selection = grid.selection; // 현재 선택된 셀의 정보 가져오기
 
@@ -1599,7 +1599,7 @@
 
                         Alert.confirm('', "선택한 BOM을 가지고 새 BOM을 복제하시겠습니까?",
                             function () {
-                        page.replicateBOM(id);
+                                page.replicateBOM(id);
                             },
                             function () {
                             }
@@ -1616,7 +1616,6 @@
                         }
                     );
                 }*/
-
 
 
             });
@@ -1765,18 +1764,16 @@
                 }
 
 
-               /* let row = items[0];
-                if (row.parent_mat_id > 0) {
-                    Alert.alert('', '1레벨의 구성품만 삭제할 수 있습니다.');
-                    return;
-                }
-                Alert.confirm('', "삭제하시겠습니까?", function (e) {
-                    page.deleteMaterialData(row.id);
-                });*/
+                /* let row = items[0];
+                 if (row.parent_mat_id > 0) {
+                     Alert.alert('', '1레벨의 구성품만 삭제할 수 있습니다.');
+                     return;
+                 }
+                 Alert.confirm('', "삭제하시겠습니까?", function (e) {
+                     page.deleteMaterialData(row.id);
+                 });*/
 
             });
-
-
 
 
             $('#btnBomEdit').click(function (e) {
@@ -1789,7 +1786,7 @@
                     if (item) {
                         let id = item.id; // ID 값 가져오기
                         let url = '/api/definition/bom/detail';
-                        let result = AjaxUtil.getSyncData(url, { id: id });
+                        let result = AjaxUtil.getSyncData(url, {id: id});
 
                         if (result.success) {
                             page.showBomEdit(result.data);
@@ -1816,7 +1813,7 @@
                         let id = item.id; // ID 값 가져오기
                         Alert.confirm('', "삭제하시겠습니까?",
                             function () {
-                        page.deleteBOM(id);
+                                page.deleteBOM(id);
                             },
                             function () {
                             }
@@ -1927,7 +1924,6 @@
                 };
                 page.showPopupExcelUpload(data);
             });
-
 
 
         });
