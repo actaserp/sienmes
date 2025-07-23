@@ -51,465 +51,474 @@
                 <li>거래처정보</li>
             </ul>
         </div>
-
-        <section class="section">
-            <div class="section-top">
-                <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            <label>업체구분</label>
-                        </dt>
-                        <dd>
-                            <select class="form-control2" id="cboCompanyType" name="cboCompanyType"></select>
-                        </dd>
-                    </dl>
-                    <!--<dl>
-                        <dt>
-                            <label>분류</label>
-                        </dt>
-                        <dd>
-                            <select class="form-control2" id="cboGroupName" name="cboGroupName"></select>
-                        </dd>
-                    </dl>-->
-                    <dl>
-                        <dt>
-                            <label>업체명</label>
-                        </dt>
-                        <dd>
-                            <input type="text" class="form-control2" id="txtCompany" name="txtCompany">
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt><span class="eq"></span></dt>
-                        <dd>
-                            <li>
-                                <a class="btn btn-delete" title="검색" id="btnSearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    검색
-                                </a>
-                            </li>
-                        </dd>
-                    </dl>
-                </div>
-            </div>
-
-            <!--<div class="grid_box">
-                <div class="h-350" data-ax5grid="company-grid"></div>
-            </div>-->
-            <div class="container-fluid">
-                <div id="theGrid" style="height: 350px; max-height: 350px;"></div>
-            </div>
-        </section>
-
-        <section>
-            <div class="tab-wrap">
-                <ul class="tab-links">
-                    <li><a href="#tabs_basic_tab" id="tabs_basic">기본정보</a></li>
-                    <li><a href="#tabs_manage_tab" id="tabs_manage">관리정보</a></li>
-                    <li><a href="#tabs_price_tab" id="tabs_unitcost">품목단가</a></li>
-                    <div class="button-wrap button-list">
-                        <ul>
-                            <li>
-                                <button type="button" class="btn-excellt btn-default " id="btnNew" name="btnNew"
-                                        style="width: 115px; height: 36px;">
-                                    <i class="fas fa-plus"></i>신규등록
-                                </button>
-                            </li>
-
-                            <li>
-                                <button type="button" class="btn-delete btn-danger" id="btnDelete"
-                                        style="width: 115px; height: 36px;">
-                                    <i class="fas fa-trash"></i>삭제
-                                </button>
-                            </li>
-
-                            <li>
-                                <button disabled type="button" class="btn-excellt btn-defaul" id="btnSave"
-                                        style="width: 115px; height: 36px;">
-                                    <i class="fas fa-save"></i>저장
-                                </button>
-                            </li>
-                        </ul>
+        <div style="display: flex; gap: 5px">
+            <section class="section" style="width: 50%;">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label>업체구분</label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboCompanyType" name="cboCompanyType"></select>
+                            </dd>
+                        </dl>
+                        <!--<dl>
+                            <dt>
+                                <label>분류</label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboGroupName" name="cboGroupName"></select>
+                            </dd>
+                        </dl>-->
+                        <dl>
+                            <dt>
+                                <label>업체명</label>
+                            </dt>
+                            <dd>
+                                <input type="text" class="form-control2" id="txtCompany" name="txtCompany">
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt><span class="eq"></span></dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
                     </div>
-                </ul>
-                <div>
-                    <section class="tab-item" id="tabs_basic_tab" style="border-top-left-radius: 0;">
-                        <div>
-                            <form id="basicForm">
-                                <table class="write-table">
-                                    <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
-                                    <input type="hidden" id="id" name="id" readonly>
-                                    <tbody>
-                                    <tr>
-                                        <th>
-                                            <label for="company_type"><span class="eq">*</span>업체구분</label>
-                                        </th>
-                                        <td>
-                                            <select id="company_type" name="company_type"
-                                                    style="width: 100%;"></select>
-                                        </td>
+                </div>
 
-                                        <th>
-                                            <label for="comp_code"><span class="eq">*</span>업체코드</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="comp_code"
-                                                   name="comp_code">
-                                        </td>
+                <!--<div class="grid_box">
+                    <div class="h-350" data-ax5grid="company-grid"></div>
+                </div>-->
+                <div class="container-fluid">
+                    <div id="theGrid"></div>
+                </div>
+            </section>
 
-                                        <th>
-                                            <label for="name"><span class="eq">*</span>업체명</label>
-                                        </th>
-                                        <td  colspan="3">
-                                            <input type="text" id="name" name="name"
-                                                   style="width: 100%;">
-                                        </td>
+            <section style="width: 50%;">
+                <div class="tab-wrap">
+                    <ul class="tab-links">
+                        <li><a href="#tabs_basic_tab" id="tabs_basic">기본정보</a></li>
+                        <li><a href="#tabs_manage_tab" id="tabs_manage">관리정보</a></li>
+                        <li><a href="#tabs_price_tab" id="tabs_unitcost">품목단가</a></li>
+                        <div class="button-wrap button-list">
+                            <ul>
+                                <li>
+                                    <button type="button" class="btn-excellt btn-default " id="btnNew" name="btnNew"
+                                            style="width: 115px; height: 36px;">
+                                        <i class="fas fa-plus"></i>신규등록
+                                    </button>
+                                </li>
 
-                                        <th>
-                                            <label for="eng_name">영문명</label>
-                                        </th>
-                                        <td >
-                                            <input type="text" style="width: 100%;" id="eng_name"
-                                                   name="eng_name">
-                                        </td>
-                                    </tr>
+                                <li>
+                                    <button type="button" class="btn-delete btn-danger" id="btnDelete"
+                                            style="width: 115px; height: 36px;">
+                                        <i class="fas fa-trash"></i>삭제
+                                    </button>
+                                </li>
 
-                                    <tr>
-
-                                        <th>
-                                            <label for="ceo_name">대표자</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="ceo_name"
-                                                   name="ceo_name">
-                                        </td>
-
-                                        <th>
-                                            <label for="business_number"><span class="eq">*</span>사업자번호</label>
-                                        </th>
-                                        <td colspan="2">
-                                            <input type="text" style="width: 100%;" id="business_number" class="biz-number"
-                                                   name="business_number" maxlength="15" oninput="formatNumber(this)">
-                                        </td>
-
-                                        <th>
-                                            <label for="business_type">업태</label>
-                                        </th>
-                                        <td colspan="2">
-                                            <input type="text" style="width: 100%;" id="business_type"
-                                                   name="business_type">
-                                        </td>
-
-                                        <th>
-                                            <label for="business_item">종목</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="business_item" name="business_item"
-                                                   style="width: 100%;">
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>
-                                            <label for="comp_code2">법인번호</label>
-                                        </th>
-                                        <td colspan="2">
-                                            <input type="text" style="width: 100%;" id="comp_code2"
-                                                   name="comp_code2">
-                                        </td>
-
-                                        <th>
-                                            <label for="tel_number">연락처</label>
-                                        </th>
-                                        <td >
-                                            <input type="text" id="tel_number" name="tel_number" class="phone-format"
-                                                   style="width: 100%;">
-                                        </td>
-
-                                        <th>
-                                            <label for="fax_number">팩스</label>
-                                        </th>
-                                        <td colspan="2">
-                                            <input type="text" id="fax_number" name="fax_number"
-                                                   style="width: 100%;">
-                                        </td>
-
-                                        <th>
-                                            <label for="email">이메일</label>
-                                        </th>
-                                        <td colspan="2">
-                                            <input type="text" style="width: 100%;" id="email"
-                                                   name="email">
-                                        </td>
-                                    </tr>
-
-
-                                    <tr>
-                                        <th>
-                                            <label for="zip_code">우편번호</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="zip_code"
-                                                   name="zip_code" onclick="sample4_execDaumPostcode()" placeholder="우편번호">
-                                        </td>
-
-                                        <th>
-                                            <label for="address">주소</label>
-                                        </th>
-                                        <td colspan="2">
-                                            <input type="text" style="width: 100%;" id="address"
-                                                   name="address" >
-                                            <input type="hidden" id="placeAddress" placeholder="지번주소">
-                                            <span id="guide" style="color:#999;display:none"></span>
-                                        </td>
-
-                                        <th>
-                                            <label for="homepage">홈페이지</label>
-                                        </th>
-                                        <td colspan="2">
-                                            <input type="text" style="width: 100%;" id="homepage"
-                                                   name="homepage">
-                                        </td>
-
-                                        <th>
-                                            <label for="group_name">분류</label>
-                                        </th>
-                                        <td >
-                                            <input type="text" id="group_name" name="group_name"
-                                                   style="width: 100%;">
-                                        </td>
-                                    </tr>
-
-                                   <tr>
-                                       <th>
-                                           <label for="relyn">거래중지여부</label>
-                                       </th>
-                                       <td style="text-align: center;">
-                                           <input type="checkbox" id="relyn" name="relyn" value="1" style="display: block; margin: auto; height: 26px; width: 26px;">
-                                       </td>
-
-
-                                       <th>
-                                            <label for="description">설명</label>
-                                        </th>
-                                        <td colspan="7">
-                                            <input type="text" id="description" name="description"
-                                                   style="width: 100%;">
-                                          <!--<textarea id="description" name="description"></textarea>-->
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </form>
+                                <li>
+                                    <button disabled type="button" class="btn-excellt btn-defaul" id="btnSave"
+                                            style="width: 115px; height: 36px;">
+                                        <i class="fas fa-save"></i>저장
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
-                    </section>
+                    </ul>
+                    <div>
+                        <section class="tab-item" id="tabs_basic_tab" style="border-top-left-radius: 0;">
+                            <div>
+                                <form id="basicForm">
+                                    <table class="write-table">
+                                        <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
+                                        <input type="hidden" id="id" name="id" readonly>
+                                        <tbody>
+                                        <tr>
+                                            <th>
+                                                <label for="company_type"><span class="eq">*</span>업체구분</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <select id="company_type" name="company_type"
+                                                        style="width: 100%;"></select>
+                                            </td>
+
+                                            <th>
+                                                <label for="comp_code"><span class="eq">*</span>업체코드</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" style="width: 100%;" id="comp_code"
+                                                       name="comp_code">
+                                            </td>
 
 
-                    <!--section 2-->
-                    <section class="tab-item" id="tabs_manage_tab" style="border-top-left-radius: 0;">
-                        <div>
-                            <form id="manageForm">
-                                <table class="write-table">
-                                    <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
-                                    <col class="wp12">
-                                    <col class="wp20">
-                                    <col class="wp15">
-                                    <col class="wp18">
-                                    <col class="wp15">
-                                    <col class="wp20">
-                                    <tbody>
-                                    <tr>
-                                        <th>
-                                            <label for="our_manager">자사담당자</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="our_manager" name="our_manager"
-                                                   style="width: 60%;">
-                                            <a class="btn btn-navy" title="자료가져오기" id="getPersonId">직원등록</a>
-                                        </td>
+                                        </tr>
 
-                                        <th>
-                                            <label for="sales_manager">영업담당자</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="sales_manager" name="sales_manager"
-                                                   style="width: 100%;">
-                                        </td>
+                                        <tr>
+                                            <th>
+                                                <label for="name"><span class="eq">*</span>업체명</label>
+                                            </th>
+                                            <td  colspan="2">
+                                                <input type="text" id="name" name="name"
+                                                       style="width: 100%;">
+                                            </td>
 
-                                        <th>
-                                            <label for="sales_manager_phone">영업담당자연락처</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="sales_manager_phone" class="phone-format"
-                                                   name="sales_manager_phone">
-                                        </td>
-                                    </tr>
+                                            <th>
+                                                <label for="eng_name">영문명</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" style="width: 100%;" id="eng_name"
+                                                       name="eng_name">
+                                            </td>
 
-                                    <tr>
-                                        <th>
-                                            <label for="account_manager">계산서담당자</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="account_manager"
-                                                   name="account_manager">
-                                        </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="ceo_name">대표자</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" style="width: 100%;" id="ceo_name"
+                                                       name="ceo_name">
+                                            </td>
 
-                                        <th>
-                                            <label for="account_manager_phone">계산서담당자연락처</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="account_manager_phone" name="account_manager_phone" class="phone-format"
-                                                   style="width: 100%;">
-                                        </td>
-
-                                        <th>
-                                            <label for="invoiceEmail">계산서담당자이메일</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="invoiceEmail" name="invoiceEmail"
-                                                   style="width: 100%;">
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>
-                                            <label for="first_trading_day">거래개시일</label>
-                                        </th>
-                                        <td>
-                                            <input type="date" style="width: 100%; min-width: 100%;" id="first_trading_day"
-                                                   name="first_trading_day">
-                                        </td>
-
-                                        <th>
-                                            <label for="purchase_sales_deadline">매입매출마감일</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="purchase_sales_deadline"
-                                                   name="purchase_sales_deadline">
-                                        </td>
-
-                                        <th>
-                                            <label for="last_trading_day">최종거래일</label>
-                                        </th>
-                                        <td>
-                                            <input type="date" id="last_trading_day" name="last_trading_day"
-                                                   style="width: 100%; min-width: 100%;">
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>
-                                            <label for="tranding_bank">거래은행</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="tranding_bank"
-                                                   name="tranding_bank">
-                                        </td>
-
-                                        <th>
-                                            <label for="account_holder">예금주</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="account_holder" name="account_holder"
-                                                   style="width: 100%;">
-                                        </td>
-
-                                        <th>
-                                            <label for="account_number">계좌번호</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="account_number" name="account_number"
-                                                   style="width: 100%;">
-                                        </td>
-                                    </tr>
+                                            <th>
+                                                <label for="business_number"><span class="eq">*</span>사업자번호</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" style="width: 100%;" id="business_number" class="biz-number"
+                                                       name="business_number" maxlength="15" oninput="formatNumber(this)">
+                                            </td>
 
 
-                                    <tr>
-                                        <th>
-                                            <label for="receivable_amount">미수금액</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" style="width: 100%;" id="receivable_amount"
-                                                   name="receivable_amount" disabled>
-                                        </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="business_type">업태</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" style="width: 100%;" id="business_type"
+                                                       name="business_type">
+                                            </td>
 
-                                        <th>
-                                            <label for="unpaid_amount">미지급금액</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" style="width: 100%;" id="unpaid_amount"
-                                                   name="unpaid_amount" disabled>
-                                        </td>
-                                        <th>
-                                            <label for="payment_condition">대금결제조건</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="payment_condition"
-                                                   name="payment_condition">
-                                        </td>
-                                    </tr>
+                                            <th>
+                                                <label for="business_item">종목</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" id="business_item" name="business_item"
+                                                       style="width: 100%;">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="comp_code2">법인번호</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" style="width: 100%;" id="comp_code2"
+                                                       name="comp_code2">
+                                            </td>
+
+                                            <th>
+                                                <label for="tel_number">연락처</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" id="tel_number" name="tel_number" class="phone-format"
+                                                       style="width: 100%;">
+                                            </td>
 
 
-                                    <tr>
-                                        <th>
-                                            <label for="manage_remark">관리비고</label>
-                                        </th>
-                                        <td colspan="9">
-                                            <input type="text" style="width: 100%;" id="manage_remark"
-                                                   name="manage_remark">
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </form>
-                        </div>
-                    </section>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="fax_number">팩스</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" id="fax_number" name="fax_number"
+                                                       style="width: 100%;">
+                                            </td>
 
-                    <!--section3-->
+                                            <th>
+                                                <label for="email">이메일</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" style="width: 100%;" id="email"
+                                                       name="email">
+                                            </td>
+                                        </tr>
 
-                    <section class="tab-item" id="tabs_price_tab" style="border-top-left-radius: 0;">
-                        <div class="section-top">
-                            <div class="search-wrap">
+                                        <tr>
+                                            <th>
+                                                <label for="zip_code">우편번호</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" style="width: 100%;" id="zip_code"
+                                                       name="zip_code" onclick="sample4_execDaumPostcode()" placeholder="우편번호">
+                                            </td>
+
+                                            <th>
+                                                <label for="address">주소</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" style="width: 100%;" id="address"
+                                                       name="address" >
+                                                <input type="hidden" id="placeAddress" placeholder="지번주소">
+                                                <span id="guide" style="color:#999;display:none"></span>
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="homepage">홈페이지</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" style="width: 100%;" id="homepage"
+                                                       name="homepage">
+                                            </td>
+
+                                            <th>
+                                                <label for="group_name">분류</label>
+                                            </th>
+                                            <td colspan="2">
+                                                <input type="text" id="group_name" name="group_name"
+                                                       style="width: 100%;">
+                                            </td>
+                                        </tr>
+                                       <tr>
+                                           <th>
+                                               <label for="relyn">거래중지여부</label>
+                                           </th>
+                                           <td style="text-align: center;">
+                                               <input type="checkbox" id="relyn" name="relyn" value="1" style="display: block; margin: auto; height: 26px; width: 26px;">
+                                           </td>
+
+
+                                           <th>
+                                                <label for="description">설명</label>
+                                            </th>
+                                            <td colspan="3">
+                                                <input type="text" id="description" name="description"
+                                                       style="width: 100%;">
+                                              <!--<textarea id="description" name="description"></textarea>-->
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </form>
                             </div>
-                            <div class="button-wrap">
-                                <!--<small2>*단가정보는 왼쪽 버튼을 통해 별도로 저장됩니다. 기존 이력을 남기려면 단가등록/변경 버튼을 누르시고 이력을 남기지 않으시려면 단가 수정 버튼을
-                                    누르십시오.
-                                </small2>-->
-                                <ul class="button-list">
-                                    <li>
-                                        <button type="button" class="btn-default" id="btnPriceHistory" style="width: 115px; height: 36px;"><span
-                                                data-labelCd="히스토리조회">히스토리조회</span></button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn-default" id="btnNewPrice" style="width: 115px; height: 36px;"><span
-                                                data-labelCd="신규">신규</span>
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn-default y_write_auth" id="btnSavePrice" style="width: 115px; height: 36px;"><span
-                                                data-labelCd="단가등록/변경">단가등록/변경</span></button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn-danger y_write_auth" id="btnDeletePrice" style="width: 115px; height: 36px;"><span
-                                                data-labelCd="단가삭제">단가삭제</span></button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn-default y_write_auth" id="btnUpdatePrice" style="width: 115px; height: 36px;"><span
-                                                data-labelCd="단가수정">단가수정</span></button>
-                                    </li>
-                                </ul>
+                        </section>
 
+
+                        <!--section 2-->
+                        <section class="tab-item" id="tabs_manage_tab" style="border-top-left-radius: 0;">
+                            <div>
+                                <form id="manageForm">
+                                    <table class="write-table">
+                                        <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
+                                        <col class="wp12">
+                                        <col class="wp20">
+                                        <col class="wp15">
+                                        <col class="wp18">
+                                        <tbody>
+                                        <tr>
+                                            <th>
+                                                <label for="our_manager">자사담당자</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="our_manager" name="our_manager"
+                                                       style="width: 56%;">
+                                                <a class="btn btn-navy" title="자료가져오기" id="getPersonId">직원등록</a>
+                                            </td>
+
+                                            <th>
+                                                <label for="sales_manager">영업담당자</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="sales_manager" name="sales_manager"
+                                                       style="width: 100%;">
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr>
+                                            <th>
+                                                <label for="sales_manager_phone">영업담당자<br>연락처</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" style="width: 100%;" id="sales_manager_phone" class="phone-format"
+                                                       name="sales_manager_phone">
+                                            </td>
+                                            <th>
+                                                <label for="account_manager">계산서담당자</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" style="width: 100%;" id="account_manager"
+                                                       name="account_manager">
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="account_manager_phone">계산서담당자<br>연락처</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="account_manager_phone" name="account_manager_phone" class="phone-format"
+                                                       style="width: 100%;">
+                                            </td>
+
+                                            <th>
+                                                <label for="invoiceEmail">계산서담당자<br>이메일</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="invoiceEmail" name="invoiceEmail"
+                                                       style="width: 100%;">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="first_trading_day">거래개시일</label>
+                                            </th>
+                                            <td>
+                                                <input type="date" style="width: 100%; min-width: 100%;" id="first_trading_day"
+                                                       name="first_trading_day">
+                                            </td>
+
+                                            <th>
+                                                <label for="purchase_sales_deadline">매입매출마감일</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" style="width: 100%;" id="purchase_sales_deadline"
+                                                       name="purchase_sales_deadline">
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr>
+                                            <th>
+                                                <label for="last_trading_day">최종거래일</label>
+                                            </th>
+                                            <td>
+                                                <input type="date" id="last_trading_day" name="last_trading_day"
+                                                       style="width: 100%; min-width: 100%;">
+                                            </td>
+                                            <th>
+                                                <label for="tranding_bank">거래은행</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" style="width: 100%;" id="tranding_bank"
+                                                       name="tranding_bank">
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="account_holder">예금주</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="account_holder" name="account_holder"
+                                                       style="width: 100%;">
+                                            </td>
+
+                                            <th>
+                                                <label for="account_number">계좌번호</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="account_number" name="account_number"
+                                                       style="width: 100%;">
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>
+                                                <label for="receivable_amount">미수금액</label>
+                                            </th>
+                                            <td>
+                                                <input type="number" style="width: 100%;" id="receivable_amount"
+                                                       name="receivable_amount" disabled>
+                                            </td>
+
+                                            <th>
+                                                <label for="unpaid_amount">미지급금액</label>
+                                            </th>
+                                            <td>
+                                                <input type="number" style="width: 100%;" id="unpaid_amount"
+                                                       name="unpaid_amount" disabled>
+                                            </td>
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="payment_condition">대금결제조건</label>
+                                            </th>
+                                            <td colspan="3">
+                                                <input type="text" style="width: 100%;" id="payment_condition"
+                                                       name="payment_condition">
+                                            </td>
+                                        </tr>
+                                        <tr>
+
+                                            <th>
+                                                <label for="manage_remark">관리비고</label>
+                                            </th>
+                                            <td colspan="3">
+                                                <input type="text" style="width: 100%;" id="manage_remark"
+                                                       name="manage_remark">
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </form>
                             </div>
-                        </div>
+                        </section>
 
-                        <div class="row">
-                            <div class="wp75">
-                                <div class="container-fluid col">
-                                    <p id="selectedItem"></p>
-                                    <div id="price_grid" style="height: 200px; max-height: 200px;"></div>
+                        <!--section3-->
+
+                        <section class="tab-item" id="tabs_price_tab" style="border-top-left-radius: 0;">
+                            <div class="section-top">
+                                <div class="search-wrap">
+                                </div>
+                                <div class="button-wrap">
+                                    <!--<small2>*단가정보는 왼쪽 버튼을 통해 별도로 저장됩니다. 기존 이력을 남기려면 단가등록/변경 버튼을 누르시고 이력을 남기지 않으시려면 단가 수정 버튼을
+                                        누르십시오.
+                                    </small2>-->
+                                    <ul class="button-list">
+                                        <li>
+                                            <button type="button" class="btn-default" id="btnPriceHistory" style="width: 115px; height: 36px;"><span
+                                                    data-labelCd="히스토리조회">히스토리조회</span></button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="btn-default" id="btnNewPrice" style="width: 115px; height: 36px;"><span
+                                                    data-labelCd="신규">신규</span>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="btn-default y_write_auth" id="btnSavePrice" style="width: 115px; height: 36px;"><span
+                                                    data-labelCd="단가등록/변경">단가등록/변경</span></button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="btn-danger y_write_auth" id="btnDeletePrice" style="width: 115px; height: 36px;"><span
+                                                    data-labelCd="단가삭제">단가삭제</span></button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="btn-default y_write_auth" id="btnUpdatePrice" style="width: 115px; height: 36px;"><span
+                                                    data-labelCd="단가수정">단가수정</span></button>
+                                        </li>
+                                    </ul>
+
                                 </div>
                             </div>
-                            <div class="col wp25">
+
+
+                            <div class="">
                                 <div class="section">
                                     <form id="priceForm">
                                         <table class="write-table">
@@ -566,11 +575,15 @@
                                     </form>
                                 </div>
                             </div>
-                        </div>
-                    </section>
+                            <div class="container-fluid" style="margin-top: 5px">
+                                <p id="selectedItem"></p>
+                                <div id="price_grid" style=""></div>
+                            </div>
+                        </section>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
     </div>
 
     <script type="text/x-tmpl" id="CompanyTemplate">
@@ -691,9 +704,9 @@
                         }
                     },
                     columns: [
-                        {binding: 'comp_code', header: '업체코드', width: 150, align: 'center',},
-                        {binding: 'name', header: '업체명', width: 300, align: 'left'},
-                        {binding: 'company_type_name', header: '업체구분', width: 150, align: 'center',},
+                        {binding: 'comp_code', header: '업체코드', width: 90, align: 'center',},
+                        {binding: 'name', header: '업체명', width: 130, align: 'left'},
+                        {binding: 'company_type_name', header: '업체구분', width: 90, align: 'center',},
                         {binding: 'business_number', header: '사업자번호', width: 150, align: 'left',},
                         {binding: 'ceo_name', header: '대표자', width: 150, align: 'left',},
                         {binding: 'tel_number', header: '연락처', width: 150, align: 'left',},

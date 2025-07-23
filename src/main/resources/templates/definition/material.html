@@ -31,7 +31,23 @@
         .unitcost-save-btn {
             margin-top: 10px;
         }
-
+        .tab-links li a {
+            display: inline-flex;
+            justify-content: center;
+            min-width: 90px;
+            padding: 8px 32px 8px 32px;
+            background-color: #3069B3;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 500;
+            text-align: center;
+            transition: all .3s;
+        }
+        .tab-links li.active a {
+            background-color: #fff;
+            color: #03428E;
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -54,663 +70,690 @@
         </div>
 
 
-        <section class="section">
-            <div class="section-top">
-                <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            <label>품목구분</label>
-                        </dt>
-                        <dd>
-                            <select class="form-control2" id="cboMaterialType" name="cboMaterialType"></select>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>
-                            <label>품목그룹</label>
-                        </dt>
-                        <dd>
-                            <select class="form-control2" id="cboMaterialGroup" name="cboMaterialGroup"></select>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>
-                            <label>품목명</label>
-                        </dt>
-                        <dd>
-                            <input type="text" class="form-control2" id="keyword" name="keyword">
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt><span class="eq"></span></dt>
-                        <dd>
-                            <li>
-                                <a class="btn btn-delete" title="검색" id="btnSearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    검색
-                                </a>
-                            </li>
-                        </dd>
-                    </dl>
+        <div style="display: flex; gap: 5px">
+            <section class="section" style="width: 50%;">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label>품목구분</label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboMaterialType" name="cboMaterialType"></select>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label>품목그룹</label>
+                            </dt>
+                            <dd>
+                                <select class="form-control2" id="cboMaterialGroup" name="cboMaterialGroup"></select>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label>품목명</label>
+                            </dt>
+                            <dd>
+                                <input type="text" class="form-control2" id="keyword" name="keyword">
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt><span class="eq"></span></dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+                    </div>
                 </div>
-            </div>
 
-            <!--<div class="grid_box">
-                 <div class="h-280" data-ax5grid="material-grid" ></div>
-            </div>-->
-            <div class="container-fluid">
-                <div id="theGrid" style="height: 280px; max-height: 280px;"></div>
-            </div>
-        </section>
+                <!--<div class="grid_box">
+                     <div class="h-280" data-ax5grid="material-grid" ></div>
+                </div>-->
+                <div class="container-fluid">
+                    <div id="theGrid" style=""></div>
+                </div>
+            </section>
         <!--border-radius: 6px 0 0 0;-->
-        <section>
-            <!--<div class="section-top">
-                <div class="button-wrap">
-                    <ul>
-                        <li>
-                            <button type="button" class="btn-default" id="btnNew" name="btnNew"
-                                    style="width: 115px; height: 36px;">
-                                <i class="fas fa-plus"></i>신규등록
-                            </button>
-                        </li>
-
-                        <li>
-                            <button type="button" class="btn-danger" id="btnDelete"
-                                    style="width: 115px; height: 36px;">
-                                <i class="fas fa-trash"></i>삭제
-                            </button>
-                        </li>
-
-                        <li>
-                            <button disabled type="button" class="btn-default" id="btnSave"
-                                    style="width: 115px; height: 36px;">
-                                <i class="fas fa-save"></i>저장
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </div>-->
-
-            <div class="tab-wrap">
-                <ul class="tab-links">
-                    <li><a href="#tab_basic" name="tabs_basic" id="tabs_basic">기본정보</a></li>
-                    <li><a href="#tab_production" name="tab_production" id="tabs_production" >생산/출하정보</a></li>
-                    <li><a href="#tab_inventory" name="tab_inventory" id="tabs_inventory">발주/재고정보</a></li>
-                    <li><a href="#tab_bom" name="tab_bom">BOM</a></li>
-                    <li><a href="#tab_bom_reverse" name="tab_bom_reverse">BOM(역전개)</a></li>
-                    <li><a href="#tab_unitcost" name="tab_unitcost" id="tabs_unitcost">단가정보</a></li>
-                    <li><a href="#tab_test_master" name="tab_test_master">검사정보</a></li>
-                    <li><a href="#tab_routing" name="tab_routing">라우팅</a></li>
-
-                    <div class="button-wrap button-list">
+            <section style="width: 50%;">
+                <!--<div class="section-top">
+                    <div class="button-wrap">
                         <ul>
                             <li>
-                                <button type="button" class="btn-excellt btn-default" id="btnNew" name="btnNew"
+                                <button type="button" class="btn-default" id="btnNew" name="btnNew"
                                         style="width: 115px; height: 36px;">
                                     <i class="fas fa-plus"></i>신규등록
                                 </button>
                             </li>
 
                             <li>
-                                <button type="button" class="btn-delete btn-danger" id="btnDelete"
+                                <button type="button" class="btn-danger" id="btnDelete"
                                         style="width: 115px; height: 36px;">
                                     <i class="fas fa-trash"></i>삭제
                                 </button>
                             </li>
 
                             <li>
-                                <button disabled type="button" class="btn-excellt btn-default" id="btnSave"
+                                <button disabled type="button" class="btn-default" id="btnSave"
                                         style="width: 115px; height: 36px;">
                                     <i class="fas fa-save"></i>저장
                                 </button>
                             </li>
                         </ul>
                     </div>
-                </ul>
+                </div>-->
 
-                <div>
-                    <section class="tab-item" id="tab_basic" style="border-top-left-radius: 0;">
-                        <div>
-                            <form id="matBasicForm">
-                                <table class="write-table">
-                                    <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
-                                    <input type="hidden" id="id" name="id" readonly>
-                                    <tbody>
-                                    <tr>
-                                        <th>
-                                            <label for="MaterialGroup_id"><span class="eq">*</span>품목그룹</label>
-                                        </th>
-                                        <td>
-                                            <select id="MaterialGroup_id" name="MaterialGroup_id"
-                                                    style="width: 100%;" required></select>
-                                        </td>
+                <div class="tab-wrap">
+                    <ul class="tab-links">
+                        <li><a href="#tab_basic" name="tabs_basic" id="tabs_basic">기본정보</a></li>
+                        <li><a href="#tab_production" name="tab_production" id="tabs_production" >생산/출하정보</a></li>
+                        <li><a href="#tab_inventory" name="tab_inventory" id="tabs_inventory">발주/재고정보</a></li>
+                        <li><a href="#tab_bom" name="tab_bom">BOM</a></li>
+                        <li><a href="#tab_bom_reverse" name="tab_bom_reverse">BOM(역전개)</a></li>
+                        <li><a href="#tab_unitcost" name="tab_unitcost" id="tabs_unitcost">단가정보</a></li>
+                        <li><a href="#tab_test_master" name="tab_test_master">검사정보</a></li>
+                        <li><a href="#tab_routing" name="tab_routing">라우팅</a></li>
 
-                                        <th>
-                                            <label for="Code"><span class="eq">*</span>품목코드(바코드)</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="Code" name="Code"
-                                                   style="width: 100%;" required>
-                                        </td>
+                    </ul>
+                    <di>
+                        <div class="button-wrap button-list" style="margin: 5px 0 5px 0">
+                            <ul>
+                                <li>
+                                    <button type="button" class="btn-excellt btn-default" id="btnNew" name="btnNew"
+                                            style="width: 115px; height: 36px;">
+                                        <i class="fas fa-plus"></i>신규등록
+                                    </button>
+                                </li>
 
-                                        <th>
-                                            <label for="Name"><span class="eq">*</span>품목명</label>
-                                        </th>
-                                        <td colspan="3">
-                                            <input type="text" style="width: 100%;" id="Name"
-                                                   name="Name" required>
-                                        </td>
+                                <li>
+                                    <button type="button" class="btn-delete btn-danger" id="btnDelete"
+                                            style="width: 115px; height: 36px;">
+                                        <i class="fas fa-trash"></i>삭제
+                                    </button>
+                                </li>
 
-
-                                    </tr>
-
-                                    <tr>
-                                        <th>
-                                            <label for="Unit_id"><span class="eq">*</span>단위(생상/투입)</label>
-                                        </th>
-                                        <td>
-                                            <select style="width: 100%;" id="Unit_id"
-                                                    name="Unit_id" required></select>
-                                        </td>
-                                        <th>
-                                            <label for="Factory_id"><span class="eq">*</span>공장</label>
-                                        </th>
-                                        <td>
-                                            <select type="text" id="Factory_id" name="Factory_id"
-                                                    style="width: 100%;"></select>
-                                        </td>
-
-                                        <th>
-                                            <label for="mtyn">재고관리여부</label>
-                                        </th>
-                                        <td>
-                                            <input type="checkbox" id="mtyn" name="mtyn" value="1" style="display: block; margin: auto; height: 26px; width: 26px;" checked>
-                                        </td>
-                                        <th>
-                                            <label for="useyn">사용중지여부</label>
-                                        </th>
-                                        <td>
-                                            <input type="checkbox" id="useyn" name="useyn" value="1" style="display: block; margin: auto; height: 26px; width: 26px;">
-                                        </td>
-
-
-
-                                    </tr>
-                                    <tr>
-                                        <th style="font-size: 14px;">
-                                            <label for="LotSize">(생산/발주)로트사이즈</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="LotSize" name="LotSize"
-                                                   style="width: 100%;">
-                                        </td>
-                                        <th>
-                                            <label for="CustomerBarcode">고객바코드</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="CustomerBarcode"
-                                                   name="CustomerBarcode">
-                                        </td>
-                                        <th>
-                                            <label for="Standard1">규격1</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="Standard1" name="Standard1"
-                                                   style="width: 100%;">
-                                        </td>
-                                        <th>
-                                            <label for="Standard2">규격2</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="Standard2"
-                                                   name="Standard2">
-                                        </td>
-
-
-<!--                                        <th>-->
-<!--                                            <label for="Thickness">두께(mm)</label>-->
-<!--                                        </th>-->
-<!--                                        <td>-->
-<!--                                            <input type="number" style="width: 100%;" id="Thickness"-->
-<!--                                                   name="Thickness">-->
-<!--                                        </td>-->
-<!--                                        <th>-->
-<!--                                            <label for="Width">폭(mm)</label>-->
-<!--                                        </th>-->
-<!--                                        <td>-->
-<!--                                            <input type="number" id="Width" name="Width"-->
-<!--                                                   style="width: 100%;">-->
-<!--                                        </td>-->
-<!--                                        <th>-->
-<!--                                            <label for="Length">길이(mm)</label>-->
-<!--                                        </th>-->
-<!--                                        <td>-->
-<!--                                            <input type="number" id="Length" name="Length"-->
-<!--                                                   style="width: 100%;">-->
-<!--                                        </td>-->
-                                    </tr>
-
-                                    <tr>
-<!--                                        <th>-->
-<!--                                            <label for="Height">높이(mm)</label>-->
-<!--                                        </th>-->
-<!--                                        <td>-->
-<!--                                            <input type="number" style="width: 100%;" id="Height"-->
-<!--                                                   name="Height">-->
-<!--                                        </td>-->
-
-<!--                                        <th>-->
-<!--                                            <label for="Weight">중량</label>-->
-<!--                                        </th>-->
-<!--                                        <td>-->
-<!--                                            <input type="number" style="width: 100%;" id="Weight"-->
-<!--                                                   name="Weight">-->
-<!--                                        </td>-->
-
-<!--                                        <th>-->
-<!--                                            <label for="Color">Color</label>-->
-<!--                                        </th>-->
-<!--                                        <td>-->
-<!--                                            <input type="text" id="Color" name="Color"-->
-<!--                                                   style="width: 100%;">-->
-<!--                                        </td>-->
-                                        <th>
-                                            <label for="Class1">분류1</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="Class1" name="Class1"
-                                                   style="width: 100%;">
-                                        </td>
-                                        <th>
-                                            <label for="Class2">분류2</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="Class2"
-                                                   name="Class2">
-                                        </td>
-                                        <th>
-                                            <label for="Class3">분류3</label>
-                                        </th>
-                                        <td colspan="3">
-                                            <input type="text" style="width: 100%;" id="Class3"
-                                                   name="Class3">
-                                        </td>
-
-                                    </tr>
-                                    <tr>
-                                        <th>
-                                            <label for="Usage">용도</label>
-                                        </th>
-                                        <td colspan="3">
-                                            <input type="text" id="Usage" name="Usage"
-                                                   style="width: 100%;">
-                                        </td>
-
-                                        <th>
-                                            <label for="Description">비고</label>
-                                        </th>
-                                        <td colspan="3">
-                                            <!--<textarea id="Description" name="Description"></textarea>-->
-                                            <input type="text" id="Description" name="Description"
-                                                   style="width: 100%;">
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </form>
+                                <li>
+                                    <button disabled type="button" class="btn-excellt btn-default" id="btnSave"
+                                            style="width: 115px; height: 36px;">
+                                        <i class="fas fa-save"></i>저장
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
-                    </section>
+                        <section class="tab-item" id="tab_basic" style="border-top-left-radius: 0;">
+                            <div>
+                                <form id="matBasicForm">
+                                    <table class="write-table">
+                                        <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
+                                        <colgroup>
+                                            <col class="wp17">
+                                            <col class="wp33">
+                                            <col class="wp17">
+                                            <col class="wp33">
+                                        </colgroup>
+                                        <input type="hidden" id="id" name="id" readonly>
+                                        <tbody>
+                                        <tr>
+                                            <th>
+                                                <label for="MaterialGroup_id"><span class="eq">*</span>품목그룹</label>
+                                            </th>
+                                            <td>
+                                                <select id="MaterialGroup_id" name="MaterialGroup_id"
+                                                        style="width: 100%;" required></select>
+                                            </td>
+
+                                            <th>
+                                                <label for="Code"><span class="eq">*</span>품목코드<br>(바코드)</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="Code" name="Code"
+                                                       style="width: 100%;" required>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>
+                                                <label for="Name"><span class="eq">*</span>품목명</label>
+                                            </th>
+                                            <td >
+                                                <input type="text" style="width: 100%;" id="Name"
+                                                       name="Name" required>
+                                            </td>
+                                            <th>
+                                                <label for="Unit_id"><span class="eq">*</span>단위<br>(생상/투입)</label>
+                                            </th>
+                                            <td>
+                                                <select style="width: 100%;" id="Unit_id"
+                                                        name="Unit_id" required></select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="Factory_id"><span class="eq">*</span>공장</label>
+                                            </th>
+                                            <td>
+                                                <select type="text" id="Factory_id" name="Factory_id"
+                                                        style="width: 100%;"></select>
+                                            </td>
+
+                                            <th>
+                                                <label for="mtyn">재고관리여부</label>
+                                            </th>
+                                            <td>
+                                                <input type="checkbox" id="mtyn" name="mtyn" value="1" style="display: block; margin: auto; height: 26px; width: 26px;" checked>
+                                            </td>
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="useyn">사용중지여부</label>
+                                            </th>
+                                            <td>
+                                                <input type="checkbox" id="useyn" name="useyn" value="1" style="display: block; margin: auto; height: 26px; width: 26px;">
+                                            </td>
+                                            <th style="font-size: 14px;">
+                                                <label for="LotSize">(생산/발주)<br>로트사이즈</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="LotSize" name="LotSize"
+                                                       style="width: 100%;">
+                                            </td>
 
 
-                    <!--section 2-->
-                    <section class="tab-item" id="tab_production" style="border-top-left-radius: 0;">
-                        <div>
-                            <form id="matProductionForm">
-                                <table class="write-table">
-                                    <caption style="text-align: left; margin-bottom: 8px;">생산/출하정보</caption>
-                                    <!--<input type="hidden" id="id" name="id"/>-->
-                                    <tbody>
-                                    <tr>
-                                        <th>
-                                            <label for="WorkCenter_id">기본 워크센터</label>
-                                        </th>
-                                        <td>
-                                            <select id="WorkCenter_id" name="WorkCenter_id"
-                                                    style="width: 100%;" ></select>
-                                        </td>
 
-                                        <th>
-                                            <label for="Equipment_id">생산 설비</label>
-                                        </th>
-                                        <td>
-                                            <select id="Equipment_id" name="Equipment_id"
-                                                    style="width: 100%;"></select>
-                                        </td>
+    <!--                                        <th>-->
+    <!--                                            <label for="Thickness">두께(mm)</label>-->
+    <!--                                        </th>-->
+    <!--                                        <td>-->
+    <!--                                            <input type="number" style="width: 100%;" id="Thickness"-->
+    <!--                                                   name="Thickness">-->
+    <!--                                        </td>-->
+    <!--                                        <th>-->
+    <!--                                            <label for="Width">폭(mm)</label>-->
+    <!--                                        </th>-->
+    <!--                                        <td>-->
+    <!--                                            <input type="number" id="Width" name="Width"-->
+    <!--                                                   style="width: 100%;">-->
+    <!--                                        </td>-->
+    <!--                                        <th>-->
+    <!--                                            <label for="Length">길이(mm)</label>-->
+    <!--                                        </th>-->
+    <!--                                        <td>-->
+    <!--                                            <input type="number" id="Length" name="Length"-->
+    <!--                                                   style="width: 100%;">-->
+    <!--                                        </td>-->
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="CustomerBarcode">고객바코드</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" style="width: 100%;" id="CustomerBarcode"
+                                                       name="CustomerBarcode">
+                                            </td>
+                                            <th>
+                                                <label for="Standard1">규격1</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="Standard1" name="Standard1"
+                                                       style="width: 100%;">
+                                            </td>
 
-                                        <th>
-                                            <label for="StandardTime">표준 생산 시간</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" style="width: 100%;" id="StandardTime"
-                                                   name="StandardTime">
-                                        </td>
+                                        </tr>
 
-                                        <th>
-                                            <label for="StandardTimeUnit">생산 시간 단위</label>
-                                        </th>
-                                        <td>
-                                            <select id="StandardTimeUnit" name="StandardTimeUnit"
-                                                    style="width: 100%;">
-                                                <option value="min">분</option>
-                                                <option value="sec">초</option>
-                                            </select>
-                                        </td>
-                                    </tr>
+                                        <tr>
+    <!--                                        <th>-->
+    <!--                                            <label for="Height">높이(mm)</label>-->
+    <!--                                        </th>-->
+    <!--                                        <td>-->
+    <!--                                            <input type="number" style="width: 100%;" id="Height"-->
+    <!--                                                   name="Height">-->
+    <!--                                        </td>-->
 
-                                    <tr>
-                                        <th>
-                                            <label for="InputManCount">기본 작업자 수</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" id="InputManCount" name="InputManCount"
-                                                   style="width: 100%;">
-                                        </td>
+    <!--                                        <th>-->
+    <!--                                            <label for="Weight">중량</label>-->
+    <!--                                        </th>-->
+    <!--                                        <td>-->
+    <!--                                            <input type="number" style="width: 100%;" id="Weight"-->
+    <!--                                                   name="Weight">-->
+    <!--                                        </td>-->
 
-                                        <th>
-                                            <label for="InputManHour">기본 ManHour</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" id="InputManHour" name="InputManHour"
-                                                   style="width: 100%;">
-                                        </td>
-
-                                        <th>
-                                            <label for="VatExemptionYN">부가세 면제</label>
-                                        </th>
-                                        <td>
-                                            <select id="VatExemptionYN" name="VatExemptionYN"
-                                                    style="width: 100%;">
-                                                <option value="N">면제아님</option>
-                                                <option value="Y">면제</option>
-                                            </select>
-                                        </td>
-
-                                        <th></th>
-                                        <td>
-                                            <input type="text" style="width: 100%; display: none;">
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </form>
-                        </div>
-                    </section>
-
-                    <!--section3-->
-                    <section class="tab-item" id="tab_inventory" style="border-top-left-radius: 0;">
-                        <div>
-                            <form id="matStockForm">
-                                <table class="write-table">
-                                    <caption style="text-align: left; margin-bottom: 8px;">발주/재고정보</caption>
-                                    <!--<input type="hidden" id="id" name="id" readonly>-->
-                                    <tbody>
-                                    <tr>
-                                        <th>
-                                            <label for="PurchaseOrderStandard">발주 기준</label>
-                                        </th>
-                                        <td>
-                                            <select id="PurchaseOrderStandard" name="PurchaseOrderStandard"
-                                                    style="width: 100%;">
-                                                <option value="mrp">ROP</option>
-                                                <option value="rop">MRP</option>
-                                            </select>
-                                        </td>
-
-                                        <th>
-                                            <label for="LeadTime">리드타임(일)</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="LeadTime" name="LeadTime"
-                                                   style="width: 100%;">
-                                        </td>
-
-                                        <th>
-                                            <label for="MinOrder"><span class="eq">*</span>최소 발주량</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="MinOrder"
-                                                   name="MinOrder" value="1" required>
-                                        </td>
-
-                                        <th>
-                                            <label for="MaxOrder"><span class="eq">*</span>최대 발주량</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="MaxOrder"
-                                                   name="MaxOrder" value="10" required>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>
-                                            <label for="StoreHouse_id"><span class="eq">*</span>기본 재고 창고</label>
-                                        </th>
-                                        <td>
-                                            <select type="text" id="StoreHouse_id" name="StoreHouse_id"
-                                                    style="width: 100%;" required></select>
-                                        </td>
-                                        <th>
-                                            <label for="StoreHouseLoc">창고 내 위치</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="StoreHouseLoc" name="StoreHouseLoc"
-                                                   style="width: 100%;">
-                                        </td>
-
-                                        <th>
-                                            <label for="ManagementLevel">자재 관리 등급</label>
-                                        </th>
-                                        <td>
-                                            <select style="width: 100%;" id="ManagementLevel"
-                                                    name="ManagementLevel"></select>
-                                        </td>
-
-                                        <th>
-                                            <label for="PackingUnitQty">포장단위수량</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="PackingUnitQty"
-                                                   name="PackingUnitQty">
-                                        </td>
-                                    </tr>
+    <!--                                        <th>-->
+    <!--                                            <label for="Color">Color</label>-->
+    <!--                                        </th>-->
+    <!--                                        <td>-->
+    <!--                                            <input type="text" id="Color" name="Color"-->
+    <!--                                                   style="width: 100%;">-->
+    <!--                                        </td>-->
+                                            <th>
+                                                <label for="Standard2">규격2</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" style="width: 100%;" id="Standard2"
+                                                       name="Standard2">
+                                            </td>
+                                            <th>
+                                                <label for="Class1">분류1</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="Class1" name="Class1"
+                                                       style="width: 100%;">
+                                            </td>
 
 
-                                    <tr>
-                                        <th>
-                                            <label for="PackingUnitName">포장단위</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="PackingUnitName" name="PackingUnitName"
-                                                   style="width: 100%;">
-                                        </td>
-                                        <td colspan="2">
-                                            보관/입출고 시 생산/투입 단위가 몇 개 포장되어 존재하는지. 20/bag 이라면 포장단위수량 20, 포당단위명 bag 입력.
-                                        </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="Class2">분류2</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" style="width: 100%;" id="Class2"
+                                                       name="Class2">
+                                            </td>
+                                            <th>
+                                                <label for="Class3">분류3</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" style="width: 100%;" id="Class3"
+                                                       name="Class3">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="Usage">용도</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="Usage" name="Usage"
+                                                       style="width: 100%;">
+                                            </td>
 
-
-                                        <th><label for="avrqty">적정재고수량</label></th>
-                                        <td>
-                                            <input type="text" id="avrqty" name="avrqty" style="width: 100%;">
-                                        </td>
-
-                                        <th>
-                                            <label for="lot_use_yn">LOT 관리 유무</label>
-                                        </th>
-
-                                        <td style="text-align: center; vertical-align: middle;">
-                                            <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                                                <input type="checkbox" id="lot_use_yn" name="lot_use_yn" value="Y" >
-                                            </div>
-                                        </td>
-                                    </tr>
-
-
-                                    <tr>
-                                        <th>
-                                            <label for="SafetyStock">안전재고</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="SafetyStock" name="SafetyStock"
-                                                   style="width: 100%;">
-                                        </td>
-                                        <th>
-                                            <label for="MaxStock">최대재고</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" id="MaxStock" name="MaxStock"
-                                                   style="width: 100%;">
-                                        </td>
-
-                                        <th>
-                                            <label for="ProcessSafetyStock">공정 안전재고</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" style="width: 100%;" id="ProcessSafetyStock"
-                                                   name="ProcessSafetyStock">
-                                        </td>
-
-                                        <th>
-                                            <label for="ValidDays"><span class="eq">*</span>사용기한(일)</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" style="width: 100%;" id="ValidDays"
-                                                   name="ValidDays" value="1" required>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>
-                                            <label for="CurrentStock">재고량</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" id="CurrentStock" name="CurrentStock"
-                                                   style="width: 100%;">
-                                        </td>
-                                        <th>
-                                            <label for="AvailableStock">가용재고량</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" id="AvailableStock" name="AvailableStock"
-                                                   style="width: 100%;">
-                                        </td>
-
-                                        <th>
-                                            <label for="ReservationStock">예약재고량</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" style="width: 100%;" id="ReservationStock"
-                                                   name="ReservationStock">
-                                        </td>
-
-                                        <th>
-                                            <label for="ExpectedOutput">출고예정량(수주/계획 기준)</label>
-                                        </th>
-                                        <td>
-                                            <input type="number" style="width: 100%;" id="ExpectedOutput"
-                                                   name="ExpectedOutput">
-                                        </td>
-                                    </tr>
-
-                                    </tbody>
-                                </table>
-                            </form>
-                        </div>
-
-                    </section>
-
-                    <!--section4-->
-                    <section class="tab-item" id="tab_bom" style="border-top-left-radius: 0;">
-
-                        <div class="container-fluid">
-                            <div id="bom-grid" style="height: 250px; max-height: 250px;"></div>
-                        </div>
-                    </section>
-
-                    <!--section5-->
-                    <section class="tab-item" id="tab_bom_reverse" style="border-top-left-radius: 0;">
-                        <div class="container-fluid">
-                            <div id="bom-reverse-grid" style="height: 250px; max-height: 250px;"></div>
-                        </div>
-                    </section>
-
-
-                    <!--section6-->
-                    <section class="tab-item" id="tab_unitcost" style="border-top-left-radius: 0;">
-                        <div class="section-top">
-                            <div class="search-wrap">
-                                <form id="priceForm">
-                                    <dl>
-                                        <dt>
-                                            <label>평균단가</label>
-                                        </dt>
-                                        <dd>
-                                            <input type="number" id="UnitPrice" name="UnitPrice">
-                                        </dd>
-                                    </dl>
+                                            <th>
+                                                <label for="Description">비고</label>
+                                            </th>
+                                            <td>
+                                                <!--<textarea id="Description" name="Description"></textarea>-->
+                                                <input type="text" id="Description" name="Description"
+                                                       style="width: 100%;">
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
                                 </form>
-                                <div id="unitcostSaveButtonContainer" style="display: none; margin-top: 10px;">
+                            </div>
+                        </section>
+
+
+                        <!--section 2-->
+                        <section class="tab-item" id="tab_production" style="border-top-left-radius: 0;">
+                            <div>
+                                <form id="matProductionForm">
+                                    <table class="write-table">
+                                        <colgroup>
+                                            <col class="wp20">
+                                            <col class="wp80">
+                                        </colgroup>
+                                        <caption style="text-align: left; margin-bottom: 8px;">생산/출하정보</caption>
+                                        <!--<input type="hidden" id="id" name="id"/>-->
+                                        <tbody>
+                                        <tr>
+                                            <th>
+                                                <label for="WorkCenter_id">기본 워크센터</label>
+                                            </th>
+                                            <td>
+                                                <select id="WorkCenter_id" name="WorkCenter_id"
+                                                        style="width: 100%;" ></select>
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="Equipment_id">생산 설비</label>
+                                            </th>
+                                            <td>
+                                                <select id="Equipment_id" name="Equipment_id"
+                                                        style="width: 100%;"></select>
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="StandardTime">표준 생산 시간</label>
+                                            </th>
+                                            <td>
+                                                <input type="number" style="width: 100%;" id="StandardTime"
+                                                       name="StandardTime">
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="StandardTimeUnit">생산 시간 단위</label>
+                                            </th>
+                                            <td>
+                                                <select id="StandardTimeUnit" name="StandardTimeUnit"
+                                                        style="width: 100%;">
+                                                    <option value="min">분</option>
+                                                    <option value="sec">초</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="InputManCount">기본 작업자 수</label>
+                                            </th>
+                                            <td>
+                                                <input type="number" id="InputManCount" name="InputManCount"
+                                                       style="width: 100%;">
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="InputManHour">기본 ManHour</label>
+                                            </th>
+                                            <td>
+                                                <input type="number" id="InputManHour" name="InputManHour"
+                                                       style="width: 100%;">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="VatExemptionYN">부가세 면제</label>
+                                            </th>
+                                            <td>
+                                                <select id="VatExemptionYN" name="VatExemptionYN"
+                                                        style="width: 100%;">
+                                                    <option value="N">면제아님</option>
+                                                    <option value="Y">면제</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </form>
+                            </div>
+                        </section>
+
+                        <!--section3-->
+                        <section class="tab-item" id="tab_inventory" style="border-top-left-radius: 0;">
+                            <div>
+                                <form id="matStockForm">
+                                    <table class="write-table">
+                                        <colgroup>
+                                            <col class="wp20">
+                                            <col class="wp30">
+                                            <col class="wp20">
+                                            <col class="wp30">
+                                        </colgroup>
+                                        <caption style="text-align: left; margin-bottom: 8px;">발주/재고정보</caption>
+                                        <!--<input type="hidden" id="id" name="id" readonly>-->
+                                        <tbody>
+                                        <tr>
+                                            <th>
+                                                <label for="PurchaseOrderStandard">발주 기준</label>
+                                            </th>
+                                            <td>
+                                                <select id="PurchaseOrderStandard" name="PurchaseOrderStandard"
+                                                        style="width: 100%;">
+                                                    <option value="mrp">ROP</option>
+                                                    <option value="rop">MRP</option>
+                                                </select>
+                                            </td>
+
+                                            <th>
+                                                <label for="LeadTime">리드타임(일)</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="LeadTime" name="LeadTime"
+                                                       style="width: 100%;">
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="MinOrder"><span class="eq">*</span>최소 발주량</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" style="width: 100%;" id="MinOrder"
+                                                       name="MinOrder" value="1" required>
+                                            </td>
+
+                                            <th>
+                                                <label for="MaxOrder"><span class="eq">*</span>최대 발주량</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" style="width: 100%;" id="MaxOrder"
+                                                       name="MaxOrder" value="10" required>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>
+                                                <label for="StoreHouse_id"><span class="eq">*</span>기본 재고 창고</label>
+                                            </th>
+                                            <td>
+                                                <select type="text" id="StoreHouse_id" name="StoreHouse_id"
+                                                        style="width: 100%;" required></select>
+                                            </td>
+                                            <th>
+                                                <label for="StoreHouseLoc">창고 내 위치</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="StoreHouseLoc" name="StoreHouseLoc"
+                                                       style="width: 100%;">
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="ManagementLevel">자재 관리 등급</label>
+                                            </th>
+                                            <td>
+                                                <select style="width: 100%;" id="ManagementLevel"
+                                                        name="ManagementLevel"></select>
+                                            </td>
+
+                                            <th>
+                                                <label for="PackingUnitQty">포장단위수량</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" style="width: 100%;" id="PackingUnitQty"
+                                                       name="PackingUnitQty">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="PackingUnitName">포장단위</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="PackingUnitName" name="PackingUnitName"
+                                                       style="width: 100%;">
+                                            </td>
+                                            <td colspan="2" style="font-size: 14px">
+                                                보관/입출고 시 생산/투입 단위가 몇 개 포장되어 존재하는지.<br>20/bag 이라면 포장단위수량 20, 포당단위명 bag 입력.
+                                            </td>
+
+
+
+                                        </tr>
+                                        <tr>
+                                            <th><label for="avrqty">적정재고수량</label></th>
+                                            <td>
+                                                <input type="text" id="avrqty" name="avrqty" style="width: 100%;">
+                                            </td>
+
+                                            <th>
+                                                <label for="lot_use_yn">LOT 관리 유무</label>
+                                            </th>
+
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                                                    <input type="checkbox" id="lot_use_yn" name="lot_use_yn" value="Y" >
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>
+                                                <label for="SafetyStock">안전재고</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="SafetyStock" name="SafetyStock"
+                                                       style="width: 100%;">
+                                            </td>
+                                            <th>
+                                                <label for="MaxStock">최대재고</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" id="MaxStock" name="MaxStock"
+                                                       style="width: 100%;">
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="ProcessSafetyStock">공정 안전재고</label>
+                                            </th>
+                                            <td>
+                                                <input type="text" style="width: 100%;" id="ProcessSafetyStock"
+                                                       name="ProcessSafetyStock">
+                                            </td>
+
+                                            <th>
+                                                <label for="ValidDays"><span class="eq">*</span>사용기한(일)</label>
+                                            </th>
+                                            <td>
+                                                <input type="number" style="width: 100%;" id="ValidDays"
+                                                       name="ValidDays" value="1" required>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="CurrentStock">재고량</label>
+                                            </th>
+                                            <td>
+                                                <input type="number" id="CurrentStock" name="CurrentStock"
+                                                       style="width: 100%;">
+                                            </td>
+                                            <th>
+                                                <label for="AvailableStock">가용재고량</label>
+                                            </th>
+                                            <td>
+                                                <input type="number" id="AvailableStock" name="AvailableStock"
+                                                       style="width: 100%;">
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <label for="ReservationStock">예약재고량</label>
+                                            </th>
+                                            <td>
+                                                <input type="number" style="width: 100%;" id="ReservationStock"
+                                                       name="ReservationStock">
+                                            </td>
+
+                                            <th>
+                                                <label for="ExpectedOutput">출고예정량<br>(수주/계획 기준)</label>
+                                            </th>
+                                            <td>
+                                                <input type="number" style="width: 100%;" id="ExpectedOutput"
+                                                       name="ExpectedOutput">
+                                            </td>
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                </form>
+                            </div>
+
+                        </section>
+
+                        <!--section4-->
+                        <section class="tab-item" id="tab_bom" style="border-top-left-radius: 0;">
+                            <div class="container-fluid">
+                                <div id="bom-grid" style=""></div>
+                            </div>
+                        </section>
+
+                        <!--section5-->
+                        <section class="tab-item" id="tab_bom_reverse" style="border-top-left-radius: 0;">
+                            <div class="container-fluid">
+                                <div id="bom-reverse-grid" style=""></div>
+                            </div>
+                        </section>
+
+
+                        <!--section6-->
+                        <section class="tab-item" id="tab_unitcost" style="border-top-left-radius: 0;">
+                            <div class="section-top">
+                                <div class="button-wrap">
+                                    <!--<small2>단가정보는 왼쪽 버튼을 통해 별도로 저장됩니다. 기존 이력을 남기려면 단가등록/변경 버튼을 누르시고 이력을 남기지 않으시려면 단가 수정 버튼을
+                                        누르십시오.
+                                    </small2>-->
+                                    <ul class="button-list">
+                                        <li>
+                                            <button type="button" class="btn-excellt btn-default" id="btnPriceHistory"
+                                                    style="width: 115px; height: 36px;"><span
+                                                    data-labelCd="히스토리조회">히스토리조회</span></button>
+                                        </li>
+
+                                        <li>
+                                            <button type="button" class="btn-excellt btn-default" id="btnPriceNew"
+                                                    style="width: 115px; height: 36px;"><span
+                                                    data-labelCd="신규">신규</span></button>
+                                        </li>
+
+                                        <li>
+                                            <button type="button" class="btn-excellt btn-default" id="btnPriceSave"
+                                                    style="width: 115px; height: 36px;"><span
+                                                    data-labelCd="단가등록/변경">단가등록/변경</span></button>
+                                        </li>
+
+                                        <li>
+                                            <button type="button" class="btn-delete btn-danger" id="btnPriceDelete"
+                                                    style="width: 115px; height: 36px;"><span
+                                                    data-labelCd="단가삭제">단가삭제</span>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="btn-edit btn-default" id="btnPriceUpdate"
+                                                    style="width: 115px; height: 36px;"><span
+                                                    data-labelCd="단가수정">단가수정</span>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="search-wrap">
+                                    <form id="priceForm" style="margin-left: auto;">
+                                        <dl>
+                                            <dt>
+                                                <label>평균단가</label>
+                                            </dt>
+                                            <dd>
+                                                <input type="number" id="UnitPrice" name="UnitPrice">
+                                            </dd>
+                                        </dl>
+                                    </form>
+                                    <div id="unitcostSaveButtonContainer" style="display: none; margin-top: 10px;">
+                                    </div>
                                 </div>
                             </div>
-                            <div class="button-wrap">
-                                <!--<small2>단가정보는 왼쪽 버튼을 통해 별도로 저장됩니다. 기존 이력을 남기려면 단가등록/변경 버튼을 누르시고 이력을 남기지 않으시려면 단가 수정 버튼을
-                                    누르십시오.
-                                </small2>-->
-                                <ul class="button-list">
-                                    <li>
-                                        <button type="button" class="btn-excellt btn-default" id="btnPriceHistory"
-                                                style="width: 115px; height: 36px;"><span
-                                                data-labelCd="히스토리조회">히스토리조회</span></button>
-                                    </li>
 
-                                    <li>
-                                        <button type="button" class="btn-excellt btn-default" id="btnPriceNew"
-                                                style="width: 115px; height: 36px;"><span
-                                                data-labelCd="신규">신규</span></button>
-                                    </li>
-
-                                    <li>
-                                        <button type="button" class="btn-excellt btn-default" id="btnPriceSave"
-                                                style="width: 115px; height: 36px;"><span
-                                                data-labelCd="단가등록/변경">단가등록/변경</span></button>
-                                    </li>
-
-                                    <li>
-                                        <button type="button" class="btn-delete btn-danger" id="btnPriceDelete"
-                                                style="width: 115px; height: 36px;"><span
-                                                data-labelCd="단가삭제">단가삭제</span>
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn-edit btn-default" id="btnPriceUpdate"
-                                                style="width: 115px; height: 36px;"><span
-                                                data-labelCd="단가수정">단가수정</span>
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-
-
-                        <div class="row">
-                            <div class="wp75">
-                                <div class="container-fluid col">
-                                    <p id="selectedItem"></p>
-                                    <div id="price-grid" style="height: 200px; max-height:200px;"></div>
-                                </div>
-                            </div>
-
-                            <div class="col wp25">
+                            <div class="">
                                 <div class="section">
                                     <form id="companyPriceForm">
                                         <table class="write-table">
@@ -763,85 +806,88 @@
                                     </form>
                                 </div>
                             </div>
-                        </div>
-                    </section>
-
-
-                    <!--section7-->
-                    <section class="tab-item" id="tab_test_master" style="border-top-left-radius: 0;">
-
-                        <div class="section-top">
-                            <form id="matTestForm">
-                                <div class="search-wrap">
-                                    <dl>
-                                        <dt>
-                                            <label>수입 검사 필수</label>
-                                        </dt>
-                                        <dd>
-                                            <input type="checkbox" id="InTestYN" name="InTestYN" value="Y"/>
-                                        </dd>
-                                    </dl>
-                                    <dl>
-                                        <dt>
-                                            <label>출하 검사 필수</label>
-                                        </dt>
-                                        <dd>
-                                            <input type="checkbox" id="OutTestYN" name="OutTestYN" value="Y"/>
-                                        </dd>
-                                    </dl>
-                                    <dl>
-                                        <dt></dt>
-                                        <dd>
-                                            <select class="s-150" id="cboTestMasterGroup"
-                                                    name="cboTestMasterGroup"></select>
-                                        </dd>
-                                    </dl>
-                                    <dl>
-                                        <dt></dt>
-                                        <dd>
-                                            <select class="s-150" id="cboTestMaster" name="cboTestMaster"></select>
-                                        </dd>
-                                    </dl>
-                                </div>
-                            </form>
-                            <div class="button-wrap">
-                                <ul>
-                                    <li>
-                                        <button type="button" class="btn-excellt btn-default" id="btnAddTestMaster"
-                                                style="width: 115px; height: 36px;"><i
-                                                class="fas fa-plus"></i>추가
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn-delete btn-danger y_write_auth" id="btnDelTestMaster"
-                                                style="float:none; width: 115px; height: 36px;"><i
-                                                class="fas fa-trash"></i>삭제
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn-excellt btn-default y_write_auth"
-                                                id="btnSaveTest" style="width: 115px; height: 36px;"><span
-                                                data-labelCd="저장">저장</span></button>
-                                    </li>
-                                </ul>
+                            <div class="container-fluid" style="margin-top: 5px">
+                                <p id="selectedItem"></p>
+                                <div id="price_grid" style=""></div>
                             </div>
-                        </div>
+                        </section>
 
-                        <div class="container-fluid">
-                            <div id="test-master-grid" style="height: 200px; max-height: 200px;"></div>
-                        </div>
 
-                    </section>
+                        <!--section7-->
+                        <section class="tab-item" id="tab_test_master" style="border-top-left-radius: 0;">
 
-                    <!--section8-->
-                    <section class="tab-item" id="tab_routing" style="border-top-left-radius: 0;">
-                        <div class="container-fluid">
-                            <div id="routing-grid" style="height: 200px; max-height: 200px;"></div>
-                        </div>
-                    </section>
+                            <div class="section-top">
+                                <form id="matTestForm">
+                                    <div class="search-wrap">
+                                        <dl>
+                                            <dt>
+                                                <label>수입 검사 필수</label>
+                                            </dt>
+                                            <dd>
+                                                <input type="checkbox" id="InTestYN" name="InTestYN" value="Y"/>
+                                            </dd>
+                                        </dl>
+                                        <dl>
+                                            <dt>
+                                                <label>출하 검사 필수</label>
+                                            </dt>
+                                            <dd>
+                                                <input type="checkbox" id="OutTestYN" name="OutTestYN" value="Y"/>
+                                            </dd>
+                                        </dl>
+                                        <dl>
+                                            <dt></dt>
+                                            <dd>
+                                                <select class="s-150" id="cboTestMasterGroup"
+                                                        name="cboTestMasterGroup"></select>
+                                            </dd>
+                                        </dl>
+                                        <dl>
+                                            <dt></dt>
+                                            <dd>
+                                                <select class="s-150" id="cboTestMaster" name="cboTestMaster"></select>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </form>
+                                <div class="button-wrap">
+                                    <ul>
+                                        <li>
+                                            <button type="button" class="btn-excellt btn-default" id="btnAddTestMaster"
+                                                    style="width: 115px; height: 36px;"><i
+                                                    class="fas fa-plus"></i>추가
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="btn-delete btn-danger y_write_auth" id="btnDelTestMaster"
+                                                    style="float:none; width: 115px; height: 36px;"><i
+                                                    class="fas fa-trash"></i>삭제
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="btn-excellt btn-default y_write_auth"
+                                                    id="btnSaveTest" style="width: 115px; height: 36px;"><span
+                                                    data-labelCd="저장">저장</span></button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="container-fluid">
+                                <div id="test-master-grid" style=""></div>
+                            </div>
+                        </section>
+
+                        <!--section8-->
+                        <section class="tab-item" id="tab_routing" style="border-top-left-radius: 0;">
+                            <div class="container-fluid">
+                                <div id="routing-grid" style=""></div>
+                            </div>
+                        </section>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
     </div>
 
 
@@ -899,17 +945,18 @@
                     autoGenerateColumns: false,
                     showMarquee: true,
                     isReadOnly: true,
-                    frozenColumns: 5, // 앞에 5개의 컬럼 고정
+                    frozenColumns: 3, // 앞에 5개의 컬럼 고정
                     formatItem: (sender, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
                     },
                     columns: [
-                        {binding: 'mat_type_name', header: '품목구분', width: 100, align: 'center'},
+                        {binding: 'mat_type_name', header: '품목구분', width: 80, align: 'center'},
                         {binding: 'mat_grp_name', header: '품목그룹', width: 100, align: 'left'},
+
+                        {binding: 'mat_name', header: '품목명', width: 220, align: 'left'},
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'left'},
-                        {binding: 'mat_name', header: '품목명', width: 600, align: 'left'},
                         {binding: 'unit_name', header: '단위', width: 100, align: 'center'},
                         {binding: 'starndard1', header: '규격1', width: 150, align: 'right'},
                         {binding: 'standard2', header: '규격2', width: 150, align: 'right'},
@@ -1191,7 +1238,7 @@
                   this.grid = new ax5.ui.grid(config);
                   this.grid.setData([]);*/
 
-                this.price_grid = new wijmo.grid.FlexGrid('#price-grid', {
+                this.price_grid = new wijmo.grid.FlexGrid('#price_grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
@@ -2561,7 +2608,7 @@
 
             // 단가 히스토리버튼
             $('#btnPriceHistory').click(function (e) {
-                let price_grid = wijmo.Control.getControl('#price-grid');
+                let price_grid = wijmo.Control.getControl('#price_grid');
                 let selectedRow = price_grid.selection.row;
 
                 // 선택한 행의 데이터 가져오기 (단일 객체)
