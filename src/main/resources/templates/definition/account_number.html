@@ -24,176 +24,200 @@
             </ul>
         </div>
 
-        <section class="section">
-            <div class="section-top">
-                <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            <label>은행명</label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <select class="form-control2" id="banknmCombo" name="banknmCombo"></select>
-                            </div>
-                        </dd>
-                    </dl>
+        <div style="display: flex; gap: 5px">
+            <section class="section" style="width: 60%;">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label>은행명</label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <select class="form-control2" id="banknmCombo" name="banknmCombo"></select>
+                                </div>
+                            </dd>
+                        </dl>
 
-                    <dl>
-                        <dt>
-                            <label>계좌번호</label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <input type="text" id="accountnum" name="accountnum" class="form-control2"/>
-                            </div>
-                        </dd>
-                    </dl>
+                        <dl>
+                            <dt>
+                                <label>계좌번호</label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="text" id="accountnum" name="accountnum" class="form-control2"/>
+                                </div>
+                            </dd>
+                        </dl>
 
-                    <dl>
-                        <dt><span class="eq"></span></dt>
-                        <dd>
+                        <dl>
+                            <dt><span class="eq"></span></dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+                    </div>
+                </div> <!--//section-top end -->
+                <div class="container-fluid">
+                    <p id="selectedItem"></p>
+                    <div id="theGrid" style=""></div>
+                </div>
+                <div class="btn-wrap">
+                </div>
+            </section>
+            <section style="width: 40%;">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <ul>
                             <li>
-                                <a class="btn btn-delete" title="검색" id="btnSearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    검색
-                                </a>
+                                <!-- <a class="btn btn-excell" title="신규등록" id="btnNew" >
+                                     <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                     신규등록
+                                 </a>-->
+                                <button type="button" class="btn-default" id="btnNew" name="btnNew"
+                                        style="height: 36px; width:115px;"><i
+                                        class="fas fa-plus"></i>신규등록
+                                </button>
                             </li>
-                        </dd>
-                    </dl>
+
+                            <li>
+                                <!-- <a class="btn btn-edit" id="btnSave" title="저장">
+                                     <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
+                                     저장
+                                 </a>-->
+                                <button type="button" class="btn-default y_write_auth" id="btnSave"
+                                        style="float:none; height: 36px; width:115px;">
+                                    <i class="fas fa-save"></i>저장
+                                </button>
+                            </li>
+
+
+                            <li>
+                                <!--  <a class="btn btn-delete" title="삭제" id="btnDel">
+                                      <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                      삭제
+                                  </a>-->
+                                <button type="button" class="btn-danger y_write_auth" id="btnDel"
+                                        style="float:none; height: 36px; width:115px;"><i
+                                        class="fas fa-trash"></i>삭제
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div> <!--//section-top end -->
-            <div class="container-fluid">
-                <p id="selectedItem"></p>
-                <div id="theGrid" style="height: 530px; max-height: 530px;"></div>
-            </div>
-            <div class="btn-wrap">
-            </div>
-        </section>
-        <section>
-            <div class="section-top">
-                <div class="search-wrap">
-                    <ul>
-                        <li>
-                            <!-- <a class="btn btn-excell" title="신규등록" id="btnNew" >
-                                 <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                 신규등록
-                             </a>-->
-                            <button type="button" class="btn-default" id="btnNew" name="btnNew"
-                                    style="height: 36px; width:115px;"><i
-                                    class="fas fa-plus"></i>신규등록
-                            </button>
-                        </li>
 
-                        <li>
-                            <!-- <a class="btn btn-edit" id="btnSave" title="저장">
-                                 <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
-                                 저장
-                             </a>-->
-                            <button type="button" class="btn-default y_write_auth" id="btnSave"
-                                    style="float:none; height: 36px; width:115px;">
-                                <i class="fas fa-save"></i>저장
-                            </button>
-                        </li>
+                <div class="table-wrap" style=" overflow-x: auto;">
+                    <form id="materialGroupForm">
+                        <table class="write-table" style="width: 100%; border-collapse: collapse; table-layout: fixed;"
+                               id="detail_box">
+                            <caption style="text-align: left; margin-bottom: 8px;">등록테이블</caption>
+                            <colgroup>
+                                <col class="wp30">
+                                <col class="wp70">
+                            </colgroup>
+                            <input type="hidden" id="id" name="id"/>
+                            <tbody>
+                            <tr>
+                                <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                                    <label for=""><span class="eq">*</span>은행명</label>
+                                </th>
+                                <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                    <select type="text" id="bankid" name="bankid" disabled
+                                            style="width: 100%;"></select>
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                    <label for="accountNumber"><span class="eq">*</span>계좌번호</label>
+                                </th>
+                                <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                    <input type="text" id="accountNumber" name="accountNumber" disabled
+                                           style="width: 100%;">
+                                </td>
 
 
-                        <li>
-                            <!--  <a class="btn btn-delete" title="삭제" id="btnDel">
-                                  <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                  삭제
-                              </a>-->
-                            <button type="button" class="btn-danger y_write_auth" id="btnDel"
-                                    style="float:none; height: 36px; width:115px;"><i
-                                    class="fas fa-trash"></i>삭제
-                            </button>
-                        </li>
-                    </ul>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                                    <label><span class="eq">*</span>계좌명칭</label>
+                                </th>
+                                <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                    <input type="text" id="accountName" name="accountName" disabled
+                                           style="width: 100%;">
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                                    <label for="accountType">계좌유형</label>
+                                </th>
+                                <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                    <select id="accountType" name="accountType" style="width: 100%;">
+                                        <option value="">선택</option>
+                                        <option value="0">법인</option>
+                                        <option value="1">개인</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                                    <label><span class="eq">*</span>인터넷뱅킹아이디</label><br>
+                                    <span style="color: tomato">(국민은행인 경우만)</span>
+                                </th>
+                                <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                    <input type="text" id="onlineid" name="onlineid"
+                                           style="width: 100%;" disabled>
+                                </td>
+
+
+
+                            </tr>
+                            <tr>
+                                <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                                    <label><span class="eq">*</span>조회전용아이디</label><br>
+                                    <span style="color: tomato">(아이엠뱅크, 신한은행, 신협중앙회인 경우만)</span>
+                                </th>
+                                <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                    <input type="text" id="viewid" name="viewid"
+                                           style="width: 100%;" disabled>
+                                </td>
+
+
+                            </tr>
+                            <tr>
+                                <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                                    <label><span class="eq">*</span>조회전용비밀번호</label><br>
+                                    <span style="color: tomato">(아이엠뱅크, 신한은행, 신협중앙회인 경우만)</span>
+                                </th>
+                                <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                    <input type="text" id="viewpw" name="viewpw"
+                                           style="width: 100%;" disabled>
+                                </td>
+
+
+                            </tr>
+                            <tr>
+                                <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
+                                    <label><span class="eq">*</span>지급수수료</label><br>
+                                </th>
+                                <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                    <input type="text" id="mijamt" name="mijamt"
+                                           style="width: 100%;" disabled>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
                 </div>
-            </div>
-
-            <div class="table-wrap" style=" overflow-x: auto;">
-                <form id="materialGroupForm">
-                    <table class="write-table" style="width: 100%; border-collapse: collapse; table-layout: fixed;"
-                           id="detail_box">
-                        <caption style="text-align: left; margin-bottom: 8px;">등록테이블</caption>
-                        <input type="hidden" id="id" name="id"/>
-                        <tbody>
-                        <tr>
-                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for=""><span class="eq">*</span>은행명</label>
-                            </th>
-                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <select type="text" id="bankid" name="bankid" disabled
-                                        style="width: 100%;"></select>
-                            </td>
-                            <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="accountNumber"><span class="eq">*</span>계좌번호</label>
-                            </th>
-                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <input type="text" id="accountNumber" name="accountNumber" disabled
-                                       style="width: 100%;">
-                            </td>
-
-                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label><span class="eq">*</span>계좌명칭</label>
-                            </th>
-                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <input type="text" id="accountName" name="accountName" disabled
-                                       style="width: 100%;">
-                            </td>
-                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label for="accountType">계좌유형</label>
-                            </th>
-                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <select id="accountType" name="accountType" style="width: 100%;">
-                                    <option value="">선택</option>
-                                    <option value="0">법인</option>
-                                    <option value="1">개인</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label><span class="eq">*</span>인터넷뱅킹아이디</label><br>
-                                <span style="color: tomato">(국민은행인 경우만)</span>
-                            </th>
-                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <input type="text" id="onlineid" name="onlineid"
-                                       style="width: 100%;" disabled>
-                            </td>
-
-                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label><span class="eq">*</span>조회전용아이디</label><br>
-                                <span style="color: tomato">(아이엠뱅크, 신한은행, 신협중앙회인 경우만)</span>
-                            </th>
-                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <input type="text" id="viewid" name="viewid"
-                                       style="width: 100%;" disabled>
-                            </td>
-
-                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label><span class="eq">*</span>조회전용비밀번호</label><br>
-                                <span style="color: tomato">(아이엠뱅크, 신한은행, 신협중앙회인 경우만)</span>
-                            </th>
-                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <input type="text" id="viewpw" name="viewpw"
-                                       style="width: 100%;" disabled>
-                            </td>
-
-                            <th style="text-align: center; width: 5%; padding: 5px; border: 1px solid #ddd;">
-                                <label><span class="eq">*</span>지급수수료</label><br>
-                            </th>
-                            <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                <input type="text" id="mijamt" name="mijamt"
-                                       style="width: 100%;" disabled>
-                            </td>
-
-                        </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
-            <!--//tab-wrap end-->
-        </section>
+                <!--//tab-wrap end-->
+            </section>
+        </div>
     </div> <!--//layout-contents end -->
 
     <footer style="margin-top: 24px;">
@@ -219,14 +243,14 @@
 
         let columns = [
             {binding: 'accid', header: '번호', width: 100, align: 'center'},
-            {binding: 'bankname', header: '은행명', width: '*', align: 'center'},
-            {binding: 'accountNumber', header: '계좌번호', width: '*', align: 'center'},
-            {binding: 'accountName', header: '계좌명칭', width: '*', align: 'center'},
+            {binding: 'bankname', header: '은행명', width: 150, align: 'center'},
+            {binding: 'accountNumber', header: '계좌번호', width: 150, align: 'center'},
+            {binding: 'accountName', header: '계좌명칭', width: 150, align: 'center'},
             {binding: 'onlineid', header: '인터넷뱅킹아이디', width: 200, align: 'center'},
             {binding: 'viewid', header: '조회전용아이디', width: 200, align: 'center'},
             {binding: 'viewpw', header: '조회전용비밀번호', width: 200, align: 'center'},
             {binding: 'mijamt', header: '지급수수료(원)', width: 150, align: 'center'},
-            {binding: 'popyn', header: '예금연동', width: "*", align: 'center'}
+            {binding: 'popyn', header: '예금연동', width: 100, align: 'center'}
         ];
 
         document.readyState === 'complete' ? init() : window.onload = init;

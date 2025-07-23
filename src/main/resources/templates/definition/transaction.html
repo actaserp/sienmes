@@ -24,144 +24,148 @@
             </ul>
         </div>
 
-        <section class="section">
-            <div class="section-top">
-                <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            <label>구분명</label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <input type="text" class="form-control2" id="searchtradenm" name="searchtradenm">
-                            </div>
-                        </dd>
-                    </dl>
+        <div style="display: flex; gap: 5px">
+            <section class="section" style="width: 50%;">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label>구분명</label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="text" class="form-control2" id="searchtradenm" name="searchtradenm">
+                                </div>
+                            </dd>
+                        </dl>
 
-                    <dl>
-                        <dt>
-                            <label>구분</label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <select id="searchioflag" name="searchioflag">
-                                    <option value="">전체</option>
-                                    <option value="0">입금</option>
-                                    <option value="1">출금</option>
-                                </select>
-                            </div>
-                        </dd>
-                    </dl>
+                        <dl>
+                            <dt>
+                                <label>구분</label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <select id="searchioflag" name="searchioflag">
+                                        <option value="">전체</option>
+                                        <option value="0">입금</option>
+                                        <option value="1">출금</option>
+                                    </select>
+                                </div>
+                            </dd>
+                        </dl>
 
-                    <dl>
-                        <dt><span class="eq"></span></dt>
-                        <dd>
+                        <dl>
+                            <dt><span class="eq"></span></dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+                    </div>
+                </div> <!--//section-top end -->
+                <div class="container-fluid">
+                    <p id="selectedItem"></p>
+                    <div id="transaction-grid" style=""></div>
+                </div>
+                <div class="btn-wrap">
+                </div>
+            </section>
+
+            <section style="width: 50%;">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <ul>
                             <li>
-                                <a class="btn btn-delete" title="검색" id="btnSearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    검색
-                                </a>
+                                <button type="button" class="btn-excellt btn-default " id="btnNew" name="btnNew"
+                                        style="width: 115px; height: 36px;"><i
+                                        class="fas fa-plus"></i>신규등록
+                                </button>
                             </li>
-                        </dd>
-                    </dl>
+
+                            <li>
+                                <button type="button" class="btn-delete btn-danger " id="btnDel"
+                                        style=" width: 115px; height: 36px;"><i
+                                        class="fas fa-trash"></i>삭제</button>
+                            </li>
+                            <li>
+                                <button type="button" class="btn-excellt btn-default" id="btnSave"
+                                        style="width: 115px; height: 36px;"><i
+                                        class="fas fa-save"></i>저장</button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div> <!--//section-top end -->
-            <div class="container-fluid">
-                <p id="selectedItem"></p>
-                <div id="transaction-grid" style="height: 480px; max-height: 480px;"></div>
-            </div>
-            <div class="btn-wrap">
-            </div>
-        </section>
+                <div class="table-wrap">
+                    <form id="tradeForm">
+                        <table class="write-table" style="width: 100%">
+                            <caption style="text-align: left; margin-bottom: 8px;">등록테이블</caption>
+                            <input type="hidden" id="id" name="id"/>
+                            <colgroup>
+                                <col class="wp20">
+                                <col class="wp80">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>
+                                    <label for="tradenm"><span class="eq">*</span>거래구분명</label>
+                                </th>
+                                <td>
+                                    <input type="text" id="tradenm" name="tradenm" style="width: 100%">
+                                </td>
 
-        <section>
-            <div class="section-top">
-                <div class="search-wrap">
-                    <ul>
-                        <li>
-                            <button type="button" class="btn-excellt btn-default " id="btnNew" name="btnNew"
-                                    style="width: 115px; height: 36px;"><i
-                                    class="fas fa-plus"></i>신규등록
-                            </button>
-                        </li>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label for="ioflag">입출구분</label>
+                                </th>
+                                <td>
+                                    <select type="text" id="ioflag" name="ioflag" style="width: 100%">
+                                        <option value="0">입금</option>
+                                        <option value="1">출금</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label for="acccd">계정코드</label>
+                                </th>
+                                <td>
+                                    <input type="text" id="acccd" name="acccd" style="display: inline-block; width: 45%;" placeholder="클릭해서 검색하세요.">
+                                    <input type="text" id="accname1" name="accname1" style="display: inline-block; width: 45%; margin-left: 4%;" readonly>
+                                </td>
 
-                        <li>
-                            <button type="button" class="btn-delete btn-danger " id="btnDel"
-                                    style=" width: 115px; height: 36px;"><i
-                                    class="fas fa-trash"></i>삭제</button>
-                        </li>
-                        <li>
-                            <button type="button" class="btn-excellt btn-default" id="btnSave"
-                                    style="width: 115px; height: 36px;"><i
-                                    class="fas fa-save"></i>저장</button>
-                        </li>
-                    </ul>
+
+
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label for="reacccd">상대계정</label>
+                                </th>
+                                <td>
+                                    <input type="text" id="reacccd" name="reacccd" style="display: inline-block; width: 45%;" placeholder="클릭해서 검색하세요.">
+                                    <input type="text" id="accname2" name="accname2" style="display: inline-block; width: 45%; margin-left: 4%;" readonly>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label for="remark">비고</label>
+                                </th>
+                                <td colspan="3">
+                                    <input type="text" id="remark" name="remark" style="width: 100%;">
+                                    <!--<textarea id="description" name="description"></textarea>-->
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
                 </div>
-            </div>
-            <div class="table-wrap">
-                <form id="tradeForm">
-                    <table class="write-table" style="width: 100%">
-                        <caption style="text-align: left; margin-bottom: 8px;">등록테이블</caption>
-                        <input type="hidden" id="id" name="id"/>
-                        <colgroup>
-                            <col class="wp20">
-                            <col class="wp30">
-                            <col class="wp20">
-                            <col class="wp30">
-                        </colgroup>
-                        <tbody>
-                        <tr>
-                            <th>
-                                <label for="tradenm"><span class="eq">*</span>거래구분명</label>
-                            </th>
-                            <td>
-                                <input type="text" id="tradenm" name="tradenm" style="width: 100%">
-                            </td>
-                            <th>
-                                <label for="ioflag">입출구분</label>
-                            </th>
-                            <td>
-                                <select type="text" id="ioflag" name="ioflag" style="width: 100%">
-                                    <option value="0">입금</option>
-                                    <option value="1">출금</option>
-                                </select>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>
-                                <label for="acccd">계정코드</label>
-                            </th>
-                            <td>
-                                <input type="text" id="acccd" name="acccd" style="display: inline-block; width: 45%;" placeholder="클릭해서 검색하세요.">
-                                <input type="text" id="accname1" name="accname1" style="display: inline-block; width: 45%; margin-left: 4%;" readonly>
-                            </td>
-
-
-                            <th>
-                                <label for="reacccd">상대계정</label>
-                            </th>
-                            <td>
-                                <input type="text" id="reacccd" name="reacccd" style="display: inline-block; width: 45%;" placeholder="클릭해서 검색하세요.">
-                                <input type="text" id="accname2" name="accname2" style="display: inline-block; width: 45%; margin-left: 4%;" readonly>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>
-                                <label for="remark">비고</label>
-                            </th>
-                            <td colspan="3">
-                                <input type="text" id="remark" name="remark" style="width: 100%;">
-                                <!--<textarea id="description" name="description"></textarea>-->
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
-            <!--//tab-wrap end-->
-        </section>
+                <!--//tab-wrap end-->
+            </section>
+        </div>
     </div> <!--//layout-contents end -->
 
 
@@ -247,7 +251,7 @@
                         {binding: 'tradenm', header: '거래구분명', width: 200, align: 'center'},
                         {binding: 'acccd', header: '계정코드', width: 180, align: 'left'},
                         {binding: 'reacccd', header: '상대계정', width: 250, align: 'left'},
-                        {binding: 'remark', header: '비고', width: "*", align: 'left'},
+                        {binding: 'remark', header: '비고', width: 200, align: 'left'},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });

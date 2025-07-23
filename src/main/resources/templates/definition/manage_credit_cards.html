@@ -1,6 +1,19 @@
 <html layout:decorate="~{layout_page}">
 <th:block layout:fragment="content">
-
+  <style>
+    /*input[type="text"],*/
+    /*input[type="tel"],*/
+    /*input[type="date"],*/
+    /*input[type="number"],*/
+    /*input[type="email"],*/
+    /*select {*/
+    /*  width: 280px;*/
+    /*}*/
+    input[type="radio"]:checked:after {
+      margin-left: 3px;
+      margin-top: 3px;
+    }
+  </style>
   <div class="layout-contents">
     <div class="page-title-wrap">
       <div class="left">
@@ -15,213 +28,212 @@
         <li>입금 현황</li>
       </ul>
     </div>
-    <section class="section">
-      <div class="section-top">
-        <input type="hidden" id="spjangcdHidden">
-        <div class="search-wrap">
-          <dl>
-            <dt>
-              <label for="txtcardnm">
-                카드명
-              </label>
-            </dt>
-            <dd>
-              <div class="srch-box">
-                <input class="form-control2" type="text" id="txtcardnm" name="txtcardnm" placeholder="카드명" style="width:200px"/>
-              </div>
-            </dd>
-          </dl>
-          <dl>
-            <dt>
-              <label for="txtcardnum">
-                카드번호
-              </label>
-            </dt>
-            <dd>
-              <div class="srch-box">
-                <input class="form-control2" type="text" id="txtcardnum" name="txtcardnum" placeholder="카드번호" style="width:200px"/>
-              </div>
-            </dd>
-          </dl>
-          <dl>
-            <dt>&nbsp;</dt>
-            <dd>
+    <div style="display: flex; gap: 5px">
+      <section class="section" style="width: 40%;">
+        <div class="section-top">
+          <input type="hidden" id="spjangcdHidden">
+          <div class="search-wrap">
+            <dl>
+              <dt>
+                <label for="txtcardnm">
+                  카드명
+                </label>
+              </dt>
+              <dd>
+                <div class="srch-box">
+                  <input class="form-control2" type="text" id="txtcardnm" name="txtcardnm" placeholder="카드명" style="width:200px"/>
+                </div>
+              </dd>
+            </dl>
+            <dl>
+              <dt>
+                <label for="txtcardnum">
+                  카드번호
+                </label>
+              </dt>
+              <dd>
+                <div class="srch-box">
+                  <input class="form-control2" type="text" id="txtcardnum" name="txtcardnum" placeholder="카드번호" style="width:200px"/>
+                </div>
+              </dd>
+            </dl>
+            <dl>
+              <dt>&nbsp;</dt>
+              <dd>
+                <li>
+                  <a class="btn btn-delete" title="검색" id="btnSearch">
+                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                    검색
+                  </a>
+                </li>
+              </dd>
+            </dl>
+          </div>
+
+        </div>
+          <div class="container-fluid">
+            <p id="selectedItem"></p>
+            <div id="theGrid"></div>
+          </div>
+      </section>
+      <section style="width: 60%;">
+        <div class="section">
+          <div class="title-wrap">
+          </div>
+          <div class="button-wrap" style="border-top:none; display: flex; text-align: right; !important; margin-left: auto; justify-content: end;">
+            <ul>
               <li>
-                <a class="btn btn-delete" title="검색" id="btnSearch">
-                  <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                  검색
+                <a class="btn btn-excell" title="신규등록" id="Newbtn">
+                  <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                  신규등록
                 </a>
               </li>
-            </dd>
-          </dl>
-        </div>
-        <div class="button-wrap" style="border-top:none; text-align: right; !important;">
-          <ul>
-            <li>
-              <a class="btn btn-excell" title="신규등록" id="Newbtn">
-                <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                신규등록
-              </a>
-            </li>
-            <li>
-              <a class="btn btn-edit" id="btnSave" title="저장">
-                <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
-                저장
-              </a>
-            </li>
-            <li>
-              <a class="btn btn-delete" title="삭제" id="btnDelete">
-                <img src="/images/icon/ico-delete.svg" alt="엑셀 아이콘">
-                삭제
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="container-fluid">
-        <div class="row">
-          <div class="wp40">
-            <div class="container-fluid col">
-              <p id="selectedItem"></p>
-              <div id="theGrid"></div>
-            </div>
+              <li>
+                <a class="btn btn-edit" id="btnSave" title="저장">
+                  <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
+                  저장
+                </a>
+              </li>
+              <li>
+                <a class="btn btn-delete" title="삭제" id="btnDelete">
+                  <img src="/images/icon/ico-delete.svg" alt="엑셀 아이콘">
+                  삭제
+                </a>
+              </li>
+            </ul>
           </div>
-          <div class="col 60">
-            <div class="section">
-              <form id="CategoryForm">
-                <!-- Hidden Fields -->
-                <!-- Table Wrap -->
-                <div class="table-wrap">
-                  <table class="view-table" id="selectedData">
-                    <caption>신용카드 등록 테이블</caption>
-                    <colgroup>
-                      <col class="wp20">
-                      <col class="wauto">
-                      <col class="wp20">
-                      <col class="wp40">
-                    </colgroup>
-                    <tbody>
-                    <tr>
-                      <th>
-                        <label for="cardType">카드구분</label>
-                      </th>
-                      <td colspan="3">
-                        <label>
-                          <input type="radio" id="cardTypeCorp" name="cardType" value="1"/>
-                          법인
-                        </label>
-                        <label style="margin-left: 30px;">
-                          <input type="radio" id="cardTypePersonal" name="cardType" value="2" />
-                          개인
-                        </label>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>
-                        <label for="cardnum">카드번호</label>
-                      </th>
-                      <td>
-                        <input type="text" id="cardnum" name="cardnum" class="wp100" placeholder="카드번호"/>
-                      </td>
-                      <th>
-                        <label for="cardco">카드사</label>
-                      </th>
-                      <td>
-                        <select id="cardco" name="cardco">
-                        </select>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th><label for="cdpernm">성명</label></th>
-                      <td>
-                        <select id="cdpernm" name = "cdpernm" >
-                        </select>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th><label for="regAsName">발급일자</label></th>
-                      <td>
-                        <input type="date" id="regAsName" name="regAsName" class="wp100" placeholder="발급일자"/>
-                      </td>
-                      <th><label for="expdate">만기일자</label></th>
-                      <td>
-                        <input type="date" id="expdate" name="expdate" class="wp100" placeholder="만기일자" />
-                      </td>
-                    </tr>
-                    <tr>
-                      <th><label for="ACCNUM">결제 계좌</label></th>
-                      <td>
-                        <input type="hidden" id="ACCID" name="ACCID" />
-                        <input type="hidden" id="ACCNUM_REAL" />
-                        <input type="text" id="ACCNUM" name="ACCNUM" class="wp100" style="width: 300px !important" placeholder="계좌번호 입력 후 엔터를 눌러 검색하세요." />
-                      </td>
-                      <th><label for="BANKNM">결제 은행</label></th>
-                      <td >
-                        <input type="hidden" id="bankid" name="bankid" placeholder="은행 코드"/>
-                        <input type="text" id="BANKNM" name="BANKNM" class="wp100" placeholder="은행이름" readonly/>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th><label for="stldate">결제 일자</label></th>
-                      <td>
-                        <div style="position: relative;">
-                          <input type="text" id="stldate" name="stldate" class="wp100" placeholder="1~31일 중 작성하세요" maxlength="5" />
-                        </div>
-                      </td>
-                    </tr>
+          <form id="CategoryForm">
+            <!-- Hidden Fields -->
+            <!-- Table Wrap -->
+            <div class="table-wrap">
 
-                    <tr>
-                      <th><label for="useyn">사용여부</label></th>
-                      <td>
-                        <label><input type="radio" id="useYnYes" name="useYn" value="1" /> 사용</label>
-                        <label style="margin-left: 30px;"><input type="radio" id="useYnNo" name="useYn" value="0" /> 미사용</label>
-                      </td>
-                      <th><label for="baroflag">카드거래연동</label></th>
-                      <td >
-                        <input type="checkbox" id="baroflag" name="baroflag" class="wp100" style="display: flex; justify-content: center; align-items: center; " />
-                      </td>
-                    </tr>
-                    <!--<tr>
-                      <th><label for="stldate">정지일자</label></th>
-                      <td >
-                        <input type="date" id="stldate" name="stldate" class="wp100" placeholder="정지일자" />
-                      </td>
+              <table class="view-table" id="selectedData">
+                <caption>신용카드 등록 테이블</caption>
+                <colgroup>
+                  <col class="wp20">
+                  <col class="wauto">
+                  <col class="wp20">
+                  <col class="wp40">
+                </colgroup>
+                <tbody>
+                <tr>
+                  <th>
+                    <label for="cardType">카드구분</label>
+                  </th>
+                  <td colspan="3">
+                    <label>
+                      <input type="radio" id="cardTypeCorp" name="cardType" value="1"/>
+                      법인
+                    </label>
+                    <label style="margin-left: 30px;">
+                      <input type="radio" id="cardTypePersonal" name="cardType" value="2" />
+                      개인
+                    </label>
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    <label for="cardnum">카드번호</label>
+                  </th>
+                  <td>
+                    <input type="text" id="cardnum" name="cardnum" class="wp100" placeholder="카드번호"/>
+                  </td>
+                  <th>
+                    <label for="cardco">카드사</label>
+                  </th>
+                  <td>
+                    <select id="cardco" name="cardco">
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th><label for="cdpernm">성명</label></th>
+                  <td colspan="3">
+                    <select id="cdpernm" name = "cdpernm" >
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th><label for="regAsName">발급일자</label></th>
+                  <td>
+                    <input type="date" id="regAsName" name="regAsName" class="wp100" placeholder="발급일자"/>
+                  </td>
+                  <th><label for="expdate">만기일자</label></th>
+                  <td>
+                    <input type="date" id="expdate" name="expdate" class="wp100" placeholder="만기일자" />
+                  </td>
+                </tr>
+                <tr>
+                  <th><label for="ACCNUM">결제 계좌</label></th>
+                  <td>
+                    <input type="hidden" id="ACCID" name="ACCID" />
+                    <input type="hidden" id="ACCNUM_REAL" />
+                    <input type="text" id="ACCNUM" name="ACCNUM" class="wp100" style="width: 300px !important" placeholder="계좌번호 입력 후 엔터를 눌러 검색하세요." />
+                  </td>
+                  <th><label for="BANKNM">결제 은행</label></th>
+                  <td >
+                    <input type="hidden" id="bankid" name="bankid" placeholder="은행 코드"/>
+                    <input type="text" id="BANKNM" name="BANKNM" class="wp100" placeholder="은행이름" readonly/>
+                  </td>
+                </tr>
+                <tr>
+                  <th><label for="stldate">결제 일자</label></th>
+                  <td colspan="3">
+                    <div style="position: relative;">
+                      <input type="text" id="stldate" name="stldate" class="wp100" placeholder="1~31일 중 작성하세요" maxlength="5" />
+                    </div>
+                  </td>
+                </tr>
 
-                      <th><label for="">제출자와의 관계</label></th>
-                      <td >
-                        <input type="text" id="" name="" class="wp100" placeholder="제출자와의 관계" />
-                      </td>
-                    </tr>-->
-                    <tr>
-                      <th><label for="cardwebid">홈페이지 아이디</label></th>
-                      <td>
-                        <input type="text" id="cardwebid" name="cardwebid" class="wp100" placeholder="홈페이지 아이디" />
-                      </td>
-                      <th><label for="cardwebpw">홈페이지 비밀번호</label></th>
-                      <td>
-                        <input type="text" id="cardwebpw" name="cardwebpw" class="wp100" placeholder="홈페이지 비밀번호" />
-                      </td>
-                    </tr>
-                    <tr>
-                      <th><label for="barocd">바로빌카드 코드</label></th>
-                      <td>
-                        <input type="text" id="barocd" name="barocd" class="wp100" placeholder="바로빌카드 코드" />
-                      </td>
-                      <th><label for="baroid">바로빌 아이디</label></th>
-                      <td>
-                        <input type="text" id="baroid" name="baroid" class="wp100" placeholder="바로빌 아이디" />
-                      </td>
-                    </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </form>
+                <tr>
+                  <th><label for="useyn">사용여부</label></th>
+                  <td>
+                    <label><input type="radio" id="useYnYes" name="useYn" value="1" /> 사용</label>
+                    <label style="margin-left: 30px;"><input type="radio" id="useYnNo" name="useYn" value="0" /> 미사용</label>
+                  </td>
+                  <th><label for="baroflag">카드거래연동</label></th>
+                  <td >
+                    <input type="checkbox" id="baroflag" name="baroflag" class="wp100" style="display: flex; justify-content: center; align-items: center; " />
+                  </td>
+                </tr>
+                <!--<tr>
+                  <th><label for="stldate">정지일자</label></th>
+                  <td >
+                    <input type="date" id="stldate" name="stldate" class="wp100" placeholder="정지일자" />
+                  </td>
+
+                  <th><label for="">제출자와의 관계</label></th>
+                  <td >
+                    <input type="text" id="" name="" class="wp100" placeholder="제출자와의 관계" />
+                  </td>
+                </tr>-->
+                <tr>
+                  <th><label for="cardwebid">홈페이지 아이디</label></th>
+                  <td>
+                    <input type="text" id="cardwebid" name="cardwebid" class="wp100" placeholder="홈페이지 아이디" />
+                  </td>
+                  <th><label for="cardwebpw">홈페이지 비밀번호</label></th>
+                  <td>
+                    <input type="text" id="cardwebpw" name="cardwebpw" class="wp100" placeholder="홈페이지 비밀번호" />
+                  </td>
+                </tr>
+                <tr>
+                  <th><label for="barocd">바로빌카드 코드</label></th>
+                  <td>
+                    <input type="text" id="barocd" name="barocd" class="wp100" placeholder="바로빌카드 코드" />
+                  </td>
+                  <th><label for="baroid">바로빌 아이디</label></th>
+                  <td>
+                    <input type="text" id="baroid" name="baroid" class="wp100" placeholder="바로빌 아이디" />
+                  </td>
+                </tr>
+                </tbody>
+              </table>
             </div>
-          </div>
+          </form>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </div>
 </th:block>
 

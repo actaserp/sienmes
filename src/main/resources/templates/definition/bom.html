@@ -1282,10 +1282,33 @@
                     return;
                 }
 
+                let selectedRowIndex = this.grid.selection.row;
+                let selectedId = null;
+                if (selectedRowIndex >= 0) {
+                    let selectedItem = this.grid.rows[selectedRowIndex].dataItem;
+                    selectedId = selectedItem.id;
+                }
+
                 let fnSuccess = function (result) {
                     if (result.success) {
                         Alert.alert('', '저장되었습니다');
                         _this.searchBomList();
+                        setTimeout(() => {
+                            let targetIndex = -1;
+                            for (let i = 0; i < _this.grid.rows.length; i++) { // ← 반드시 _this!
+                                if (_this.grid.rows[i].dataItem.id === selectedId) {
+                                    targetIndex = i;
+                                    break;
+                                }
+                            }
+                            if (targetIndex >= 0) {
+                                _this.grid.select(targetIndex, 0);
+                                _this.grid.scrollIntoView(targetIndex, 0);
+                            } else if (_this.grid.rows.length > 0) {
+                                _this.grid.select(0, 0);
+                                _this.grid.scrollIntoView(0, 0);
+                            }
+                        }, 0);
                     } else {
                         Notify.error(result.message);
                     }
@@ -1303,6 +1326,13 @@
                 if (data.Material_id == '') {
                     Alert.alert('', '품목을 선택하세요.');
                     return;
+                }
+
+                let selectedRowIndex = this.grid2.selection.row;
+                let selectedId = null;
+                if (selectedRowIndex >= 0) {
+                    let selectedItem = this.grid2.rows[selectedRowIndex].dataItem;
+                    selectedId = selectedItem.id;
                 }
 
                 let fnSuccess = function (res) {
@@ -1325,6 +1355,22 @@
                         if (item) {
                             let id = item.id; // ID 값 가져오기
                             _this.showBomCompList(id);
+                            setTimeout(() => {
+                                let targetIndex = -1;
+                                for (let i = 0; i < _this.grid2.rows.length; i++) { // ← 반드시 _this!
+                                    if (_this.grid2.rows[i].dataItem.id === selectedId) {
+                                        targetIndex = i;
+                                        break;
+                                    }
+                                }
+                                if (targetIndex >= 0) {
+                                    _this.grid2.select(targetIndex, 0);
+                                    _this.grid2.scrollIntoView(targetIndex, 0);
+                                } else if (_this.grid2.rows.length > 0) {
+                                    _this.grid2.select(0, 0);
+                                    _this.grid2.scrollIntoView(0, 0);
+                                }
+                            }, 0);
                         }
                     }
 

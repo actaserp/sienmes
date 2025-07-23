@@ -908,7 +908,7 @@
                         {binding: 'apply_start_date', header: '적용시작일', width: 120, align: 'center',},
                         {binding: 'apply_end_date', header: '적용종료일', width: 120, align: 'center',},
                         {binding: 'changer_name', header: '변경자', width: 120, align: 'center',},
-                        {binding: 'change_date', header: '변경일', width: '*', align: 'center',},
+                        {binding: 'change_date', header: '변경일', width: 200, align: 'center',},
                     ],
                     itemsSource: this.viewData2, // 데이터를 설정할 배열
                 });
@@ -1195,7 +1195,12 @@
                     let ss = String(now.getSeconds()).padStart(2, '0');
                     data.ApplyStartDate = `${applyDate}T${hh}:${mm}:${ss}`;
                 }
-
+                let selectedRowIndex = this.price_grid.selection.row;
+                let selectedId = null;
+                if (selectedRowIndex >= 0) {
+                    let selectedItem = this.price_grid.rows[selectedRowIndex].dataItem;
+                    selectedId = selectedItem.id;
+                }
 
                 let fnSuccess = function (res) {
                     /*console.log(res);*/ // 서버 응답 확인
@@ -1204,6 +1209,23 @@
                     } else {
                         Alert.alert('', '저장되었습니다');
                         _this.showPriceList(comp_id)
+                        setTimeout(() => {
+                            let targetIndex = -1;
+                            for (let i = 0; i < _this.price_grid.rows.length; i++) { // ← 반드시 _this!
+                                if (_this.price_grid.rows[i].dataItem.id === selectedId) {
+                                    targetIndex = i;
+                                    break;
+                                }
+                            }
+                            if (targetIndex >= 0) {
+                                _this.price_grid.select(targetIndex, 0);
+                                _this.price_grid.scrollIntoView(targetIndex, 0);
+                            } else if (_this.price_grid.rows.length > 0) {
+                                _this.price_grid.select(0, 0);
+                                _this.price_grid.scrollIntoView(0, 0);
+                            }
+                        }, 0);
+
                     }
                 };
 
@@ -1341,9 +1363,32 @@
                     return;
                 }
 
+                let selectedRowIndex = this.grid.selection.row;
+                let selectedId = null;
+                if (selectedRowIndex >= 0) {
+                    let selectedItem = this.grid.rows[selectedRowIndex].dataItem;
+                    selectedId = selectedItem.id;
+                }
+
                 let fnSuccess = function (res) {
                     Alert.alert('','저장되었습니다');
                     _this.searchMainData1();
+                    setTimeout(() => {
+                        let targetIndex = -1;
+                        for (let i = 0; i < _this.grid.rows.length; i++) { // ← 반드시 _this!
+                            if (_this.grid.rows[i].dataItem.id === selectedId) {
+                                targetIndex = i;
+                                break;
+                            }
+                        }
+                        if (targetIndex >= 0) {
+                            _this.grid.select(targetIndex, 0);
+                            _this.grid.scrollIntoView(targetIndex, 0);
+                        } else if (_this.grid.rows.length > 0) {
+                            _this.grid.select(0, 0);
+                            _this.grid.scrollIntoView(0, 0);
+                        }
+                    }, 0);
                 };
                 AjaxUtil.postAsyncData(this.url + '/save', data, fnSuccess);
 

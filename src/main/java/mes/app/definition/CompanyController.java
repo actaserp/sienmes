@@ -1,6 +1,8 @@
 package mes.app.definition;
 
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -186,7 +188,32 @@ public class CompanyController {
 			@RequestParam("company_id") int companyId,
 			HttpServletRequest request) {
 		List<Map<String, Object>> items = this.companyService.getPriceListByCompany(companyId);
-		
+		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		for (Map<String, Object> item : items) {
+			// ApplyStartDate 포맷 변환
+			Object startDate = item.get("ApplyStartDate");
+			if (startDate != null) {
+				// 예: java.sql.Timestamp 또는 String인 경우 처리
+				LocalDate localDate = null;
+				if (startDate instanceof java.sql.Timestamp) {
+					localDate = ((java.sql.Timestamp) startDate).toLocalDateTime().toLocalDate();
+				} else if (startDate instanceof String) {
+					localDate = LocalDate.parse(((String) startDate).substring(0,10));
+				}
+				item.put("ApplyStartDate", localDate.format(fmt));
+			}
+
+			Object endDate = item.get("ApplyEndDate");
+			if (endDate != null) {
+				LocalDate localDate = null;
+				if (endDate instanceof java.sql.Timestamp) {
+					localDate = ((java.sql.Timestamp) endDate).toLocalDateTime().toLocalDate();
+				} else if (endDate instanceof String) {
+					localDate = LocalDate.parse(((String) endDate).substring(0,10));
+				}
+				item.put("ApplyEndDate", localDate.format(fmt));
+			}
+		}
 		AjaxResult result = new AjaxResult();
 		result.data = items;
 		

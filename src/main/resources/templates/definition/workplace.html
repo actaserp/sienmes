@@ -32,198 +32,182 @@
     </div>
     <!-- Select -->
 
-    <div class="tab-wrap">
-      <!--      <ul class="tab-links">-->
-      <!--        <input type="hidden" id="checkdtParam" name="checkdtParam" th:value="${checkdt}"/>-->
-      <!--        <li>-->
-      <!--          <a href="#tab1" title="주문 등록" id="listTabLink">주문 등록</a>-->
-      <!--        </li>-->
-      <!--        <li>-->
-      <!--          <a href="#tab2" title="등록">주문/진행현황</a>-->
-      <!--        </li>-->
-      <!--      </ul>-->
-      <div class="tab-contents" style="display: flex; gap: 20px;">
-        <!--       탭 시작       -->
-        <!-- Section -->
-        <section style="width: 30%;">
-          <div class="container-fluid">
-            <p id=""></p>
-            <div id="theGrid" style="max-height: 735px; height: 735px; margin-top: 40px;"></div>
+
+    <div style="display: flex; gap: 5px">
+      <section class="section" style="width: 30%;">
+        <div class="container-fluid">
+          <p id=""></p>
+          <div id="theGrid" style="max-height: 735px; height: 735px; margin-top: 40px;"></div>
+        </div>
+      </section>
+      <section style="width: 70%;">
+        <div class="section-top">
+          <div class="title-wrap">
           </div>
-        </section>
-        <section>
-          <div class="section-top">
-            <div class="title-wrap">
-              <h3>사업장 등록</h3>
-              <!--              <img src="/images/icon/exclamation/exclamation-circle.svg"-->
-              <!--                   class="zoom-img" style="margin-left: 5px"-->
-              <!--                   onclick="openPopup('https://foms.atlassian.net/wiki/external/YzNmYmE3MTkyYTFlNGU2OGIwOTY5YTEyNDFiZjcwZmE')" alt="도움말">-->
-            </div>
-            <div class="button-wrap" style="justify-content: end">
-              <ul>
-                <li>
-                  <a id="newdataBtn" class="btn btn-excell" title="신규등록" onclick="resetFormFields();">
-                    <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                    신규등록
-                  </a>
-                </li>
-                <li>
-                  <a class="btn btn-delete" id="deleteButton" title="삭제" onclick="deleteSpjang()">
-                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                    삭제
-                  </a>
-                </li>
-                <li>
-                  <a class="btn btn-edit" id="btnSave" title="저장" onclick="save()">
-                    <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
-                    저장
-                  </a>
-                </li>
-              </ul>
-            </div>
+          <div class="button-wrap" style="justify-content: end">
+            <ul>
+              <li>
+                <a id="newdataBtn" class="btn btn-excell" title="신규등록" onclick="resetFormFields();">
+                  <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                  신규등록
+                </a>
+              </li>
+              <li>
+                <a class="btn btn-delete" id="deleteButton" title="삭제" onclick="deleteSpjang()">
+                  <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                  삭제
+                </a>
+              </li>
+              <li>
+                <a class="btn btn-edit" id="btnSave" title="저장" onclick="save()">
+                  <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
+                  저장
+                </a>
+              </li>
+            </ul>
           </div>
-          <div class="table-wrap">
-            <table class="write-table">
-              <caption>사업장 테이블</caption>
-              <tbody>
-              <tr>
-                <th>사업장코드</th>
-                <td colspan="4"><input type="text" id="spjangcd2" name="spjangcd2"></td>
-                <th>사업장명</th>
-                <td colspan="4"><input type="text" id="spjangnm" name="spjangnm"></td>
-              </tr>
-              <tr>
-                <th colspan="10" style="text-align: center; height: 30px; padding: 5px 10px;">기본정보</th>
-              </tr>
-              <tr>
-                <th colspan="">사업형태</th>
-                <td colspan="4">
-                  <label><input type="radio" class="custperclsf" name="custperclsf" value="8" checked> 법인</label>
-                  <label><input type="radio" class="custperclsf" name="custperclsf" value="1"> 개인</label>
-                </td>
-                <th colspan="">사업자등록번호</th>
-                <td colspan="4">
-                  <input type="text" id="saupnum" name="saupnum" class="biz-number">
-                </td>
-              </tr>
-              <tr>
-                <th colspan="">대표자</th>
-                <td colspan="4">
-                  <input type="text" id="prenm" name="prenm">
-                </td>
-                <th colspan="">법인/주민등록번호</th>
-                <td colspan="4">
-                  <input type="text" id="compnum" name="compnum" class="biz-number">
-                </td>
-              </tr>
-              <tr>
-                <th colspan="">업태</th>
-                <td colspan="4">
-                  <input type="text" id="biztype" name="biztype">
-                </td>
-                <th colspan="">업종</th>
-                <td colspan="4">
-                  <input type="text" id="item" name="item">
-                </td>
-              </tr>
-              <tr>
-                <th colspan="">개업일자</th>
-                <td colspan="4">
-                  <input type="date" id="openymd" name="openymd">
-                </td>
-                <th colspan="">폐업일자</th>
-                <td colspan="4">
-                  <input type="date" id="eddate" name="eddate">
-                </td>
-              </tr>
-              <tr>
-                <th>전화번호</th>
-                <td colspan="4"><input type="tel" id="tel1" class="phone-format" name="tel1"></td>
-                <th>팩스번호</th>
-                <td colspan="4"><input type="tel" id="fax" class="phone-format" name="fax"></td>
-              </tr>
-              <tr>
-                <th>사업장소재지</th>
-                <td colspan="9">
-                  <input type="text" id="zipcd" name="zipcd" placeholder="우편번호" onclick="setZipCode('zipcd')" style="width: 200px;">
-                  <input type="text" id="adresa" name="adresa">
-                  <input type="text" id="adresb" name="adresb" placeholder="상세주소">
-                </td>
-              </tr>
-              <tr>
-                <th>공장소재지</th>
-                <td colspan="9">
-                  <input type="text" id="zipcd2" name="zipcd2" placeholder="우편번호" onclick="setZipCode('zipcd2')" style="width: 200px;">
-                  <input type="text" id="adres2a" name="adres2a">
-                  <input type="text" id="adres2b" name="adres2b" placeholder="상세주소">
-                </td>
-              </tr>
-              <tr>
-                <th colspan="10" style="text-align: center; height: 30px; padding: 5px 10px;">세무서 정보</th>
-              </tr>
-              <tr>
-                <th>관할세무서</th>
-                <th>세무서명</th>
-                <td><input type="text" id="taxnm" name="taxnm" style="width:100px;"></td>
-                <th style="width: 70px;">코드</th>
-                <td><input type="text" id="comtaxoff" name="comtaxoff" style="width:100px;"></td>
-                <th rowspan="1">성명</th>
-                <td colspan="4">
-                  <input type="text" id="taxagentnm" name="taxagentnm">
-                </td>
-              </tr>
-              <tr>
-                <th rowspan="2">세무대리인</th>
-                <th>코드</th>
-                <td colspan="3">
-                  <input type="text" id="taxagentcd" name="taxagentcd">
-                </td>
-                <th>전화번호</th>
-                <td colspan="4">
-                  <input type="text" id="taxagenttel" name="taxagenttel" class="phone-format">
-                </td>
-              </tr>
-              <tr>
-                <th>사업자번호</th>
-                <td colspan="3">
-                  <input type="text" id="taxagentsp" name="taxagentsp" class="biz-number">
-                </td>
-                <th>세무서코드</th>
-                <td colspan="4">
-                  <input type="text" id="taxaccnum" name="taxaccnum">
-                </td>
-              </tr>
-              <tr>
-                <th rowspan="2">부가세 담당자</th>
-                <th style="width: 100px;">성명</th>
-                <td colspan="3">
-                  <input type="text" id="agnertel1" name="agnertel1">
-                </td>
-                <th style="width: 100px">연락처</th>
-                <td colspan="4">
-                  <input type="text" id="agnertel2" name="agnertel2" class="phone-format">
-                </td>
-              </tr>
-              <tr>
-                <th>메일주소</th>
-                <td colspan="9">
-                  <input type="text" id="emailadres" name="emailadres">
-                </td>
-              </tr>
-              <tr>
-                <th>종사업장 코드</th>
-                <td colspan="8">
-                  <input type="text" id="ajongcd" name="ajongcd">
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+        </div>
+        <div class="table-wrap">
+          <table class="write-table">
+            <caption>사업장 테이블</caption>
+            <tbody>
+            <tr>
+              <th>사업장코드</th>
+              <td colspan="4"><input type="text" id="spjangcd2" name="spjangcd2"></td>
+              <th>사업장명</th>
+              <td colspan="4"><input type="text" id="spjangnm" name="spjangnm"></td>
+            </tr>
+            <tr>
+              <th colspan="10" style="text-align: center; height: 30px; padding: 5px 10px;">기본정보</th>
+            </tr>
+            <tr>
+              <th colspan="">사업형태</th>
+              <td colspan="4">
+                <label><input type="radio" class="custperclsf" name="custperclsf" value="8" checked> 법인</label>
+                <label><input type="radio" class="custperclsf" name="custperclsf" value="1"> 개인</label>
+              </td>
+              <th colspan="">사업자등록번호</th>
+              <td colspan="4">
+                <input type="text" id="saupnum" name="saupnum" class="biz-number">
+              </td>
+            </tr>
+            <tr>
+              <th colspan="">대표자</th>
+              <td colspan="4">
+                <input type="text" id="prenm" name="prenm">
+              </td>
+              <th colspan="">법인/주민등록번호</th>
+              <td colspan="4">
+                <input type="text" id="compnum" name="compnum" class="biz-number">
+              </td>
+            </tr>
+            <tr>
+              <th colspan="">업태</th>
+              <td colspan="4">
+                <input type="text" id="biztype" name="biztype">
+              </td>
+              <th colspan="">업종</th>
+              <td colspan="4">
+                <input type="text" id="item" name="item">
+              </td>
+            </tr>
+            <tr>
+              <th colspan="">개업일자</th>
+              <td colspan="4">
+                <input type="date" id="openymd" name="openymd">
+              </td>
+              <th colspan="">폐업일자</th>
+              <td colspan="4">
+                <input type="date" id="eddate" name="eddate">
+              </td>
+            </tr>
+            <tr>
+              <th>전화번호</th>
+              <td colspan="4"><input type="tel" id="tel1" class="phone-format" name="tel1"></td>
+              <th>팩스번호</th>
+              <td colspan="4"><input type="tel" id="fax" class="phone-format" name="fax"></td>
+            </tr>
+            <tr>
+              <th>사업장소재지</th>
+              <td colspan="9">
+                <input type="text" id="zipcd" name="zipcd" placeholder="우편번호" onclick="setZipCode('zipcd')" style="width: 200px;">
+                <input type="text" id="adresa" name="adresa">
+                <input type="text" id="adresb" name="adresb" placeholder="상세주소">
+              </td>
+            </tr>
+            <tr>
+              <th>공장소재지</th>
+              <td colspan="9">
+                <input type="text" id="zipcd2" name="zipcd2" placeholder="우편번호" onclick="setZipCode('zipcd2')" style="width: 200px;">
+                <input type="text" id="adres2a" name="adres2a">
+                <input type="text" id="adres2b" name="adres2b" placeholder="상세주소">
+              </td>
+            </tr>
+            <tr>
+              <th colspan="10" style="text-align: center; height: 30px; padding: 5px 10px;">세무서 정보</th>
+            </tr>
+            <tr>
+              <th>관할세무서</th>
+              <th>세무서명</th>
+              <td><input type="text" id="taxnm" name="taxnm" style="width:100px;"></td>
+              <th style="width: 70px;">코드</th>
+              <td><input type="text" id="comtaxoff" name="comtaxoff" style="width:100px;"></td>
+              <th rowspan="1">성명</th>
+              <td colspan="4">
+                <input type="text" id="taxagentnm" name="taxagentnm">
+              </td>
+            </tr>
+            <tr>
+              <th rowspan="2">세무대리인</th>
+              <th>코드</th>
+              <td colspan="3">
+                <input type="text" id="taxagentcd" name="taxagentcd">
+              </td>
+              <th>전화번호</th>
+              <td colspan="4">
+                <input type="text" id="taxagenttel" name="taxagenttel" class="phone-format">
+              </td>
+            </tr>
+            <tr>
+              <th>사업자번호</th>
+              <td colspan="3">
+                <input type="text" id="taxagentsp" name="taxagentsp" class="biz-number">
+              </td>
+              <th>세무서코드</th>
+              <td colspan="4">
+                <input type="text" id="taxaccnum" name="taxaccnum">
+              </td>
+            </tr>
+            <tr>
+              <th rowspan="2">부가세 담당자</th>
+              <th style="width: 100px;">성명</th>
+              <td colspan="3">
+                <input type="text" id="agnertel1" name="agnertel1">
+              </td>
+              <th style="width: 100px">연락처</th>
+              <td colspan="4">
+                <input type="text" id="agnertel2" name="agnertel2" class="phone-format">
+              </td>
+            </tr>
+            <tr>
+              <th>메일주소</th>
+              <td colspan="9">
+                <input type="text" id="emailadres" name="emailadres">
+              </td>
+            </tr>
+            <tr>
+              <th>종사업장 코드</th>
+              <td colspan="8">
+                <input type="text" id="ajongcd" name="ajongcd">
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
         <!--       주문등록 탭 종료   / 주문 의뢰현황 시작       -->
         <!-- Section -->
         <!--      주문 의뢰 현황 종료          -->
-      </div> <!--//tab-contens end-->
     </div> <!--//tab-wrap end-->
   </div> <!--//layout-contents end -->
   <footer style="margin-top:5px;">
