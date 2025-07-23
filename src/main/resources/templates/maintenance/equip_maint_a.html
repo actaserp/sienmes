@@ -1,10 +1,11 @@
 <html layout:decorate="~{layout_page}">
 <head>
     <style>
-        .wx210{
+        .wx210 {
             width: 210px !important;
         }
-        .wx190{
+
+        .wx190 {
             width: 150px !important;
         }
 
@@ -25,276 +26,277 @@
                 <li>설비정비내역</li>
             </ul>
         </div>
-        <form id="searchForm" autocomplete="off">
-            <section class="section">
+        <div style="display: flex; gap: 5px;">
+            <section class="section" style="flex: 1;">
+                <form id="searchForm" autocomplete="off">
+                    <div class="section-top">
+                        <div class="search-wrap">
+
+                            <dl>
+                                <dt>
+                                    <label>
+                                        등록일
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <ul class="date-box">
+                                        <li>
+                                            <input type="date" id="srchStartDt" name="srchStartDt">
+                                            <label for="srchStartDt" class="hide">시작일</label>
+                                        </li>
+                                        <li>
+                                            <input type="date" id="srchEndDt" name="srchEndDt">
+                                            <label for="srchEndDt" class="hide">종료일</label>
+                                        </li>
+                                    </ul>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label>
+                                        설비명<span class="eq"></span>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <select id="cboEquipment" name="cboEquipment">
+
+                                        </select>
+                                    </div>
+                                </dd>
+                            </dl>
+
+                            <dl>
+                                <dt>&nbsp;</dt>
+                                <dd>
+                                    <li>
+                                        <a class="btn btn-delete" title="검색" id="btnSearch">
+                                            <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            검색
+                                        </a>
+                                    </li>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <!--        <div class="grid_box">-->
+
+                    <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
+                    <!--        </div>-->
+                </form>
+                <div class="container-fluid">
+                    <div id="theGrid"></div>
+                </div>
+            </section>
+
+            <section class="section" style="flex: 1; min-width: 0;">
                 <div class="section-top">
                     <div class="search-wrap">
-
-                        <dl>
-                            <dt>
-                                <label>
-                                    등록일
-                                </label>
-                            </dt>
-                            <dd>
-                                <ul class="date-box">
-                                    <li>
-                                        <input type="date" id="srchStartDt" name="srchStartDt">
-                                        <label for="srchStartDt" class="hide">시작일</label>
-                                    </li>
-                                    <li>
-                                        <input type="date" id="srchEndDt" name="srchEndDt">
-                                        <label for="srchEndDt" class="hide">종료일</label>
-                                    </li>
-                                </ul>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>
-                                <label>
-                                    설비명<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <div class="srch-box">
-                                    <select id="cboEquipment" name="cboEquipment">
-
-                                    </select>
-                                </div>
-                            </dd>
-                        </dl>
-
-                        <dl>
-                            <dt>&nbsp;</dt>
-                            <dd>
-                                <li>
-                                    <a class="btn btn-delete" title="검색" id="btnSearch">
-                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                        검색
-                                    </a>
-                                </li>
-                            </dd>
-                        </dl>
-
+                        <h3>상세 정보</h3>
                     </div>
                     <div class="button-wrap">
-
+                        <ul>
+                            <li>
+                                <a class="btn btn-excell" title="신규" id="btnAddNew">
+                                    <img src="/images/icon/ico-plus.svg" alt="신규 아이콘">
+                                    신규
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn btn-delete" title="삭제" id="btnDel">
+                                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                    삭제
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn btn-edit" title="저장" id="btnSave">
+                                    <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
+                                    저장
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-                <div class="container-fluid">
-                    <div id="theGrid" style="height: 300px;"></div>
 
-                </div>
+                <form id="editForm" autocomplete="off">
+                    <div class="table-wrap" id="maintInfo">
+                        <input type="hidden" id="id" name="id" value=""/>
+                        <table class="write-table">
+                            <tbody>
+                            <tr>
+                                <th>
+                                    <label>
+                                        *설비
+                                    </label>
+                                </th>
+                                <td>
+                                    <select id="equipment_id" class="wx210" name="equipment_id"></select>
+                                </td>
 
+                                <th>
+                                    <label>
+                                        *정비구분
+                                    </label>
+                                </th>
+                                <td>
+                                    <select id="maint_type" class="wx210" name="maint_type">
+                                        <option value="prevention" data-labelCd="예방정비">예방정비</option>
+                                        <option value="failure" data-labelCd="고장정비">고장정비</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="min-width: 107px;">
+                                    <label>
+                                        정비수행자
+                                    </label>
+                                </th>
+                                <td>
+                                    <input type="text" id="service_name" name="service_name" class="wx210">
+                                </td>
+                                <th style="min-width: 70px">
+                                    <label>
+                                        비용
+                                    </label>
+                                </th>
+                                <td>
+                                    <input type="number" id="maint_cost" name="maint_cost" class="wx210">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="min-width: 130px">
+                                    <label>
+                                        정비 시작일
+                                    </label>
+                                </th>
+                                <td>
+                                    <input type="date" class="wx210" id="maint_start_date" name="maint_start_date">
+                                </td>
+
+                                <th style="min-width: 140px">
+                                    <label>
+                                        정비 시작시간
+                                    </label>
+                                </th>
+                                <td>
+                                    <input type="text" class="wx210" id="maint_start_time" name="maint_start_time">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label>
+                                        정비 종료일
+                                    </label>
+                                </th>
+                                <td>
+                                    <input type="date" id="maint_end_date" name="maint_end_date" class="wx210">
+                                </td>
+                                <th>
+                                    <label>
+                                        정비 종료시간
+                                    </label>
+                                </th>
+                                <td>
+                                    <input type="text" id="maint_end_time" class="wx210" name="maint_end_time">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <label>
+                                        정비내역
+                                    </label>
+                                </th>
+                                <td colspan="3">
+                                    <textarea style="width: 100%;height: 90px;" id="description" name="description"></textarea>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                    <div class="table-wrap" style="margin-top: 20px;">
+                        <h3>고장 정보</h3>
+                        <table class="write-table" style="margin-top: 20px">
+                            <colgroup>
+                                <!--<col width="20%">
+                                <col class="wp40">
+                                <col class="wp12">
+                                <col class="wp40">-->
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>
+                                    <label>
+                                        고장시작일
+                                    </label>
+                                </th>
+                                <td>
+                                    <input type="date" class="wx190" id="fail_start_date" name="fail_start_date">
+                                </td>
+
+                                <th>
+                                    <label>
+                                        고장시작시간
+                                    </label>
+                                </th>
+                                <td>
+                                    <input type="text" class="wx190" id="fail_start_time" name="fail_start_time">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label>
+                                        고장 종료일
+                                    </label>
+                                </th>
+                                <td>
+                                    <input type="date" class="wx190" id="fail_end_date" name="fail_end_date">
+                                </td>
+                                <th>
+                                    <label>
+                                        고장 종료시간
+                                    </label>
+                                </th>
+                                <td>
+                                    <input type="text" class="wx190" id="fail_end_time" name="fail_end_time">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label>
+                                        고장시간(분)
+                                    </label>
+                                </th>
+                                <td colspan="3">
+                                    <input type="number" id="fail_hr" name="fail_hr" class="wx210">
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <th>
+                                    <label>
+                                        고장 내역
+                                    </label>
+                                </th>
+                                <td colspan="3">
+                                    <textarea style="width: 100%; height: 90px;" id="fail_description" name="fail_description"></textarea>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
                 <!--        <div class="grid_box">-->
 
                 <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
                 <!--        </div>-->
             </section>
-        </form>
-
-
-        <section class="section">
-            <div class="section-top">
-                <div class="search-wrap">
-                    <h3>상세 정보</h3>
-                </div>
-                <div class="button-wrap">
-                    <ul>
-                        <li>
-                            <a class="btn btn-excell" title="신규" id="btnAddNew">
-                                <img src="/images/icon/ico-plus.svg" alt="신규 아이콘">
-                                신규
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-delete" title="삭제" id="btnDel">
-                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                삭제
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-edit" title="저장" id="btnSave">
-                                <img src="/images/icon/ico-edit.svg" alt="저장 아이콘">
-                                저장
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <form id="editForm" autocomplete="off">
-                <div class="table-wrap" id="maintInfo">
-                    <input type="hidden" id="id" name="id"  value=""/>
-                    <table class="write-table">
-                        <tbody>
-                        <tr>
-                            <th>
-                                <label>
-                                    *설비
-                                </label>
-                            </th>
-                            <td>
-                                <select id="equipment_id" class="wx210" name="equipment_id"></select>
-                            </td>
-
-                            <th>
-                                <label>
-                                    *정비구분
-                                </label>
-                            </th>
-                            <td>
-                                <select id="maint_type" class="wx210" name="maint_type">
-                                    <option value="prevention" data-labelCd="예방정비">예방정비</option>
-                                    <option value="failure" data-labelCd="고장정비">고장정비</option>
-                                </select>
-                            </td>
-                            <th style="min-width: 107px;">
-                                <label>
-                                    정비수행자
-                                </label>
-                            </th>
-                            <td>
-                                <input type="text"  id="service_name" name="service_name" class="wx210">
-                            </td>
-                            <th style="min-width: 70px">
-                                <label>
-                                    비용
-                                </label>
-                            </th>
-                            <td>
-                                <input type="number" id="maint_cost" name="maint_cost" class="wx210">
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th style="min-width: 130px">
-                                <label>
-                                    정비 시작일
-                                </label>
-                            </th>
-                            <td>
-                                <input type="date" class="wx210" id="maint_start_date" name="maint_start_date">
-                            </td>
-
-                            <th style="min-width: 140px">
-                                <label>
-                                    정비 시작시간
-                                </label>
-                            </th>
-                            <td>
-                                <input type="text" class="wx210" id="maint_start_time" name="maint_start_time">
-                            </td>
-                            <th>
-                                <label>
-                                    정비 종료일
-                                </label>
-                            </th>
-                            <td>
-                                <input type="date" id="maint_end_date" name="maint_end_date" class="wx210">
-                            </td>
-                            <th>
-                                <label>
-                                    정비 종료시간
-                                </label>
-                            </th>
-                            <td>
-                                <input type="text" id="maint_end_time" class="wx210" name="maint_end_time">
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>
-                                <label>
-                                    정비내역
-                                </label>
-                            </th>
-                            <td colspan="7">
-                                <textarea style="width: 100%" id="description" name="description"></textarea>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-
-                <div class="table-wrap" style="margin-top: 20px;">
-                    <h3>고장 정보</h3>
-                    <table class="write-table" style="margin-top: 20px">
-                        <colgroup>
-                            <!--<col width="20%">
-                            <col class="wp40">
-                            <col class="wp12">
-                            <col class="wp40">-->
-                        </colgroup>
-                        <tbody>
-                        <tr>
-                            <th>
-                                <label>
-                                    고장시작일
-                                </label>
-                            </th>
-                            <td>
-                                <input type="date" class="wx190" id="fail_start_date" name="fail_start_date">
-                            </td>
-
-                            <th>
-                                <label>
-                                    고장시작시간
-                                </label>
-                            </th>
-                            <td>
-                                <input type="text" class="wx190" id="fail_start_time" name="fail_start_time">
-                            </td>
-                            <th>
-                                <label>
-                                    고장 종료일
-                                </label>
-                            </th>
-                            <td>
-                                <input type="date" class="wx190" id="fail_end_date" name="fail_end_date">
-                            </td>
-                            <th>
-                                <label>
-                                    고장 종료시간
-                                </label>
-                            </th>
-                            <td>
-                                <input type="text" class="wx190" id="fail_end_time" name="fail_end_time">
-                            </td>
-
-                            <th>
-                                <label>
-                                    고장시간(분)
-                                </label>
-                            </th>
-                            <td>
-                                <input type="number" id="fail_hr" name="fail_hr" class="wx210">
-                            </td>
-                        </tr>
-
-
-
-                        <tr>
-                            <th>
-                                <label>
-                                    고장 내역
-                                </label>
-                            </th>
-                            <td colspan="9">
-                                <textarea style="width: 100%" id="fail_description" name="fail_description"></textarea>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </form>
-            <!--        <div class="grid_box">-->
-
-            <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
-            <!--        </div>-->
-        </section>
+        </div>
         <!--<div class="table_box search" >
 
             <div class="row" >
@@ -328,7 +330,7 @@
 </th:block>
 
 <th:block layout:fragment="scripts">
-    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
     <script type="text/javascript">
 
         let isInitialLoad = true; // 초기 상태 플래그
@@ -357,18 +359,18 @@
                     showMarquee: true,
                     isReadOnly: true,
                     columns: [
-                        {binding: 'equipment_group_name', header: '설비그룹', width: '*', align : 'left'},
-                        {binding: 'equipment_code', header: '설비코드', width: '*', align: 'center'},
-                        {binding: 'equipment_name', header: '설비명', width: '*', align: 'left'},
-                        {binding: 'data_date', header: '등록일', width: '*', align: 'center'},
-                        {binding: 'maint_type', header: '구분', width: '*', align: 'center'},
-                        {binding: 'fail_start_date', header: '고장시작일', width: '*', align: 'center'},
-                        {binding: 'fail_end_date', header: '고장종료일', width: '*', align: 'center'},
-                        {binding: 'fail_description', header: '고장내역', width: '*', align: 'left'},
-                        {binding: 'maint_start_date', header: '정비시작일', width: '*', align: 'center'},
-                        {binding: 'maint_end_date', header: '정비종료일', width: '*', align: 'center'},
-                        {binding: 'description', header: '정비내역', width: '*', align: 'left'},
-                        {binding: 'maint_cost', header: '비용', width: '*', align: 'right'},
+                        {binding: 'equipment_group_name', header: '설비그룹', width: 100, align: 'left'},
+                        {binding: 'equipment_code', header: '설비코드', width: 100, align: 'center'},
+                        {binding: 'equipment_name', header: '설비명', width: 120, align: 'left'},
+                        {binding: 'data_date', header: '등록일', width: 100, align: 'center'},
+                        {binding: 'maint_type', header: '구분', width: 100, align: 'center'},
+                        {binding: 'fail_start_date', header: '고장시작일', width: 100, align: 'center'},
+                        {binding: 'fail_end_date', header: '고장종료일', width: 100, align: 'center'},
+                        {binding: 'fail_description', header: '고장내역', width: 120, align: 'left'},
+                        {binding: 'maint_start_date', header: '정비시작일', width: 100, align: 'center'},
+                        {binding: 'maint_end_date', header: '정비종료일', width: 100, align: 'center'},
+                        {binding: 'description', header: '정비내역', width: 100, align: 'left'},
+                        {binding: 'maint_cost', header: '비용', width: 100, align: 'right'},
 
                     ],
                     itemsSource: this.viewData,
@@ -410,10 +412,9 @@
                 AjaxUtil.fillSelectOptions($('#equipment_id'), 'equipment', 'choose', false);
 
 
-                console.log('date',getNowDateMinus7());
+                console.log('date', getNowDateMinus7());
                 document.getElementById('srchStartDt').value = getNowDateMinus7();
                 document.getElementById('srchEndDt').value = getNowDate();
-
 
 
                 $('#fail_start_date, #fail_start_time, #fail_end_date, #fail_end_time').change(function () {
@@ -528,7 +529,7 @@
             showDetail(id) {
                 let _this = this;
 
-                let param = { 'id': id };
+                let param = {'id': id};
 
                 let result = AjaxUtil.getSyncData(_this.baseUrl + '/detail', param);
 
@@ -541,7 +542,7 @@
             // 비가동사유 상세정보 조회
             showDetailStopCause(id) {
                 let _this = this;
-                let param = { 'id': id };
+                let param = {'id': id};
                 let result = AjaxUtil.getSyncData(_this.baseUrl + '/detail', param);
 
                 if (result.data != null) {
@@ -612,7 +613,7 @@
             delInfo(id) {
                 let _this = this;
 
-                let data = { id: id };
+                let data = {id: id};
                 let fnSuccess = function (res) {
                     if (res.success) {
                         Notify.success('삭제되었습니다');
@@ -625,7 +626,6 @@
 
                 AjaxUtil.postAsyncData(_this.baseUrl + '/delete', data, fnSuccess);
             }
-
 
 
         }
@@ -642,7 +642,7 @@
                     format: 'YYYY-MM-DD'
                 },
                 content: {
-                    width:  214,  // 130, //270,
+                    width: 214,  // 130, //270,
                     margin: 10,
                     type: 'date',
 
@@ -685,28 +685,33 @@
 
 
             // 검색버튼
-            $('#btnSearch').click(function (e) { page.searchMainData(); });
+            $('#btnSearch').click(function (e) {
+                page.searchMainData();
+            });
 
 
-            $('#btnAddNew').click(function(e){
+            $('#btnAddNew').click(function (e) {
                 page.initForm();
                 page.setMaintDateTime();
             });
 
-            $('#btnSave').click(function(e){
+            $('#btnSave').click(function (e) {
                 page.saveInfo();
             });
 
             $('#btnDel').click(function (e) {
                 let id = $('#editForm').find('#id').val()
-                if(id === null || id === undefined || id === ''){
+                if (id === null || id === undefined || id === '') {
                     Alert.alert('', '삭제할 행을 선택해주세요');
                     return;
                 }
                 Alert.confirm('',
                     '삭제하시겠습니까?',
-                    function () { page.delInfo(id); },
-                    function () { }
+                    function () {
+                        page.delInfo(id);
+                    },
+                    function () {
+                    }
                 );
             });
             page.searchMainData();

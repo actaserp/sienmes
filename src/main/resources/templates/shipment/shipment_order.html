@@ -14,35 +14,163 @@
                 <li>출하지시등록</li>
             </ul>
         </div>
-        <form id="searchForm">
-            <section class="section">
+        <div style="display: flex; gap: 5px;">
+            <section class="section" style="flex: 4;">
+                <form id="searchForm">
+                    <div class="section-top">
+                        <div class="search-wrap">
+                            <dl>
+                                <dt>
+                                    <label>
+                                        조회내용
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <select class="" id="cboSource" name="cboSource">
+                                        <option value="suju">수주 내역</option>
+                                        <option value="product">제품</option>
+                                    </select>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label>
+                                        수주일<span class="eq"></span>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <input type="date" id="srchStartDt" name="srchStartDt"/>
+                                        <span class="slow_sign">~</span>
+                                        <input type="date" id="srchEndDt" name="srchEndDt"/>
+                                    </div>
+                                </dd>
+                            </dl>
+
+                            <dl>
+                                <dt>
+                                    <label>
+                                        업체<span class="eq"></span>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <select class="" id="cboCompany" name="cboCompany">
+                                    </select>
+                                </dd>
+                            </dl>
+
+                        </div>
+                        <div class="search-wrap">
+                            <dl>
+                                <dt>
+                                    <label>
+                                        품목그룹
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <select class="" id="cboMatGroup" name="cboMatGroup">
+                                    </select>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label>
+                                        품목<span class="eq"></span>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <select class="" id="cboMaterial" name="cboMaterial">
+                                    </select>
+                                </dd>
+                            </dl>
+
+                            <dl>
+                                <dt>
+                                    <label>
+                                        품목명<span class="eq"></span>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" style="width: 180px" class="" id="keyword" name="keyword">
+                                </dd>
+                            </dl>
+
+                            <dl>
+                                <dt>
+                                    <label>
+                                        미출하<span class="eq"></span>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="checkbox" id="chkNotShipped" name="chkNotShipped" value="Y" checked/>
+                                </dd>
+                            </dl>
+
+                            <dl>
+                                <dt>&nbsp;</dt>
+                                <dd>
+                                    <li>
+                                        <a class="btn btn-delete" title="검색" id="btnSearch">
+                                            <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            검색
+                                        </a>
+                                    </li>
+                                </dd>
+                            </dl>
+
+
+                        </div>
+
+                    </div>
+                </form>
+
+                <div class="title_box" style="margin-bottom: 5px;">
+                    <div class="left_align">
+                        <!--                    <label class="switch">-->
+                        <!--                        <input type="checkbox" checked id="btnListCollapse"><span class="slider round"></span>-->
+                        <!--                    </label>-->
+                        <!--                    수주/제품 보기/감추기-->
+                        <a class="btn btn-delete" title="출하품목 추가" id="btnAddMat">
+                            출하품목 추가
+                        </a>
+                        <a class="btn btn-delete" title="강제 완료" id="btnCompletionMat">
+                            강제 완료
+                        </a>
+                    </div>
+                </div>
+                <div class="container-fluid" id="divList" style="height: 20vh;">
+                    <div class="container-fluid" id="div_suju">
+                        <div id="theGrid"></div>
+                    </div>
+                    <div class="container-fluid" id="div_product">
+                        <div id="theGrid3"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" style="flex: 3; min-width: 0;">
                 <div class="section-top">
                     <div class="search-wrap">
-
                         <dl>
                             <dt>
                                 <label>
-                                    조회내용
+                                    판매처 <span style="color: tomato">*</span>
                                 </label>
                             </dt>
                             <dd>
-                                <select class="" id="cboSource" name="cboSource" >
-                                    <option value="suju">수주 내역</option>
-                                    <option value="product">제품</option>
-                                </select>
+                                <select class="" id="company_id" name="company_id" disabled></select>
                             </dd>
                         </dl>
                         <dl>
                             <dt>
                                 <label>
-                                    수주일<span class="eq"></span>
+                                    출하일<span class="eq"></span>
                                 </label>
                             </dt>
                             <dd>
                                 <div class="srch-box">
-                                    <input type="date"id="srchStartDt" name="srchStartDt"  />
-                                    <span class="slow_sign">~</span>
-                                    <input type="date" id="srchEndDt" name="srchEndDt" />
+                                    <input type="date" id="shipdate" name="shipdate"/>
                                 </div>
                             </dd>
                         </dl>
@@ -50,189 +178,54 @@
                         <dl>
                             <dt>
                                 <label>
-                                    업체<span class="eq"></span>
+                                    비고<span class="eq"></span>
                                 </label>
                             </dt>
                             <dd>
-                                <select class="" id="cboCompany" name="cboCompany" >
-                                </select>
+                                <input class="" type="text" id="description" value="">
                             </dd>
                         </dl>
-
-                        <dl>
-                            <dt>
-                                <label>
-                                    품목그룹
-                                </label>
-                            </dt>
-                            <dd>
-                                <select class="" id="cboMatGroup" name="cboMatGroup" >
-                                </select>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>
-                                <label>
-                                    품목<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <select class="" id="cboMaterial" name="cboMaterial" >
-                                </select>
-                            </dd>
-                        </dl>
-
-                        <dl>
-                            <dt>
-                                <label>
-                                    품목명<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <input type="text" style="width: 180px" class="" id="keyword" name="keyword">
-                            </dd>
-                        </dl>
-
-                        <dl>
-                            <dt>
-                                <label>
-                                    미출하<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <input type="checkbox" id="chkNotShipped" name="chkNotShipped" value="Y" checked />
-                            </dd>
-                        </dl>
-
-                        <dl>
-                            <dt>&nbsp;</dt>
-                            <dd>
-                                <li>
-                                    <a class="btn btn-delete" title="검색" id="btnSearch">
-                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                        검색
-                                    </a>
-                                </li>
-                            </dd>
-                        </dl>
-
-
                     </div>
 
+                    <div class="button-wrap">
+                        <ul>
+                            <li>
+                                <a class="btn btn-excell"
+                                   style="border: 1px solid red; color: red"
+                                   title="품목 전체제외" id="btnDeleteAllShipMat">
+                                    품목 전체제외
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn btn-delete"
+                                   style="border: 1px solid red; color: red"
+                                   title="품목 제외" id="btnDeleteShipMat">
+                                    품목 제외
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn btn-edit"
+                                   style="border: 1px solid dodgerblue; color: dodgerblue"
+                                   title="출하지시 저장" id="btnSaveShipOrder">
+                                    출하지시 저장
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="section-top">
-                    <div class="search-wrap">
-
-
-                    </div>
+                <div class="container-fluid" style="height: 15vh;">
+                    <div id="theGrid2"></div>
                 </div>
             </section>
-        </form>
-
-
-        <section class="section">
-            <div class="title_box">
-                <div class="left_align">
-                    <label class="switch" >
-                        <input type="checkbox" checked id="btnListCollapse"><span class="slider round"></span>
-                    </label>
-                    수주/제품 보기/감추기
-                    <a class="btn btn-delete" title="출하품목 추가" id="btnAddMat">
-                        출하품목 추가
-                    </a>
-                    <a class="btn btn-delete" title="강제 완료" id="btnCompletionMat">
-                        강제 완료
-                    </a>
-                </div>
-            </div>
-            <div class="grid_box" id="divList">
-                <div class="container-fluid" id="div_suju">
-                    <div id="theGrid" style="height: 350px;"></div>
-                </div>
-                <div class="container-fluid" id="div_product">
-                    <div id="theGrid3" style="height: 350px;"></div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section">
-            <div class="section-top">
-                <div class="search-wrap">
-
-                    <dl>
-                        <dt>
-                            <label>
-                                판매처 <span style="color: tomato">*</span>
-                            </label>
-                        </dt>
-                        <dd>
-                            <select class="" id="company_id" name="company_id" disabled></select>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>
-                            <label>
-                                출하일<span class="eq"></span>
-                            </label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <input type="date" id="shipdate" name="shipdate"  />
-                            </div>
-                        </dd>
-                    </dl>
-
-                    <dl>
-                        <dt>
-                            <label>
-                                비고<span class="eq"></span>
-                            </label>
-                        </dt>
-                        <dd>
-                            <input class="" type="text" id="description" value="" >
-                        </dd>
-                    </dl>
-                </div>
-
-                <div class="button-wrap">
-                    <ul>
-                        <li>
-                            <a class="btn btn-excell"
-                               style="border: 1px solid red; color: red"
-                               title="품목 전체제외" id="btnDeleteAllShipMat">
-                                품목 전체제외
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-delete"
-                               style="border: 1px solid red; color: red"
-                               title="품목 제외" id="btnDeleteShipMat">
-                                품목 제외
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn btn-edit"
-                               style="border: 1px solid dodgerblue; color: dodgerblue"
-                               title="출하지시 저장" id="btnSaveShipOrder">
-                                출하지시 저장
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="container-fluid">
-                <div id="theGrid2" style="height: 350px;"></div>
-            </div>
-        </section>
+        </div>
     </div>
 
 </th:block>
 
 <th:block layout:fragment="scripts">
-    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
-    <th:block th:replace="/common/multiform_material :: multiform_material" ></th:block>
-    <th:block th:replace="/common/multiform_company :: multiform_company" ></th:block>
+    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+    <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
+    <th:block th:replace="/common/multiform_company :: multiform_company"></th:block>
 
     <script type="text/javascript">
 
@@ -269,23 +262,26 @@
                     selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
                     isReadOnly: false,
                     columns: [
-                        {binding: 'suju_pk', header: '수주번호', width: '*', align: 'center', isReadOnly: true, visible: false},
-                        {binding: 'JumunNumber', header: '수주번호', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'JumunDate', header: '수주일', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'DueDate', header: '납기일', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'CompanyName', header: '판매처', width: '*', align: 'left', isReadOnly: true},
-                        {binding: 'mat_grp', header: '제품그룹', width: '*', align: 'left', isReadOnly: true},
-                        {binding: 'mat_code', header: '제품코드', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'mat_name', header: '제품명', width: '*', align: 'left', isReadOnly: true},
-                        {binding: 'unit_name', header: '단위', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'suju_qty', header: '수주량', width: '*', align: 'right', isReadOnly: true},
-                        {binding: 'cur_stock', header: '현재고', width: '*', align: 'right', isReadOnly: true},
-                        {binding: 'order_qty', header: '지시량', width: '*', align: 'right', isReadOnly: true},
+                        {
+                            binding: 'suju_pk',
+                            header: '수주번호',
+                            width: '*',
+                            align: 'center',
+                            isReadOnly: true,
+                            visible: false
+                        },
+                        {binding: 'JumunNumber', header: '수주번호', width: 130, align: 'center', isReadOnly: true},
+                        {binding: 'DueDate', header: '납기일', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'mat_code', header: '제품코드', width: 90, align: 'center', isReadOnly: true},
+                        {binding: 'mat_name', header: '제품명', width: 120, align: 'left', isReadOnly: true},
+                        {binding: 'suju_qty', header: '수주량', width: 80, align: 'right', isReadOnly: true},
+                        {binding: 'cur_stock', header: '현재고', width: 80, align: 'right', isReadOnly: true},
+                        {binding: 'order_qty', header: '기지시량', width: 80, align: 'right', isReadOnly: true},
                         //{ binding: 'order_input_qty', header: '추가지시량', width: '*', align: 'right', isReadOnly: false },
                         {
                             binding: 'order_input_qty',
                             header: '추가지시량',
-                            width: '*',
+                            width: 80,
                             align: 'right',
                             isReadOnly: false, // 편집 가능
                             editor: new wijmo.input.InputNumber(document.createElement('div'), {
@@ -295,13 +291,21 @@
                                 step: 1       // 증가/감소 단위
                             })
                         },
-                        {binding: 'shipment_qty', header: '출하량', width: '*', align: 'right', isReadOnly: true},
-                        {binding: 'remark', header: '비고', width: '*', align: 'left', isReadOnly: true}
+                        {binding: 'shipment_qty', header: '출하량', width: 80, align: 'right', isReadOnly: true},
+                        {binding: 'CompanyName', header: '판매처', width: 100, align: 'left', isReadOnly: true},
+                        {binding: 'JumunDate', header: '수주일', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'mat_grp', header: '제품그룹', width: 100, align: 'left', isReadOnly: true},
+                        {binding: 'unit_name', header: '단위', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'remark', header: '비고', width: 100, align: 'left', isReadOnly: true}
                     ],
                     itemsSource: this.viewData,
                     formatItem: (s, e) => {
                         if (e.panel.cellType === wijmo.grid.CellType.Cell) {
                             let col = s.columns[e.col];
+                            e.cell.style.backgroundColor = '';
+                            e.cell.style.color = '';
+                            e.cell.style.border = '';
+
                             if (col.binding === 'order_input_qty') {
                                 e.cell.style.backgroundColor = '#ffd800'; // 배경색 노란색으로 설정
                                 e.cell.style.color = 'black';           // 글자색 설정 (가독성 고려)
@@ -340,21 +344,34 @@
                     allowDelete: true,
                     isReadOnly: false,
                     formatItem: (sender, e) => {
-                      if(e.panel.cellType === wijmo.grid.CellType.RowHeader){
-                          e.cell.textContent = (e.row + 1).toString();
-                      }
+                        if (e.panel.cellType === wijmo.grid.CellType.RowHeader) {
+                            e.cell.textContent = (e.row + 1).toString();
+                        }
                     },
                     columns: [
-                        {binding: 'suju_pk', header: '순번(지워야됨)', width: 70, align: 'right', isReadOnly: true, visible : false},
-                        {binding: 'mat_id', header: '순번(지워야됨)', width: 70, align: 'right', isReadOnly: true, visible : false},
-                        {binding: 'mat_grp', header: '제품그룹', width: '*', align: 'left', isReadOnly: true},
-                        {binding: 'mat_code', header: '제품코드', width: '*', align: 'center', isReadOnly: true},
-                        {binding: 'mat_name', header: '제품명', width: '*', align: 'left', isReadOnly: true},
-                        {binding: 'unit_name', header: '단위', width: '*', align: 'center', isReadOnly: true},
+                        {
+                            binding: 'suju_pk',
+                            header: '순번(지워야됨)',
+                            width: 70,
+                            align: 'right',
+                            isReadOnly: true,
+                            visible: false
+                        },
+                        {
+                            binding: 'mat_id',
+                            header: '순번(지워야됨)',
+                            width: 70,
+                            align: 'right',
+                            isReadOnly: true,
+                            visible: false
+                        },
+                        {binding: 'mat_code', header: '제품코드', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'mat_name', header: '제품명', width: 140, align: 'left', isReadOnly: true},
+                        {binding: 'unit_name', header: '단위', width: 100, align: 'center', isReadOnly: true},
                         {
                             binding: 'order_qty',
                             header: '수량',
-                            width: '*',
+                            width: 100,
                             align: 'right',
                             isReadOnly: false, // 편집 가능
                             editor: new wijmo.input.InputNumber(document.createElement('div'), {
@@ -364,10 +381,11 @@
                                 step: 1       // 증가/감소 단위
                             })
                         },
+                        {binding: 'mat_grp', header: '제품그룹', width: 100, align: 'left', isReadOnly: true},
                         {
                             binding: 'description',
                             header: '비고',
-                            width: '*',
+                            width: 100,
                             align: 'center',
                             isReadOnly: false, // 편집 가능
                             editor: new wijmo.input.InputMask(document.createElement('div'), {
@@ -402,13 +420,13 @@
                     selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
                     isReadOnly: true,
                     columns: [
-                        {binding: 'mat_id', header: '품목번호', width: '*', align: 'right'},  // width: 40
-                        {binding: 'mat_type', header: '품목유형', width: '*', align: 'left'},
-                        {binding: 'mat_grp', header: '품목그룹', width: '*', align: 'left'},
-                        {binding: 'mat_code', header: '품목코드', width: '*', align: 'left'},
+                        {binding: 'mat_id', header: '품목번호', width: 100, align: 'right'},  // width: 40
+                        {binding: 'mat_type', header: '품목유형', width: 100, align: 'left'},
+                        {binding: 'mat_grp', header: '품목그룹', width: 100, align: 'left'},
+                        {binding: 'mat_code', header: '품목코드', width: 100, align: 'left'},
                         {binding: 'mat_name', header: '품목명', width: '*', align: 'left'},
-                        {binding: 'unit_name', header: '단위', width: '*', align: 'center'},
-                        {binding: 'cur_stock', header: '현재고', width: '*', align: 'right'}
+                        {binding: 'unit_name', header: '단위', width: 80, align: 'center'},
+                        {binding: 'cur_stock', header: '현재고', width: 80, align: 'right'}
                     ],
                     itemsSource: this.viewData3,
                 });
@@ -452,7 +470,7 @@
 
             grid_shipment_clear() {
                 this.grid_shipment.itemsSource = new wijmo.collections.CollectionView([]);
-                document.getElementById('company_id').selectedIndex  = 0;
+                document.getElementById('company_id').selectedIndex = 0;
 
             }
 
@@ -558,7 +576,7 @@
                         });
                         row['order_qty'] = order_sum;
                     });*/
-                    if(hasError) return;
+                    if (hasError) return;
                     $("#company_id").val(comp_pk);
                     $("#company_id_text").val(comp_name);
                 } else if ($("#cboSource").val() == 'product') {
@@ -594,8 +612,8 @@
                 cv.remove(selectedItem);
                 cv.refresh();
 
-                if(cv.items.length === 0){
-                   document.getElementById('company_id').selectedIndex = 0;
+                if (cv.items.length === 0) {
+                    document.getElementById('company_id').selectedIndex = 0;
                 }
 
             }
@@ -654,9 +672,9 @@
 
                         let comboBox = $('#cboSource').val();
 
-                        if(comboBox === 'product'){
+                        if (comboBox === 'product') {
                             $('#company_id').attr('disabled', false);
-                        }else{
+                        } else {
                             $('#company_id').attr('disabled', true);
                         }
 
@@ -702,7 +720,7 @@
 
                 let existingItem = cv.items.find(item =>
                     item.suju_pk && item.suju_pk === new_data['suju_pk']);
-                if(existingItem){
+                if (existingItem) {
                     cv.remove(existingItem);
                     cv.commitEdit();
                 }
@@ -758,16 +776,15 @@
                 $('#btnListCollapse').prop("checked", true);
                 $('#divList').show();
 
-                if($("#cboSource").val() === 'product'){
+                if ($("#cboSource").val() === 'product') {
                     $("#company_id").attr("disabled", false);
 
                     $("#company_id option:eq(0)").prop("selected", true);
-                }else{
+                } else {
                     $("#company_id").attr("disabled", true);
 
                     $("#company_id option:eq(0)").prop("selected", true);
                 }
-
 
 
                 if ($("#cboSource").val() != 'product') {
@@ -816,16 +833,16 @@
                 if ($("#cboSource").val() == 'suju') {
 
                     let bottomCompanySelectBox = $('#company_id').val();
-                    if(bottomCompanySelectBox != '' && bottomCompanySelectBox !== null){
-                        $.each(SelectItem, function (index, item){
-                            if(item._data.Company_id !=  bottomCompanySelectBox){
+                    if (bottomCompanySelectBox != '' && bottomCompanySelectBox !== null) {
+                        $.each(SelectItem, function (index, item) {
+                            if (item._data.Company_id != bottomCompanySelectBox) {
                                 console.log('bottom', bottomCompanySelectBox);
                                 console.log('item', item._data.Company_id);
 
                                 return_a = 1;
                             }
                         })
-                    }else{
+                    } else {
                         $.each(SelectItem, function (index, item) {
                             if (comp_a && (comp_a !== item._data.Company_id)) {
                                 return_a = 1;
@@ -874,7 +891,7 @@
                     }
                 };
 
-                AjaxUtil.postJsonData('/api/sales/suju/force-complete', { sujuPkList }, fnSuccess);
+                AjaxUtil.postJsonData('/api/sales/suju/force-complete', {sujuPkList}, fnSuccess);
 
             });
 

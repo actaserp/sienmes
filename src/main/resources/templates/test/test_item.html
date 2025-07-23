@@ -17,216 +17,223 @@
             </ul>
         </div>
 
+        <div style="display: flex; gap: 5px;">
+            <section class="section" style="flex: 1;">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label>검사방법</label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <select id="cboTestMethod" name="cboTestMethod" class="form-control2"></select>
+                                </div>
+                            </dd>
+                        </dl>
 
-        <section class="section">
-            <div class="section-top">
-                <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            <label>검사방법</label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <select id="cboTestMethod" name="cboTestMethod" class="form-control2"></select>
-                            </div>
-                        </dd>
-                    </dl>
+                        <dl>
+                            <dt>
+                                <label>항목명</label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="text" id="txtItemName" name="txtItemName" class="form-control2">
+                                </div>
+                            </dd>
+                        </dl>
 
-                    <dl>
-                        <dt>
-                            <label>항목명</label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <input type="text" id="txtItemName" name="txtItemName" class="form-control2">
-                            </div>
-                        </dd>
-                    </dl>
+                        <dl>
+                            <dt>
+                                <label>결과값유형</label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <select id="cboResType" name="cboResType" class="form-control2"></select>
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label>단위</label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <select id="cboUnit" name="cboUnit" class="form-control2"></select>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt><span class="eq"></span></dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-delete" title="검색" id="btnSearch">
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+                    </div>
+                </div> <!--//section-top end -->
 
-                    <dl>
-                        <dt>
-                            <label>결과값유형</label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <select id="cboResType" name="cboResType" class="form-control2"></select>
-                            </div>
-                        </dd>
-                    </dl>
-
-                    <dl>
-                        <dt>
-                            <label>단위</label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <select id="cboUnit" name="cboUnit" class="form-control2"></select>
-                            </div>
-                        </dd>
-                    </dl>
-
-
-                    <dl>
-                        <dt><span class="eq"></span></dt>
-                        <dd>
-                            <li>
-                                <a class="btn btn-delete" title="검색" id="btnSearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    검색
-                                </a>
-                            </li>
-                        </dd>
-                    </dl>
+                <div class="container-fluid">
+                    <div id="test-item-grid"></div>
                 </div>
-            </div> <!--//section-top end -->
+            </section>
 
-            <div class="container-fluid">
-                <p id="selectedItem"></p>
-                   <div id="test-item-grid" style="height: 350px; max-height: 350px;"></div>
-                <!--<div class="h-350" data-ax5grid="test-item-grid"></div>-->
-            </div>
-            <!-- <div class="grid_box">
-                 <div class="h-300" data-ax5grid="process-grid"></div>
-             </div>-->
+            <div class="tab-wrap" style="flex: 1; min-width: 0;">
+                <ul class="tab-links">
+                    <li><a href="#tab_basic">기본 정보</a></li>
+                    <li><a href="#tab_res">선택형결과</a></li>
+                </ul>
+                <div>
+                    <section class="tab-item" id="tab_basic" style="border-top-left-radius: 0;">
+                        <div class="section-top">
+                            <div class="button-wrap">
+                                <ul>
+                                    <li>
+                                        <button type="button" class="btn-default" id="btnNew" name="btnNew"
+                                                style="width: 115px; height: 36px;"><i
+                                                class="fas fa-plus"></i>신규등록
+                                        </button>
+                                    </li>
 
-            <div class="btn-wrap">
-            </div>
-        </section>
+                                    <li>
+                                        <button type="button" class="btn-danger y_write_auth" id="btnDel"
+                                                style="width: 115px; height: 36px;"><i
+                                                class="fas fa-trash"></i>삭제
+                                        </button>
+                                    </li>
 
-
-        <div class="tab-wrap">
-            <ul class="tab-links">
-                <li><a href="#tab_basic">기본 정보</a></li>
-                <li><a href="#tab_res">선택형결과</a></li>
-            </ul>
-            <div>
-                <section class="tab-item" id="tab_basic" style="border-top-left-radius: 0;">
-                    <div class="section-top">
-                        <div class="button-wrap">
-                            <ul>
-                                <li>
-                                    <button type="button" class="btn-default" id="btnNew" name="btnNew" style="width: 115px; height: 36px;"><i
-                                            class="fas fa-plus"></i>신규등록</button>
-                                </li>
-
-                                <li>
-                                    <button type="button" class="btn-danger y_write_auth" id="btnDel" style="width: 115px; height: 36px;"><i
-                                            class="fas fa-trash"></i>삭제</button>
-                                </li>
-
-                                <li>
-                                    <button type="button" class="btn-default y_write_auth" id="btnSave"style="width: 115px; height: 36px;"><i
-                                            class="fas fa-save"></i>저장</button>
-                                </li>
-                            </ul>
+                                    <li>
+                                        <button type="button" class="btn-default y_write_auth" id="btnSave"
+                                                style="width: 115px; height: 36px;"><i
+                                                class="fas fa-save"></i>저장
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                    <div id="detail_box">
-                        <form id="testItemForm">
-                            <table class="write-table"
-                                   style="width: 100%; border-collapse: collapse; table-layout: fixed;">
-                                <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
-                                <input type="hidden" class="form-control2" id="id" name="id" readonly
-                                       style="background-color:#cecece" disabled/>
-                                <tbody>
-                                <tr>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="test_method_id"><span class="eq">*</span>검사방법</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select type="text" id="test_method_id" name="test_method_id"
-                                                style="width: 100%;"></select>
-                                    </td>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="item_type">구분</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="text" id="item_type" name="item_type"
-                                               style="width: 100%;">
-                                    </td>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="item_code"><span class="eq">*</span>코드</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="text" style="width: 100%;" id="item_code"
-                                               name="item_code">
-                                    </td>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="item_name"><span class="eq">*</span>항목명</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="text" style="width: 100%;" id="item_name"
-                                               name="item_name">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="item_eng_name">영문명</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="text" id="item_eng_name" name="item_eng_name"
-                                               style="width: 100%;">
-                                    </td>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="res_type"><span class="eq">*</span>결과값유형</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select type="text" id="res_type" name="res_type"
-                                                style="width: 100%;"></select>
-                                    </td>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="item_unit">단위</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <select style="width: 100%;" id="item_unit"
-                                                name="item_unit"></select>
-                                    </td>
-                                    <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
-                                        <label for="item_round_digit">소수점자리수</label>
-                                    </th>
-                                    <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
-                                        <input type="text" style="width: 100%;" id="item_round_digit"
-                                               name="item_round_digit">
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </form>
-                    </div>
-                </section>
-
-                <section class="tab-item" id="tab_res" style="border-top-left-radius: 0;">
-                    <div class="section-top">
-                        <div class="button-wrap">
-                            <ul>
-                                <li>
-                                    <button type="button" class="btn-default" id="btnAddRow" style="width: 115px; height: 36px;"><i class="fas fa-plus"></i>추가</button>
-                                </li>
-
-                                <li>
-                                    <button type="button" class="btn-danger y_write_auth" id="btnDelRow" style="width: 115px; height: 36px;"><i class="fas fa-trash"></i>삭제</button>
-                                </li>
-
-                                <li>
-                                    <button type="button" class="btn-default y_write_auth" id="btnSaveRow" style="width: 115px; height: 36px;"><i class="fas fa-save">저장</i>
-                                    </button>
-                                </li>
-                            </ul>
+                        <div id="detail_box">
+                            <form id="testItemForm">
+                                <table class="write-table"
+                                       style="width: 100%; border-collapse: collapse; ">
+                                    <caption style="text-align: left; margin-bottom: 8px;">상세테이블</caption>
+                                    <input type="hidden" class="form-control2" id="id" name="id" readonly
+                                           style="background-color:#cecece" disabled/>
+                                    <tbody>
+                                    <tr>
+                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label for="test_method_id"><span class="eq">*</span>검사방법</label>
+                                        </th>
+                                        <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                            <select type="text" id="test_method_id" name="test_method_id"
+                                                    style="width: 100%;"></select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label for="item_type">구분</label>
+                                        </th>
+                                        <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                            <input type="text" id="item_type" name="item_type"
+                                                   style="width: 100%;">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label for="item_code"><span class="eq">*</span>코드</label>
+                                        </th>
+                                        <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                            <input type="text" style="width: 100%;" id="item_code"
+                                                   name="item_code">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label for="item_name"><span class="eq">*</span>항목명</label>
+                                        </th>
+                                        <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                            <input type="text" style="width: 100%;" id="item_name"
+                                                   name="item_name">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label for="item_eng_name">영문명</label>
+                                        </th>
+                                        <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                            <input type="text" id="item_eng_name" name="item_eng_name"
+                                                   style="width: 100%;">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label for="res_type"><span class="eq">*</span>결과값유형</label>
+                                        </th>
+                                        <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                            <select type="text" id="res_type" name="res_type"
+                                                    style="width: 100%;"></select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label for="item_unit">단위</label>
+                                        </th>
+                                        <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                            <select style="width: 100%;" id="item_unit"
+                                                    name="item_unit"></select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="text-align: center; width: 7%; padding: 5px; border: 1px solid #ddd;">
+                                            <label for="item_round_digit">소수점자리수</label>
+                                        </th>
+                                        <td style="width: 15%; padding: 5px; border: 1px solid #ddd;">
+                                            <input type="text" style="width: 100%;" id="item_round_digit"
+                                                   name="item_round_digit">
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </form>
                         </div>
-                    </div>
-                    <!-- <div class="grid_box">
-                         <div class="h-230" data-ax5grid="test_item_grid"></div>
-                     </div>-->
-                    <div class="container-fluid">
-                        <p id="selectedItem"></p>
-                        <div id="res-grid" style="height: 230px; max-height: 230px;"></div>
-                           <!--<div class="h-200" data-ax5grid="res-grid" ></div>-->
-                    </div>
-                </section>
-            </div>
+                    </section>
 
+                    <section class="tab-item" id="tab_res" style="border-top-left-radius: 0;">
+                        <div class="section-top">
+                            <div class="button-wrap">
+                                <ul>
+                                    <li>
+                                        <button type="button" class="btn-default" id="btnAddRow"
+                                                style="width: 115px; height: 36px;"><i class="fas fa-plus"></i>추가
+                                        </button>
+                                    </li>
+
+                                    <li>
+                                        <button type="button" class="btn-danger y_write_auth" id="btnDelRow"
+                                                style="width: 115px; height: 36px;"><i class="fas fa-trash"></i>삭제
+                                        </button>
+                                    </li>
+
+                                    <li>
+                                        <button type="button" class="btn-default y_write_auth" id="btnSaveRow"
+                                                style="width: 115px; height: 36px;"><i class="fas fa-save">저장</i>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="container-fluid">
+                            <div id="res-grid"></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
         </div>
-        </section>
     </div>
 </th:block>
 
@@ -266,8 +273,7 @@
                         {binding: 'item_eng_name', header: '영문명', width: 200, align: 'left'},
                         {binding: 'item_res_type', header: '결과값유형', width: 150, align: 'left'},
                         {binding: 'unit_name', header: '단위', width: 150, align: 'center'},
-                        {binding: 'item_round_digit', header: '소수점자리수', width: 150, align: 'right'},
-                        {binding: '', header: '', width: "*", align: 'right'},
+                        {binding: 'item_round_digit', header: '소수점자리수', width: 150, align: 'right'}
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
@@ -342,7 +348,7 @@
                     ]
                 };
 */
-               /* this.grid = new ax5.ui.grid(config);*/
+                /* this.grid = new ax5.ui.grid(config);*/
 
                 this.grid2 = new wijmo.grid.FlexGrid('#res-grid', {
                     selectionMode: wijmo.grid.SelectionMode.Row,
@@ -365,7 +371,7 @@
                             header: '검사항목id',
                             width: 150,
                             align: 'center',
-                            visible:false,
+                            visible: false,
                             /*editor: {type: "number"}*/
                         },
                         {
@@ -389,12 +395,11 @@
                             align: 'center',
                             /*editor: {type: "checkbox", config: {height: 17, trueValue: "Y", falseValue: "N"}}*/
                             dataMap: new wijmo.grid.DataMap([
-                                { key: 'Y', value: 'Y' },   // 체크 표시
-                                { key: 'N', value: 'N' }   // 빈 값
+                                {key: 'Y', value: 'Y'},   // 체크 표시
+                                {key: 'N', value: 'N'}   // 빈 값
                             ], 'key', 'value'),
                             isReadOnly: false,
-                        },
-                        {binding: '', header: '', width: "*", align: 'right'},
+                        }
                     ],
                     itemsSource: this.viewData2, // 데이터를 설정할 배열
                 });
@@ -522,7 +527,7 @@
 
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Alert.alert('','저장되었습니다');
+                        Alert.alert('', '저장되었습니다');
                         _this.searchMainData();
                         /*_this.showDetailItem(res.data.id);*/
                     } else if (!res.success) {
@@ -540,7 +545,7 @@
                 let data = {'id': id};
                 let fnSuccess = function (res) {
                     if (res.success) {
-                        Alert.alert('','삭제되었습니다');
+                        Alert.alert('', '삭제되었습니다');
                         _this.searchMainData();
                     } else {
                         Alert.alert('', res.message);
@@ -605,8 +610,6 @@
             }
 
 
-
-
             // 선택형결과 정보 삭제
             deleteRes() {
                 let _this = this;
@@ -621,7 +624,7 @@
                 let test_item_id = $('#detail_box').find('#id').val();
                 let data = {'id': id};
                 let fnSuccess = function () {
-                    Alert.alert('','삭제되었습니다');
+                    Alert.alert('', '삭제되었습니다');
                     _this.showDetailRes(test_item_id);
                 }
 
@@ -679,7 +682,7 @@
             $('#btnSave').click(function (e) {
                 let data = FormUtil.extractForm($('#testItemForm'));
 
-                if(!data.test_method_id){
+                if (!data.test_method_id) {
                     Alert.alert('', '검사방법을 선택해주세요.');
                     return false;
                 } else if (!data.item_code) {
@@ -688,7 +691,7 @@
                 } else if (!data.item_name) {
                     Alert.alert('', '항목명을 입력해주세요.');
                     return false;
-                }else if (!data.res_type) {
+                } else if (!data.res_type) {
                     Alert.alert('', '결과값 유형을 선택해주세요.');
                     return false;
                 }
@@ -748,7 +751,6 @@
             });
 
 
-
             // 선택형결과 > 저장
             $('#btnSaveRow').click(function (e) {
                 let res_grid = wijmo.Control.getControl('#res-grid');
@@ -773,7 +775,8 @@
                     function () {
                         page.saveRes();
                     },
-                    function () {}
+                    function () {
+                    }
                 );
             });
 
@@ -786,12 +789,12 @@
                 // 선택한 행의 데이터 가져오기 (단일 객체)
                 let selectedItem = res_grid.rows[selectedRow].dataItem;
 
-              /*  if (page.res_grid.getList("selected").length < 1) {
-                    Alert.alert('', '삭제할 그리드를 선택하세요.');
-                    return;
-                }*/
+                /*  if (page.res_grid.getList("selected").length < 1) {
+                      Alert.alert('', '삭제할 그리드를 선택하세요.');
+                      return;
+                  }*/
 
-                if(selectedItem.length === 0){
+                if (selectedItem.length === 0) {
                     Alert.alert('', '삭제할 그리드를 선택하세요.');
                     return;
                 }

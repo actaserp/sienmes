@@ -5,6 +5,7 @@
         .write-table input, select {
             width: 150px;
         }
+
         .write-table select {
             width: 150px;
         }
@@ -25,195 +26,188 @@
                 <li>데이터 수집 설정</li>
             </ul>
         </div>
-        <div class="tab-wrap">
-            <div class="tab-contents">
-                <!-- Section -->
-                <div class="row" style="margin-bottom: 0;">
-                    <section class="wp60" style="margin-right: 10px; border-radius:15px">
-                        <div class="section-top">
-                            <form id="searchForm">
-                                <div class="search-wrap">
 
-                                    <dl>
-                                        <dt>
-                                            <label>
-                                                서버
-                                            </label>
-                                        </dt>
-                                        <dd>
-                                            <div class="srch-box">
-                                                <select class="form-control2" id="cboDASServer" name="cboDASServer" ></select>
-                                            </div>
-                                        </dd>
-                                    </dl>
-                                    <dl>
-                                        <dt>
-                                            <label>
-                                                설비
-                                            </label>
-                                        </dt>
-                                        <dd>
-                                            <div class="srch-box">
-                                                <select class="form-control2" id="cboEquipment" name="cboEquipment" ></select>
-                                            </div>
-                                        </dd>
-                                    </dl>
+        <div style="display: flex; gap: 5px;">
+            <section style="border-radius:15px; flex:3">
+                <div class="section-top">
+                    <form id="searchForm">
+                        <div class="search-wrap">
+                            <dl>
+                                <dt>
+                                    <label>
+                                        서버
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <select class="form-control2" id="cboDASServer" name="cboDASServer"></select>
+                                    </div>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label>
+                                        설비
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <select class="form-control2" id="cboEquipment" name="cboEquipment"></select>
+                                    </div>
+                                </dd>
+                            </dl>
 
-                                    <dl>
-                                        <dt>&nbsp;</dt>
-                                        <dd>
-                                            <li>
-                                                <a class="btn btn-delete" title="검색" id="btnSearch">
-                                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                                    검색
-                                                </a>
-                                            </li>
-                                        </dd>
-                                    </dl>
-                                </div>
-                            </form>
-
-                            <div class="container-fluid">
-                                <div id="dasconfig-grid" style="height: 300px;"></div>
-
-                            </div>
+                            <dl>
+                                <dt>&nbsp;</dt>
+                                <dd>
+                                    <li>
+                                        <a class="btn btn-delete" title="검색" id="btnSearch">
+                                            <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            검색
+                                        </a>
+                                    </li>
+                                </dd>
+                            </dl>
                         </div>
-                    </section>
-                    <section class="wp39" style="margin-right: 0; border-radius:15px">
-
-                        <div class="section-top">
-                            <div class="search-wrap">
-                                <h3>상세 정보</h3>
-                            </div>
-                            <div class="button-wrap">
-                                <ul>
-                                    <li>
-                                        <button type="button" class="btn" id="btnNew" name="btnNew"><i class="fas fa-plus"></i></button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn y_write_auth" id="btnDelete" style="float:none"><i class="fas fa-trash"></i></button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn y_write_auth" id="btnSave" style="float:none"><i class="fas fa-save"></i></button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <form id="configForm">
-                            <input type="hidden" id="id" name="id" />
-                            <div class="table-wrap" id="detail_box">
-                                <table class="write-table">
-                                    <tbody>
-                                    <tr>
-                                        <th>
-                                            <label>
-                                                서버
-                                            </label>
-                                        </th>
-                                        <td>
-                                            <select class="form-control2" id="Server_id" name="Server_id" ></select>
-                                        </td>
-
-                                        <th>
-                                            <label>
-                                                설비
-                                            </label>
-                                        </th>
-                                        <td>
-                                            <select class="form-control2" id="Equipment_id" name="Equipment_id" ></select>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>
-                                            <label>
-                                                설정명
-                                            </label>
-                                        </th>
-                                        <td>
-                                            <input class="form-control2" id="Name" name="Name" />
-                                        </td>
-
-                                        <th>
-                                            <label>
-                                                설정파일명
-                                            </label>
-                                        </th>
-                                        <td>
-                                            <input class="form-control2" id="ConfigFileName" name="ConfigFileName" />
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>
-                                            <label>
-                                                처리모듈명
-                                            </label>
-                                        </th>
-                                        <td>
-                                            <input class="form-control2" id="Handler" name="Handler" />
-                                        </td>
-
-                                        <th>
-                                            <label>
-                                                장치구분
-                                            </label>
-                                        </th>
-                                        <td>
-                                            <select class="form-control2" id="DeviceType" name="DeviceType" >
-                                                <option value="테스트">테스트</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>
-                                            <label>
-                                                TOPIC명
-                                            </label>
-                                        </th>
-                                        <td>
-                                            <input class="form-control2" id="Topic" name="Topic" />
-                                        </td>
-
-                                        <th>
-                                            <label>
-                                                수집 활성화
-                                            </label>
-                                        </th>
-                                        <td>
-                                            <input type="checkbox" id="is_active" name="is_active" value="Y" />
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>
-                                            <label>설명</label>
-                                        </th>
-                                        <td colspan="8">
-                                            <textarea  class="form-control2 " id="Description" name="Description" ></textarea>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <th>
-                                            <label>설정(JSON)</label>
-                                        <td colspan="8">
-                                            <textarea class="form-control2" id="Configuration" name="Configuration" style="height:390px;" ></textarea>
-                                        </td>
-                                        </th>
-                                    </tr>
-
-
-                                    </tbody>
-                                </table>
-                            </div>
-                        </form>
-                    </section>
+                    </form>
                 </div>
-            </div>
+                <div class="container-fluid">
+                    <div id="dasconfig-grid"></div>
+                </div>
+            </section>
+            <section style="border-radius:15px; flex:2;">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <h3>상세 정보</h3>
+                    </div>
+                    <div class="button-wrap">
+                        <ul>
+                            <li>
+                                <button type="button" class="btn" id="btnNew" name="btnNew"><i class="fas fa-plus"></i>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="btn y_write_auth" id="btnDelete" style="float:none"><i
+                                        class="fas fa-trash"></i></button>
+                            </li>
+                            <li>
+                                <button type="button" class="btn y_write_auth" id="btnSave" style="float:none"><i
+                                        class="fas fa-save"></i></button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <form id="configForm">
+                    <input type="hidden" id="id" name="id"/>
+                    <div class="table-wrap" id="detail_box">
+                        <table class="write-table">
+                            <tbody>
+                            <tr>
+                                <th>
+                                    <label>
+                                        서버
+                                    </label>
+                                </th>
+                                <td>
+                                    <select class="form-control2" id="Server_id" name="Server_id"></select>
+                                </td>
+
+                                <th>
+                                    <label>
+                                        설비
+                                    </label>
+                                </th>
+                                <td>
+                                    <select class="form-control2" id="Equipment_id" name="Equipment_id"></select>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <label>
+                                        설정명
+                                    </label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" id="Name" name="Name"/>
+                                </td>
+
+                                <th>
+                                    <label>
+                                        설정파일명
+                                    </label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" id="ConfigFileName" name="ConfigFileName"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <label>
+                                        처리모듈명
+                                    </label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" id="Handler" name="Handler"/>
+                                </td>
+
+                                <th>
+                                    <label>
+                                        장치구분
+                                    </label>
+                                </th>
+                                <td>
+                                    <select class="form-control2" id="DeviceType" name="DeviceType">
+                                        <option value="테스트">테스트</option>
+                                    </select>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <label>
+                                        TOPIC명
+                                    </label>
+                                </th>
+                                <td>
+                                    <input class="form-control2" id="Topic" name="Topic"/>
+                                </td>
+
+                                <th>
+                                    <label>
+                                        수집 활성화
+                                    </label>
+                                </th>
+                                <td>
+                                    <input type="checkbox" id="is_active" name="is_active" value="Y"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <label>설명</label>
+                                </th>
+                                <td colspan="8">
+                                    <textarea class="form-control2 " id="Description" name="Description"></textarea>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <label>설정(JSON)</label>
+                                </th>
+                                <td colspan="8">
+                                    <textarea class="form-control2" id="Configuration" name="Configuration" style="height: 200px;"></textarea>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </section>
         </div>
     </div>
 </th:block>
@@ -241,13 +235,13 @@
                     showMarquee: true,
                     isReadOnly: true,
                     columns: [
-                        { binding: 'server_name', header: '서버', width: 100, align: 'center', isReadOnly: true },
-                        { binding: 'equipment_name', header: '설비', width: 150, align: 'left', isReadOnly: true },
-                        { binding: 'Name', header: '설정명', width: 180, align: 'left', isReadOnly: true },
-                        { binding: 'DeviceType', header: '수집구분', width: 100, align: 'left', isReadOnly: true },
-                        { binding: 'Description', header: '설명', width: 220, align: 'left', isReadOnly: true },
-                        { binding: 'created', header: '생성일', width: 150, align: 'center', isReadOnly: true },
-                        { binding: 'is_active', header: '활성화', width: 100, align: 'center', isReadOnly: true }
+                        {binding: 'server_name', header: '서버', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'equipment_name', header: '설비', width: 150, align: 'left', isReadOnly: true},
+                        {binding: 'Name', header: '설정명', width: 180, align: 'left', isReadOnly: true},
+                        {binding: 'DeviceType', header: '수집구분', width: 100, align: 'left', isReadOnly: true},
+                        {binding: 'Description', header: '설명', width: 220, align: 'left', isReadOnly: true},
+                        {binding: 'created', header: '생성일', width: 150, align: 'center', isReadOnly: true},
+                        {binding: 'is_active', header: '활성화', width: 100, align: 'center', isReadOnly: true}
                         /*{
                             binding: 'is_active',
                             header: '활성화',
@@ -334,9 +328,9 @@
 
             showDetail(idx) {
                 let _this = this;
-                let param = { 'id': idx };
+                let param = {'id': idx};
                 let resp = AjaxUtil.getSyncData(_this.baseUrl + '/detail', param);
-                let result= resp.data;
+                let result = resp.data;
 
                 if (result != null) {
                     //FormUtil.BindDataForm(result, $('#configForm'));
@@ -350,7 +344,7 @@
                     $('#Topic').val(result.Topic)
 
 
-                    if (result.is_active=='Y') {
+                    if (result.is_active == 'Y') {
                         $('#is_active').prop('checked', 'true');
                     } else {
                         $('#is_active').removeProp('checked');
@@ -360,7 +354,8 @@
                     if (result.Configuration) {
                         let configObj = JSON.parse(result.Configuration);
                         j = _this.jsonValuePretty(configObj);
-                    };
+                    }
+                    ;
                     $('#Configuration').text(j);
                     $('#Description').val(result.Description);
                 }
@@ -379,7 +374,7 @@
                 };
 
                 let resp = AjaxUtil.getSyncData(_this.baseUrl + '/read', data);
-                let result= resp.data;
+                let result = resp.data;
 
                 if (result != null) {
                     _this.viewData.sourceCollection = result;
@@ -419,7 +414,7 @@
             deleteData() {
                 let _this = this;
                 let id = $('#configForm').find('#id').val()
-                let data = { id: id };
+                let data = {id: id};
                 let fnSuccess = function (res) {
                     if (res.success) {
                         Notify.success('삭제되었습니다'); // Notification
@@ -488,16 +483,22 @@
             $('#btnSave').click(function (e) {
                 Alert.confirm('',
                     '저장하시겠습니까?',
-                    function () { page.saveData() },
-                    function () { }
+                    function () {
+                        page.saveData()
+                    },
+                    function () {
+                    }
                 );
             });
 
             $('#btnDelete').click(function (e) {
                 Alert.confirm('',
                     '삭제하시겠습니까?',
-                    function () { page.deleteData() },
-                    function () { }
+                    function () {
+                        page.deleteData()
+                    },
+                    function () {
+                    }
                 );
             });
 
@@ -505,7 +506,8 @@
                 if (event.keyCode === 9) {
                     var v = this.value, s = this.selectionStart, e = this.selectionEnd;
                     this.value = v.substring(0, s) + '\t' + v.substring(e);
-                    this.selectionStart = this.selectionEnd = s + 1; return false;
+                    this.selectionStart = this.selectionEnd = s + 1;
+                    return false;
                 }
             });
 

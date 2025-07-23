@@ -4,11 +4,13 @@
         .chart_border {
             border: 1px solid blue;
         }
-        .select2{
+
+        .select2 {
             margin-top: 13px;
             height: 35px;
         }
-        .select2-selection{
+
+        .select2-selection {
             border: 1px solid rgb(208, 216, 221);
         }
     </style>
@@ -32,11 +34,10 @@
                 <li>데이터 통계</li>
             </ul>
         </div>
-        <form id="searchForm">
-            <section class="section">
+        <section class="section">
+            <form id="searchForm">
                 <div class="section-top">
                     <div class="search-wrap">
-
                         <dl>
                             <dt>
                                 <label>
@@ -45,9 +46,9 @@
                             </dt>
                             <dd>
                                 <div class="srch-box">
-                                    <input type="date" id="srchStartDt" style="width: 100px" name="srchStartDt"  />
+                                    <input type="date" id="srchStartDt" style="width: 100px" name="srchStartDt"/>
                                     <span class="slow_sign">~</span>
-                                    <input type="date" id="srchEndDt" style="width: 100px" name="srchEndDt" />
+                                    <input type="date" id="srchEndDt" style="width: 100px" name="srchEndDt"/>
                                 </div>
                             </dd>
                         </dl>
@@ -89,21 +90,18 @@
                         </dl>
 
                     </div>
-                    <div class="button-wrap">
-
-                    </div>
                 </div>
-                <div class="container-fluid">
-                    <div id="theGrid" style="height: 300px;"></div>
-                </div>
-            </section>
-        </form>
+            </form>
+            <div class="container-fluid">
+                <div id="theGrid"></div>
+            </div>
+        </section>
 
     </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
-    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
     <script type="text/javascript">
         class tagDataStatistics {
             constructor() {
@@ -122,13 +120,13 @@
                     showMarquee: true,
                     isReadOnly: true,
                     columns: [
-                        { binding: 'tag_code', header: '태그', width: '*', align: 'left' },
-                        { binding: 'tag_name', header: '태그명', width: '*', align: 'left' },
-                        { binding: 'count_value',header: '데이터수', width: '*', align: 'right' },
-                        { binding: 'avg_value', header: '평균', width: '*', align: 'right' },
-                        { binding: 'min_value', header: '최소', width: '*', align: 'right' },
-                        { binding: 'max_value', header: '최대', width: '*', align: 'right' },
-                        { binding: 'std_value', header: '표준편차', width: '*', align: 'right' },
+                        {binding: 'tag_code', header: '태그', width: '*', align: 'left'},
+                        {binding: 'tag_name', header: '태그명', width: '*', align: 'left'},
+                        {binding: 'count_value', header: '데이터수', width: '*', align: 'right'},
+                        {binding: 'avg_value', header: '평균', width: '*', align: 'right'},
+                        {binding: 'min_value', header: '최소', width: '*', align: 'right'},
+                        {binding: 'max_value', header: '최대', width: '*', align: 'right'},
+                        {binding: 'std_value', header: '표준편차', width: '*', align: 'right'},
                     ],
                     itemsSource: this.viewData,
                 });
@@ -145,12 +143,12 @@
                 let tag_code = $('#tag').val();
                 let tag_group_pk = $('#tagGroup').val();
 
-                let url = this.url+'/read';
+                let url = this.url + '/read';
                 let data = {
-                    start_date : srchStartDt,
-                    end_date : srchEndDt,
-                    tag_code : tag_code,
-                    tag_group_pk : tag_group_pk,
+                    start_date: srchStartDt,
+                    end_date: srchEndDt,
+                    tag_code: tag_code,
+                    tag_group_pk: tag_group_pk,
                 };
 
                 AjaxUtil.getAsyncData(url, data, function (result) {
@@ -172,7 +170,9 @@
             $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
             $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
             // 검색
-            $('#btnSearch').click(function (e) { page.searchMainData(); });
+            $('#btnSearch').click(function (e) {
+                page.searchMainData();
+            });
 
             page.searchMainData();
         });

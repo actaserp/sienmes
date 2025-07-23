@@ -112,12 +112,18 @@
                 if (panel.cellType === wijmo.grid.CellType.Cell) {
                     let colName = panel.columns[col].binding;
 
-                    if (['mat_type_name', 'mat_grp_name', 'mat_code', 'mat_name', 'unit_name', 'standard1'].includes(colName)) {
+                    if (['mat_type_name', 'mat_grp_name', 'mat_code', 'unit_name', 'standard1'].includes(colName)) {
                         cell.style.textAlign = 'center';          // 수평 가운데
                         cell.style.verticalAlign = 'middle';      // 수직 가운데
                         cell.style.display = 'flex';              // flex로 정렬
                         cell.style.alignItems = 'center';         // 수직 정렬
                         cell.style.justifyContent = 'center';     // 수평 정렬
+                    } else if (['mat_name']){
+                        cell.style.textAlign = 'left';
+                        cell.style.verticalAlign = 'middle';      // 수직 가운데
+                        cell.style.display = 'flex';              // flex로 정렬
+                        cell.style.alignItems = 'center';         // 수직 정렬
+                        cell.style.justifyContent = 'left';     // 수평 정렬
                     }
                 }
             };

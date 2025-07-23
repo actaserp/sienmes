@@ -219,7 +219,7 @@
         <div class="page-title-wrap">
             <div class="left">
                 <h2>생산 실적 입력(LOT)</h2>
-<!--                <small2>라우팅이 없는 품목에 대한 실적 입력. 로트투입 가능</small2>-->
+                <!--                <small2>라우팅이 없는 품목에 대한 실적 입력. 로트투입 가능</small2>-->
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
@@ -230,251 +230,264 @@
                 <li>생산 실적 입력</li>
             </ul>
         </div>
+        <div style="display: flex; gap: 5px;">
+            <section class="section" style="flex: 1;">
+                <div class="section-top">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                생산일<span class="eq">*</span>
+                            </dt>
+                            <dd>
+                                <ul class="date-box">
+                                    <li>
+                                        <input type="date" id="date_from" name="date_from">
+                                        <label for="date_from" class="hide">시작일</label>
+                                    </li>
+                                    <li>
+                                        <input type="date" id="date_to" name="date_to">
+                                        <label for="date_to" class="hide">종료일</label>
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
 
-        <section class="section">
-
-            <div class="section-top">
-                <div class="search-wrap">
-                    <dl>
-                        <dt>
-                            생산일<span class="eq">*</span>
-                        </dt>
-                        <dd>
-                            <ul class="date-box">
-                                <li>
-                                    <input type="date" id="date_from" name="date_from">
-                                    <label for="date_from" class="hide">시작일</label>
-                                </li>
-                                <li>
-                                    <input type="date" id="date_to" name="date_to">
-                                    <label for="date_to" class="hide">종료일</label>
-                                </li>
-                            </ul>
-                        </dd>
-                    </dl>
-
-                    <dl>
-                        <dt>
-                            <label for="cboMaterialType">
-                                품목 구분<span class="eq"></span>
-                            </label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <select id="cboMaterialType" name="cboMaterialType">
-                                </select>
-                            </div>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>
-                            <label for="cboShift">
-                                근무조<span class="eq"></span>
-                            </label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <select id="cboShift" name="cboShift">
-                                </select>
-                            </div>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>
-                            <label for="cboWorkCenter">
-                                워크센터<span class="eq"></span>
-                            </label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <select id="cboWorkCenter" name="cboWorkCenter">
-                                </select>
-                            </div>
-                        </dd>
-                    </dl>
-
-                    <dl>
-                        <dt>
-                            <label for="chxCompYn">
-
-                            </label>
-                        </dt>
-                        <dd>
-                            <div class="srch-box">
-                                <input type="checkbox" id="chxCompYn" name="chxCompYn" checked/>
-                                완료 포함
-                            </div>
-                        </dd>
-                    </dl>
-
-                    <dl>
-                        <dt>&nbsp;</dt>
-                        <dd>
-                            <li>
-                                <a class="btn btn-search" title="검색" id="btnMainSearch">
-                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    검색
-                                </a>
-                            </li>
-                        </dd>
-                    </dl>
-                </div>
-            </div>
-            <div class="grid_box" id="prodResultList">
-                <div class="search-wrap">
-
-                    <dl>
-                        <dt>
-                            작지번호
-                        </dt>
-                        <dd>
-                            <ul class="date-box">
-                                <li>
-                                    <input type="text" id="selected_order_num" name="selected_order_num" readonly>
-                                    <label for="selected_order_num" class="hide">생산일</label>
-                                </li>
-                            </ul>
-                        </dd>
-                    </dl>
-                </div>
-                <div id="prod-result-grid" style="height: 300px;"></div>
-            </div>
-        </section>
-
-        <div class="tab-wrap">
-
-            <ul class="tab-links">
-                <li><a href="#tabBasic" name="tabBasic">기본 정보</a></li>
-                <li><a href="#tabChasu" name="tabChasu">차수별 생산</a></li>
-                <li><a href="#tabDefect" name="tabDefect">부적합 정보</a></li>
-                <li><a href="#tabConsumed" name="tabConsumed">투입 내역</a></li>
-                <li hidden><a href="#tabBarcode" name="tabBarcode">바코드</a></li>
-            </ul>
-            <div>
-                <section class="tab-item" id="tabBasic" style="border-top-left-radius: 0;">
-                    <div class="section-top">
-                        <div class="button-wrap">
-                            <ul>
-                                <li>
-                                    <button class="btn" title="시작" disabled id="btnWorkStart">
-                                        시작
-                                    </button>
-                                </li>
-                                <li>
-                                    <button class="btn" title="중지" disabled id="btnWorkStop">
-                                        일시중지
-                                    </button>
-                                </li>
-                                <li>
-                                    <button class="btn" title="저장" disabled id="btnSave">
-                                        <i class="fas fa-save"></i>
-                                    </button>
-                                </li>
-                                <li>
-                                    <button class="btn" title="삭제" disabled id="btnDel">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </li>
-                                <li>
-                                    <button class="btn" title="완료" disabled id="btnWorkFinish">
-                                        완료
-                                    </button>
-                                </li>
-                                <li>
-                                    <button class="btn" title="완료 취소" disabled id="btnFinishCancel">
-                                        완료 취소
-                                    </button>
-                                </li>
-                                <li>
-                                    <button class="btn" title="제품검사" disabled id="btnTest">
-                                        제품검사
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="table-wrap">
-                            <form id="basicForm">
-                                <input type="hidden" id="id" name="id"/>
-                                <input type="hidden" id="mp_id" name="mp_id"/>
-                                <input type="hidden" id="mat_pk" name="mat_pk"/>
-                                <input type="hidden" id="state" name="state"/>
-                                <table class="work-table">
-                                    <caption>작업 지시 테이블</caption>
-                                    <colgroup>
-                                        <col style="width: 10%;">
-                                        <col style="width: 15%;">
-                                        <col style="width: 10%;">
-                                        <col style="width: 15%;">
-                                        <col style="width: 10%;">
-                                        <col style="width: 15%;">
-                                        <col style="width: 10%;">
-                                        <col style="width: 15%;">
-                                    </colgroup>
-                                    <tbody>
-                                    <tr>
-                                        <th><label for="order_num">작지번호</label></th>
-                                        <td><input type="text" id="order_num" name="order_num" readonly/></td>
-                                        <th><label for="mat_code">제품코드</label></th>
-                                        <td><input type="text" id="mat_code" name="mat_code" readonly/></td>
-                                        <th><label for="mat_name">제품</label></th>
-                                        <td><input type="text" id="mat_name" name="mat_name" readonly/></td>
-                                        <th><label for="unit">단위</label></th>
-                                        <td><input type="text" id="unit" name="unit" readonly/></td>
-                                    </tr>
-                                    <tr>
-                                        <th><label for="job_state">상태</label></th>
-                                        <td><input type="text" id="job_state" name="job_state" readonly/></td>
-                                        <th><label for="workcenter_id">워크센터</label></th>
-                                        <td>
-                                            <input id="workcenter_id" name="workcenter_id" readonly type="hidden"/>
-                                            <input id="workcenter_name" name="workcenter_name" readonly
-                                                   style="width: 160px"/>
-                                        </td>
-                                        <th><label for="equipment_id">설비</label></th>
-                                        <td><select id="equipment_id" name="equipment_id" disabled></select></td>
-                                        <th><label for="shift_code">근무조</label></th>
-                                        <td><select id="shift_code" name="shift_code" disabled></select></td>
-                                    </tr>
-                                    <tr>
-                                        <th><label for="prod_date">생산시간</label></th>
-                                        <td colspan="7">
-                                            <div class="input-group" id="prod_datepicker">
-                                                <input type="date" id="prod_date" name="prod_date" style="background-color: #EDEFF5;" readonly/>
-                                                <input type="time" id="start_time" name="start_time" readonly/>
-                                                <span class="slow_sign">~</span>
-                                                <input type="date" id="end_date" name="end_date" style="background-color: #EDEFF5;" readonly/>
-                                                <input type="time" id="end_time" name="end_time" readonly/>
-                                            </div>
-
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th><label for="order_qty">지시량</label></th>
-                                        <td><input type="number" id="order_qty" name="order_qty"
-                                                   class="background-order" readonly/></td>
-                                        <th><label for="good_qty">양품량</label></th>
-                                        <td><input type="number" id="good_qty" name="good_qty" class="background-blue"
-                                                   readonly disabled/></td>
-                                        <th><label for="defect_qty">부적합량</label></th>
-                                        <td colspan="3"><input type="number" id="defect_qty" name="defect_qty"
-                                                               class="background-defect" value="0" readonly/></td>
-                                    </tr>
-                                    <tr>
-                                        <th><label for="description">비고</label></th>
-                                        <td colspan="7"><textarea id="description" name="description"
-                                                                  disabled></textarea></td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </form>
-                        </div>
-
+                        <dl>
+                            <dt>
+                                <label for="cboMaterialType">
+                                    품목 구분<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <select id="cboMaterialType" name="cboMaterialType">
+                                    </select>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label for="cboShift">
+                                    근무조<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <select id="cboShift" name="cboShift">
+                                    </select>
+                                </div>
+                            </dd>
+                        </dl>
                     </div>
-                </section>
-                <section class="tab-item" id="tabChasu" style="border-top-left-radius: 0;">
-                    <div class="tab_con_box ">
+                </div>
+                <div class="section-top" id="prodResultList">
+                    <div class="search-wrap">
+                        <dl>
+                            <dt>
+                                <label for="cboWorkCenter">
+                                    워크센터<span class="eq"></span>
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <select id="cboWorkCenter" name="cboWorkCenter">
+                                    </select>
+                                </div>
+                            </dd>
+                        </dl>
+
+                        <dl>
+                            <dt>
+                                <label for="chxCompYn">
+
+                                </label>
+                            </dt>
+                            <dd>
+                                <div class="srch-box">
+                                    <input type="checkbox" id="chxCompYn" name="chxCompYn" checked/>
+                                    완료 포함
+                                </div>
+                            </dd>
+                        </dl>
+
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <li>
+                                    <a class="btn btn-search" title="검색" id="btnMainSearch">
+                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        검색
+                                    </a>
+                                </li>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                선택한 작지번호
+                            </dt>
+                            <dd>
+                                <ul class="date-box">
+                                    <li>
+                                        <input type="text" id="selected_order_num" name="selected_order_num" readonly>
+                                        <label for="selected_order_num" class="hide">생산일</label>
+                                    </li>
+                                </ul>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="container-fluid">
+                    <div id="prod-result-grid"></div>
+                </div>
+            </section>
+
+            <div class="tab-wrap" style="flex: 1; min-width: 0;">
+
+                <ul class="tab-links">
+                    <li><a href="#tabBasic" name="tabBasic">기본 정보</a></li>
+                    <li><a href="#tabChasu" name="tabChasu">차수별 생산</a></li>
+                    <li><a href="#tabDefect" name="tabDefect">부적합 정보</a></li>
+                    <li><a href="#tabConsumed" name="tabConsumed">투입 내역</a></li>
+                    <li hidden><a href="#tabBarcode" name="tabBarcode">바코드</a></li>
+                </ul>
+                <div>
+                    <section class="tab-item" id="tabBasic" style="border-top-left-radius: 0;">
+                        <div class="section-top">
+                            <div class="button-wrap">
+                                <ul>
+                                    <li>
+                                        <button class="btn" title="시작" disabled id="btnWorkStart">
+                                            시작
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="btn" title="중지" disabled id="btnWorkStop">
+                                            일시중지
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="btn" title="저장" disabled id="btnSave">
+                                            <i class="fas fa-save"></i>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="btn" title="삭제" disabled id="btnDel">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="btn" title="완료" disabled id="btnWorkFinish">
+                                            완료
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="btn" title="완료 취소" disabled id="btnFinishCancel">
+                                            완료 취소
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="btn" title="제품검사" disabled id="btnTest">
+                                            제품검사
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="table-wrap">
+                                <form id="basicForm">
+                                    <input type="hidden" id="id" name="id"/>
+                                    <input type="hidden" id="mp_id" name="mp_id"/>
+                                    <input type="hidden" id="mat_pk" name="mat_pk"/>
+                                    <input type="hidden" id="state" name="state"/>
+                                    <table class="work-table">
+                                        <caption>작업 지시 테이블</caption>
+                                        <colgroup>
+                                            <col style="width: 20%;">
+                                            <col style="width: 30%;">
+                                            <col style="width: 20%;">
+                                            <col style="width: 30%;">
+                                        </colgroup>
+                                        <tbody>
+                                        <tr>
+                                            <th><label for="order_num">작지번호</label></th>
+                                            <td><input type="text" id="order_num" name="order_num" readonly/></td>
+                                            <th><label for="mat_code">제품코드</label></th>
+                                            <td><input type="text" id="mat_code" name="mat_code" readonly/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="mat_name">제품</label></th>
+                                            <td><input type="text" id="mat_name" name="mat_name" readonly/></td>
+                                            <th><label for="unit">단위</label></th>
+                                            <td><input type="text" id="unit" name="unit" readonly/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="job_state">상태</label></th>
+                                            <td><input type="text" id="job_state" name="job_state" readonly/></td>
+                                            <th><label for="workcenter_id">워크센터</label></th>
+                                            <td>
+                                                <input id="workcenter_id" name="workcenter_id" readonly type="hidden"/>
+                                                <input id="workcenter_name" name="workcenter_name" readonly
+                                                       style="width: 160px"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="equipment_id">설비</label></th>
+                                            <td><select id="equipment_id" name="equipment_id" disabled></select></td>
+                                            <th><label for="shift_code">근무조</label></th>
+                                            <td><select id="shift_code" name="shift_code" disabled></select></td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="prod_date">생산 시작시간</label></th>
+                                            <td colspan="3">
+                                                <div class="input-group" id="prod_datepicker">
+                                                    <input type="date" id="prod_date" name="prod_date"
+                                                           style="background-color: #EDEFF5;margin-right: 5px;"
+                                                           readonly/>
+                                                    <input type="time" id="start_time" name="start_time" readonly/>
+                                                </div>
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="prod_date">생산 종료시간</label></th>
+                                            <td colspan="3">
+                                                <div class="input-group" id="prod_datepicker1">
+                                                    <input type="date" id="end_date" name="end_date"
+                                                           style="background-color: #EDEFF5; margin-right: 5px;"
+                                                           readonly/>
+                                                    <input type="time" id="end_time" name="end_time" readonly/>
+                                                </div>
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="order_qty">지시량</label></th>
+                                            <td colspan="3"><input type="number" id="order_qty" name="order_qty"
+                                                                   class="background-order" readonly/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="good_qty">양품량</label></th>
+                                            <td><input type="number" id="good_qty" name="good_qty"
+                                                       class="background-blue"
+                                                       readonly disabled/></td>
+                                            <th><label for="defect_qty">부적합량</label></th>
+                                            <td><input type="number" id="defect_qty" name="defect_qty"
+                                                       class="background-defect" value="0" readonly/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><label for="description">비고</label></th>
+                                            <td colspan="3"><textarea id="description" name="description"
+                                                                      disabled></textarea></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </form>
+                            </div>
+
+                        </div>
+                    </section>
+                    <section class="tab-item" id="tabChasu" style="border-top-left-radius: 0;">
                         <div class="grid_box">
                             <div class="button-wrap">
                                 <ul>
@@ -503,29 +516,30 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div id="chasu-grid" style="height: 220px;"></div>
+                            <div class="container-fluid">
+                                <div id="chasu-grid"></div>
+                            </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
 
-                <section class="tab-item" id="tabDefect" style="border-top-left-radius: 0;">
-                    <div class="tab_con_box">
+                    <section class="tab-item" id="tabDefect" style="border-top-left-radius: 0;">
                         <div class="grid_box">
                             <div class="button-wrap">
                                 <ul>
                                     <li>
-                                        <button type="button" class="btn" id="btnDefectSave" title="부적합내역 저장" disabled>
+                                        <button type="button" class="btn" id="btnDefectSave" title="부적합내역 저장"
+                                                disabled>
                                             <i
                                                     class="fas fa-save"></i></button>
                                     </li>
                                 </ul>
                             </div>
-                            <div id="defect-grid" style="height: 220px;"></div>
+                            <div class="container-fluid">
+                                <div id="defect-grid" style="height: 220px;"></div>
+                            </div>
                         </div>
-                    </div>
-                </section>
-                <section class="tab-item" id="tabConsumed" style="border-top-left-radius: 0;">
-                    <div class="tab_con_box">
+                    </section>
+                    <section class="tab-item" id="tabConsumed" style="border-top-left-radius: 0;">
                         <div>
                             <label class="switch">
                                 <input type="checkbox" id="btnToggle"><span class="slider round"></span>
@@ -558,52 +572,54 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div id="input-lot-grid" style="height: 220px;"></div>
+                            <div class="container-fluid">
+                                <div id="input-lot-grid" style="height: 20vh;"></div>
+                            </div>
                         </div>
-
                         <div class="grid_box">
                             <div class="title_box">
                                 투입 내역
                             </div>
-                            <div id="consumed-grid" style="height: 200px;"></div>
+                            <div class="container-fluid">
+                                <div id="consumed-grid" style="height: 20vh;"></div>
+                            </div>
                         </div>
-                    </div>
-                </section>
-                <section class="tab-item" id="tabBarcode">
+                    </section>
+                    <section class="tab-item" id="tabBarcode">
 
-                    <div class="table_box sub">
-                        <div class="row">
+                        <div class="table_box sub">
+                            <div class="row">
 
-                            <div class="col-6">
-                                <div class="title_box">
-                                    <div class="left_align">
-                                        작업지시번호
-                                        <button type="button" class="btn-cancel" id="btnPrintWorkOrderBarcode"
-                                                data-labelCd="프린트">프린트
-                                        </button>
+                                <div class="col-6">
+                                    <div class="title_box">
+                                        <div class="left_align">
+                                            작업지시번호
+                                            <button type="button" class="btn-cancel" id="btnPrintWorkOrderBarcode"
+                                                    data-labelCd="프린트">프린트
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-12" id="workOrderContainerDiv"></div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="title_box">
+                                        <div class="left_align">
+                                            Lot number
+                                            <button type="button" class="btn-cancel" id="btnPrintLotNumberBarcode"
+                                                    data-labelCd="프린트">프린트
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-12" id="LotNumberContainerDiv">
                                     </div>
                                 </div>
-                                <div class="col-12" id="workOrderContainerDiv"></div>
                             </div>
-
-                            <div class="col-6">
-                                <div class="title_box">
-                                    <div class="left_align">
-                                        Lot number
-                                        <button type="button" class="btn-cancel" id="btnPrintLotNumberBarcode"
-                                                data-labelCd="프린트">프린트
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-12" id="LotNumberContainerDiv">
-                                </div>
-                            </div>
-
                         </div>
-                    </div>
-                </section>
+                    </section>
+                </div>
+
             </div>
-
         </div>
     </div>
 
@@ -966,18 +982,18 @@
                     isReadOnly: true,
                     showMarquee: true,
                     columns: [
-                        {binding: 'order_num', header: '작지번호', width: 150, align: 'center'},
-                        {binding: 'prod_date', header: '생산일', width: 120, align: 'center'},
-                        {binding: 'mat_type', header: '품목구분', width: 100, align: 'center'},
-                        {binding: 'workcenter', header: '워크센터', width: 100, align: 'left'},
-                        {binding: 'work_idx', header: '작업순서', width: 100, align: 'center'},
-                        {binding: 'job_state', header: '상태', width: 100, align: 'center'},
-                        {binding: 'mat_code', header: '품목코드', width: 100, align: 'left'},
+                        {binding: 'order_num', header: '작지번호', width: 130, align: 'center'},
+                        {binding: 'prod_date', header: '생산일', width: 100, align: 'center'},
+                        {binding: 'mat_code', header: '품목코드', width: 90, align: 'center'},
                         {binding: 'mat_name', header: '품목', width: 200, align: 'left'},
+                        {binding: 'order_qty', header: '지시량', width: 80, align: 'right'},
+                        {binding: 'good_qty', header: '양품량', width: 80, align: 'right'},
+                        {binding: 'defect_qty', header: '부적합량', width: 80, align: 'right'},
+                        {binding: 'job_state', header: '상태', width: 100, align: 'center'},
+                        {binding: 'mat_type', header: '품목구분', width: 100, align: 'center'},
                         {binding: 'unit', header: '단위', width: 80, align: 'center'},
-                        {binding: 'order_qty', header: '지시량', width: 100, align: 'right'},
-                        {binding: 'good_qty', header: '양품량', width: 100, align: 'right'},
-                        {binding: 'defect_qty', header: '부적합량', width: 100, align: 'right'},
+                        {binding: 'workcenter', header: '워크센터', width: 100, align: 'center'},
+                        {binding: 'work_idx', header: '작업순서', width: 100, align: 'center'},
                         {binding: 'description', header: '비고', width: 190, align: 'left'}
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]),
@@ -985,6 +1001,10 @@
                         if (panel.cellType === wijmo.grid.CellType.Cell) {
                             let column = panel.columns[col];
                             let item = panel.rows[row].dataItem;
+
+                            cell.style.backgroundColor = '';
+                            cell.style.color = '';
+                            cell.style.borderBottom = '';
 
                             // 상태 값에 따라 스타일 적용
                             if (column.binding === 'job_state') {
@@ -1200,7 +1220,7 @@
                         {
                             binding: 'defect_remark',
                             header: '비고',
-                            width: 450,
+                            width: '*',
                             align: 'center',
                             isReadOnly: false, // 편집 가능
                         }
@@ -1604,7 +1624,7 @@
                         $('#job_state').addClass('working-status');
                     } else if (result.state === 'finished') {
                         $('#job_state').addClass('finished-status');
-                    } else if (result.state === 'stopped'){
+                    } else if (result.state === 'stopped') {
                         $('#job_state').addClass('stopped-status');
                     }
 
@@ -1796,7 +1816,7 @@
                         setTimeout(() => {
                             _this.grid.select(previousIndex, 0);
                         }, 100);
-                    } else{
+                    } else {
                         Alert.alert('작업 시작 실패', res.message || '작업을 시작할 수 없습니다.');
                     }
                 }

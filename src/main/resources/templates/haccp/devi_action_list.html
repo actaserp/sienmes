@@ -22,78 +22,76 @@
                 <li>이상발생 내역</li>
             </ul>
         </div>
-        <form id="searchForm" autocomplete="off">
-            <section class="section">
-                <div class="section-top">
-                    <div class="search-wrap">
-                        <dl>
-                            <dt>
-                                <label>
-                                    점검일
-                                </label>
-                            </dt>
-                            <dd>
-                                <ul class="date-box">
-                                    <li>
-                                        <input type="date" id="srchStartDt" name="srchStartDt">
-                                        <label for="srchStartDt" class="hide">시작일</label>
-                                    </li>
-                                    <li>
-                                        <input type="date" id="srchEndDt" name="srchEndDt">
-                                        <label for="srchEndDt" class="hide">종료일</label>
-                                    </li>
-                                </ul>
-                            </dd>
-                        </dl>
-
-
-
-                        <dl>
-                            <dt>
-                                <label>
-                                    일지명<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <div class="srch-box">
-                                    <input type="text" class="form-control2" id="keyword" name="keyword"/>
-                                </div>
-                            </dd>
-                        </dl>
-
-                        <dl>
-                            <dt>&nbsp;</dt>
-                            <dd>
+        <section class="section">
+            <div class="section-top">
+                <div class="search-wrap">
+                    <dl>
+                        <dt>
+                            <label>
+                                점검일
+                            </label>
+                        </dt>
+                        <dd>
+                            <ul class="date-box">
                                 <li>
-                                    <a class="btn btn-delete" title="검색" id="btnSearch">
-                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                        검색
-                                    </a>
+                                    <input type="date" id="srchStartDt" name="srchStartDt">
+                                    <label for="srchStartDt" class="hide">시작일</label>
                                 </li>
-                            </dd>
-                        </dl>
+                                <li>
+                                    <input type="date" id="srchEndDt" name="srchEndDt">
+                                    <label for="srchEndDt" class="hide">종료일</label>
+                                </li>
+                            </ul>
+                        </dd>
+                    </dl>
 
-                    </div>
+
+                    <dl>
+                        <dt>
+                            <label>
+                                일지명<span class="eq"></span>
+                            </label>
+                        </dt>
+                        <dd>
+                            <div class="srch-box">
+                                <input type="text" class="form-control2" id="keyword" name="keyword"/>
+                            </div>
+                        </dd>
+                    </dl>
+
+                    <dl>
+                        <dt>&nbsp;</dt>
+                        <dd>
+                            <li>
+                                <a class="btn btn-delete" title="검색" id="btnSearch">
+                                    <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                    검색
+                                </a>
+                            </li>
+                        </dd>
+                    </dl>
+
                 </div>
-                <div class="container-fluid">
-                    <div id="theGrid" style="height: 700px;"></div>
+            </div>
+            <div class="container-fluid">
+                <div id="theGrid" ></div>
 
-                </div>
+            </div>
 
-                <!--        <div class="grid_box">-->
+            <!--        <div class="grid_box">-->
 
-                <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
-                <!--        </div>-->
-            </section>
-        </form>
+            <!--            <div class="h-640" data-ax5grid="sujuGrid" ></div>-->
+            <!--        </div>-->
+        </section>
+
 
     </div>
 
 </th:block>
 
 <th:block layout:fragment="scripts">
-    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
     <script type="text/javascript">
         class DeviActionPage {
             constructor() {
@@ -117,12 +115,12 @@
                     isReadOnly: true,
                     columns: [
 
-                        {binding: 'happen_date', header: '점검일', width: '*', align: 'left' },
-                        {binding: 'happen_place', header: '일지명', width: '*', align: 'left' },
-                        {binding: 'abnormal_detail', header: '이상발생내역', width: '*', align: 'left' },
-                        {binding: 'action_detail', header: '조치내역 및 결과', width: '*', align: 'left' },
-                        {binding: 'creater_name', header: '조치자', width: '*', align: 'left' },
-                        {binding: 'action_name', header: '작성자', width: '*', align: 'left' },
+                        {binding: 'happen_date', header: '점검일', width: '*', align: 'left'},
+                        {binding: 'happen_place', header: '일지명', width: '*', align: 'left'},
+                        {binding: 'abnormal_detail', header: '이상발생내역', width: '*', align: 'left'},
+                        {binding: 'action_detail', header: '조치내역 및 결과', width: '*', align: 'left'},
+                        {binding: 'creater_name', header: '조치자', width: '*', align: 'left'},
+                        {binding: 'action_name', header: '작성자', width: '*', align: 'left'},
 
                     ],
                     itemsSource: this.viewData,
@@ -142,7 +140,7 @@
                 let _this = this;
 
                 let param = {
-                    'keyword':  $('#keyword').val(),
+                    'keyword': $('#keyword').val(),
                     'date_from': $('#srchStartDt').val(),
                     'date_to': $('#srchEndDt').val()
                 };

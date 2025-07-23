@@ -14,146 +14,143 @@
                 <li>출하처리B(LOT)</li>
             </ul>
         </div>
-        <form id="searchForm" autocomplete="off">
-            <section class="section">
-                <div class="section-top">
-                    <div class="search-wrap">
+        <div style="display: flex; gap: 5px;">
+            <section class="section" style="flex: 1;">
+                <form id="searchForm" autocomplete="off">
+                    <div class="section-top">
+                        <div class="search-wrap">
+                            <dl>
+                                <dt>
+                                    <label>
+                                        출하일<span class="eq"></span>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <input type="date" id="srchStartDt" name="srchStartDt"/>
+                                        <span class="slow_sign">~</span>
+                                        <input type="date" id="srchEndDt" name="srchEndDt"/>
+                                    </div>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label>
+                                        업체
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <select class="form-control2" id="cboCompany" name="cboCompany">
+                                    </select>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label>
+                                        품목그룹
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <select class="" id="cboMatGroup" name="cboMatGroup">
+                                    </select>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="search-wrap">
+                            <dl>
+                                <dt>
+                                    <label>
+                                        품목<span class="eq"></span>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <select class="" id="cboMaterial" name="cboMaterial">
+                                    </select>
+                                </dd>
+                            </dl>
 
-
-                        <dl>
-                            <dt>
-                                <label>
-                                    출하일<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <div class="srch-box">
-                                    <input type="date"id="srchStartDt" name="srchStartDt"  />
-                                    <span class="slow_sign">~</span>
-                                    <input type="date" id="srchEndDt" name="srchEndDt" />
-                                </div>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>
-                                <label>
-                                    업체
-                                </label>
-                            </dt>
-                            <dd>
-                                <select class="form-control2" id="cboCompany" name="cboCompany" >
-                                </select>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>
-                                <label>
-                                    품목그룹
-                                </label>
-                            </dt>
-                            <dd>
-                                <select class="" id="cboMatGroup" name="cboMatGroup" >
-                                </select>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>
-                                <label>
-                                    품목<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <select class="" id="cboMaterial" name="cboMaterial" >
-                                </select>
-                            </dd>
-                        </dl>
-
-                        <dl>
-                            <dt>
-                                <label>
-                                    품목명<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <input type="text" class="" id="keyword" name="keyword" />
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>
-                                <label>
-                                    출하대기<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <input type="checkbox" id="chkNotShipped" name="chkNotShipped" value="Y" checked />
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>&nbsp;</dt>
-                            <dd>
-                                <li>
-                                    <a class="btn btn-delete" title="검색" id="btnSearch">
-                                        <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                        검색
-                                    </a>
-                                </li>
-                            </dd>
-                        </dl>
+                            <dl>
+                                <dt>
+                                    <label>
+                                        품목명<span class="eq"></span>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="text" class="" id="keyword" name="keyword"/>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label>
+                                        출하대기<span class="eq"></span>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <input type="checkbox" id="chkNotShipped" name="chkNotShipped" value="Y" checked/>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>&nbsp;</dt>
+                                <dd>
+                                    <li>
+                                        <a class="btn btn-delete" title="검색" id="btnSearch">
+                                            <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            검색
+                                        </a>
+                                    </li>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </form>
+                <!--            <div class="title_box">-->
+                <!--                <div class="left_align">-->
+                <!--                    <label class="switch">-->
+                <!--                        <input type="checkbox" checked id="btnListCollapse"><span class="slider round"></span>-->
+                <!--                    </label>-->
+                <!--                    출하 지시 보기/감추기-->
+                <!--                </div>-->
+                <!--            </div>-->
+                <div class="grid_box" id="divList">
+                    <div class="title_box">
+                        <span class="right_align rpt" data-labelCd="출하 지시 목록">출하 지시 목록</span>
+                        <button class="btn-default y_write_auth" id="btnShipmentComplete" title="출하처리" disabled>출하처리
+                        </button>
+                    </div>
+                    <div class="container-fluid">
+                        <div id="theGrid"></div>
                     </div>
                 </div>
-                <!--<div class="section-top">
-                    <div class="search-wrap">
-
-
-                    </div>
-                </div>-->
             </section>
-        </form>
 
-
-        <section class="section">
-            <div class="title_box">
-                <div class="left_align">
-                    <label class="switch">
-                        <input type="checkbox" checked id="btnListCollapse"><span class="slider round"></span>
-                    </label>
-                    출하 지시 보기/감추기
-                </div>
-            </div>
-            <div class="grid_box" id="divList">
-                <div class="title_box">
-                    <span class="right_align rpt" data-labelCd="출하 지시 목록">출하 지시 목록</span>
-                    <button class="btn-default y_write_auth" id="btnShipmentComplete" title="출하처리" disabled>출하처리</button>
-                </div>
-                <div id="theGrid" style="height: 350px;"></div>
-            </div>
-        </section>
-
-        <section>
-            <div class="row">
-                <div class="col-7">
-                    <div class="grid_box">
+            <section class="section" style="flex: 1; min-width: 0;">
+                <div class="section-top">
+                    <div class="container-fluid">
                         <div class="title_box buttons">
                             <span class="right_align rpt" data-labelCd="출하">출하</span>
-                            <button style="visibility: hidden;" class="btn-default y_write_auth" id="btnSaveShip" data-labelCd="출하 처리">출하 처리</button>
+                            <button style="visibility: hidden;" class="btn-default y_write_auth" id="btnSaveShip"
+                                    data-labelCd="출하 처리">출하 처리
+                            </button>
                         </div>
-                        <div id="theGrid2" style="height: 350px;"></div>
+                        <div id="theGrid2" style="height: 32vh;"></div>
                     </div>
-                </div>
-                <div class="col-5">
-                    <div class="grid_box">
+
+                    <div class="container-fluid" style="margin-top: 15px;">
                         <div class="title_box buttons">
                             <span class="right_align rpt" data-labelCd="출하 처리 LOT상세">출하 처리 LOT상세</span>
-                            <input style="width: 170px; height: 32px"  class="w-140 tac y_write_auth" type="text" id="LotNumber" placeholder="LOT번호 스캔 or 입력" disabled />
-                            <button type="button" class="btn-default" id="btnLOTSelect" title="LOT추가" disabled><i class="fas fa-plus"></i></button>
-                            <button style="" type="button" class="btn-danger y_write_auth" id="btnLOTSelectCancel" title="LOT삭제" disabled><i class="fas fa-trash"></i></button>
+                            <input style="width: 170px; height: 32px" class="w-140 tac y_write_auth" type="text"
+                                   id="LotNumber" placeholder="LOT번호 스캔 or 입력" disabled/>
+                            <button type="button" class="btn-default" id="btnLOTSelect" title="LOT추가" disabled><i
+                                    class="fas fa-plus"></i></button>
+                            <button style="" type="button" class="btn-danger y_write_auth" id="btnLOTSelectCancel"
+                                    title="LOT삭제" disabled><i class="fas fa-trash"></i></button>
                         </div>
-                        <div id="theGrid3" style="height: 350px;"></div>
+                        <div id="theGrid3" style="height: 32vh;"></div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
     </div>
 
     <script type="text/x-tmpl" id="lotSelectTemplate">
@@ -232,7 +229,7 @@
 </th:block>
 
 <th:block layout:fragment="scripts">
-    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
+    <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
     <script type="text/javascript">
 
         let gUrl = '/api/shipment/shipment_do_a';
@@ -281,7 +278,7 @@
 
             }
 
-            initShipmentHeader(){
+            initShipmentHeader() {
                 let _this = this;
 
                 this.shipmentHeaderGrid = new wijmo.grid.FlexGrid('#theGrid', {
@@ -342,8 +339,7 @@
                             _this.$LotNumber.attr('disabled', 'disabled');
                             _this.$btnLOTSelect.attr('disabled', 'disabled');
                             _this.$btnLOTSelectCancel.attr('disabled', 'disabled');
-                        }
-                        else {
+                        } else {
                             _this.$btnShipmentComplete.removeAttr('disabled');
                             _this.$LotNumber.removeAttr('disabled');
                             _this.$btnLOTSelect.removeAttr('disabled');
@@ -364,14 +360,16 @@
                         return;
                     }
                     let head_item = headerItems[0];
-                    Alert.confirm('출하처리', "출하 처리하시겠습니까?", function () { _this.shipmentStateComplete(head_item); });
+                    Alert.confirm('출하처리', "출하 처리하시겠습니까?", function () {
+                        _this.shipmentStateComplete(head_item);
+                    });
                 });
 
                 new FlexGridContextMenu(this.shipmentHeaderGrid);
                 this.shipmentHeaderGrid.downloadFileName = '출하지시';
             }
 
-            initShipmentList(){
+            initShipmentList() {
                 let _this = this;
 
                 this.shipmentListGrid = new wijmo.grid.FlexGrid('#theGrid2', {
@@ -442,7 +440,7 @@
                 this.shipmentListGrid.downloadFileName = '출하';
             }
 
-            initLotList(){
+            initLotList() {
                 let _this = this;
                 this.lotListGrid = new wijmo.grid.FlexGrid('#theGrid3', {
                     autoGenerateColumns: false,
@@ -557,7 +555,6 @@
                 let sh_id = headerItems[0].id;
 
 
-
                 let fnsuccess = function (result) {
 
                     if (result.data.length > 0) {
@@ -566,7 +563,7 @@
                         let content = tmpl('lotDetailTemplate', {});
                         let $content = $(content);
                         let modalContainer = new PopupDraggable('LOT 지정 수량 입력');
-                        modalContainer.open({ width: 800, height: 300, $content });
+                        modalContainer.open({width: 800, height: 300, $content});
                         console.log('2')
 
                         let $lotDetailForm = $content.find('#lotDetailForm');
@@ -617,8 +614,7 @@
 
                             Alert.confirm('LOT 지정', '저장 하시겠습니까?', fnOkCallback);
                         });
-                    }
-                    else {
+                    } else {
                         Alert.alert('LOT 정보 조회 오류', "적용할 수 있는 LOT 정보가 없습니다.");
                         return;
                     }
@@ -653,10 +649,10 @@
                 return;
             }
 
-            showMatLotConsumeList(){
+            showMatLotConsumeList() {
                 let headerItems = this.shipmentHeaderGrid.selectedItems;
                 let shipmentItems = this.shipmentListGrid.selectedItems;
-                if(headerItems.length === 0 || headerItems === null || headerItems === undefined){
+                if (headerItems.length === 0 || headerItems === null || headerItems === undefined) {
                     return;
                 }
                 let sh_id = headerItems[0].id;
@@ -676,10 +672,11 @@
                 }
             }
 
-            showShipmentList(){
+            showShipmentList() {
                 let headerItems = this.shipmentHeaderGrid.selectedItems;
-                if(headerItems.length === 0 || headerItems === null || headerItems === undefined){
-                    Alert.alert('', '항목을 선택해 주세요.'); return;
+                if (headerItems.length === 0 || headerItems === null || headerItems === undefined) {
+                    Alert.alert('', '항목을 선택해 주세요.');
+                    return;
                 }
                 let shipment_header = headerItems[0];
                 let data = {
@@ -697,13 +694,13 @@
             }
 
             // LOT 추가 버튼 클릭
-            showLotSelectPopup(){
+            showLotSelectPopup() {
                 let _this = this;
 
                 let headerItems = this.shipmentHeaderGrid.selectedItems;
                 let shipmentItems = this.shipmentListGrid.selectedItems;
 
-                if(headerItems.length === 0 || headerItems === undefined || headerItems === null){
+                if (headerItems.length === 0 || headerItems === undefined || headerItems === null) {
                     Alert.alert('로트 지정 오류', '출하 지시 항목을 선택해 주세요.');
                     return;
                 }
@@ -719,7 +716,7 @@
                 let $content = $(content);
 
                 let modalContainer = new PopupDraggable('LOT지정');
-                modalContainer.open({ width: 800, height: 600, $content });
+                modalContainer.open({width: 800, height: 600, $content});
                 let $lotForm = $content.find('#lotForm');
 
                 let lotSearchGrid = null;
@@ -731,13 +728,13 @@
                     showMarquee: true,
                     isReadOnly: true,
                     columns: [
-                        { binding: 'LotNumber', header: 'LOT', width: '*', align: 'center' },
-                        { binding: 'unit_name', header: '단위', width: '*', align: 'center' },
-                        { binding: 'InputQty', header: '초기수량', width: '*', align: 'right' },
-                        { binding: 'CurrentStock', header: '현재고량', width: '*', align: 'right' },
-                        { binding: 'mat_grp_name', header: '품목그룹', width: '*', align: 'left' },
-                        { binding: 'mat_code', header: '품목코드', width: '*', align: 'center' },
-                        { binding: 'mat_name', header: '품목', width: '*', align: 'left' },
+                        {binding: 'LotNumber', header: 'LOT', width: '*', align: 'center'},
+                        {binding: 'unit_name', header: '단위', width: '*', align: 'center'},
+                        {binding: 'InputQty', header: '초기수량', width: '*', align: 'right'},
+                        {binding: 'CurrentStock', header: '현재고량', width: '*', align: 'right'},
+                        {binding: 'mat_grp_name', header: '품목그룹', width: '*', align: 'left'},
+                        {binding: 'mat_code', header: '품목코드', width: '*', align: 'center'},
+                        {binding: 'mat_name', header: '품목', width: '*', align: 'left'},
                     ],
                     itemsSource: _this.viewData4,
                     formatItem: function (s, e) {
@@ -778,14 +775,14 @@
                 new FlexGridContextMenu(lotSearchGrid);
                 lotSearchGrid.downloadFileName = '출하';
 
-                let fnLotSearch = function(){
+                let fnLotSearch = function () {
                     $lotForm[0].reset();
                     // 헤더번호만 있거나 헤데와 material이 다 있거나 둘 중 하나
                     // 헤더만 있는경우 출하 항목의 모든 폼목에 해당되는 lot을 리스트업
                     // 헤더와 material 이 있는경우 해당 품목에 해당되는 lot 리스트업
                     let data = {
-                        material_id : material_id,
-                        sh_id : sh_id,
+                        material_id: material_id,
+                        sh_id: sh_id,
                         lot_number: $('#LotNumber').val().trim()
                     };
 
@@ -899,9 +896,9 @@
             }
 
             //출하처리
-            shipmentStateComplete(head_item){
+            shipmentStateComplete(head_item) {
                 let _this = this;
-                let data = { sh_id: head_item.id, description: head_item.description};
+                let data = {sh_id: head_item.id, description: head_item.description};
                 let url = this.url + '/shipment_status_complete';
                 let fnSuccess = function (result) {
                     if (result.success) {

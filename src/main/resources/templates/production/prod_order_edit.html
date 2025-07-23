@@ -125,9 +125,8 @@
                 </div>
             </div>
 
-            <div class="grid_box">
+            <div class="grid_box" style="height: 30vh;">
                 <div class="search-wrap">
-
                     <dl>
                         <dt>
                             생산일
@@ -141,14 +140,11 @@
                             </ul>
                         </dd>
                     </dl>
-
                 </div>
-                <div id="theGrid" style="height: 300px;"></div>
+                <div id="theGrid"></div>
             </div>
-
         </section>
-        <div class="tab-wrap">
-
+        <div class="tab-wrap" style="height: 30vh;">
             <ul class="tab-links">
                 <li><a href="#tabJobRes">제품 지시내역</a></li>
                 <li><a href="#tabSemi">반제품 작업지시</a></li>
@@ -156,7 +152,6 @@
             </ul>
             <div>
                 <section class="tab-item" id="tabJobRes" style="border-top-left-radius: 0;">
-
                     <div class="section-top">
                         <div class="button-wrap">
                             <ul>
@@ -168,12 +163,14 @@
                                 </li>
                             </ul>
                         </div>
-                        <div id="jobResGrid" style="height: 220px;"></div>
+                    </div>
+                    <div class="container-fluid">
+                        <div id="jobResGrid"></div>
                     </div>
                 </section>
                 <section class="tab-item" id="tabSemi" style="border-top-left-radius: 0;">
-                    <div class="section-top">
-                        <div id="semiGrid" style="height: 270px;"></div>
+                    <div class="container-fluid">
+                        <div id="semiGrid"></div>
                     </div>
                 </section>
                 <section class="tab-item" id="tabConsumed" style="border-top-left-radius: 0;">
@@ -188,7 +185,9 @@
                                 </li>
                             </ul>
                         </div>
-                        <div id="semiJobResGrid" style="height: 220px;"></div>
+                    </div>
+                    <div class="container-fluid">
+                        <div id="semiJobResGrid" ></div>
                     </div>
                 </section>
             </div>
@@ -1042,6 +1041,7 @@
             semiJobRes() {
                 let _this = this;
                 let data = this.grid.selectedItems[0];
+                if (!data) return;
                 let url = this.url + '/semi_list';
                 let param = {
                     'data_date': $('#ProductionDate').val(),

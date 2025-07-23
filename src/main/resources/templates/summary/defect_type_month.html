@@ -87,31 +87,35 @@
             <div>
                 <section class="tab-item" id="tabs_count" style="border-top-left-radius: 0;">
                     <div class="container-fluid">
-                        <div id="theGrid1" style="height: 730px;"></div>
+                        <div id="theGrid1"></div>
                     </div>
                 </section>
                 <section class="tab-item" id="tabs_portion" style="border-top-left-radius: 0; display: none;">
-                    <div class="container-fluid" style="width: 72%">
-                        <div id="theGrid3" style="height: 730px;"></div>
-                    </div>
-                    <div class="grid_box col-3">
-                        <div class="title_box">
-                            <span class="right_align rpt" data-labelCd=""></span>
+                    <div class="content-wrap" style="display: flex; flex-direction: row; flex: 1; min-height: 0;">
+                        <div class="container-fluid" style="flex: 5;min-width: 0">
+                            <div id="theGrid3" ></div>
                         </div>
-                        <canvas id="chart" width="420" height="420"></canvas>
-                        <!-- <div id="chart" class="chart-canvas"></div>-->
+                        <div class="chart-wrapper" style="flex: 2;">
+                            <div class="title_box">
+                                <span class="right_align rpt" data-labelCd=""></span>
+                            </div>
+                            <canvas id="chart" class="chart-canvas" style="width: 100%; height: 100%; flex: 2;"></canvas>
+                            <!-- <div id="chart" class="chart-canvas"></div>-->
+                        </div>
                     </div>
                 </section>
                 <section class="tab-item" id="tabs_portion_detail" style="border-top-left-radius: 0; display: none;">
-                    <div class="container-fluid" style="width: 72%">
-                        <div id="theGrid4" style="height: 730px;"></div>
-                    </div>
-                    <div class="grid_box col-3">
-                        <div class="title_box">
-                            <span class="right_align rpt" data-labelCd=""></span>
+                    <div class="content-wrap" style="display: flex; flex-direction: row; flex: 1; min-height: 0;">
+                        <div class="container-fluid" style="flex: 5;min-width: 0">
+                            <div id="theGrid4"></div>
                         </div>
-                        <canvas id="chart2" width="420" height="420"></canvas>
-                        <!-- <div id="chart" class="chart-canvas"></div>-->
+                        <div class="chart-wrapper" style="flex: 2;">
+                            <div class="title_box">
+                                <span class="right_align rpt" data-labelCd=""></span>
+                            </div>
+                            <canvas id="chart2" class="chart-canvas" style="width: 100%; height: 100%;"></canvas>
+                            <!-- <div id="chart" class="chart-canvas"></div>-->
+                        </div>
                     </div>
                 </section>
             </div>
@@ -279,7 +283,7 @@
             this.grid3.itemFormatter = function (panel, row, col, cell) {
                 if (panel.cellType === wijmo.grid.CellType.Cell) {
                     let colName = panel.columns[col].binding;
-                    if (['mat_type_name', 'mat_grp_name', 'mat_code', 'mat_name', 'unit_name'].includes(colName)) {
+                    if (['mat_type_name', 'mat_grp_name', 'mat_code', 'unit_name'].includes(colName)) {
                         cell.style.textAlign = 'center';          // 수평 가운데
                         cell.style.verticalAlign = 'middle';      // 수직 가운데
                         cell.style.display = 'flex';              // flex로 정렬
@@ -289,7 +293,7 @@
                     else if (colName.startsWith('mon_') || ['year_defect_pro', 'year_defect_qty', 'year_defect_money'].includes(colName)) {
                         // 숫자 오른쪽 정렬
                         cell.style.textAlign = 'right';
-                    } else if (['company_name'].includes(colName)) {
+                    } else if (['company_name', 'mat_name'].includes(colName)) {
                         // 그 외 기본값 정렬 (선택)
                         cell.style.textAlign = 'left';
                     }
