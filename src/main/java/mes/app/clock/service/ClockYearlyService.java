@@ -20,10 +20,8 @@ public class ClockYearlyService {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("year", year);
-        dicParam.addValue("name", name);
         dicParam.addValue("spjangcd", spjangcd);
         dicParam.addValue("startdate", startdate);
-        dicParam.addValue("rtflag", rtflag);
 
         String sql = """
                 SELECT
@@ -57,12 +55,23 @@ public class ClockYearlyService {
                         GROUP BY personid
                     ) latest ON t.personid = latest.personid AND t.reqdate = latest.max_reqdate
                 ) tb209 ON p.id = tb209.personid
-                WHERE rtflag = '0'
-                AND p."Name" LIKE concat('%', :name, '%')
-                GROUP BY
-                    p.id, s."Value", tb209.ewolnum, tb209.holinum, tb204.daynum, p."Name", p.rtdate, p.jik_id
-                ORDER BY p.jik_id;
+                WHERE 1 = 1
                 """;
+
+        if (rtflag != null && !rtflag.isEmpty()) {
+            sql += " and rtflag = :rtflag ";
+            dicParam.addValue("rtflag",  rtflag);
+        }
+
+        if (name != null && !name.isEmpty()) {
+            sql += " AND p.\"Name\" LIKE concat('%', :name, '%') ";
+            dicParam.addValue("name", "%" + name + "%");
+        }
+        sql  +="""
+            GROUP BY
+                p.id, s."Value", tb209.ewolnum, tb209.holinum, tb204.daynum, p."Name", p.rtdate, p.jik_id
+            ORDER BY p.jik_id
+            """;
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 

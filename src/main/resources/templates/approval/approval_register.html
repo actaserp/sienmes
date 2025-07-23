@@ -31,10 +31,10 @@
       <!--          <a href="#tab2" title="등록">주문/진행현황</a>-->
       <!--        </li>-->
       <!--      </ul>-->
-      <div class="tab-contents" style="display: flex; gap: 20px;">
+      <div class="tab-contents" style="display: flex;flex-direction: row; gap: 20px;">
         <!--       탭 시작       -->
         <!-- Section -->
-        <section style="width: 30%;">
+        <section style="width: 30%; flex-shrink: 0;">
           <div class="section-top">
             <tbody>
             <tr>
@@ -52,10 +52,10 @@
           </div>
           <div class="container-fluid">
             <p id=""></p>
-            <div id="theGrid" style="max-height: 714px; height: 500px; margin-top: 40px;"></div>
+            <div id="theGrid" style="margin-top: 40px;"></div>
           </div>
         </section>
-        <section>
+        <section style="width: 70%; flex-shrink: 0;">
           <div class="section-top">
             <div class="title-wrap">
               <h3>결재라인등록</h3>
@@ -154,7 +154,7 @@
           </div>
           <div class="container-fluid">
             <p id=""></p>
-            <div id="theGrid2" style="max-height: 714px; height: 390px; margin-top: 40px;"></div>
+            <div id="theGrid2" style="margin-top: 40px;"></div>
           </div>
         </section>
         <!--       주문등록 탭 종료   / 주문 의뢰현황 시작       -->
@@ -229,7 +229,7 @@
           data2.forEach(item =>{
           })
           // data2의 개수가 5개 미만인 경우 빈 객체 추가
-          while (data2.length < 13) {
+          while (data2.length < 20) {
             data2.push({});
           }
         }
@@ -275,9 +275,6 @@
             }
           }
         })
-        // FlexGrid의 최대 높이를 제한하여 스크롤바를 활성화
-        theGrid.hostElement.style.maxHeight = '500px';
-        theGrid.hostElement.style.overflowY = 'auto';
         // 선택이 변경될 때, 현재 항목 업데이트
         new FlexGridContextMenu(theGrid);
         window.downloadFileName = '문서코드별 사원 리스트';
@@ -306,7 +303,7 @@
           data2.forEach(item =>{
           })
           // data2의 개수가 5개 미만인 경우 빈 객체 추가
-          while (data2.length < 10) {
+          while (data2.length < 17) {
             data2.push({});
           }
         }
@@ -375,9 +372,6 @@
 
           }
         })
-        // FlexGrid의 최대 높이를 제한하여 스크롤바를 활성화
-        theGrid2.hostElement.style.maxHeight = '400px'; // 약 5개의 행 높이에 맞게 설정
-        theGrid2.hostElement.style.overflowY = 'auto';
         // 선택이 변경될 때, 현재 항목 업데이트
         new FlexGridContextMenu(theGrid2);
         window.downloadFileName = '결재라인 리스트';

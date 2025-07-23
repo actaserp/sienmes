@@ -1,5 +1,6 @@
 package mes.app.clock;
 
+import lombok.extern.slf4j.Slf4j;
 import mes.app.clock.service.ClockYearlyService;
 import mes.domain.entity.Tb_pb203;
 import mes.domain.entity.Tb_pb209;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/clock/Yearly")
 public class YearlyController {
@@ -34,11 +36,11 @@ public class YearlyController {
             @RequestParam(value="year") String year,
             @RequestParam(value="name",required=false) String name,
             @RequestParam(value ="spjangcd") String spjangcd,
-            @RequestParam(value="startdate2",required=false) String startdate,
+            @RequestParam(value="startdate",required=false) String startdate,
             @RequestParam(value="rtflag",required=false) String rtflag,
             HttpServletRequest request) {
 
-
+//        log.info("연차관리 들어옴 데이터 ---  year:{}, name:{}, startdate2:{}, rtflag:{}", year, name, startdate, rtflag);
         if (startdate != null && startdate.contains("-")) {
             startdate = startdate.replaceAll("-", "");
         }
