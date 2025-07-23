@@ -211,6 +211,9 @@
                         </li>
                     </ul>
                     <div class="layout-sidebar-tabcont">
+                        <div style="margin-top: 10px" id="searchkeyword-box">
+                            <input type="text" style="width: 90%" id="searchkeyword" name="searchkeyword" />
+                        </div>
                         <nav class="layout-nav sidebar-tabcont" id="menu">
                             <ul class="dep1">
                                 <li class="dep1-1">
@@ -359,6 +362,8 @@
 <script type="text/javascript">
     let nthTabs = null;
     let default_menu = null;
+    let menuName_list = [];
+    let menu_arr = [];
 
     $(document).ready(function () {
 
@@ -366,7 +371,6 @@
             nthTabs.delAllTab();
             // window.location.reload();
         });
-
 
         // let lang_cd = i18n.getLanguageCode();
         //i18n.initializeCommonData(lang_cd);
@@ -396,6 +400,19 @@
                 url: '/api/system/menus', // menus API를 통해 전체 메뉴 데이터를 가져옴
                 type: 'GET',
                 success: function (response) {
+
+                    //메뉴리스트 초기화
+                    menuName_list = response.data.flatMap(folder =>
+                        (folder.nodes || []).map(node => node.objNm)
+                    ).filter(Boolean)
+
+                    //메뉴명 : 메뉴경로 (key : value) 배열 초기화
+                    menu_arr = response.data.flatMap(folder =>
+                        (folder.nodes || []).map(node => ({ [node.objNm]: node.objUrl }))
+                    )
+
+                    //console.log('arr', menu_arr);
+
                     // FrontFolder_id를 기반으로 폴더 필터링
                     const folders = response.data.filter(folder => folder.frontfolder_id === parseInt(FrontFolderId));
 
@@ -504,6 +521,7 @@
         Object.keys(dep2Mappings).forEach(FrontFolderId => {
             loadMenu(FrontFolderId, $(dep2Mappings[FrontFolderId]));
         });
+
 
 
         $('#navbarBarMenu2 .open_menu').click(function () {
@@ -753,6 +771,36 @@
         // 오픈소스 사용공지 필요
     });
 
+    //메뉴 검색창 이벤트 등록
+    document.addEventListener('input', function(event){
+        if(event.target){
+            const ele = event.target;
+
+            if(ele.id === 'searchkeyword'){
+                initializeAutocomplete('searchkeyword', 'searchkeyword-box', menuName_list, menu_arr)
+            }
+        }
+    });
+
+    //메뉴 검색바 엔터시 발동함수
+    document.getElementById('searchkeyword').addEventListener("keydown", (e) => {
+        if(e.key === 'Enter'){
+            e.preventDefault();
+
+            const inputValue = $('#searchkeyword').val();
+
+            const matchedItem = menu_arr.find(obj => {
+                const key = Object.keys(obj)[0];
+                return key.trim() === inputValue;
+            })
+
+            if(matchedItem) {
+                const url = matchedItem[inputValue];
+                const target = url.substring(url.lastIndexOf("/")+1);
+                document.querySelector(`[data-objid="${target}"]`)?.click();
+            }
+        }
+    });
 </script>
 
 <script type="text/javascript">

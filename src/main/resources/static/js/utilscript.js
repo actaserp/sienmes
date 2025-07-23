@@ -190,3 +190,148 @@ function formatToCommaNumberInput(e) {
     e.target.value = val;
 }
 
+class Trie{
+    constructor() {
+        this.wordList = [];
+    }
+
+    insert(word){
+
+        this.wordList.push(word);
+    }
+
+    searchPrefix(prefix) {
+        return this.wordList.filter(word => word.includes(prefix)); // 부분 일치 검색
+    }
+
+}
+
+
+
+
+function createSuggestionBox(searchInput) {
+    let box = document.getElementById("autocomplete-list");
+    if (!box) {
+        box = document.createElement("div");
+        box.id = "autocomplete-list";
+        box.style.position = "absolute";
+        box.style.background = "white";
+        box.style.border = "1px solid #ccc";
+        box.style.zIndex = "1000";
+        box.style.maxHeight = "200px";
+        box.style.overflowY = "auto";
+        box.style.display = "none";
+        document.body.appendChild(box);
+    }
+    box.style.width = searchInput.offsetWidth + "px";
+    return box;
+}
+
+function attachInputListener(searchInput, suggestionBox, trie, dataArrList) {
+    let currentIndex = -1;
+
+    searchInput.addEventListener("input", () => {
+        const query = searchInput.value.trim();
+        suggestionBox.innerHTML = "";
+        currentIndex = -1;
+
+        if (!query) return suggestionBox.style.display = "none";
+
+        const matches = trie.searchPrefix(query);
+        if (matches.length === 0) return suggestionBox.style.display = "none";
+
+        matches.forEach(name => {
+            const item = document.createElement("div");
+            item.textContent = name;
+            item.classList.add("autocomplete-item");
+            Object.assign(item.style, {
+                padding: "10px",
+                cursor: "pointer",
+                borderBottom: "1px solid #eee",
+                fontSize: "14px"
+            });
+
+            item.addEventListener("click", () => {
+                searchInput.value = name;
+                suggestionBox.style.display = "none";
+            });
+
+            suggestionBox.appendChild(item);
+        });
+
+        const rect = searchInput.getBoundingClientRect();
+        suggestionBox.style.top = `${window.scrollY + rect.bottom}px`;
+        suggestionBox.style.left = `${window.scrollX + rect.left}px`;
+        suggestionBox.style.width = `${rect.width}px`;
+        suggestionBox.style.display = "block";
+    });
+
+    searchInput.addEventListener("keydown", (e) => {
+        const items = suggestionBox.getElementsByClassName("autocomplete-item");
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            if (currentIndex < items.length - 1) currentIndex++;
+            updateSelection(items, currentIndex);
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            if (currentIndex > 0) currentIndex--;
+            updateSelection(items, currentIndex);
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            if (currentIndex >= 0 && currentIndex < items.length) {
+                searchInput.value = items[currentIndex].textContent;
+                suggestionBox.style.display = "none";
+
+                const inputValue = searchInput.value.trim();
+
+                const matchedItem = dataArrList.find(obj => {
+                    const key = Object.keys(obj)[0];
+                    return key.trim() === inputValue;
+                });
+
+                if(matchedItem) {
+                    const url = matchedItem[inputValue];
+                    const target = url.substring(url.lastIndexOf("/") + 1);
+                    document.querySelector(`[data-objid="${target}"]`)?.click();
+                }
+
+
+            }
+        }
+    });
+}
+
+function updateSelection(items, currentIndex) {
+    Array.from(items).forEach(item => item.style.background = "white");
+    if (currentIndex >= 0 && currentIndex < items.length) {
+        const selectedItem = items[currentIndex];
+        selectedItem.style.background = "dodgerblue";
+        selectedItem.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+}
+
+function bindClickOutside(searchBox, suggestionBox) {
+    document.addEventListener("click", (event) => {
+        if (!searchBox.contains(event.target)) {
+            suggestionBox.style.display = "none";
+        }
+    });
+}
+
+function initializeAutocomplete(inputId, divId, dataList, dataArrList) {
+    const searchInput = document.getElementById(inputId);
+    if (!searchInput || searchInput.dataset.autocompleteInitialized === "true") return;
+
+    const searchBox = searchInput.closest("#" + divId);
+    if (!searchBox) return;
+
+    const suggestionBox = createSuggestionBox(searchInput);
+    const trie = new Trie();
+    dataList.forEach(name => trie.insert(name));
+
+    attachInputListener(searchInput, suggestionBox, trie, dataArrList);
+    bindClickOutside(searchBox, suggestionBox);
+
+    searchInput.dataset.autocompleteInitialized = "true";
+}
+
