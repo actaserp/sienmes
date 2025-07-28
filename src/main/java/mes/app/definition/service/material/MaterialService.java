@@ -79,6 +79,10 @@ public class MaterialService {
                 , m."Mtyn" as mtyn
                 , m."Useyn" as useyn
                 , m."Avrqty" as avrqty
+                , CASE
+					 WHEN b."Material_id" IS NOT NULL THEN 1
+					 ELSE 0
+				 END as "useBOM"
             from material m
             left join mat_grp mg on mg.id = m."MaterialGroup_id"
             left join unit u on u.id = m."Unit_id"
@@ -87,11 +91,12 @@ public class MaterialService {
             left join work_center wc on wc.id = m."WorkCenter_id"
             left join equ e on e.id = m."Equipment_id"
             left join routing r on r.id = m."Routing_id"
+            left join bom b on b."Material_id" = m.id
             where 1=1
             AND m.spjangcd = :spjangcd
         """;
-        if (StringUtils.isEmpty(matType)==false) sql +="and mg.\"MaterialType\" = :mat_type ";
-        if (StringUtils.isEmpty(matGroupId)==false) sql +="and m.\"MaterialGroup_id\" = (:mat_group_id)::int ";
+        if (StringUtils.isEmpty(matType)==false) sql +=" and mg.\"MaterialType\" = :mat_type ";
+        if (StringUtils.isEmpty(matGroupId)==false) sql +=" and m.\"MaterialGroup_id\" = (:mat_group_id)::int ";
         if (StringUtils.isEmpty(keyword)==false) {
         	sql += """  
             		and ( m."Name" ilike concat('%',:keyword,'%')
@@ -417,5 +422,22 @@ public class MaterialService {
         //품목 삭제
     	sql = " delete from material where id = :mat_pk";
     	return this.sqlRunner.execute(sql, dicParam);
+	}
+
+	public int deleteMaterials(List<Integer> matPKs) {
+		int total = 0;
+		for (int matPK : matPKs) {
+			MapSqlParameterSource dicParam = new MapSqlParameterSource();
+			dicParam.addValue("mat_pk", matPK);
+
+			// 1. 단가 삭제
+			String sql = "delete from mat_comp_uprice where \"Material_id\" = :mat_pk";
+			this.sqlRunner.execute(sql, dicParam);
+
+			// 2. 품목 삭제
+			sql = "delete from material where id = :mat_pk";
+			total += this.sqlRunner.execute(sql, dicParam);
+		}
+		return total;
 	}
 }

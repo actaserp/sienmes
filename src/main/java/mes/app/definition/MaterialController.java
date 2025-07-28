@@ -97,7 +97,18 @@ public class MaterialController {
         
 		return result;
 	}
-	
+
+	@PostMapping("/batchDelete")
+	public AjaxResult batchDelete(@RequestBody Map<String, Object> param) {
+		List<Integer> ids = (List<Integer>) param.get("ids");
+		AjaxResult result = new AjaxResult();
+		int count = materialService.deleteMaterials(ids); // 여러개 삭제하는 서비스 메서드 필요
+		result.success = count == ids.size();
+		result.data = count;
+		result.message = result.success ? "삭제 성공" : "삭제 실패";
+		return result;
+	}
+
 	/**
 	 * @apiNote 품목저장(생성/수정)
 	 * 
