@@ -958,7 +958,7 @@
                         }
                     },
                     columns: [
-                        // {binding: 'mio_pk', header: '입고번호', width: 80, align: 'center'},
+                        {binding: 'mio_pk', header: '입고번호', width: 80, align: 'center', visible:false},
                         {binding: 'store_house_name', header: '창고', width: 80, align: 'center'},
                         {binding: 'inout', header: '입출', width: 60, align: 'center'},
                         {binding: 'material_type', header: '품목유형', width: 80, align: 'center'},
@@ -1011,7 +1011,7 @@
                     if (ht.cellType === wijmo.grid.CellType.Cell) {
                         let row = _this.grid.rows[ht.row]; // 해당 행
                         let item = _this.grid.rows[ht.row].dataItem; // 해당 row의 데이터
-
+                        window.selectedGridId = item.mio_pk;
                         _this.modify([item]); // 배열로 넘기는 걸 유지하려면 이렇게
                     }
                 });
@@ -1073,6 +1073,11 @@
                 let result = AjaxUtil.getSyncData(this.url + "/read_issue", data);
                 if (result.data != null) {
                     _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
+
+                    if (window.selectedGridId) {
+                        GridUtil.selectRowById(_this.grid, window.selectedGridId, { idField: 'mio_pk' });
+                        window.selectedGridId = null;
+                    }
                 }
             }
 
@@ -1207,7 +1212,6 @@
                     let poppage = new PopCompComponent();
                     let $poppage = $(poppage);
                     let searchcallback = function (items) {
-                        console.log('btnCompanySearch', items);
                         $content.find('#cboCompany').val(items.id);
                         $content.find('#CompanyName').val(items.compname);
                     };
@@ -1223,7 +1227,6 @@
 
                     setTimeout(function () {
                         FormUtil.BindDataForm(data[0], form);
-                        console.log('edit BindDataForm data', data);
                         $content.find('#inoutSelect').prop('disabled', true);
                         $content.find('#InoutType').prop('disabled', true);
 
@@ -1263,7 +1266,6 @@
                         mio_pk: $content.find('#mio_pk').val(),
                         action: 'delete'
                     };
-                    console.log('data', data);
                     let url = '/api/inventory/material_inout/delete';
                     AjaxUtil.postJsonData(url, data, function (res) {
                         if (res.success) {
@@ -1409,7 +1411,6 @@
                     let poppage = new PopCompComponent();
                     let $poppage = $(poppage);
                     let searchcallback = function (items) {
-                        console.log('btnCompanySearch', items);
                         $content.find('#cboCompany').val(items.id);
                         $content.find('#CompanyName').val(items.compname);
                     };
@@ -1684,7 +1685,6 @@
                         .filter(row => row.isSelected)
                         .map(row => row.dataItem);
 
-                    console.log(items);
 
                     if (!items || items.length === 0) {
                         Alert.alert('', '저장할 항목을 선택하세요.');
@@ -1963,7 +1963,6 @@
             showInputTestPopup() {
                 let _this = this;
                 let items = _this.grid.selectedItems;
-                console.log('items',items);
                 if (items.length === 0) {
                     Alert.alert('입고검사', '선택된 입고 데이터가 없습니다. ', function () {
                     });
@@ -2380,7 +2379,6 @@
                 data['Q'] = JSON.stringify(grid_data);
 
                 let res = AjaxUtil.postSyncData(url, data);
-                console.log('data', data);
                 if (!res.success) {
                     Alert.alert('', res.message);
                     return false;

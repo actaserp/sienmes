@@ -11,7 +11,7 @@ import mes.domain.entity.JobResDefect;
 public interface JobResDefectRepository extends JpaRepository<JobResDefect, Integer>{
 
 	List<JobResDefect> findByJobResponseId(Integer jrPk);
-
+	void deleteByJobResponseId(Integer jobResponseId);
 	JobResDefect findByJobResponseIdAndDefectTypeId(Integer jrPk, int defectTypeId);
 
 }

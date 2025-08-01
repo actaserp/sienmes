@@ -154,7 +154,6 @@
             this.baseUrl = '/api/inventory/material_move';
             this.grid = null;
             this.init();
-            this.selectedIndex = null;
         }
 
         init() {
@@ -301,13 +300,13 @@
                         if (row.dataItem.mat_lot_check === 'Y') {
                             btn.innerText = "이동";
                             btn.onclick = function () {
-                                _this.selectedIndex = s.rows.findIndex(r => r.dataItem === row.dataItem);
+                                GridUtil.saveView(_this.grid, row.dataItem, { idField: 'mat_code' });
                                 _this.moveMaterialLot(row.dataItem);
                             };
                         } else {
                             btn.innerText = "이동";
                             btn.onclick = function () {
-                                _this.selectedIndex = s.rows.findIndex(r => r.dataItem === row.dataItem);
+                                GridUtil.saveView(_this.grid, row.dataItem, { idField: 'mat_code' });
                                 _this.moveMaterial(row.dataItem);
                             };
                         }
@@ -339,13 +338,8 @@
             AjaxUtil.getAsyncData(url, param, function(result){
                 if (result.success) {
                     _this.grid.itemsSource.sourceCollection = result.data;
-                    console.log('selectedIndex', _this.selectedIndex);
-                    let restoreIndex = _this.selectedIndex || 0;
-                    _this.grid.selectedIndex = -1;
-                    setTimeout(() => {
-                        _this.grid.select(restoreIndex, 0);
-                    }, 10);
-                    _this.selectedIndex = 0; // 초기화
+                    // 위치 불러오기
+                    GridUtil.restoreView(_this.grid, { idField: 'mat_code' });
                 }
             });
         }

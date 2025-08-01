@@ -1097,7 +1097,7 @@
                         }
                     },
                     columns: [
-                        // {binding: 'mio_pk', header: '입고번호', width: 80, align: 'center'},
+                        {binding: 'mio_pk', header: '입고번호', width: 80, align: 'center', visible:false},
                         {binding: 'store_house_name', header: '창고', width: 80, align: 'center'},
                         {binding: 'inout', header: '입출', width: 60, align: 'center'},
                         {binding: 'material_type', header: '품목유형', width: 80, align: 'center'},
@@ -1150,7 +1150,7 @@
                     if (ht.cellType === wijmo.grid.CellType.Cell) {
                         let row = _this.grid.rows[ht.row]; // 해당 행
                         let item = _this.grid.rows[ht.row].dataItem; // 해당 row의 데이터
-
+                        window.selectedGridId = item.mio_pk;
                         _this.modify([item]); // 배열로 넘기는 걸 유지하려면 이렇게
                     }
                 });
@@ -1212,6 +1212,10 @@
                 let result = AjaxUtil.getSyncData(this.url + "/read_disposal", data);
                 if (result.data != null) {
                     _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
+                    if (window.selectedGridId) {
+                        GridUtil.selectRowById(_this.grid, window.selectedGridId, { idField: 'mio_pk' });
+                        window.selectedGridId = null;
+                    }
                 }
             }
 

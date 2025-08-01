@@ -5,7 +5,9 @@
             width: 100px;
             height: 40px;
         }
-
+        input[type="date"][readonly] {
+            background-color: #EDEFF5;
+        }
     </style>
 </head>
 <th:block layout:fragment="content">
@@ -13,15 +15,15 @@
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
-                <h2>수주 및 계획량 등록</h2>
+                <h2>생산 계획 등록</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>영업 관리</li>
-                <li>수주 및 계획량 등록</li>
+                <li>생산 관리</li>
+                <li>생산 계획 등록</li>
             </ul>
         </div>
 
@@ -31,15 +33,17 @@
                     <dl>
                         <dt>
                             <label for="cboDateKind">
-                                검색 구분<span class="eq"></span>
+                                계획일자<span class="eq"></span>
                             </label>
                         </dt>
                         <dd>
                             <div class="srch-box">
                                 <select id="cboDateKind" name="cboDateKind">
-                                    <option value="sales">수주일</option>
-                                    <option value="delivery">납기일</option>
+                                    <option value="selectDate" selected>기간</option>
+                                    <option value="week">주간</option>
+                                    <option value="month">월간</option>
                                 </select>
+                                <div id="extraSelectBox" style="display:inline-block; margin-left: 10px;"></div>
                             </div>
                         </dd>
                     </dl>
@@ -88,22 +92,22 @@
                                 삭제
                             </a>
                         </li>
-                        <li>
-                            <a class="btn btn-edit" title="수정" id="btnEdit">
-                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
-                                수정
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn" title="엑셀 업로드" id="btnShowUpload">
-                                엑셀 업로드
-                            </a>
-                        </li>
-                        <li>
-                            <a class="btn" title="양식 다운로드" id="btnDownloadTemplate">
-                                양식 다운로드
-                            </a>
-                        </li>
+<!--                        <li>-->
+<!--                            <a class="btn btn-edit" title="수정" id="btnEdit">-->
+<!--                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">-->
+<!--                                수정-->
+<!--                            </a>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <a class="btn" title="엑셀 업로드" id="btnShowUpload">-->
+<!--                                엑셀 업로드-->
+<!--                            </a>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <a class="btn" title="양식 다운로드" id="btnDownloadTemplate">-->
+<!--                                양식 다운로드-->
+<!--                            </a>-->
+<!--                        </li>-->
                     </ul>
                 </div>
             </div>
@@ -116,7 +120,7 @@
             <!--        </div>-->
         </section>
     </div>
-    <script type="text/x-tmpl" id="sujuTemplate">
+    <script type="text/x-tmpl" id="planTemplate">
         <style>
             /* 아이템 테이블 전체 설정 */
             .item-table {
@@ -239,85 +243,61 @@
                 height: 18px;
             }
         </style>
-        <div class="content_wrap popup" id="div_excel_upload">
+        <div class="content_wrap popup">
             <div class="table-wrap">
-            <form id="sujuForm">
+            <form id="planForm">
                 <table class="write-table">
-                    <caption>주문등록 테이블</caption>
-                    <input type="hidden" id="id" name="id">
+                    <caption>계획 등록 테이블</caption>
+                    <input type="hidden" id="head_id" name="head_id">
                     <tbody>
                         <tr>
                             <th style="text-align: center">
-                                <label for="JumunDate">수주일*</label>
+                                <label for="datetype">계획일자</label>
                             </th>
                             <td>
-                                <input type="date" id="JumunDate" name="JumunDate">
+                                <div class="input-group" id="prod_datepicker">
+                                    <select id="datetype" name="datetype">
+                                        <option value="selectDate" selected>기간</option>
+                                        <option value="week">주간</option>
+                                        <option value="month">월간</option>
+                                    </select>
+                                </div>
                             </td>
                             <th style="text-align: center">
-                                <label for="DueDate">납기일*</label>
+                                <label>납기일*</label>
                             </th>
                             <td>
-                                <input type="date" id="DueDate" name="DueDate">
+                                <div class="input-group" id="prod_datepicker">
+                                    <input type="date" id="stdate" name="stdate" style="margin-right: 5px;" readOnly>
+                                    ~
+                                    <input type="date" id="eddate" name="eddate" style="margin-right: 5px;" readOnly>
+                                </div>
                             </td>
                         </tr>
                         <tr>
                             <th style="text-align: center">
-                                <label for="cboCompany">판매처*</label>
+                                <label for="cboCompany">현장명</label>
+                            </th>
+                            <td>
+                                <input class="form-control2" type="text" id="actnm" name="actnm">
+                            </td>
+                            <th style="text-align: center">
+                                <label for="cboSujuType">통신</label>
                             </th>
                             <td colspan="3">
-                                <input id="cboCompany" name="Company_id" type="hidden">
-                                <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
-                                placeholder="판매처 검색 버튼을 클릭하여 판매처를 검색하세요" readonly/>
-                                &nbsp;
-                                <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                    판매처 검색
-                                </a>
+                                <select id="cmcode" name="cmcode">
+                                    <option value="무통신">무통신</option>
+                                    <option value="코멕스">코멕스</option>
+                                </select>
                             </td>
                         </tr>
-<!--                        <tr>-->
-<!--                            <th style="text-align: center">-->
-<!--                                <label for="cboCompany">프로젝트</label>-->
-<!--                            </th>-->
-<!--                            <td colspan="3">-->
-<!--                                <input id="projectHidden" name="projectHidden" type="hidden">-->
-<!--                                <input class="form-control2" type="text" id="project" name="project"-->
-<!--                                placeholder="프로젝트 검색 버튼을 클릭하여 검색하세요" readonly/>-->
-<!--                                &nbsp;-->
-<!--                                <a class="btn btn-delete" title="검색" id="btnSelect_project">-->
-<!--                                    <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">-->
-<!--                                    프로젝트 검색-->
-<!--                                </a>-->
-<!--                            </td>-->
-<!--                        </tr>-->
+
                         <tr>
                             <th style="text-align: center">
-                                <label for="cboSujuType">수주구분</label>
+                                <label for="description">비고</label>
                             </th>
                             <td colspan="3">
-                                <select id="cboSujuType" name="SujuType"></select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th style="text-align: center">
-                                <label for="Description">비고</label>
-                            </th>
-                            <td colspan="3">
-                                <textarea id="Description" name="Description" style="height:40px;"></textarea>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th style="text-align: center">
-                                <label for="StateName">상태</label>
-                            </th>
-                            <td>
-                                <input type="text" id="StateName" name="StateName" readonly disabled>
-                            </td>
-                            <th style="text-align: center">
-                                <label for="totalAmountSum">총액</label>
-                            </th>
-                            <td>
-                                <input id="totalAmountSum" name="totalAmountSum" style="text-align:right;" readonly>
+                                <textarea id="description" name="description" style="height:40px;"></textarea>
                             </td>
                         </tr>
                     </tbody>
@@ -327,30 +307,18 @@
                     <table class="item-table">
 
                     <colgroup>
-                        <col style="width: 6%">
-                        <col style="width: 18%">
-                        <col style="width: 5%">
-                        <col style="width: 13%">
-                        <col style="width: 9%">
-                        <col style="width: 9%">
-                        <col style="width: 9%">
                         <col style="width: 10%">
-                        <col style="width: 11%">
-                        <col style="width: 6%">
-                        <col style="width: 4%">
+                        <col style="width: 30%">
+                        <col style="width: 10%">
+                        <col style="width: 45%">
+                        <col style="width: 5%">
                     </colgroup>
                     <thead>
                     <tr id="itemHeaderRow">
                         <th>코드</th>
                         <th>품목</th>
                         <th>수량</th>
-                        <th>단가 <span style="font-size: 13px;">(선택시 부가세 포함)</span></th>
-                        <th>공급가액</th>
-                        <th>부가세</th>
-                        <th>합계</th>
-                        <th>프로젝트</th>
-                        <th>비고</th>
-                        <th>상태</th>
+                        <th>메모</th>
                         <th>
                             <a class="btn in_btn plus" id="addRemark" title="추가">
                                 <img src="/images/icon/ico-plus.svg" alt="등록 아이콘" />
@@ -360,39 +328,22 @@
                     </thead>
                     <tr class="item-template-row" style="display: none;">
                         <td>
-                            <input type="text" name="product_code" readonly/>
+                            <input type="text" name="product_code" readOnly/>
                         </td>
                         <td>
                             <div class="input-with-button">
-                                <input type="hidden" name="suju_id" />
+                                <input type="hidden" name="id" />
                                 <input type="text" name="txtProductName" placeholder="코드 또는 품명 입력 후 엔터" autocomplete="off" />
-                                <input type="hidden" name="MaterialGroupName" />
-                                <input type="hidden" name="Material_id" />
+                                <input type="hidden" name="material_id" />
                                 <a class="btn in_btn" title="품목 검색" id="btnProductSearch" >
                                     <img src="/images/icon/btn-srch-black.svg" alt="검색 아이콘" />
                                 </a>
                             </div>
                         </td>
-                        <td><input type="text" name="quantity" placeholder="수량" /></td>
-                        <td>
-                            <div class="input-with-checkbox">
-                                <input type="text" name="unitPrice" placeholder="단가" />
-                                <input type="hidden" name="originalUnitPrice" />
-                                <input type="checkbox" name="VatIncluded" />
-                            </div>
-                        </td>
-                        <td><input type="text" name="supplyAmount" /></td>
-                        <td><input type="text" name="VatAmount" /></td>
-                        <td><input type="text" name="totalAmount" /></td>
-                        <td>
-                            <input name="projectHidden" type="hidden">
-                            <input type="text" name="project" placeholder="입력 후 엔터">
-                        </td>
-                        <td><input type="text" name="description" /></td>
-                         <td>
-                            <input type="hidden" name="State"/>
-                            <input type="text" name="suju_StateName" readonly />
-                        </td>
+                        <td><input type="text" name="qty" placeholder="수량" /></td>
+
+                        <td><input type="text" name="remark" /></td>
+
                         <td class="al_c item_border">
                             <a class="btn in_btn" title="삭제" onclick="removeItemRow(this)">
                                 <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘" />
@@ -403,71 +354,25 @@
                 </table>
             </form>
             </div>
-            <div id="notUpdate" style="display:none;">*계획 또는 출하가 진행된 수주는 수정이 불가합니다.</div>
             <div class="popup-button">
-                    <button type="button" class="btn-popup y_write_auth" id="btnPopSujuSave">저장</button>
+                    <button type="button" class="btn-popup y_write_auth" id="btnPopSave">저장</button>
                     <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
             </div>
         </div>
     </script>
 
-    <script type="text/x-tmpl" id="excelUploadTemplate">
-        <div class="content_wrap popup" id="div_excel_upload">
-
-            <div class="table-wrap">
-                <form id="excelUploadForm">
-                <table class="write-table">
-                    <colgroup>
-                        <col style="width: 25%;">
-                        <col style="width: 75%;">
-                    </colgroup>
-                    <tbody>
-                        <tr>
-                            <th style="text-align: center">
-                                <label>일자</label>
-                            </th>
-                            <td>
-                                <input style="width:300px;" type="date" id="data_date" name="data_date" value=""  />
-                            </td>
-                        </tr>
-                        <tr>
-                            <th style="text-align: center">
-                                <label>첨부파일</label>
-                            </th>
-                            <td>
-                                <input style="width:300px; height: 44px;" type="file" id="upload_file" name="upload_file" enctype="multipart/form-data" accept=".xls, .xlsx"/>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                </form>
-            </div>
-            <div class="pt-2">
-                <textarea id="upload_message" style='display:none;width:100%;height:150px;'></textarea>
-            </div>
-
-            </section>
-
-            <div class="popup-button">
-                <button type="button" class="btn-popup y_write_auth" id="btn_excel_save" >저장</button>
-                <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
-            </div>
-        </div>
-    </script>
 </th:block>
 
 <th:block layout:fragment="scripts">
     <!--<th:block th:replace="/common/columns_setting :: columns_setting"></th:block>-->
     <th:block th:replace="/common/multiform_material :: multiform_material"></th:block>
-    <th:block th:replace="/common/popup_company :: popup_company"></th:block>
-    <th:block th:replace="/common/popup_project :: popup_project"></th:block>
 
     <script type="text/javascript">
 
         let isInternalFormatting = false;
-        class SujuUploadPage {
+        class JobPlanPage {
             constructor() {
-                this.url = '/api/sales/suju';
+                this.url = '/api/production/job_plan';
                 this.grid = null;
                 this.$btnEdit = $('#btnEdit');
                 this.$btnAddNew = $('#btnAddNew');
@@ -493,26 +398,35 @@
                     showMarquee: true,
                     isReadOnly: true,
                     formatItem: (sender, e) => {
+                        const col = e.getColumn();
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            // 날짜 포맷 처리
+                            if (col.binding === 'stdate' || col.binding === 'eddate') {
+                                const raw = e.cell.textContent?.trim();
+                                if (/^\d{8}$/.test(raw)) {
+                                    e.cell.textContent = `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
+                                }
+                            }
+                        }
                     },
                     columns: [
-                        {binding: 'CompanyName', header: '판매처', width: 150, align: 'center'},
-                        {binding: 'JumunDate', header: '수주일', width: 130, align: 'center'},
-                        {binding: 'JumunNumber', header: '수주 번호', width: 150, align: 'center'},
-                        {binding: 'product_name', header: '제품명', width: 400},
-                        {binding: 'TotalPrice', header: '총액', width: 120, align: 'right', format: 'n0'},
-                        {binding: 'DueDate', header: '납기일', width: 130, align: 'center'},
-                        {binding: 'StateName', header: '작업상태', width: 100, align: 'center'},
-                        {binding: 'ShipmentStateName', header: '출하상태', width: 100, align: 'center'},
-                        {binding: 'Description', header: '비고', width: '*'}
+                        {binding: 'stdate', header: '계획 시작일', width: 120, align: 'center'},
+                        {binding: 'eddate', header: '계획 종료일', width: 120, align: 'center'},
+                        {binding: 'actnm', header: '현장명', width: 200},
+                        {binding: 'cmcode', header: '통신', width: 100, align: 'center', format: 'n0'},
+                        {binding: 'description', header: '비고', width: 200},
+                        {binding: 'mat_code', header: '품목 코드', width: 150, align: 'center'},
+                        {binding: 'mat_name', header: '품목', width: 200},
+                        {binding: 'remark', header: '메모', width: 200},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
                 });
 
                 new FlexGridContextMenu(this.grid);
-                this.grid.downloadFileName = '수주 내역';
+                this.grid.downloadFileName = '생산 계획 내역';
 
                 this.grid.hostElement.addEventListener('dblclick', function (e) {
                     let items = _this.grid.selectedItems;
@@ -533,7 +447,7 @@
                         JumunDate: nowDate,
                         DueDate: dueDate,
                     };
-                    _this.showSujuForm(defaultData);
+                    _this.showPlanForm(defaultData);
                 });
 
                 // 수주 수정 클릭
@@ -549,20 +463,7 @@
                         };
                         let fnsuccess = function (result) {
                             result.data['mode'] = 'edit';
-                            const selected = selectedItems[0];
-                            // 기본 설정
-                            if (selected.StateName) {
-                                result.data['StateName'] = selected.StateName;
-                            }
-                            if (selected.State) {
-                                result.data['State'] = selected.State;
-                            }
-
-                            // 출하 상태가 있다면 덮어쓰기
-                            if (selected.ShipmentStateName) {
-                                result.data['StateName'] = selected.ShipmentStateName;
-                            }
-                            _this.showSujuForm(result.data);
+                            _this.showPlanForm(result.data);
                         };
                         AjaxUtil.getAsyncData(_this.url + '/detail', data, fnsuccess);
                     } else {
@@ -577,10 +478,8 @@
                     if (items.length > 0) {
                         Alert.confirm('', '삭제하시겠습니까?',
                             function () {
-                                let id = items[0].id;
-                                let state = items[0].State;
-                                let ShipmentStateName = items[0].ShipmentStateName;
-                                _this.deleteSujuData(id, state, ShipmentStateName);
+                                let id = items[0].head_id;
+                                _this.deletePlanData(id);
                             },
                             function () {
                             }
@@ -600,11 +499,10 @@
                 });
             }
 
-            showSujuForm(data) {
+            showPlanForm(data) {
 
-                //sujuTemplate
                 let _this = this;
-                let content = tmpl('sujuTemplate', data);
+                let content = tmpl('planTemplate', data);
                 let $content = $(content);
 
                 let modalContainer = null;
@@ -613,11 +511,12 @@
                 } else {
                     modalContainer = new PopupDraggable('수정');
                 }
-                modalContainer.open({width: 1300, height: 600, $content});
+                modalContainer.open({width: 1100, height: 550, $content});
+                initPopupDateKindHandler($content);
 
                 // 제품검색
                 let $btnProductSearch = $content.find('#btnProductSearch');
-                let $sujuForm = $content.find('#sujuForm');
+                let $planForm = $content.find('#planForm');
 
                 let $cboSujuType = $content.find('#cboSujuType');
 
@@ -641,45 +540,21 @@
                 });
 
                 // 저장버튼
-                let $btnPopSujuSave = $('#btnPopSujuSave');
+                let $btnPopSave = $('#btnPopSave');
 
                 //수주구분
                 AjaxUtil.fillSelectOptions($cboSujuType, 'system_code', 'choose', 'sales', 'suju_type');
 
                 setTimeout(() => {
-                    FormUtil.BindDataSujuForm(data, $sujuForm);
-                    $content.find('tr:visible').each(function () {
-                        calculateAmounts($(this), 'unit');
-                    });
+                    FormUtil.BindDataSujuForm(data, $planForm);
                 }, 100);
 
-
-
-                if (data.StateName && data.StateName !== '수주') {
-                    $('#btnPopSujuSave').hide();
-                    $('#notUpdate')
-                        .css('margin-top', '10px') // 조건 만족 시 margin-top 적용
-                        .show();
-                    $('.popup-button').css('margin-top', '10px');
-                }
-
-                if (data.SujuQty > 0) {
-                    $SujuQty.val(data.SujuQty.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-                }
-
-
                 // 수주등록 팝업 저장버튼 클릭
-                $btnPopSujuSave.click(function (e) {
+                $btnPopSave.click(function (e) {
 
-                    //수주일, 납기일 체크?
-                    let data = FormUtil.extractForm($sujuForm);
+                    let data = FormUtil.extractForm($planForm);
 
-                    if (!$('#cboCompany').val()) {
-                        Alert.alert('', '판매처를 선택하세요.');
-                        return;
-                    }
-
-                    if (!data.Material_id_0) {
+                    if (!data.material_id_0) {
                         Alert.alert('', '품목을 선택하세요.');
                         return;
                     }
@@ -687,13 +562,12 @@
                     // 2. 각 행의 유효성 체크
                     let index = 0;
                     while (true) {
-                        const materialId = data[`Material_id_${index}`];
+                        const materialId = data[`material_id_${index}`];
 
                         if (materialId === undefined) break; // 끝까지 체크
 
                         if (materialId !== null && materialId !== '') {
-                            const qty = data[`quantity_${index}`];
-                            const price = data[`unitPrice_${index}`];
+                            const qty = data[`qty_${index}`];
 
                             if (!qty) {
                                 Alert.alert('', `(${index + 1}번째 행) 수량을 입력하세요.`);
@@ -707,47 +581,33 @@
                     Alert.confirm('', '저장하시겠습니까?', function () {
                         const items = [];
                         for (let i = 0; i < page.sujuListIndex; i++) {
-                            const materialId = data[`Material_id_${i}`];
+                            const materialId = data[`material_id_${i}`];
                             if (!materialId) continue;
 
                             items.push({
-                                suju_id: data[`suju_id_${i}`] || '',
-                                Material_id: materialId,
-                                MaterialGroupName: data[`MaterialGroupName_${i}`] || '',
-                                product_code: data[`product_code_${i}`] || '',
+                                id: data[`id_${i}`] || '',
+                                material_id: materialId,
                                 txtProductName: data[`txtProductName_${i}`] || '',
-                                quantity: (data[`quantity_${i}`] || '0').replace(/,/g, ''),
-                                unitPrice: (data[`unitPrice_${i}`] || '0').replace(/,/g, ''),
-                                supplyAmount: (data[`supplyAmount_${i}`] || '0').replace(/,/g, ''),
-                                VatAmount: data[`VatAmount_${i}`] === '면세' ? '0' : (data[`VatAmount_${i}`] || '0').replace(/,/g, ''),
-                                totalAmount: (data[`totalAmount_${i}`] || '0').replace(/,/g, ''),
-                                description: data[`description_${i}`] || '',
-                                VatIncluded: data[`VatIncluded_${i}`] === 'on' ? 'Y' : 'N',
-                                projectHidden: data[`projectHidden_${i}`] || '',
-                                unitPriceChanged: (() => {
-                                    const ori = parseFloat(data[`originalUnitPrice_${i}`] || '0');
-                                    const cur = parseFloat((data[`unitPrice_${i}`] || '0').replace(/,/g, ''));
-                                    return ori !== cur;
-                                })()
+                                qty: (data[`qty_${i}`] || '0').replace(/,/g, ''),
+                                remark: data[`remark_${i}`] || '',
                             });
                         }
 
 
                         // 공통 정보 + 리스트 전송
                         const payload = {
-                            id: data.id,
-                            JumunDate: data.JumunDate,
-                            DueDate: data.DueDate,
-                            Company_id: data.Company_id,
-                            CompanyName: data.CompanyName,
-                            SujuType: data.SujuType,
+                            head_id: data.head_id,
+                            actnm: data.actnm,
+                            stdate: data.stdate,
+                            eddate: data.eddate,
+                            datetype: data.datetype,
+                            cmcode: data.cmcode,
                             spjangcd: data.spjangcd,
-                            totalAmountSum: data.totalAmountSum,
-                            Description: data.Description,
+                            description: data.description,
                             items: items
                         };
 
-                        AjaxUtil.postJsonData(_this.url + '/manual_save', payload, function (res) {
+                        AjaxUtil.postJsonData(_this.url + '/save', payload, function (res) {
                             if (res.success) {
                                 Notify.success("저장되었습니다.");
                                 _this.searchMainData();
@@ -761,167 +621,8 @@
 
                 });
 
-                // 단가 정보 가져오기
-                function tryShowPrice($row) {
-                    const mat_pk = $row.find('input[name^="Material_id_"]').val();
-                    const company_id = $content.find('#cboCompany').val();
-                    const JumunDate = $content.find('#JumunDate').val();
-                    const SujuQty = parseFloat($row.find('input[name^="quantity"]').val().replace(/,/g, '') || '0');
-
-                    let url = _this.url + '/readPriceSuju';
-                    let data = {
-                        'mat_pk': mat_pk,
-                        'company_id': company_id,
-                        'JumunDate': JumunDate
-                    };
-
-                    if (mat_pk && company_id && JumunDate) {
-
-                        let fnsuccess = function (result) {
-
-                            let unitPrice = 0;
-                            if (result != null && result.data && result.data.length > 0) {
-                                unitPrice = parseFloat(result.data[0].UnitPrice);
-                                $row.find('input[name^="unitPrice_"]').val(unitPrice.toLocaleString());
-                                $row.find('input[name^="originalUnitPrice_"]').val(unitPrice.toLocaleString());
-
-                            } else {
-                                $row.find('input[name^="unitPrice"]').val('0');
-                                $row.find('input[name^="originalUnitPrice"]').val('0');
-                            }
-                            calculateAmounts($row);
-                        };
-
-                        AjaxUtil.getAsyncData(url, data, fnsuccess);
-                    }
-                }
-
-                function getNumericValue($input) {
-                    if ($input.length === 0) return '';
-                    const val = ($input.val() || '').replace(/[^0-9.]/g, '').trim();
-                    return val ? parseFloat(val) : '';
-                }
-
-                function calculateAmounts($row, source = null) {
-                    if (isInternalFormatting) return;
-                    isInternalFormatting = true;
-
-                    const quantity = getNumericValue($row.find('input[name^="quantity_"]'));
-                    const unitPrice = getNumericValue($row.find('input[name^="unitPrice_"]'));
-                    const isVatIncluded = $row.find('input[name^="VatIncluded_"]').is(':checked');
-                    const isVatExempt = false;
-
-                    let supplyAmount = getNumericValue($row.find('input[name^="supplyAmount_"]'));
-                    let vatAmount = getNumericValue($row.find('input[name^="VatAmount_"]'));
-                    const isSupplyEdited = $row.data('supplyEdited') === true;
-                    const isVatEdited = $row.data('vatEdited') === true;
-
-                    if (source === 'unit' && quantity > 0 && unitPrice >= 0) {
-                        const total = quantity * unitPrice;
-
-                        if (!isSupplyEdited || !isVatEdited) {
-                            if (isVatExempt) {
-                                supplyAmount = total;
-                                vatAmount = 0;
-                            } else if (isVatIncluded) {
-                                supplyAmount = Math.round(total / 1.1);
-                                vatAmount = total - supplyAmount;
-                            } else {
-                                supplyAmount = total;
-                                vatAmount = Math.floor(supplyAmount * 0.1);
-                            }
-
-                            if (!isSupplyEdited) {
-                                $row.find('input[name^="supplyAmount_"]').val(
-                                    supplyAmount === 0 ? '' : supplyAmount.toLocaleString()
-                                );
-                            }
-                            if (!isVatEdited) {
-                                $row.find('input[name^="VatAmount_"]').val(
-                                    vatAmount === 0 ? '' : (isVatExempt ? '면세' : vatAmount.toLocaleString())
-                                );
-
-                            }
-                        }
-                    }
-
-                    if (!isNaN(supplyAmount) && !isNaN(vatAmount)) {
-                        const total = supplyAmount + vatAmount;
-                        $row.find('input[name^="totalAmount_"]').val(
-                            total === 0 ? '' : total.toLocaleString()
-                        );
-
-                    }
-
-                    if (quantity !== '') {
-                        $row.find('input[name^="quantity_"]').val(quantity.toLocaleString());
-                    }
-                    if (unitPrice !== '') {
-                        $row.find('input[name^="unitPrice_"]').val(unitPrice.toLocaleString());
-                    }
-
-                    calculateTotalSum();
-                    isInternalFormatting = false;
-                }
-
-                function calculateTotalSum() {
-                    let sum = 0;
-
-                    $content.find('tr:visible').each(function () {
-                        const $row = $(this);
-                        const $totalInput = $row.find('input[name^="totalAmount_"]');
-
-                        const raw = ($totalInput.val() || '').replace(/[^0-9.]/g, '').trim();
-                        if (raw !== '') {
-                            const total = parseFloat(raw);
-                            if (!isNaN(total)) {
-                                sum += total;
-                            }
-                        }
-                    });
-
-                    $content.find('#totalAmountSum').val(sum > 0 ? sum.toLocaleString() : '');
-                }
-
-
-                // 수량/단가 입력 시
-                $content.on('input', 'input[name^="quantity_"], input[name^="unitPrice_"]', function () {
-                    const $row = $(this).closest('tr');
-                    $row.removeData('supplyEdited');
-                    $row.removeData('vatEdited');
-                    calculateAmounts($row, 'unit');
-                });
-
-                // 공급가 입력
-                $content.on('input', 'input[name^="supplyAmount_"]', function () {
-                    const $row = $(this).closest('tr');
-                    $row.data('supplyEdited', true);
-                    calculateAmounts($row);
-                });
-
-                // 세액 입력
-                $content.on('input', 'input[name^="VatAmount_"]', function () {
-                    const $row = $(this).closest('tr');
-                    $row.data('vatEdited', true);
-                    calculateAmounts($row);
-                });
-
-                // 합계 직접 입력 시 총합 계산
-                $content.on('input', 'input[name^="totalAmount_"]', function () {
-                    calculateTotalSum();
-                });
-
-                // 부가세 체크 변경
-                $content.on('change', 'input[name^="VatIncluded_"]', function () {
-                    const $row = $(this).closest('tr');
-                    $(this).val(this.checked ? 'Y' : 'N');
-                    $row.removeData('supplyEdited');
-                    $row.removeData('vatEdited');
-                    calculateAmounts($row, 'unit');
-                });
-
                 // 숫자 포맷 (input 중 formatting)
-                $content.on('input', 'input[name^="quantity_"], input[name^="unitPrice_"], input[name^="supplyAmount_"], input[name^="VatAmount_"], input[name^="totalAmount_"]', function () {
+                $content.on('input', 'input[name^="qty_"]', function () {
                     if (isInternalFormatting) return;
                     isInternalFormatting = true;
 
@@ -949,9 +650,8 @@
                     const $row = $(this).closest('tr');
 
                     const $productInput = $row.find('input[name^="txtProductName_"]');
-                    const $productId = $row.find('input[name^="Material_id_"]');
+                    const $productId = $row.find('input[name^="material_id_"]');
                     const $productCode = $row.find('input[name^="product_code_"]');
-                    const $materialGroup = $row.find('input[name^="MaterialGroupName_"]');
 
                     const pop = new PopMatComponent();
                     pop.material_type = 'product,sangpum';
@@ -960,8 +660,6 @@
                         $productInput.val(item.Name);
                         $productId.val(item.id);
                         $productCode.val(item.Code);
-                        $materialGroup.val(item.group_name);
-                        tryShowPrice($row);
                     });
 
 
@@ -976,7 +674,7 @@
                     const $row = $field.closest('tr');
 
                     const $productInput = $row.find('input[name^="txtProductName_"]');
-                    const $productId = $row.find('input[name^="Material_id_"]');
+                    const $productId = $row.find('input[name^="material_id_"]');
                     const $productCode = $row.find('input[name^="product_code_"]');
 
                     const keyword = $field.val().trim();
@@ -987,7 +685,6 @@
                         $productId.val(item.id || '');
                         $productInput.val(item.Name || '');
                         $productCode.val(item.Code || '');
-                        tryShowPrice($row);
                     };
 
                     if (!keyword) {
@@ -1020,56 +717,13 @@
                     const $field = $(this);
                     const $row = $field.closest('tr');
 
-                    const $productId = $row.find('input[name^="Material_id_"]');
+                    const $productId = $row.find('input[name^="material_id_"]');
                     const $productCode = $row.find('input[name^="product_code_"]');
 
                     if ($field.val().trim() === '') {
                         // 값이 비었을 경우 연관된 필드 초기화
                         $productId.val('');
                         $productCode.val('');
-                    }
-                });
-
-
-                // 프로젝트 팝업 열기
-                $content.on('keydown', 'input[name^="project_"]', function (e) {
-                    if (e.key !== 'Enter' && e.keyCode !== 13) return;
-
-                    e.preventDefault();
-
-                    const $field = $(this);
-                    const $row = $field.closest('tr');
-
-                    const keyword = $field.val().trim();
-                    const pop = new PopProjectComponent();
-
-                    const callback = function (item) {
-                        $row.find('input[name^="projectHidden_"]').val(item.projno || '');
-                        $row.find('input[name^="project_"]').val(item.projnm || '');
-                    };
-
-                    if (!keyword) {
-                        pop.focusAfterClose = $field[0];
-                        pop.show(callback);
-                        return;
-                    }
-
-                    const data = {
-                        srchName: keyword,
-                        spjangcd: sessionStorage.getItem('spjangcd')
-                    };
-
-                    const result = AjaxUtil.getSyncData('/api/popup/search_project', data);
-                    const rows = result?.data || [];
-
-                    if (rows.length === 1) {
-                        callback(rows[0]);
-                    } else {
-                        pop.show(callback);
-                        setTimeout(() => {
-                            pop.$srchName.val(keyword);
-                            pop.$btnSearch.trigger('click');
-                        }, 50);
                     }
                 });
 
@@ -1105,13 +759,8 @@
 
                     const focusOrder = [
                         'txtProductName_',
-                        'quantity_',
-                        'unitPrice_',
-                        'supplyAmount_',
-                        'VatAmount_',
-                        'totalAmount_',
-                        'project_',
-                        'description_',
+                        'qty_',
+                        'remark_',
                     ];
 
                     const currentIndex = focusOrder.findIndex(prefix => nameAttr.startsWith(prefix));
@@ -1134,7 +783,7 @@
                             ? $row.nextAll('tr:visible').first()
                             : $row.prevAll('tr:visible').first();
 
-                        const allowAutoAdd = ['txtProductName_', 'description_'];
+                        const allowAutoAdd = ['txtProductName_', 'remark_'];
                         const isAllowedField = allowAutoAdd.some(prefix => nameAttr.startsWith(prefix));
 
                         // ⬇️ 방향키 + 현재 행이 마지막 + 허용된 필드일 경우 → 행 자동 추가
@@ -1182,10 +831,10 @@
 
             }
 
-            deleteSujuData(id, state, ShipmentStateName) {
+            deletePlanData(id) {
                 let _this = this;
                 let url = _this.url + '/delete';
-                let data = {'id': id, 'State': state, 'ShipmentStateName': ShipmentStateName}
+                let data = {'id': id}
                 let fnsuccess = function (res) {
                     if (res.success) {
                         Notify.success('삭제되었습니다.');
@@ -1197,11 +846,6 @@
 
                 AjaxUtil.postAsyncData(url, data, fnsuccess);
             }
-
-            // exportExcel() {
-            //     var targetview = this.grid;
-            //     targetview.exportExcel('수주내역.xls');
-            // }
 
             searchMainData() {
                 let _this = this;
@@ -1219,6 +863,7 @@
 
                 let fnsuccess = function (result) {
                     if (result != null) {
+                        console.log('result', result.data);
                         _this.viewData.sourceCollection = result.data;
 
                         if (window.selectedGridId) {
@@ -1231,75 +876,6 @@
 
             }
 
-            // 엑셀 업로드 버튼
-            showPopupExcelUpload(data) {
-                let _this = this;
-                let content = tmpl('excelUploadTemplate', data);
-                let $content = $(content);
-                $content.find('#data_date').val(data.data_date);
-                $content.find('#day_index').val(data.day_index);
-
-                //팝업공통모듈
-                let modalContainer = new PopupDraggable('엑셀 업로드');
-                modalContainer.open({width: 440, height: 220, $content});
-
-
-                $content.find('#btn_excel_save').on('click', function () {
-                    let $form = $content.find('#excelUploadForm');
-                    Alert.confirm('',
-                        '저장하시겠습니까?',
-                        function () {
-                            _this.saveSujuBulkData($form, modalContainer);
-                            //modalContainer.close();
-                        },
-                        function () {
-                        }
-                    );
-                });
-            }
-
-            // 엑셀 업로드 저장
-            saveSujuBulkData($form, modalContainer) {
-                let _this = this;
-                var form = $('#excelUploadForm')[0];
-                var formData = new FormData(form);
-
-                formData['data_date'] = $('#srchStartDt').val();
-                formData.append("uploadfile", $('#upload_file')[0].files[0].name);
-
-                let result = AjaxUtil.postFileSyncData(_this.url + '/upload_save', formData);
-
-                if (result) {
-                    let message = '저장되었습니다.';
-                    if (result.success) {
-                        Notify.success(message);
-                        _this.searchMainData();
-                        modalContainer.close();
-                    } else {
-
-                        Alert.alert('', result.message);
-
-                        /*let $divMessage = modalContainer.$content.find('#upload_message');
-                        $divMessage.text(JSON.stringify(result.error_items));
-                        $divMessage.show();*/
-                    }
-                }
-
-            }
-
-            downloadExcelForm() {
-                let _this = this;
-                //let url = '/api/files/mes_form?action=suju_upload';
-                let fileName = "수주업로드양식.xlsx";
-                let url = '/api/files/mes_form?file_name=' + fileName;
-                /*
-                let data = {
-                    //'tableName' : tableName,
-                    'file_name': "수주업로드양식.xlsx",
-                };
-                */
-                AjaxUtil.downloadFile(url, fileName);
-            }
 
         }
 
@@ -1328,13 +904,120 @@
             $targetRow.remove();
         }
 
+        // 팝업 날짜 계산 로직
+        function initPopupDateKindHandler($content) {
+            const $datetype = $content.find('#datetype');
+            const $extraSelectBox = $('<span style="margin-top:10px;" id="extraSelectBox"></span>');
+            const $stdate = $content.find('#stdate');
+            const $eddate = $content.find('#eddate');
+
+            $datetype.after($extraSelectBox);
+
+            $datetype.on('change', function () {
+                const type = $(this).val();
+                $extraSelectBox.empty();
+                $stdate.val('').prop('readOnly', false);
+                $eddate.val('').prop('readOnly', false);
+
+                if (type === 'week') {
+                    const $weekSelect = $('<select id="popupWeekSelector"></select>');
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const currentWeek = getISOWeekNumber(now);
+                    for (let i = 1; i <= 52; i++) {
+                        const value = `${year}-W${String(i).padStart(2, "0")}`;
+                        const text = `${year}년 ${i}주차`;
+                        const $option = $(`<option value="${value}">${text}</option>`);
+                        if (i === currentWeek) {
+                            $option.prop("selected", true); // ✅ selected 설정
+                        }
+                        $weekSelect.append($option);
+                    }
+
+                    $weekSelect.on('change', function () {
+                        const [y, w] = $(this).val().split('-W');
+                        const weekNum = parseInt(w, 10);
+                        const start = getDateOfISOWeek(weekNum, y);
+                        const end = new Date(start);
+                        end.setDate(start.getDate() + 6);
+                        $stdate.val(formatDate(start)).prop('readOnly', true);
+                        $eddate.val(formatDate(end)).prop('readOnly', true);
+                    });
+
+                    $extraSelectBox.append($weekSelect);
+                    $weekSelect.trigger('change');
+                } else if (type === 'month') {
+                    const $monthSelect = $('<select id="popupMonthSelector"></select>');
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const currentMonth = now.getMonth() + 1;
+
+                    for (let i = 1; i <= 12; i++) {
+                        const value = `${year}-${String(i).padStart(2, "0")}`;
+                        const text = `${year}년 ${i}월`;
+                        const $option = $(`<option value="${value}">${text}</option>`);
+                        if (i === currentMonth) {
+                            $option.prop("selected", true);
+                        }
+                        $monthSelect.append($option);
+                    }
+
+                    $monthSelect.on('change', function () {
+                        const [y, m] = $(this).val().split('-');
+                        const start = new Date(parseInt(y), parseInt(m) - 1, 1);
+                        const end = new Date(parseInt(y), parseInt(m), 0);
+                        $stdate.val(formatDate(start)).prop('readOnly', true);
+                        $eddate.val(formatDate(end)).prop('readOnly', true);
+                    });
+
+                    $extraSelectBox.append($monthSelect);
+                    $monthSelect.trigger('change');
+                } else{
+                    const startVal = CommonUtil.getYYYYMMDD(-7);
+                    const endVal = CommonUtil.getYYYYMMDD();
+
+                    $stdate.val(startVal).prop('readOnly', false);
+                    $eddate.val(endVal).prop('readOnly', false);
+                }
+
+            });
+
+            // 최초 적용
+            $datetype.trigger('change');
+        }
+
+        // ISO 주차 계산
+        function getDateOfISOWeek(week, year) {
+            const jan4 = new Date(year, 0, 4);
+            const day = jan4.getDay() || 7;
+            const start = new Date(jan4);
+            start.setDate(jan4.getDate() - day + 1 + (week - 1) * 7);
+            return start;
+        }
+
+        function formatDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, "0");
+            const d = String(date.getDate()).padStart(2, "0");
+            return `${y}-${m}-${d}`;
+        }
+
+        function getISOWeekNumber(date) {
+            const target = new Date(date.valueOf());
+            const dayNum = (date.getDay() + 6) % 7;
+            target.setDate(target.getDate() - dayNum + 3);
+            const firstThursday = new Date(target.getFullYear(), 0, 4);
+            const diff = target - firstThursday;
+            return 1 + Math.round(diff / (7 * 24 * 60 * 60 * 1000));
+        }
+
+
 
         let page = null;
 
         $(document).ready(function (e) {
 
-            page = new SujuUploadPage();
-
+            page = new JobPlanPage();
 
             $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
             $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
@@ -1347,21 +1030,126 @@
                 page.searchMainData();
             });
 
-            // 양식 다운로드
-            $('#btnDownloadTemplate').click(function (e) {
-                page.downloadExcelForm();
-            });
-
-            // 엑셀 업로드 버튼
-            $('#btnShowUpload').click(function (e) {
-                let data = {
-                    'id': '',
-                    'data_date': CommonUtil.getYYYYMMDD(),
-                };
-                page.showPopupExcelUpload(data);
-            });
 
         })
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const cboDateKind = document.getElementById("cboDateKind");
+            const extraSelectBox = document.getElementById("extraSelectBox");
+            const srchStartDt = document.getElementById("srchStartDt");
+            const srchEndDt = document.getElementById("srchEndDt");
+
+            cboDateKind.addEventListener("change", function () {
+                const type = this.value;
+
+                extraSelectBox.innerHTML = ""; // 초기화
+                srchStartDt.value = "";
+                srchEndDt.value = "";
+                srchStartDt.readOnly = false;
+                srchEndDt.readOnly = false;
+
+                if (type === "week") {
+                    const select = document.createElement("select");
+                    select.id = "weekSelector";
+
+                    const now = new Date();
+                    const currentYear = now.getFullYear();
+                    const currentWeek = getISOWeekNumber(now);
+                    for (let i = 1; i <= 52; i++) {
+                        const option = document.createElement("option");
+                        option.value = `${currentYear}-W${String(i).padStart(2, "0")}`;
+                        option.textContent = `${currentYear}년 ${i}주차`;
+                        if (i === currentWeek) {
+                            option.selected = true; // ← 현재 주차 자동 선택
+                        }
+                        select.appendChild(option);
+                    }
+
+                    select.addEventListener("change", function () {
+                        const week = this.value;
+                        const [year, weekNumStr] = week.split("-W");
+                        const weekNum = parseInt(weekNumStr, 10);
+
+                        const start = getDateOfISOWeek(weekNum, year);
+                        const end = new Date(start);
+                        end.setDate(start.getDate() + 6);
+
+                        srchStartDt.value = formatDate(start);
+                        srchEndDt.value = formatDate(end);
+                        srchStartDt.readOnly = true;
+                        srchEndDt.readOnly = true;
+                    });
+
+                    extraSelectBox.appendChild(select);
+                    select.dispatchEvent(new Event("change")); // 초기 선택값 반영
+                }
+
+                else if (type === "month") {
+                    const select = document.createElement("select");
+                    select.id = "monthSelector";
+
+                    const now = new Date();
+                    const currentYear = now.getFullYear();
+                    const currentMonth = now.getMonth();
+
+                    for (let i = 0; i < 12; i++) {
+                        const month = new Date(currentYear, i, 1);
+                        const option = document.createElement("option");
+                        option.value = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}`;
+                        option.textContent = `${month.getFullYear()}년 ${month.getMonth() + 1}월`;
+                        if (i === currentMonth) {
+                            option.selected = true; // ← 현재 달 자동 선택
+                        }
+                        select.appendChild(option);
+                    }
+
+                    select.selectedIndex = currentMonth;
+
+                    select.addEventListener("change", function () {
+                        const [year, month] = this.value.split("-");
+                        const start = new Date(parseInt(year), parseInt(month) - 1, 1);
+                        const end = new Date(parseInt(year), parseInt(month), 0); // 말일
+
+                        srchStartDt.value = formatDate(start);
+                        srchEndDt.value = formatDate(end);
+                        srchStartDt.readOnly = true;
+                        srchEndDt.readOnly = true;
+                    });
+
+                    extraSelectBox.appendChild(select);
+                    select.dispatchEvent(new Event("change")); // 초기 선택값 반영
+                } else {
+                    const startVal = CommonUtil.getYYYYMMDD(-7);
+                    const endVal = CommonUtil.getYYYYMMDD();
+
+                    $('#srchStartDt').val(startVal).prop('readOnly', false);
+                    $('#srchEndDt').val(endVal).prop('readOnly', false);
+                }
+            });
+
+            function getDateOfISOWeek(week, year) {
+                const jan4 = new Date(year, 0, 4); // 항상 1월 4일 기준
+                const day = jan4.getDay() || 7;
+                const start = new Date(jan4);
+                start.setDate(jan4.getDate() - day + 1 + (week - 1) * 7);
+                return start;
+            }
+
+            function formatDate(date) {
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2, "0");
+                const d = String(date.getDate()).padStart(2, "0");
+                return `${y}-${m}-${d}`;
+            }
+            function getISOWeekNumber(date) {
+                const target = new Date(date.valueOf());
+                const dayNum = (date.getDay() + 6) % 7;
+                target.setDate(target.getDate() - dayNum + 3);
+                const firstThursday = new Date(target.getFullYear(), 0, 4);
+                const diff = target - firstThursday;
+                return 1 + Math.round(diff / (7 * 24 * 60 * 60 * 1000));
+            }
+        });
 
 
     </script>

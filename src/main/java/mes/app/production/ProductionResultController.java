@@ -396,6 +396,8 @@ public class ProductionResultController {
 
         JobResDefect jrd = null;
 
+        jobResDefectRepository.deleteByJobResponseId(jrPk);
+
         for (int i = 0; i < items.size(); i++) {
 
             Integer defectId = Integer.parseInt(items.get(i).get("defect_id").toString());

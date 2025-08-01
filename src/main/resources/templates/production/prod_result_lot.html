@@ -2376,26 +2376,27 @@
                 let jr_pk = $('#tabBasic').find('#id').val();
                 let workcenterId = $('#tabBasic').find('#workcenter_id').val();
 
-                let defectList = [];
-                let dataDefault = {
-                    'defect_id': '',
-                    'defect_type': '',
-                    'defect_qty': '',
-                    'defect_remark': '',
-                }
+                const defectMap = new Map();
 
-                defectGridList.forEach(function (item) {
-                    let defectItem = {};
-                    $.each(dataDefault, function (key) {
-                        defectItem[key] = item[key]
-                    });
+                defectGridList.forEach((row) => {
+                    const id = row.defect_id;
+                    const qty = parseFloat(row.defect_qty);
+                    if (!id) return;                // id가 없으면 스킵
+                    if (!isFinite(qty) || qty <= 0) return; // 0 또는 빈값/NaN은 제외
 
-                    if (!defectItem.defect_qty) {
-                        defectItem.defect_qty = 0;
+                    if (!defectMap.has(id)) {
+                        defectMap.set(id, {
+                            defect_id: id,
+                            defect_type: row.defect_type || null,
+                            defect_qty: qty,
+                            defect_remark: row.defect_remark ?? null,
+                        });
+                    } else {
+                        // 같은 defect_id가 여러 행에 있으면 수량 합산
+                        defectMap.get(id).defect_qty += qty;
                     }
-
-                    defectList.push(defectItem);
                 });
+                const defectList = Array.from(defectMap.values());
 
                 let data = {
                     'jr_pk': jr_pk,
@@ -2435,12 +2436,12 @@
                 AjaxUtil.postAsyncData(url, data, fnSuccess);
             }
 
-            getModifiedList() {
-                // 최신 변경 사항을 반영하기 위해 `commitEdit()` 호출
-                this.defectGrid.collectionView.commitEdit();
-
-                return this.modifiedItems.length > 0 ? [...this.modifiedItems] : [];
-            }
+            // getModifiedList() {
+            //     // 최신 변경 사항을 반영하기 위해 `commitEdit()` 호출
+            //     this.defectGrid.collectionView.commitEdit();
+            //
+            //     return this.modifiedItems.length > 0 ? [...this.modifiedItems] : [];
+            // }
 
 
             // 투입목록 조회
@@ -3234,8 +3235,8 @@
 
             // 저장 메서드 호출
             $('#btnDefectSave').click(function (e) {
-                const modifiedList = page.getModifiedList(); // 수정된 데이터 가져오기
-                page.saveDefectList(modifiedList); // 저장 메서드 호출
+                const fullList = page.defectGrid.collectionView.items;
+                page.saveDefectList(fullList); // 저장 메서드 호출
             });
 
             // 투입내역 저장
