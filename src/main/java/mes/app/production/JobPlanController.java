@@ -63,7 +63,7 @@ public class JobPlanController {
 	SqlRunner sqlRunner;
 
 
-	// 수주 목록 조회 
+	// 목록 조회
 	@GetMapping("/read")
 	public AjaxResult getPlanList(
 			@RequestParam(value="date_kind", required=false) String date_kind,
@@ -72,7 +72,9 @@ public class JobPlanController {
 			@RequestParam(value="spjangcd") String spjangcd,
 			HttpServletRequest request) {
 
-		
+		if (start_date != null) start_date = start_date.replaceAll("-", "");
+		if (end_date != null) end_date = end_date.replaceAll("-", "");
+
 		List<Map<String, Object>> items = this.jobPlanService.getList(date_kind, start_date, end_date, spjangcd);
 		
 		AjaxResult result = new AjaxResult();
@@ -81,12 +83,12 @@ public class JobPlanController {
 		return result;
 	}
 	
-	// 수주 상세정보 조회
+	// 상세정보 조회
 	@GetMapping("/detail")
 	public AjaxResult getPlanDetail(
-			@RequestParam("id") int id,
+			@RequestParam("head_id") int head_id,
 			HttpServletRequest request) {
-		Map<String, Object> item = this.jobPlanService.getDetail(id);
+		Map<String, Object> item = this.jobPlanService.getDetail(head_id);
 		
 		AjaxResult result = new AjaxResult();
 		result.data = item;
@@ -94,7 +96,7 @@ public class JobPlanController {
 		return result;
 	}
 
-	// 수주 등록 
+	// 등록
 	@PostMapping("/save")
 	@Transactional
 	public AjaxResult PlanSave(@RequestBody Map<String, Object> payload, Authentication auth) {
@@ -177,12 +179,14 @@ public class JobPlanController {
 	@Transactional
 	@PostMapping("/delete")
 	public AjaxResult deletePlan(
-			@RequestParam("id") Integer id) {
+			@RequestParam("id") Integer head_id) {
 		
 		AjaxResult result = new AjaxResult();
 
-//		JobPlanHeadRepository.deleteBySujuHeadId(id);
-//		JobPlanRepository.deleteById(id);
+		jobPlanRepository.deleteByHead_Id(Long.valueOf(head_id));
+
+		// 2. 그 다음 job_plan_head 삭제
+		jobPlanHeadRepository.deleteById(Long.valueOf(head_id));
 		
 		return result;
 	}

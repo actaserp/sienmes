@@ -769,6 +769,129 @@ let FormUtil = {
             $tbody.append($newRow);
         }
     },
+    BindDataPlanForm : function (_resultSet, $form) {
+        page.resetPlanListIndex();
+        $.each(_resultSet, function (key, value) {
+            if (key === '') value = null;
+            if (value === '') value = null;
+
+            var $frmCtl = $form.find('[name=' + key + ']');
+            if ($frmCtl.length == 0) return true;
+
+            let object = $frmCtl[0];
+            var tagName = object === undefined ? '' : object.tagName.toUpperCase();
+            var tagClassName = object === undefined ? '' : object.className.toUpperCase();
+            let type_name = object.type;
+
+            if (tagName == 'SELECT') {
+                if ($frmCtl.is(':disabled')) { $frmCtl.removeAttr('disabled'); }
+                $frmCtl.val(value);
+            } else if (tagName == 'INPUT' || tagName == 'TEXTAREA') {
+                if ($frmCtl.is(':disabled')) { $frmCtl.removeAttr('disabled'); }
+
+                if (type_name == 'checkbox') {
+                    let checkValue = $frmCtl.val();
+                    if (checkValue != undefined)
+                        $frmCtl.prop('checked', value == checkValue);
+                    else
+                        $frmCtl.prop('checked', value);
+                } else if (type_name == 'radio') {
+                    $frmCtl.removeAttr('checked');
+                    var $radioCtl = $('input:radio[name=' + key + ']:input[value=' + value + ']');
+                    $radioCtl.prop('checked', true);
+                    $radioCtl.attr('checked', true);
+                } else {
+                    if ($.isNumeric(value) || value === null) {
+                        let numberFields = ['unitPrice', 'vat', 'price', 'totalAmount'];
+                        if (numberFields.includes(key)) {
+                            $frmCtl.val(Number(value).toLocaleString());
+                        } else {
+                            $frmCtl.val(value);
+                        }
+                    } else {
+                        $frmCtl.val(value.replace('&amp;', '&'));
+                    }
+                }
+            } else if (tagName == 'SPAN') {
+                if (tagClassName == 'DATE') {
+                    var ddspan = new Date(value);
+                    $frmCtl.text(ddspan.toLocaleString());
+                } else {
+                    $frmCtl.text(value);
+                }
+            }
+        });
+
+        // sujuList 바인딩
+        const planList = _resultSet.planList ?? [];
+        const planListCount = planList.length;
+        const minRowCount = 3;
+
+        const $tbody = $form.find('.item-table tbody');
+        const $template = $tbody.find('.item-template-row');
+
+        // 1. 실데이터 바인딩
+        planList.forEach(item => {
+            const $newRow = $template.clone().removeClass('item-template-row').show();
+            const index = page.nextPlanListIndex();
+
+            $newRow.find('input').each(function () {
+                const $input = $(this);
+                let baseName = $input.attr('name');
+
+                if (!baseName) return;
+
+                // name 속성 업데이트 (예: unitPrice_0)
+                const nameWithoutIndex = baseName.replace(/_\d+$/, '');
+                const newName = `${nameWithoutIndex}_${index}`;
+                $input.attr('name', newName);
+
+                if (nameWithoutIndex === 'VatIncluded') {
+                    if (String(item.invatyn).toUpperCase() === 'N') {
+                        $input.prop('checked', false);
+                    } else {
+                        $input.prop('checked', true);
+                    }
+                }
+                // 일반 필드 처리
+                else if (item.hasOwnProperty(nameWithoutIndex)) {
+                    if ($input.attr('type') === 'checkbox') {
+                        const isChecked = item[nameWithoutIndex] === true || item[nameWithoutIndex] === 'Y';
+                        $input.prop('checked', isChecked);
+                    } else {
+                        $input.val(item[nameWithoutIndex]);
+                    }
+                }
+            });
+
+            $newRow.find('a[title="삭제"]').attr('id', `btnDelItem_${index}`);
+            $tbody.append($newRow);
+        });
+
+        // 2. 부족한 줄 만큼 빈 행 추가
+        const additionalCount = Math.max(minRowCount - planListCount, 0);
+
+        for (let i = 0; i < additionalCount; i++) {
+            const $newRow = $template.clone().removeClass('item-template-row').show();
+            const index = page.nextPlanListIndex();
+            $newRow.find('input').each(function () {
+                const $input = $(this);
+                const baseName = $input.attr('name');
+
+                if (!baseName) return;
+
+                const nameWithoutIndex = baseName.replace(/_\d+$/, '');
+                const newName = `${nameWithoutIndex}_${index}`;
+                $input.attr('name', newName);
+
+                if (nameWithoutIndex === 'VatIncluded') {
+                    $input.prop('checked', true);
+                }
+            });
+            $newRow.find('a[title="삭제"]').attr('id', `btnDelItem_${index}`);
+            $tbody.append($newRow);
+        }
+    },
     BindInvoiceDataForm: function (_resultSet, $form) {
         $.each(_resultSet, function (key, value) {
             // 빈스트링으로 오는 값은 반드시 null 값으로 치환한다. 또는 json 에서 null 로 넘겨준다

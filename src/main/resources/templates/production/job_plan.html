@@ -5,6 +5,7 @@
             width: 100px;
             height: 40px;
         }
+
         input[type="date"][readonly] {
             background-color: #EDEFF5;
         }
@@ -86,28 +87,28 @@
                                 등록
                             </a>
                         </li>
+                        <!--                        <li>-->
+                        <!--                            <a class="btn btn-delete" title="삭제" id="btnDelete">-->
+                        <!--                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">-->
+                        <!--                                삭제-->
+                        <!--                            </a>-->
+                        <!--                        </li>-->
                         <li>
-                            <a class="btn btn-delete" title="삭제" id="btnDelete">
-                                <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                삭제
+                            <a class="btn btn-edit" title="수정" id="btnEdit">
+                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">
+                                수정
                             </a>
-                        </li>
-<!--                        <li>-->
-<!--                            <a class="btn btn-edit" title="수정" id="btnEdit">-->
-<!--                                <img src="/images/icon/ico-edit.svg" alt="수정 아이콘">-->
-<!--                                수정-->
-<!--                            </a>-->
-<!--                        </li>-->
-<!--                        <li>-->
-<!--                            <a class="btn" title="엑셀 업로드" id="btnShowUpload">-->
-<!--                                엑셀 업로드-->
-<!--                            </a>-->
-<!--                        </li>-->
-<!--                        <li>-->
-<!--                            <a class="btn" title="양식 다운로드" id="btnDownloadTemplate">-->
-<!--                                양식 다운로드-->
-<!--                            </a>-->
-<!--                        </li>-->
+                            <!--                        </li>-->
+                            <!--                        <li>-->
+                            <!--                            <a class="btn" title="엑셀 업로드" id="btnShowUpload">-->
+                            <!--                                엑셀 업로드-->
+                            <!--                            </a>-->
+                            <!--                        </li>-->
+                            <!--                        <li>-->
+                            <!--                            <a class="btn" title="양식 다운로드" id="btnDownloadTemplate">-->
+                            <!--                                양식 다운로드-->
+                            <!--                            </a>-->
+                            <!--                        </li>-->
                     </ul>
                 </div>
             </div>
@@ -276,18 +277,16 @@
                         </tr>
                         <tr>
                             <th style="text-align: center">
-                                <label for="cboCompany">현장명</label>
+                                <label for="actnm">현장명</label>
                             </th>
                             <td>
                                 <input class="form-control2" type="text" id="actnm" name="actnm">
                             </td>
                             <th style="text-align: center">
-                                <label for="cboSujuType">통신</label>
+                                <label for="cmcode">통신</label>
                             </th>
                             <td colspan="3">
                                 <select id="cmcode" name="cmcode">
-                                    <option value="무통신">무통신</option>
-                                    <option value="코멕스">코멕스</option>
                                 </select>
                             </td>
                         </tr>
@@ -357,6 +356,7 @@
             <div class="popup-button">
                     <button type="button" class="btn-popup y_write_auth" id="btnPopSave">저장</button>
                     <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
+                    <button type="button" class="btn-popup y_write_auth" id="btnDelete" style="display:none;">전체 삭제</button>
             </div>
         </div>
     </script>
@@ -370,6 +370,7 @@
     <script type="text/javascript">
 
         let isInternalFormatting = false;
+
         class JobPlanPage {
             constructor() {
                 this.url = '/api/production/job_plan';
@@ -381,12 +382,12 @@
 
             }
 
-            resetSujuListIndex() {
-                this.sujuListIndex = 0;
+            resetPlanListIndex() {
+                this.planListIndex = 0;
             }
 
-            nextSujuListIndex() {
-                return this.sujuListIndex++;
+            nextPlanListIndex() {
+                return this.planListIndex++;
             }
 
             init() {
@@ -419,7 +420,8 @@
                         {binding: 'cmcode', header: '통신', width: 100, align: 'center', format: 'n0'},
                         {binding: 'description', header: '비고', width: 200},
                         {binding: 'mat_code', header: '품목 코드', width: 150, align: 'center'},
-                        {binding: 'mat_name', header: '품목', width: 200},
+                        {binding: 'mat_name', header: '품목', width: 300},
+                        {binding: 'qty', header: '수량', width: 100},
                         {binding: 'remark', header: '메모', width: 200},
                     ],
                     itemsSource: this.viewData, // 데이터를 설정할 배열
@@ -454,11 +456,11 @@
                 this.$btnEdit.click(function (e) {
                     let selectedItems = _this.grid.selectedItems;
                     const it = _this.grid.selectedItems && _this.grid.selectedItems[0];
-
+                    console.log('it', it);
                     if (selectedItems.length === 1) {
-                        window.selectedGridId = it.id;
+                        window.selectedGridId = it.mat_code;
                         let data = {
-                            id: selectedItems[0].id,
+                            head_id: selectedItems[0].head_id,
                             action: 'detail'
                         };
                         let fnsuccess = function (result) {
@@ -470,25 +472,6 @@
                         Alert.alert('', '선택된 데이터가 없습니다.');
                     }
 
-                });
-
-                // 삭제 버튼
-                $('#btnDelete').click(function (e) {
-                    let items = _this.grid.selectedItems;
-                    if (items.length > 0) {
-                        Alert.confirm('', '삭제하시겠습니까?',
-                            function () {
-                                let id = items[0].head_id;
-                                _this.deletePlanData(id);
-                            },
-                            function () {
-                            }
-                        );
-                    } else {
-                        Alert.alert('', '삭제할 항목을 선택해주세요.', function () {
-                            $(this).focus();
-                        });
-                    }
                 });
 
                 // 엔터키 검색
@@ -504,49 +487,46 @@
                 let _this = this;
                 let content = tmpl('planTemplate', data);
                 let $content = $(content);
+                let $btnDelete = $content.find('#btnDelete');
+                let $planForm = $content.find('#planForm');
+                let $cmcode = $content.find('#cmcode');
 
                 let modalContainer = null;
                 if (data.mode === 'new') {
                     modalContainer = new PopupDraggable('등록');
                 } else {
                     modalContainer = new PopupDraggable('수정');
+                    $btnDelete.show();
                 }
                 modalContainer.open({width: 1100, height: 550, $content});
-                initPopupDateKindHandler($content);
-
-                // 제품검색
-                let $btnProductSearch = $content.find('#btnProductSearch');
-                let $planForm = $content.find('#planForm');
-
-                let $cboSujuType = $content.find('#cboSujuType');
-
-                if (data.mode === 'new') {
-                    $btnProductSearch.removeAttr('disabled');
-                }
-
-                $content.find('#btnCompanySearch').click(function () {
-                    let poppage = new PopCompComponent();
-                    let $poppage = $(poppage);
-                    let searchcallback = function (items) {
-                        $content.find('#cboCompany').val(items.id);
-                        $content.find('#CompanyName').val(items.compname);
-
-                        // if ($Material_id.val() && $cboCompany.val()) {
-                        //     tryShowPrice();
-                        // }
-                    };
-
-                    poppage.show(searchcallback);
-                });
 
                 // 저장버튼
                 let $btnPopSave = $('#btnPopSave');
 
                 //수주구분
-                AjaxUtil.fillSelectOptions($cboSujuType, 'system_code', 'choose', 'sales', 'suju_type');
+                AjaxUtil.fillSelectOptions($cmcode, 'system_code', 'choose', '', 'comunication_type');
+                initPopupDateKindHandler($content);
 
                 setTimeout(() => {
-                    FormUtil.BindDataSujuForm(data, $planForm);
+                    FormUtil.BindDataPlanForm(data, $planForm);
+
+                    const datetype = $content.find('#datetype').val();
+
+                    if (datetype === 'week' || datetype === 'month') {
+                        $content.find('#datetype').trigger('change');
+
+                        // select box가 생성되기까지 잠시 기다린 뒤 값 설정
+                        setTimeout(() => {
+                            if (datetype === 'week') {
+                                $content.find('#popupWeekSelector').val(data.popupWeekSelector);
+                                $content.find('#stdate').val(data.stdate);
+                                $content.find('#eddate').val(data.eddate);
+                            } else if (datetype === 'month') {
+                                $content.find('#stdate').val(data.stdate);
+                                $content.find('#eddate').val(data.eddate);
+                            }
+                        }, 10); // 너무 길게 줄 필요 없이 10~50ms 정도면 충분
+                    }
                 }, 100);
 
                 // 수주등록 팝업 저장버튼 클릭
@@ -580,7 +560,7 @@
 
                     Alert.confirm('', '저장하시겠습니까?', function () {
                         const items = [];
-                        for (let i = 0; i < page.sujuListIndex; i++) {
+                        for (let i = 0; i < page.planListIndex; i++) {
                             const materialId = data[`material_id_${i}`];
                             if (!materialId) continue;
 
@@ -606,6 +586,8 @@
                             description: data.description,
                             items: items
                         };
+
+                        console.log('payload', payload);
 
                         AjaxUtil.postJsonData(_this.url + '/save', payload, function (res) {
                             if (res.success) {
@@ -733,7 +715,7 @@
 
                     for (let i = 0; i < 3; i++) {
                         const $newRow = $template.clone().removeClass('item-template-row').show();
-                        const index = page.nextSujuListIndex();
+                        const index = page.nextPlanListIndex();
                         $newRow.find('input').each(function () {
                             const baseName = $(this).attr('name');
                             if (baseName) {
@@ -829,6 +811,22 @@
                     }
                 });
 
+                // 삭제 버튼
+                $btnDelete.click(function (e) {
+                    let data = FormUtil.extractForm($planForm);
+
+                    Alert.confirm('', '전체 삭제하시겠습니까?',
+                        function () {
+                            let id = data.head_id;
+                            _this.deletePlanData(id);
+                        },
+                        function () {
+                        }
+                    );
+                    modalContainer.close();
+
+                });
+
             }
 
             deletePlanData(id) {
@@ -867,7 +865,8 @@
                         _this.viewData.sourceCollection = result.data;
 
                         if (window.selectedGridId) {
-                            GridUtil.selectRowById(_this.grid, window.selectedGridId);
+                            // GridUtil.selectRowById(_this.grid, window.selectedGridId);
+                            GridUtil.selectRowById(_this.grid, window.selectedGridId, {idField: 'mat_code'});
                             window.selectedGridId = null;
                         }
                     }
@@ -910,6 +909,8 @@
             const $extraSelectBox = $('<span style="margin-top:10px;" id="extraSelectBox"></span>');
             const $stdate = $content.find('#stdate');
             const $eddate = $content.find('#eddate');
+            console.log('$stdate', $stdate.val());
+            console.log('$eddate', $eddate.val());
 
             $datetype.after($extraSelectBox);
 
@@ -922,8 +923,15 @@
                 if (type === 'week') {
                     const $weekSelect = $('<select id="popupWeekSelector"></select>');
                     const now = new Date();
-                    const year = now.getFullYear();
-                    const currentWeek = getISOWeekNumber(now);
+                    // 👉 stdate가 있으면 그것 기준, 없으면 오늘 기준
+                    const stdateStr = $stdate.val(); // ex: "2025-08-01" 또는 "20250801"
+                    const targetDate = stdateStr
+                        ? parseDate(stdateStr)
+                        : now;
+
+                    const year = targetDate.getFullYear();
+                    const currentWeek = getISOWeekNumber(targetDate);
+
                     for (let i = 1; i <= 52; i++) {
                         const value = `${year}-W${String(i).padStart(2, "0")}`;
                         const text = `${year}년 ${i}주차`;
@@ -948,15 +956,17 @@
                     $weekSelect.trigger('change');
                 } else if (type === 'month') {
                     const $monthSelect = $('<select id="popupMonthSelector"></select>');
-                    const now = new Date();
-                    const year = now.getFullYear();
-                    const currentMonth = now.getMonth() + 1;
+                    const stdateStr = $stdate.val();
+                    const targetDate = stdateStr ? parseDate(stdateStr) : new Date();
+
+                    const year = targetDate.getFullYear();
+                    const selectedMonth = targetDate.getMonth() + 1;
 
                     for (let i = 1; i <= 12; i++) {
                         const value = `${year}-${String(i).padStart(2, "0")}`;
                         const text = `${year}년 ${i}월`;
                         const $option = $(`<option value="${value}">${text}</option>`);
-                        if (i === currentMonth) {
+                        if (i === selectedMonth) {
                             $option.prop("selected", true);
                         }
                         $monthSelect.append($option);
@@ -972,7 +982,7 @@
 
                     $extraSelectBox.append($monthSelect);
                     $monthSelect.trigger('change');
-                } else{
+                } else {
                     const startVal = CommonUtil.getYYYYMMDD(-7);
                     const endVal = CommonUtil.getYYYYMMDD();
 
@@ -1011,7 +1021,19 @@
             return 1 + Math.round(diff / (7 * 24 * 60 * 60 * 1000));
         }
 
-
+        function parseDate(str) {
+            if (!str) return new Date();
+            if (/^\d{8}$/.test(str)) {
+                return new Date(
+                    parseInt(str.slice(0, 4)),
+                    parseInt(str.slice(4, 6)) - 1,
+                    parseInt(str.slice(6, 8))
+                );
+            } else if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+                return new Date(str);
+            }
+            return new Date();
+        }
 
         let page = null;
 
@@ -1082,9 +1104,7 @@
 
                     extraSelectBox.appendChild(select);
                     select.dispatchEvent(new Event("change")); // 초기 선택값 반영
-                }
-
-                else if (type === "month") {
+                } else if (type === "month") {
                     const select = document.createElement("select");
                     select.id = "monthSelector";
 
@@ -1141,6 +1161,7 @@
                 const d = String(date.getDate()).padStart(2, "0");
                 return `${y}-${m}-${d}`;
             }
+
             function getISOWeekNumber(date) {
                 const target = new Date(date.valueOf());
                 const dayNum = (date.getDay() + 6) % 7;
