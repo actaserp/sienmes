@@ -2678,38 +2678,120 @@
                 )
             }
 
-            // 투입로트정보
-            showLotInput(lot_number, jr_pk, mpi_id) {
-                let _this = this;
+            fetchLotInfo(lot_number, jr_pk, mpi_id) {
+                const url = '/api/popup/pop_prod_input/lot_info'; // ← 팝업에서 쓰는 LOT 조회 API로 바꾸세요
+                let data = {
+                    'action': 'lot_info',
+                    'lot_number': lot_number,
+                    'jr_pk': jr_pk,
+                    'mpi_id': mpi_id
+                };
 
+                return new Promise((resolve, reject) => {
+                    AjaxUtil.postAsyncData(url, data, (res) => {
+                        if (res && res.success) {
+                            const d = res.data || {};
+                            // 필요하면 키 정규화
+                            const lot = {
+                                ...d,
+                                lot_id: d.lot_id ?? d.id,
+                                lot_number: d.lot_number ?? d.lotNumber
+                            };
+                            resolve({ lot, message: res.message || '' });  // ← message 함께 반환
+                        } else {
+                            reject(new Error(res?.message || 'LOT 조회 실패'));
+                        }
+                    });
+                });
+            }
+
+            // 투입로트정보
+            // async showLotInput(lot_number, jr_pk, mpi_id) {
+            //     let _this = this;
+            //
+            //     if (this.jobres.state === "ordered") {
+            //         Alert.alert('LOT 투입오류', '작업이 시작되지 않았습니다.');
+            //         return;
+            //     }
+            //
+            //     let valid = true;
+            //     //let matList = this.consumedGrid.getList();
+            //     let poppage = new PopupLotInputPage();
+            //     let lot_info = {};
+            //
+            //     let callback = function (lot) {
+            //         if (!lot.lot_id) {
+            //             Alert.alert('', 'LOT 검색에 실패했습니다.');
+            //             return;
+            //         }
+            //         if (valid) {
+            //             lot_info['lot_id'] = lot.lot_id;
+            //             lot_info['lot_number'] = lot.lot_number;
+            //             lot_info['input_qty'] = lot.input_qty;
+            //
+            //             _this.saveLotInput(lot.lot_id, lot.input_qty, lot.mpi_id);
+            //         } else {
+            //             Alert.alert('', '해당 로트는 이미 추가되어있습니다.');
+            //         }
+            //     };
+            //
+            //     poppage.show(lot_number, callback, jr_pk, mpi_id);
+            // }
+
+            async showLotInput(lot_number, jr_pk, mpi_id) {
                 if (this.jobres.state === "ordered") {
                     Alert.alert('LOT 투입오류', '작업이 시작되지 않았습니다.');
                     return;
                 }
 
-                let valid = true;
-                //let matList = this.consumedGrid.getList();
-                let poppage = new PopupLotInputPage();
-                let lot_info = {};
+                // 중복 저장 방지 가드
+                if (this._savingLot) return;
+                this._savingLot = true;
 
-                let callback = function (lot) {
-                    if (!lot.lot_id) {
-                        Alert.alert('', 'LOT 검색에 실패했습니다.');
+                try {
+                    const { lot, message } = await this.fetchLotInfo(lot_number, jr_pk, mpi_id);
+                    console.log('lot', lot);
+                    if (message) {
+                        Alert.alert('', message);
+                    }
+
+                    const lotId = lot.id;
+                    if (!lotId) throw new Error('LOT 검색에 실패했습니다.');
+
+                    // 팝업에서 기본으로 넣던 규칙을 그대로 사용
+                    const remain = parseFloat(lot.remain_input_qty ?? 0) || 0;
+                    const autoQty =
+                        parseFloat(lot.cur_stock) || 0;
+
+                    if (remain <= 0) {
+                        Alert.alert('', '잔여 투입수량이 없습니다.');
                         return;
                     }
-                    if (valid) {
-                        lot_info['lot_id'] = lot.lot_id;
-                        lot_info['lot_number'] = lot.lot_number;
-                        lot_info['input_qty'] = lot.input_qty;
 
-                        _this.saveLotInput(lot.lot_id, lot.input_qty, lot.mpi_id);
-                    } else {
-                        Alert.alert('', '해당 로트는 이미 추가되어있습니다.');
+                    if (autoQty > 0 && autoQty <= remain) {
+                        // 조건 충족: 팝업 없이 바로 저장
+                        console.log('lot', lot);
+                        this.saveLotInput(lot.id, autoQty, lot.mpi_id);
+                        return;
                     }
-                };
 
-                poppage.show(lot_number, callback, jr_pk, mpi_id);
+                    // 조건 불충족: 기존처럼 팝업 열어서 사용자 입력 받기
+                    const poppage = new PopupLotInputPage();
+                    const callback = (sel) => {
+                        console.log('sel', sel);
+                        const selLotId = sel.lot_id;
+                        if (!selLotId) { Alert.alert('', 'LOT 검색에 실패했습니다.'); return; }
+                        this.saveLotInput(selLotId, sel.input_qty, sel.mpi_id);
+                    };
+                    poppage.show(lot_number, callback, jr_pk, mpi_id);
+
+                } catch (err) {
+                    Alert.alert('', err.message || 'LOT 정보를 불러오지 못했습니다.');
+                } finally {
+                    this._savingLot = false;
+                }
             }
+
 
             multiSaveLotInput(lot) {
                 let _this = this;
@@ -3303,7 +3385,6 @@
 
             $('#btnInputLotSave').click(function (e) {
                 let jr_pk = $('#tabBasic').find('#id').val();
-                console.log('btnInputLotSave jr_pk', jr_pk);
                 let lot_number = $('#txtInputLot').val();
                 page.showLotInput(lot_number, jr_pk);
             });
