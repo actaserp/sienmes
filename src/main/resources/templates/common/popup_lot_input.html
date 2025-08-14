@@ -9,6 +9,7 @@
             <div class="table-wrap">
                 <table class="write-table">
                     <tbody>
+                        <input class="form-control2" type="text" id="mpi_id" name="mpi_id" hidden />
                         <tr>
                             <th style="text-align: center">
                                 <label for="mat_grp_name">품목그룹</label>
@@ -56,8 +57,16 @@
                             <th style="text-align: center">
                                 <label for="lot_number">로트번호</label>
                             </th>
-                            <td>
+                            <td colspan="3">
                                 <input class="form-control2" type="text" id="lot_number" name="lot_number" readonly/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                <label for="lot_number">투입 잔여량</label>
+                            </th>
+                            <td>
+                                <input class="form-control2" type="text" id="remain_input_qty" name="remain_input_qty" readonly/>
                             </td>
                             <th style="text-align: center">
                                 <label for="input_qty">투입량</label>
@@ -95,7 +104,7 @@
                 this.close();
             }
 
-            fillLotInfo(lot_number) {
+            fillLotInfo(lot_number, jr_pk, mpi_id) {
                 let _this = this;
 
                 this.lot_number = lot_number;
@@ -104,8 +113,10 @@
                 let data = {
                     'action': 'lot_info',
                     'lot_number': lot_number,
+                    'jr_pk': jr_pk,
+                    'mpi_id': mpi_id
                 };
-
+                console.log('fillLotInfo data', data);
                 let result = AjaxUtil.getSyncData(url + "/lot_info", data);
                 //let row = {
                 //    'id': 0,
@@ -116,6 +127,7 @@
                 //    'cur_stock' : 100,
                 //};
                 let row = result.data
+                console.log('row', row);
                 if (row != null) {
                     this.$lot_id.val(row.id);
                     this.$mat_grp_name.val(row.mat_grp_name);
@@ -123,20 +135,28 @@
                     this.$create_date.val(row.create_date);
                     this.$effective_date.val(row.effective_date);
                     this.$cur_stock.val(row.cur_stock);
-                    this.$input_qty.val(row.cur_stock);
                     this.$popStoreHouse.val(row.storehouse_name);
+                    this.$remain_input_qty.val(row.remain_input_qty);
+                    this.$mpi_id.val(row.mpi_id);
+
+                    if (row.mpi_id) {
+                        this.$input_qty.val(row.input_stock);
+                    } else {
+                        this.$input_qty.val(row.cur_stock);
+                    }
+
                 }
             }
 
-            show(lot_number, callback) {
+            show(lot_number, callback, jr_pk, mpi_id) {
                 let _this = this;
-
+                console.log('show(jr_pk', jr_pk);
                 //this.lot_number = lot_number;
                 this.callback = callback;
 
                 let content = tmpl('LotInputTemplate', {});
                 let $content = $(content);
-                this.modalContainer.open({width: 1000, height: 320, $content});
+                this.modalContainer.open({width: 1000, height: 350, $content});
 
                 this.$lot_number = $content.find('#lot_number');
                 this.$lot_id = $content.find('#lot_id');
@@ -147,17 +167,19 @@
                 this.$cur_stock = $content.find('#cur_stock');
                 this.$input_qty = $content.find('#input_qty');
                 this.$popStoreHouse = $content.find('#popStoreHouse');
+                this.$remain_input_qty = $content.find('#remain_input_qty');
+                this.$mpi_id = $content.find('#mpi_id');
 
                 this.$lot_number.val(lot_number);
 
 
-                this.fillLotInfo(lot_number);
+                this.fillLotInfo(lot_number, jr_pk, mpi_id);
 
                 this.$lot_number.on('keypress', function (e) {
                     if (event.keyCode == 13) {
                         let lot_number = this.$lot_number.val();
                         //this.lot_number = lot_number;
-                        _this.fillLotInfo(lot_number)
+                        _this.fillLotInfo(lot_number, jr_pk, mpi_id)
                     }
                 });
 
@@ -166,6 +188,7 @@
                         'lot_id': _this.$lot_id.val(),
                         'lot_number': _this.lot_number,
                         'input_qty': _this.$input_qty.val(),
+                        'mpi_id': _this.$mpi_id.val(),
                     };
                     _this.selectData(row);
                 });

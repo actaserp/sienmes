@@ -113,8 +113,8 @@ public class ProductionResultService {
 		        bc."Material_id" as mat_pk
 		        , bom1.produced_qty
 		        , bc."Amount" as quantity 
-		        , bc."Amount" / bom1.produced_qty as bom_ratio
-		        , bc."Amount" / bom1.produced_qty * bom1.prod_qty as chasu_bom_qty 
+		        , bc."Amount"  as bom_ratio
+		        , bc."Amount"  as chasu_bom_qty 
 		        from bom_comp bc 
 		        inner join bom1 on bom1.bom_pk=bc."BOM_id"
 		        where bom1.g_idx = 1
@@ -380,22 +380,30 @@ public class ProductionResultService {
         dicParam.addValue("jrPk", jrPk);
 
         String sql = """
-			 select id
-				  , "LotIndex" as chasu
-				  , "LotNumber" as lot_no
-				  , "GoodQty" as good_qty
-				  , "DefectQty" as defect_qty
-				  , "LossQty" as loss_qty
-				  , "ScrapQty" as scrap_qty
-				  , to_char("EndTime", 'YYYY-MM-DD HH24:MI') as end_time
-				  , to_char("StartTime", 'YYYY-MM-DD HH24:MI') as start_time
-				  , case
-					  when "_modified" is null then to_char("_created", 'YYYY-MM-DD HH24:MI')
-					  else to_char("_modified", 'YYYY-MM-DD HH24:MI')
-					end as input_time
-			 from mat_produce
-			 where "JobResponse_id" = :jrPk
-			 order by "LotIndex"
+				SELECT
+				    mp.id
+				  , mp."LotIndex"                                   AS chasu
+				  , mp."LotNumber"                                  AS lot_no
+				  , mp."GoodQty"                                    AS good_qty
+				  , mp."DefectQty"                                  AS defect_qty
+				  , mp."LossQty"                                    AS loss_qty
+				  , mp."ScrapQty"                                   AS scrap_qty
+				  , TO_CHAR(mp."EndTime",   'YYYY-MM-DD HH24:MI')   AS end_time
+				  , TO_CHAR(mp."StartTime", 'YYYY-MM-DD HH24:MI')   AS start_time
+				  , CASE
+				        WHEN mp."_modified" IS NULL THEN TO_CHAR(mp."_created", 'YYYY-MM-DD HH24:MI')
+				        ELSE TO_CHAR(mp."_modified", 'YYYY-MM-DD HH24:MI')
+				    END                                             AS input_time
+				  , b."OutputAmount"                                AS bom_output_amount
+				  , CASE
+				        WHEN b."OutputAmount" IS NULL OR b."OutputAmount" = 0 THEN NULL
+				        ELSE ROUND( (mp."GoodQty"::numeric / b."OutputAmount"::numeric) * 100, 2)
+				    END                                             AS yield_pct
+				FROM mat_produce mp
+				LEFT JOIN bom b
+				       ON b."Material_id" = mp."Material_id"
+				WHERE mp."JobResponse_id" = :jrPk
+				ORDER BY mp."LotIndex";
 			""";
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
@@ -491,9 +499,9 @@ public class ProductionResultService {
                             select 
                             bc."Material_id" as mat_pk
                             , bom1.produced_qty
-                            , bc."Amount" as quantity 
+                            , bc."Amount" as quantity
                             , bc."Amount" / bom1.produced_qty as bom_ratio
-                            , bc."Amount" / bom1.produced_qty * bom1.order_qty as bom_requ_qty 
+							, bc."Amount" / bom1.produced_qty * bom1.order_qty as bom_requ_qty
                             from bom_comp bc 
                             inner join bom1 on bom1.bom_pk=bc."BOM_id"
                             where bom1.g_idx=1
@@ -514,11 +522,10 @@ public class ProductionResultService {
                                 where mc."JobResponse_id"= :jrPk group by mc."Material_id"
                             ), MMP as (
                                 select 
-                                sum(ml."CurrentStock") as current_qty_sum
+                                sum(mpi."RequestQty") as current_qty_sum
                                 , mpi."Material_id"
                                 from mat_proc_input mpi
                                 inner join job_res jr on jr."MaterialProcessInputRequest_id" = mpi."MaterialProcessInputRequest_id" 
-                                inner join mat_lot ml on ml.id = mpi."MaterialLot_id"
                                 where jr.id=:jrPk
                                 group by mpi."Material_id"
                             )
@@ -533,7 +540,7 @@ public class ProductionResultService {
                             , mh."CurrentStock" as "currentStock"
                             , u."Name" as unit
                             , BT.bom_ratio
-                            , round(BT.bom_requ_qty::numeric) as bom_consumed
+                            , round(BT.bom_requ_qty::numeric, 3) as bom_consumed
                             , COALESCE(llc.consumed_qty,0) as consumed_qty
                             , sh."Name" as storehouse_name
                             , MCC.mc_qty
@@ -543,6 +550,12 @@ public class ProductionResultService {
 				                   WHEN m."Useyn" = '0' THEN 'N'
 				                   ELSE NULL
 				              END as useyn
+							, round(
+								( coalesce(BT.bom_requ_qty, 0)
+								- coalesce(MMP.current_qty_sum, 0)
+								)::numeric
+							, 3
+							) as remain_input_qty
                             from BT
                             inner join material m on m.id=BT.mat_pk
                             left join MCC on MCC.mat_pk=BT.mat_pk

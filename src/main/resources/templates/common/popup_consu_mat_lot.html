@@ -152,16 +152,16 @@
             this.selectedItem = null;
         }
 
-        selectData(item) {
+        selectData(item, jr_pk) {
             if (typeof this.callback !== 'undefined' && this.callback!=null) {
-                this.callback(item);
+                this.callback(item, jr_pk);
             } 
             this.close();
         }
 
         show(jr_pk, callback) {
             let _this = this;
-
+            console.log('show jr_pk', jr_pk);
             this.callback = callback;
 
             let content = tmpl('matLotSearchTemplate', {});
@@ -204,8 +204,8 @@
                     { binding: 'mat_name', header: '품목명', width: 100, align: 'left' },
                     { binding: 'lot_number', header: '로트번호', width: 150, align: 'left' },
                     { binding: 'storehouse_name', header: '창고', width: 150, align: 'left' },
-                    { binding: 'cur_stock', header: '재고량', width: 80, align: 'right', format: 'n0' },
-                    { binding: 'first_qty', header: '등록량', width: 80, align: 'right', format: 'n0' },
+                    { binding: 'cur_stock', header: '재고량', width: 80, align: 'right', format: 'n3' },
+                    { binding: 'first_qty', header: '사용량', width: 80, align: 'right', format: 'n3' },
                     { binding: 'effective_date', header: '유효일', width: 100, align: 'left' },
                     { binding: 'create_date', header: '등록일', width: 100, align: 'left' },
                 ],
@@ -260,7 +260,7 @@
 					Alert.alert('로트 투입','하나의 로트만 선택해주세요.')
 					return false;
 				}
-                _this.selectData(selectedItems);
+                _this.selectData(selectedItems, jr_pk);
             });
 
             this.$btnLotMultiSelect.click(function (e) {
