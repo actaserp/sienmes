@@ -194,8 +194,6 @@ public class MaterialService {
 		dicParam.addValue("maxStock", CommonUtil.tryFloatNull(data.getFirst("MaxStock")));
 		dicParam.addValue("processSafetyStock", CommonUtil.tryFloatNull(data.getFirst("ProcessSafetyStock")));
 		dicParam.addValue("temperature", CommonUtil.tryFloatNull(data.getFirst("Temperature")));
-		dicParam.addValue("pressure", CommonUtil.tryFloatNull(data.getFirst("Pressure")));
-		dicParam.addValue("validDays", CommonUtil.tryFloatNull(data.getFirst("ValidDays")));
 
 		if(data.containsKey("lot_use_yn")) {
 			dicParam.addValue("lotUseYN", data.getFirst("lot_use_yn").toString());
@@ -303,8 +301,6 @@ public class MaterialService {
 						 , "Useyn"
 						 ,"Avrqty"
 						 ,"spjangcd"
-						 , "Temperature"
-						 , "Pressure"
 						 )
 						VALUES
 						(now()
@@ -356,8 +352,6 @@ public class MaterialService {
 						, :useyn
 						, :avrqty
 						, :spjangcd
-						, :pressure
-						, :temperature
 						)
 					""";
 		}else {
@@ -411,8 +405,6 @@ public class MaterialService {
 					, "Mtyn" = :mtyn
 					, "Useyn" = :useyn
 					,"Avrqty" = :avrqty
-					, "Temperature" = :temperature
-					, "Pressure" = :pressure
 					WHERE id = :id
 					AND spjangcd = :spjangcd
 					""";
