@@ -118,12 +118,11 @@ public class ProductionResultController {
             @RequestParam(value = "date_from", required = false) String dateFrom,
             @RequestParam(value = "date_to", required = false) String dateTo,
             @RequestParam(value = "shift_code", required = false) String shiftCode,
-            @RequestParam(value = "workcenter_pk", required = false) String workcenterPk,
             @RequestParam(value = "mat_type", required = false) String mat_type,
             @RequestParam(value = "is_include_comp", required = false) String isIncludeComp,
             @RequestParam("spjangcd") String spjangcd) {
 
-        List<Map<String, Object>> items = this.productionResultService.getProdResult(dateFrom, dateTo, shiftCode, workcenterPk, mat_type, isIncludeComp, spjangcd);
+        List<Map<String, Object>> items = this.productionResultService.getProdResult(dateFrom, dateTo, shiftCode, mat_type, isIncludeComp, spjangcd);
 
         AjaxResult result = new AjaxResult();
         result.data = items;
@@ -182,27 +181,26 @@ public class ProductionResultController {
     public AjaxResult getConsumedList(
             @RequestParam(value = "jr_pk", required = false) Integer jrPk,
             @RequestParam(value = "prod_pk", required = false) Integer prodPk,
+            @RequestParam(value = "proc_id", required = false) Integer procId,
             @RequestParam(value = "prod_date", required = false) String prodDate) {
 
 
-        //int cnt = this.matConsuRepository.countByJobResponseId(jrPk);
-
         JobRes jr = this.jobResRepository.getJobResById(jrPk);
-
         if (jr != null) {
+            // 안정적으로 서버 기준으로 값 덮어쓰기
             prodDate = jr.getProductionDate().toString();
-            prodPk = jr.getMaterialId();
+            prodPk   = jr.getMaterialId();
+            // procId가 null이면 서비스 쪽에서 jr→wc 조인으로 보완
         }
 
         List<Map<String, Object>> items;
-        items = this.productionResultService.getConsumedListFirst(jrPk, prodPk, prodDate);
-		/*
-		if (cnt > 0) {
-			items = this.productionResultService.getConsumedListFirst(jrPk,prodPk,prodDate);
-		} else {
-			items = this.productionResultService.getConsumedListSecond(jrPk,prodPk,prodDate);
-		}
-		*/
+        if (this.productionResultService.hasProcBom(jrPk, procId)) {
+            // 라우팅 기반 공정 BOM 존재 → 공정별 투입 BOM으로
+            items = this.productionResultService.getConsumedListByProc(jrPk, prodPk, procId, prodDate);
+        } else {
+            // 라우팅 없음/공정 BOM 미정의 → 기존 로직 유지
+            items = this.productionResultService.getConsumedListFirst(jrPk, prodPk, prodDate);
+        }
 
         AjaxResult result = new AjaxResult();
         result.data = items;
