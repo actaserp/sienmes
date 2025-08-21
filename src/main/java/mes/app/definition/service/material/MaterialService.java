@@ -192,6 +192,9 @@ public class MaterialService {
 		dicParam.addValue("maxStock", CommonUtil.tryFloatNull(data.getFirst("MaxStock")));
 		dicParam.addValue("processSafetyStock", CommonUtil.tryFloatNull(data.getFirst("ProcessSafetyStock")));
 		dicParam.addValue("temperature", CommonUtil.tryFloatNull(data.getFirst("Temperature")));
+		dicParam.addValue("pressure", CommonUtil.tryFloatNull(data.getFirst("Pressure")));
+		dicParam.addValue("validDays", CommonUtil.tryFloatNull(data.getFirst("ValidDays")));
+		String validDaysStr = data.getFirst("ValidDays") != null ? data.getFirst("ValidDays").toString().trim() : "";
 
 		if(data.containsKey("lot_use_yn")) {
 			dicParam.addValue("lotUseYN", data.getFirst("lot_use_yn").toString());
@@ -442,5 +445,16 @@ public class MaterialService {
 			total += this.sqlRunner.execute(sql, dicParam);
 		}
 		return total;
+	}
+
+	// 라우팅 정보 저장 (material update)
+	public int saveRouting(Integer matId, Integer routingPk) {
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("mat_pk", matId);
+		dicParam.addValue("routing_pk", routingPk);
+
+		String sql = " UPDATE material SET \"Routing_id\" = :routing_pk WHERE id = :mat_pk;";
+		int result = this.sqlRunner.execute(sql, dicParam);
+		return result;
 	}
 }
