@@ -119,7 +119,7 @@
                   </tr>
                   <tr>
                     <th>
-                      <label for="food_type">식품유형</label>
+                      <label for="food_type">식품유형(그룹)</label>
                     </th>
                     <td>
                       <input type="text" id="food_type" name="food_type"
@@ -537,14 +537,9 @@
             // {binding: 'mat_code', header: '품목코드', width: 90, align: 'center'},
             {binding: 'mat_name', header: '품목', width: 200, align: 'left'},
             {binding: 'job_state', header: '상태', width: 100, align: 'center'},
-            {binding: 'order_qty', header: '지시량', width: 80, align: 'right'},
-            {binding: 'good_qty', header: '양품량(중량)', width: 100, align: 'right'},
-            {binding: 'defect_qty', header: '부적합량', width: 80, align: 'right'},
-            // {binding: 'mat_type', header: '품목구분', width: 100, align: 'center'},
-            {binding: 'unit', header: '단위', width: 80, align: 'center'},
-            {binding: 'workcenter', header: '워크센터', width: 100, align: 'center'},
-            // {binding: 'work_idx', header: '작업순서', width: 100, align: 'center'},
-            // {binding: 'description', header: '비고', width: 190, align: 'left'}
+            {binding: 'workcenter_name', header: '제조구분', width: 100, align: 'center'},
+            {binding: 'validate', header: '소비기한', width: 100, align: 'center'},
+            {binding: 'remark', header: '특이사항', width: 300, align: 'left'},
           ],
           itemsSource: new wijmo.collections.CollectionView([]),
           itemFormatter: function (panel, row, col, cell) {
@@ -574,15 +569,6 @@
                   cell.style.color = '';
                   cell.style.borderBottom = '';
                 }
-              }
-              if (column.binding === 'order_qty') {
-                cell.style.backgroundColor = '#00ff21';
-              }
-              if (column.binding === 'good_qty') {
-                cell.style.backgroundColor = '#dcf0f8';
-              }
-              if (column.binding === 'defect_qty') {
-                cell.style.backgroundColor = '#f8d2cb';
               }
             }
           },

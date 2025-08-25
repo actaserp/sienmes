@@ -80,6 +80,8 @@ public class MaterialService {
                 , m."Mtyn" as mtyn
                 , m."Useyn" as useyn
                 , m."Avrqty" as avrqty
+                , m."storage_method"
+                , m."packaging_mat"
                 , CASE
 					 WHEN b."Material_id" IS NOT NULL THEN 1
 					 ELSE 0
@@ -158,6 +160,8 @@ public class MaterialService {
             , m."Mtyn" as mtyn
             , m."Useyn" as useyn
             , m."Avrqty" as avrqty
+            , m."storage_method"
+            , m."packaging_mat"
             from material m
             inner join mat_grp mg on m."MaterialGroup_id" = mg.id
             left join unit u on u.id = m."Unit_id"
@@ -247,6 +251,8 @@ public class MaterialService {
 		dicParam.addValue("routingId", CommonUtil.tryIntNull(data.getFirst("Routing_id")));
 		dicParam.addValue("unitPrice", CommonUtil.tryFloatNull(data.getFirst("UnitPrice")));
 		dicParam.addValue("user_id", CommonUtil.tryIntNull(data.getFirst("user_id").toString()));
+		dicParam.addValue("storage_method", CommonUtil.tryString(data.getFirst("storage_method")));
+		dicParam.addValue("packaging_mat", CommonUtil.tryString(data.getFirst("packaging_mat")));
 
 		String sql = "";
 
@@ -302,6 +308,8 @@ public class MaterialService {
 						 , "Useyn"
 						 ,"Avrqty"
 						 ,"spjangcd"
+						 ,"storage_method"
+						 ,"packaging_mat"
 						 )
 						VALUES
 						(now()
@@ -353,6 +361,8 @@ public class MaterialService {
 						, :useyn
 						, :avrqty
 						, :spjangcd
+						, :storage_method
+						, :packaging_mat
 						)
 					""";
 		}else {
@@ -405,7 +415,9 @@ public class MaterialService {
 					, "UnitPrice" = :unitPrice
 					, "Mtyn" = :mtyn
 					, "Useyn" = :useyn
-					,"Avrqty" = :avrqty
+					, "Avrqty" = :avrqty
+					, "storage_method" = :storage_method
+					, "packaging_mat" = :packaging_mat
 					WHERE id = :id
 					AND spjangcd = :spjangcd
 					""";
