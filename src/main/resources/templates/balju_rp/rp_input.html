@@ -1164,9 +1164,10 @@
                         {binding: 'InoutDate', header: '입출일', width: 100, align: 'center'},
                         {binding: 'InoutTime', header: '시간', width: 60, align: 'center'},
                         {binding: 'potentialInputQty', header: '가입고량', width: 80, align: 'right', format: 'n0'},
-                        {binding: 'InputQty', header: '입고량', width: 80, align: 'right', format: 'n0'},
+                        {binding: 'InputQtyEA', header: '입고량(EA)', width: 90, align: 'right', format: 'n0'},
+                        //{binding: 'InputQty', header: '입고량', width: 80, align: 'right', format: 'n0'},
                         // {binding: 'OutputQty', header: '출고량', width: 80, align: 'right', format: 'n0'},
-                        {binding: 'HouseStock', header: '창고재고', width: 80, align: 'right', format: 'n0'},
+                        {binding: 'HouseStock', header: '창고재고(KG)', width: 100, align: 'right', format: 'n0'},
                         {binding: 'lot_count', header: '로트개수', width: 80, align: 'center'},
                         {binding: 'CurrentStock', header: '전체재고', width: 80, align: 'right', format: 'n0'},
                         {binding: 'Description', header: '비고', width: 150, align: 'left'},
@@ -1420,6 +1421,12 @@
                     setTimeout(function () {
                         FormUtil.BindDataForm(data[0], form);
                         console.log('edit BindDataForm data', data);
+
+                        const ea = data[0]?.InoutQtyEA;
+                        if (ea != null) {
+                            $content.find('#InoutQty').val(formatNumberWithDecimal(ea));
+                        }
+
                         $content.find('#inoutSelect').prop('disabled', true);
                         $content.find('#InoutType').prop('disabled', true);
 
@@ -1428,6 +1435,50 @@
                     }, 10);
 
                 }
+
+                function formatInoutQty() {
+                    const $qty = $content.find('#InoutQty');
+                    let raw = ($qty.val() || '').trim();
+
+                    if (!raw) { $qty.val(''); return; }
+
+                    // 부호는 type에 따라 결정
+                    const needNegative = (type === 'recall' || type === 'return');
+
+                    // 1) 숫자/소수점만 유지 (첫 '.'만 허용)
+                    raw = raw.replace(/,/g, '');
+                    let sign = '';
+                    if (raw.startsWith('-')) raw = raw.substring(1); // 일단 제거
+                    // 숫자와 점만 남기되 점은 하나만
+                    raw = raw.replace(/[^0-9.]/g, '');
+                    const firstDot = raw.indexOf('.');
+                    if (firstDot >= 0) {
+                        raw = raw.substring(0, firstDot + 1) + raw.substring(firstDot + 1).replace(/\./g, '');
+                    }
+
+                    if (raw === '' || raw === '.') { $qty.val(''); return; }
+
+                    const num = Number(raw);
+                    if (isNaN(num)) { $qty.val(''); return; }
+
+                    // 2) 천단위+소수 포맷 (간단 구현)
+                    $qty.val(formatNumberWithDecimal(num, 6, needNegative));
+                }
+
+                function formatNumberWithDecimal(value, scale = 6, negative = false) {
+                    // value: number|string
+                    const n = Number(value);
+                    if (!isFinite(n)) return '';
+
+                    const abs = Math.abs(n);
+                    const [intPart, fracPart = ''] = abs.toFixed(scale).split('.');
+                    const intFmt = Number(intPart).toLocaleString(); // 정수부만 로케일 포맷
+                    const hasFrac = fracPart && Number(fracPart) !== 0;
+
+                    const s = hasFrac ? `${intFmt}.${fracPart.replace(/0+$/,'')}` : intFmt;
+                    return (negative ? '-' : '') + s;
+                }
+
 
                 $content.find('#btnSave').on('click', function () {
 
@@ -1700,7 +1751,7 @@
                         {binding: 'product_name', header: '제품명', width: 150, align: 'left', isReadOnly: true},
                         {binding: 'unit', header: '단위', width: 60, align: 'center', isReadOnly: true},
                         {binding: 'SujuQty', header: '발주 수량', width: 80, align: 'right', format: 'n0', isReadOnly: true},
-                        {binding: 'SujuQty2', header: '입고 수량', width: 90, align: 'right', isReadOnly: true},
+                        {binding: 'SujuQty2_ea', header: '입고 수량', width: 90, align: 'right', isReadOnly: true},
                         {binding: 'ReturnQty', header: '반품된 수량', width: 90, align: 'right', isReadOnly: true},
                         {binding: 'StoreHouse_id', header: '반품 창고', width: 90, align: 'center',dataMap: storeHouseMap, isReadOnly: false},
                         {

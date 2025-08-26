@@ -32,7 +32,25 @@ public class BaljuOrderService {
     dicParam.addValue("spjangcd", spjangcd);
 
     String sql = """
-        WITH base_data AS (
+        WITH s2 AS (            -- Standard2 숫자만 저장 → 그대로 사용
+           SELECT
+             m.id AS material_id,
+             CASE
+               WHEN m."Standard2" IS NULL OR btrim(m."Standard2") = '' THEN NULL
+               ELSE NULLIF(
+                      regexp_replace(m."Standard2", '[^0-9\\.]', '', 'g'),
+                      ''
+                    )::numeric
+             END AS s2_num
+         FROM material m
+         ),
+         unitw AS (              -- 단위 미표시 → kg 가정
+           SELECT
+             s2.material_id,
+             s2.s2_num AS unit_weight_kg
+           FROM s2
+         ),
+         base_data AS (
            SELECT
              bh.id AS bh_id,
              bh."Company_id",
@@ -47,54 +65,142 @@ public class BaljuOrderService {
              m."Name" AS product_name,
              u."Name" AS unit,
              b."SujuQty",
+             -- ▼ 단위중량(kg) 컬럼도 같이 노출 (질문 예시 표의 '단위중량')
+             uw.unit_weight_kg AS "단위중량",
              b."UnitPrice",
              b."Price",
              b."Vat",
              b."TotalAmount",
              fn_code_name('balju_state', bh."State") AS "StateName",
-             mi."SujuQty2" AS "SujuQty2",
-             GREATEST((b."SujuQty" - mi."SujuQty2"), 0) AS "SujuQty3",
+             mi."SujuQty2" AS "SujuQty2", -- 입고 '중량'
+            COALESCE(mi."SujuQty2",0) / NULLIF(uw.unit_weight_kg, 0) AS "SujuQty2_ea",  -- ★ 추가: 입고 '개수'
+            GREATEST(                                              -- ★ 변경: 미입고(잔여) '개수'
+              COALESCE(b."SujuQty",0)
+              - (COALESCE(mi."SujuQty2",0) / NULLIF(uw.unit_weight_kg, 0)),
+              0
+            ) AS "SujuQty3",
              sh."Name" AS "ShipmentStateName",
              bh."DeliveryDate",
              b."Description",
-             (
+         -- ■ BalJuHeadType (영문 코드) — 라인 상태 집계만 사용
+         (
+           SELECT CASE
+                    WHEN s.cnt_force     = s.cnt_total AND s.cnt_total > 0 THEN 'force_completion'
+                    WHEN s.cnt_canceled  = s.cnt_total THEN 'canceled'
+                    WHEN s.cnt_received  = s.cnt_total THEN 'received'
+                    WHEN s.cnt_draft     = s.cnt_total THEN 'draft'
+                    WHEN s.cnt_partial   = s.cnt_total THEN 'partial'
+                    ELSE 'partial'  -- 섞여 있으면 partial
+                  END
+           FROM (
+             SELECT
+               COUNT(*) FILTER (WHERE x.line_state = 'force_completion') AS cnt_force,
+               COUNT(*) FILTER (WHERE x.line_state = 'canceled')         AS cnt_canceled,
+               COUNT(*) FILTER (WHERE x.line_state = 'received')         AS cnt_received,
+               COUNT(*) FILTER (WHERE x.line_state = 'draft')            AS cnt_draft,
+               COUNT(*) FILTER (WHERE x.line_state = 'partial')          AS cnt_partial,
+               COUNT(*)                                                 AS cnt_total
+             FROM (
                SELECT
                  CASE
-                   WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
-                   WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
-                   WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
-                   ELSE 'partial'
-                 END
+                   WHEN b2."State" = 'canceled'         THEN 'canceled'         -- 명시 상태 우선
+                   WHEN b2."State" = 'force_completion' THEN 'force_completion' -- 명시 상태 우선
+                   ELSE CASE
+                          -- 잔량 = 발주개수 - 입고개수
+                          WHEN ABS(
+                                 COALESCE(b2."SujuQty",0)
+                                 - (COALESCE(mi2."SujuQty2",0) / NULLIF(u2.unit_weight_kg,0))
+                               ) < 1e-9 THEN 'received'
+                          WHEN (
+                                 COALESCE(b2."SujuQty",0)
+                                 - (COALESCE(mi2."SujuQty2",0) / NULLIF(u2.unit_weight_kg,0))
+                               ) > 0 THEN 'partial'
+                          ELSE 'draft'
+                        END
+                 END AS line_state
                FROM balju b2
+               LEFT JOIN (
+                 SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+                 FROM mat_inout
+                 WHERE "SourceTableName"='balju' AND COALESCE("_status",'a')='a'
+                 GROUP BY "SourceDataPk"
+               ) mi2 ON mi2."SourceDataPk" = b2.id
+               INNER JOIN material m2 ON m2.id = b2."Material_id"
+               LEFT JOIN unitw u2 ON u2.material_id = m2.id  -- unitw CTE 재사용
                WHERE b2."BaljuHead_id" = bh.id
-             ) AS "BalJuHeadType",
-             fn_code_name(
-               'balju_state',
-               (
+             ) x
+           ) s
+         ) AS "BalJuHeadType",
+         -- ■ bh_StateName (한글명) — 같은 로직을 코드명 매핑
+         fn_code_name(
+           'balju_state',
+           (
+             SELECT CASE
+                      WHEN s.cnt_force     = s.cnt_total AND s.cnt_total > 0 THEN 'force_completion'
+                      WHEN s.cnt_canceled  = s.cnt_total THEN 'canceled'
+                      WHEN s.cnt_received  = s.cnt_total THEN 'received'
+                      WHEN s.cnt_draft     = s.cnt_total THEN 'draft'
+                      WHEN s.cnt_partial   = s.cnt_total THEN 'partial'
+                      ELSE 'partial'
+                    END
+             FROM (
+               SELECT
+                 COUNT(*) FILTER (WHERE x.line_state = 'force_completion') AS cnt_force,
+                 COUNT(*) FILTER (WHERE x.line_state = 'canceled')         AS cnt_canceled,
+                 COUNT(*) FILTER (WHERE x.line_state = 'received')         AS cnt_received,
+                 COUNT(*) FILTER (WHERE x.line_state = 'draft')            AS cnt_draft,
+                 COUNT(*) FILTER (WHERE x.line_state = 'partial')          AS cnt_partial,
+                 COUNT(*)                                                 AS cnt_total
+               FROM (
                  SELECT
                    CASE
-                     WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
-                     WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
-                     WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
-                     ELSE 'partial'
-                   END
+                     WHEN b2."State" = 'canceled'         THEN 'canceled'
+                     WHEN b2."State" = 'force_completion' THEN 'force_completion'
+                     ELSE CASE
+                            WHEN ABS(
+                                   COALESCE(b2."SujuQty",0)
+                                   - (COALESCE(mi2."SujuQty2",0) / NULLIF(u2.unit_weight_kg,0))
+                                 ) < 1e-9 THEN 'received'
+                            WHEN (
+                                   COALESCE(b2."SujuQty",0)
+                                   - (COALESCE(mi2."SujuQty2",0) / NULLIF(u2.unit_weight_kg,0))
+                                 ) > 0 THEN 'partial'
+                            ELSE 'draft'
+                          END
+                   END AS line_state
                  FROM balju b2
+                 LEFT JOIN (
+                   SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+                   FROM mat_inout
+                   WHERE "SourceTableName"='balju' AND COALESCE("_status",'a')='a'
+                   GROUP BY "SourceDataPk"
+                 ) mi2 ON mi2."SourceDataPk" = b2.id
+                 INNER JOIN material m2 ON m2.id = b2."Material_id"
+                 LEFT JOIN unitw u2 ON u2.material_id = m2.id
                  WHERE b2."BaljuHead_id" = bh.id
-               )
-             ) AS "bh_StateName",
+               ) x
+             ) s
+           )
+         ) AS "bh_StateName",
              ROW_NUMBER() OVER (PARTITION BY bh."JumunNumber" ORDER BY b.id ASC) AS rn
            FROM balju_head bh
-           LEFT JOIN balju b ON b."BaljuHead_id" = bh.id AND b.spjangcd = bh.spjangcd AND b."JumunNumber" = bh."JumunNumber"
-           INNER JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
-           INNER JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
-           LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
-           LEFT JOIN store_house sh ON sh.id::varchar = b."ShipmentState" AND sh.spjangcd = b.spjangcd
+           LEFT JOIN balju b
+             ON b."BaljuHead_id" = bh.id AND b.spjangcd = bh.spjangcd AND b."JumunNumber" = bh."JumunNumber"
+           INNER JOIN material m
+             ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
+           INNER JOIN mat_grp mg
+             ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
+           LEFT JOIN unit u
+             ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
+           LEFT JOIN store_house sh
+             ON sh.id::varchar = b."ShipmentState" AND sh.spjangcd = b.spjangcd
            LEFT JOIN (
              SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
              FROM mat_inout
-             WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
+             WHERE "SourceTableName" = 'balju' AND COALESCE("_status",'a') = 'a'
              GROUP BY "SourceDataPk"
            ) mi ON mi."SourceDataPk" = b.id
+           LEFT JOIN unitw uw ON uw.material_id = m.id
            WHERE bh.spjangcd = :spjangcd
         """;
 
@@ -106,34 +212,37 @@ public class BaljuOrderService {
 
     sql += """
         )
-        SELECT
-          bh_id,
-          "JumunNumber",
-          MAX("Company_id") AS "Company_id",
-          MAX("CompanyName") AS "CompanyName",
-          MAX("BaljuHead_id") AS "BaljuHead_id",
-          MAX("JumunDate") AS "JumunDate",
-          MAX("MaterialGroupName") AS "MaterialGroupName",
-          MAX("BaljuTypeName") AS "BaljuTypeName",
-          MAX(CASE WHEN rn = 1 THEN product_code END) AS product_code,
-          MAX(CASE WHEN rn = 1 THEN product_name END) AS product_name,
-          MAX(CASE WHEN rn = 1 THEN unit END) AS unit,
-          SUM("SujuQty") AS "SujuQty",
-          SUM("UnitPrice") AS "BaljuUnitPrice",
-          SUM("Price") AS "BaljuPrice",
-          SUM("Vat") AS "BaljuVat",
-         SUM("TotalAmount") AS "BaljuTotalPrice",
-          MAX("StateName") AS "StateName",
-          MAX("BalJuHeadType") AS "BalJuHeadType",
-          MAX("bh_StateName") AS "bh_StateName",
-          SUM("SujuQty2") AS "SujuQty2",
-          SUM("SujuQty3") AS "SujuQty3",
-          MAX("ShipmentStateName") AS "ShipmentStateName",
-          MAX("DeliveryDate") AS "DueDate",
-          MAX("Description") AS "Description"
-        FROM base_data
-        GROUP BY "JumunNumber", bh_id
-        ORDER BY MAX("DeliveryDate") DESC, bh_id
+         SELECT
+           bh_id,
+           "JumunNumber",
+           MAX("Company_id") AS "Company_id",
+           MAX("CompanyName") AS "CompanyName",
+           MAX("BaljuHead_id") AS "BaljuHead_id",
+           MAX("JumunDate") AS "JumunDate",
+           MAX("MaterialGroupName") AS "MaterialGroupName",
+           MAX("BaljuTypeName") AS "BaljuTypeName",
+           MAX(CASE WHEN rn = 1 THEN product_code END) AS product_code,
+           MAX(CASE WHEN rn = 1 THEN product_name END) AS product_name,
+           MAX(CASE WHEN rn = 1 THEN unit END) AS unit,
+           SUM("SujuQty") AS "SujuQty",
+           MAX("단위중량") AS "단위중량",               -- (참고용 표시)
+           SUM("UnitPrice") AS "BaljuUnitPrice",
+           SUM("Price") AS "BaljuPrice",
+           SUM("Vat") AS "BaljuVat",
+           SUM("TotalAmount") AS "BaljuTotalPrice",
+           MAX("StateName") AS "StateName",
+           MAX("BalJuHeadType") AS "BalJuHeadType",
+           MAX("bh_StateName") AS "bh_StateName",
+           SUM("SujuQty2") AS "SujuQty2",
+           -- ▼ row에서 만든 (SujuQty2/단위중량) 값의 합
+           COALESCE(SUM("SujuQty2_ea"), 0) AS "SujuQty2_ea",
+           COALESCE(SUM("SujuQty3"), 0) AS "SujuQty3",
+           MAX("ShipmentStateName") AS "ShipmentStateName",
+           MAX("DeliveryDate") AS "DueDate",
+           MAX("Description") AS "Description"
+         FROM base_data
+         GROUP BY "JumunNumber", bh_id
+         ORDER BY MAX("DeliveryDate") DESC, bh_id
         """;
 
 //    log.info("발주 read SQL: {}", sql);

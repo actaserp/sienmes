@@ -49,8 +49,9 @@
         <li>공정별 BOM</li>
       </ul>
     </div>
-    <div style="display: flex; gap: 5px">
-      <section class="section" style="width: 50%;">
+    <div style="display: flex; gap: 5px;">
+    <div  style="width: 50%;">
+      <section class="section">
         <div class="section-top">
           <div class="button-wrap">
             <ul>
@@ -155,40 +156,41 @@
         </div>
       </section>
 
-      <div class="tab-wrap" style="width: 50%;">
-        <ul class="tab-links">
-          <li><a href="#tabs_second">공정별 BOM</a></li>
-        </ul>
-
-        <div>
-          <section class="tab-item" id="tabs_second" style="border-top-left-radius: 0;">
-            <div class="section-top">
-            </div>
-            <div class="container-fluid">
-              <div id="bom-grid"></div>
-            </div>
-          </section>
-
-        </div>
+      <div>
+        <section class="section" >
+          <div class="button-wrap">
+            <ul>
+              <li>
+                <button type="button" class="btn-excellt btn-default" id="btnBomCompSave"
+                        style="width: 100px; height: 36px;"><i
+                    class="fas fa-plus"></i>저장
+                </button>
+              </li>
+            </ul>
+          </div>
+          <div id="item-grid" style="min-height: 234px;"></div>
+        </section>
       </div>
       </section>
     </div>
-    <div>
-      <section class="section" style="height: 300px;">
-        <div class="button-wrap">
-          <ul>
-            <li>
-              <button type="button" class="btn-excellt btn-default" id="btnBomCompSave"
-                      style="width: 100px; height: 36px;"><i
-                  class="fas fa-plus"></i>저장
-              </button>
-            </li>
-          </ul>
-        </div>
-        <div id="item-grid" style="height: 230px;"></div>
-      </section>
-    </div>
 
+    <div class="tab-wrap" style="width: 50%;">
+      <ul class="tab-links">
+        <li><a href="#tabs_second">공정별 BOM</a></li>
+      </ul>
+
+      <div>
+        <section class="tab-item" id="tabs_second" style="border-top-left-radius: 0;">
+          <div class="section-top">
+          </div>
+          <div class="container-fluid">
+            <div id="bom-grid"></div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+    </div>
   </div>
 </th:block>
 
@@ -231,12 +233,14 @@
             {binding: 'routing_pk', header: 'routing_pk', visible: false},
             {binding: 'prod_pk', header: '제품id', visible: false},
             {binding: 'process_code', header: '공정코드', visible: false},
-            {binding: 'process_name', header: '공정', width: 170, align: 'left'},
-            {binding: 'prod_grp_name', header: '제품그룹', width: 120, align: 'left'},
+            {binding: 'process_name', header: '공정', width: 140, align: 'left'},
+            //{binding: 'prod_grp_name', header: '제품그룹', width: 120, align: 'left'},
             // {binding: 'prod_code', header: '제품코드', width: 120, align: 'center'},
             // {binding: 'prod_name', header: '제품명', width: 200, align: 'center'},
-            {binding: 'mat_name', header: '자재명', width: 200, isReadOnly: true},
+            {binding: 'mat_grp_name', header: '자재그룹', width: 70, isReadOnly: true},
+            {binding: 'mat_name', header: '자재명', width: 210, isReadOnly: true},
             {binding: 'amount', header: '수량', width: 150, align: 'left', format: 'n3'},
+            {binding: '', header: '기준량', width: 90, align: 'center'},
           ],
           itemsSource: this.bomView, // 데이터를 설정할 배열
         });
