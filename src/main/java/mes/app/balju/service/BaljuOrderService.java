@@ -256,88 +256,120 @@ public class BaljuOrderService {
 
     String sql = """
         WITH balju_total AS (
-            SELECT 
-                "BaljuHead_id" AS bh_id,
-                SUM(COALESCE("TotalAmount", 0)) AS total_amount_sum
-            FROM balju
-            GROUP BY "BaljuHead_id"
-        )
-        SELECT
-            bh.id AS bh_id,
-            bh."Company_id",
-            c."Name" AS "CompanyName",
-            bh."JumunDate",
-            bh."DeliveryDate",
-            bh.special_note,
-            bh."JumunNumber",
-            b.id AS balju_id,
-            b."Material_id",
-            COALESCE(m."Code", '') AS product_code,
-            COALESCE(m."Name", '') AS product_name,
-            COALESCE(mg."Name", '') AS "MaterialGroupName",
-            COALESCE(mg.id, 0) AS "MaterialGroup_id",
-            fn_code_name('mat_type', mg."MaterialType") AS "MaterialTypeName",
-            s."Value" as "BaljuTypeName",
-            b."SujuQty",
-            u."Name" AS unit,
-            b."UnitPrice" AS "BaljuUnitPrice",
-            b."Price" AS "BaljuPrice",
-            b."Vat" AS "BaljuVat",
-            b."InVatYN",
-            b."TotalAmount" AS "LineTotalAmount",
-            COALESCE(bt.total_amount_sum, 0) AS "BaljuTotalPrice", 
-            TO_CHAR(b."ProductionPlanDate", 'yyyy-mm-dd') AS production_plan_date,
-            TO_CHAR(b."ShipmentPlanDate", 'yyyy-mm-dd') AS shiment_plan_date,
-            b."Description",
-            b."AvailableStock",
-            b."ReservationStock",
-            mi."SujuQty2",
-            -- 동적 계산된 Head 상태
-            (
-                SELECT
-                    CASE
-                        WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
-                        WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
-                        WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
-                        ELSE 'partial'
-                    END
-                FROM balju b2
-                WHERE b2."BaljuHead_id" = bh.id
-            ) AS "BalJuHeadType",
-            -- Head 상태명
-            fn_code_name(
-                'balju_state',
-                (
-                    SELECT
-                        CASE
-                            WHEN COUNT(*) FILTER (WHERE b2."State" = 'received') = COUNT(*) THEN 'received'
-                            WHEN COUNT(*) FILTER (WHERE b2."State" = 'draft') = COUNT(*) THEN 'draft'
-                            WHEN COUNT(*) FILTER (WHERE b2."State" = 'canceled') = COUNT(*) THEN 'canceled'
-                            ELSE 'partial'
-                        END
-                    FROM balju b2
-                    WHERE b2."BaljuHead_id" = bh.id
-                )
-            ) AS "bh_StateName",
-            -- 개별 balju 상태
-            b."State" AS "BalJuType",
-            fn_code_name('balju_state', b."State") AS "balju_StateName",
-            TO_CHAR(b."_created", 'yyyy-mm-dd') AS create_date
-        FROM balju_head bh
-        LEFT JOIN balju b ON b."BaljuHead_id" = bh.id
-        LEFT JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
-        LEFT JOIN mat_grp mg ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
-        LEFT JOIN unit u ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
-        LEFT JOIN company c ON c.id = b."Company_id"
-        left join sys_code s on bh."SujuType" = s."Code" and s."CodeType" = 'Balju_type'
-        LEFT JOIN (
-            SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
-            FROM mat_inout
-            WHERE "SourceTableName" = 'balju' AND COALESCE("_status", 'a') = 'a'
-            GROUP BY "SourceDataPk"
-        ) mi ON mi."SourceDataPk" = b.id
-        LEFT JOIN balju_total bt ON bt.bh_id = bh.id
-        WHERE bh.id = :id
+           SELECT "BaljuHead_id" AS bh_id,
+                  SUM(COALESCE("TotalAmount", 0)) AS total_amount_sum
+           FROM balju
+           GROUP BY "BaljuHead_id"
+         ),
+         -- 1개당 중량(kg)
+         s2 AS (
+           SELECT
+             m.id AS material_id,
+             CASE
+               WHEN m."Standard2" IS NULL OR btrim(m."Standard2")='' THEN NULL
+               ELSE NULLIF(
+                      regexp_replace(replace(m."Standard2", ',', '.'), '[^0-9\\.]', '', 'g'),
+                      ''
+                    )::numeric
+             END AS unit_weight_kg
+           FROM material m
+         ),
+         -- 누적 입고중량(kg)
+         mi AS (
+           SELECT "SourceDataPk" AS balju_id,
+                  SUM("InputQty") AS recv_kg
+           FROM mat_inout
+           WHERE "SourceTableName" = 'balju'
+             AND COALESCE("_status", 'a') = 'a'
+           GROUP BY "SourceDataPk"
+         ),
+         -- 라인 상태(중량 기준 파생)
+         line_state AS (
+           SELECT
+             b.id AS balju_id,
+             b."BaljuHead_id" AS bh_id,
+             CASE
+               WHEN b."State" = 'canceled' THEN 'canceled'
+               WHEN COALESCE(mi.recv_kg, 0) = 0 THEN 'draft'
+               WHEN COALESCE(mi.recv_kg, 0) >= (COALESCE(b."SujuQty",0) * COALESCE(s2.unit_weight_kg,1))
+                    THEN 'received'
+               ELSE 'partial'
+             END AS derived_state
+           FROM balju b
+           LEFT JOIN material m ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
+           LEFT JOIN s2      ON s2.material_id = m.id
+           LEFT JOIN mi      ON mi.balju_id   = b.id
+         ),
+         -- Head 상태(라인 파생 상태 집계)
+         head_state AS (
+           SELECT
+             ls.bh_id,
+             CASE
+               WHEN COUNT(*) FILTER (WHERE ls.derived_state = 'received') = COUNT(*) THEN 'received'
+               WHEN COUNT(*) FILTER (WHERE ls.derived_state = 'draft')    = COUNT(*) THEN 'draft'
+               WHEN COUNT(*) FILTER (WHERE ls.derived_state = 'canceled') = COUNT(*) THEN 'canceled'
+               ELSE 'partial'
+             END AS head_state
+           FROM line_state ls
+           GROUP BY ls.bh_id
+         )
+
+         SELECT
+           bh.id AS bh_id,
+           bh."Company_id",
+           c."Name" AS "CompanyName",
+           bh."JumunDate",
+           bh."DeliveryDate",
+           bh.special_note,
+           bh."JumunNumber",
+           b.id AS balju_id,
+           b."Material_id",
+           COALESCE(m."Code", '') AS product_code,
+           COALESCE(m."Name", '') AS product_name,
+           COALESCE(mg."Name", '') AS "MaterialGroupName",
+           COALESCE(mg.id, 0) AS "MaterialGroup_id",
+           fn_code_name('mat_type', mg."MaterialType") AS "MaterialTypeName",
+           s."Value" as "BaljuTypeName",
+           b."SujuQty",
+           u."Name" AS unit,
+           b."UnitPrice" AS "BaljuUnitPrice",
+           b."Price" AS "BaljuPrice",
+           b."Vat" AS "BaljuVat",
+           b."InVatYN",
+           b."TotalAmount" AS "LineTotalAmount",
+           COALESCE(bt.total_amount_sum, 0) AS "BaljuTotalPrice",
+           TO_CHAR(b."ProductionPlanDate", 'yyyy-mm-dd') AS production_plan_date,
+           TO_CHAR(b."ShipmentPlanDate", 'yyyy-mm-dd') AS shiment_plan_date,
+           b."Description",
+           b."AvailableStock",
+           b."ReservationStock",
+
+           -- ★ 라인 상태: 중량 기준 파생 값 사용
+           ls.derived_state AS "BalJuType",
+           fn_code_name('balju_state', ls.derived_state) AS "balju_StateName",
+
+           COALESCE(mi.recv_kg, 0) AS recv_kg,
+           (COALESCE(b."SujuQty",0) * COALESCE(s2.unit_weight_kg,1)) AS order_kg,
+
+           -- ★ Head 상태: 파생 라인 상태 집계 결과 사용
+           hs.head_state AS "BalJuHeadType",
+           fn_code_name('balju_state', hs.head_state) AS "bh_StateName",
+
+           TO_CHAR(b."_created", 'yyyy-mm-dd') AS create_date
+
+         FROM balju_head bh
+         LEFT JOIN balju b         ON b."BaljuHead_id" = bh.id
+         LEFT JOIN material m      ON m.id = b."Material_id" AND m.spjangcd = b.spjangcd
+         LEFT JOIN s2              ON s2.material_id = m.id
+         LEFT JOIN mat_grp mg      ON mg.id = m."MaterialGroup_id" AND mg.spjangcd = b.spjangcd
+         LEFT JOIN unit u          ON m."Unit_id" = u.id AND u.spjangcd = b.spjangcd
+         LEFT JOIN company c       ON c.id = b."Company_id"
+         LEFT JOIN sys_code s      ON bh."SujuType" = s."Code" AND s."CodeType" = 'Balju_type'
+         LEFT JOIN mi              ON mi.balju_id = b.id
+         LEFT JOIN line_state ls   ON ls.balju_id = b.id
+         LEFT JOIN head_state hs   ON hs.bh_id    = bh.id
+         LEFT JOIN balju_total bt  ON bt.bh_id    = bh.id
+         WHERE bh.id = :id
         """;
 //    log.info("발주상세 데이터 SQL: {}", sql);
 //    log.info("SQL Parameters: {}", paramMap.getValues());
