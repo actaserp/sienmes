@@ -117,12 +117,10 @@ public class ProductionResultController {
     public AjaxResult getProdResult(
             @RequestParam(value = "date_from", required = false) String dateFrom,
             @RequestParam(value = "date_to", required = false) String dateTo,
-            @RequestParam(value = "shift_code", required = false) String shiftCode,
-            @RequestParam(value = "mat_type", required = false) String mat_type,
             @RequestParam(value = "is_include_comp", required = false) String isIncludeComp,
             @RequestParam("spjangcd") String spjangcd) {
 
-        List<Map<String, Object>> items = this.productionResultService.getProdResult(dateFrom, dateTo, shiftCode, mat_type, isIncludeComp, spjangcd);
+        List<Map<String, Object>> items = this.productionResultService.getProdResult(dateFrom, dateTo, isIncludeComp, spjangcd);
 
         AjaxResult result = new AjaxResult();
         result.data = items;
@@ -141,6 +139,36 @@ public class ProductionResultController {
 
         return result;
     }
+
+    @GetMapping("/process-step-meta")
+    public AjaxResult getProcessStepMeta(
+            @RequestParam Integer material_id,
+            @RequestParam Integer routing_id,
+            @RequestParam Integer process_id,
+            @RequestParam(required=false) BigDecimal order_qty,
+            @RequestParam(required=false) String prod_date
+    ){
+        Map<String,Object> data = productionResultService.getProcessStepMeta(routing_id, process_id, material_id, order_qty, prod_date);
+        AjaxResult r = new AjaxResult();
+        r.data = data;
+        return r;
+    }
+
+    @GetMapping("/consumed_list_by_process")
+    public AjaxResult getConsumedByProcess(
+            @RequestParam Integer material_id,
+            @RequestParam Integer routing_id,
+            @RequestParam Integer process_id,
+            @RequestParam BigDecimal order_qty,
+            @RequestParam String prod_date
+    ){
+        List<Map<String,Object>> rows = productionResultService.getConsumedByProcess(routing_id, process_id, material_id, order_qty, prod_date);
+        AjaxResult r = new AjaxResult();
+        r.data = rows;
+        return r;
+    }
+
+
 
     @GetMapping("/defect_list")
     public AjaxResult getDefectList(
@@ -177,34 +205,44 @@ public class ProductionResultController {
         return result;
     }
 
+    @GetMapping("/find-by-order-process")
+    public AjaxResult findJobByOrderAndProcess(
+            @RequestParam String order_num,
+            @RequestParam Integer process_id,
+            @RequestParam Integer pro_mat_id
+    ){
+        Integer jrPk = productionResultService.findJobByOrderAndProcess(order_num, process_id, pro_mat_id);
+        AjaxResult r = new AjaxResult();
+        r.data = (jrPk != null) ? Map.of("jr_pk", jrPk) : null;
+        return r;
+    }
+
     @GetMapping("/consumed_list")
     public AjaxResult getConsumedList(
             @RequestParam(value = "jr_pk", required = false) Integer jrPk,
-            @RequestParam(value = "prod_pk", required = false) Integer prodPk,
-            @RequestParam(value = "proc_id", required = false) Integer procId,
-            @RequestParam(value = "prod_date", required = false) String prodDate) {
+            @RequestParam(value = "mat_pk", required = false) Integer materialId,
+            @RequestParam(value = "process_id", required = false) Integer processId,
+            @RequestParam(value = "routing_id", required = false) Integer routingId,
+            @RequestParam(value = "order_qty", required = false) BigDecimal order_qty,
+            @RequestParam(value = "prod_date", required = false) String prodDate,
+            @RequestParam(value = "prod_mat_id", required = false) Integer prod_mat_id,
+            @RequestParam(value = "need_pro_mat_qty", required = false) BigDecimal need_pro_mat_qty,
+            @RequestParam(value = "consumed_mode", required = false) String consumed_mode) {
 
-
-        JobRes jr = this.jobResRepository.getJobResById(jrPk);
-        if (jr != null) {
-            // 안정적으로 서버 기준으로 값 덮어쓰기
-            prodDate = jr.getProductionDate().toString();
-            prodPk   = jr.getMaterialId();
-            // procId가 null이면 서비스 쪽에서 jr→wc 조인으로 보완
-        }
 
         List<Map<String, Object>> items;
-        if (this.productionResultService.hasProcBom(jrPk, procId)) {
-            // 라우팅 기반 공정 BOM 존재 → 공정별 투입 BOM으로
-            items = this.productionResultService.getConsumedListByProc(jrPk, prodPk, procId, prodDate);
-        } else {
-            // 라우팅 없음/공정 BOM 미정의 → 기존 로직 유지
-            items = this.productionResultService.getConsumedListFirst(jrPk, prodPk, prodDate);
+
+        if ("PLAN".equalsIgnoreCase(consumed_mode)) {
+            // 공정 시작 전(예상): pro_mat_id + need_pro_mat_qty로 소요 계산
+            items = this.productionResultService.getConsumedListPlan(prod_mat_id, need_pro_mat_qty, prodDate);
+
+        } else{
+            items = this.productionResultService.getConsumedListFirst(jrPk, materialId, prodDate);
         }
 
         AjaxResult result = new AjaxResult();
         result.data = items;
-
+        System.out.println(items);
         return result;
     }
 
@@ -300,18 +338,31 @@ public class ProductionResultController {
             @RequestParam(value = "equipment_id", required = false) Integer equipmentId,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "mat_pk", required = false) Integer matPk,
-            @RequestParam(value = "order_num", required = false) String order_num,
+            @RequestParam(value = "order_num", required = false) String orderNum,
+            @RequestParam(value = "prod_mat_id", required = false) Integer prodMatId,
+            @RequestParam(value = "process_id", required = false) Integer processId,
+            @RequestParam(value = "need_pro_mat_qty", required = false) BigDecimal needProMatQty,
+            @RequestParam(value = "consumed_mode", required = false) String consumedMode,
             @RequestParam("spjangcd") String spjangcd,
             HttpServletRequest request,
             Authentication auth) {
 
         AjaxResult result = new AjaxResult();
-
         User user = (User) auth.getPrincipal();
 
-        Timestamp start_time = Timestamp.valueOf(prodDate + ' ' + startTime + ":00");
-        Timestamp end_time = null;
+        // 공통 시간 세팅
+        if (prodDate == null || prodDate.isBlank()) {
+            result.success = false;
+            result.message = "생산일이 없습니다.";
+            return result;
+        }
+        Timestamp start_ts = Timestamp.valueOf(prodDate + " " + startTime + ":00");
+        Timestamp end_ts   = (endTime != null && !endTime.isEmpty())
+                ? Timestamp.valueOf(prodDate + " " + endTime + ":00")
+                : null;
+        Timestamp prod_ts  = CommonUtil.tryTimestamp(prodDate);
 
+        // 설비 중복 가동 체크
         long runningCount = this.equRunRepository.countByEquipmentIdAndRunState(equipmentId, "run");
         if (runningCount > 0) {
             result.success = false;
@@ -319,62 +370,124 @@ public class ProductionResultController {
             return result;
         }
 
-        if (!endTime.equals("")) {
-            end_time = Timestamp.valueOf(prodDate + ' ' + endTime + ":00");
+        JobRes target; // 실제로 start 상태로 저장할 대상(자식 또는 기존)
+        if ("PLAN".equalsIgnoreCase(consumedMode)) {
+            // ✅ PLAN: 새 자식 job_res 생성
+            if (jrPk == null || prodMatId == null || needProMatQty == null) {
+                result.success = false;
+                result.message = "PLAN 모드에는 부모작지/공정산출품/지시수량이 필요합니다.";
+                return result;
+            }
+
+            JobRes parent = this.jobResRepository.getJobResById(jrPk);
+            if (parent == null) {
+                result.success = false;
+                result.message = "부모 작업지가 없습니다.";
+                return result;
+            }
+
+            Material m = materialRepository.getMaterialById(prodMatId);
+            Integer locPk = m.getStoreHouseId();
+
+            // (중복 방지) 동일 WO + 동일 공정 + 동일 산출품 자식이 이미 있으면 재사용
+            Integer dupId = this.jobResRepository.findIdByOrderProcessAndMaterial(orderNum, processId, prodMatId);
+            if (dupId != null) {
+                target = this.jobResRepository.getJobResById(dupId);
+            } else {
+                // 필요 시 공정 순서 조회
+
+                target = new JobRes();
+                target.setWorkOrderNumber(orderNum != null ? orderNum : parent.getWorkOrderNumber());
+                target.setParentId(parent.getId());
+                target.setMaterialId(prodMatId);
+                target.setOrderQty(needProMatQty.floatValue());
+                target.setWorkCenter_id(workcenterId);
+                target.setEquipment_id(equipmentId);
+                target.setProductionDate(prod_ts);
+                target.setProductionPlanDate(prod_ts);
+                target.setFirstWorkCenter_id(
+                        parent.getFirstWorkCenter_id() != null ? parent.getFirstWorkCenter_id() : workcenterId);
+                target.setDescription(description);
+                target.setShiftCode(shiftCode);
+                target.setState("working");                          // 바로 시작
+                target.setStartTime(start_ts);
+                target.setSpjangcd(spjangcd);
+                if (endDate != null && !endDate.isEmpty()) target.setEndDate(Date.valueOf(endDate));
+                target.set_audit(user);
+                target.setStoreHouse_id(locPk);
+                target.setRouting_id(parent.getRouting_id());
+                target.setWorkIndex(parent.getWorkIndex());
+
+                // 투입요청 생성(최초 1회)
+                MatProcInputReq mir = new MatProcInputReq();
+                mir.setRequestDate(DateUtil.getNowTimeStamp());
+                mir.setRequesterId(user.getId());
+                mir.set_audit(user);
+                mir = this.matProcInputReqRepository.save(mir);
+                target.setMaterialProcessInputRequestId(mir.getId());
+
+                target = this.jobResRepository.save(target);
+            }
+
         } else {
-            end_time = null;
+            // ✅ ACTUAL: 기존 job_res 업데이트
+            if (jrPk == null) {
+                result.success = false;
+                result.message = "작업지 id가 없습니다.";
+                return result;
+            }
+            target = this.jobResRepository.getJobResById(jrPk);
+            if (target == null) {
+                result.success = false;
+                result.message = "작업지를 찾을 수 없습니다.";
+                return result;
+            }
+
+            // 최초 투입요청 연결
+            if (target.getMaterialProcessInputRequestId() == null) {
+                MatProcInputReq mir = new MatProcInputReq();
+                mir.setRequestDate(DateUtil.getNowTimeStamp());
+                mir.setRequesterId(user.getId());
+                mir.set_audit(user);
+                mir = this.matProcInputReqRepository.save(mir);
+                target.setMaterialProcessInputRequestId(mir.getId());
+            }
+
+            // 상태/시간/기본값 보정
+            if (target.getOrderQty() == null) target.setOrderQty(0f);
+            if (target.getFirstWorkCenter_id() == null) target.setFirstWorkCenter_id(workcenterId);
+            if (target.getProductionPlanDate() == null) target.setProductionPlanDate(prod_ts);
+            if (target.getMaterialId() == null) target.setMaterialId(matPk);
+
+            target.setState("working");
+            target.setProductionDate(prod_ts);
+            target.setStartTime(start_ts);
+            target.setEndTime(end_ts);
+            if (endDate != null && !endDate.isEmpty()) target.setEndDate(Date.valueOf(endDate));
+            target.setShiftCode(shiftCode);
+            target.setWorkCenter_id(workcenterId);
+            target.setEquipment_id(equipmentId);
+            target.setDescription(description);
+            target.set_audit(user);
+
+            target = this.jobResRepository.save(target);
         }
-        Timestamp prod_date = CommonUtil.tryTimestamp(prodDate);
-        Timestamp now = DateUtil.getNowTimeStamp();
 
-        JobRes jr = this.jobResRepository.getJobResById(jrPk);
-
-        MatProcInputReq mir = null;
-        if (jr != null && jr.getMaterialProcessInputRequestId() == null) {
-            mir = new MatProcInputReq();
-            mir.setRequestDate(now);
-            mir.setRequesterId(user.getId());
-            mir.set_audit(user);
-            mir = this.matProcInputReqRepository.save(mir);
-
-            jr.setMaterialProcessInputRequestId(mir.getId());
-
-        } else {
-
-        }
-        jr.setState("working");
-        jr.setProductionDate(prod_date);
-        jr.setStartTime(start_time);
-        // 임시로 추가 ------
-        if (jr.getOrderQty() == null) jr.setOrderQty((float) 0);
-        if (jr.getFirstWorkCenter_id() == null) jr.setFirstWorkCenter_id(workcenterId);
-        if (jr.getProductionPlanDate() == null) jr.setProductionPlanDate(prod_date);
-        if (jr.getMaterialId() == null) jr.setMaterialId(matPk);
-        // -------------
-        jr.setEndTime(end_time);
-        jr.setEndDate(Date.valueOf(endDate));
-        jr.setShiftCode(shiftCode);
-        jr.setWorkCenter_id(workcenterId);
-        jr.setEquipment_id(equipmentId);
-        jr.setDescription(description);
-        jr.set_audit(user);
-        jr = this.jobResRepository.save(jr);
-
-        // 설비 시작 추가
+        // 설비 가동 시작 로그
         EquRun er = new EquRun();
         er.setEquipmentId(equipmentId);
-        er.setStartDate(start_time);
-        er.setWorkOrderNumber(order_num);
+        er.setStartDate(start_ts);
+        er.setWorkOrderNumber(orderNum != null ? orderNum : target.getWorkOrderNumber());
         er.setRunState("run");
         er.set_audit(user);
         er.setSpjangcd(spjangcd);
-
         this.equRunRepository.save(er);
 
-
-        result.data = jr;
-
-        return result;
+        // 응답: 프론트에서 res.data.jr_pk를 쓰니 id만 내려주자
+        AjaxResult r = new AjaxResult();
+        r.success = true;
+        r.data = java.util.Map.of("jr_pk", target.getId());
+        return r;
     }
 
     @PostMapping("/defect_save")
@@ -725,138 +838,77 @@ public class ProductionResultController {
             @RequestParam(value = "mp_pk", required = false) String mpPk,
             @RequestParam(value = "lot_id", required = false) Integer lotId,
             @RequestParam(value = "input_qty", required = false) Float inputQty,
-            @RequestParam(value = "mpi_id", required = false) Integer mpiId,
             HttpServletRequest request,
             Authentication auth) {
 
         AjaxResult result = new AjaxResult();
+
         User user = (User) auth.getPrincipal();
+
         Timestamp inoutTime = DateUtil.getNowTimeStamp();
 
         JobRes jr = this.jobResRepository.getJobResById(jrPk);
-        if (jr == null) {
-            result.success = false;
-            result.message = "유효하지 않은 작업(jr_pk) 입니다.";
-            return result;
-        }
 
         MaterialLot ml = this.matLotRepository.getMatLotById(lotId);
-        if (ml == null) {
-            result.success = false;
-            result.message = "유효하지 않은 LOT 입니다.";
-            return result;
-        }
 
-        // 공통 검증 (LOT 재고 / 창고)
-        if (ml.getCurrentStock() <= 0) {
-            result.message = "가용한 재고가 없는 LOT을 지정했습니다.(" + ml.getLotNumber() + ")";
-            result.success = false;
-            return result;
-        }
-        if (ml.getStoreHouseId() == null) {
-            result.message = "해당 품목의 기본창고가 지정되지 않았습니다(" + ml.getLotNumber() + ")";
-            result.success = false;
-            return result;
-        }
-
-        // ===== 1) 수정 경로: mpi_id 가 있는 경우 =====
-        if (mpiId != null) {
-            MatProcInput mpi = this.matProcInputRepository.findById(mpiId).orElse(null);
-            if (mpi == null) {
+        if (ml != null) {
+            if (ml.getCurrentStock() <= 0) {
+                result.message = "가용한 재고가 없는 LOT을 지정했습니다.(" + ml.getLotNumber() + ")";
                 result.success = false;
-                result.message = "수정 대상 MatProcInput(mpi_id=" + mpiId + ")을 찾을 수 없습니다.";
                 return result;
             }
 
-            // jr에 MIR가 없다면, 수정 대상 mpi의 MIR를 따라가도록 동기화 (필요 시)
-            if (jr.getMaterialProcessInputRequestId() == null) {
-                jr.setMaterialProcessInputRequestId(mpi.getMaterialProcessInputRequestId());
-            } else if (!jr.getMaterialProcessInputRequestId().equals(mpi.getMaterialProcessInputRequestId())) {
-                // 서로 다른 요청 묶음이면 안전하게 막기
+            if (ml.getStoreHouseId() == null) {
+                result.message = "해당 품목의 기본창고가 지정되지 않았습니다(" + ml.getLotNumber() + ")";
                 result.success = false;
-                result.message = "요청 묶음이 일치하지 않습니다. (jr의 MIR와 mpi의 MIR 불일치)";
                 return result;
             }
 
-            // 입력값으로 해당 MPI 업데이트
-            if (inputQty != null) {
-                mpi.setRequestQty(toScale3f(inputQty));
+            List<MatProcInput> mpiList = this.matProcInputRepository.findByMaterialProcessInputRequestIdAndMaterialLotId(jr.getMaterialProcessInputRequestId(), ml.getId());
+            Integer mpiCount = mpiList.size();
+            if (mpiCount > 0) {
+                result.message = "이미 지정된 로트입니다.(" + ml.getLotNumber() + ")";
+                result.success = false;
+                return result;
             }
-            // lot_id가 넘어왔으므로 LOT 관련 필드도 최신화
+
+            MatProcInputReq mir = null;
+
+            if (jr != null) {
+                if (jr.getMaterialProcessInputRequestId() == null) {
+                    mir = new MatProcInputReq();
+                    mir.setRequestDate(inoutTime);
+                    mir.setRequesterId(user.getId());
+                    mir.set_audit(user);
+                    mir = this.matProcInputReqRepository.save(mir);
+                    jr.setMaterialProcessInputRequestId(mir.getId());
+
+                } else {
+                    mir = this.matProcInputReqRepository.getMatProcInputReqById(jr.getMaterialProcessInputRequestId());
+                }
+            }
+
+            MatProcInput mpi = new MatProcInput();
+            mpi.setMaterialProcessInputRequestId(mir.getId());
             mpi.setMaterialId(ml.getMaterialId());
+            mpi.setRequestQty(inputQty);
+            mpi.setInputQty((float) 0);
             mpi.setMaterialLotId(ml.getId());
             mpi.setMaterialStoreHouseId(ml.getStoreHouseId());
-
             mpi.setState("requested");
-            // 기존 inputQty를 보존하고 싶으면 아래 라인은 제거
-            mpi.setInputQty(mpi.getInputQty() == null ? 0f : mpi.getInputQty());
             mpi.setInputDateTime(inoutTime);
             mpi.setActorId(user.getId());
             mpi.set_audit(user);
-
             mpi = this.matProcInputRepository.save(mpi);
 
             result.success = true;
             result.data = mpi;
-            return result;
-        }
-
-        // ===== 2) 생성 경로: mpi_id 가 없는 경우 (기존 중복 검사 유지) =====
-        MatProcInputReq mir;
-        if (jr.getMaterialProcessInputRequestId() == null) {
-            // MIR가 없으면 생성
-            mir = new MatProcInputReq();
-            mir.setRequestDate(inoutTime);
-            mir.setRequesterId(user.getId());
-            mir.set_audit(user);
-            mir = this.matProcInputReqRepository.save(mir);
-            jr.setMaterialProcessInputRequestId(mir.getId());
         } else {
-            mir = this.matProcInputReqRepository.getMatProcInputReqById(jr.getMaterialProcessInputRequestId());
-            if (mir == null) {
-                result.success = false;
-                result.message = "유효하지 않은 MaterialProcessInputRequest 입니다.";
-                return result;
-            }
-        }
-
-        // ★ 중복 LOT 지정 검사 (요청 ID 확정 후 검사해야 정확)
-        List<MatProcInput> mpiList = this.matProcInputRepository
-                .findByMaterialProcessInputRequestIdAndMaterialLotId(jr.getMaterialProcessInputRequestId(), ml.getId());
-        if (mpiList != null && !mpiList.isEmpty()) {
-            result.message = "이미 지정된 로트입니다.(" + ml.getLotNumber() + ")";
             result.success = false;
-            return result;
         }
 
-        // 신규 생성
-        MatProcInput mpi = new MatProcInput();
-        mpi.setMaterialProcessInputRequestId(mir.getId());
-        mpi.setMaterialId(ml.getMaterialId());
-        mpi.setRequestQty(toScale3f(inputQty));
-        mpi.setInputQty(0f);
-        mpi.setMaterialLotId(ml.getId());
-        mpi.setMaterialStoreHouseId(ml.getStoreHouseId());
-        mpi.setState("requested");
-        mpi.setInputDateTime(inoutTime);
-        mpi.setActorId(user.getId());
-        mpi.set_audit(user);
-
-        mpi = this.matProcInputRepository.save(mpi);
-
-        result.success = true;
-        result.data = mpi;
         return result;
     }
-
-    private static BigDecimal toScale3(Float v) {
-        return v == null ? null : BigDecimal.valueOf(v.doubleValue()).setScale(3, RoundingMode.HALF_UP);
-    }
-
-    private static Float toScale3f(Float v) {
-        return v == null ? null : toScale3(v).floatValue();
-    }
-
 
     @PostMapping("/multi_add_lot_input")
     @Transactional
@@ -1057,11 +1109,11 @@ public class ProductionResultController {
             String matName = bomMap.get("mat_name").toString();
             Material consMat = this.materialRepository.getMaterialById(consumeMatPk);
             String lotUseYn = bomMap.get("lotUseYn").toString();
-			
+            float totalQty = 0f;
 			/*
-			 선입선출로 mat_lot 찾아서 차감 
-             차감하면서 mat_lot_cons 생성 
-             투입되어야할 수량보다 적으면 재고량 부족으로 return 
+			 선입선출로 mat_lot 찾아서 차감
+             차감하면서 mat_lot_cons 생성
+             투입되어야할 수량보다 적으면 재고량 부족으로 return
              */
 
             if ("Y".equals(lotUseYn)) {
@@ -1070,29 +1122,14 @@ public class ProductionResultController {
 
                 List<Map<String, Object>> mpiList = this.productionResultService.getMaterialProcessInputList(jr.getId(), consumeMatPk);
                 // 투입요청에서 해당 품목이 로트 투입인지 조회한다
+                float remainQty = chasuBomQty;
 
-                float totalLotQty = 0;
                 for (int j = 0; j < mpiList.size(); j++) {
                     Map<String, Object> mpiMap = mpiList.get(j);
 
-                    float currQty = Float.parseFloat(mpiMap.get("curr_qty").toString());
-                    totalLotQty += currQty;
-                }
+                    float reqQty = Float.parseFloat(mpiMap.get("req_qty").toString());
+                    totalQty += reqQty;
 
-                if (totalLotQty < chasuBomQty) {
-                    result.message = "가용한 LOT 재고가 없습니다.(" + matName + ")\n 투입 내역에서 가용 재고를 추가해주세요. ";
-                    result.success = false;
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    return result;
-                }
-
-                // 작업준비에 설정된 lot 투입 품목이면
-                // 로트 사용량 추가
-                float remainQty = chasuBomQty;
-
-                // MaterialProcessInput 조회
-                for (int k = 0; k < mpiList.size(); k++) {
-                    Map<String, Object> mpiMap = mpiList.get(k);
                     int matLotId = (int) mpiMap.get("ml_id");
                     float currentStock = Float.parseFloat(mpiMap.get("curr_qty").toString());
                     if (currentStock == 0) {
@@ -1109,15 +1146,15 @@ public class ProductionResultController {
                     mlc.setSpjangcd(spjangcd);
                     if (currentStock >= remainQty) {
                         // 해당로트의현재수량 가능
-                        mlc.setOutputQty(remainQty);
+                        mlc.setOutputQty(reqQty);
                         remainQty = (float) 0;
                         mlc = this.matLotConsRepository.save(mlc);
 
                         break;
                     } else {
-                        mlc.setOutputQty(currentStock);
+                        mlc.setOutputQty(reqQty);
                         mlc = this.matLotConsRepository.save(mlc);
-                        remainQty = remainQty - currentStock;
+                        remainQty = remainQty - reqQty;
                     }
 
                 }
@@ -1153,6 +1190,7 @@ public class ProductionResultController {
                         return result;
                     }
                 }
+                totalQty += chasuBomQty;
             }
 
             // mat_cons 생성
@@ -1165,7 +1203,7 @@ public class ProductionResultController {
             mc.setEndTime(now);
             mc.setDescription("차수생산분");
             mc.setBomQty(chasuBomQty);
-            mc.setConsumedQty(chasuBomQty);        // 차수 생산분에 해당하는 BOM기준물량
+            mc.setConsumedQty(totalQty);        // 차수 생산분에 해당하는 BOM기준물량, lot 사용시 총 투입 수량
             mc.set_audit(user);
             mc.setState("finished");
             mc.set_status("a");
@@ -1173,7 +1211,7 @@ public class ProductionResultController {
             mc.setSpjangcd(spjangcd);
             mc = this.matConsuRepository.save(mc);
 
-            //1. mat_inout 생성=> BOM 수량만큼 재고를 차감한다.
+            //1. mat_inout 생성=> lot 투입이면 투입 수량만큼 lot 없으면 BOM 수량만큼 재고를 차감한다.
             MaterialInout mic = new MaterialInout();
             mic.setMaterialInoutHeadId(null);
             mic.setMaterialId(mc.getMaterialId());
@@ -1183,7 +1221,7 @@ public class ProductionResultController {
             mic.setInoutTime(LocalTime.parse(time.format(timeFormat)));
             mic.setInOut("out");
             mic.setOutputType("consumed_out");
-            mic.setOutputQty(mc.getConsumedQty());
+            mic.setOutputQty(totalQty);
             mic.setSourceDataPk(mc.getId());
             mic.setSourceTableName("mat_consu");
             mic.setState("confirmed");
@@ -1234,6 +1272,7 @@ public class ProductionResultController {
         item.put("lot_number", lotNumber);
         item.put("good_qty_sum", jr.getGoodQty());
         item.put("chasu", chasu);
+        item.put("prod_mat_cd", m.getCode());
 
         result.data = item;
 
@@ -1671,19 +1710,19 @@ public class ProductionResultController {
 //			Authentication auth) {
 
 //		AjaxResult result = new AjaxResult();
-//		
+//
 //		JobRes jr = this.jobResRepository.getJobResById(jobresId);
-//		
+//
 //		User user = (User)auth.getPrincipal();
-//		
+//
 //		List<MaterialProduce> mpList =  new ArrayList<>();
 //		List<JobResDefect> jdList =  new ArrayList<>();
-//		
+//
 //		if (!jr.getState().equals("finisehed") && !jr.getSourceTableName().equals("suju")) {
-//			
+//
 //			mpList = this.matProduceRepository.findByJobResponseId(jr.getId());
 //			jdList = this.jobResDefectRepository.findByJobResponseId(jr.getId());
-//			
+//
 //			if (mpList.size() > 0) {
 //				result.success = false;
 //				result.message = "저장된 차수가 존재합니다.";
@@ -1691,67 +1730,67 @@ public class ProductionResultController {
 //			}
 //		}
 //		String state = "";
-//		
+//
 //		if (jr.getSourceTableName().equals("suju")) {
 //			Suju s = this.sujuRepository.getSujuById(jr.getSourceDataPk());
 //			boolean jrExist = false;
-//			
+//
 //			if (s.getMaterialId() == jr.getMaterialId()) {
 //				List<JobRes> jrList = this.jobResRepository.findBySourceDataPkAndSourceTableName(s.getId(),"suju");
-//				
+//
 //				// 로직 맞는지 점검
 //				for (int i = 0; i < jrList.size(); i++) {
 //					Material m = this.materialRepository.getMaterialById(jrList.get(i).getMaterialId());
 //					MaterialGroup mg = this.materialGroupRepository.getMatGrpById(m.getMaterialGroupId());
-//					
+//
 //					if (jrList.get(i).getId() == jr.getId() || mg.getMaterialType().equals("product")) {
 //						jrList.remove(i);
 //					}
 //				}
-//				
+//
 //				if (jrList.size() > 0) {
 //					jrExist = true;
 //				}
-//				
+//
 //				if(jrExist) {
 //					result.message = "반제품 작업지시가 존재합니다.\\n반제품 작지를 삭제해주세요.";
 //					result.success = false;
 //					return result;
 //				} else {
-//					
+//
 //					List<Integer> id = new ArrayList<Integer>();
 //					id.add(jr.getId());
-//					
+//
 //					jrList = this.jobResRepository.findBySourceDataPkAndSourceTableNameAndMaterialIdAndIdNotIn(s.getId(),"suju",jr.getMaterialId(),id);
-//					
+//
 //					if (jrList.size() == 0 ) {
 //						state = "received";
 //					}
 //				}
 //			}
 //		}
-//		
+//
 //		Integer sujuPk = jr.getSourceDataPk();
-//		
+//
 //		if (jdList.size() > 0) {
 //			for (int i = 0; i < jdList.size(); i++) {
 //				this.jobResDefectRepository.deleteById(jdList.get(i).getId());
 //			}
 //		}
-//		
+//
 //		if (state.equals("received")) {
 //			Suju sj = this.sujuRepository.findByIdAndState(sujuPk,"ordered");
-//			
+//
 //			if (sj != null) {
 //				sj.setState("received");
 //				sj.set_audit(user);
 //				sj = this.sujuRepository.save(sj);
 //			}
-//			
+//
 //			this.jobResRepository.deleteById(jr.getId());
 //		}
-//		
-//		
+//
+//
 //		return result;
 //	}
 
