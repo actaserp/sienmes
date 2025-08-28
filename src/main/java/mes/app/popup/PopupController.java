@@ -302,9 +302,9 @@ public class PopupController {
         BT as (
             select
                 bc."Material_id" as mat_pk
-              , bc."Amount" as bom_requ_qty
-              , bc."Amount" as bom_ratio
-			  , bc."Amount" / bom1.produced_qty * bom1.order_qty as chasu_bom_qty
+              ,round(bc."Amount"::numeric, 4) as quantity
+			  ,round((bc."Amount" / bom1.produced_qty)::numeric, 4) as bom_ratio
+			  ,round((bc."Amount" / bom1.produced_qty * bom1.order_qty)::numeric, 4) as bom_requ_qty
             from bom_comp bc
             inner join bom1 on bom1.bom_pk = bc."BOM_id"
             where bom1.g_idx = 1
@@ -334,7 +334,7 @@ public class PopupController {
         ),
         MMP as (
             select
-                sum(mpi."RequestQty") as current_qty_sum
+                sum(mpi."RequestQty") as request_qty_sum
               , mpi."Material_id"
             from mat_proc_input mpi
             inner join job_res jr
@@ -350,16 +350,18 @@ public class PopupController {
             a.id
           , mg."Name" as mat_grp_name
           , m."Name" as mat_name
-          , round((a."CurrentStock")::numeric, 3) as cur_stock
-          , round((a."RequestQty")::numeric, 3) as input_stock
-          , round((a."InputQty")::numeric, 3) as first_qty
+          , round((a."CurrentStock")::numeric, 4) as cur_stock
+          , round((a."RequestQty")::numeric, 4) as input_stock
+          , round((a."InputQty")::numeric, 4) as first_qty
           , sh."Name" as storehouse_name
           , to_char(a."EffectiveDate",'yyyy-mm-dd') as effective_date
           , to_char(a."InputDateTime",'yyyy-mm-dd') as create_date
-          , round((
-                coalesce(BT.chasu_bom_qty,0)
-              - coalesce(MMP.current_qty_sum,0)
-            )::numeric, 3) as remain_input_qty
+          	,round(
+				(
+				  coalesce(round(BT.bom_requ_qty::numeric, 4), 0)
+				- coalesce(round(MMP.request_qty_sum::numeric, 4), 0)
+				)
+			  , 4) as remain_input_qty
           , a.mpi_id
         from target_lot a
         inner join material m on m.id = a."Material_id"
