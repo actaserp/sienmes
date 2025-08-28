@@ -522,7 +522,7 @@ public class PopupController {
             from company
             WHERE ("CompanyType" = 'sale'
             OR "CompanyType" = 'sale-purchase')
-            and "relyn" = '0'
+             AND ("relyn" = '0' OR "relyn" IS NULL)
 			""";
 
 		if (compCode != null && !compCode.isEmpty()) {
@@ -768,7 +768,7 @@ public class PopupController {
             from company
             WHERE ("CompanyType" = 'sale'
             OR "CompanyType" = 'sale-purchase')
-            and "relyn" = '0'
+            AND ("relyn" = '0' OR "relyn" IS NULL)
             and id = :id
 			""";
 
@@ -925,7 +925,7 @@ public class PopupController {
             from company
             WHERE ("CompanyType" = 'purchase'
             OR "CompanyType" = 'sale-purchase')
-            and "relyn" = '0'
+            AND ("relyn" = '0' OR "relyn" IS NULL)
 			""";
 		//relyn = 거래중지 여부
 		
@@ -977,7 +977,7 @@ public class PopupController {
             , "AccountManagerPhone" as invoiceetel1
             , "Email" as invoiceeemail1
             from company
-            WHERE  "relyn" = '0'
+            WHERE ("relyn" = '0' OR "relyn" IS NULL)
 			""";
 
 		if (compCode != null && !compCode.isEmpty()) {
