@@ -589,6 +589,11 @@
                                         <button type="button" class="btn" id="btnInputLotSave" title="로트투입 저장"><i
                                                 class="fas fa-edit"></i></button>
                                     </li>
+                                    <li>
+                                        품목코드 필터 :  <input type="text" id="txtInputCode"
+                                                    placeholder="계획 선택"
+                                                    autocomplete="off" style="width:100px; height: 36px;"/>
+                                    </li>
                                 </ul>
                             </div>
                             <div class="container-fluid">
@@ -980,6 +985,7 @@
                 this._suppressProcessChange = false;
                 this._currentJrPk = null;
                 this._hasRouting = false;
+                this.suppressSelect = true;
                 this.init();
             }
 
@@ -1280,36 +1286,37 @@
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     allowSorting: true, // 모든 컬럼 정렬 가능
                     columns: [
-                        {binding: 'mat_type_name', header: '제품구분', width: 100, align: 'left', isReadOnly: true},
+                        {binding: 'mpi_id', align: 'left', visible: false},
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'left', isReadOnly: true},
                         {binding: 'mat_name', header: '품목', width: 250, align: 'left', isReadOnly: true},
-                        {binding: 'unit_name', header: '단위', width: 80, align: 'center', isReadOnly: true},
-                        {binding: 'lot_number', header: '로트번호', width: 150, align: 'center', isReadOnly: true},
-                        {binding: 'StoreHouseName', header: '창고', width: 150, align: 'left', isReadOnly: true},
-                        {
-                            binding: 'cur_stock',
-                            header: '현재재고',
-                            width: 100,
-                            align: 'right',
-                            format: 'n0',
-                            isReadOnly: true
-                        },
                         {
                             binding: 'req_qty',
                             header: '투입요청량',
                             width: 100,
                             align: 'right',
-                            format: 'n0',
+                            format: 'n4',
                             isReadOnly: true
                         },
+                        {binding: 'unit_name', header: '단위', width: 80, align: 'center', isReadOnly: true},
+                        {binding: 'lot_number', header: '로트번호', width: 150, align: 'center', isReadOnly: true},
                         {
                             binding: 'consumed_qty',
                             header: '생산소모량',
                             width: 100,
                             align: 'right',
-                            format: 'n0',
+                            format: 'n4',
                             isReadOnly: true
                         },
+                        {
+                            binding: 'cur_stock',
+                            header: '현재재고',
+                            width: 100,
+                            align: 'right',
+                            format: 'n4',
+                            isReadOnly: true
+                        },
+                        {binding: 'mat_type_name', header: '제품구분', width: 100, align: 'left', isReadOnly: true},
+                        {binding: 'StoreHouseName', header: '창고', width: 150, align: 'left', isReadOnly: true},
                         {binding: 'start_date', header: '투입일시', width: 200, align: 'center', isReadOnly: true}
                     ],
                     itemsSource: new wijmo.collections.CollectionView([]), // 빈 데이터로 초기화
@@ -1335,26 +1342,14 @@
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     allowSorting: true, // 모든 컬럼 정렬 가능
                     columns: [
-                        {binding: 'mat_type_name', header: '제품구분', width: 100, align: 'left', isReadOnly: true},
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'left', isReadOnly: true},
                         {binding: 'mat_name', header: '품목', width: 250, align: 'left', isReadOnly: true},
-                        {binding: 'unit', header: '단위', width: 80, align: 'center', isReadOnly: true},
-                        {binding: 'useyn', header: '사용중지여부', width: 100, align: 'center', isReadOnly: true},
-                        {binding: 'lotUseYn', header: 'LOT관리 유무', width: 120, align: 'center', isReadOnly: true},
                         {
-                            binding: 'lot_size',
-                            header: '로트 size',
-                            width: 120,
-                            align: 'right',
-                            format: 'n0',
-                            isReadOnly: true
-                        },
-                        {
-                            binding: 'current_qty_sum',
+                            binding: 'request_qty_sum',
                             header: '로트투입량',
                             width: 100,
                             align: 'right',
-                            format: 'n0',
+                            format: 'n4',
                             isReadOnly: true
                         },
                         {
@@ -1362,7 +1357,15 @@
                             header: '소요량(BOM)',
                             width: 120,
                             align: 'right',
-                            format: 'n0',
+                            format: 'n4',
+                            isReadOnly: true
+                        },
+                        {
+                            binding: 'remain_input_qty',
+                            header: '잔여량',
+                            width: 100,
+                            align: 'right',
+                            format: 'n4',
                             isReadOnly: true
                         },
                         {
@@ -1370,7 +1373,7 @@
                             header: '실생산소모량',
                             width: 120,
                             align: 'right',
-                            format: 'n0',
+                            format: 'n4',
                             isReadOnly: true
                         },
                         {
@@ -1378,7 +1381,19 @@
                             header: '현재재고',
                             width: 100,
                             align: 'right',
-                            format: 'n0',
+                            format: 'n4',
+                            isReadOnly: true
+                        },
+                        {binding: 'mat_type_name', header: '제품구분', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'useyn', header: '사용중지여부', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'lotUseYn', header: 'LOT관리 유무', width: 120, align: 'center', isReadOnly: true},
+                        {binding: 'unit', header: '단위', width: 80, align: 'center', isReadOnly: true},
+                        {
+                            binding: 'lot_size',
+                            header: '로트 size',
+                            width: 120,
+                            align: 'right',
+                            format: 'n4',
                             isReadOnly: true
                         }
                     ],
@@ -1397,6 +1412,44 @@
                             }
                         }
                     }
+                });
+
+                this.consumedGrid.selectionChanged.addHandler((s, e) => {
+                    if (this.suppressSelect) return;
+                    const view = s.collectionView;
+                    const cur = view ? view.currentItem : null;
+                    const code = (cur && cur.mat_code) ? cur.mat_code : '';
+
+                    const $input = $('#txtInputCode');
+                    if ($input.val() !== code) {
+                        $input.val(code).trigger('input'); // 값 세팅 후 input 이벤트 발생
+                    } else {
+                        // 값이 같아도 검색을 바로 돌리고 싶다면 주석 해제
+                        _this.showInputLotList();
+                    }
+                });
+
+                // 인풋 디바운스 핸들러는 기존 그대로
+                (function() {
+                    function debounce(fn, delay) {
+                        let t = null;
+                        return function(...args) {
+                            clearTimeout(t);
+                            t = setTimeout(() => fn.apply(this, args), delay);
+                        };
+                    }
+
+                    const handler = debounce(() => {
+                        if (typeof _this?.showInputLotList === 'function') _this.showInputLotList();
+                        else if (typeof _this.showInputLotList === 'function') this.showInputLotList();
+                    }, 200);
+
+                    $('#txtInputCode').off('input.consumed').on('input.consumed', handler);
+                })();
+
+                // 클리어 버튼 클릭 시 값 비우고 'input' 이벤트 트리거
+                $(document).on('click', '.input-clear .btn-clear', function (e) {
+                    _this.showInputLotList();
                 });
 
                 // 필터
@@ -1676,6 +1729,7 @@
                     // 소비내역/투입 LOT 리스트는 바로 갱신
                     this.showConsumedList(this._currentJrPk);
                     this.showInputLotList();
+                    this.suppressSelect = false;
                 }
 
                 this.setButtonState();
@@ -2789,9 +2843,11 @@
             showInputLotList() {
                 let _this = this;
                 let jr_pk = this.jobres.id;
+                let mat_code = $('#txtInputCode').val();
 
                 let param = {
                     'jr_pk': jr_pk,
+                    'mat_code': mat_code
                 };
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/input_lot_list', param);

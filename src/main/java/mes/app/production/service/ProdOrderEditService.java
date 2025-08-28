@@ -55,7 +55,7 @@ public class ProdOrderEditService {
 	                from suju s
 	                inner join material m on m.id = s."Material_id"
 	                inner join mat_grp mg on mg.id = m."MaterialGroup_id"
-	                inner join routing r on m."Routing_id" = r.id
+	                left join routing r on m."Routing_id" = r.id
 	                left join unit u on m."Unit_id" = u.id
 	                where 1 = 1 and mg."MaterialType"!='sangpum'
 	                and s.spjangcd = :spjangcd
@@ -85,7 +85,7 @@ public class ProdOrderEditService {
 	            , q as (
 	                select s.id as suju_id
 	                , sum(jr."OrderQty") as ordered_qty
-	                from job_res jr 
+	                from job_res jr
 	                inner join s on s.id = jr."SourceDataPk" 
 	                and jr."SourceTableName"='suju' 
 	                and jr."Material_id" = s."Material_id"

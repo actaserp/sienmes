@@ -195,9 +195,10 @@ public class ProductionResultController {
 
     @GetMapping("/input_lot_list")
     public AjaxResult getInputLotList(
-            @RequestParam(value = "jr_pk", required = false) Integer jrPk) {
+            @RequestParam(value = "jr_pk", required = false) Integer jrPk,
+            @RequestParam(value = "mat_code", required = false) String mat_code) {
 
-        List<Map<String, Object>> items = this.productionResultService.getInputLotList(jrPk);
+        List<Map<String, Object>> items = this.productionResultService.getInputLotList(jrPk, mat_code);
 
         AjaxResult result = new AjaxResult();
         result.data = items;

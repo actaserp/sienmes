@@ -452,10 +452,11 @@ public class ProductionResultService {
 		return items;
 	}
 
-	public List<Map<String, Object>> getInputLotList(Integer jrPk) {
+	public List<Map<String, Object>> getInputLotList(Integer jrPk, String mat_code) {
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("jrPk", jrPk);
+		dicParam.addValue("mat_code", mat_code);
 
 		String sql = """
                 with AA as (
@@ -496,6 +497,7 @@ public class ProductionResultService {
                              left join mat_lot ml on ml.id = mpi."MaterialLot_id"
                              left join store_house sh on sh.id=ml."StoreHouse_id"
                              where jr.id =  :jrPk
+                             and (:mat_code is null or :mat_code = '' or m."Code" = :mat_code)
                           )
                           select R.mat_pk, R.mat_type_name, R.mat_group_name, R.mat_code, R.mat_name
                           , R.mpir_id
@@ -622,10 +624,10 @@ public class ProductionResultService {
 						), BT as (
 						select 
 						bc."Material_id" as mat_pk
-						, bom1.produced_qty
-						, bc."Amount" as quantity 
-						, bc."Amount" / bom1.produced_qty as bom_ratio
-						, bc."Amount" / bom1.produced_qty * bom1.order_qty as bom_requ_qty 
+						, round(bom1.produced_qty::numeric, 4) as produced_qty
+				    	, round(bc."Amount"::numeric, 4) as quantity
+				    	, round((bc."Amount" / bom1.produced_qty)::numeric, 4) as bom_ratio
+				    	, round((bc."Amount" / bom1.produced_qty * bom1.order_qty)::numeric, 4) as bom_requ_qty 
 						from bom_comp bc 
 						inner join bom1 on bom1.bom_pk=bc."BOM_id"
 						where bom1.g_idx=1
@@ -646,8 +648,9 @@ public class ProductionResultService {
 							where mc."JobResponse_id"= :jrPk group by mc."Material_id"
 						), MMP as (
 							select 
-							sum(ml."CurrentStock") as current_qty_sum
+							sum(ml."OutQtySum") as current_qty_sum
 							, mpi."Material_id"
+							, sum(round(mpi."RequestQty"::numeric, 4)) as request_qty_sum
 							from mat_proc_input mpi
 							inner join job_res jr on jr."MaterialProcessInputRequest_id" = mpi."MaterialProcessInputRequest_id" 
 							inner join mat_lot ml on ml.id = mpi."MaterialLot_id"
@@ -665,12 +668,25 @@ public class ProductionResultService {
 						, mh."CurrentStock" as "currentStock"
 						, u."Name" as unit
 						, BT.bom_ratio
-						, round(BT.bom_requ_qty::numeric) as bom_consumed
+						, round(BT.bom_requ_qty::numeric, 4) as bom_consumed
 						, COALESCE(llc.consumed_qty,0) as consumed_qty
+						, MMP.request_qty_sum
+						,round(
+				  			(coalesce(round(BT.bom_requ_qty::numeric, 4), 0)   -- = bom_consumed과 동일
+				  			- coalesce(round(MMP.request_qty_sum::numeric, 4), 0)
+				  			)
+						, 4) as remain_input_qty
 						, sh."Name" as storehouse_name
 						, MCC.mc_qty
 						, COALESCE(MMP.current_qty_sum,0) as current_qty_sum
 						, coalesce(m."LotUseYN",'N') as "lotUseYn"
+						, MMP.request_qty_sum
+						,round(
+						   (
+							 coalesce(round(BT.bom_requ_qty::numeric, 0), 0)   -- = bom_consumed과 동일
+						   - coalesce(round(MMP.request_qty_sum::numeric, 0), 0)
+						   )
+						 , 3) as remain_input_qty
 						, CASE WHEN m."Useyn" = '1' THEN 'Y'
 							   WHEN m."Useyn" = '0' THEN 'N'
 							   ELSE NULL
