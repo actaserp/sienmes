@@ -268,111 +268,103 @@ public class MaterialInoutController {
 			@RequestParam(value = "mio_pk", required = false) Integer mio_pk,
 			@RequestParam("cboMaterialGroup") String cboMaterialGroup,
 			@RequestParam("cboMaterialType") String cboMaterialType,
-			@RequestParam("type") String type,  // "in", "out", "recall", "return"
+			@RequestParam("type") String type,
 			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
 
 		User user = (User)auth.getPrincipal();
+
 		AjaxResult result = new AjaxResult();
+
+		Integer matPk = Integer.parseInt(materialId);
+		String state = "confirmed";
+		String _status = "a";
+		int qty = Integer.parseInt(
+				inoutQty.replace(",", "").replaceAll("[^\\d-]", "")
+		);
+
 		result.success = false;
 
-		try {
-			Integer matPk = Integer.parseInt(materialId);
+		boolean isUpdate = false;
 
-			// 1) 입력 수량 → BigDecimal (쉼표 제거, 공백 제거)
-			java.math.BigDecimal txnQty = new java.math.BigDecimal(inoutQty.replace(",", "").trim());
+		MaterialInout mi;
+		if (mio_pk != null) {
+			isUpdate = true;
+			mi = matInoutRepository.findById(mio_pk)
+					.orElseThrow(() -> new RuntimeException("기존 데이터 없음: " + mio_pk));
+		} else {
+			mi = new MaterialInout();
+		}
 
-			// 2) 기존 vs 신규
-			MaterialInout mi = (mio_pk != null)
-					? matInoutRepository.findById(mio_pk).orElseThrow(() -> new RuntimeException("기존 데이터 없음: " + mio_pk))
-					: new MaterialInout();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+		LocalDateTime dateTime = LocalDateTime.parse(inoutDateStr, formatter);
 
-			// 3) 일시 설정
-			java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-			java.time.LocalDateTime dt = java.time.LocalDateTime.parse(inoutDateStr, fmt);
+		mi.setInoutDate(dateTime.toLocalDate());
+		mi.setInoutTime(dateTime.toLocalTime());
+		mi.setCompanyId(companyId);
+		mi.setMaterialId(matPk);
+		mi.setStoreHouseId(Integer.parseInt(storeHouseId));
 
-			mi.setInoutDate(dt.toLocalDate());
-			mi.setInoutTime(dt.toLocalTime());
-			mi.setCompanyId(companyId);
-			mi.setMaterialId(matPk);
-			mi.setStoreHouseId(Integer.parseInt(storeHouseId));
+		Material m = this.materialRepository.getMaterialById(matPk);
 
-			Material m = this.materialRepository.getMaterialById(matPk);
-			String testYn = m.getInTestYN() != null ? m.getInTestYN() : "";
+		String testYn = m.getInTestYN() != null ? m.getInTestYN() : "";
 
-			// ★ 서버 폴백: 거래단위는 항상 EA(개수)로 간주
-			Integer inputUnitId = null;      // id는 안 넘겨도 됨
-			String  inputUnitName = "EA";    // 이름만 EA로 고정 전달
+		if (type.equals("in")) {
+			mi.setInOut("in");
+			mi.setInputType(inoutType);
 
-			// 4) 거래단위(EA) → 기본단위(kg) 환산 (Standard2 사용)
-			java.math.BigDecimal baseQtyKg = materialInoutService.toBaseQty(
-					matPk, txnQty, inputUnitId, inputUnitName
-			);
-			if (baseQtyKg == null) {
-				throw new IllegalArgumentException("단위 환산 불가: 품목 Standard2(단위중량) 또는 단위매핑을 확인하세요.");
-			}
+			boolean isWaiting = mi.getState() != null && mi.getState().equals("waiting");
 
-			// 5) 입출고 타입별 저장 (항상 kg로 저장)
-			String state   = "confirmed";
-			String _status = "a";
-
-			if ("in".equalsIgnoreCase(type)) {
-				mi.setInOut("in");
-				mi.setInputType(inoutType);
-
-				boolean isWaiting = ("waiting".equals(mi.getState()));
-				if ("Y".equalsIgnoreCase(testYn) && isWaiting) {
-					mi.setPotentialInputQty(baseQtyKg.floatValue()); // 검사대기 시 잠정입고(kg)
-					state   = "waiting";
-					_status = "t";
-					mi.setOutputQty(0f);
-					mi.setOutputType("");
-				} else {
-					mi.setInputQty(baseQtyKg.floatValue());          // 확정입고(kg)
-					mi.setOutputQty(0f);
-					mi.setOutputType("");
-				}
-
-			} else if ("return".equalsIgnoreCase(type)) {
-				mi.setInOut("return");
-				mi.setInputType(inoutType);
-				mi.setInputQty(baseQtyKg.floatValue());              // 반품입고(kg)
+			if(testYn.equals("Y") && isWaiting) {
+				mi.setPotentialInputQty((float)qty);
+				state = "waiting";
+				_status = "t";
+			} else {
+				mi.setInputQty((float)qty);
 				mi.setOutputQty(0f);
 				mi.setOutputType("");
-
-			} else if ("recall".equalsIgnoreCase(type)) {
-				mi.setInOut("recall");
-				mi.setOutputType(inoutType);
-				mi.setOutputQty(baseQtyKg.floatValue());             // 회수출고(kg)
-				mi.setInputQty(0f);
-				mi.setInputType("");
-
-			} else { // "out"
-				mi.setInOut("out");
-				mi.setOutputType(inoutType);
-				mi.setOutputQty(baseQtyKg.floatValue());             // 출고(kg)
-				mi.setInputQty(0f);
-				mi.setInputType("");
 			}
+		} else if(type.equals("recall")){
+			mi.setInOut("recall");
+			mi.setOutputType(inoutType);
+			mi.setOutputQty((float)qty);
+			mi.setInputQty(0f);
+			mi.setInputType("");
 
-			mi.setDescription(description);
-			mi.setState(state);
-			mi.set_status(_status);
-			mi.set_audit(user);
-			mi.setSpjangcd(spjangcd);
+		} else if(type.equals("return")){
+			mi.setInOut("return");
+			mi.setInputType(inoutType);
+			mi.setInputQty((float)qty);
+			mi.setOutputQty(0f);
+			mi.setOutputType("");
 
-			matInoutRepository.save(mi);
-			matInoutRepository.flush();
-
-			result.success = true;
-			return result;
-
-		} catch (Exception e) {
-			result.success = false;
-			result.message = "처리 중 오류: " + e.getMessage();
-			return result;
+		} else  {
+			mi.setInOut("out");
+			mi.setOutputType(inoutType);
+			mi.setOutputQty((float)qty);
+			mi.setInputQty(0f);
+			mi.setInputType("");
 		}
+		mi.setDescription(description);
+		mi.setState(state);
+		mi.set_status(_status);
+		mi.set_audit(user);
+		mi.setSpjangcd(spjangcd);
+
+		this.matInoutRepository.save(mi);
+		this.matInoutRepository.flush();
+
+
+//		jdbcTemplate.query(
+//				"SELECT sp_update_mat_in_house_by_inout(?, ?)",
+//				rs -> {},  // 결과 무시
+//				matPk, Integer.parseInt(storeHouseId)
+//		);
+
+		result.success = true;
+
+		return result;
 	}
 
 	@PostMapping("/save_nocomp")
@@ -950,29 +942,12 @@ public class MaterialInoutController {
 				if (description == null || description.trim().isEmpty()) {
 					description = "발주 입고";
 				}
-
-				String materialIdStr   = String.valueOf(item.get("Material_id"));
+				String inoutQtyStr = String.valueOf(item.get("inputQty")); // '입고 수량'
+				String materialIdStr = String.valueOf(item.get("Material_id"));
 				String storeHouseIdStr = String.valueOf(item.get("StoreHouse_id"));
+
 				Integer matPk = Integer.parseInt(materialIdStr);
-
-				// ★ 화면 표시 단위(예: "kg") – 표시용일 뿐 환산엔 쓰지 않음
-				String unitNameFromReq = (String) item.get("unit");
-
-				// ★ 입력 개수(문자→BigDecimal)
-				BigDecimal txnQty = new BigDecimal(String.valueOf(item.get("inputQty")).trim());
-
-				// ★ 입고 입력단위 (프런트가 보내면 그대로 사용)
-				Integer inputUnitId = (item.get("InputUnit_id") != null)
-						? Integer.parseInt(String.valueOf(item.get("InputUnit_id")))
-						: null;
-				String inputUnitName = (item.get("InputUnit_name") != null)
-						? String.valueOf(item.get("InputUnit_name")).trim()
-						: null;
-
-				// ★ 프런트가 안 보냈다면 EA로 강제 (발주는 개수로 입고)
-				if (inputUnitId == null && (inputUnitName == null || inputUnitName.isEmpty())) {
-					inputUnitName = "EA"; // 서비스 SQL이 name→id→EA→기본단위 순으로 폴백
-				}
+				Integer qty = Integer.parseInt(inoutQtyStr);
 
 				MaterialInout mi = new MaterialInout();
 				mi.setInoutDate(LocalDate.now());
@@ -983,21 +958,12 @@ public class MaterialInoutController {
 				Material m = materialRepository.getMaterialById(matPk);
 				String testYn = m.getInTestYN() != null ? m.getInTestYN() : "";
 
-				// ★ 거래단위(개수/EA 등) → 기본단위(kg)로 환산 (Standard2를 내부에서 파싱)
-				BigDecimal baseQty = materialInoutService.toBaseQty(
-						matPk,
-						txnQty,           // 예: 2 (개수)
-						inputUnitId,      // 예: 3 (EA) or null
-						inputUnitName     // 예: "EA" (미지정 시 EA로 폴백)
-				);
-
-				// ★ 저장은 반드시 중량(kg)으로!
 				if ("Y".equals(testYn)) {
-					mi.setPotentialInputQty(baseQty.floatValue());   // 검사 대기 → 잠정입고(중량)
+					mi.setPotentialInputQty((float) qty);
 					mi.setState("waiting");
 					mi.set_status("t");
 				} else {
-					mi.setInputQty(baseQty.floatValue());            // 확정 입고(중량)
+					mi.setInputQty((float) qty);
 					mi.setState("confirmed");
 					mi.set_status("a");
 				}
@@ -1009,20 +975,19 @@ public class MaterialInoutController {
 				mi.setSourceTableName("balju");
 				mi.setSpjangcd((String) item.get("spjangcd"));
 				mi.setCompanyId((Integer) item.get("Company_id"));
-				mi.setInputType("order_in");
 
 				Balju balju = this.bujuRepository.getBujuById(bal_pk);
 
-				// (선택) 누적 입고 중량 조회 – 사용하지 않으면 제거해도 무방
 				double sujuQty2 = jdbcTemplate.queryForObject("""
-                SELECT COALESCE(SUM("InputQty"), 0)
-                FROM mat_inout
-                WHERE "SourceDataPk" = ?
-                  AND "SourceTableName" = 'balju'
-                  AND COALESCE("_status", 'a') = 'a'
-            """, Double.class, bal_pk);
+					SELECT COALESCE(SUM("InputQty"), 0)
+					FROM mat_inout
+					WHERE "SourceDataPk" = ? 
+					  AND "SourceTableName" = 'balju'
+					  AND COALESCE("_status", 'a') = 'a'
+				""", Double.class, bal_pk);
 
 				balju.setShipmentState(storeHouseIdStr);
+				mi.setInputType("order_in");
 
 				matInoutRepository.save(mi);
 				bujuRepository.save(balju);
@@ -1070,14 +1035,7 @@ public class MaterialInoutController {
 				String storeHouseIdStr = String.valueOf(item.get("StoreHouse_id"));
 
 				Integer matPk = Integer.parseInt(materialIdStr);
-				BigDecimal eaQty = new BigDecimal(inoutQtyStr);
-
-				BigDecimal eaAbs = eaQty.abs();
-				// ★ 항상 kg로 환산되도록 toBaseQty는 'EA'를 입력단위로 넘김
-				BigDecimal kgAbs = materialInoutService.toBaseQty(matPk, eaAbs, null, "EA"); // ← kg로 환산된 양(양수)
-
-				// DB에는 음수 kg로 저장(반품)
-				BigDecimal kgQty = kgAbs.negate();
+				Integer qty = Integer.parseInt(inoutQtyStr);
 
 				MaterialInout mi = new MaterialInout();
 				mi.setInoutDate(LocalDate.now());
@@ -1085,7 +1043,7 @@ public class MaterialInoutController {
 				mi.setMaterialId(matPk);
 				mi.setStoreHouseId(Integer.parseInt(storeHouseIdStr));
 
-				mi.setInputQty(kgQty.setScale(6, RoundingMode.HALF_UP).floatValue());
+				mi.setInputQty((float) qty);
 				mi.setState("confirmed");
 				mi.set_status("a");
 				mi.setDescription(description);
