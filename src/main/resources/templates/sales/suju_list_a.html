@@ -334,7 +334,7 @@
                         <col style="width: 9%">
                         <col style="width: 9%">
                         <col style="width: 9%">
-                        <col style="width: 10%">
+                      <!--  <col style="width: 10%">-->
                         <col style="width: 11%">
                         <col style="width: 6%">
                         <col style="width: 4%">
@@ -348,7 +348,7 @@
                         <th>공급가액</th>
                         <th>부가세</th>
                         <th>합계</th>
-                        <th>프로젝트</th>
+                       <!-- <th>프로젝트</th>-->
                         <th>비고</th>
                         <th>상태</th>
                         <th>
@@ -384,10 +384,10 @@
                         <td><input type="text" name="supplyAmount" /></td>
                         <td><input type="text" name="VatAmount" /></td>
                         <td><input type="text" name="totalAmount" /></td>
-                        <td>
+                        <!--<td>
                             <input name="projectHidden" type="hidden">
                             <input type="text" name="project" placeholder="입력 후 엔터">
-                        </td>
+                        </td>-->
                         <td><input type="text" name="description" /></td>
                          <td>
                             <input type="hidden" name="State"/>
@@ -962,7 +962,7 @@
                         $productCode.val(item.Code);
                         $materialGroup.val(item.group_name);
                         tryShowPrice($row);
-                    });
+                    }, { groupId: 59 });
 
 
                 });
@@ -992,7 +992,7 @@
 
                     if (!keyword) {
                         pop.focusAfterClose = $field[0];
-                        pop.show(callback);
+                        pop.show(callback, { groupId: 59 });
                         return;
                     }
 

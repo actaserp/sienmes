@@ -242,10 +242,11 @@
                 this.close();
             }
 
-            show(callback) {
+            show(callback, opts = {}) {
                 let _this = this;
 
                 this.callback = callback;
+                if (opts.groupId != null) this.defaultGroupId = String(opts.groupId);
 
                 let content = tmpl('mult_matSearchTemplate', {});
                 let $content = $(content);
@@ -304,14 +305,17 @@
                     //     AjaxUtil.fillSelectOptions(_this.$cboMaterialGrp, 'material_group', 'all', false, _this.$cboMaterialType.val());
                     // })
 
+                    if (this.defaultGroupId) this.$cboMaterialGrp.val(this.defaultGroupId);
+                    this.searchDataBind();
+
                     this.$btnMaterialSearch.click(function (e) {
                         _this.searchDataBind();
                     });
 
-                    setTimeout(() => {
+                    /*setTimeout(() => {
                         _this.searchDataBind();
                     }, 0);
-
+*/
                     this.$btnMaterialSelect.click(function (e) {
                         // 그리드에서 현재 선택된 item을 찾아서 호출한다.
                         let items = _this.grid.selectedItems;
