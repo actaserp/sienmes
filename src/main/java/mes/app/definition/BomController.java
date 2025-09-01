@@ -80,6 +80,8 @@ public class BomController {
 
     @Autowired
     private BomComponentRepository bomComponentRepository;
+    @Autowired
+    private MatCompUpriceRepository matCompUpriceRepository;
 
 	@RequestMapping("/read")
 	public AjaxResult getMaterialList(
@@ -369,328 +371,104 @@ public class BomController {
 		unitNameToIdMap.put("seconds", 15);
 		unitNameToIdMap.put("t", 6);
 
-		if ("00".equals(excelType)) {
-			// ===== 제일전기 =====
-			List<List<String>> all_rows = this.bomUploadService.excel_read(upload_filename);
-			// 제품
-			List<String> productNames = new ArrayList<>();
-			List<String> productRow = all_rows.get(0); // 1번째 행
-			int productStartCol = 12; // M열 (index 12)
-			for (int col = productStartCol; col < productRow.size(); col++) {
-				String name = productRow.get(col);
-				if (name == null || name.trim().isEmpty()) break;
-				productNames.add(name.replaceAll("[\\r\\n]+", " ").trim());
-			}
-			// 자재
-			List<String> materialNames = new ArrayList<>();
-			int materialStartRow = 1; // 2번째 행부터
-			int materialNameCol = 9;   // J열 (index 9)
-			String lastMaterialName = null;
-			for (int rowIdx = materialStartRow; rowIdx < all_rows.size(); rowIdx++) {
-				List<String> row = all_rows.get(rowIdx);
-				if (row.size() <= materialNameCol) break;
-				String matName = row.get(materialNameCol);
-				if (matName != null) matName = matName.replaceAll("[\\r\\n]+", " ").trim();
-				if (matName == null || matName.trim().isEmpty()) matName = lastMaterialName;
-				else lastMaterialName = matName.trim();
-				materialNames.add(matName.trim());
-			}
-			// 제품 material 등록/조회
-			Map<String, Integer> productNameToId = new HashMap<>();
-			for (String pname : productNames) {
-				productNameToId.put(pname, getOrCreateProductId(pname, spjangcd));
-			}
-			// 자재 material 등록/조회
-			Map<String, Integer> materialNameToId = new HashMap<>();
-			for (String mname : materialNames) {
-				if (!materialNameToId.containsKey(mname)) {
-					// 최초 등장한 자재명만 id 생성(중복 insert 방지)
-					Integer mid = getOrCreateMaterialId(mname, spjangcd);
-					materialNameToId.put(mname, mid);
-				}
-			}
+		List<List<String>> all_rows = this.bomUploadService.excel_read(upload_filename);
 
-			List<Bom> bomList = new ArrayList<>();
-			for (String productName : productNames) {
-				Integer productId = productNameToId.get(productName);
-				Bom bom = bomRepository.findByMaterialIdAndBomTypeAndVersion(productId, "manufacturing", "1.0");
-				if (bom == null) {
-					bom = new Bom();
-					bom.setName(productName);
-					bom.setMaterialId(productId);
-					bom.setBomType("manufacturing");
-					bom.setVersion("1.0");
-					bom.setStartDate(startDate);
-					bom.setOutputAmount(1F);
-					bom.setEndDate(endDate);
-					bom.setSpjangcd(spjangcd);
-					bom.set_creater_id(userId);
-					bom.set_created(startDate);
-					bom = bomRepository.save(bom);
-				}
-				bomList.add(bom); // **기존이든 신규든 무조건 추가! (이게 핵심)**
-			}
+		// 제품명: 0번째 행, 1번째 열 (B1)
+		String productName = all_rows.get(0).get(1).replaceAll("[\\r\\n]+", " ").trim();
+		// 제품 코드(1행 3열 C1) 및 규격(1행 4열 D1)
+		String productCode = all_rows.get(0).get(2).replaceAll("[\\r\\n]+", " ").trim();
+		String productSize = all_rows.get(0).get(3).replaceAll("[\\r\\n]+", " ").trim();
+		int productId = getOrCreateProductId_Acro(productName, productCode, productSize ,spjangcd);
 
-			// BOM Component 중복(동일 materialId) 누적/합산
-			for (int pIdx = 0; pIdx < productNames.size(); pIdx++) {
-				Bom bom = bomList.get(pIdx);
-
-				// 중복 자재 합산 map
-				Map<Integer, BomComponent> bomCompMap = new HashMap<>();
-
-				for (int mIdx = 0; mIdx < materialNames.size(); mIdx++) {
-					List<String> row = all_rows.get(1 + mIdx);
-					int cellIdx = productStartCol + pIdx;
-					if (row.size() <= cellIdx) continue;
-					String qtyStr = row.get(cellIdx);
-					double qty = 0;
-					try { qty = Double.parseDouble((qtyStr == null || qtyStr.trim().isEmpty()) ? "0" : qtyStr.trim()); }
-					catch (Exception ignore) { qty = 0; }
-
-					if (qty <= 0) continue; // 수량이 0인 데이터 무시
-
-					String description = "";
-					if (row.size() > 10 && row.get(10) != null)
-						description = row.get(10).replaceAll("[\\r\\n]+", " ").trim();
-
-					String materialName = materialNames.get(mIdx);
-					Integer materialId = materialNameToId.get(materialName);
-
-					// 중복 자재 합산
-					BomComponent comp = bomCompMap.get(materialId);
-					if (comp == null) {
-						comp = new BomComponent();
-						comp.setBomId(bom.getId());
-						comp.setMaterialId(materialId);
-						comp.setAmount((float) qty);
-						comp.set_creater_id(userId);
-						comp.set_created(startDate);
-						comp.set_order(1);
-						comp.setSpjangcd(spjangcd);
-						comp.setDescription(description);
-						bomCompMap.put(materialId, comp);
-					} else {
-						comp.setAmount(comp.getAmount() + (float) qty);
-						if (qty > 0 && description != null && !description.trim().isEmpty()) {
-							if (comp.getDescription() == null || comp.getDescription().trim().isEmpty())
-								comp.setDescription(description);
-							else
-								comp.setDescription(comp.getDescription() + ", " + description);
-						}
-					}
-
-				}
-				for (BomComponent comp : bomCompMap.values()) {
-					// 이미 DB에 (BOM_id, Material_id) 있는지 확인
-					Optional<BomComponent> dbCompOpt =
-							bomComponentRepository.findByBomIdAndMaterialId(comp.getBomId(), comp.getMaterialId());
-					if (dbCompOpt.isPresent()) {
-						BomComponent dbComp = dbCompOpt.get();
-						// 기존과 합산
-						dbComp.setAmount(dbComp.getAmount() + comp.getAmount());
-						if (comp.getDescription() != null && !comp.getDescription().isEmpty()) {
-							if (dbComp.getDescription() == null || dbComp.getDescription().isEmpty())
-								dbComp.setDescription(comp.getDescription());
-							else
-								dbComp.setDescription(dbComp.getDescription() + ", " + comp.getDescription());
-						}
-						bomComponentRepository.save(dbComp); // **update!**
-					} else {
-						bomComponentRepository.save(comp); // **insert!**
-					}
-				}
-
-			}
-			result.success = true;
-			result.data = bomList;
-
-		}  else if ("01".equals(excelType)) {
-			// ===== 대양전기 =====
-			List<List<String>> all_rows = this.bomUploadService.excel_read(upload_filename);
-
-			// 제품명: 0번째 행, 1번째 열 (B1)
-			String productName = all_rows.get(0).get(1).replaceAll("[\\r\\n]+", " ").trim();
-			int productId = getOrCreateProductId_Daeyang(productName, spjangcd);
-
-			Bom bom = bomRepository.findByMaterialIdAndBomTypeAndVersion(productId, "manufacturing", "1.0");
-			if (bom == null) {
-				bom = new Bom();
-				bom.setName(productName);
-				bom.setMaterialId(productId);
-				bom.setBomType("manufacturing");
-				bom.setVersion("1.0");
-				bom.setStartDate(startDate);
-				bom.setOutputAmount(1F);
-				bom.setEndDate(endDate);
-				bom.setSpjangcd(spjangcd);
-				bom.set_creater_id(userId);
-				bom.set_created(startDate);
-				bom = bomRepository.save(bom);
-			}
-
-			Map<Integer, BomComponent> bomCompMap = new HashMap<>();
-			Map<String, Integer> materialNameToId = new HashMap<>(); // 자재명 → id 캐시
-			// 3번째 행(index=2)부터 끝까지 반복 (자재 정보)
-			for (int r = 2; r < all_rows.size(); r++) {
-				List<String> row = all_rows.get(r);
-				if (row.size() < 4 || row.get(1) == null || row.get(1).trim().isEmpty()) continue;
-
-				// 그룹정보(구분) 수집
-				String groupStr = row.get(0) != null ? row.get(0).trim() : "";
-				int materialGroupId = 48; // 구분이 SMD, 대양 둘다 아닐경우 48
-				if (groupStr.equals("SMD 동영자재")) materialGroupId = 44;
-				else if (groupStr.equals("대양 수삽자재")) materialGroupId = 49;
-
-				// 자재명 수집
-				String materialName = row.get(1) != null ? row.get(1).replaceAll("[\\r\\n]+", " ").trim() : "";
-				// 자재단위 수집
-				String unitName = row.get(2) != null ? row.get(2).trim() : "";
-				int unitId = unitNameToIdMap.getOrDefault(unitName, 3);
-
-				// 자재 id 생성/조회
-				Integer materialId;
-				String key = materialName + "|" + materialGroupId + "|" + unitId;
-				if (materialNameToId.containsKey(key)) {
-					materialId = materialNameToId.get(key);
-				} else {
-					materialId = getOrCreateMaterialId_Daeyang(materialName, spjangcd, materialGroupId, unitId);
-					materialNameToId.put(key, materialId);
-				}
-				// 필요수량 수집
-				// 수량/설명
-				String qtyStr = row.get(3) != null ? row.get(3).trim() : "";
-				float amount = 0f;
-				try { amount = Float.parseFloat(qtyStr); }
-				catch(Exception e) { amount = 0f; }
-
-				if (amount <= 0) continue; // 수량이 0인 데이터 무시
-
-				// 위치정보(비고) 수집
-				String location = row.size() > 5 && row.get(5) != null ? row.get(5).replaceAll("[\\r\\n]+", " ").trim() : "";
-
-				BomComponent comp = bomCompMap.get(materialId);
-				if (comp == null) {
-					comp = new BomComponent();
-					comp.setBomId(bom.getId());
-					comp.setMaterialId(materialId);
-					comp.setAmount(amount);
-					comp.set_creater_id(userId);
-					comp.set_created(startDate);
-					comp.set_order(1);
-					comp.setSpjangcd(spjangcd);
-					comp.setDescription(location);
-					bomCompMap.put(materialId, comp);
-				} else {
-					comp.setAmount(comp.getAmount() + amount);
-					if (amount > 0 && location != null && !location.trim().isEmpty()) {
-						if (comp.getDescription() == null || comp.getDescription().trim().isEmpty())
-							comp.setDescription(location);
-						else
-							comp.setDescription(comp.getDescription() + ", " + location);
-					}
-				}
-			}
-			// 수량이 0 초과인 것만 저장
-			bomComponentRepository.saveAll(
-					bomCompMap.values().stream()
-							.filter(c -> Optional.ofNullable(c.getAmount()).orElse(0f) > 0)
-							.collect(Collectors.toList())
-			);
-			result.success = true;
-			result.data = bom;
-		}  else if ("02".equals(excelType)) {
-			// ===== 기타 =====
-			List<List<String>> all_rows = this.bomUploadService.excel_read(upload_filename);
-
-			// 제품명: 0번째 행, 1번째 열 (B1)
-			String productName = all_rows.get(0).get(1).replaceAll("[\\r\\n]+", " ").trim();
-			int productId = getOrCreateProductId_Acro(productName, spjangcd);
-
-			Bom bom = bomRepository.findByMaterialIdAndBomTypeAndVersion(productId, "manufacturing", "1.0");
-			if (bom == null) {
-				bom = new Bom();
-				bom.setName(productName);
-				bom.setMaterialId(productId);
-				bom.setBomType("manufacturing");
-				bom.setVersion("1.0");
-				bom.setStartDate(startDate);
-				bom.setOutputAmount(1F);
-				bom.setEndDate(endDate);
-				bom.setSpjangcd(spjangcd);
-				bom.set_creater_id(userId);
-				bom.set_created(startDate);
-				bom = bomRepository.save(bom);
-			}
-
-			Map<Integer, BomComponent> bomCompMap = new HashMap<>();
-			Map<String, Integer> materialNameToId = new HashMap<>(); // 자재명 → id 캐시
-			// 3번째 행(index=2)부터 끝까지 반복 (자재 정보)
-			for (int r = 2; r < all_rows.size(); r++) {
-				List<String> row = all_rows.get(r);
-				if (row.size() < 4 || row.get(1) == null || row.get(1).trim().isEmpty()) continue;
-
-				// 그룹정보(구분) 수집
-				String groupStr = row.get(0) != null ? row.get(0).trim() : "";
-				int materialGroupId = 55; // 구분 아크로SMD자재 고정
-
-				// 자재명 수집
-				String materialName = row.get(1) != null ? row.get(1).replaceAll("[\\r\\n]+", " ").trim() : "";
-				// 자재단위 수집
-				String unitName = row.get(2) != null ? row.get(2).trim() : "";
-				int unitId = unitNameToIdMap.getOrDefault(unitName, 3);
-
-				// 자재 id 생성/조회
-				Integer materialId;
-				String key = materialName + "|" + materialGroupId + "|" + unitId;
-				if (materialNameToId.containsKey(key)) {
-					materialId = materialNameToId.get(key);
-				} else {
-					materialId = getOrCreateMaterialId_Acro(materialName, spjangcd, materialGroupId, unitId);
-					materialNameToId.put(key, materialId);
-				}
-				// 필요수량 수집
-				// 수량/설명
-				String qtyStr = row.get(3) != null ? row.get(3).trim() : "";
-				float amount = 0f;
-				try { amount = Float.parseFloat(qtyStr); }
-				catch(Exception e) { amount = 0f; }
-
-				if (amount <= 0) continue; // 수량이 0인 데이터 무시
-
-				// 위치정보(비고) 수집
-				String location = row.size() > 5 && row.get(5) != null ? row.get(5).replaceAll("[\\r\\n]+", " ").trim() : "";
-
-				BomComponent comp = bomCompMap.get(materialId);
-				if (comp == null) {
-					comp = new BomComponent();
-					comp.setBomId(bom.getId());
-					comp.setMaterialId(materialId);
-					comp.setAmount(amount);
-					comp.set_creater_id(userId);
-					comp.set_created(startDate);
-					comp.set_order(1);
-					comp.setSpjangcd(spjangcd);
-					comp.setDescription(location);
-					bomCompMap.put(materialId, comp);
-				} else {
-					comp.setAmount(comp.getAmount() + amount);
-					if (amount > 0 && location != null && !location.trim().isEmpty()) {
-						if (comp.getDescription() == null || comp.getDescription().trim().isEmpty())
-							comp.setDescription(location);
-						else
-							comp.setDescription(comp.getDescription() + ", " + location);
-					}
-				}
-			}
-			// 수량이 0 초과인 것만 저장
-			bomComponentRepository.saveAll(
-					bomCompMap.values().stream()
-							.filter(c -> Optional.ofNullable(c.getAmount()).orElse(0f) > 0)
-							.collect(Collectors.toList())
-			);
-			result.success = true;
-			result.data = bom;
+		Bom bom = bomRepository.findByMaterialIdAndBomTypeAndVersion(productId, "manufacturing", "1.0");
+		if (bom == null) {
+			bom = new Bom();
+			bom.setName(productName);
+			bom.setMaterialId(productId);
+			bom.setBomType("manufacturing");
+			bom.setVersion("1.0");
+			bom.setStartDate(startDate);
+			bom.setOutputAmount(1F);
+			bom.setEndDate(endDate);
+			bom.setSpjangcd(spjangcd);
+			bom.set_creater_id(userId);
+			bom.set_created(startDate);
+			bom = bomRepository.save(bom);
 		}
+
+		Map<Integer, BomComponent> bomCompMap = new HashMap<>();
+		Map<String, Integer> materialNameToId = new HashMap<>(); // 자재명 → id 캐시
+		// 3번째 행(index=2)부터 끝까지 반복 (자재 정보)
+		for (int r = 2; r < all_rows.size(); r++) {
+			List<String> row = all_rows.get(r);
+			if (row.size() < 4 || row.get(1) == null || row.get(1).trim().isEmpty()) continue;
+
+			// 그룹정보(구분) 수집
+			String groupStr = row.get(0) != null ? row.get(0).trim() : "";
+			int materialGroupId = 57; // 자재그룹아이디
+
+			// 자재명 수집
+			String materialName = row.get(1) != null ? row.get(1).replaceAll("[\\r\\n]+", " ").trim() : "";
+			// 자재코드 수집
+			String materialCode = row.get(0) != null ? row.get(0).replaceAll("[\\r\\n]+", " ").trim() : "";
+			// 자재단위 수집
+			String unitName = row.get(2) != null ? row.get(2).trim() : "";
+			int unitId = unitNameToIdMap.getOrDefault(unitName, 3);
+			// 자재 규격 수집
+			String unitSize = row.get(5) != null ? row.get(5).trim() : "";
+			// 자재 단가 수집
+			String unitPrice = row.get(4) != null ? row.get(4).trim() : "";
+			// 자재 id 생성/조회
+			Integer materialId;
+			String key = materialName + "|" + materialGroupId + "|" + unitId;
+			if (materialNameToId.containsKey(key)) {
+				materialId = materialNameToId.get(key);
+			} else {
+				materialId = getOrCreateMaterialId_Acro(materialName, materialCode, unitSize, unitPrice, spjangcd, materialGroupId, unitId);
+				materialNameToId.put(key, materialId);
+			}
+			// 필요수량 수집
+			// 수량/설명
+			String qtyStr = row.get(3) != null ? row.get(3).trim() : "";
+			float amount = 0f;
+			try { amount = Float.parseFloat(qtyStr); }
+			catch(Exception e) { amount = 0f; }
+
+			if (amount <= 0) continue; // 수량이 0인 데이터 무시
+
+			// 비고 수집
+			String location = row.size() > 5 && row.get(6) != null ? row.get(6).replaceAll("[\\r\\n]+", " ").trim() : "";
+
+			BomComponent comp = bomCompMap.get(materialId);
+			if (comp == null) {
+				comp = new BomComponent();
+				comp.setBomId(bom.getId());
+				comp.setMaterialId(materialId);
+				comp.setAmount(amount);
+				comp.set_creater_id(userId);
+				comp.set_created(startDate);
+				comp.set_order(1);
+				comp.setSpjangcd(spjangcd);
+				comp.setDescription(location);
+				bomCompMap.put(materialId, comp);
+			} else {
+				comp.setAmount(comp.getAmount() + amount);
+				if (amount > 0 && location != null && !location.trim().isEmpty()) {
+					if (comp.getDescription() == null || comp.getDescription().trim().isEmpty())
+						comp.setDescription(location);
+					else
+						comp.setDescription(comp.getDescription() + ", " + location);
+				}
+			}
+		}
+		// 수량이 0 초과인 것만 저장
+		bomComponentRepository.saveAll(
+				bomCompMap.values().stream()
+						.filter(c -> Optional.ofNullable(c.getAmount()).orElse(0f) > 0)
+						.collect(Collectors.toList())
+		);
+		result.success = true;
+		result.data = bom;
 
 		// 파일 삭제
 		File uploadedFile = new File(upload_filename);
@@ -698,36 +476,46 @@ public class BomController {
 
 		return result;
 	}
-	// 대양전기 제품 등록
+
+	// bom 엑셀업로드 제품 등록
 	@Transactional
-	public Integer getOrCreateProductId_Daeyang(String productName, String spjangcd) {
-		String cleanName = productName.trim();
-		Material prod = materialRepository.findByNameTrimmed(cleanName);
+	public Integer getOrCreateProductId_Acro(String productName, String productCode, String productSize, String spjangcd) {
+		String cleanCode = productCode.trim();
+		Material prod = materialRepository.findByCodeTrimmed(cleanCode);
 
 		if (prod != null) return prod.getId();
 
-		// 대양전기 전용 materialGroupId 예시 (47로 지정, 필요시 수정)
+		// 기타 전용 materialGroupId 예시 ()
 		Material newProd = new Material();
 		newProd.setName(productName);
-		newProd.setMaterialGroupId(45); // <-- 대양전기 그룹ID로
-		newProd.setCode(getNextMaterialCode());
+		newProd.setMaterialGroupId(59); // '소스' 그룹 아이디
+		newProd.setCode(cleanCode); // 제품코드
 		newProd.set_created(Timestamp.valueOf(LocalDateTime.now()));
-		newProd.setFactory_id(1);
+		newProd.setFactory_id(1); // 공장
+		newProd.setStandard1(productSize); // 규격
+		newProd.setStandard2("1"); // 단위중량
+		newProd.setStandardTimeUnit("min"); // 생산시간단위
+		newProd.setValidDays(90); // 사용가능일자
+		newProd.setPurchaseOrderStandard("mrp"); // 발주기준
+		newProd.setVatExemptionYN("N"); //
+		newProd.setMinOrder(1F); // 최소발주량
+		newProd.setMaxOrder(10F); // 최대발주량
+		newProd.setEquipment(102); // 생산설비 (포장)
+		newProd.setStoreHouseId(4); // 저장 창고 id
 		newProd.setUnitId(3); // 기본단위
-		newProd.setLotUseYn("0");
+		newProd.setLotUseYn("Y");
 		newProd.setMtyn("1");
 		newProd.setUseyn("0");
 		newProd.setSpjangcd(spjangcd);
-		newProd.setWorkCenterId(39);
-		newProd.setStoreHouseId(4);
+		newProd.setWorkCenterId(45);
 		newProd = materialRepository.save(newProd);
 		return newProd.getId();
 	}
-	// --- 대양전기: 자재 신규 등록/조회 (GroupId/UnitId 파라미터) ---
+	// --- 자재 신규 등록/조회 (GroupId/UnitId 파라미터) ---
 	@Transactional
-	public Integer getOrCreateMaterialId_Daeyang(String materialName, String spjangcd, int materialGroupId, int unitId) {
-		String cleanName = materialName.trim();
-		Material mat = materialRepository.findByNameTrimmed(cleanName);
+	public Integer getOrCreateMaterialId_Acro(String materialName, String materialCode, String unitSize, String unitPrice, String spjangcd, int materialGroupId, int unitId) {
+		String cleanCode = materialCode.trim();
+		Material mat = materialRepository.findByCodeTrimmed(cleanCode);
 		if (mat != null) return mat.getId();
 		Material newMat = new Material();
 		newMat.setName(materialName);
@@ -736,132 +524,35 @@ public class BomController {
 		newMat.set_created(Timestamp.valueOf(LocalDateTime.now()));
 		newMat.setSpjangcd(spjangcd);
 		// ... 추가 필드
-		newMat.setCode(getNextMaterialCode()); // '4000' + N
-		newMat.setLotUseYn("0");
+		newMat.setCode(cleanCode);
+		newMat.setLotUseYn("Y");
 		newMat.setMtyn("1");
 		newMat.setUseyn("0");
-		newMat.setWorkCenterId(39);
+		newMat.setWorkCenterId(44);
 		newMat.setStoreHouseId(3);
 		newMat.setFactory_id(1);
+		newMat.setStandard1(unitSize); // 규격
+		newMat.setStandard2("1"); // 단위중량
+		newMat.setStandardTimeUnit("min"); // 생산시간단위
+		newMat.setValidDays(90); // 사용가능일자
+		newMat.setPurchaseOrderStandard("mrp"); // 발주기준
+		newMat.setVatExemptionYN("N"); //
+		newMat.setMinOrder(1F); // 최소발주량
+		newMat.setMaxOrder(10F); // 최대발주량
+		newMat.setEquipment(102); // 생산설비 (포장)
 		newMat = materialRepository.save(newMat);
+
+		// 자재 단가정보 등록(신규등록건 만)
+		MatCompUprice matCompUprice =  new MatCompUprice();
+		matCompUprice.setMaterialId(newMat.getId());
+		matCompUprice.set_created(Timestamp.valueOf(LocalDateTime.now()));
+		matCompUprice.set_creater_id(3);
+		matCompUprice.setUnitPrice(Double.valueOf(unitPrice));
+		matCompUprice.setApplyStartDate(Timestamp.valueOf(LocalDateTime.now()));
+		matCompUprice.setApplyEndDate(Timestamp.valueOf("2100-12-31 00:00:00"));
+		matCompUprice.setCompanyId(219);
+		matCompUprice.setType("01");
+		matCompUpriceRepository.save(matCompUprice);
 		return newMat.getId();
 	}
-	// 기타(아크로) 제품 등록
-	@Transactional
-	public Integer getOrCreateProductId_Acro(String productName, String spjangcd) {
-		String cleanName = productName.trim();
-		Material prod = materialRepository.findByNameTrimmed(cleanName);
-
-		if (prod != null) return prod.getId();
-
-		// 기타(아크로) 전용 materialGroupId 예시 (47로 지정, 필요시 수정)
-		Material newProd = new Material();
-		newProd.setName(productName);
-		newProd.setMaterialGroupId(52); // <-- 대양전기 그룹ID로
-		newProd.setCode(getNextMaterialCode());
-		newProd.set_created(Timestamp.valueOf(LocalDateTime.now()));
-		newProd.setFactory_id(1);
-		newProd.setUnitId(3); // 기본단위
-		newProd.setLotUseYn("0");
-		newProd.setMtyn("1");
-		newProd.setUseyn("0");
-		newProd.setSpjangcd(spjangcd);
-		newProd.setWorkCenterId(39);
-		newProd.setStoreHouseId(4);
-		newProd = materialRepository.save(newProd);
-		return newProd.getId();
-	}
-	// --- 기타(아크로): 자재 신규 등록/조회 (GroupId/UnitId 파라미터) ---
-	@Transactional
-	public Integer getOrCreateMaterialId_Acro(String materialName, String spjangcd, int materialGroupId, int unitId) {
-		String cleanName = materialName.trim();
-		Material mat = materialRepository.findByNameTrimmed(cleanName);
-		if (mat != null) return mat.getId();
-		Material newMat = new Material();
-		newMat.setName(materialName);
-		newMat.setMaterialGroupId(materialGroupId);
-		newMat.setUnitId(unitId);
-		newMat.set_created(Timestamp.valueOf(LocalDateTime.now()));
-		newMat.setSpjangcd(spjangcd);
-		// ... 추가 필드
-		newMat.setCode(getNextMaterialCode()); // '4000' + N
-		newMat.setLotUseYn("0");
-		newMat.setMtyn("1");
-		newMat.setUseyn("0");
-		newMat.setWorkCenterId(39);
-		newMat.setStoreHouseId(3);
-		newMat.setFactory_id(1);
-		newMat = materialRepository.save(newMat);
-		return newMat.getId();
-	}
-	// 제일전기 제품 조회/등록
-	@Transactional
-	public Integer getOrCreateProductId(String productName, String spjangcd) {
-		String cleanName = productName.trim();
-		Material prod = materialRepository.findByNameTrimmed(cleanName);
-
-		if (prod != null) return prod.getId();
-
-		// 신규 등록: 제품 (materialGroupId=46, Code 자동)
-		Material newProd = new Material();
-		newProd.setName(productName);
-		newProd.setMaterialGroupId(46);
-		newProd.setCode(getNextMaterialCode()); // '4000' + N
-		newProd.set_created(Timestamp.valueOf(LocalDateTime.now()));
-		newProd.setFactory_id(1);
-		newProd.setUnitId(3);
-		newProd.setLotUseYn("0");
-		newProd.setMtyn("1");
-		newProd.setUseyn("0");
-		newProd.setSpjangcd(spjangcd);
-		newProd.setWorkCenterId(39);
-		newProd.setStoreHouseId(4);
-		newProd = materialRepository.save(newProd);
-		return newProd.getId();
-	}
-	// 제일전기 자재 조회/등록
-	@Transactional
-	public Integer getOrCreateMaterialId(String materialName, String spjangcd) {
-		String cleanName = materialName.trim();
-		Material mat = materialRepository.findByNameTrimmed(cleanName);
-		if (mat != null) return mat.getId();
-
-		// 신규 등록: 자재 (materialGroupId=50, Code 자동)
-		Material newMat = new Material();
-		newMat.setName(materialName);
-		newMat.setMaterialGroupId(50);
-		newMat.setCode(getNextMaterialCode()); // '4000' + N
-		newMat.set_created(Timestamp.valueOf(LocalDateTime.now()));
-		newMat.setFactory_id(1);
-		newMat.setUnitId(3);
-		newMat.setSpjangcd(spjangcd);
-		newMat.setLotUseYn("0");
-		newMat.setMtyn("1");
-		newMat.setUseyn("0");
-		newMat.setWorkCenterId(39);
-		newMat.setStoreHouseId(3);
-		newMat = materialRepository.save(newMat);
-		return newMat.getId();
-	}
-
-	/** material.code의 다음 '4000'+N 값을 생성하는 메서드 (실제 구현 필요!) */
-	public String getNextMaterialCode() {
-		String maxCode = materialRepository.findMaxCodeBy4000Prefix();
-		int nextNumber = 4000;
-		if (maxCode != null && !maxCode.isEmpty()) {
-			try {
-				int codeNum = Integer.parseInt(maxCode);
-				nextNumber = codeNum + 1;
-			} catch (NumberFormatException ignore) {}
-		}
-
-		// 최종 insert 직전 중복 체크
-		while (materialRepository.existsByCode(String.valueOf(nextNumber))) {
-			nextNumber++;
-		}
-		return String.valueOf(nextNumber);
-	}
-
-
-
 }
