@@ -84,6 +84,13 @@ public class BalJuOptimalStockService {
           JOIN bom_pick  bp ON bp.fg_id = o.fg_id
           JOIN bom_comp  bc ON bc."BOM_id" = bp.bom_id
         ),
+        exploded_sum AS (
+          SELECT
+            comp_id AS material_id,
+            SUM(order_qty)::numeric AS order_qty
+          FROM exploded
+          GROUP BY comp_id
+        ),
         -- 4) 현재고(입출고 누적)
         stock_now AS (
           SELECT
@@ -94,67 +101,69 @@ public class BalJuOptimalStockService {
           GROUP BY mi."Material_id"
         ),
         -- 5) 발주 수량(취소 제외) : material 기준 오더 합
-        po_order AS (
+        po_lines AS (
           SELECT
-            b."Material_id" AS material_id,
-            SUM(
-              CASE WHEN COALESCE(b."SujuQty2",0)>0 THEN b."SujuQty2"
-                   ELSE b."SujuQty" END
-            )::numeric AS ordered_qty
+              b.id                 AS balju_id,
+              b."Material_id"      AS material_id,
+              b."SujuQty"::numeric AS ordered_qty,
+              bh."JumunDate",
+              bh.spjangcd
           FROM balju_head bh
           JOIN balju b ON b."BaljuHead_id" = bh.id
           WHERE bh.spjangcd = :spjangcd
+            AND bh."JumunDate" BETWEEN :start AND :end    -- ✅ 단건 쿼리와 동일
             AND COALESCE(b."State",'') <> 'canceled'
-          GROUP BY b."Material_id"
+            AND COALESCE(b."State",'') <> 'force_completion'  -- ✅ 단건 쿼리와 동일
         ),
-        -- 6) 발주대상 입고누적(해당 PO건으로 입고된 수량 합계)
-        po_receipt AS (
+        /* 6) 발주행별 기입고수량(= mat_inout에서 해당 행으로 들어온 수량 합) */
+        po_line_receipts AS (
           SELECT
-            b."Material_id" AS material_id,
-            SUM(COALESCE(mi."InputQty",0))::numeric AS received_qty_on_po
-          FROM balju b
-          LEFT JOIN mat_inout mi
-                 ON mi."Material_id" = b."Material_id"  -- 핵심 링크
-          GROUP BY b."Material_id"
+              mi."SourceDataPk" AS balju_id,
+              SUM(COALESCE(mi."InputQty",0))::numeric AS received_qty
+          FROM mat_inout mi
+          WHERE mi."SourceTableName" = 'balju'
+            AND mi."InOut" = 'in'
+            AND COALESCE(mi."_status",'a') = 'a'
+          GROUP BY mi."SourceDataPk"
         ),
-        -- 7) 미입고수량(오픈 발주잔량 = 발주합 - (해당발주로 입고된 합))
+        -- 7) 자재별 미입고(Σ max(발주수량 − 기입고, 0))
         incoming AS (
           SELECT
-            m.id AS material_id,
-            GREATEST(COALESCE(po.ordered_qty,0) - COALESCE(rcv.received_qty_on_po,0), 0)::numeric AS incoming_qty
-          FROM material m
-          LEFT JOIN po_order  po ON po.material_id = m.id
-          LEFT JOIN po_receipt rcv ON rcv.material_id = m.id
+              p.material_id,
+              SUM(GREATEST(p.ordered_qty - COALESCE(r.received_qty,0), 0))::numeric AS incoming_qty
+          FROM po_lines p
+          LEFT JOIN po_line_receipts r ON r.balju_id = p.balju_id
+          GROUP BY p.material_id
         )
         -- 최종: 그리드 컬럼 매핑
         SELECT *
-          FROM (
-            SELECT
-              m.material_code,
-              m.material_name,
-              m.unit_name,
-              COALESCE(e.order_qty,0)::numeric      AS order_qty,
-              COALESCE(i.incoming_qty,0)::numeric   AS incoming_qty,
-              COALESCE(sn.current_stock,0)::numeric AS current_stock,
-              COALESCE(m.safety_stock,0)::numeric   AS optimal_stock,
-              GREATEST(
-                (COALESCE(e.order_qty,0) + COALESCE(m.safety_stock,0))
-                - (COALESCE(sn.current_stock,0) + COALESCE(i.incoming_qty,0)),
-                0
-              )::numeric AS need_more_qty,
-              CASE
-                WHEN (COALESCE(sn.current_stock,0) + COALESCE(i.incoming_qty,0))\s
-                       >= (COALESCE(e.order_qty,0) + (m.safety_stock * 2)) THEN '여유'
-                WHEN (COALESCE(sn.current_stock,0) + COALESCE(i.incoming_qty,0))\s
-                       >= (COALESCE(e.order_qty,0) + COALESCE(m.safety_stock,0)) THEN '적정'
-                ELSE '부족'
-              END AS state
-            FROM exploded e
-            JOIN mat m            ON m.id = e.comp_id
-            LEFT JOIN stock_now sn ON sn.material_id = e.comp_id
-            LEFT JOIN incoming  i  ON i.material_id = e.comp_id
-          ) t
-          WHERE 1=1
+        FROM (
+          SELECT
+            m.material_code,
+            m.material_name,
+            m.unit_name,
+            COALESCE(es.order_qty,0)::numeric      AS order_qty,       -- 필요량
+            COALESCE(i.incoming_qty,0)::numeric    AS incoming_qty,    -- 미입고(발주잔량)
+            COALESCE(sn.current_stock,0)::numeric  AS current_stock,   -- 현재고
+            COALESCE(m.safety_stock,0)::numeric    AS optimal_stock,   -- 적정재고
+            GREATEST(
+              (COALESCE(es.order_qty,0) + COALESCE(m.safety_stock,0))
+              - (COALESCE(sn.current_stock,0) + COALESCE(i.incoming_qty,0)),
+              0
+            )::numeric AS need_more_qty,
+            CASE
+              WHEN (COALESCE(sn.current_stock,0) + COALESCE(i.incoming_qty,0))
+                     >= (COALESCE(es.order_qty,0) + (m.safety_stock * 2)) THEN '여유'
+              WHEN (COALESCE(sn.current_stock,0) + COALESCE(i.incoming_qty,0))
+                     >= (COALESCE(es.order_qty,0) + COALESCE(m.safety_stock,0)) THEN '적정'
+              ELSE '부족'
+            END AS state
+          FROM mat m
+          LEFT JOIN exploded_sum es ON es.material_id = m.id          -- ✅ 자재별 합계 필요량
+          LEFT JOIN stock_now   sn ON sn.material_id = m.id           -- ✅ m.id로 연결
+          LEFT JOIN incoming    i  ON i.material_id  = m.id           -- ✅ m.id로 연결
+        ) t
+        WHERE 1=1
       """;
 
     // 품명(키워드) 필터  ← 바깥 스코프 컬럼명 사용
