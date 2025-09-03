@@ -251,47 +251,15 @@
                                 </ul>
                             </dd>
                         </dl>
-
                         <dl>
                             <dt>
-                                <label for="cboMaterialType">
-                                    품목 구분<span class="eq"></span>
+                                <label for="choMat">
+                                    품목<span class="eq"></span>
                                 </label>
                             </dt>
                             <dd>
                                 <div class="srch-box">
-                                    <select id="cboMaterialType" name="cboMaterialType">
-                                    </select>
-                                </div>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>
-                                <label for="cboShift">
-                                    근무조<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <div class="srch-box">
-                                    <select id="cboShift" name="cboShift">
-                                    </select>
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-                <div class="section-top" id="prodResultList">
-                    <div class="search-wrap">
-                        <dl>
-                            <dt>
-                                <label for="cboWorkCenter">
-                                    워크센터<span class="eq"></span>
-                                </label>
-                            </dt>
-                            <dd>
-                                <div class="srch-box">
-                                    <select id="cboWorkCenter" name="cboWorkCenter">
-                                    </select>
+                                    <input id="choMat" name="choMat" style="width: 160px;"/>
                                 </div>
                             </dd>
                         </dl>
@@ -320,19 +288,6 @@
                                         검색
                                     </a>
                                 </li>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>
-                                선택한 작지번호
-                            </dt>
-                            <dd>
-                                <ul class="date-box">
-                                    <li>
-                                        <input type="text" id="selected_order_num" name="selected_order_num" readonly>
-                                        <label for="selected_order_num" class="hide">생산일</label>
-                                    </li>
-                                </ul>
                             </dd>
                         </dl>
                     </div>
@@ -1644,6 +1599,7 @@
                 let param = {
                     'date_from': $('#date_from').val(),
                     'date_to': $('#date_to').val(),
+                    'choMat': $('#choMat').val(),
                     'is_include_comp': $('#chxCompYn').is(':checked')
                 };
 
@@ -3491,6 +3447,13 @@
             });
 
             page.searchMainData();
+
+            $('#choMat').on('keydown', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    e.preventDefault(); // form submit 방지
+                    page.searchMainData();
+                }
+            });
 
         });
     </script>

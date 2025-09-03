@@ -232,20 +232,22 @@ public class ProductionResultService {
 		this.sqlRunner.execute(sql, dicParam);
 	}
 
-	public List<Map<String, Object>> getProdResult(String dateFrom, String dateTo, String isIncludeComp, String spjangcd) {
+	public List<Map<String, Object>> getProdResult(String dateFrom, String dateTo, String isIncludeComp, String spjangcd, String choMat) {
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("dateFrom", dateFrom);
 		dicParam.addValue("dateTo", dateTo);
 		dicParam.addValue("isIncludeComp", isIncludeComp);
 		dicParam.addValue("spjangcd", spjangcd);
+		String pattern = (choMat == null || choMat.isBlank()) ? "%" : "%" + choMat + "%";
+		dicParam.addValue("choMat", pattern);
 
 		String sql = """
 			WITH T AS (
 			  SELECT
 				  jr.id                              AS child_id,
-				  jr."Parent_id"                  AS parent_id,
-				  COALESCE(jr."Parent_id", jr.id) AS base_id,
+				  jr."Parent_id"                     AS parent_id,
+				  COALESCE(jr."Parent_id", jr.id)    AS base_id,
 				  CASE WHEN jr."State"='working' THEN 1 ELSE 0 END AS is_working
 			  FROM job_res jr
 			  WHERE jr."ProductionDate" BETWEEN CAST(:dateFrom AS date) AND CAST(:dateTo AS date)
@@ -254,63 +256,77 @@ public class ProductionResultService {
 			S AS (
 			  SELECT
 				  T.*,
-				  -- 체인(base_id) 내에서 working 우선, 그다음 최근 id로 대표행 선택
+				  -- 대표행 선택: working 우선, 다음 최근 id
 				  ROW_NUMBER() OVER (
 					PARTITION BY T.base_id
 					ORDER BY T.is_working DESC, T.child_id DESC
-				  ) AS rn
+				  ) AS rn,
+				  -- 체인에 working 있는지 (있으면 1)
+				  MAX(T.is_working) OVER (PARTITION BY T.base_id) AS any_working
 			  FROM T
+			),
+			F AS (
+			  SELECT
+				 S.child_id                                  AS id                         -- 대표행 id
+			   , C."WorkOrderNumber"                         AS order_num
+			   , TO_CHAR(B."ProductionDate",'yyyy-mm-dd')    AS prod_date                  -- 기본정보는 base(부모)
+			   , C."LotNumber"                               AS lot_num
+			   , TO_CHAR(B."StartTime",'hh24:mi')            AS start_time
+			   , TO_CHAR(B."EndTime",'hh24:mi')              AS end_time
+			   , WC.id                                       AS workcenter_id
+			   , WC."Name"                                   AS workcenter
+			   , C."ShiftCode"                                AS shift_code
+			   , SH."Name"                                    AS shift_name
+			   , B."WorkIndex"                                AS work_idx
+			
+			   -- 파생 상태: working 있으면 working, 아니면 부모 상태
+			   , CASE WHEN S.any_working = 1 THEN 'working' ELSE B."State" END            AS state
+			   , fn_code_name('job_state', CASE WHEN S.any_working = 1 THEN 'working' ELSE B."State" END)
+																						  AS job_state
+			
+			   , C."WorkerCount"                              AS worker_count
+			   , M.id                                         AS mat_pk
+			   , M."Code"                                     AS mat_code
+			   , M."Name"                                     AS mat_name
+			   , fn_code_name('mat_type', MG."MaterialType")  AS mat_type
+			   , M."LotSize"                                  AS lot_size
+			   , M."Weight"                                   AS weight
+			   , U."Name"                                     AS unit
+			   , E.id                                         AS equipment_id
+			   , E."Name"                                     AS equipment
+			   , C."Description"                              AS description
+			   , B."OrderQty"                                 AS order_qty
+			   , B."GoodQty"                                  AS good_qty
+			   , B."DefectQty"                                AS defect_qty
+			   , B."LossQty"                                  AS loss_qty
+			   , B."ScrapQty"                                 AS scrap_qty
+			   , TO_CHAR(B."ProductionDate" + M."ValidDays", 'yyyy-mm-dd') AS "ValidDays"
+			   , M."Routing_id"                               AS routing_id
+			  FROM S
+			  JOIN job_res       C  ON C.id = S.child_id              -- child = 대표행
+			  JOIN job_res       B  ON B.id = S.base_id               -- base = 부모
+			  LEFT JOIN work_center WC ON WC.id = C."WorkCenter_id"
+			  LEFT JOIN equ           E  ON E.id  = C."Equipment_id"
+			  LEFT JOIN shift         SH ON SH."Code" = C."ShiftCode"
+			  LEFT JOIN material      M  ON M.id = B."Material_id"
+			  LEFT JOIN routing       R  ON M."Routing_id" = R.id
+			  LEFT JOIN mat_grp       MG ON MG.id = M."MaterialGroup_id"
+			  LEFT JOIN unit          U  ON U.id = M."Unit_id"
+			  WHERE S.rn = 1
 			)
-			SELECT
-			   S.child_id                                  AS id                         -- ★ 대표행 id (working 자식이면 자식 id)
-			 , C."WorkOrderNumber"                         AS order_num
-			 , TO_CHAR(B."ProductionDate",'yyyy-mm-dd')    AS prod_date                   -- 기본정보는 base(부모 우선)
-			 , C."LotNumber"                               AS lot_num
-			 , TO_CHAR(B."StartTime",'hh24:mi')            AS start_time
-			 , TO_CHAR(B."EndTime",'hh24:mi')              AS end_time
-			 , WC.id                                       AS workcenter_id
-			 , WC."Name"                                   AS workcenter
-			 , C."ShiftCode"                                AS shift_code
-			 , SH."Name"                                    AS shift_name
-			 , B."WorkIndex"                                AS work_idx
-			 , fn_code_name('job_state', C."State")         AS job_state                  -- 상태/공정/설비는 child 기준
-			 , C."State"                                    AS state
-			 , C."WorkerCount"                              AS worker_count
-			 , M.id                                         AS mat_pk
-			 , M."Code"                                     AS mat_code
-			 , M."Name"                                     AS mat_name
-			 , fn_code_name('mat_type', MG."MaterialType")  AS mat_type
-			 , M."LotSize"                                  AS lot_size
-			 , M."Weight"                                   AS weight
-			 , U."Name"                                     AS unit
-			 , E.id                                         AS equipment_id
-			 , E."Name"                                     AS equipment
-			 , C."Description"                              AS description
-			 , B."OrderQty"                                 AS order_qty
-			 , B."GoodQty"                                  AS good_qty
-			 , B."DefectQty"                                AS defect_qty
-			 , B."LossQty"                                  AS loss_qty
-			 , B."ScrapQty"                                 AS scrap_qty
-			 , TO_CHAR(B."ProductionDate" + M."ValidDays", 'yyyy-mm-dd') AS "ValidDays"
-			 , M."Routing_id"                               AS routing_id
-			FROM S
-			JOIN job_res       C  ON C.id = S.child_id              -- child = 대표행
-			JOIN job_res       B  ON B.id = S.base_id               -- base = 부모 우선
-			LEFT JOIN work_center WC ON WC.id = C."WorkCenter_id"
-			LEFT JOIN equ           E  ON E.id  = C."Equipment_id"
-			LEFT JOIN shift         SH ON SH."Code" = C."ShiftCode"
-			LEFT JOIN material      M  ON M.id = B."Material_id"
-			LEFT JOIN routing       R  ON M."Routing_id" = R.id
-			LEFT JOIN mat_grp       MG ON MG.id = M."MaterialGroup_id"
-			LEFT JOIN unit          U  ON U.id = M."Unit_id"
-			WHERE S.rn = 1
-                	""";
+			SELECT *
+			FROM F
+			where  1=1
+			and F.mat_name like :choMat
+			""";
 
 		if ("false".equalsIgnoreCase(isIncludeComp)) {
-			sql += " AND C.\"State\" != 'finished' ";
+			// ★ 파생 상태(state) 기준으로 완료 제외
+			sql += " and F.state != 'finished' ";
 		}
 
-		sql += " ORDER BY B.\"ProductionDate\", C.\"WorkOrderNumber\", S.child_id ";
+		sql += " ORDER BY F.prod_date, F.order_num, F.id ";
+
 
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		return items;
