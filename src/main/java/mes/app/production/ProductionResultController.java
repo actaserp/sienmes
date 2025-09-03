@@ -244,7 +244,6 @@ public class ProductionResultController {
 
         AjaxResult result = new AjaxResult();
         result.data = items;
-        System.out.println(items);
         return result;
     }
 
@@ -654,7 +653,6 @@ public class ProductionResultController {
         this.productionResultService.add_jobres_defectqty_inout(jrPk, user.getId());
 
         jr = this.jobResRepository.save(jr);
-        System.out.println("jr data" + jr);
 
         Optional<EquRun> runningRunOpt = equRunRepository.findLatestRunningByEquipmentAndOrder(equipmentId, order_num);
         if (runningRunOpt.isPresent()) {
