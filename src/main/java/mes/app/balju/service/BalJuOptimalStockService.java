@@ -26,7 +26,7 @@ public class BalJuOptimalStockService {
     paramMap.addValue("spjangcd", spjangcd);
 
     String sql = """
-        WITH
+        WITH RECURSIVE
         -- 0) 자재 마스터(+단위/안전재고)
         mat AS (
           SELECT
@@ -60,36 +60,43 @@ public class BalJuOptimalStockService {
         -- 2) 유효 BOM 1건 선택(현재 유효 + 최신 StartDate 우선)
         bom_pick AS (
           SELECT DISTINCT ON (b."Material_id")
-            b.id AS bom_id,
-            b."Material_id" AS fg_id,
-            b."OutputAmount"::numeric AS output_amount
+                 b.id AS bom_id,
+                 b."Material_id" AS parent_id,
+                 COALESCE(NULLIF(b."OutputAmount",0),1)::numeric AS output_amount
           FROM bom b
           WHERE (b."StartDate" IS NULL OR b."StartDate" <= now())
             AND (b."EndDate"   IS NULL OR b."EndDate"   >= now())
           ORDER BY b."Material_id", COALESCE(b."StartDate",'1900-01-01'::timestamp) DESC
         ),
-        -- 3) BOM 전개: 자재 필요량(= 수주량 × Amount/OutputAmount)
-        exploded AS (
-          SELECT
-            bc."Material_id"     AS comp_id,
-            o.fg_id,
-            o.fg_qty,
-            bp.output_amount,
-            bc."Amount"::numeric AS amount_per_output,
-            ROUND(
-          (o.fg_qty * (bc."Amount"::numeric / NULLIF(bp.output_amount,0)))::numeric,
-          4
-        ) AS order_qty
+        bom_walk AS (
+          -- 앵커: FG → 1레벨
+          SELECT o.fg_id,
+                 bc."Material_id" AS comp_id,
+                 1 AS lvl,
+                 ARRAY[o.fg_id, bc."Material_id"] AS path,
+                 (bc."Amount"::numeric / bp.output_amount) AS acc_ratio
           FROM orders_fg o
-          JOIN bom_pick  bp ON bp.fg_id = o.fg_id
-          JOIN bom_comp  bc ON bc."BOM_id" = bp.bom_id
+          JOIN bom_pick bp ON bp.parent_id = o.fg_id
+          JOIN bom_comp bc ON bc."BOM_id"  = bp.bom_id
+          UNION ALL
+          -- 재귀: 자식 확장
+          SELECT w.fg_id,
+                 bc."Material_id" AS comp_id,
+                 w.lvl + 1,
+                 w.path || bc."Material_id",
+                 w.acc_ratio * (bc."Amount"::numeric / bp.output_amount) AS acc_ratio
+          FROM bom_walk w
+          JOIN bom_pick bp ON bp.parent_id = w.comp_id
+          JOIN bom_comp bc ON bc."BOM_id"  = bp.bom_id
+          WHERE NOT bc."Material_id" = ANY(w.path)   -- 사이클 방지
+          -- AND w.lvl < 20                           -- (옵션) 깊이 제한
         ),
         exploded_sum AS (
-          SELECT
-            comp_id AS material_id,
-            SUM(order_qty)::numeric AS order_qty
-          FROM exploded
-          GROUP BY comp_id
+          SELECT w.comp_id AS material_id,
+                 SUM(o.fg_qty * w.acc_ratio)::numeric AS order_qty
+          FROM bom_walk w
+          JOIN orders_fg o ON o.fg_id = w.fg_id
+          GROUP BY w.comp_id
         ),
         -- 4) 현재고(입출고 누적)
         stock_now AS (
