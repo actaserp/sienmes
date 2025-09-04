@@ -82,106 +82,120 @@ public class BaljuOrderService {
              sh."Name" AS "ShipmentStateName",
              bh."DeliveryDate",
              b."Description",
-         -- ■ BalJuHeadType (영문 코드) — 라인 상태 집계만 사용
-         (
-           SELECT CASE
-                    WHEN s.cnt_force     = s.cnt_total AND s.cnt_total > 0 THEN 'force_completion'
-                    WHEN s.cnt_canceled  = s.cnt_total THEN 'canceled'
-                    WHEN s.cnt_received  = s.cnt_total THEN 'received'
-                    WHEN s.cnt_draft     = s.cnt_total THEN 'draft'
-                    WHEN s.cnt_partial   = s.cnt_total THEN 'partial'
-                    ELSE 'partial'  -- 섞여 있으면 partial
-                  END
-           FROM (
-             SELECT
-               COUNT(*) FILTER (WHERE x.line_state = 'force_completion') AS cnt_force,
-               COUNT(*) FILTER (WHERE x.line_state = 'canceled')         AS cnt_canceled,
-               COUNT(*) FILTER (WHERE x.line_state = 'received')         AS cnt_received,
-               COUNT(*) FILTER (WHERE x.line_state = 'draft')            AS cnt_draft,
-               COUNT(*) FILTER (WHERE x.line_state = 'partial')          AS cnt_partial,
-               COUNT(*)                                                 AS cnt_total
-             FROM (
-               SELECT
-                 CASE
-                   WHEN b2."State" = 'canceled'         THEN 'canceled'         -- 명시 상태 우선
-                   WHEN b2."State" = 'force_completion' THEN 'force_completion' -- 명시 상태 우선
-                   ELSE CASE
-                          -- 잔량 = 발주개수 - 입고개수
-                          WHEN ABS(
-                                 COALESCE(b2."SujuQty",0)
-                                 - (COALESCE(mi2."SujuQty2",0) / NULLIF(u2.unit_weight_kg,0))
-                               ) < 1e-9 THEN 'received'
-                          WHEN (
-                                 COALESCE(b2."SujuQty",0)
-                                 - (COALESCE(mi2."SujuQty2",0) / NULLIF(u2.unit_weight_kg,0))
-                               ) > 0 THEN 'partial'
-                          ELSE 'draft'
-                        END
-                 END AS line_state
-               FROM balju b2
-               LEFT JOIN (
-                 SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
-                 FROM mat_inout
-                 WHERE "SourceTableName"='balju' AND COALESCE("_status",'a')='a'
-                 GROUP BY "SourceDataPk"
-               ) mi2 ON mi2."SourceDataPk" = b2.id
-               INNER JOIN material m2 ON m2.id = b2."Material_id"
-               LEFT JOIN unitw u2 ON u2.material_id = m2.id  -- unitw CTE 재사용
-               WHERE b2."BaljuHead_id" = bh.id
-             ) x
-           ) s
-         ) AS "BalJuHeadType",
-         -- ■ bh_StateName (한글명) — 같은 로직을 코드명 매핑
-         fn_code_name(
-           'balju_state',
-           (
-             SELECT CASE
-                      WHEN s.cnt_force     = s.cnt_total AND s.cnt_total > 0 THEN 'force_completion'
-                      WHEN s.cnt_canceled  = s.cnt_total THEN 'canceled'
-                      WHEN s.cnt_received  = s.cnt_total THEN 'received'
-                      WHEN s.cnt_draft     = s.cnt_total THEN 'draft'
-                      WHEN s.cnt_partial   = s.cnt_total THEN 'partial'
-                      ELSE 'partial'
-                    END
-             FROM (
-               SELECT
-                 COUNT(*) FILTER (WHERE x.line_state = 'force_completion') AS cnt_force,
-                 COUNT(*) FILTER (WHERE x.line_state = 'canceled')         AS cnt_canceled,
-                 COUNT(*) FILTER (WHERE x.line_state = 'received')         AS cnt_received,
-                 COUNT(*) FILTER (WHERE x.line_state = 'draft')            AS cnt_draft,
-                 COUNT(*) FILTER (WHERE x.line_state = 'partial')          AS cnt_partial,
-                 COUNT(*)                                                 AS cnt_total
-               FROM (
-                 SELECT
+          -- ■ BalJuHeadType (영문 코드) — 라인 상태 집계만 사용
+          (
+            SELECT CASE
+                     WHEN s.cnt_force     = s.cnt_total AND s.cnt_total > 0 THEN 'force_completion'
+                     WHEN s.cnt_canceled  = s.cnt_total THEN 'canceled'
+                     WHEN s.cnt_received  = s.cnt_total THEN 'received'
+                     WHEN s.cnt_draft     = s.cnt_total THEN 'draft'
+                     WHEN s.cnt_partial   = s.cnt_total THEN 'partial'
+                     ELSE 'partial'  -- 섞여 있으면 partial
+                   END
+            FROM (
+              SELECT
+                COUNT(*) FILTER (WHERE x.line_state = 'force_completion') AS cnt_force,
+                COUNT(*) FILTER (WHERE x.line_state = 'canceled')         AS cnt_canceled,
+                COUNT(*) FILTER (WHERE x.line_state = 'received')         AS cnt_received,
+                COUNT(*) FILTER (WHERE x.line_state = 'draft')            AS cnt_draft,
+                COUNT(*) FILTER (WHERE x.line_state = 'partial')          AS cnt_partial,
+                COUNT(*)                                                 AS cnt_total
+              FROM (
+                SELECT
+                  CASE
+                    WHEN b2."State" = 'canceled'         THEN 'canceled'         -- 명시 상태 우선
+                    WHEN b2."State" = 'force_completion' THEN 'force_completion' -- 명시 상태 우선
+                ELSE CASE
+                       -- 잔량 = 발주개수 - 입고개수
+                       WHEN ABS(
+                              COALESCE(b2."SujuQty",0)
+                              - (COALESCE(mi2."SujuQty2",0) / NULLIF(u2.unit_weight_kg,0))
+                            ) < 1e-9 THEN 'received'
+                       WHEN (
+                              COALESCE(b2."SujuQty",0)
+                              - (COALESCE(mi2."SujuQty2",0) / NULLIF(u2.unit_weight_kg,0))
+                            ) > 0 THEN 'partial'
+                       ELSE 'draft'
+                     END
+                  END AS line_state
+                FROM balju b2
+                LEFT JOIN (
+                  SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+                  FROM mat_inout
+                  WHERE "SourceTableName"='balju' AND COALESCE("_status",'a')='a'
+                  GROUP BY "SourceDataPk"
+                ) mi2 ON mi2."SourceDataPk" = b2.id
+                INNER JOIN material m2 ON m2.id = b2."Material_id"
+                LEFT JOIN unitw u2 ON u2.material_id = m2.id  -- unitw CTE 재사용
+                WHERE b2."BaljuHead_id" = bh.id
+              ) x
+            ) s
+          ) AS "BalJuHeadType",
+          -- ■ bh_StateName (한글명) — 같은 로직을 코드명 매핑
+          fn_code_name(
+            'balju_state',
+            (
+              SELECT CASE
+                       WHEN s.cnt_force     = s.cnt_total AND s.cnt_total > 0 THEN 'force_completion'
+                       WHEN s.cnt_canceled  = s.cnt_total THEN 'canceled'
+                       WHEN s.cnt_received  = s.cnt_total THEN 'received'
+                       WHEN s.cnt_draft     = s.cnt_total THEN 'draft'
+                       WHEN s.cnt_partial   = s.cnt_total THEN 'partial'
+                       ELSE 'partial'
+                     END
+              FROM (
+                SELECT
+                  COUNT(*) FILTER (WHERE x.line_state = 'force_completion') AS cnt_force,
+                  COUNT(*) FILTER (WHERE x.line_state = 'canceled')         AS cnt_canceled,
+                  COUNT(*) FILTER (WHERE x.line_state = 'received')         AS cnt_received,
+                  COUNT(*) FILTER (WHERE x.line_state = 'draft')            AS cnt_draft,
+                  COUNT(*) FILTER (WHERE x.line_state = 'partial')          AS cnt_partial,
+                  COUNT(*)                                                 AS cnt_total
+                FROM (
+                  SELECT
+           CASE
+             WHEN b2."State" = 'canceled'         THEN 'canceled'
+             WHEN b2."State" = 'force_completion' THEN 'force_completion'
+             ELSE
+               CASE
+                 -- 단위중량 없음/0 → 안전 분기(중량 기준)
+                 WHEN NULLIF(u2.unit_weight_kg, 0) IS NULL THEN
                    CASE
-                     WHEN b2."State" = 'canceled'         THEN 'canceled'
-                     WHEN b2."State" = 'force_completion' THEN 'force_completion'
-                     ELSE CASE
-                            WHEN ABS(
-                                   COALESCE(b2."SujuQty",0)
-                                   - (COALESCE(mi2."SujuQty2",0) / NULLIF(u2.unit_weight_kg,0))
-                                 ) < 1e-9 THEN 'received'
-                            WHEN (
-                                   COALESCE(b2."SujuQty",0)
-                                   - (COALESCE(mi2."SujuQty2",0) / NULLIF(u2.unit_weight_kg,0))
-                                 ) > 0 THEN 'partial'
-                            ELSE 'draft'
-                          END
-                   END AS line_state
-                 FROM balju b2
-                 LEFT JOIN (
-                   SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
-                   FROM mat_inout
-                   WHERE "SourceTableName"='balju' AND COALESCE("_status",'a')='a'
-                   GROUP BY "SourceDataPk"
-                 ) mi2 ON mi2."SourceDataPk" = b2.id
-                 INNER JOIN material m2 ON m2.id = b2."Material_id"
-                 LEFT JOIN unitw u2 ON u2.material_id = m2.id
-                 WHERE b2."BaljuHead_id" = bh.id
-               ) x
-             ) s
-           )
-         ) AS "bh_StateName",
+                     WHEN COALESCE(mi2."SujuQty2", 0) = 0 THEN 'draft'   -- 전혀 입고 없음
+                     ELSE 'partial'                                      -- 일부(중량) 입고
+                   END
+                 -- 단위중량 있음 → EA 기준 판정
+                 ELSE
+                   CASE
+                     WHEN ABS(
+                            COALESCE(b2."SujuQty",0)
+                            - (COALESCE(mi2."SujuQty2",0) / u2.unit_weight_kg)
+                          ) < 1e-9
+                       THEN 'received'                                   -- 완납
+                     WHEN COALESCE(mi2."SujuQty2",0) = 0
+                       THEN 'draft'                                      -- 전혀 입고 없음
+                     WHEN (COALESCE(mi2."SujuQty2",0) / u2.unit_weight_kg) > 0
+                        AND (COALESCE(b2."SujuQty",0)
+                             - (COALESCE(mi2."SujuQty2",0) / u2.unit_weight_kg)) > 0
+                       THEN 'partial'                                    -- 일부 입고
+                     ELSE 'draft'
+                   END
+               END
+           END AS line_state
+         FROM balju b2
+         LEFT JOIN (
+           SELECT "SourceDataPk", SUM("InputQty") AS "SujuQty2"
+           FROM mat_inout
+           WHERE "SourceTableName"='balju' AND COALESCE("_status",'a')='a'
+           GROUP BY "SourceDataPk"
+         ) mi2 ON mi2."SourceDataPk" = b2.id
+         INNER JOIN material m2 ON m2.id = b2."Material_id"
+         LEFT JOIN unitw u2 ON u2.material_id = m2.id
+         WHERE b2."BaljuHead_id" = bh.id
+                ) x
+              ) s
+            )
+          ) AS "bh_StateName",
              ROW_NUMBER() OVER (PARTITION BY bh."JumunNumber" ORDER BY b.id ASC) AS rn
            FROM balju_head bh
            LEFT JOIN balju b

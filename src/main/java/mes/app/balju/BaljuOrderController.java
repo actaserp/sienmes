@@ -237,15 +237,17 @@ public class BaljuOrderController {
   public AjaxResult deleteSuju(
       @RequestParam("id") Integer id,
       @RequestParam("State") String State) {
-
     AjaxResult result = new AjaxResult();
 
-    if (!"draft".equalsIgnoreCase(State)) {
+    String state = (State == null) ? "" : State.trim();
+    boolean isDraft =
+        "draft".equalsIgnoreCase(state) || "미입고".equals(state);
+
+    if (!isDraft) {
       result.success = false;
       result.message = "미입고 상태일 때만 삭제할 수 있습니다.";
       return result;
     }
-
     Optional<BaljuHead> optionalHead = balJuHeadRepository.findById(id);
     if (!optionalHead.isPresent()) {
       result.success = false;

@@ -769,16 +769,17 @@
           let items = _this.grid.selectedItems;
           if (items.length > 0) {
             let id = items[0].bh_id;
-            let state = (items[0].BalJuHeadType || '').toLowerCase();  // 상태 값 확인
+            //let state = (items[0].BalJuHeadType || '').toLowerCase();  // 상태 값 확인
+            let stateKor = (items[0].bh_StateName || '').trim();
 
-            if (state !== 'draft') {
+            if (stateKor === '미입고') {
               Alert.alert('', '미입고 상태일 때만 삭제할 수 있습니다.');
               return;
             }
 
             Alert.confirm('', '삭제하시겠습니까?',
               function () {
-                _this.deleteSujuData(id, state);
+                _this.deleteSujuData(id, stateKor);
               },
               function () {}
             );
@@ -1490,10 +1491,10 @@
       }
 
 
-      deleteSujuData(id, state) {
+      deleteSujuData(id, stateKor) {
         let _this = this;
         let url = _this.url + '/delete';
-        let data = {'id': id, 'State': state}
+        let data = {'id': id, 'State': stateKor}
         let fnsuccess = function (res) {
           if (res.success) {
             Notify.success('삭제되었습니다.');
