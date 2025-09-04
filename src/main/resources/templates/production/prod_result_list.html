@@ -514,6 +514,11 @@
                 selectionMode: wijmo.grid.SelectionMode.None,
                 headersVisibility: wijmo.grid.HeadersVisibility.Column,
                 allowSorting: true,
+                formatItem: (sender, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                        e.cell.style.textAlign = 'center';
+                    }
+                },
                 columns: [
                     { binding: 'defect_type', header: '부적합유형', width: 200, align: 'center' },
                     { binding: 'defect_qty', header: '부적합량', width: 130, align: 'right', format: 'n0' },
@@ -529,13 +534,18 @@
                 selectionMode: wijmo.grid.SelectionMode.None,
                 headersVisibility: wijmo.grid.HeadersVisibility.Column,
                 allowSorting: true,
+                formatItem: (sender, e) => {
+                    if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
+                        e.cell.style.textAlign = 'center';
+                    }
+                },
                 columns: [
-                    { binding: 'mat_name', header: '품목', width: 250, align: 'left' },
+                    { binding: 'mat_name', header: '품목', width: 300, align: 'left' },
                     { binding: 'unit', header: '단위', width: 70, align: 'center' },
-                    { binding: 'consumed', header: '실소요량', width: 100, align: 'right', format: 'n0' },
-                    { binding: 'bom_consumed', header: '소요량(BOM)', width: 105, align: 'right', format: 'n0' },
-                    { binding: 'scrap_consumed', header: 'Scrap투입량', width: 100, align: 'right', format: 'n0' },
-                    { binding: 'add_consumed', header: '추가소요량', width: 100, align: 'right', format: 'n0' },
+                    { binding: 'consumed', header: '실소요량', width: 100, align: 'right', format: 'n4' },
+                    { binding: 'bom_consumed', header: '소요량(BOM)', width: 105, align: 'right', format: 'n4' },
+                    { binding: 'scrap_consumed', header: 'Scrap투입량', width: 100, align: 'right', format: 'n0', visible:false },
+                    { binding: 'add_consumed', header: '추가소요량', width: 100, align: 'right', format: 'n0', visible:false },
                     { binding: 'consumed_start', header: '투입시작', width: 80, align: 'center' },
                     { binding: 'consumed_end', header: '투입종료', width: 80, align: 'center' },
                 ],
