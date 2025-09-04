@@ -649,8 +649,9 @@ public class ProductionResultController {
         jr.setEquipment_id(equipmentId);
         jr.setDescription(description);
         jr.setState("finished");
-
-        this.productionResultService.add_jobres_defectqty_inout(jrPk, user.getId());
+        
+        // 부적합량을 부적합 창고에 저장
+//        this.productionResultService.add_jobres_defectqty_inout(jrPk, user.getId());
 
         jr = this.jobResRepository.save(jr);
 
@@ -693,7 +694,8 @@ public class ProductionResultController {
 
         jr = this.jobResRepository.save(jr);
 
-        this.productionResultService.delete_jobres_defectqty_inout(jrPk);
+        // 부적합량을 부적합 창고에 저장한걸 삭제
+//        this.productionResultService.delete_jobres_defectqty_inout(jrPk);
 
         Optional<EquRun> latestComplete = equRunRepository.findLatestCompleteByEquipmentAndOrder(
                 jr.getEquipment_id(), jr.getWorkOrderNumber());
@@ -1431,6 +1433,7 @@ public class ProductionResultController {
 
         MaterialLot prodMatLot = this.matLotRepository.getByLotNumber(mpe.getLotNumber());
 
+
         List<MatLotCons> prodMatLotConsCount = this.matLotConsRepository.findByMaterialLotId(prodMatLot.getId());
 
         if (prodMatLotConsCount.size() > 0) {
@@ -1478,6 +1481,7 @@ public class ProductionResultController {
             mi.setInoutTime(LocalTime.parse(time.format(timeFormat)));
             mi = this.matInoutRepository.saveAndFlush(mi);
 
+            ml.setCurrentStock(ml.getCurrentStock() - ml.getInputQty() + mp.getGoodQty());
             ml.setInputQty(mp.getGoodQty());
             ml = this.matLotRepository.saveAndFlush(ml);
         }

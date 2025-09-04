@@ -109,14 +109,14 @@
                                 </div>
                             </dd>
                         </dl>
-                        <dl>
-                            <dt>&nbsp;</dt>
-                            <dd>
-                                <button class="btn" title="LOT 상세검색" id="btnLotSearch">
-                                    LOT 상세검색
-                                </button>
-                            </dd>
-                        </dl>
+<!--                        <dl>-->
+<!--                            <dt>&nbsp;</dt>-->
+<!--                            <dd>-->
+<!--                                <button class="btn" title="LOT 상세검색" id="btnLotSearch">-->
+<!--                                    LOT 상세검색-->
+<!--                                </button>-->
+<!--                            </dd>-->
+<!--                        </dl>-->
                     </div>
 
                 </div>
@@ -271,11 +271,11 @@
                         }
                     },
                     columns: [
-                        {binding: 'mat_type', header: '품목유형', width: 100, align: 'center'},
-                        {binding: 'mat_grp', header: '품목그룹', width: 130, align: 'center'},
+                        {binding: 'mat_type', header: '품목유형', width: 80, align: 'center'},
+                        {binding: 'mat_grp', header: '품목그룹', width: 80, align: 'center'},
                         {binding: 'mat_code', header: '품목코드', width: 100, align: 'center'},
-                        {binding: 'mat_name', header: '품목명', width: 450, align: 'left'},
-                        {binding: 'cur_stock', header: '총재고', width: 100, align: 'right', format: 'n0'},
+                        {binding: 'mat_name', header: '품목명', width: 250, align: 'left'},
+                        {binding: 'cur_stock', header: '총재고', width: 100, align: 'right', format: 'n4'},
                         {binding: 'unit_name', header: '단위', width: 100, align: 'center'}
                     ],
                     selectionChanged: (s, e) => {
@@ -344,22 +344,39 @@
                             }
                         }
                     },
-                    cellEditEnded: (s, e) => { // cellEditEnding -> cellEditEnded
-                        const column = s.columns[e.col];
+                    cellEditEnded: (s, e) => {
+                        const col = s.columns[e.col];
+                        if (col.binding !== 'real_stock') return;
+
                         const item = s.rows[e.row].dataItem;
 
-                        if (column.binding === 'real_stock') {
-                            if (item.real_stock != null && item.CurrentStock != null) {
-                                item.gap = item.real_stock - item.CurrentStock;
-                            }
-                        }
+                        // 편집 반영을 확실히
+                        s.collectionView.commitEdit?.();
+
+                        // 안전 변환 함수
+                        const toNum = v =>
+                            v == null || v === '' ? 0 :
+                                (typeof v === 'string' ? parseFloat(v.replace(/,/g, '')) : Number(v));
+
+                        const rs = toNum(item.real_stock);
+                        const cs = toNum(item.CurrentStock);
+
+                        // 소수 4자리 반올림(부동소수 오차 방지)
+                        const round4 = n => Math.round((n + Number.EPSILON) * 1e4) / 1e4;
+
+                        item.gap = round4(rs - cs);
+
+                        // 해당 셀만 다시 그리기(선택)
+                        const gapCol = s.columns.getColumn('gap');
+                        if (gapCol) s.invalidateCell(e.row, gapCol.index);
                     },
+
                     columns: [
-                        {binding: 'storehouse_name', header: '창고', width: 120, align: 'left', isReadOnly: true},
-                        {binding: 'LotNumber', header: 'Lot', width: 170, align: 'center', isReadOnly: true},
-                        {binding: 'CurrentStock', header: '재고', width: 100, align: 'right', isReadOnly: true},
-                        {binding: 'real_stock', header: '실사재고', width: 100, align: 'right', isReadOnly: false},
-                        {binding: 'gap', header: '차이', width: 80, align: 'right', isReadOnly: true},
+                        {binding: 'storehouse_name', header: '창고', width: 100, align: 'center', isReadOnly: true},
+                        {binding: 'LotNumber', header: 'Lot', width: 150, align: 'center', isReadOnly: true},
+                        {binding: 'CurrentStock', header: '재고', width: 100, align: 'right', format: 'n4',dataType: wijmo.DataType.Number, isReadOnly: true},
+                        {binding: 'real_stock', header: '실사재고', width: 100, align: 'right', format: 'n4', dataType: wijmo.DataType.Number, isReadOnly: false},
+                        {binding: 'gap', header: '차이', width: 80, align: 'right', format: 'n4',dataType: wijmo.DataType.Number, isReadOnly: true},
                         {binding: 'gap_description', header: '차이설명', width: 200, align: 'left', isReadOnly: false},
                         {binding: 'btn_save', header: '저장', width: 80, align: 'center', isReadOnly: true},
                         {binding: 'last_take_date', header: '최종실사일', width: 200, align: 'center', isReadOnly: true}

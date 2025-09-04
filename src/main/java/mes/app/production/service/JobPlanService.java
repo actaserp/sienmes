@@ -14,6 +14,7 @@ import org.springframework.util.StringUtils;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -73,6 +74,61 @@ public class JobPlanService {
 		List<Map<String, Object>> itmes = this.sqlRunner.getRows(sql, dicParam);
 		
 		return itmes;
+	}
+
+	// 계획 대비 실적 조회
+	public Map<String, Object> getActualPlanList(String date_kind, String start, String end, String spjangcd) {
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("date_kind", date_kind);
+		dicParam.addValue("start", start);
+		dicParam.addValue("end", end);
+		dicParam.addValue("spjangcd", spjangcd);
+
+		String planSql = """
+            SELECT
+                h.id AS head_id,
+                h.stdate,
+                h.eddate,
+                h.actnm,
+                fn_code_name('comunication_type', h.cmcode) AS cmcode,
+                h.spjangcd,
+                h.description,
+                p.id AS plan_id,
+                p.material_id,
+                m."Code" AS mat_code,
+                m."Name" AS mat_name,
+                p.qty AS plan_qty,
+                p.remark
+            FROM job_plan_head h
+            LEFT JOIN job_plan p ON p.head_id = h.id
+            LEFT JOIN material m ON m.id = p.material_id
+            WHERE h.spjangcd = :spjangcd
+              AND h.stdate <= :end
+              AND h.eddate >= :start
+            ORDER BY h.id DESC
+        """;
+
+		// 실적 리스트
+		String actualSql = """
+            SELECT
+                mp."Material_id" AS material_id,
+                mp."ProductionDate"::text AS work_date,
+                mp."GoodQty" AS actual_qty,
+                m."Code" AS mat_code,
+                m."Name" AS mat_name
+            FROM job_res mp
+            LEFT JOIN material m ON m.id = mp."Material_id"
+            WHERE mp."State" = 'finished'
+              AND mp."ProductionDate" BETWEEN TO_DATE(:start, 'YYYYMMDD') AND TO_DATE(:end, 'YYYYMMDD')
+            GROUP BY mp."Material_id", mp."ProductionDate", actual_qty, mat_code, mat_name
+        """;
+
+		Map<String, Object> result = new HashMap<>();
+		result.put("planList", sqlRunner.getRows(planSql, dicParam));
+		result.put("actualList", sqlRunner.getRows(actualSql, dicParam));
+
+		return result;
 	}
 	
 	// 수주 상세정보 조회

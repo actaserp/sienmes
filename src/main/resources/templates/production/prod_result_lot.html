@@ -433,7 +433,7 @@
                                                                    class="background-order" readonly/></td>
                                         </tr>
                                         <tr>
-                                            <th><label for="good_qty">양품량</label></th>
+                                            <th><label for="good_qty">생산량</label></th>
                                             <td><input type="number" id="good_qty" name="good_qty"
                                                        class="background-blue"
                                                        readonly disabled/></td>
@@ -964,7 +964,7 @@
                         {binding: 'mat_code', header: '품목코드', width: 90, align: 'center'},
                         {binding: 'mat_name', header: '품목', width: 200, align: 'left'},
                         {binding: 'order_qty', header: '지시량', width: 80, align: 'right'},
-                        {binding: 'good_qty', header: '양품량', width: 80, align: 'right'},
+                        {binding: 'good_qty', header: '생산량', width: 80, align: 'right'},
                         {binding: 'defect_qty', header: '부적합량', width: 80, align: 'right'},
                         {binding: 'job_state', header: '상태', width: 100, align: 'center'},
                         {binding: 'mat_type', header: '품목구분', width: 100, align: 'center'},
@@ -1074,7 +1074,7 @@
                         {binding: 'lot_no', header: 'LOT', width: 200, align: 'center', isReadOnly: true},
                         {
                             binding: 'good_qty',
-                            header: '양품량',
+                            header: '생산량',
                             width: 100,
                             align: 'right',
                             format: 'n0',
@@ -1546,7 +1546,6 @@
                         $('#btnWorkStart').attr('disabled', 'disabled');
                         $('#process_id').attr('disabled', 'disabled');
                         $('#equipment_id').attr('disabled', 'disabled');
-                        $('#shift_code').attr('disabled', 'disabled');
                         $('#btnWorkStop').removeAttr('disabled');
                         $('#btnSave').removeAttr('disabled');
                         $('#btnTest').removeAttr('disabled');
@@ -1653,6 +1652,8 @@
                 // 상태 뱃지 처리 등 생략...
                 $('#ordqty').text((result.order_qty ?? 0).toLocaleString());
                 $('#chasuLotSize').val(result.lot_size);
+                if (!result.end_time)
+                    $('#end_date').val(page.today);
 
                 // 라우팅 존재 여부 판단
                 this._hasRouting = (routing_id != null && String(routing_id).trim() !== '');
@@ -1970,19 +1971,19 @@
                     Alert.alert('작업완료 오류', '부적합량과 부적합 정보의 부적합량을 확인해주세요.');
                     return;
                 }
-
+                AjaxUtil.postAsyncData(url, data, fnSuccess);
                 // 지시량 대비 입력량 check
-                if (orderQty !== goodQty) {
-                    Alert.confirm('', '지시량과 총양품량 합이 일치하지 않습니다. \n 완료 처리하시겠습니까?',
-                        function () {
-                            AjaxUtil.postAsyncData(url, data, fnSuccess);
-                        },
-                        function () {
-                        }
-                    )
-                } else {
-                    AjaxUtil.postAsyncData(url, data, fnSuccess);
-                }
+                // if (orderQty !== goodQty) {
+                //     Alert.confirm('', '지시량과 총 생산량 합이 일치하지 않습니다. \n 완료 처리하시겠습니까?',
+                //         function () {
+                //
+                //         },
+                //         function () {
+                //         }
+                //     )
+                // } else {
+                //     AjaxUtil.postAsyncData(url, data, fnSuccess);
+                // }
             }
 
             // 작업완료취소
@@ -2158,7 +2159,7 @@
                     let defect_qty = item.defect_qty;
 
                     if (good_qty === "0" || good_qty === "") {
-                        Alert.alert('차수 양품량 수정', '잘못된 수량이 포함되어 있습니다.');
+                        Alert.alert('차수 생산량 수정', '잘못된 수량이 포함되어 있습니다.');
                         return;
                     }
 
@@ -2791,10 +2792,10 @@
                     const autoQty =
                         parseFloat(lot.cur_stock) || 0;
 
-                    if (remain <= 0) {
-                        Alert.alert('', '잔여 투입수량이 없습니다.');
-                        return;
-                    }
+                    // if (remain <= 0) {
+                    //     Alert.alert('', '잔여 투입수량이 없습니다.');
+                    //     return;
+                    // }
 
                     if (autoQty > 0 && autoQty <= remain) {
                         // 조건 충족: 팝업 없이 바로 저장
