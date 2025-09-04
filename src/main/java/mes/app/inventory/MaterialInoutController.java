@@ -947,7 +947,7 @@ public class MaterialInoutController {
 				String storeHouseIdStr = String.valueOf(item.get("StoreHouse_id"));
 
 				Integer matPk = Integer.parseInt(materialIdStr);
-				Integer qty = Integer.parseInt(inoutQtyStr);
+				BigDecimal qty = parseDecimal(inoutQtyStr);
 
 				MaterialInout mi = new MaterialInout();
 				mi.setInoutDate(LocalDate.now());
@@ -959,11 +959,11 @@ public class MaterialInoutController {
 				String testYn = m.getInTestYN() != null ? m.getInTestYN() : "";
 
 				if ("Y".equals(testYn)) {
-					mi.setPotentialInputQty((float) qty);
+					mi.setPotentialInputQty(qty.floatValue());
 					mi.setState("waiting");
 					mi.set_status("t");
 				} else {
-					mi.setInputQty((float) qty);
+					mi.setInputQty(qty.floatValue());
 					mi.setState("confirmed");
 					mi.set_status("a");
 				}
@@ -1001,6 +1001,16 @@ public class MaterialInoutController {
 
 		result.success = true;
 		return result;
+	}
+	private BigDecimal parseDecimal(Object v) {
+		if (v == null) return BigDecimal.ZERO;
+		if (v instanceof Number) {
+			// Double/Integer 등 어떤 Number든 안전하게 BigDecimal로
+			return new BigDecimal(v.toString());
+		}
+		String s = v.toString().trim().replace(",", "");
+		if (s.isEmpty()) return BigDecimal.ZERO;
+		return new BigDecimal(s);
 	}
 
 	@PostMapping("/force-complete")
