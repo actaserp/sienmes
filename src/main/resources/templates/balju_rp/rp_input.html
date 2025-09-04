@@ -1447,7 +1447,7 @@
 
                     // 1) 숫자/소수점만 유지 (첫 '.'만 허용)
                     raw = raw.replace(/,/g, '');
-                    let sign = '';
+                    const sign = needNegative ? '-' : '';     // ← 사용하도록 변경
                     if (raw.startsWith('-')) raw = raw.substring(1); // 일단 제거
                     // 숫자와 점만 남기되 점은 하나만
                     raw = raw.replace(/[^0-9.]/g, '');
@@ -1458,6 +1458,12 @@
 
                     if (raw === '' || raw === '.') { $qty.val(''); return; }
 
+                    // ★ 추가: 끝이 '.'으로 끝나면 그대로 보여주고 종료 (입력 계속 가능)
+                    if (/^\d+\.$/.test(raw)) {
+                        $qty.val(sign + raw);
+                        return;
+                    }
+
                     const num = Number(raw);
                     if (isNaN(num)) { $qty.val(''); return; }
 
@@ -1465,20 +1471,18 @@
                     $qty.val(formatNumberWithDecimal(num, 6, needNegative));
                 }
 
-                function formatNumberWithDecimal(value, scale = 6, negative = false) {
-                    // value: number|string
+                function formatNumberWithDecimal(value, scale = 2, negative = false) {
                     const n = Number(value);
                     if (!isFinite(n)) return '';
 
                     const abs = Math.abs(n);
                     const [intPart, fracPart = ''] = abs.toFixed(scale).split('.');
-                    const intFmt = Number(intPart).toLocaleString(); // 정수부만 로케일 포맷
+                    const intFmt = Number(intPart).toLocaleString();
                     const hasFrac = fracPart && Number(fracPart) !== 0;
 
                     const s = hasFrac ? `${intFmt}.${fracPart.replace(/0+$/,'')}` : intFmt;
                     return (negative ? '-' : '') + s;
                 }
-
 
                 $content.find('#btnSave').on('click', function () {
 
@@ -2233,7 +2237,7 @@
                 $UnitName.val(item.unit_name);
                 $LotSize.val(item.PackingUnitQty);
                 $StoreHouseName.val(item.store_house_name);
-                $InputQty.val(item.InputQty);
+                $InputQty.val(Number(item.InputQty).toFixed(2));
                 $ValidDays.val(item.ValidDays);
                 if (item.ValidDays) {
                     let valDate = CommonUtil.getYYYYMMDD(item.ValidDays);
