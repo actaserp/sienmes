@@ -373,7 +373,7 @@ public class ProductionResultController {
 
         JobRes target; // 실제로 start 상태로 저장할 대상(자식 또는 기존)
         if ("PLAN".equalsIgnoreCase(consumedMode)) {
-            // ✅ PLAN: 새 자식 job_res 생성
+            // PLAN: 새 자식 job_res 생성
             if (jrPk == null || prodMatId == null || needProMatQty == null) {
                 result.success = false;
                 result.message = "PLAN 모드에는 부모작지/공정산출품/지시수량이 필요합니다.";
