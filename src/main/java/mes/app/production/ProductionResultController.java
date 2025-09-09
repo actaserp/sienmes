@@ -1112,6 +1112,7 @@ public class ProductionResultController {
             Material consMat = this.materialRepository.getMaterialById(consumeMatPk);
             String lotUseYn = bomMap.get("lotUseYn").toString();
             float totalQty = 0f;
+            final float EPS = 1e-4f;
 			/*
 			 선입선출로 mat_lot 찾아서 차감
              차감하면서 mat_lot_cons 생성
@@ -1134,34 +1135,27 @@ public class ProductionResultController {
 
                     int matLotId = (int) mpiMap.get("ml_id");
                     float currentStock = Float.parseFloat(mpiMap.get("curr_qty").toString());
-                    if (currentStock == 0) {
-                        continue;
+                    if (currentStock <= EPS) continue;
+
+                    float take = Math.min(reqQty, Math.min(currentStock, remainQty)); // 실제 투입량
+                    if (take > EPS) {
+                        MatLotCons mlc = new MatLotCons();
+                        mlc.setMaterialLotId((int) mpiMap.get("ml_id"));
+                        mlc.setOutputDateTime(now);
+                        mlc.setSourceDataPk(mp.getId());
+                        mlc.setSourceTableName("mat_produce");
+                        mlc.set_audit(user);
+                        mlc.setCurrentStock(currentStock); // 해당 로트의 당시 재고
+                        mlc.setSpjangcd(spjangcd);
+                        mlc.setOutputQty(take);
+                        this.matLotConsRepository.save(mlc);
+
+                        remainQty -= take;
+                        if (remainQty <= EPS) { remainQty = 0f; break; }
                     }
-
-                    MatLotCons mlc = new MatLotCons();
-                    mlc.setMaterialLotId(matLotId);
-                    mlc.setOutputDateTime(now);
-                    mlc.setSourceDataPk(mp.getId());
-                    mlc.setSourceTableName("mat_produce");
-                    mlc.set_audit(user);
-                    mlc.setCurrentStock(ml.getCurrentStock()); // 당시 재고량
-                    mlc.setSpjangcd(spjangcd);
-                    if (currentStock >= remainQty) {
-                        // 해당로트의현재수량 가능
-                        mlc.setOutputQty(reqQty);
-                        remainQty = (float) 0;
-                        mlc = this.matLotConsRepository.save(mlc);
-
-                        break;
-                    } else {
-                        mlc.setOutputQty(reqQty);
-                        mlc = this.matLotConsRepository.save(mlc);
-                        remainQty = remainQty - reqQty;
-                    }
-
                 }
 
-                if (remainQty > 0) {
+                if (remainQty > EPS) {
                     result.message = "로트 수량이 부족합니다.(" + matName + ")";
                     result.success = false;
                     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
