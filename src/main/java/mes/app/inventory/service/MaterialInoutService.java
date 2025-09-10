@@ -411,115 +411,67 @@ public class MaterialInoutService {
 		param.addValue("mio_pk", mio_pk);
 
 		String sql= """
-				WITH s2 AS (  -- Standard2 → unit_weight_kg (kg/EA)로 환산
-				  SELECT
-				    m.id AS material_id,
-				    lower(COALESCE(m."Standard2", '')) AS s2_raw,
-				    NULLIF(
-				      regexp_replace(
-				        replace(lower(COALESCE(m."Standard2", '')), ',', '.'),
-				        '[^0-9.\\-]', '', 'g'
-				      ),
-				      ''
-				    )::numeric AS s2_num
-				  FROM material m
-				),
-				unitw AS (  -- kg/EA 값 계산
-				  SELECT
-				    s2.material_id,
-				    CASE
-				      WHEN s2_num IS NULL       THEN NULL
-				      WHEN s2_raw LIKE '%t%'    THEN s2_num * 1000      -- ton → kg
-				      WHEN s2_raw LIKE '%kg%'   THEN s2_num             -- kg
-				      WHEN s2_raw ~ '(^|[^k])g' THEN s2_num / 1000      -- g → kg (kg와 구분)
-				      ELSE s2_num               -- 단위 없음 → kg 가정
-				    END AS unit_weight_kg
-				  FROM s2
-				)
-				SELECT DISTINCT
-				      mi.id AS mio_pk
-				    , fn_code_name('inout_type', mi."InOut") AS inout
-				    , mi."InOut" AS "inoutSelect"
-				    , mg."Name" AS "cboMaterialGroupName"
-				    , mg."id"   AS "cboMaterialGroup"
-				    , COALESCE(NULLIF(mi."InputType", ''), NULLIF(mi."OutputType", '')) AS "InoutType"
-				    , to_char(mi."InoutDate", 'yyyy-mm-dd') || 'T' || to_char(mi."InoutTime", 'hh24:mi') AS "inoutDate"
-				    -- ▼ 저장값(kg) 중 선택된 값
-				    , COALESCE(
-				        NULLIF(mi."InputQty", 0),
-				        NULLIF(mi."OutputQty", 0),
-				        NULLIF(mi."PotentialInputQty", 0),
-				        0
-				      ) AS "InoutQtyKg"
-				    -- ▼ 화면표시용: 개수(EA)로 역환산 (kg ÷ (kg/EA) = EA)
-				    , CASE
-				        WHEN uw.unit_weight_kg IS NOT NULL
-				          THEN (COALESCE(
-				                  NULLIF(mi."InputQty", 0),
-				                  NULLIF(mi."OutputQty", 0),
-				                  NULLIF(mi."PotentialInputQty", 0),
-				                  0
-				                ) / NULLIF(uw.unit_weight_kg, 0))
-				      END::numeric(18,6) AS "InoutQtyEA"
-				    -- ▼ 화면에 쓸 단위 (환산 성공 시 EA, 아니면 기본단위명)
-				    , CASE WHEN uw.unit_weight_kg IS NOT NULL THEN 'EA' ELSE u2."Name" END AS "disp_unit"
-				    , mg."MaterialType" AS "cboMaterialType"
-				    , mi."Material_id"
-				    , mi."InputType"
-				    , mi."OutputType"
-				    , CASE
-				        WHEN mi."InOut" = 'in'     THEN fn_code_name('input_type',  mi."InputType")
-				        WHEN mi."InOut" = 'out'    THEN fn_code_name('output_type', mi."OutputType")
-				        WHEN mi."InOut" = 'recall' THEN fn_code_name('recall_type', mi."OutputType")
-				        WHEN mi."InOut" = 'return' THEN fn_code_name('return_type', mi."InputType")
-				      END AS inout_type
-				    , to_char(mi."InoutDate",'yyyy-mm-dd ') AS "InoutDate"
-				    , to_char(mi."InoutTime", 'hh24:mi')    AS "InoutTime"
-				    , sh."Name" AS "store_house_name"
-				    , m."Code"  AS "Material_code"
-				    , m."Name"  AS "Material_name"
-				    , m."CurrentStock"
-				    , m."ValidDays"
-				    , m."PackingUnitQty"
-				    , mi."StoreHouse_id"
-				    , mih2."CurrentStock" AS "HouseStock"
-				    , m."SafetyStock"
-				    , COALESCE(mi."InputQty",  0) AS "InputQty"          -- 원본 kg
-				    , COALESCE(mi."OutputQty", 0) AS "OutputQty"         -- 원본 kg
-				    , u2."Name" AS "unit_name"                           -- 기본단위명(보통 'kg')
-				    , mi."Description"
-				    , fn_code_name('mat_type', mg."MaterialType") AS "cboMaterialTypeName"
-				    , COALESCE(mi."PotentialInputQty",0) AS "potentialInputQty"  -- 원본 kg
-				    , fn_code_name('inout_state', mi."State") AS "inout_state"
-				    , var."StateName" AS "state_name"
-				    , tir."JudgeCode" AS judge_code
-				    , m."LotUseYN"    AS lot_use
-				    , mi."Company_id" AS "cboCompany"
-				    , c."Name"        AS "CompanyName"
-				    -- 참고: 단위중량(kg/EA)도 같이 내려주면 화면에서 표기나 디버깅에 도움
-				    , uw.unit_weight_kg
-				FROM mat_inout mi
-				JOIN material     m   ON mi."Material_id"   = m.id
-				LEFT JOIN mat_grp mg  ON mg.id              = m."MaterialGroup_id"
-				JOIN store_house sh   ON mi."StoreHouse_id" = sh.id
-				LEFT JOIN unit   u2   ON m."Unit_id"        = u2.id
-				LEFT JOIN mat_in_house mih2
-				       ON mih2."Material_id"  = m.id
-				      AND mih2."StoreHouse_id" = mi."StoreHouse_id"
-				LEFT JOIN rela_data    rd
-				       ON mi.id = rd."DataPk2" AND rd."RelationName" = 'mat_inout_test_result' AND rd."TableName2"  = 'mat_inout'
-				LEFT JOIN bundle_head  bh
-				       ON bh.id = rd."DataPk1" AND rd."RelationName" = 'mat_inout_test_result' AND rd."TableName1"  = 'bundle_head'
-				LEFT JOIN v_appr_result var
-				       ON var."SourceDataPk" = bh.id AND var."SourceTableName" ='bundle_head'
-				LEFT JOIN test_result tr
-				       ON tr."SourceDataPk"  = mi.id AND tr."SourceTableName" = 'mat_inout'
-				LEFT JOIN test_item_result tir ON tr.id = tir."TestResult_id"
-				left join company c on c.id= mi."Company_id"
-				-- ★ Standard2 파싱 결과(kg/EA) 조인
-				LEFT JOIN unitw uw ON uw.material_id = m.id
-				WHERE m."Useyn" = '0'
-				  AND mi.id = :mio_pk
+			select distinct mi.id as mio_pk
+                    , fn_code_name('inout_type', mi."InOut") as inout
+                    , mi."InOut" as "inoutSelect"
+					, mg."Name" as "cboMaterialGroupName"
+					, mg."id" as "cboMaterialGroup"
+					, COALESCE(NULLIF(mi."InputType", ''), NULLIF(mi."OutputType", '')) AS "InoutType"
+					, to_char(mi."InoutDate", 'yyyy-mm-dd') || 'T' || to_char(mi."InoutTime", 'hh24:mi') as "inoutDate"
+					,COALESCE(
+						   NULLIF(mi."InputQty", 0),
+						   NULLIF(mi."OutputQty", 0),
+						   NULLIF(mi."PotentialInputQty", 0),
+						   0
+						 ) AS "InoutQty"
+					, mg."MaterialType" as "cboMaterialType"
+                    , mi."Material_id"
+                    , mi."InputType" 
+                    , mi."OutputType" 
+                    , case when mi."InOut" = 'in' then fn_code_name('input_type', mi."InputType") 
+	                    when mi."InOut" = 'out' then fn_code_name('output_type', mi."OutputType") 
+	                    when mi."InOut" = 'recall' then fn_code_name('recall_type', mi."OutputType")
+	                    when mi."InOut" = 'return' then fn_code_name('return_type', mi."InputType")
+	                    end as inout_type
+                    , to_char(mi."InoutDate",'yyyy-mm-dd ') as "InoutDate"
+                    , to_char(mi."InoutTime", 'hh24:mi') as "InoutTime"
+                    , sh."Name" as "store_house_name"
+                    , m."Code" as "Material_code"
+                    , m."Name" as "Material_name"
+                    , m."CurrentStock" 
+                    , m."ValidDays"
+                    , m."PackingUnitQty"
+                    , mi."StoreHouse_id"
+                    , mih2."CurrentStock" as "HouseStock"
+                    , m."SafetyStock" 
+                    , coalesce(mi."InputQty", 0) as "InputQty"
+                    , coalesce(mi."OutputQty", 0) as "OutputQty"
+                    , u2."Name" as "unit_name"
+                    , mi."Description" 
+                    , fn_code_name('mat_type', mg."MaterialType") as "cboMaterialTypeName"
+                    , coalesce(mi."PotentialInputQty",0) as "potentialInputQty"
+                    , fn_code_name('inout_state', mi."State" ) as "inout_state"
+                    , var."StateName" as "state_name"
+                    , tir."JudgeCode" as judge_code
+                    , m."LotUseYN" as lot_use
+                    , mi."Company_id" as "cboCompany"
+                    , c."Name" as "CompanyName"
+                    from mat_inout mi 
+                    inner join material m on mi."Material_id" = m.id
+                    left join mat_grp mg on mg.id = m."MaterialGroup_id"
+                    inner join store_house sh on mi."StoreHouse_id" = sh.id
+                    left join unit u2 on m."Unit_id" = u2.id 
+                    left join mat_in_house mih2 on mih2."Material_id"  = m.id
+                    and mih2."StoreHouse_id" = mi."StoreHouse_id"
+                    left join rela_data rd on mi.id = rd."DataPk2" and rd."RelationName" = 'mat_inout_test_result' and rd."TableName2"  = 'mat_inout'
+                    left join bundle_head bh on bh.id = rd."DataPk1" and rd."RelationName" = 'mat_inout_test_result' and rd."TableName1"  = 'bundle_head'
+                    left join v_appr_result var on var."SourceDataPk" = bh.id and var."SourceTableName" ='bundle_head'
+                    left join test_result tr on tr."SourceDataPk"  = mi.id and tr."SourceTableName" = 'mat_inout'
+                    left join test_item_result tir on tr.id = tir."TestResult_id"
+                    left join company c on c.id= mi."Company_id"
+                    where 1 = 1
+                    and m."Useyn" = '0'
+					and mi.id = :mio_pk
 				""";
 
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, param);

@@ -1365,6 +1365,12 @@
 
                     setTimeout(function () {
                         FormUtil.BindDataForm(data[0], form);
+                        if (data[0].OutputQty !== undefined) {
+                            $content.find('#InoutQty').val(
+                                parseInt(data[0].OutputQty, 10).toLocaleString()
+                            );
+                        }
+
                         console.log('edit BindDataForm data', data);
                         $content.find('#inoutSelect').prop('disabled', true);
                         $content.find('#InoutType').prop('disabled', true);
