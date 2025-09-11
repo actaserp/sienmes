@@ -2765,7 +2765,29 @@
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/consumed_list', param);
                 if (result.data != null) {
+                    let selectedKey = null;
+
+                    // 갱신 전 선택행의 pk 저장 (예: mpi_id)
+                    if (_this.consumedGrid.selection && _this.consumedGrid.selection.row > -1) {
+                        let selItem = _this.consumedGrid.collectionView.currentItem;
+                        if (selItem) {
+                            selectedKey = selItem.mat_pk;   // 고유값 컬럼
+                        }
+                    }
+
                     _this.consumedGrid.itemsSource = result.data;
+                    // console.log('selectedKey', selectedKey);
+                    // 갱신 후 같은 pk 다시 선택
+                    if (selectedKey != null) {
+                        let cv = _this.consumedGrid.collectionView;
+                        for (let i = 0; i < cv.items.length; i++) {
+                            if (cv.items[i].mat_pk === selectedKey) {
+                                cv.moveCurrentToPosition(i);
+                                _this.consumedGrid.select(i, 0); // 선택 위치
+                                break;
+                            }
+                        }
+                    }
 
                     let goodQty = parseFloat($('#tabBasic').find('#good_qty').val());
                     let defectQty = parseFloat($('#tabBasic').find('#defect_qty').val());
@@ -3053,7 +3075,7 @@
 
                     if (autoQty > 0 && autoQty <= remain) {
                         // 조건 충족: 팝업 없이 바로 저장
-                        console.log('lot', lot);
+                        // console.log('lot', lot);
                         this.saveLotInput(lot.id, autoQty, lot.mpi_id);
                         return;
                     }
@@ -3061,7 +3083,7 @@
                     // 조건 불충족: 기존처럼 팝업 열어서 사용자 입력 받기
                     const poppage = new PopupLotInputPage();
                     const callback = (sel) => {
-                        console.log('sel', sel);
+                        // console.log('sel', sel);
                         const selLotId = sel.lot_id;
                         if (!selLotId) { Alert.alert('', 'LOT 검색에 실패했습니다.'); return; }
                         this.saveLotInput(selLotId, sel.input_qty, sel.mpi_id);
