@@ -252,7 +252,7 @@ public class PopupController {
 		        )
 		       	select 
 				a.id, m."Name" as mat_name, a."LotNumber" as lot_number
-		        , a."CurrentStock" as cur_stock
+		        , a."CurrentStock"::numeric(18,4) as cur_stock
 		        , aa."RequestQty" as first_qty
 		        , sh."Name" as storehouse_name
 		        , to_char(a."EffectiveDate",'yyyy-mm-dd') as effective_date
@@ -263,7 +263,7 @@ public class PopupController {
 		        left join aa on aa.mat_lot_id = a.id
 		        left join store_house sh on sh.id = a."StoreHouse_id" 
 		        where a."Material_id" = :matPk
-		        and a."CurrentStock" > 0
+		        and a."CurrentStock" > 0.0001
 		        order by a."EffectiveDate" , a."InputDateTime" 
 				""";
 
