@@ -81,6 +81,7 @@ public class ShipmentOrderService {
             , m."Code" as mat_code
             , m."Name" as mat_name
             , s."SujuQty" as suju_qty
+            , s."SujuQty" as order_input_qty
             , s."SujuQty2" as prod_qty 
             , sp.order_sum as order_qty 
             , sp.ship_sum  as shipment_qty
