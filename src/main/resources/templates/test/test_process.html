@@ -639,8 +639,15 @@
         let result = AjaxUtil.getSyncData(url, param);
 
         if (result.success) {
-          FormUtil.BindDataForm(result.data, $('#testBasicForm'));
-          FormUtil.BindDataForm(result.data, $('#testProcessForm'));
+          if (result.data.process_test_id) {
+            // 공정검사 데이터 있을 때
+            FormUtil.BindDataForm(result.data, $('#testBasicForm'));
+            FormUtil.BindDataForm(result.data, $('#testProcessForm'));
+          } else {
+            // 공정검사 데이터 없을 때
+            FormUtil.BindDataForm(result.data, $('#testBasicForm'));
+            $('#testProcessForm')[0].reset(); // 공정검사는 초기화
+          }
           $('#job_res_id').val(result.data.job_res_id);
           $('#selected_order_num').val(result.data.order_num);
 
