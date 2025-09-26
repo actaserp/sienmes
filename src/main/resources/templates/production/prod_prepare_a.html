@@ -118,6 +118,13 @@
                 <div >
                     <section class="tab-item" id="tab1" style="border-top-left-radius: 0;">
 
+                        <div  style="margin-bottom: 5px;">
+                            <label class="switch">
+                                <input type="checkbox" id="btnToggle">
+                                <span class="slider round"></span>
+                            </label>  부족분만 보기
+                        </div>
+
                         <div class="container-fluid">
 
                             <div id="matreqGrid"></div>
@@ -280,7 +287,16 @@
             // 해당소요자재
             initMaterialRequired() {
                 let _this = this;
+                this.matreqView = new wijmo.collections.CollectionView([], {
+                    filter: function(item) {
+                        if ($('#btnToggle').prop('checked')) {
+                            return item.cur_stock < item.requ_qty;  // 부족분만 보기
+                        }
+                        return true; // 전체 보기
+                    }
+                });
                 this.matreqGrid = new wijmo.grid.FlexGrid('#matreqGrid', {
+                    itemsSource: this.matreqView,
                     selectionMode: wijmo.grid.SelectionMode.Row,
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     autoGenerateColumns: false,
@@ -327,6 +343,10 @@
 
                 new FlexGridContextMenu(this.matreqGrid);
                 this.matreqGrid.downloadFileName = '해당 소요 자재';
+
+                $('#btnToggle').change(function() {
+                    _this.matreqView.refresh();  // 필터 다시 적용
+                });
 
                 //소요량조회
                 $('#btnMatReqSearch').click(function (e) {
@@ -451,7 +471,9 @@
 
                 let fnsuccess = function (result) {
                     if (result != null) {
-                        _this.matreqGrid.itemsSource = result.data;
+                        // _this.matreqGrid.itemsSource = result.data;
+                        _this.matreqView.sourceCollection = result.data; // 데이터 넣기
+                        _this.matreqView.refresh();
                     }
                 };
                 //let url = this.url + '/bom_detail_list'
