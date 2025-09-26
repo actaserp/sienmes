@@ -3,12 +3,15 @@ package mes.app.balju;
 import lombok.extern.slf4j.Slf4j;
 import mes.app.MailService;
 import mes.app.balju.service.BaljuOrderService;
+import mes.config.Settings;
 import mes.domain.entity.Balju;
 import mes.domain.entity.BaljuHead;
+import mes.domain.entity.Company;
 import mes.domain.entity.User;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.BalJuHeadRepository;
 import mes.domain.repository.BujuRepository;
+import mes.domain.repository.MaterialRepository;
 import mes.domain.services.CommonUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -17,18 +20,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -51,6 +55,12 @@ public class BaljuOrderController {
 
   @Autowired
   MailService mailService;
+
+  @Autowired
+  MaterialRepository materialRepository;
+
+  @Autowired
+  Settings settings;
 
   // 발주 목록 조회
   @GetMapping("/read")
@@ -607,6 +617,386 @@ public class BaljuOrderController {
     }
 
     sheet.addMergedRegion(newRegion);
+  }
+
+  /**
+   * 엑셀 업로드
+   * 파일명 :sien_balju_upload
+   * 납기 예정일 : B2  # DeliveryDate   --- balju_head
+   * 품목 코드: A4     # Material_id    --- balju
+   * 품목명:  B4
+   * 주문수량: C4      # SujuQty        --- balju
+   * 단가: D4          # UnitPrice      --- balju
+   * 업체명: E4        # CompanyName    --- balju
+   * **/
+  @PostMapping("/upload_save")
+  public AjaxResult uploadSeve(
+      @RequestParam("data_date") String data_date,
+      @RequestParam("spjangcd") String spjangcd,
+      @RequestParam("upload_file") MultipartFile upload_file,
+      Authentication auth) {
+
+    User user = (User) auth.getPrincipal();
+    AjaxResult res = new AjaxResult();
+
+    try {
+
+      if (upload_file == null || upload_file.isEmpty()) {
+        res.success = false;
+        res.message = "업로드 파일이 없습니다.";
+        res.code = "NO_FILE";
+        return res;
+      }
+
+      // 1) 임시 저장
+      DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+      String ts = LocalDateTime.now().format(dtf);
+      String basePath = settings.getProperty("file_temp_upload_path"); // 예: c:\\temp\\mes21\\upload_temp\\
+      String uploadFilename = basePath + ts + "_" + upload_file.getOriginalFilename();
+
+      // 🔹 디렉터리 보장
+      File dir = new File(basePath);
+      if (!dir.exists()) { dir.mkdirs(); }
+
+      File f = new File(uploadFilename);
+      if (f.exists()) f.delete();
+      try (FileOutputStream out = new FileOutputStream(uploadFilename)) {
+        out.write(upload_file.getBytes());
+      }
+
+      // 2) 엑셀 파싱
+      try (InputStream in = new FileInputStream(uploadFilename);
+           Workbook wb = WorkbookFactory.create(in)) {
+
+        Sheet sheet = wb.getSheetAt(0);
+
+        // B2: 납기예정일
+        // B2: 납기예정일 안전 파싱
+        Row row2 = sheet.getRow(1);
+        String deliveryDateIso = data_date; // 기본값
+
+        if (row2 != null) {
+          Cell dcell = row2.getCell(1); // B2
+          if (dcell != null) {
+            if (dcell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(dcell)) {
+              // ✅ 진짜 날짜 셀
+              java.util.Date d = dcell.getDateCellValue();
+              deliveryDateIso = new java.text.SimpleDateFormat("yyyy-MM-dd").format(d);
+            } else if (dcell.getCellType() == CellType.STRING) {
+              // ✅ 문자열 셀 → 유연 파싱
+              String s = dcell.getStringCellValue().trim();
+              Date parsed = tryParseIsoOrKoreanDate(s); // 아래 헬퍼 참고
+              if (parsed != null) deliveryDateIso = CommonUtil.tryString(parsed);
+            } else {
+              // ✅ 기타 타입 → 표시문자열로 변환 후 유연 파싱
+              DataFormatter fmt = new DataFormatter(java.util.Locale.KOREAN);
+              String s = fmt.formatCellValue(dcell).trim();
+              Date parsed = tryParseIsoOrKoreanDate(s);
+              if (parsed != null) deliveryDateIso = CommonUtil.tryString(parsed);
+            }
+          }
+        }
+
+
+        // A4~: 데이터 읽고 → ID/금액 계산까지 해서 item 구성
+        List<Map<String, Object>> items = new ArrayList<>();
+
+        for (int r = 3; r <= sheet.getLastRowNum(); r++) {
+          Row row = sheet.getRow(r);
+          if (row == null) continue;
+
+          String materialCode = getCellString(row.getCell(0)); // A: 품목 코드
+          String materialName = getCellString(row.getCell(1)); // B: 품목명
+          Double qty         = getCellNumeric(row.getCell(2)); // C: 수량
+          Double unitPrice   = getCellNumeric(row.getCell(3)); // D: 단가
+          String companyName = getCellString(row.getCell(4));  // E: 업체명
+
+          // 빈 행 스킵
+          if ((materialCode == null || materialCode.isEmpty()) &&
+              (materialName == null || materialName.isEmpty()) &&
+              qty == null && unitPrice == null &&
+              (companyName == null || companyName.isEmpty())) {
+            continue;
+          }
+
+          // ✅ 2-1) 품목 코드 → Material_id
+          Integer materialId = materialRepository.findIdByCodeAndSpjangcd(materialCode, spjangcd);
+          if (materialId == null) {
+            res.success = false;
+            res.message = "미등록 품목코드: " + materialCode + " (행 " + (r+1) + ")";
+            res.code = "NO_MATERIAL";
+            return res;
+          }
+
+          // ✅ 2-2) 업체명 → Company (baljuOrderService에 위임)
+          Company comp = baljuOrderService.resolveCompanyForBalju(companyName, spjangcd);
+          if (comp == null) {
+            res.success = false;
+            res.message = "업체 매핑 실패: " + companyName + " (행 " + (r+1) + ")";
+            res.code = "NO_COMPANY"; // 선택
+            return res;
+          }
+
+
+          double q  = (qty != null ? qty : 0d);
+          double up = (unitPrice != null ? unitPrice : 0d);
+          double supply = q * up;
+          double vat    = Math.floor(supply * 0.1); // 부가세 10% (정책에 맞게 조정 가능)
+
+          Map<String, Object> item = new HashMap<>();
+          item.put("Material_id", materialId);
+          item.put("quantity", q);
+          item.put("unit_price", up);
+          item.put("supply_price", supply);
+          item.put("vat", vat);
+
+          item.put("Company_id", comp.getId());
+          item.put("CompanyName", comp.getName());
+
+          item.put("due_date", deliveryDateIso);  // 공통 납기일
+          item.put("description", materialName);  // 비고로 품목명 저장 (선택)
+          item.put("totalEdited", false);         // 자동계산 기본
+
+          items.add(item);
+
+        }
+
+        // 3) payload 구성 → 업체별 발주 저장 (saveBaljuMultiGrouped가 Company_id로 그룹핑)
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("JumunDate", data_date);
+        payload.put("DueDate", deliveryDateIso);
+        payload.put("spjangcd", spjangcd);
+        payload.put("invatyn", "N");
+        payload.put("cboBaljuType", "Regular"); //기본은 Regular(정기) 로 저장
+        payload.put("special_note", "");
+        payload.put("items", items);
+
+        return saveBaljuMultiGrouped(payload, auth);
+      }
+
+    } catch (Exception e) {
+      res.success = false;
+      res.message = "엑셀 처리 중 오류: " + e.getMessage();
+      return res;
+    }
+  }
+
+  private AjaxResult saveBaljuMultiGrouped(Map<String, Object> payload, Authentication auth) {
+    User user = (User) auth.getPrincipal();
+    Set<String> priceKeys = new HashSet<>();
+
+    // 공통 헤더 필드
+    String jumunDateStr = (String) payload.get("JumunDate");
+    String defaultDueStr = (String) payload.get("DueDate");   // B2 기본 납기
+    String spjangcd      = (String) payload.get("spjangcd");
+    String isVat         = (String) payload.get("invatyn");   // "Y"/"N"
+    String specialNote   = (String) payload.get("special_note");
+    String sujuType      = (String) payload.get("cboBaljuType"); // "Regular" 등
+
+    Date jumunDate   = CommonUtil.trySqlDate(jumunDateStr);
+    Date defaultDue  = CommonUtil.trySqlDate(defaultDueStr);
+
+    List<Map<String, Object>> items = (List<Map<String, Object>>) payload.get("items");
+    if (items == null || items.isEmpty()) {
+      AjaxResult r = new AjaxResult();
+      r.success = false;
+      r.code = "EMPTY_ITEMS";
+      r.message = "업로드할 데이터가 없습니다.";
+      return r;
+    }
+
+    // ✅ 업체별 그룹핑 (Company_id 우선, 없으면 CompanyName)
+    Map<String, List<Map<String, Object>>> grouped = items.stream().collect(
+        Collectors.groupingBy(it -> {
+          Object cid = it.get("Company_id");
+          if (cid != null) return "ID:" + cid.toString();
+          String cname = (String) it.getOrDefault("CompanyName", "");
+          return "NM:" + cname;
+        })
+    );
+
+    List<Map<String, Object>> results = new ArrayList<>();
+
+    for (Map.Entry<String, List<Map<String, Object>>> entry : grouped.entrySet()) {
+      List<Map<String, Object>> groupItems = entry.getValue();
+      Map<String, Object> first = groupItems.get(0);
+
+      Integer companyId   = CommonUtil.tryIntNull(first.get("Company_id"));
+      String  companyName = CommonUtil.tryString(first.get("CompanyName"));
+
+      // 🔹 헤더 생성
+      BaljuHead head = new BaljuHead();
+      head.setCreated(new Timestamp(System.currentTimeMillis()));
+      head.setCreaterId(user.getId());
+      head.set_status("manual");
+
+      head.setJumunDate(jumunDate);
+      head.setDeliveryDate(defaultDue);     // 기본 납기(행 단위로 덮어쓸 수 있음)
+      head.setSujuType(sujuType);
+      head.setSpjangcd(spjangcd);
+      head.setSpecialNote(specialNote);
+      head.setCompanyId(companyId);         // 회사 연결
+
+      String jumunNumber = baljuOrderService.makeJumunNumber(jumunDate);
+      head.setJumunNumber(jumunNumber);
+
+      balJuHeadRepository.save(head);
+
+      double totalPriceSum = 0d;
+
+      // 🔹 상세 저장
+      for (Map<String, Object> item : groupItems) {
+
+        Integer materialId   = CommonUtil.tryIntNull(item.get("Material_id"));
+        Double  qty          = CommonUtil.tryDouble(item.get("quantity"));
+        Double  unitPrice    = CommonUtil.tryDouble(item.get("unit_price"));
+        Double  supply_price = CommonUtil.tryDouble(item.get("supply_price"));
+        Double  vat          = CommonUtil.tryDouble(item.get("vat"));
+
+        // 행 단위 due_date(문자열) → Date
+        String rowDueStr = CommonUtil.tryString(item.get("due_date"));
+        Date   rowDue    = CommonUtil.trySqlDate(rowDueStr);
+        Date   dueDate   = (rowDue != null) ? rowDue : defaultDue;
+
+        String editedFlag = String.valueOf(item.get("totalEdited")).toUpperCase();
+        boolean isManual  = "TRUE".equals(editedFlag) || "Y".equals(editedFlag);
+
+        Balju detail = new Balju();
+        detail.setBaljuHeadId(head.getId());
+        detail.setJumunNumber(head.getJumunNumber());
+        detail.setJumunDate(jumunDate);
+        detail.setDueDate(dueDate);
+        detail.set_audit(user);
+
+        detail.setMaterialId(materialId);
+        detail.setCompanyId(companyId);
+        detail.setCompanyName(companyName);
+
+        detail.setSujuQty(qty != null ? qty : 0d);
+        detail.setUnitPrice(unitPrice != null ? unitPrice : 0d);
+        detail.setPrice(supply_price != null ? supply_price : 0d);
+        detail.setVat(vat != null ? vat : 0d);
+
+        if (isManual && item.get("total_price") != null) {
+          detail.setTotalAmount(CommonUtil.tryDouble(item.get("total_price")));
+        } else {
+          double auto = (supply_price != null ? supply_price : 0d) + (vat != null ? vat : 0d);
+          detail.setTotalAmount(auto);
+        }
+
+        detail.setSpjangcd(spjangcd);
+        detail.setInVatYN("Y".equalsIgnoreCase(isVat) ? "Y" : "N");
+        detail.setSujuType(sujuType);
+        detail.setState("draft");
+        detail.setSujuQty2(0.0d);
+        detail.set_status("manual");
+
+        totalPriceSum += (detail.getTotalAmount() != null ? detail.getTotalAmount() : 0d);
+        bujuRepository.save(detail);
+
+        if (materialId != null && companyId != null && unitPrice != null) {
+          String key = materialId + "-" + companyId + "-" + unitPrice.intValue();
+          if (priceKeys.add(key)) {
+            Map<String, Object> priceData = new HashMap<>();
+            priceData.put("Material_id", materialId);
+            priceData.put("Company_id",  companyId);
+            priceData.put("UnitPrice",   unitPrice.intValue());
+
+            String hhmmss = java.time.LocalTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
+            String applyStart = (jumunDate != null
+                ? new java.text.SimpleDateFormat("yyyy-MM-dd").format(jumunDate)
+                : java.time.LocalDate.now().toString()) + "T" + hhmmss;
+
+            priceData.put("ApplyStartDate", applyStart);
+            priceData.put("type", "01");
+            priceData.put("user_id", user.getId());
+
+            baljuOrderService.saveCompanyUnitPrice(priceData);
+          }
+        }
+
+      }
+
+      // 🔹 헤더 합계/수정자 반영
+      head.setTotalPrice(totalPriceSum);
+      head.setModified(new Timestamp(System.currentTimeMillis()));
+      head.setModifierId(user.getId());
+      balJuHeadRepository.save(head);
+
+      results.add(Map.of(
+          "companyId", companyId,
+          "companyName", companyName,
+          "headId", head.getId(),
+          "jumunNumber", head.getJumunNumber(),
+          "totalPrice", totalPriceSum
+      ));
+    }
+
+    AjaxResult ok = new AjaxResult();
+    ok.success = true;
+    ok.data = Map.of("count", results.size(), "results", results);
+    return ok;
+  }
+
+  /** 안전 문자열 추출 */
+  private static String getCellString(Cell cell) {
+    if (cell == null) return null;
+    try {
+      if (cell.getCellType() == CellType.STRING) {
+        return Optional.ofNullable(cell.getStringCellValue()).orElse("").trim();
+      } else if (cell.getCellType() == CellType.NUMERIC) {
+        // 코드가 숫자로 들어온 경우 소수점 제거
+        return new BigDecimal(cell.getNumericCellValue()).stripTrailingZeros().toPlainString();
+      } else if (cell.getCellType() == CellType.BOOLEAN) {
+        return String.valueOf(cell.getBooleanCellValue());
+      }
+    } catch (Exception ignore) {}
+    return null;
+  }
+
+  /** 안전 숫자 추출 */
+  private static Double getCellNumeric(Cell cell) {
+    if (cell == null) return null;
+    try {
+      if (cell.getCellType() == CellType.NUMERIC) {
+        return cell.getNumericCellValue();
+      } else if (cell.getCellType() == CellType.STRING) {
+        String s = cell.getStringCellValue();
+        if (s == null || s.trim().isEmpty()) return null;
+        return Double.parseDouble(s.replace(",", "").trim());
+      }
+    } catch (Exception ignore) {}
+    return null;
+  }
+
+  private static Date tryParseIsoOrKoreanDate(String s) {
+    if (s == null || s.isBlank()) return null;
+    s = s.trim();
+
+    java.time.format.DateTimeFormatter[] fmts = new java.time.format.DateTimeFormatter[] {
+        // ISO
+        java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+        java.time.format.DateTimeFormatter.ofPattern("yyyy.MM.dd"),
+        java.time.format.DateTimeFormatter.ofPattern("yyyy/MM/dd"),
+
+        // 한글 월 표기
+        java.time.format.DateTimeFormatter.ofPattern("d-M월-uuuu", java.util.Locale.KOREAN),
+        java.time.format.DateTimeFormatter.ofPattern("dd-M월-uuuu", java.util.Locale.KOREAN),
+        java.time.format.DateTimeFormatter.ofPattern("yyyy년 M월 d일", java.util.Locale.KOREAN),
+
+        // 기타 보편
+        java.time.format.DateTimeFormatter.ofPattern("M/d/uuuu"),
+        java.time.format.DateTimeFormatter.ofPattern("d/M/uuuu")
+    };
+
+    for (var f : fmts) {
+      try {
+        java.time.LocalDate ld = java.time.LocalDate.parse(s, f);
+        return java.sql.Date.valueOf(ld);
+      } catch (Exception ignore) {}
+    }
+    return null;
   }
 
 

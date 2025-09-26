@@ -36,4 +36,8 @@ public interface MaterialRepository extends JpaRepository<Material, Integer>{
 	Material findByCodeTrimmed(@Param("materialCode") String materialCode);
 
 	boolean existsByCode(String s);
+
+	@Query("select m.id from Material m where m.code = :code and m.spjangcd = :spjangcd")
+	Integer findIdByCodeAndSpjangcd(@Param("code") String code, @Param("spjangcd") String spjangcd);
+
 }

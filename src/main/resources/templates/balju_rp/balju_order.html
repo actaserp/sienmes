@@ -92,6 +92,11 @@
                 수정
               </a>
             </li>
+            <li>
+               <a class="btn" title="엑셀 업로드" id="btnShowUpload">
+                   엑셀 업로드
+               </a>
+            </li>
           </ul>
         </div>
       </div>
@@ -100,8 +105,6 @@
       </div>
     </section>
   </div>
-  </div>
-
   <script type="text/x-tmpl" id="baljuTemplate">
     <style>
 
@@ -486,6 +489,51 @@
    </div>
  </div>
   </script>
+
+  <script type="text/x-tmpl" id="excelUploadTemplate">
+    <div class="content_wrap popup" id="div_excel_upload">
+
+        <div class="table-wrap">
+            <form id="excelUploadForm">
+            <table class="write-table">
+                <colgroup>
+                    <col style="width: 25%;">
+                    <col style="width: 75%;">
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <th style="text-align: center">
+                            <label>일자</label>
+                        </th>
+                        <td>
+                            <input style="width:300px;" type="date" id="data_date" name="data_date" value=""  />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: center">
+                            <label>첨부파일</label>
+                        </th>
+                        <td>
+                            <input style="width:300px; height: 44px;" type="file" id="upload_file" name="upload_file" enctype="multipart/form-data" accept=".xls, .xlsx"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            </form>
+        </div>
+        <div class="pt-2">
+            <textarea id="upload_message" style='display:none;width:100%;height:150px;'></textarea>
+        </div>
+
+        </section>
+
+        <div class="popup-button">
+            <button type="button" class="btn-popup y_write_auth" id="btn_excel_save" >저장</button>
+            <button type="button" class="btn-popup" id="modal-close-button">닫기</button>
+        </div>
+    </div>
+  </script>
+
 </th:block>
 
 <th:block layout:fragment="scripts">
@@ -771,8 +819,9 @@
             let id = items[0].bh_id;
             //let state = (items[0].BalJuHeadType || '').toLowerCase();  // 상태 값 확인
             let stateKor = (items[0].bh_StateName || '').trim();
+            console.info("bh_StateName", items[0].bh_StateName);
 
-            if (stateKor === '미입고') {
+            if (stateKor !== '미입고') {
               Alert.alert('', '미입고 상태일 때만 삭제할 수 있습니다.');
               return;
             }
@@ -796,6 +845,72 @@
             _this.searchMainData();
           }
         });
+
+        // 엑셀 업로드 버튼
+        $('#btnShowUpload').click(function (e) {
+          let data = {
+            'id': '',
+            'data_date': CommonUtil.getYYYYMMDD(),
+          };
+          page.showPopupExcelUpload(data);
+        });
+
+      }//init()
+
+      // 엑셀 업로드 버튼
+      showPopupExcelUpload(data) {
+        let _this = this;
+        let content = tmpl('excelUploadTemplate', data);
+        let $content = $(content);
+        $content.find('#data_date').val(data.data_date);
+       // $content.find('#day_index').val(data.day_index);
+
+        //팝업공통모듈
+        let modalContainer = new PopupDraggable('엑셀 업로드');
+        modalContainer.open({width: 440, height: 220, $content});
+
+
+        $content.find('#btn_excel_save').on('click', function () {
+          let $form = $content.find('#excelUploadForm');
+          Alert.confirm('',
+            '저장하시겠습니까?',
+            function () {
+              _this.saveBalJuBulkData($form, modalContainer);
+              //modalContainer.close();
+            },
+            function () {
+            }
+          );
+        });
+      }
+
+      // 엑셀 업로드 저장
+      saveBalJuBulkData($form, modalContainer) {
+        let _this = this;
+        var form = $('#excelUploadForm')[0];
+        var formData = new FormData(form);
+
+        formData['data_date'] = $('#srchStartDt').val();
+        formData.append("uploadfile", $('#upload_file')[0].files[0].name);
+
+        let result = AjaxUtil.postFileSyncData(_this.url + '/upload_save', formData);
+
+        if (result) {
+          let message = '저장되었습니다.';
+          if (result.success) {
+            Notify.success(message);
+            _this.searchMainData();
+            modalContainer.close();
+          } else {
+
+            Alert.alert('', result.message);
+
+            /*let $divMessage = modalContainer.$content.find('#upload_message');
+            $divMessage.text(JSON.stringify(result.error_items));
+            $divMessage.show();*/
+          }
+        }
+
       }
 
       showBalJuMailForm(data) {
