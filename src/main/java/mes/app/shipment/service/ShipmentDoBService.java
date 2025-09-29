@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.util.List;
 import java.util.Map;
 
+import mes.domain.repository.MatLotConsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
@@ -11,17 +12,20 @@ import org.springframework.stereotype.Service;
 import io.micrometer.core.instrument.util.StringUtils;
 import mes.domain.services.CommonUtil;
 import mes.domain.services.SqlRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ShipmentDoBService {
 
 	@Autowired
 	SqlRunner sqlRunner;
-	
+	@Autowired
+	private MatLotConsRepository matLotConsRepository;
+
 	// 출하지시헤더 조회
 	public List<Map<String, Object>> getShipmentHeaderList(String date_from, String date_to, String state, Integer comp_pk, Integer mat_grp_pk, Integer mat_pk) {
-		
-		MapSqlParameterSource paramMap = new MapSqlParameterSource();        
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("date_from", Date.valueOf(date_from));
 		paramMap.addValue("date_to", Date.valueOf(date_to));
 		paramMap.addValue("state", state);
@@ -29,7 +33,7 @@ public class ShipmentDoBService {
 		paramMap.addValue("mat_grp_pk", CommonUtil.tryIntNull(mat_grp_pk));
 		paramMap.addValue("mat_pk", CommonUtil.tryIntNull(mat_pk));
 
-        String sql = """
+		String sql = """
 			with SH as
 					    (
 					    select sh.id
@@ -45,16 +49,16 @@ public class ShipmentDoBService {
 				            left join company c on c.id = sh."Company_id"
 				            where sh."ShipDate" between :date_from and :date_to		
         		     """;
-        
-        if (comp_pk != null) {
-        	sql += " and sh.\"Company_id\" = :comp_pk ";
-        }
-        
-        if (StringUtils.isEmpty(state) == false) {
-        	sql += " and sh.\"State\" = :state ";
-        }
-        
-        sql += """
+
+		if (comp_pk != null) {
+			sql += " and sh.\"Company_id\" = :comp_pk ";
+		}
+
+		if (StringUtils.isEmpty(state) == false) {
+			sql += " and sh.\"State\" = :state ";
+		}
+
+		sql += """
         		 ), S as 
 			    (
 			    select s."ShipmentHead_id" as head_id
@@ -64,20 +68,20 @@ public class ShipmentDoBService {
 			    from SH
 			    inner join shipment s on s."ShipmentHead_id" = SH.id 
         	""";
-        
-        if (mat_grp_pk != null && mat_pk == null) {
-        	sql += " inner join material m on m.id = s.\"Material_id\" ";
-        }
 
-        sql += " where 1 = 1 ";
-        
-        if (mat_pk != null) {
-        	sql += " and s.\"Material_id\" = :mat_pk ";
-        } else if (mat_grp_pk != null) {
-        	sql += " and m.\"MaterialGroup_id\" = :mat_grp_pk ";
-        }
-        
-        sql += """
+		if (mat_grp_pk != null && mat_pk == null) {
+			sql += " inner join material m on m.id = s.\"Material_id\" ";
+		}
+
+		sql += " where 1 = 1 ";
+
+		if (mat_pk != null) {
+			sql += " and s.\"Material_id\" = :mat_pk ";
+		} else if (mat_grp_pk != null) {
+			sql += " and m.\"MaterialGroup_id\" = :mat_grp_pk ";
+		}
+
+		sql += """
         		group by s."ShipmentHead_id"
 			    )
 			    select SH.*
@@ -88,19 +92,19 @@ public class ShipmentDoBService {
 			    inner join S on S.head_id = SH.id
 	            where 1 = 1
         		""";
-        
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-        
-        return items;
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
+
+		return items;
 	}
-	
+
 	// 출하 항목 조회
 	public List<Map<String, Object>> getShipmentList (Integer shipment_header_id) {
 
-		MapSqlParameterSource paramMap = new MapSqlParameterSource();        
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("shipment_header_id", shipment_header_id);
-		
-		 String sql = """
+
+		String sql = """
 	       select
 	        s."ShipmentHead_id" as sh_id
 	        , s.id as shipment_id
@@ -126,19 +130,19 @@ public class ShipmentDoBService {
 	            left join unit u on u.id = m."Unit_id" 
 	        where sh.id = :shipment_header_id	
 		        		 """;
-		 
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-        
-        return items;
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
+
+		return items;
 	}
 
 	// 출하 처리 LOT상세
 	public List<Map<String, Object>> getShipmentLotList (Integer sh_id, Integer shipment_id) {
 
-		MapSqlParameterSource paramMap = new MapSqlParameterSource();        
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("shipment_id", shipment_id);
 		paramMap.addValue("sh_id", sh_id);
-		
+
 		String sql = """
 			          select
 		                  mlc.id as mlc_id
@@ -161,66 +165,63 @@ public class ShipmentDoBService {
 		        		 """;
 		if (shipment_id != null) {
 			sql += " and s.id = :shipment_id ";
-	    }
-	    sql += " order by ml.\"LotNumber\" ";
+		}
+		sql += " order by ml.\"LotNumber\" ";
 
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-        
-        return items;
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
+
+		return items;
 	}
-	
+
 	// lot 검색
 	public List<Map<String, Object>> getMatLotSearch (Integer sh_id, Integer material_id, String lot_number) {
 
-		MapSqlParameterSource paramMap = new MapSqlParameterSource();      
-		paramMap.addValue("sh_id", sh_id);  
-		paramMap.addValue("material_id", material_id);  
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("material_id", material_id);
 		paramMap.addValue("lot_number", lot_number);
-		
+
 		String sql = """
-			with A as (
-		        select 
-		        s."Material_id" 
-		        from shipment_head sh 
-		            inner join shipment s on s."ShipmentHead_id" = sh.id 
-		        where sh.id = :sh_id
-		        ), B as( select s.id as shipment_id, s."Material_id" from shipment s  where s."ShipmentHead_id" = :sh_id)
-			        select 
-			         ml.id as ml_id 
-			        , ml."LotNumber" 
-			        , ml."InputQty" 
-			        , ml."CurrentStock" 
-			        , ml."InputDateTime"         
-			        , ml."Material_id"
-			        , u."Name" as unit_name
-			        , mg."Name" as mat_grp_name
-			        , m."Code" as mat_code
-			        , m."Name" as mat_name
-			        , B.shipment_id
-		            , to_char(ml."EffectiveDate", 'YYYY-MM-DD HH24:MI:SS') as "EffectiveDate"
-		            , to_char(ml."InputDateTime", 'YYYY-MM-DD HH24:MI:SS') as "InputDateTime"
-		            , fn_code_name('mat_type', mg."MaterialType") as mat_type 
-	        from mat_lot ml 
-	            inner join A on A."Material_id" = ml."Material_id" 
-	            inner join material m on m.id = ml."Material_id" 
-	            left join mat_grp mg on mg.id= m."MaterialGroup_id" 
-	            left join unit u on u.id = m."Unit_id"
-	            left join B on B."Material_id"= A."Material_id"
-	        where ml."CurrentStock" > 0 
+				select\s
+				         ml.id as ml_id\s
+				        , ml."LotNumber"\s
+				        , ml."InputQty"\s
+				        , ml."CurrentStock"\s
+				        , ml."InputDateTime"        \s
+				        , ml."Material_id"
+				        , u."Name" as unit_name
+				        , m."Code" as mat_code
+				        , m."Name" as mat_name
+				        , to_char(ml."EffectiveDate", 'YYYY-MM-DD HH24:MI:SS') as "EffectiveDate"
+				        , to_char(ml."InputDateTime", 'YYYY-MM-DD HH24:MI:SS') as "InputDateTime"
+				from mat_lot ml\s
+				    inner join material m on m.id = ml."Material_id"\s
+				    left join mat_grp mg on mg.id= m."MaterialGroup_id"\s
+				    left join unit u on u.id = m."Unit_id"
+				where ml."CurrentStock" > 0\s
 		        		 """;
 		if (material_id != null) {
 			sql += " and ml.\"Material_id\" = :material_id ";
-	    }
+		}
 
-        if (StringUtils.isEmpty(lot_number) == false) {
-        	sql += " and  ml.\"LotNumber\" = :lot_number ";
-        }
-        
-	    sql += " order by ml.\"LotNumber\" ";
+		if (StringUtils.isEmpty(lot_number) == false) {
+			sql += " and  ml.\"LotNumber\" = :lot_number ";
+		}
 
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
-        
-        return items;
+		sql += " order by ml.\"LotNumber\" ";
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
+
+		return items;
+	}
+
+	public void deleteMatLotCons(Integer mat_lot_cons_id){
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("mat_lot_cons_id", mat_lot_cons_id);
+
+		String sql = """
+				delete from mat_lot_cons where id = :mat_lot_cons_id
+				""";
+		this.sqlRunner.execute(sql, paramMap);
 	}
 
 	public void updateShipmentQantityByLotConsume (Integer sh_id, Integer shipment_id) {
@@ -228,22 +229,22 @@ public class ShipmentDoBService {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("sh_id", sh_id);
 		paramMap.addValue("shipment_id", shipment_id);
-	    
+
 		String sql = """
 				with A as(
 	            select
-	            s.id, coalesce(sum(mlc."OutputQty"),0) as qty  
-	            from shipment s  
+	            s.id, coalesce(sum(mlc."OutputQty"),0) as qty
+	            from shipment s
 	            inner join shipment_head sh on sh.id = s."ShipmentHead_id" 
 	            left join mat_lot_cons mlc on mlc."SourceTableName" ='shipment' and mlc."SourceDataPk" = s.id
 	            where 1=1 
 	            and sh.id = :sh_id
 				""";
-		
+
 		if (shipment_id != null) {
 			sql += " and s.id = :shipment_id ";
 		}
-		
+
 		sql += """
 				group by s.id),
 				UPC as (
@@ -281,19 +282,19 @@ public class ShipmentDoBService {
 	        from B
 	        where shipment.id = B.id
 				""";
-		
-        this.sqlRunner.execute(sql, paramMap);    
+
+		this.sqlRunner.execute(sql, paramMap);
 	}
-	
+
 	// 수주헤더 기준으로 출하항목(shipment) 금액합산 정리
 	public void updateShipmentStateComplete (Integer sh_id, String description) {
-		
+
 		updateShipmentQantityByLotConsume(sh_id, null);
 
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("sh_id", sh_id);
 		paramMap.addValue("description", description);
-	    
+
 		String sql = """
 				with A as(
 				select 
@@ -315,16 +316,16 @@ public class ShipmentDoBService {
 		        from A 
 		        where id=A.sh_id
 				""";
-		
-        this.sqlRunner.execute(sql, paramMap);  
+
+		this.sqlRunner.execute(sql, paramMap);
 	}
-	
+
 	// 관련 수주를 찾아서 수주의 출하 상태를 변경한다.
 	public void updateSujuShipmentState (Integer sh_id) {
 
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("sh_id", sh_id);
-	    
+
 		String sql = """
 		        with A as(
 		        select
@@ -342,7 +343,9 @@ public class ShipmentDoBService {
 		        update suju set "ShipmentState" ='shipped'
 		        from A where A.suju_id = id
 				""";
-		
-        this.sqlRunner.execute(sql, paramMap); 
-	}	
+
+		this.sqlRunner.execute(sql, paramMap);
+	}
+
+
 }

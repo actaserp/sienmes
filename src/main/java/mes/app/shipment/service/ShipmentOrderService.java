@@ -1,6 +1,7 @@
 package mes.app.shipment.service;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,11 +25,18 @@ public class ShipmentOrderService {
 
 	@Autowired
 	SujuRepository sujuRepository;
-	
-	public List<Map<String, Object>> getSujuList(String dateFrom, String dateTo, String notShip, String compPk,
-			String matGrpPk, String matPk, String keyword) {
-		
+
+	public List<Map<String, Object>> getSujuList(String dateFrom, String dateTo, String notShip, String compPk,String matGrpPk, String matPk, String keyword) {
+
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+
+		if(dateFrom.isEmpty()){
+			dateFrom = LocalDate.now().toString();
+		}
+		if(dateTo.isEmpty()){
+			dateTo = LocalDate.now().toString();
+		}
+
 		paramMap.addValue("dateFrom", dateFrom);
 		paramMap.addValue("dateTo", dateTo);
 		paramMap.addValue("notShip", notShip);
@@ -36,8 +44,8 @@ public class ShipmentOrderService {
 		paramMap.addValue("matGrpPk", matGrpPk);
 		paramMap.addValue("matPk", matPk);
 		paramMap.addValue("keyword", keyword);
-		
-        String sql = """ 
+
+		String sql = """ 
     			with s as (
                 select suju.id as suju_pk
 	            , suju."JumunNumber" 
@@ -51,17 +59,19 @@ public class ShipmentOrderService {
 	            , suju."SujuQty" 
 	            , suju."SujuQty2" 
                 , suju."Description"
+                , sh."DeliveryName"
 	            from suju suju
+	            inner join suju_head sh on sh.id = suju."SujuHead_id"
                 inner join material m on m.id = suju."Material_id" 
                 left join company c2 on c2.id = suju."Company_id"
 	            where suju."JumunDate" between cast(:dateFrom as date) and cast(:dateTo as date) 
 	            AND suju."State" NOT IN ('canceled', 'force_completion')
                 """;
-        
-        if (StringUtils.isEmpty(compPk)==false)  sql += " and suju.\"Company_id\" = cast(:compPk as Integer) ";
-        if (StringUtils.isEmpty(matPk)==false)  sql += " and suju.\"Material_id\"  = cast(:matPk as Integer) ";
-        if (StringUtils.isEmpty(matGrpPk)==false)  sql += " and m.\"MaterialGroup_id\"  = cast(:matGrpPk as Integer) ";
-        sql += """
+
+		if (StringUtils.isEmpty(compPk)==false)  sql += " and suju.\"Company_id\" = cast(:compPk as Integer) ";
+		if (StringUtils.isEmpty(matPk)==false)  sql += " and suju.\"Material_id\"  = cast(:matPk as Integer) ";
+		if (StringUtils.isEmpty(matGrpPk)==false)  sql += " and m.\"MaterialGroup_id\"  = cast(:matGrpPk as Integer) ";
+		sql += """
         		), SP as (
                 select s.suju_pk
                 , sum(RD."Number1") as order_sum
@@ -90,6 +100,7 @@ public class ShipmentOrderService {
             , u."Name" as unit_name
             , case when sp.ship_sum > 0 then '출하' when sp.order_sum > 0 then '출하' else '' end as shipment_state
             , s."State"
+            , s."DeliveryName"
             from s  
             left join sp on sp.suju_pk = s.suju_pk
             inner join material m on m.id = s."Material_id" 
@@ -97,24 +108,24 @@ public class ShipmentOrderService {
             left join unit u on u.id = m."Unit_id" 
             where 1 = 1
            """;
-        
-        if (StringUtils.isEmpty(keyword)==false)  sql += " and (m.\"Name\" ilike concat('%%',:keyword,'%%') or m.\"Code\" ilike concat('%%',:keyword,'%%')) ";
-        if ((notShip).equals("Y"))  sql += " and s.\"SujuQty\" > coalesce(sp.order_sum,0) ";
-        sql += " order by s.\"DueDate\", s.\"CompanyName\", m.\"Code\", m.\"Name\"";
-        
-        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
-		
+
+		if (StringUtils.isEmpty(keyword)==false)  sql += " and (m.\"Name\" ilike concat('%%',:keyword,'%%') or m.\"Code\" ilike concat('%%',:keyword,'%%')) ";
+		if ((notShip).equals("Y"))  sql += " and s.\"SujuQty\" > coalesce(sp.order_sum,0) ";
+		sql += " order by s.\"DueDate\", s.\"CompanyName\", m.\"Code\", m.\"Name\"";
+
+		List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
+
 		return items;
 	}
 
 	public List<Map<String, Object>> getProductList(String matGrpPk, String matPk, String keyword) {
-		
+
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 		paramMap.addValue("matGrpPk", matGrpPk);
 		paramMap.addValue("matPk", matPk);
 		paramMap.addValue("keyword", keyword);
-		
-        String sql = """ 
+
+		String sql = """ 
     			select m.id as mat_id
                 , fn_code_name('mat_type', mg."MaterialType") as mat_type
                     , mg."Name" as mat_grp
@@ -128,17 +139,17 @@ public class ShipmentOrderService {
                 left join unit u on u.id = m."Unit_id" 
                 where mg."MaterialType" in ('product', 'semi')
                 """;
-	        if (StringUtils.isEmpty(matPk)==false)  sql += " and m.\"id\" = cast(:matPk as Integer) ";
-	        if (StringUtils.isEmpty(matGrpPk)==false)  sql += " and mg.\"id\"  = cast(:matGrpPk as Integer) ";
-	        if (StringUtils.isEmpty(keyword)==false)  sql += " and (m.\"Name\" ilike concat('%%',:keyword,'%%') or m.\"Code\" ilike concat('%%',:keyword,'%%')) ";
-	        
-	        sql += " order by mg.\"MaterialType\", m.\"Code\", m.\"Name\" ";
-	        
-	        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
-			
-			return items;
+		if (StringUtils.isEmpty(matPk)==false)  sql += " and m.\"id\" = cast(:matPk as Integer) ";
+		if (StringUtils.isEmpty(matGrpPk)==false)  sql += " and mg.\"id\"  = cast(:matGrpPk as Integer) ";
+		if (StringUtils.isEmpty(keyword)==false)  sql += " and (m.\"Name\" ilike concat('%%',:keyword,'%%') or m.\"Code\" ilike concat('%%',:keyword,'%%')) ";
+
+		sql += " order by mg.\"MaterialType\", m.\"Code\", m.\"Name\" ";
+
+		List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
+
+		return items;
 	}
-	
+
 	// 출하지시 목록 조회
 	public List<Map<String, Object>> getShipmentOrderList(String date_from, String date_to, String state, Integer comp_pk, Integer mat_grp_pk, Integer mat_pk, String keyword) {
 
@@ -166,6 +177,7 @@ public class ShipmentOrderService {
                 , sh."StatementIssuedYN" as issue_yn
                 , sh."StatementNumber" as stmt_number 
                 , sh."IssueDate" as issue_date
+                , sh."DeliveryName"
                 from shipment_head sh 
                 join company c on c.id = sh."Company_id"   
                 where sh."ShipDate"  between :date_from and :date_to
@@ -173,11 +185,11 @@ public class ShipmentOrderService {
 		if (comp_pk != null) {
 			sql += " and sh.\"Company_id\" = :comp_pk ";
 		}
-		
+
 		if (StringUtils.isEmpty(state) == false) {
 			sql += "  and sh.\"State\" = :state ";
 		}
-		
+
 		if (mat_pk != null || mat_grp_pk != null || StringUtils.isEmpty(keyword) == false) {
 			sql += """
 					and exists ( select 1
@@ -186,22 +198,22 @@ public class ShipmentOrderService {
                         left join mat_grp mg on mg.id = m."MaterialGroup_id"
                         where s."ShipmentHead_id" = sh.id 
 					""";
-			
+
 			if (mat_pk != null) {
 				sql += " and s.\"Material_id\" = :mat_pk ";
 			}
-			
+
 			if (mat_grp_pk != null) {
 				sql += " and mg.id = :mat_grp_pk ";
 			}
-			
+
 			if (StringUtils.isEmpty(keyword) == false) {
 				sql += """
 						 and ( m."Name" ilike concat('%%', :keyword,'%%')
 						       or m."Code" ilike concat('%%', :keyword,'%%'))
 						""";
 			}
-			
+
 			sql += """
 					)
 					       order by sh."ShipDate", c."Name", sh.id
@@ -212,7 +224,7 @@ public class ShipmentOrderService {
 
 		return items;
 	}
-	
+
 	// 출하 품목 목록 조회
 	public List<Map<String, Object>> getShipmentItemList (Integer head_id){
 
@@ -245,7 +257,7 @@ public class ShipmentOrderService {
 			where s."ShipmentHead_id" = :head_id
             order by m."Code", m."Name"
 		 """;
-		
+
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
 
 		return items;
@@ -286,5 +298,5 @@ public class ShipmentOrderService {
 
 		return items;
 	}
-	
+
 }

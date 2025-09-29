@@ -272,34 +272,34 @@ var CommonUtil = {
         return str;
     },
     formatYYYYMMDD: function (p_date) {
-	    let m = p_date.getMonth() + 1;
-	    let day = p_date.getDate();
-	    if (m < 10) {
-	        m = "0" + m;
-	    }
-	    if (day < 10) {
-	        day = "0" + day;
-	    }
-	    var str = p_date.getFullYear() + '-' + m + '-' + day;
-	    return str;
+        let m = p_date.getMonth() + 1;
+        let day = p_date.getDate();
+        if (m < 10) {
+            m = "0" + m;
+        }
+        if (day < 10) {
+            day = "0" + day;
+        }
+        var str = p_date.getFullYear() + '-' + m + '-' + day;
+        return str;
     },
     formatYYYYMMDDhhmmss: function (p_date) {
-	    let m = this.zeoPadding(p_date.getMonth() + 1, 2);
-	    let day = this.zeoPadding(p_date.getDate(), 2);
-	    let hh = this.zeoPadding(p_date.getHours(), 2);
-	    let mm = this.zeoPadding(p_date.getMinutes(), 2);
-	    let ss = this.zeoPadding(p_date.getSeconds(), 2);
-	    
-	    var str = p_date.getFullYear() + '-' + m + '-' + day + ' ' + hh + ':' + mm + ':' + ss;
-	    return str;
+        let m = this.zeoPadding(p_date.getMonth() + 1, 2);
+        let day = this.zeoPadding(p_date.getDate(), 2);
+        let hh = this.zeoPadding(p_date.getHours(), 2);
+        let mm = this.zeoPadding(p_date.getMinutes(), 2);
+        let ss = this.zeoPadding(p_date.getSeconds(), 2);
+
+        var str = p_date.getFullYear() + '-' + m + '-' + day + ' ' + hh + ':' + mm + ':' + ss;
+        return str;
     },
     zeoPadding: function (number, length){
-		var str = '' + number;
-	    while (str.length < length) {
-	      str = '0' + str;
-	    }
-  		return str;
-	},
+        var str = '' + number;
+        while (str.length < length) {
+            str = '0' + str;
+        }
+        return str;
+    },
     //from to 숫자 입력값 유효성 체크(title 입력 필요)
     checkValidNumberRange: function (from, to) {
         if (Number(from.val()) > Number(to.val())) {
@@ -762,7 +762,7 @@ let FormUtil = {
                 $input.attr('name', newName);
 
                 if (nameWithoutIndex === 'VatIncluded') {
-                    $input.prop('checked', false);
+                    $input.prop('checked', true);
                 }
             });
             $newRow.find('a[title="삭제"]').attr('id', `btnDelItem_${index}`);
@@ -1040,9 +1040,9 @@ let AjaxUtil = {
             }
             //Notify.error(message);
             Alert.alert('Error', message);
-            
+
         }
-        
+
     },
     getSyncData: function (url, p_data, fn_failure) {
         let items = null;
@@ -1094,7 +1094,7 @@ let AjaxUtil = {
         });
     },
 
-    // POST저장시에는 성공여부를 확인하여 분기하는 루틴이 많으므로, items만 리턴할 것이 아니라 
+    // POST저장시에는 성공여부를 확인하여 분기하는 루틴이 많으므로, items만 리턴할 것이 아니라
     // 성공여부와 메시지도 리턴한다
     postSyncData: function (url, param_data, fn_failure) {
         let result = null;
@@ -1123,8 +1123,12 @@ let AjaxUtil = {
             },
             complete: function () {
                 AjaxUtil.hideLoading();
+            },
+            finally: function() {
+                AjaxUtil.hideLoading();
             }
-        });
+        })
+        ;
         return result;
     },
     postAsyncData: function (url, param_data, fn_success, fn_failure) {
@@ -1145,17 +1149,26 @@ let AjaxUtil = {
             url: url,
             data: param_data,
             success: function (res) {
+                console.log('asdas');
+
                 fn_success(res);
+
             },
             error: function (req, status, error) {
                 if (typeof fn_failure !== 'undefined') {
                     fn_failure(req, status, error);
+                    AjaxUtil.hideLoading();
                 } else {
 
                     AjaxUtil.failureCallback(req, status, error);
+                    AjaxUtil.hideLoading();
                 }
             },
             complete: function () {
+                AjaxUtil.hideLoading();
+            },
+            finally: function() {
+                console.log('asdasaaa');
                 AjaxUtil.hideLoading();
             }
         });
@@ -1190,6 +1203,9 @@ let AjaxUtil = {
             },
             complete: function () {
                 AjaxUtil.hideLoading();
+            },
+            finally: function() {
+                AjaxUtil.hideLoading();
             }
         });
     },
@@ -1222,6 +1238,9 @@ let AjaxUtil = {
                 }
             },
             complete: function () {
+                AjaxUtil.hideLoading();
+            },
+            finally: function() {
                 AjaxUtil.hideLoading();
             }
         });
@@ -1266,6 +1285,9 @@ let AjaxUtil = {
             },
             complete: function () {
                 AjaxUtil.hideLoading();
+            },
+            finally: function() {
+                AjaxUtil.hideLoading();
             }
         });
     },
@@ -1308,6 +1330,9 @@ let AjaxUtil = {
             },
             complete: function () {
                 AjaxUtil.hideLoading();
+            },
+            finally: function() {
+                AjaxUtil.hideLoading();
             }
         });
         return result;
@@ -1342,6 +1367,9 @@ let AjaxUtil = {
             },
             complete: function () {
                 AjaxUtil.hideLoading();
+            },
+            finally: function() {
+                AjaxUtil.hideLoading();
             }
         });
         return result;
@@ -1374,6 +1402,9 @@ let AjaxUtil = {
             },
             complete: function () {
                 AjaxUtil.hideLoading();
+            },
+            finally: function() {
+                AjaxUtil.hideLoading();
             }
         });
     },
@@ -1391,7 +1422,7 @@ let AjaxUtil = {
             data.cond3 = cond3;
         }
         let ret = AjaxUtil.getSyncData('/api/common/combo', data);
-        
+
         return ret.data == null ? []: ret.data;
     },
     getSelectDataWithNull: function (combo_type, null_option, condition1, condition2, condition3) {
@@ -1428,7 +1459,7 @@ let AjaxUtil = {
             let option = $('<option>');
             option.val(row['value']).text(row['text']);
             Object.keys(row).forEach(function (key) {
-                
+
                 if (key != 'value' && key != 'text') {
                     option.data(key, row[key]);
                 }
@@ -1592,11 +1623,11 @@ let AjaxUtil = {
                 downloadmask.close();
                 //Notify.success('다운로드 성공');
             }).catch(() => {
-                let message = '에러가 발생했습니다.관리자에게 문의 주세요.';
-                //Notify.error(message);
-                Alert.alert('Error', message);
-                downloadmask.close();
-            });
+            let message = '에러가 발생했습니다.관리자에게 문의 주세요.';
+            //Notify.error(message);
+            Alert.alert('Error', message);
+            downloadmask.close();
+        });
 
         //let url = yullin.getUrl({ api: api_url + '?' + param + '=' + val });
         //var link = document.createElement("a");
@@ -2132,7 +2163,7 @@ DataValidation.timeCheck = function (hours, minutes) {
     if (i == 0) {
         return hours + ":" + minutes;
     } else {
-            /*alert*/("Invalid Time Format.");
+        /*alert*/("Invalid Time Format.");
         return "";
     }
 }
@@ -2148,7 +2179,7 @@ DataValidation.validateTime = function (obj) {
     let sMinutes;
 
     if (timeValue == "") {
-            /*alert*/("Invalid Time format.");
+        /*alert*/("Invalid Time format.");
         obj.value = "";
         return false;
     }
