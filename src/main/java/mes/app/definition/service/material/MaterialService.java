@@ -165,6 +165,7 @@ public class MaterialService {
             , m."Avrqty" as avrqty
             , m."storage_method"
             , m."packaging_mat"
+            , m."CompCode"
             from material m
             inner join mat_grp mg on m."MaterialGroup_id" = mg.id
             left join unit u on u.id = m."Unit_id"
@@ -193,6 +194,7 @@ public class MaterialService {
 		dicParam.addValue("storeHouseId", CommonUtil.tryIntNull(data.getFirst("StoreHouse_id")));
 		dicParam.addValue("storeHouseLoc", CommonUtil.tryString(data.getFirst("StoreHouseLoc")));
 		dicParam.addValue("managementLevel", CommonUtil.tryString(data.getFirst("ManagementLevel")));
+		dicParam.addValue("compCode", CommonUtil.tryString(data.getFirst("CompCode")));
 		dicParam.addValue("spjangcd", CommonUtil.tryString(data.getFirst("spjangcd")));
 
 		dicParam.addValue("safetyStock", CommonUtil.tryFloatNull(data.getFirst("SafetyStock")));
@@ -313,6 +315,7 @@ public class MaterialService {
 						 ,"spjangcd"
 						 ,"storage_method"
 						 ,"packaging_mat"
+						 ,"CompCode"
 						 )
 						VALUES
 						(now()
@@ -366,6 +369,7 @@ public class MaterialService {
 						, :spjangcd
 						, :storage_method
 						, :packaging_mat
+						, :compCode
 						)
 					""";
 		}else {
@@ -421,6 +425,7 @@ public class MaterialService {
 					, "Avrqty" = :avrqty
 					, "storage_method" = :storage_method
 					, "packaging_mat" = :packaging_mat
+					, "CompCode" = :compCode
 					WHERE id = :id
 					AND spjangcd = :spjangcd
 					""";
