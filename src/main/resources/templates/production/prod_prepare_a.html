@@ -450,19 +450,23 @@
 
             loadMatReqList() {
                 let _this = this;
-                let items = _this.grid.selectedItems;
-                if (items.length === 0) {
+                let arrTmp = [];
+
+                // ✅ selector(체크박스)에서 체크된 행들만 모으기
+                _this.grid.rows.forEach(row => {
+                    if (row.isSelected) {
+                        let item = row.dataItem;
+                        if (item) {
+                            arrTmp.push(item.id || item.jr_pk);
+                        }
+                    }
+                });
+
+                if (arrTmp.length === 0) {
                     return;
                 }
-                let arrTmp = [];
-                $.each(items, function (idx, item) {
-                    arrTmp.push(item.id);
-                    //if (item.proc_input_req_id != '' && item.proc_input_req_id != null) {
-                    //    Alert.alert('', '이미 투입요청한 데이터가 있습니다.');
-                    //    return;
-                    //}
-                });
                 let jr_pks = arrTmp.join(',');
+                console.log('jr_pks', jr_pks);
                 let data_date = $('#srchStartDt').val();
                 let data = {
                     jr_pks: jr_pks,

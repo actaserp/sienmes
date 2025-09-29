@@ -246,14 +246,15 @@ public class PopupController {
 
 		String sql = """
 		        with aa as (
-		        	select mpi."MaterialLot_id" as mat_lot_id, mpi."RequestQty" from job_res jr 
+		        	select mpi."MaterialLot_id" as mat_lot_id, mpi."RequestQty", mpi."InputQty" from job_res jr 
 			        inner join mat_proc_input mpi on jr."MaterialProcessInputRequest_id" = mpi."MaterialProcessInputRequest_id" 
 			        where jr.id = :jrPk
 		        )
 		       	select 
 				a.id, m."Name" as mat_name, a."LotNumber" as lot_number
 		        , a."CurrentStock"::numeric(18,4) as cur_stock
-		        , aa."RequestQty" as first_qty
+		        , aa."RequestQty" as req_qty
+		        , aa."InputQty" as in_qty
 		        , sh."Name" as storehouse_name
 		        , to_char(a."EffectiveDate",'yyyy-mm-dd') as effective_date
 		        , to_char(a."InputDateTime",'yyyy-mm-dd') as create_date

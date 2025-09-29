@@ -600,7 +600,7 @@ public class ProductionResultService {
             mh."CurrentStock" AS "currentStock",
             u."Name" AS unit,
             BT.bom_ratio,
-            ROUND(BT.bom_requ_qty::numeric) AS bom_consumed,   -- 예상 소요
+            ROUND(BT.bom_requ_qty::numeric, 4) AS bom_consumed,   -- 예상 소요
             0::numeric AS consumed_qty,                        -- 아직 미시작이므로 0
             sh."Name" AS storehouse_name,
             0::numeric AS mc_qty,

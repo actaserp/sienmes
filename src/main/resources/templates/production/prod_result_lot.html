@@ -1163,19 +1163,9 @@
                     const item = editedRow.dataItem;
 
                     if (col.binding === 'defect_qty') {
-                        // 기존 양품량 저장 안돼있으면 최초값 저장
-                        if (!item.original_good_qty) {
-                            item.original_good_qty = item.good_qty || 0;
-                        }
-
-                        let prevDefectQty = item._prev_defect_qty || 0;
                         let newDefectQty = parseInt(item.defect_qty) || 0;
 
-                        // 기존과 새 defect_qty 차이만큼 good_qty 보정
-                        let diff = prevDefectQty - newDefectQty;
-                        item.good_qty = Math.max(0, item.good_qty + diff);
-
-                        // 수정된 값 저장
+                        // 그냥 이전값만 저장 (good_qty는 수정하지 않음)
                         item._prev_defect_qty = newDefectQty;
 
                         s.collectionView.commitEdit();
@@ -2448,6 +2438,17 @@
                                 _this.grid.collectionView.commitEdit();
                                 _this.grid.invalidate();
                             }
+                        }
+                        // ✅ 차수 저장 후 부적합 목록도 바로 저장 실행
+                        const defectGridList = _this.defectGrid.collectionView.items;
+                        if (defectGridList && defectGridList.length > 0) {
+                            // chasuGrid 선택된 item 기준으로 defect_qty를 defectGrid에 반영
+                            const chasuItem = items[0]; // 어차피 하나만 선택된다고 가정
+                            const defectItem = defectGridList[0]; // defectGrid도 하나만 있다고 하셨음
+                            defectItem.defect_qty = chasuItem.defect_qty;
+
+                            // 저장 실행
+                            _this.saveDefectList(defectGridList);
                         }
                     } else {
                         Alert.alert('', res.message);

@@ -27,7 +27,7 @@ public class ProdPrepareService {
 		paramMap.addValue("spjangcd", spjangcd);
 		
         String sql = """
-        		select jr.id
+        		select jr.id as jr_pk
                 , jr."WorkOrderNumber" as work_order_number
                 , to_char(jr."ProductionDate", 'yyyy-mm-dd') as production_date
                 , jr."ShiftCode" as shift_code, sh."Name" as shift_name
@@ -36,6 +36,7 @@ public class ProdPrepareService {
                 , fn_code_name('mat_type', mg."MaterialType") as mat_type_name
                 , mg."Name" as mat_grp_name
                 , m."Code" as mat_code, m."Name" as mat_name, u."Name" as unit_name
+                , m.id as mat_pk
                 , jr."OrderQty" as order_qty
                 , e."Name" as equip_name
                 , jr."State" as state, fn_code_name('job_state', jr."State") as state_name
