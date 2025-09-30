@@ -92,6 +92,8 @@
                 <div>
                     <section class="tab-item" id="tabConsumed" style="border-top-left-radius: 0;">
                         <div class="grid_box">
+                            <input type="hidden" id="jr_pk">
+                            <input type="hidden" id="mp_id" name="mp_id"/>
                             <div class="title_box">
                                 투입 계획
                             </div>
@@ -117,9 +119,13 @@
                                                 class="fas fa-trash"></i></button>
                                     </li>
                                     <li>
-                                        로트번호 <input type="text" id="txtInputLot" class="w-200 tac"
-                                                    placeholder="로트번호를 스캔하세요"
-                                                    autocomplete="off" style="height: 36px;"/>
+                                        로트번호
+                                        <input type="text" id="txtInputLot" class="w-200 tac"
+                                               placeholder="로트번호를 스캔하세요"
+                                               autocomplete="off"
+                                               lang="en"
+                                               inputmode="latin"
+                                               style="height: 36px;"/>
                                     </li>
                                     <li>
                                         <button type="button" class="btn" id="btnInputLotSave" title="로트투입 저장"><i
@@ -281,11 +287,18 @@
                     if (ht.cellType === wijmo.grid.CellType.Cell) {
                         let item = _this.grid.rows[ht.row].dataItem;
                         if (item) {
+
+                            document.getElementById("jr_pk").value = item.jr_pk;
                             // showConsumedList 호출
                             _this.showConsumedList();
 
                             // showInputLotList 호출
                             _this.showInputLotList();
+
+                            // txtInputLot 포커스 주기
+                            setTimeout(() => {
+                                document.getElementById("txtInputLot").focus();
+                            }, 100);
                         }
                     }
                 });
@@ -332,7 +345,7 @@
 
                 this.inputLotGrid.hostElement.addEventListener('dblclick', function(e) {
                     const ht = this.inputLotGrid.hitTest(e);
-                    const jr_pk = $('#tabBasic').find('#id').val();
+                    const jr_pk = $('#jr_pk').val();
                     if (ht.panel === this.inputLotGrid.cells) {
                         const item = this.inputLotGrid.rows[ht.row]?.dataItem;
                         console.log('item', item);
@@ -481,7 +494,7 @@
                     this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'mat_name', '합계');
                     this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'cur_stock', totalCurStock);
                     this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'req_qty', totalReqQty);
-                    this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'consumed_qty', totalConsumedQty);
+                    // this.inputLotGrid.columnFooters.setCellData(footerRow.index, 'consumed_qty', totalConsumedQty);
                 }
             }
 
@@ -511,6 +524,7 @@
 
                 let fnsuccess = function (result) {
                     if (result != null) {
+                        console.log('result.data', result.data);
                         _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
                     }
                 };
@@ -548,25 +562,12 @@
                         let cv = _this.consumedGrid.collectionView;
                         for (let i = 0; i < cv.items.length; i++) {
                             if (cv.items[i].mat_pk === selectedKey) {
-                                cv.moveCurrentToPosition(i);
                                 _this.consumedGrid.select(i, 0); // 선택 위치
                                 break;
                             }
                         }
                     }
 
-                    let goodQty = parseFloat($('#tabBasic').find('#good_qty').val());
-                    let defectQty = parseFloat($('#tabBasic').find('#defect_qty').val());
-                    let lossQty = parseFloat($('#tabBasic').find('#loss_qty').val());
-                    let scrapQty = parseFloat($('#tabBasic').find('#scrap_qty').val());
-
-                    if (isNaN(goodQty)) goodQty = 0;
-                    if (isNaN(defectQty)) defectQty = 0;
-                    if (isNaN(lossQty)) lossQty = 0;
-                    if (isNaN(scrapQty)) scrapQty = 0;
-
-                    let totalProdQty = goodQty + defectQty + lossQty + scrapQty;
-                    //$('#lblTotalOutput').text(totalProdQty.toLocaleString());
                 }
             }
 
@@ -607,7 +608,7 @@
             delMaterialLot() {
                 let _this = this;
                 let select_grid = _this.inputLotGrid.selectedItems;
-                let jr_pk = $('#tabBasic').find('#id').val();
+                let jr_pk = $('#jr_pk').val();
                 let url = this.baseUrl + '/del_lot_list';
 
                 if (select_grid.length === 0) {
@@ -631,7 +632,7 @@
 
                         _this.showConsumedList(jr_pk);
 
-                        $('#txtInputLot').val('');
+                        $('#txtInputLot').val('').focus();
                     } else {
                         Alert.alert('', res.message);
                     }
@@ -646,6 +647,7 @@
                 )
             }
 
+            // 자동처리
             fetchLotInfo(lot_number, jr_pk, mpi_id) {
                 const url = '/api/popup/pop_prod_input/lot_info'; // ← 팝업에서 쓰는 LOT 조회 API로 바꾸세요
 
@@ -724,12 +726,10 @@
                 let _this = this;
 
                 let url = this.baseUrl + '/multi_add_lot_input';
-                let jr_pk = $('#tabBasic').find('#id').val();
-                let mp_pk = $('#tabBasic').find('#mp_id').val();
+                let jr_pk = $('#jr_pk').val();
 
                 let data = {
                     'jr_pk': jr_pk,
-                    'mp_pk': mp_pk,
                     'Q': JSON.stringify(lot),
                 };
 
@@ -740,7 +740,7 @@
 
                         _this.showConsumedList(jr_pk);
 
-                        $('#txtInputLot').val('');
+                        $('#txtInputLot').val('').focus();
                     } else {
                         Alert.alert('', res.message);
                     }
@@ -773,7 +773,7 @@
 
                         _this.showConsumedList(jr_pk);
 
-                        $('#txtInputLot').val('');
+                        $('#txtInputLot').val('').focus();
                     } else {
                         Alert.alert('', res.message);
                     }
@@ -833,7 +833,8 @@
             });
 
             $('#btnInputLotSave').click(function (e) {
-                let jr_pk = $('#tabBasic').find('#id').val();
+                e.preventDefault();
+                let jr_pk = $('#jr_pk').val();
                 let lot_number = $('#txtInputLot').val();
                 page.showLotInput(lot_number, jr_pk);
             });
@@ -841,7 +842,7 @@
             // 일반 바코드 스캐너 이벤트
             $('#txtInputLot').keydown(function (e) {
                 if (e.keyCode == 9) {
-                    let jr_pk = $('#tabBasic').find('#id').val();
+                    let jr_pk = $('#jr_pk').val();
                     let lot_number = $('#txtInputLot').val();
                     page.showLotInput(lot_number, jr_pk);
 
@@ -850,7 +851,7 @@
 
 
             $('#txtInputLot').keydown(function (event) {
-                let jr_pk = $('#tabBasic').find('#id').val();
+                let jr_pk = $('#jr_pk').val();
                 let lot_number = $('#txtInputLot').val();
                 let keyCode = event.keyCode || event.which;
                 if (event.key === 'Enter' || keyCode === 13) {
@@ -859,6 +860,10 @@
             });
 
             page.searchMainData();
+
+            document.getElementById("txtInputLot").addEventListener("focus", function () {
+                this.setAttribute("lang", "en");
+            });
 
 
         });

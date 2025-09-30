@@ -893,7 +893,6 @@ public class ProductionMensuController {
     @Transactional
     public AjaxResult multiAddLotInput(
             @RequestParam(value = "jr_pk", required = false) Integer jrPk,
-            @RequestParam(value = "mp_pk", required = false) String mpPk,
             @RequestBody MultiValueMap<String, Object> Q,
             HttpServletRequest request,
             Authentication auth) {
