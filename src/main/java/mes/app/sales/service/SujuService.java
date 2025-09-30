@@ -382,4 +382,41 @@ public class SujuService {
 		return items;
 	}
 
+	public String getNextCompCode() {
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		String sql = """
+        SELECT (COALESCE(MAX("Code")::bigint, 0) + 1) AS next_code
+        FROM company
+    """;
+
+		Map<String, Object> row = sqlRunner.getRow(sql, params);
+		Object v = (row == null) ? null : row.get("next_code");
+		return (v == null) ? "1" : v.toString();   // "1"부터 시작
+	}
+
+	public String getNextMatCode() {
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		String sql = """
+      WITH cleaned AS (
+				SELECT regexp_replace("Code", '\\D', '', 'g') AS only_digits
+				FROM material
+			),
+			nums AS (
+				SELECT NULLIF(only_digits, '')::bigint AS num,
+							 length(NULLIF(only_digits, ''))   AS num_len
+				FROM cleaned
+			),
+			next_num AS (
+				SELECT COALESCE(MAX(num), 0) + 1 AS n
+				FROM nums
+			)
+			SELECT 'E' || LPAD(n::text, GREATEST(3, length(n::text)), '0') AS next_code
+			FROM next_num;
+    """;
+
+		Map<String, Object> row = sqlRunner.getRow(sql, params);
+		Object v = (row == null) ? null : row.get("next_code");
+		return (v == null) ? "E001" : v.toString();   // 기본 시작값 "E001"
+	}
+
 }

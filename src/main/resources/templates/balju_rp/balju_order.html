@@ -700,7 +700,7 @@
             {binding: 'product_code', header: '제품코드', width: 90, visible: false},
             {binding: 'product_name', header: '제품명', width: 210},
             {binding: 'unit', header: '단위', width: 60, align: 'center'},
-            {binding: 'SujuQty', header: '수량', width: 100, align: 'right', format: 'n0'},
+            {binding: 'SujuQty', header: '수량', width: 100, align: 'right', format: 'n2'},
             {binding: 'BaljuUnitPrice', header: '단가', width: 100, align: 'right'},
             {binding: 'BaljuPrice', header: '공급가', width: 100, align: 'right'},
             {binding: 'BaljuVat', header: '부과세', width: 100, align: 'right'},
@@ -1671,11 +1671,22 @@
       $targetRow.remove();
     }
 
-
     function formatNumberInput(inputValue, targetSelector) {
-      let cleaned = inputValue.replace(/[^0-9]/g, '').replace(/,/g, '');// 숫자만 남기기
-      let formatted = cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ',');// 쉼표 넣기
-      $(targetSelector).val(formatted);// 값 넣기
+      // 숫자와 소수점만 남기기
+      let cleaned = inputValue.replace(/[^0-9.]/g, '').replace(/,/g, '');
+
+      // 소수점 여러 개 입력 방지 (첫 번째만 허용)
+      let parts = cleaned.split('.');
+      if (parts.length > 2) {
+        cleaned = parts[0] + '.' + parts.slice(1).join('');
+      }
+
+      // 정수 부분에만 3자리마다 콤마 추가
+      let formatted = parts.length > 1
+        ? parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.' + parts[1]
+        : cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+      $(targetSelector).val(formatted);
     }
 
     function calculateAmount({ row: $row, $content }) {

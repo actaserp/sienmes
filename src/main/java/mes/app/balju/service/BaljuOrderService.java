@@ -732,59 +732,29 @@ public class BaljuOrderService {
     return this.sqlRunner.queryForObject(sql, param, (rs, rowNum) -> rs.getString("Email"));
   }
 
-  public Company resolveCompanyForBalju(String companyName, String spjangcd) {
-    if (companyName == null || companyName.isBlank()) return null;
-
+  public Company findCompCode(String materialCode, String spjangcd) {
     MapSqlParameterSource param = new MapSqlParameterSource();
-    param.addValue("q", companyName);   // 🔹 :q 로 통일
+    param.addValue("mat_code", materialCode);
     param.addValue("spjangcd", spjangcd);
 
-    String sql = """
-        WITH norm AS (
-          SELECT regexp_replace(lower(:q), '[\\s　]', '', 'g') AS q1
-        ), norm2 AS (
-          SELECT regexp_replace(q1, '(주식회사|농업회사법인|유한책임회사|유한회사|합자회사|㈜|[(（](주|유)[)）])','', 'g') AS q2
-          FROM norm
-        ), norm3 AS (
-          SELECT regexp_replace(q2, '[^0-9a-z가-힣]', '', 'g') AS q_norm,
-                 lower(:q) AS q_raw
-          FROM norm2
-        )
-        SELECT c.*
-        FROM company c, norm3 n
-        WHERE
-          regexp_replace(
-            regexp_replace(
-              regexp_replace(lower(c."Name"), '[\\s　]', '', 'g'),
-              '(주식회사|농업회사법인|유한책임회사|유한회사|합자회사|㈜|[(（](주|유)[)）])', '', 'g'
-            ),
-            '[^0-9a-z가-힣]', '', 'g'
-          ) LIKE '%' || n.q_norm || '%'
-          OR lower(c."Name") ILIKE '%' || n.q_raw || '%'     -- ← 보조 매칭
-         AND c.spjangcd = :spjangcd
+    String sql= """
+        select 
+          c.id as company_id,
+          c."Name" as company_name
+        from material m
+        left join company c on c.id = m."CompCode"::int
+        where m."Code" = :mat_code
+          and m.spjangcd = :spjangcd
         """;
 
-    List<Map<String, Object>> rows = this.sqlRunner.getRows(sql, param);
-    if (rows == null || rows.isEmpty()) return null;
+    List<Map<String,Object>> rows = this.sqlRunner.getRows(sql, param);
+    if (rows.isEmpty()) return null;
 
-    Map<String, Object> r = rows.get(0);
-
-    // ✅ Company 매핑 (컬럼 키 대소문자 차이를 대비)
-    Company c = new Company();
-    Object idObj = r.get("id");
-    if (idObj instanceof Number) {
-      c.setId(((Number) idObj).intValue());
-    } else if (idObj != null) {
-      c.setId(Integer.parseInt(idObj.toString()));
-    }
-    Object nameObj = r.get("Name"); // 드라이버에 따라 "name"일 수도 있음
-    if (nameObj == null) nameObj = r.get("name");
-    if (nameObj != null) c.setName(nameObj.toString());
-
-    Object spObj = r.get("spjangcd");
-    if (spObj != null) c.setSpjangcd(spObj.toString());
-
-    return c;
+    Map<String,Object> row = rows.get(0);
+    Company comp = new Company();
+    comp.setId(((Number)row.get("company_id")).intValue());
+    comp.setName((String)row.get("company_name"));
+    return comp;
   }
 
 }

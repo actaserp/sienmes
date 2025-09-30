@@ -627,7 +627,6 @@ public class BaljuOrderController {
    * 품목명:  B4
    * 주문수량: C4      # SujuQty        --- balju
    * 단가: D4          # UnitPrice      --- balju
-   * 업체명: E4        # CompanyName    --- balju
    * **/
   @PostMapping("/upload_save")
   public AjaxResult uploadSeve(
@@ -709,13 +708,11 @@ public class BaljuOrderController {
           String materialName = getCellString(row.getCell(1)); // B: 품목명
           Double qty         = getCellNumeric(row.getCell(2)); // C: 수량
           Double unitPrice   = getCellNumeric(row.getCell(3)); // D: 단가
-          String companyName = getCellString(row.getCell(4));  // E: 업체명
 
           // 빈 행 스킵
           if ((materialCode == null || materialCode.isEmpty()) &&
               (materialName == null || materialName.isEmpty()) &&
-              qty == null && unitPrice == null &&
-              (companyName == null || companyName.isEmpty())) {
+              qty == null && unitPrice == null ){
             continue;
           }
 
@@ -729,10 +726,10 @@ public class BaljuOrderController {
           }
 
           // ✅ 2-2) 업체명 → Company (baljuOrderService에 위임)
-          Company comp = baljuOrderService.resolveCompanyForBalju(companyName, spjangcd);
+          Company comp = baljuOrderService.findCompCode(materialCode, spjangcd);
           if (comp == null) {
             res.success = false;
-            res.message = "업체 매핑 실패: " + companyName + " (행 " + (r+1) + ")";
+            res.message = "업체 매핑 실패: " + materialCode + " (행 " + (r+1) + ")";
             res.code = "NO_COMPANY"; // 선택
             return res;
           }
