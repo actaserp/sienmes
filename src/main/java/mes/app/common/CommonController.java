@@ -123,8 +123,6 @@ public class CommonController {
 			result.data = lcl.getId();
 			
 			return result;
-			
-		
 		}
 	
 	//@Cacheable(value="combo",key="{#comboType, #cond1, #cond2, cond3}")	

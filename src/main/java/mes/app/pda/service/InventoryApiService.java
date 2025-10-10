@@ -34,7 +34,7 @@ public class InventoryApiService {
             --    else null end as box_qty
             --, m."AvailableStock" as avail_stock
             --, m."ReservationStock" as reserve_stock
-            , m."CurrentStock" as cur_stock  --총재고
+            , ROUND(m."CurrentStock"::NUMERIC, 2) as cur_stock  --총재고
             --, sh."Name" as house_name, mh."CurrentStock" as house_stock
             --, count(*) over (partition by m.id) as house_count
             --, count(ml.id) as lot_count
