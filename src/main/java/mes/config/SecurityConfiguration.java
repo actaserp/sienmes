@@ -49,7 +49,7 @@ public class SecurityConfiguration {
 
         
         http.authorizeRequests().mvcMatchers("/login","/logout" ,"/useridchk/**","/user-auth/save",
-                        "/pda/login",
+                        "/pda/login", "/pda/app/version/**",
                         "/popbill/webhook", "/api/transaction/input/**").permitAll()
         .mvcMatchers("/authentication/**","/user-auth/**").permitAll()
         .mvcMatchers("/setup").hasAuthority("admin")		// hasRole -> hasAuthority로 수정
