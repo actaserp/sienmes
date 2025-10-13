@@ -1,7 +1,7 @@
 package mes.app.shipment.service;
 
 import java.sql.Date;
-import java.time.LocalDate;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,16 +26,17 @@ public class ShipmentOrderService {
 	@Autowired
 	SujuRepository sujuRepository;
 
-	public List<Map<String, Object>> getSujuList(String dateFrom, String dateTo, String notShip, String compPk,String matGrpPk, String matPk, String keyword) {
+	public List<Map<String, Object>> getSujuList(String dateFrom, String dateTo, String notShip, String compPk,
+												 String matGrpPk, String matPk, String keyword) {
 
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 
-		if(dateFrom.isEmpty()){
-			dateFrom = LocalDate.now().toString();
-		}
-		if(dateTo.isEmpty()){
-			dateTo = LocalDate.now().toString();
-		}
+
+
+
+
+
+
 
 		paramMap.addValue("dateFrom", dateFrom);
 		paramMap.addValue("dateTo", dateTo);
@@ -59,9 +60,9 @@ public class ShipmentOrderService {
 	            , suju."SujuQty" 
 	            , suju."SujuQty2" 
                 , suju."Description"
-                , sh."DeliveryName"
+
 	            from suju suju
-	            inner join suju_head sh on sh.id = suju."SujuHead_id"
+
                 inner join material m on m.id = suju."Material_id" 
                 left join company c2 on c2.id = suju."Company_id"
 	            where suju."JumunDate" between cast(:dateFrom as date) and cast(:dateTo as date) 
@@ -100,7 +101,7 @@ public class ShipmentOrderService {
             , u."Name" as unit_name
             , case when sp.ship_sum > 0 then '출하' when sp.order_sum > 0 then '출하' else '' end as shipment_state
             , s."State"
-            , s."DeliveryName"
+
             from s  
             left join sp on sp.suju_pk = s.suju_pk
             inner join material m on m.id = s."Material_id" 
@@ -177,7 +178,7 @@ public class ShipmentOrderService {
                 , sh."StatementIssuedYN" as issue_yn
                 , sh."StatementNumber" as stmt_number 
                 , sh."IssueDate" as issue_date
-                , sh."DeliveryName"
+
                 from shipment_head sh 
                 join company c on c.id = sh."Company_id"   
                 where sh."ShipDate"  between :date_from and :date_to

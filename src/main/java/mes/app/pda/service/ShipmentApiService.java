@@ -88,7 +88,6 @@ public class ShipmentApiService {
 				, sh."StatementIssuedYN" as issue_yn
 				, sh."StatementNumber" as stmt_number\s
 				, sh."IssueDate" as issue_date
-				, sh."DeliveryName" as delivery_name
 				, sg."item_names" as material_name_summary
 				from shipment_head sh\s
 				join company c on c.id = sh."Company_id"
