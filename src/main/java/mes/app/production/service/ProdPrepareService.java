@@ -111,13 +111,15 @@ public class ProdPrepareService {
 	                , m."CurrentStock" as cur_stock
 	                , m."AvailableStock" as available_stock 
                     ,coalesce( m."ProcessSafetyStock",0) as proc_safety_stock
+                    , c."Name" as comp_name
 	                from B1 
 	                inner join jr on jr.prod_pk = B1.prod_pk
 	                inner join material m on m.id = B1.mat_pk
 	                inner join mat_grp mg on mg.id = m."MaterialGroup_id"		
                     left join unit u on u.id = m."Unit_id"
+                    left join company c on c.id = m."CompCode"::integer
 	                group by B1.mat_pk, mg."MaterialType", mg."Name", m."Code", m."Name", u."Name"
-	                , m."CurrentStock", m."AvailableStock", m."ProcessSafetyStock"
+	                , m."CurrentStock", m."AvailableStock", m."ProcessSafetyStock", c."Name"
 	            ), S as (
 	                select R.mat_pk
 	                ,coalesce( sum(case when sh."HouseType" = 'material' then mh."CurrentStock" end),0) as material_stock
@@ -133,7 +135,8 @@ public class ProdPrepareService {
 	            , S.material_stock, S.process_stock
                 , R.proc_safety_stock
                 , R.cur_stock
-	            , greatest(0, R.requ_qty + ( coalesce(R.proc_safety_stock,0) - greatest(0, S.process_stock) )) as input_req_qty 
+	            , greatest(0, R.requ_qty + ( coalesce(R.proc_safety_stock,0) - greatest(0, S.process_stock) )) as input_req_qty
+	            , R.comp_name 
 	            from R 
 	            left join S on S.mat_pk = R.mat_pk
                 order by R.mat_type_name, R.mat_group_name, R.mat_code, R.mat_name
