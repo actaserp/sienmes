@@ -677,6 +677,13 @@
                     $content.find('tr:visible').each(function () {
                         calculateAmounts($(this), 'unit');
                     });
+                    if (data.mode === 'new') {
+                        // 신규는 기본 해제 + 값도 N으로 맞춰서 extractForm 시 누락 방지
+                        $content.find('input[type="checkbox"][name^="VatIncluded"]')
+                            .prop('checked', false)
+                            .val('N')
+                            .trigger('change'); // 계산식 즉시 반영
+                    }
                 }, 100);
 
 
