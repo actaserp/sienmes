@@ -56,6 +56,7 @@ public class ShipmentOrderService {
 	            --, suju."CompanyName"
                 ,c2."Name" as "CompanyName" 
 	            , fn_code_name('suju_state', suju."State") as "State"
+	            , suju."State" as State2
 	            , suju."Material_id"  
 	            , suju."SujuQty" 
 	            , suju."SujuQty2" 
@@ -66,7 +67,7 @@ public class ShipmentOrderService {
                 inner join material m on m.id = suju."Material_id" 
                 left join company c2 on c2.id = suju."Company_id"
 	            where suju."JumunDate" between cast(:dateFrom as date) and cast(:dateTo as date) 
-	            AND suju."State" NOT IN ('canceled', 'force_completion')
+	            AND suju."State" NOT IN ('canceled')
                 """;
 
 		if (StringUtils.isEmpty(compPk)==false)  sql += " and suju.\"Company_id\" = cast(:compPk as Integer) ";
@@ -111,7 +112,8 @@ public class ShipmentOrderService {
            """;
 
 		if (StringUtils.isEmpty(keyword)==false)  sql += " and (m.\"Name\" ilike concat('%%',:keyword,'%%') or m.\"Code\" ilike concat('%%',:keyword,'%%')) ";
-		if ((notShip).equals("Y"))  sql += " and s.\"SujuQty\" > coalesce(sp.order_sum,0) ";
+		//부분출하는 제외
+		if ((notShip).equals("Y"))  sql += " and s.\"SujuQty\" > coalesce(sp.order_sum,0) and s.State2 <> 'force_completion'";
 		sql += " order by s.\"DueDate\", s.\"CompanyName\", m.\"Code\", m.\"Name\"";
 
 		List<Map<String,Object>> items = this.sqlRunner.getRows(sql, paramMap);
@@ -291,7 +293,8 @@ public class ShipmentOrderService {
 				where "Material_id" IN (:mat_id)
 				AND "Type" = '02'
 				AND "Company_id" = :company_id
-				AND "ApplyEndDate" > CURRENT_DATE
+				AND "ApplyStartDate" <= NOW()
+				AND "ApplyEndDate"   >= NOW()
 				ORDER BY "Material_id", "ApplyStartDate" desc
 		""";
 

@@ -403,7 +403,7 @@
                             <div class="input-with-checkbox">
                                 <input style="text-align:right;" type="text" name="unitPrice" placeholder="단가" />
                                 <input type="hidden" name="originalUnitPrice" />
-                                <input type="checkbox" name="VatIncluded" />
+                                <input type="checkbox" name="VatIncluded"  />
                             </div>
                         </td>
                         <td><input type="text" style="text-align:right;" name="supplyAmount" /></td>
@@ -588,6 +588,7 @@
                             if (selected.ShipmentStateName) {
                                 result.data['StateName'] = selected.ShipmentStateName;
                             }
+
                             _this.showSujuForm(result.data);
                         };
                         AjaxUtil.getAsyncData(_this.url + '/detail', data, fnsuccess);
@@ -677,13 +678,25 @@
                     $content.find('tr:visible').each(function () {
                         calculateAmounts($(this), 'unit');
                     });
+
+
+
                     if (data.mode === 'new') {
                         // 신규는 기본 해제 + 값도 N으로 맞춰서 extractForm 시 누락 방지
                         $content.find('input[type="checkbox"][name^="VatIncluded"]')
                             .prop('checked', false)
                             .val('N')
                             .trigger('change'); // 계산식 즉시 반영
+                    }else{
+                        //edit
+                        let nextElementIndex = data.sujuList.length;
+
+                        const $checkbox = $content.find(`input[name="VatIncluded_${nextElementIndex}"]`);
+                        $checkbox.prop('checked', false).val('N').trigger('change');
                     }
+
+
+
                 }, 100);
 
 
@@ -743,6 +756,7 @@
                             const materialId = data[`Material_id_${i}`];
                             if (!materialId) continue;
 
+
                             items.push({
                                 suju_id: data[`suju_id_${i}`] || '',
                                 Material_id: materialId,
@@ -755,7 +769,7 @@
                                 VatAmount: data[`VatAmount_${i}`] === '면세' ? '0' : (data[`VatAmount_${i}`] || '0').replace(/,/g, ''),
                                 totalAmount: (data[`totalAmount_${i}`] || '0').replace(/,/g, ''),
                                 description: data[`description_${i}`] || '',
-                                VatIncluded: data[`VatIncluded_${i}`] === 'on' ? 'Y' : 'N',
+                                VatIncluded: data[`VatIncluded_${i}`] === undefined ? 'N' : 'Y',
                                 projectHidden: data[`projectHidden_${i}`] || '',
                                 unitPriceChanged: (() => {
                                     const ori = parseFloat(data[`originalUnitPrice_${i}`] || '0');
@@ -764,8 +778,8 @@
                                 })()
                             });
                         }
-
-
+                        //console.log("times", items);
+                        //return;
                         // 공통 정보 + 리스트 전송
                         const payload = {
                             id: data.id,
