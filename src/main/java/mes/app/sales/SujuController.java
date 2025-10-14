@@ -851,6 +851,8 @@ public class SujuController {
 			material.setStandard1(Standard);
 			material.setSpjangcd(spjangcd);
 			material.setUseyn("0");
+			material.setWorkCenterId(45);	//생산센터을 기본으로 저장
+			material.setRoutingId(8);	//투입-포장 을 기본으로 저장
 			material.set_audit(user);
 
 			// 저장

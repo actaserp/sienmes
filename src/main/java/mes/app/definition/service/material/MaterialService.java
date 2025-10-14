@@ -82,6 +82,7 @@ public class MaterialService {
                 , m."Avrqty" as avrqty
                 , m."storage_method"
                 , m."packaging_mat"
+                , m."Routing_id"
                 , CASE
 					 WHEN b."Material_id" IS NOT NULL THEN 1
 					 ELSE 0

@@ -1,12 +1,38 @@
 <html layout:decorate="~{layout_page}">
+<head>
+    <style>
+        @media (max-width: 1366px) {
 
+            /*.write-table input, .write-table select{*/
+            /*    width: 280px;*/
+            /*}*/
+
+            .write-table textarea {
+                height: 80px;
+            }
+
+        }
+
+        @media screen and (max-width: 1366px) {
+            .page-title-wrap {
+                display: none;   /* 1366px 이하 → 숨김 */
+            }
+        }
+
+        @media screen and (min-width: 1367px) {
+            .page-title-wrap {
+                display: flex;  /* 1367px 이상 → 보임 */
+            }
+        }
+
+    </style>
+</head>
 <th:block layout:fragment="content">
     <div class="layout-contents">
 
         <div class="page-title-wrap">
             <div class="left">
                 <h2>계량 공정</h2>
-                <!--                <small2>라우팅이 없는 품목에 대한 실적 입력. 로트투입 가능</small2>-->
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
@@ -76,6 +102,14 @@
                                 </li>
                             </dd>
                         </dl>
+                        <dl>
+                            <dt>&nbsp;</dt>
+                            <dd>
+                                <button type="button" class="btn pull-right mr-1 btnHeaderCompress" title="화면 확대/축소">
+                                    <i class="fas fa-compress" id="iCompress"></i>
+                                </button>
+                            </dd>
+                        </dl>
                     </div>
                 </div>
 
@@ -84,68 +118,70 @@
                 </div>
             </section>
 
-            <div class="tab-wrap" style="width: 50%; height: 100%;">
+            <div class="tab-wrap" style="width:100%; height: 100%; display: none;">
 
-                <ul class="tab-links">
-                    <li><a href="#tabConsumed" name="tabConsumed">투입 내역</a></li>
-                </ul>
-                <div>
-                    <section class="tab-item" id="tabConsumed" style="border-top-left-radius: 0;">
-                        <div class="grid_box">
-                            <input type="hidden" id="jr_pk">
-                            <input type="hidden" id="mp_id" name="mp_id"/>
-                            <div class="title_box">
-                                투입 계획
-                            </div>
-                            <div class="container-fluid">
-                                <div id="consumed-grid" style="height: 20vh;"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="switch">
-                                <input type="checkbox" id="btnToggle"><span class="slider round"></span>
-                            </label>투입로트 보기/감추기
-                        </div>
-                        <div>&nbsp;</div>
-                        <div class="grid_box" id="input_lot_div">
-                            <div class="button-wrap">
-                                <ul>
-                                    <li>
-                                        <button type="button" class="btn" id="btnInputLotSelect" title="로트검색"><i
-                                                class="fas fa-plus"></i></button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn" id="btnLotSelectDel" title="로트삭제"><i
-                                                class="fas fa-trash"></i></button>
-                                    </li>
-                                    <li>
-                                        로트번호
-                                        <input type="text" id="txtInputLot" class="w-200 tac"
-                                               placeholder="로트번호를 스캔하세요"
-                                               autocomplete="off"
-                                               lang="en"
-                                               inputmode="latin"
-                                               style="height: 36px;"/>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="btn" id="btnInputLotSave" title="로트투입 저장"><i
-                                                class="fas fa-edit"></i></button>
-                                    </li>
-                                    <li>
-                                        품목코드 필터 :  <input type="text" id="txtInputCode"
-                                                    placeholder="계획 선택"
-                                                    autocomplete="off" style="width:100px; height: 36px;"/>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="container-fluid">
-                                <div id="input-lot-grid" style="height: 20vh;"></div>
-                            </div>
-                        </div>
+                <section class="section-left" style="width: 50%;">
 
-                    </section>
-                </div>
+                    <input type="hidden" id="jr_pk">
+                    <input type="hidden" id="mp_id" name="mp_id"/>
+                    <div class="title_box">
+                        투입 계획
+                    </div>
+                    <div class="button-wrap">
+                        <ul>
+                            <li>
+                                <a class="btn" title="뒤로 가기" id="btnCancelInspect">뒤로 가기</a>
+                            </li>
+                            <li>
+                                <button type="button" class="btn pull-right mr-1 btnHeaderCompress" title="화면 확대/축소">
+                                    <i class="fas fa-compress" id="iCompress2"></i>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="container-fluid" style="flex: 1; overflow: hidden;">
+                        <div id="consumed-grid" style="height: 100%;"></div>
+                    </div>
 
+                </section>
+                <section class="section-right" style="width: 50%;">
+                    <div class="title_box">
+                        로트 입력창
+                    </div>
+                    <div class="button-wrap">
+                        <ul style="display: flex; align-items: flex-end; ">
+                            <li>
+                                <button type="button" class="btn" id="btnInputLotSelect" title="로트검색"><i
+                                        class="fas fa-plus"></i></button>
+                            </li>
+                            <li>
+                                <button type="button" class="btn" id="btnLotSelectDel" title="로트삭제"><i
+                                        class="fas fa-trash"></i></button>
+                            </li>
+                            <li>
+                                로트번호
+                                <input type="text" id="txtInputLot" class="w-200 tac"
+                                       placeholder="로트번호를 스캔하세요"
+                                       autocomplete="off"
+                                       lang="en"
+                                       inputmode="latin"
+                                       style="height: 36px;"/>
+                            </li>
+                            <li>
+                                <button type="button" class="btn" id="btnInputLotSave" title="로트투입 저장"><i
+                                        class="fas fa-edit"></i></button>
+                            </li>
+                            <li>
+                                품목코드 필터 :  <input type="text" id="txtInputCode"
+                                            placeholder="계획 선택"
+                                            autocomplete="off" style="width:100px; height: 36px;"/>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="container-fluid" style="flex: 1; overflow: hidden;">
+                        <div id="input-lot-grid" style="height: 100%;"></div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
@@ -282,12 +318,13 @@
                 new FlexGridContextMenu(this.grid);
                 this.grid.downloadFileName = '작업 지시 내역';
 
-                this.grid.hostElement.addEventListener('dblclick', function(e) {
+                this.grid.hostElement.addEventListener('click', function(e) {
                     let ht = _this.grid.hitTest(e);
                     if (ht.cellType === wijmo.grid.CellType.Cell) {
                         let item = _this.grid.rows[ht.row].dataItem;
                         if (item) {
 
+                            $('#txtInputCode').val('');
                             document.getElementById("jr_pk").value = item.jr_pk;
                             // showConsumedList 호출
                             _this.showConsumedList();
@@ -295,9 +332,17 @@
                             // showInputLotList 호출
                             _this.showInputLotList();
 
-                            // txtInputLot 포커스 주기
+                            const $section = $('.section');
+                            const $tabWrap = $('.tab-wrap');
+                            $section.hide();
+                            $tabWrap.css({
+                                'display': 'flex',
+                                'flex-direction': 'row'
+                            });
+
+                            // ✅ LOT 입력창 포커스
                             setTimeout(() => {
-                                document.getElementById("txtInputLot").focus();
+                                $('#txtInputLot').focus();
                             }, 100);
                         }
                     }
@@ -348,7 +393,6 @@
                     const jr_pk = $('#jr_pk').val();
                     if (ht.panel === this.inputLotGrid.cells) {
                         const item = this.inputLotGrid.rows[ht.row]?.dataItem;
-                        console.log('item', item);
                         if (item) page.showLotInput(item.lot_number, jr_pk, item.mpi_id);
                     }
                 }.bind(this));
@@ -368,12 +412,12 @@
                     headersVisibility: wijmo.grid.HeadersVisibility.Column,
                     allowSorting: true, // 모든 컬럼 정렬 가능
                     columns: [
-                        {binding: 'mat_code', header: '품목코드', width: 100, align: 'center', isReadOnly: true},
-                        {binding: 'mat_name', header: '품목', width: 250, align: 'left', isReadOnly: true},
+                        {binding: 'mat_code', header: '품목코드', width: 90, align: 'center', isReadOnly: true},
+                        {binding: 'mat_name', header: '품목', width: 200, align: 'left', isReadOnly: true},
                         {
                             binding: 'request_qty_sum',
                             header: '로트투입량',
-                            width: 100,
+                            width: 90,
                             align: 'right',
                             format: 'n4',
                             isReadOnly: true
@@ -381,7 +425,7 @@
                         {
                             binding: 'bom_consumed',
                             header: '소요량(BOM)',
-                            width: 120,
+                            width: 90,
                             align: 'right',
                             format: 'n4',
                             isReadOnly: true
@@ -424,17 +468,20 @@
                     }
                 });
 
-                this.consumedGrid.selectionChanged.addHandler((s, e) => {
-                    const view = s.collectionView;
-                    const cur = view ? view.currentItem : null;
-                    const code = (cur && cur.mat_code) ? cur.mat_code : '';
+                this.consumedGrid.hostElement.addEventListener('click', function(e) {
+                    let ht = _this.consumedGrid.hitTest(e);
+                    if (ht.cellType === wijmo.grid.CellType.Cell) {
+                        let item = _this.consumedGrid.rows[ht.row].dataItem;
+                        if (item && item.mat_code) {
+                            const code = item.mat_code;
+                            const $input = $('#txtInputCode');
 
-                    const $input = $('#txtInputCode');
-                    if ($input.val() !== code) {
-                        $input.val(code).trigger('input'); // 값 세팅 후 input 이벤트 발생
-                    } else {
-                        // 값이 같아도 검색을 바로 돌리고 싶다면 주석 해제
-                        _this.showInputLotList();
+                            // 입력창에 코드 설정
+                            $input.val(code).trigger('input');
+
+                            // 리스트 갱신 호출
+                            _this.showInputLotList();
+                        }
                     }
                 });
 
@@ -524,7 +571,6 @@
 
                 let fnsuccess = function (result) {
                     if (result != null) {
-                        console.log('result.data', result.data);
                         _this.grid.itemsSource = new wijmo.collections.CollectionView(result.data);
                     }
                 };
@@ -680,7 +726,6 @@
 
                 try {
                     const { lot, message } = await this.fetchLotInfo(lot_number, jr_pk, mpi_id);
-                    console.log('lot', lot);
                     if (message) {
                         Alert.alert('', message);
                     }
@@ -863,6 +908,17 @@
 
             document.getElementById("txtInputLot").addEventListener("focus", function () {
                 this.setAttribute("lang", "en");
+            });
+
+            $(document).ready(function () {
+                const $section = $('.section');
+                const $tabWrap = $('.tab-wrap');
+
+                // ✅ 검사 취소 버튼 클릭 시 원래 화면 복귀
+                $('#btnCancelInspect').on('click', function () {
+                    $tabWrap.hide();
+                    $section.show();
+                });
             });
 
 
