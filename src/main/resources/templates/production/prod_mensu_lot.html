@@ -288,6 +288,7 @@
                         let item = _this.grid.rows[ht.row].dataItem;
                         if (item) {
 
+                            $('#txtInputCode').val('');
                             document.getElementById("jr_pk").value = item.jr_pk;
                             // showConsumedList 호출
                             _this.showConsumedList();
@@ -424,17 +425,20 @@
                     }
                 });
 
-                this.consumedGrid.selectionChanged.addHandler((s, e) => {
-                    const view = s.collectionView;
-                    const cur = view ? view.currentItem : null;
-                    const code = (cur && cur.mat_code) ? cur.mat_code : '';
+                this.consumedGrid.hostElement.addEventListener('click', function(e) {
+                    let ht = _this.consumedGrid.hitTest(e);
+                    if (ht.cellType === wijmo.grid.CellType.Cell) {
+                        let item = _this.consumedGrid.rows[ht.row].dataItem;
+                        if (item && item.mat_code) {
+                            const code = item.mat_code;
+                            const $input = $('#txtInputCode');
 
-                    const $input = $('#txtInputCode');
-                    if ($input.val() !== code) {
-                        $input.val(code).trigger('input'); // 값 세팅 후 input 이벤트 발생
-                    } else {
-                        // 값이 같아도 검색을 바로 돌리고 싶다면 주석 해제
-                        _this.showInputLotList();
+                            // 입력창에 코드 설정
+                            $input.val(code).trigger('input');
+
+                            // 리스트 갱신 호출
+                            _this.showInputLotList();
+                        }
                     }
                 });
 

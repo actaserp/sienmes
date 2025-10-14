@@ -47,15 +47,12 @@
             .pagebreak {
                 page-break-before: always;
             }
-
-            /* page-break-after works, as well */
         }
 
         .bg_gray {
             background: #dedede;
         }
 
-        /*align*/
         .table_1 td.tar {
             text-align: right;
         }
@@ -72,14 +69,6 @@
             width: 100%;
             border-collapse: collapse;
         }
-
-        /*.table_1 th.b2 {border: 2px solid #166614;}
-        .table_1 th.b2lt {border-left: 2px solid #166614;border-top: 2px solid #166614;}
-        .table_1 th.b2rt {border-right: 2px solid #166614;border-top: 2px solid #166614;}
-        .table_1 th.b2l {border-left: 2px solid #166614;}
-        .table_1 th.b2r {border-right: 2px solid #166614;}
-        .table_1 th.b2lrt {border-left: 2px solid #166614;border-right: 2px solid #166614;border-top: 2px solid #166614;}
-        .table_1 th.b2t {border-top: 2px solid #166614;}*/
 
         .table_1 td.b2lr {
             border-left: 2px solid #166614;
@@ -145,7 +134,7 @@
             border-right: 2px solid #166614;
         }
 
-        .table_1 th, td {
+        .table_1 th, .table_1 td {
             border: 1px solid black;
             text-align: center;
             padding-left: 3px;
@@ -183,14 +172,6 @@
             font-size: 24px;
             font-weight: 600;
             padding: 5px;
-        }
-
-        .wj-align-left {
-            text-align: left !important;
-        }
-
-        .wj-colheaders .wj-cell {
-            text-align: center !important;
         }
     </style>
 
@@ -1085,7 +1066,7 @@
     </script>
 
     <script type="text/x-tmpl" id="barcode_table_tmpl">
-        <table class="table_1" style="width: 400px;border-collapse: collapse;">
+        <table class="table_1" style="width: 6.8cm; height: 6.5cm; border-collapse: collapse;">
             <tr>
                 <td class="tac">품목코드</td>
                 <td>{%=o.MaterialCode%}</td>
@@ -1116,7 +1097,6 @@
                 </td>
             </tr>
         </table>
-        <div style="width:auto;height;0px;page-break-before:always;line-height:5px;">&nbsp;</div>
 
     </script>
 </th:block>
@@ -2607,8 +2587,8 @@
                     // use options
                     JsBarcode(svg_id, item.LotNumber, {
                         format: 'code128', // 바코드 포맷 / default: code128 / options: EAN, UPC, CODE39, ITF-14, MSI, Pharmacode, Codabar (각 옵션들에 대한 설명은 사이트 참조)
-                        width: 2, // 너비 / default: 2
-                        height: 100, // 높이 / default: 100
+                        width: 1, // 너비 / default: 2
+                        height: 80, // 높이 / default: 100
                         displayValue: true, // 텍스트 표시 여부 / default: true
                         text: item.LotNumber, // 데이터 대신 특정 텍스트 표시 / default: undefined
                         fontOptions: '', // 폰트 설정 / default: '' / options: bold, italic, bold italic
@@ -2616,10 +2596,10 @@
                         textAlign: 'center', // 텍스트 위치 / default: center / options: left, center, right
                         textPosition: 'bottom', // 텍스트 위치 / default: bottom / options: top, bottom
                         textMargin: 2, // 바코드와 텍스트 사이 여백 / default: 2
-                        fontSize: 20, // 폰트 크기 / default: 20
+                        fontSize: 16, // 폰트 크기 / default: 20
                         background: '#ffffff', // 바코드 배경 색 / default: #ffffff
                         lineColor: '#000000', // 바코드 라인 색 / default: #000000
-                        margin: 10, // 바코드 영역 주변 여백 / default: 10
+                        margin: 5, // 바코드 영역 주변 여백 / default: 10
                     });
                 });
 
@@ -2627,7 +2607,7 @@
 
                 // 바코드 인쇄 버튼 클릭
                 $btnPopPrintBarcode.click(function (e) {
-                    var popupWindow = window.open("barcode_print", "_blank", "width=400px");
+                    var popupWindow = window.open("", "_blank", "width=400px");
                     let css = $('#print_css')[0].outerHTML;
 
                     let html = $barcodeDiv.html();

@@ -570,38 +570,38 @@
                         </div>
 
                     </section>
-                    <section class="tab-item" id="tabBarcode">
+<!--                    <section class="tab-item" id="tabBarcode">-->
 
-                        <div class="table_box sub">
-                            <div class="row">
+<!--                        <div class="table_box sub">-->
+<!--                            <div class="row">-->
 
-                                <div class="col-6">
-                                    <div class="title_box">
-                                        <div class="left_align">
-                                            작업지시번호
-                                            <button type="button" class="btn-cancel" id="btnPrintWorkOrderBarcode"
-                                                    data-labelCd="프린트">프린트
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="col-12" id="workOrderContainerDiv"></div>
-                                </div>
+<!--                                <div class="col-6">-->
+<!--                                    <div class="title_box">-->
+<!--                                        <div class="left_align">-->
+<!--                                            작업지시번호-->
+<!--                                            <button type="button" class="btn-cancel" id="btnPrintWorkOrderBarcode"-->
+<!--                                                    data-labelCd="프린트">프린트-->
+<!--                                            </button>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div class="col-12" id="workOrderContainerDiv"></div>-->
+<!--                                </div>-->
 
-                                <div class="col-6">
-                                    <div class="title_box">
-                                        <div class="left_align">
-                                            Lot number
-                                            <button type="button" class="btn-cancel" id="btnPrintLotNumberBarcode"
-                                                    data-labelCd="프린트">프린트
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="col-12" id="LotNumberContainerDiv">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+<!--                                <div class="col-6">-->
+<!--                                    <div class="title_box">-->
+<!--                                        <div class="left_align">-->
+<!--                                            Lot number-->
+<!--                                            <button type="button" class="btn-cancel" id="btnPrintLotNumberBarcode"-->
+<!--                                                    data-labelCd="프린트">프린트-->
+<!--                                            </button>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div class="col-12" id="LotNumberContainerDiv">-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </section>-->
                 </div>
 
             </div>
@@ -798,65 +798,65 @@
     <script type="text/x-tmpl" id="barcode_tmpl">
         <div class="content_wrap popup">
 
-            <section class="pt-2">
-                    <div class="table_box sub">
-                        <form id="productionOrderForm">
-                            <input type="hidden" id="id" name="id" value="{%=o.id%}">
+            <section class="pt-2" style="overflow:auto; height:600px;">
+                <div class="table_box">
+                    <form id="productionOrderForm">
+                        <input type="hidden" id="id" name="id" value="{%=o.id%}">
 
-                            <div class="table_box sub" >
-                                <div class="row" id = "barcodeArea">
 
-                                    <div class="col-12">
-                                        <div class="title_box">
-                                            <div class="left_align">
-                                                작업지시번호
-                                                <button type="button" class="btn-cancel" id="btnPrintWorkOrderBarcode" data-labelCd="프린트">프린트</button>
-                                            </div>
+                            <div class="row" id = "barcodeArea">
+
+                                <div class="col-12">
+                                    <div class="title_box">
+                                        <div class="left_align">
+                                            작업지시번호
+                                            <button type="button" class="btn-cancel" id="btnPrintWorkOrderBarcode" data-labelCd="프린트">프린트</button>
                                         </div>
-                                        <div class="col-12" id="workOrderContainerDiv">
+                                    </div>
+                                    <div class="col-12" id="workOrderContainerDiv">
 
-                                            <table class="table_1" style="width: 400px;border-collapse: collapse;">
-                                                <tr>
-                                                    <td class="tac">품목코드</td>
-                                                    <td>{%=o.mat_code%}</td>
-                                                    <td class="tac">워크센터</td>
-                                                    <td>{%=o.workcenter%}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="tac">생산품명</td>
-                                                    <td colspan="3">{%=o.mat_name%}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="tac">생산량</td>
-                                                    <td>{%=o.good_qty%}</td>
-                                                    <td class="tac">생산단위</td>
-                                                    <td>{%=o.unit%}</td>
-                                                </tr>
+                                        <table class="table_1" style="width: 6.8cm; height: 6.5cm; border-collapse: collapse;">
+                                            <tr>
+                                                <td class="tac">품목코드</td>
+                                                <td>{%=o.mat_code%}</td>
+                                                <td class="tac">워크센터</td>
+                                                <td>{%=o.workcenter%}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="tac">생산품명</td>
+                                                <td colspan="3">{%=o.mat_name%}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="tac">생산량</td>
+                                                <td>{%=o.good_qty%}</td>
+                                                <td class="tac">생산단위</td>
+                                                <td>{%=o.unit%}</td>
+                                            </tr>
 
-                                                <tr>
-                                                    <td class="tac">생산일자</td>
-                                                    <td colspan="3">{%=o.prod_date%} {%=o.end_time%}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="tac">유효기한</td>
-                                                    <td colspan="3">{%=o.ValidDays%}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="4" class="barcode_td">
-                                                        <svg id='svgBarcodeWorkOrderNumber'></svg>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        </div>
+                                            <tr>
+                                                <td class="tac">생산일자</td>
+                                                <td colspan="3">{%=o.prod_date%} {%=o.end_time%}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="tac">유효기한</td>
+                                                <td colspan="3">{%=o.ValidDays%}</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="4" class="barcode_td">
+                                                    <svg id='svgBarcodeWorkOrderNumber'></svg>
+                                                </td>
+                                            </tr>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
-                        </form>
-                    </div>
+
+                    </form>
+                </div>
 
             </section>
 
-            <section class="popupcontent" >
+            <section class="popupcontent" style="border:none;">
                 <div class="align_left">
                     <!--<button type="button" class="btn-popup" id="btn_save" ><span data-labelCd="저장">저장</span></button>-->
                     <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
@@ -2473,12 +2473,12 @@
                 // 작업지시번호 바코드 설정
                 //
                 let select_jr = _this.grid.selectedItems[0];
-                let select_chasu = _this.chasuGrid.selectedItems;
+                let select_chasu = _this.chasuGrid.itemsSource.items;
                 let select_jr_array = []
                 let totalHtml = []
 
                 if (select_chasu.length > 0) {
-                    for (var i = 0; i < select_chasu.length; i++) {
+                    for (let i = 0; i < select_chasu.length; i++) {
                         select_jr_array.push(this.object_copy(select_jr))
                         select_jr_array[i]['chasu_good_qty'] = select_chasu[i].good_qty;
 
@@ -2489,17 +2489,17 @@
                 let $content = $(content);
 
                 // 바코드 갯수만큼 추가
-                for (var i = 0; i < select_jr_array.length; i++) {
+                for (let i = 0; i < select_jr_array.length; i++) {
                     $content.find('#barcodeArea').append(
                         "<div class='col-12'>"
                         + "<div class='title_box'>"
                         + "   <div class='left_align'>"
                         + "        Lot number"
-                        + "        <button type='button' class='btn-cancel' id='btnPrintLotNumberBarcode' data-labelCd='프린트'>프린트</button>"
+                        + "        <button type='button' class='btn-cancel' id='btnPrintLotNumberBarcode_" + i + "' data-labelCd='프린트'>프린트</button>"
                         + "    </div>"
                         + "</div>"
-                        + "<div class='col-12' id='LotNumberContainerDiv'>"
-                        + "    <table class='table_1' style='width: 400px;border-collapse: collapse;'>"
+                        + "<div class='col-12' id='LotNumberContainerDiv_" + i + "'>"
+                        + "    <table class='table_1' style='width: 6.8cm; height: 6.5cm; border-collapse: collapse;'>"
                         + "        <tr>"
                         + "            <td class='tac'>품목코드</td>"
                         + "            <td>" + select_jr_array[i].mat_code + "</td>                                 "
@@ -2519,7 +2519,7 @@
                         + "                                                                      "
                         + "      <tr>                                                            "
                         + "          <td class='tac'>생산일자</td>                               "
-                        + "          <td colspan='3'>" + select_jr_array[i].prod_date + " " + select_chasu[i].input_time + "</td>       "
+                        + "          <td colspan='3'> " + select_chasu[i].input_time + "</td>       "
                         + "      </tr>                                                           "
                         + "      <tr>                                                            "
                         + "          <td class='tac'>유효기한</td>                               "
@@ -2527,11 +2527,10 @@
                         + "      </tr>                                                           "
                         + "      <tr>                                                            "
                         + "          <td colspan='4' class='barcode_td'>                         "
-                        + "              <svg id='svgBarcodeLotNumber'></svg>                    "
+                        + "              <svg id='svgBarcodeLotNumber_" + i + "'></svg>                    "
                         + "          </td>                                                       "
                         + "      </tr>                                                           "
                         + "  </table>                                                            "
-                        + "                                                                      "
                         + "        </div>"
                         + "    </div> "
                     )
@@ -2539,7 +2538,7 @@
 
                 let modalContainer = null;
                 modalContainer = new PopupDraggable('바코드 출력');
-                modalContainer.open({width: 600, height: 650, $content});
+                modalContainer.open({width: 400, height: 680, $content});
 
                 // scroll 처리
                 $('.ax-modal-body').css('overflow', 'auto');
@@ -2551,8 +2550,8 @@
 
                 $content.find('#svgBarcodeWorkOrderNumber').JsBarcode(select_jr.order_num, {
                     format: 'code128', // 바코드 포맷 / default: code128 / options: EAN, UPC, CODE39, ITF-14, MSI, Pharmacode, Codabar (각 옵션들에 대한 설명은 사이트 참조)
-                    width: 2, // 너비 / default: 2
-                    height: 100, // 높이 / default: 100
+                    width: 1, // 너비 / default: 2
+                    height: 80, // 높이 / default: 100
                     displayValue: true, // 텍스트 표시 여부 / default: true
                     text: barcodeLabelText, // 데이터 대신 특정 텍스트 표시 / default: undefined
                     fontOptions: '', // 폰트 설정 / default: '' / options: bold, italic, bold italic
@@ -2563,11 +2562,11 @@
                     fontSize: 12, // 폰트 크기 / default: 20
                     background: '#ffffff', // 바코드 배경 색 / default: #ffffff
                     lineColor: '#000000', // 바코드 라인 색 / default: #000000
-                    margin: 10, // 바코드 영역 주변 여백 / default: 10
+                    margin: 5, // 바코드 영역 주변 여백 / default: 10
                 });
 
                 $content.find('#btnPrintWorkOrderBarcode').click(function (e) {
-                    let popupWindow = window.open("barcode_print", "_blank", "width=800px");
+                    let popupWindow = window.open("", "_blank", "width=400px");
                     let css = $('#print_css')[0].outerHTML;
 
                     let html = $workOrderContainerDiv.html();
@@ -2579,18 +2578,15 @@
 
                 totalHtml.push($workOrderContainerDiv.html())
 
-                for (var i = 0; i < select_jr_array.length; i++) {
-                    let lotContainer = $content.find('#LotNumberContainerDiv').eq(i)
-
-
-                    let $LotNumberContainerDiv = lotContainer
+                for (let i = 0; i < select_jr_array.length; i++) {
+                    let $LotNumberContainerDiv = $content.find('#LotNumberContainerDiv_' + i);
 
                     if (select_chasu.length > 0) {
                         barcodeLabelText = select_chasu[i].lot_no + "(" + select_jr_array[i].mat_name + ")";
-                        $content.find("#svgBarcodeLotNumber").eq(i).JsBarcode(select_chasu[i].lot_no, {
+                        $content.find("#svgBarcodeLotNumber_" + i).JsBarcode(select_chasu[i].lot_no, {
                             format: 'code128', // 바코드 포맷 / default: code128 / options: EAN, UPC, CODE39, ITF-14, MSI, Pharmacode, Codabar (각 옵션들에 대한 설명은 사이트 참조)
-                            width: 2, // 너비 / default: 2
-                            height: 100, // 높이 / default: 100
+                            width: 1, // 너비 / default: 2
+                            height: 80, // 높이 / default: 100
                             displayValue: true, // 텍스트 표시 여부 / default: true
                             text: barcodeLabelText, // 데이터 대신 특정 텍스트 표시 / default: undefined
                             fontOptions: '', // 폰트 설정 / default: '' / options: bold, italic, bold italic
@@ -2601,11 +2597,11 @@
                             fontSize: 12, // 폰트 크기 / default: 20
                             background: '#ffffff', // 바코드 배경 색 / default: #ffffff
                             lineColor: '#000000', // 바코드 라인 색 / default: #000000
-                            margin: 10, // 바코드 영역 주변 여백 / default: 10
+                            margin: 5, // 바코드 영역 주변 여백 / default: 10
                         });
 
-                        $content.find('#btnPrintLotNumberBarcode').eq(i).click(function (e) {
-                            let popupWindow = window.open("barcode_print", "_blank", "width=800px");
+                        $content.find('#btnPrintLotNumberBarcode_' + i).click(function (e) {
+                            let popupWindow = window.open("", "_blank", "width=400px");
                             let css = $('#print_css')[0].outerHTML;
 
                             let html = $LotNumberContainerDiv.html();
@@ -2619,10 +2615,10 @@
                     totalHtml.push($LotNumberContainerDiv.html())
                 }
                 $content.find('#modal-printAll-button').click(function (e) {
-                    let popupWindow = window.open("barcode_print", "_blank", "width=800px");
+                    let popupWindow = window.open("", "_blank", "width=400px");
                     let css = $('#print_css')[0].outerHTML;
 
-                    let html = totalHtml;
+                    let html = totalHtml.join('');
 
                     popupWindow.document.write(css);
                     popupWindow.document.write(html);

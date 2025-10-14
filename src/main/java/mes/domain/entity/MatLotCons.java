@@ -49,7 +49,7 @@ public class MatLotCons extends AbstractAuditModel {
 	Float currentStock;
 
 	@Column(name = "\"shipment_id\"")
-	int shipmentId;
+	Integer shipmentId;
 
 	String spjangcd;
 }
