@@ -5,12 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-
+@Slf4j
 @Service
 public class ComboService {
 
@@ -308,27 +309,35 @@ public class ComboService {
         return this.sqlRunner.getRows(sql, dicParam);		
 	};
 
-	ComboDataFunction equipment_code=(String cond1, String cond2, String cond3)-> {
+	ComboDataFunction equipment_code = (String cond1, String cond2, String cond3) -> {
 		String sql = "select " +
-					 "              rd.id as id" +
-					 "              , rd.\"DataPk1\" as \"WorkCenter_id\"" +
-					 "              , rd.\"DataPk2\" as \"value\"" +
-					 "              , e.\"Name\" as \"text\"" +
-					 "              , wc.\"Name\" as \"WorkCenterName\"" +
-					 "              , e.\"Code\" as \"Code\"" +
-					 "            from rela_data rd " +
-					 "                left join work_center wc on wc.id = rd.\"DataPk1\"" +
-					 "                left join equ e on e.id = rd.\"DataPk2\"" +
-					 "            where rd.\"TableName1\"='work_center' and rd.\"TableName2\"='equ'";
-
-		if (StringUtils.hasText(cond1)) {
-			sql += " and rd.\"DataPk1\" = :cond1"; // 중복 방지
-		}
+				" rd.id as id" +
+				" , rd.\"DataPk1\" as \"WorkCenter_id\"" +
+				" , rd.\"DataPk2\" as \"value\"" +
+				" , e.\"Name\" as \"text\"" +
+				" , wc.\"Name\" as \"WorkCenterName\"" +
+				" , e.\"Code\" as \"Code\"" +
+				" from rela_data rd " +
+				" left join work_center wc on wc.id = rd.\"DataPk1\"" +
+				" left join equ e on e.id = rd.\"DataPk2\"" +
+				" where rd.\"TableName1\"='work_center' and rd.\"TableName2\"='equ'";
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
-		dicParam.addValue("cond1", Integer.parseInt(cond1));
+
+		// ✅ cond1이 null이 아니고 숫자로 변환 가능할 때만 추가
+		if (StringUtils.hasText(cond1)) {
+			try {
+				dicParam.addValue("cond1", Integer.parseInt(cond1));
+				sql += " and rd.\"DataPk1\" = :cond1";
+			} catch (NumberFormatException e) {
+				// cond1이 숫자가 아닐 경우 로그로 남기고 무시
+				log.warn("Invalid cond1 value (not a number): {}", cond1);
+			}
+		}
+
 		dicParam.addValue("cond2", cond2);
 		dicParam.addValue("cond3", cond3);
+
 		return this.sqlRunner.getRows(sql, dicParam);
 	};
 
