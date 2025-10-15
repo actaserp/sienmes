@@ -3,15 +3,15 @@
     <div class="layout-contents">
         <div class="page-title-wrap">
             <div class="left">
-                <h2>LOT 조회</h2>
+                <h2>LOT재고조회</h2>
                 <a title="북마크" class="bookmark toggle">
                     내 메뉴
                 </a>
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-                <li>LOT 관리</li>
-                <li>LOT 조회</li>
+                <li>재고 관리</li>
+                <li>LOT재고조회</li>
             </ul>
         </div>
         <form id="searchForm" autocomplete="off">
@@ -20,11 +20,9 @@
                     <div class="search-wrap">
                         <dl>
                             <dt>
-
-                                <select class="input-group-text2 fit_box_md" id="chk_filter" name="chk_filter" >
-                                    <option value="date" data-labelCd="등록일" >등록일</option>
-                                    <option value="remain" data-labelCd="잔량>0">잔량>0</option>
-                                </select>
+                                <label>
+                                    등록일
+                                </label>
                             </dt>
                             <dd>
                                 <div class="srch-box">
@@ -101,7 +99,7 @@
             </div>
         </section>
 
-        <section>
+        <section style="display: none;">
             <div class="grid_box">
                 <div class="title_box">
                     <span class="right_align rpt" data-labelCd="출하 품목">LOT 소비내역</span>
@@ -167,7 +165,6 @@
 </th:block>
 
 <th:block layout:fragment="scripts">
-    <th:block th:replace="/common/columns_setting :: columns_setting" ></th:block>
     <script type="text/javascript">
 
         class LotListPage {
@@ -198,25 +195,47 @@
                     isReadOnly: true,
                     columns: [
 
-                        {binding: 'prod_date', header: '일시', width: 120, align: 'center'},
+                        {binding: 'prod_date', header: '일시', width: 140, align: 'center'},
                         {binding: 'lot_num', header: 'LOT번호', width: 150, align: 'center'},
-                        {binding: 'mat_type', header: '품목구분', width: 100, align: 'left'},
-                        {binding: 'mat_group', header: '품목그룹', width: 120, align: 'left'},
-                        {binding: 'mat_code', header: '품목코드', width: 120, align: 'left'},
+                        {binding: 'mat_type', header: '품목구분', width: 100, align: 'center'},
+                        {binding: 'mat_group', header: '품목그룹', width: 100, align: 'center'},
+                        {binding: 'mat_code', header: '품목코드', width: 120, align: 'center'},
                         {binding: 'mat_name', header: '품목명', width: 150, align: 'left'},
-                        {binding: 'input_qty', header: '초기량', width: 100, align: 'right'},
-                        {binding: 'out_qty', header: '출고량', width: 100, align: 'right'},
-                        {binding: 'current_stock', header: '재고량', width: 100, align: 'right'},
-                        {binding: 'reg_history', header: '등록내역', width: 250, align: 'left'},
+                        {binding: 'input_qty', header: '초기량', width: 80, align: 'right'},
+                        {binding: 'out_qty', header: '출고량', width: 80, align: 'right'},
+                        {binding: 'current_stock', header: '재고량', width: 80, align: 'right'},
+                        {binding: 'effective_date', header: '유효기간', width: 100, align: 'center'},
+                        {binding: 'remaining_days', header: '잔여유효일수', width: 100, align: 'right'},
+                        {binding: 'expired_days', header: '경과일수', width: 100, align: 'right'},
+                        {binding: 'reg_history', header: '등록내역', width: 150, align: 'left'},
                         {binding: 'description', header: '비고', width: 300, align: 'left'},
 
                     ],
                     itemsSource: this.viewData,
                     formatItem: function (s, e) {
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
-                            e.cell.style.textAlign = 'center'; // 헤더 텍스트 가운데 정렬
+                            e.cell.style.textAlign = 'center'; // 헤더 가운데 정렬
                         }
-                    },
+
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            const col = s.columns[e.col];
+                            const item = s.rows[e.row].dataItem;
+
+                            // 🔹 expired_days가 0보다 크면 배경색 적용
+                            if (col.binding === 'expired_days' && item.expired_days > 0) {
+                                e.cell.style.backgroundColor = '#f8d2cb';
+                            } else {
+                                // 기본 배경 초기화 (다른 셀에 영향 방지)
+                                e.cell.style.backgroundColor = '';
+                            }
+
+                            // 선택사항: 숫자가 0이면 표시하지 않기
+                            if (col.binding === 'expired_days' && item.expired_days === 0) {
+                                e.cell.textContent = '';
+                            }
+                        }
+                    }
+
 
                 });
                 //맨 앞에 헤더부분 없애기
@@ -327,13 +346,10 @@
                 };
 
                 //let filter_cond = $("input[name='chk_filter']:checked").val();  // 이전 Radio 버튼 일때
-                let filter_cond = $("#chk_filter").val();
-                if (filter_cond == 'date') {
-                    param['date_from'] = $('#srchStartDt').val();
-                    param['date_to'] = $('#srchEndDt').val();
-                } else if (filter_cond == 'remain') {
-                    param['cond'] = 'remain'
-                }
+
+                param['date_from'] = $('#srchStartDt').val();
+                param['date_to'] = $('#srchEndDt').val();
+
 
                 let result = AjaxUtil.getSyncData(this.baseUrl + '/read', param);
                 if (result) {
@@ -421,6 +437,10 @@
 
         $(document).ready(function (e) {
             page = new LotListPage();
+
+            $('#btnSearch').click(function (e) {
+                page.searchMainData();
+            });
 
             $("#chk_filter").change(function () {
                 if ($("#chk_filter").val() == "date") {

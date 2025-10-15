@@ -499,10 +499,27 @@ with recursive T as (
                 , ml."Description" as description
                 , ml."SourceDataPk" as source_id
                 , ml."SourceTableName" as source_table
+                , to_char(ml."EffectiveDate", 'YYYY-MM-DD') as effective_date
+                
+                -- 잔여유효일수 (유효기간이 미래일 때)
+				, case
+					  when ml."EffectiveDate"::date >= current_date
+					  then (ml."EffectiveDate"::date - current_date)
+					  else 0
+				  end as remaining_days
+			  
+				  -- 경과일수 (유효기간이 지났을 때)
+				, case
+					  when ml."EffectiveDate"::date < current_date
+					  then (current_date - ml."EffectiveDate"::date)
+					  else 0
+				  end as expired_days
+				  
                 from mat_lot ml 
                 inner join material m on m.id = ml."Material_id"
                 left join mat_grp mg on mg.id = m."MaterialGroup_id"
                 where 1=1
+                and ml."CurrentStock"  > 0
             """;
 
         if (StringUtils.isEmpty(mat_type)==false) {
