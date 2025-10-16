@@ -329,7 +329,7 @@
                         const selectedRowData = this.shipmentHeaderGrid.rows[selectedRowIndex].dataItem;
 
                         if (selectedRowData) {
-                            // 👉 더블클릭 시만 실행
+                            // 👉 클릭 시만 실행
                             _this.showShipmentList();
 
                             if (selectedRowData.state == "shipped") {
@@ -390,7 +390,7 @@
                             header: '단가',
                             maxWidth: 120,
                             align: 'right',
-                            isReadOnly: false, // 편집 가능
+                            isReadOnly: true, // 편집 가능
                             editor: new wijmo.input.InputNumber(document.createElement('div'), {
                                 format: 'n0', // 정수 형식
                                 min: 0,       // 최소값 설정
@@ -400,7 +400,7 @@
                         },
                         {binding: 'price', header: '공급가', maxWidth: 120, align: 'right', isReadOnly: true},
                         {binding: 'vat', header: '부가세', maxWidth: 100, align: 'right', isReadOnly: true},
-                        {binding: 'vat_ex_yn', header: '부가세면제', maxWidth: 100, align: 'center', isReadOnly: true},
+                        {binding: 'invat_yn', header: '부가세포함', maxWidth: 100, align: 'center', isReadOnly: true},
                         {binding: 'total_price', header: '합계', maxWidth: 120, align: 'right', isReadOnly: true},
 
                     ],
@@ -413,17 +413,15 @@
 
                 });
 
+                this.shipmentListGrid.loadedRows.addHandler(() => {
+                    setTimeout(() => {
+                        this.shipmentListGrid.select(-1, -1); // 선택 상태 초기화
+                    }, 0); // 비동기로 처리하여 초기 선택 해제
+                });
+
                 this.shipmentListGrid.selectionChanged.addHandler((s, e) => {
 
-                    if (!enterFlag) {
-                        console.log('false');
-                        // 선택된 표시(UI)도 함께 해제
-                        setTimeout(() => {
-                            this.shipmentListGrid.select(-1, -1); // ✅ 시각적 선택 해제
-                        }, 0);
-                        enterFlag = true;
-                        return;
-                    }
+
 
                     let selectedRowIndex = s.selection.row; // 선택된 행의 인덱스
                     if (selectedRowIndex >= 0) { // 유효한 행이 선택되었는지 확인
@@ -923,12 +921,31 @@
                     shipment_id: shipment_id,
                     Q: strData
                 };
+                const selectedRow = _this.shipmentListGrid.selection.row >= 0
+                    ? _this.shipmentListGrid.rows[_this.shipmentListGrid.selection.row].dataItem :
+                    null;
+                const selectedId = selectedRow ? selectedRow.shipment_id : null;
 
                 let fnSuccess = function (res) {
                     if (res.success) {
                         AjaxUtil.hideLoading();
                         Notify.success("LOT지정 취소 완료.");
-                        _this.showShipmentList();
+                        _this.showShipmentList(function() {
+                            if (selectedId) {
+                                const view = _this.shipmentListGrid.collectionView;
+                                const index = view.items.findIndex(item => item.shipment_id === selectedId);
+
+                                if (index >= 0) {
+                                    // ✅ grid 데이터가 완전히 갱신된 후 select() 호출
+                                    _this.shipmentListGrid.loadedRows.addHandler(() => {
+                                        setTimeout(() => {
+                                            _this.shipmentListGrid.select(index, 0);
+                                            _this.shipmentListGrid.scrollIntoView(index, 0);
+                                        }, 0);
+                                    });
+                                }
+                            }
+                        });
 
                         if (shipment_id != null) {
                             _this.shipmentListGrid.select(shipmentItems[0].__index);

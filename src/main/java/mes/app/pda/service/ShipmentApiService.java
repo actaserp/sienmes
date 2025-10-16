@@ -46,6 +46,9 @@ public class ShipmentApiService {
     @Autowired
     private MatLotConsRepository matLotConsRepository;
 
+	@Autowired
+	private ShipmentSubApiService shipmentSubApiService;
+
 
 	public List<Map<String, Object>> ApigetShipmentOrderList(String date_from, String date_to, String state, Integer comp_pk, Integer mat_grp_pk, Integer mat_pk, String keyword) {
 
@@ -376,17 +379,18 @@ public class ShipmentApiService {
 					Double orderQty = sm.getOrderQty();
 					sm.set_status("a");
 					sm.set_audit(user);
-					sm.setQty(orderQty);
+					sm.setQty(orderQty); //나중에 과출하가 가능해지면 주석 ㄱㄱ
 
 					this.shipmentRepository.save(sm);
 
 				}
 			}
 		}
-		//TODO: 확인필요
-		//shipmentDoBService.updateShipmentStateComplete(sh_id, "");
 
-		shipmentDoBService.updateSujuShipmentState(sh_id);
+		//TODO: 확인필요
+		//shipmentSubApiService.updateShipmentStateComplete_pda(sh_id, "", sourceData); //하나의 트랜잭션으로 묶어줘야 정상실행된다. 그래서 서비스클래스 또 따로분리 , //또한 한 클래스 안에서 트랜잭션은 안걸리므로 자기자신을 주입받아야함.
+
+		shipmentSubApiService.updateSujuShipmentState_pda(sh_id);
 		//endregion
 
 
@@ -423,7 +427,11 @@ public class ShipmentApiService {
 
 			matLotConsRepository.save(matlotcons);
 
-			shipmentDoBService.updateShipmentQantityByLotConsume(sh_id, shipmentId, sourceData);
+			//shipmentSubApiService.updateShipmentStateComplete_pda(sh_id, "", sourceData);
+			shipmentSubApiService.updateShipmentQantityByLotConsume_pda(sh_id, shipmentId, sourceData);
+			shipmentSubApiService.updateShipmentStateComplete_pda(sh_id, "", sourceData);
+
+
 		}
 		//endregion
 

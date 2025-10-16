@@ -132,14 +132,16 @@ public class ShipmentDoBService {
 	        , s."Vat" as vat
 	        , (s."Price" + s."Vat") as total_price
 	        , m."VatExemptionYN" as vat_ex_yn
-	        , u."Name" as unit_name 
+	        , COALESCE(suju."InVatYN", 'N') as invat_yn
+	        , u."Name" as unit_name
 	        , s."OrderQty"
 	        , s."Qty"
 	        , s."Description" as description
 	        , (select coalesce(sum(mlc."OutputQty" ), 0) as lot_qty from mat_lot_cons mlc where mlc."SourceDataPk" = s.id and mlc."SourceTableName"='shipment') as lot_qty
-	        from shipment s 
+	        from shipment s
 	            inner join shipment_head sh on sh.id = s."ShipmentHead_id" 
 	            inner join material m on m.id = s."Material_id" 
+	            left join suju suju on suju.id = s."SourceDataPk" and s."SourceTableName" = 'rela_data'
 	            left join mat_grp mg on mg.id = m."MaterialGroup_id" 
 	            left join unit u on u.id = m."Unit_id" 
 	        where sh.id = :shipment_header_id	
@@ -360,6 +362,141 @@ public class ShipmentDoBService {
 		this.sqlRunner.execute(sql, paramMap);
 	}
 
+	public void updateShipmentAndHeadByLotConsume(Integer sh_id, Integer shipment_id, String sourceData) {
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("sh_id", sh_id);
+		paramMap.addValue("shipment_id", shipment_id);
+
+		String sql = """
+        with A as (
+            select
+                s.id,
+                coalesce(sum(mlc."OutputQty"), 0) as qty
+            from shipment s
+            inner join shipment_head sh on sh.id = s."ShipmentHead_id"
+            left join mat_lot_cons mlc 
+                on mlc."SourceTableName" = 'shipment' 
+                and mlc."SourceDataPk" = s.id
+            where sh.id = :sh_id
+    """;
+
+		if (shipment_id != null) {
+			sql += " and s.id = :shipment_id ";
+		}
+
+		sql += " group by s.id ), ";
+
+		if (sourceData.equals("rela_data")) {
+
+			sql += """
+            UPC as (
+                select
+                    s.id,
+                    s."Material_id",
+                    sh."Company_id",
+                    mcu."UnitPrice",
+                    m."VatExemptionYN"
+                from A
+                inner join shipment s on s.id = A.id
+                inner join shipment_head sh on sh.id = s."ShipmentHead_id"
+                inner join material m on m.id = s."Material_id"
+                left join mat_comp_uprice mcu 
+                    on mcu."Material_id" = s."Material_id"
+                    and mcu."Company_id" = sh."Company_id"
+                    and mcu."ApplyStartDate" <= now()
+                    and mcu."ApplyEndDate" > now()
+                where sh.id = :sh_id
+            ),
+            B as (
+                select
+                    s.id,
+                    A.qty,
+                    UPC."UnitPrice",
+                    (A.qty * UPC."UnitPrice") as "Price",
+                    case when UPC."VatExemptionYN" = 'Y' then 0 else (A.qty * UPC."UnitPrice" * 0.1) end as "Vat",
+                    COALESCE(suju."InVatYN", 'N') as invat
+                from shipment s
+                inner join suju suju on suju.id = s."SourceDataPk" and s."SourceTableName" = 'rela_data'
+                inner join A on A.id = s.id
+                inner join UPC on UPC.id = s.id
+            )
+            update shipment s set
+                "Qty" = B.qty,
+                "UnitPrice" = B."UnitPrice",
+                "Price" = case
+                    when B.invat = 'Y' then ROUND((B."Price" / 1.1)::numeric, 2)
+                    else B."Price"
+                end,
+                "Vat" = case
+                    when B.invat = 'Y' then ROUND(((B."Price" / 1.1) * 0.1)::numeric, 2)
+                    else B."Vat"
+                end
+            from B
+            where s.id = B.id;
+
+            update shipment_head sh set
+                "TotalQty" = coalesce((select sum(s."Qty") from shipment s where s."ShipmentHead_id" = :sh_id), 0),
+                "TotalPrice" = coalesce((select sum(s."Price") from shipment s where s."ShipmentHead_id" = :sh_id), 0),
+                "TotalVat" = coalesce((select sum(s."Vat") from shipment s where s."ShipmentHead_id" = :sh_id), 0)
+            where sh.id = :sh_id;
+        """;
+
+		} else if (sourceData.equals("product")) {
+
+			sql += """
+            UPC as (
+                select
+                    s.id,
+                    s."Material_id",
+                    sh."Company_id",
+                    mcu."UnitPrice",
+                    m."VatExemptionYN"
+                from A
+                inner join shipment s on s.id = A.id
+                inner join shipment_head sh on sh.id = s."ShipmentHead_id"
+                inner join material m on m.id = s."Material_id"
+                left join mat_comp_uprice mcu 
+                    on mcu."Material_id" = s."Material_id"
+                    and mcu."Company_id" = sh."Company_id"
+                    and mcu."ApplyStartDate" <= now()
+                    and mcu."ApplyEndDate" > now()
+                where sh.id = :sh_id
+            ),
+            B as (
+                select
+                    s.id,
+                    A.qty,
+                    UPC."UnitPrice",
+                    (A.qty * UPC."UnitPrice") as "Price",
+                    case when UPC."VatExemptionYN" = 'Y' then 0 else (A.qty * UPC."UnitPrice" * 0.1) end as "Vat"
+                from shipment s
+                inner join A on A.id = s.id
+                inner join UPC on UPC.id = s.id
+            )
+            update shipment s set
+                "Qty" = B.qty,
+                "UnitPrice" = B."UnitPrice",
+                "Price" = B."Price",
+                "Vat" = B."Vat"
+            from B
+            where s.id = B.id;
+
+            update shipment_head sh set
+                "TotalQty" = coalesce((select sum(s."Qty") from shipment s where s."ShipmentHead_id" = :sh_id), 0),
+                "TotalPrice" = coalesce((select sum(s."Price") from shipment s where s."ShipmentHead_id" = :sh_id), 0),
+                "TotalVat" = coalesce((select sum(s."Vat") from shipment s where s."ShipmentHead_id" = :sh_id), 0)
+            where sh.id = :sh_id;
+        """;
+		} else {
+			throw new RuntimeException("SourceDataTable의 값이 올바르지 않습니다.");
+		}
+
+		this.sqlRunner.execute(sql, paramMap);
+	}
+
+
+
 
 
 	// 수주헤더 기준으로 출하항목(shipment) 금액합산 정리
@@ -398,6 +535,8 @@ public class ShipmentDoBService {
 
 		this.sqlRunner.execute(sql, paramMap);
 	}
+
+
 
 	// 관련 수주를 찾아서 수주의 출하 상태를 변경한다.
 	public void updateSujuShipmentState (Integer sh_id) {
