@@ -90,7 +90,12 @@ public class ShipmentDoaController {
 		for(int i = 0; i < data.size(); i++) {
 			Integer head_id = Integer.parseInt(data.get(i).get("id").toString());
 			ShipmentHead smh = this.shipmentHeadRepository.getShipmentHeadById(head_id);
-			
+
+			//출하정보 없을때
+			if(smh==null){
+				result.success = false; result.message = "해당 출하정보가 없습니다."; return result;
+			}
+
 			if(!smh.getState().equals("shipped")) {
 				List<Shipment> smList = shipmentRepository.findByShipmentHeadId(head_id);
 				int orderSum = 0;
@@ -116,6 +121,7 @@ public class ShipmentDoaController {
 			}
 			result.data = smh;
 		}
+
 		
 		return result;
 	}

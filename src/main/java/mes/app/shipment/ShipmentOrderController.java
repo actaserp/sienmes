@@ -89,7 +89,8 @@ public class ShipmentOrderController {
 		
 		return result;
 	}
-	
+
+	//모달반영도 여기바라봄.
 	@PostMapping("/save_shipment_order")
 	@Transactional
 	public AjaxResult saveShipmentOrder(
@@ -215,7 +216,7 @@ public class ShipmentOrderController {
 		}
 		smh = this.shipmentHeadRepository.save(smh);
 
-
+		//로직 시작
 		for(int i = 0; i < data.size(); i++) {
 
 			int orderQty = Integer.parseInt(data.get(i).get("order_qty").toString());
@@ -285,6 +286,7 @@ public class ShipmentOrderController {
 
 				if (item != null) {
 					double qty = item.getSujuQty();
+
 					if (item.getVat() != null) {
 						double vat = item.getVat().doubleValue();
 
@@ -296,10 +298,9 @@ public class ShipmentOrderController {
 						totalVat += VatSum;
 					}
 					if (item.getPrice() != null) {
-						double price = item.getPrice().doubleValue();
 
-						double UnitPrice = price / qty;
-						double PriceSum = UnitPrice * orderQty;
+						double UnitPrice = item.getUnitPrice();
+						double PriceSum = item.getPrice();
 
 						sm.setUnitPrice(UnitPrice);
 						sm.setPrice(PriceSum);
@@ -333,9 +334,8 @@ public class ShipmentOrderController {
 		smh.setTotalVat(totalVat);
 
 		smh = this.shipmentHeadRepository.save(smh);
-		
+
 		result.data = smh;
-		
 		return result;
 	}
 		

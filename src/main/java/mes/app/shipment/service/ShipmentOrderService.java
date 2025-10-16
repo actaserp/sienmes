@@ -32,12 +32,6 @@ public class ShipmentOrderService {
 		MapSqlParameterSource paramMap = new MapSqlParameterSource();
 
 
-
-
-
-
-
-
 		paramMap.addValue("dateFrom", dateFrom);
 		paramMap.addValue("dateTo", dateTo);
 		paramMap.addValue("notShip", notShip);
