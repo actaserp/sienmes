@@ -229,7 +229,7 @@ public class ShipmentApiService {
                 , sh."State" as state
                 , case 
                 	when sh."State" = 'ordered'
-                		then '출하'
+                		then '미출고'
                 	when sh."State" = 'shipped'	
                 		then '출고'
                 	else ''
