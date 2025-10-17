@@ -169,8 +169,8 @@ public class ProdOrderAController {
 
 		header.setRouting_id(routingPk);
 		header.setProcessCount(steps.size()); // 전체 공정 수
-		header.setWorkCenter_id(lastWcId);
-		header.setFirstWorkCenter_id(lastWcId);
+		header.setWorkCenter_id(cboWorcenter);
+		header.setFirstWorkCenter_id(cboWorcenter);
 		header.setEquipment_id(cboEquipment);   // 설비/교대는 라우팅 있을 땐 화면값 미사용
 		header.setShiftCode(cboShiftCode);
 

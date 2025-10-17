@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -1083,6 +1081,19 @@ public class ProductionResultController {
         MaterialLot ml = new MaterialLot();
         ml.setLotNumber(lotNumber);
         ml.setMaterialId(m.getId());
+        // 현재 날짜 (오늘)
+
+        // 유효기간(일수) 추가
+        LocalDate newDate = date.plusDays(m.getValidDays());
+        // 날짜만 있고 시간은 00:00:00 으로 설정
+        LocalDateTime effectiveDateTime = newDate.atStartOfDay(); // 00:00:00
+        // 한국 시간(+09:00) 기준으로 변환
+        ZonedDateTime zonedDateTime = effectiveDateTime.atZone(ZoneId.of("Asia/Seoul"));
+        // DB 저장용 Timestamp 변환
+        Timestamp effectiveTimestamp = Timestamp.from(zonedDateTime.toInstant());
+
+        // 저장
+        ml.setEffectiveDate(effectiveTimestamp);
         ml.setInputDateTime(now);
         ml.setInputQty(mp.getGoodQty());
         ml.setCurrentStock(mp.getGoodQty());

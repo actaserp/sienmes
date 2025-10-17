@@ -59,7 +59,6 @@ public class TestProcessService {
                  left join mat_grp mg on mg.id = m."MaterialGroup_id"
                  left join process_test pt on pt."job_res_id" = jr."id"
                  where jr."ProductionDate" between cast(:dateFrom as date) and cast(:dateTo as date)
-                 and jr."Routing_id" is null
                  and jr.spjangcd = :spjangcd
                  and jr."State" = 'finished'
                 """;
