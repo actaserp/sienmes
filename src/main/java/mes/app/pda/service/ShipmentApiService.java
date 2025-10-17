@@ -227,7 +227,13 @@ public class ShipmentApiService {
 	            , sh."TotalVat" as total_vat
 	            , sh."Description" as description
                 , sh."State" as state
-                , fn_code_name('shipment_state', sh."State") as state_name
+                , case 
+                	when sh."State" = 'ordered'
+                		then '출하'
+                	when sh."State" = 'shipped'	
+                		then '출고'
+                	else ''
+                --fn_code_name('shipment_state', sh."State") as state_name
                 , to_char(coalesce(sh."OrderDate",sh."_created") ,'yyyy-mm-dd') as order_date
                 , sh."StatementIssuedYN" as issue_yn
                 , sh."StatementNumber" as stmt_number
