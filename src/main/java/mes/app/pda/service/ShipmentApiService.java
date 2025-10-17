@@ -232,7 +232,7 @@ public class ShipmentApiService {
                 		then '출하'
                 	when sh."State" = 'shipped'	
                 		then '출고'
-                	else ''
+                	else as '출하상태'
                 --fn_code_name('shipment_state', sh."State") as state_name
                 , to_char(coalesce(sh."OrderDate",sh."_created") ,'yyyy-mm-dd') as order_date
                 , sh."StatementIssuedYN" as issue_yn
