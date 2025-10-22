@@ -751,6 +751,10 @@
         let page = null;
 
         $(document).ready(function (e) {
+            $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
+            $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
+
+            $('#shipdate').val(CommonUtil.getYYYYMMDD());
             page = new ShipmentOrderPage();
             new CompanySelector('condCompanySelect', 'combobox', 'cboCompany', 'sale', {
                 null_option: 'all',
@@ -902,10 +906,7 @@
 
             });
 
-            $('#srchStartDt').val(CommonUtil.getYYYYMMDD(-7));
-            $('#srchEndDt').val(CommonUtil.getYYYYMMDD());
 
-            $('#shipdate').val(CommonUtil.getYYYYMMDD());
 
             $('#btnSaveShipOrder').click(function (e) {
                 if (page.grid_shipment.collectionView.items == 0) {

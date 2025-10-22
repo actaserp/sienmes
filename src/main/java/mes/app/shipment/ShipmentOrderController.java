@@ -63,11 +63,11 @@ public class ShipmentOrderController {
 			@RequestParam("keyword") String keyword ){
 
 		if(dateFrom.isEmpty()){
-			dateFrom = UtilClass.getDayByParamAdd(0); // 오늘날짜
+			//dateFrom = UtilClass.getDayByParamAdd(0); // 오늘날짜
 		}
 
 		if(dateTo.isEmpty()){
-			dateTo = UtilClass.getDayByParamAdd(7);
+			//dateTo = UtilClass.getDayByParamAdd(7);
 		}
 
 		List<Map<String, Object>> items = this.shipmentOrderService.getSujuList(dateFrom,dateTo,notShip,compPk,matGrpPk,matPk,keyword);
@@ -290,24 +290,31 @@ public class ShipmentOrderController {
 				if (item != null) {
 					double qty = item.getSujuQty();
 
-					if (item.getVat() != null) {
-						double vat = item.getVat().doubleValue();
-
-
-						double UnitVat = vat / qty;
-						double VatSum = UnitVat * orderQty;
-
-						sm.setVat(VatSum);
-						totalVat += VatSum;
-					}
 					if (item.getPrice() != null) {
 
-						double UnitPrice = item.getUnitPrice();
-						double PriceSum = item.getPrice();
+						double UnitPrice = item.getUnitPrice(); //단가
 
+						String invatyn = item.getInVatYN(); //부가세 포함 여부
 						sm.setUnitPrice(UnitPrice);
+
+						double price;
+						if(invatyn.equals("Y")){
+							price = UnitPrice / 1.1;
+						}else{
+							price = UnitPrice;
+						}
+
+						double PriceSum = price * orderQty;
+						double vat = PriceSum * 0.1;
+
+						// 반올림 (소수점 셋째자리에서)
+						PriceSum = Math.round(PriceSum * 100.0) / 100.0;
+						vat = Math.round(vat * 100.0) / 100.0;
+
 						sm.setPrice(PriceSum);
+						sm.setVat(vat);
 						totalPrice += PriceSum;
+						totalVat += vat;
 					}
 					sm.setSourceTableName("rela_data");
 				}

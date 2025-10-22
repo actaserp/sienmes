@@ -395,7 +395,8 @@ public class ShipmentDoBService {
                     s.id,
                     s."Material_id",
                     sh."Company_id",
-                    mcu."UnitPrice",
+                    --mcu."UnitPrice",
+                    coalesce(s."UnitPrice", mcu."UnitPrice") as "UnitPrice",
                     m."VatExemptionYN"
                 from A
                 inner join shipment s on s.id = A.id
