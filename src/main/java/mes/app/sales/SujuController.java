@@ -197,7 +197,7 @@ public class SujuController {
 
 				int suju_pk = suju.getId();
 
-				Optional<Shipment> shipment = shipmentRepository.findById(suju_pk);
+				Optional<Shipment> shipment = shipmentRepository.findBySourceTableNameAndSourceDataPk("rela_data", suju_pk);
 
 				//출하계획 or 부분출하는 수정하게 하면 안됨 , 자바스크립트로 막는것도 좋지만
 				//어떤 변수가 있을지 몰라서 서버측에서 방어하면 안전함 서버측은 동기화면에서 강함

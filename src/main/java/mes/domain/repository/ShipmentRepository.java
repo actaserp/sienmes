@@ -1,6 +1,7 @@
 package mes.domain.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -17,4 +18,6 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Integer>{
 	List<Shipment> findByShipmentHeadId(Integer head_id);
 
 	Shipment getByShipmentHeadId(Integer sh_id);
+
+    Optional<Shipment> findBySourceTableNameAndSourceDataPk(String sourceTableName, Integer sourceDataPk);
 }
