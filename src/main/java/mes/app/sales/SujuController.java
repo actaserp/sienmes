@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -203,10 +204,18 @@ public class SujuController {
 				//어떤 변수가 있을지 몰라서 서버측에서 방어하면 안전함 서버측은 동기화면에서 강함
 				//주석처럼 result로 던져버리면 트랜잭션 롤백이 안됨. 예외를 발생시켜야 스프링에서 프록시로 가로채서 롤백가능
 				if(shipment.isPresent()){
+
+					result.success = false;
+					result.message = "출하계획 또는 진행중인 수주입니다.";
+
+					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
+					return result;
+
 					//result.success = false;
 					//result.message = "출하계획 또는 진행중인 수주입니다.";
 					//return result;
-					throw new RuntimeException("출하계획 또는 진행중인 수주입니다.");
+					
 				}
 
 			} else {
