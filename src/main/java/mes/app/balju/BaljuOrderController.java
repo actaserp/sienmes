@@ -621,17 +621,17 @@ public class BaljuOrderController {
 
   /**
    * 엑셀 업로드
-   * 파일명 :sien_balju_upload
+   * 파일명 : sien_balju_upload
    * 납기 예정일 : B2  # DeliveryDate   --- balju_head
-   * 품목 코드: A4     # Material_id    --- balju
-   * 품목명:  B4
-   * 주문수량: C4      # SujuQty        --- balju
-   * 단가: D4          # UnitPrice      --- balju
-   * **/
+   * 품목 코드  : A4   # Material_id    --- balju
+   * 품목명     : B4
+   * 주문수량   : C4   # SujuQty        --- balju
+   * 단가       : D4   # UnitPrice      --- balju
+   */
   @PostMapping("/upload_save")
   public AjaxResult uploadSeve(
       @RequestParam("data_date") String data_date,
-      @RequestParam("spjangcd") String spjangcd,
+      @RequestParam("spjangcd")  String spjangcd,
       @RequestParam("upload_file") MultipartFile upload_file,
       Authentication auth) {
 
@@ -639,7 +639,6 @@ public class BaljuOrderController {
     AjaxResult res = new AjaxResult();
 
     try {
-
       if (upload_file == null || upload_file.isEmpty()) {
         res.success = false;
         res.message = "업로드 파일이 없습니다.";
@@ -653,7 +652,7 @@ public class BaljuOrderController {
       String basePath = settings.getProperty("file_temp_upload_path"); // 예: c:\\temp\\mes21\\upload_temp\\
       String uploadFilename = basePath + ts + "_" + upload_file.getOriginalFilename();
 
-      // 🔹 디렉터리 보장
+      // 디렉터리 보장
       File dir = new File(basePath);
       if (!dir.exists()) { dir.mkdirs(); }
 
@@ -669,7 +668,6 @@ public class BaljuOrderController {
 
         Sheet sheet = wb.getSheetAt(0);
 
-        // B2: 납기예정일
         // B2: 납기예정일 안전 파싱
         Row row2 = sheet.getRow(1);
         String deliveryDateIso = data_date; // 기본값
@@ -678,16 +676,16 @@ public class BaljuOrderController {
           Cell dcell = row2.getCell(1); // B2
           if (dcell != null) {
             if (dcell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(dcell)) {
-              // ✅ 진짜 날짜 셀
+              // 숫자형 날짜 셀
               java.util.Date d = dcell.getDateCellValue();
               deliveryDateIso = new java.text.SimpleDateFormat("yyyy-MM-dd").format(d);
             } else if (dcell.getCellType() == CellType.STRING) {
-              // ✅ 문자열 셀 → 유연 파싱
+              // 문자열 셀
               String s = dcell.getStringCellValue().trim();
-              Date parsed = tryParseIsoOrKoreanDate(s); // 아래 헬퍼 참고
+              Date parsed = tryParseIsoOrKoreanDate(s);
               if (parsed != null) deliveryDateIso = CommonUtil.tryString(parsed);
             } else {
-              // ✅ 기타 타입 → 표시문자열로 변환 후 유연 파싱
+              // 기타 타입 → 표시 문자열 후 파싱
               DataFormatter fmt = new DataFormatter(java.util.Locale.KOREAN);
               String s = fmt.formatCellValue(dcell).trim();
               Date parsed = tryParseIsoOrKoreanDate(s);
@@ -696,9 +694,9 @@ public class BaljuOrderController {
           }
         }
 
-
-        // A4~: 데이터 읽고 → ID/금액 계산까지 해서 item 구성
+        // A4~: 데이터 읽기
         List<Map<String, Object>> items = new ArrayList<>();
+        List<String> errs = new ArrayList<>();  // 에러 누적
 
         for (int r = 3; r <= sheet.getLastRowNum(); r++) {
           Row row = sheet.getRow(r);
@@ -706,56 +704,66 @@ public class BaljuOrderController {
 
           String materialCode = getCellString(row.getCell(0)); // A: 품목 코드
           String materialName = getCellString(row.getCell(1)); // B: 품목명
-          Double qty         = getCellNumeric(row.getCell(2)); // C: 수량
-          Double unitPrice   = getCellNumeric(row.getCell(3)); // D: 단가
+          Double qtyRaw       = getCellNumeric(row.getCell(2)); // C: 수량
+          Double unitPriceRaw = getCellNumeric(row.getCell(3)); // D: 단가
 
           // 빈 행 스킵
           if ((materialCode == null || materialCode.isEmpty()) &&
               (materialName == null || materialName.isEmpty()) &&
-              qty == null && unitPrice == null ){
+              qtyRaw == null && unitPriceRaw == null ){
             continue;
           }
 
-          // ✅ 2-1) 품목 코드 → Material_id
+          // 품목/거래처 조회
           Integer materialId = materialRepository.findIdByCodeAndSpjangcd(materialCode, spjangcd);
-          if (materialId == null) {
-            res.success = false;
-            res.message = "미등록 품목코드: " + materialCode + " (행 " + (r+1) + ")";
-            res.code = "NO_MATERIAL";
-            return res;
-          }
-
-          // ✅ 2-2) 업체명 → Company (baljuOrderService에 위임)
           Company comp = baljuOrderService.findCompCode(materialCode, spjangcd);
+
+          // 에러 누적(즉시 return 금지)
+          if (materialId == null) {
+            errs.add(String.format("행 %d: 미등록 품목코드입니다. (코드: %s)", r+1, materialCode));
+            continue;
+          }
           if (comp == null) {
-            res.success = false;
-            res.message = "업체 매핑 실패: " + materialCode + " (행 " + (r+1) + ")";
-            res.code = "NO_COMPANY"; // 선택
-            return res;
+            errs.add(String.format(
+                "행 %d: 품목[%s/%s]의 기본 매입처가 없습니다.\n경로: 기준정보 > 품목정보 > 발주/재고정보에서 기본 매입처 등록 후 다시 업로드하세요.",
+                r+1, materialCode, materialName
+            ));
+            continue;
           }
 
-
-          double q  = (qty != null ? qty : 0d);
-          double up = (unitPrice != null ? unitPrice : 0d);
-          double supply = q * up;
-          double vat    = Math.floor(supply * 0.1); // 부가세 10% (정책에 맞게 조정 가능)
+          double q       = dround(qtyRaw, 4);        // 수량 소수 4자리
+          double up      = dround(unitPriceRaw, 2);  // 단가 소수 2자리(정책에 맞게 조정)
+          double supply  = dround(q * up, 0);        // 공급가(정수라면 0, 정책에 따라 2도 가능)
+          double vat     = dround(supply * 0.1, 0);  // 부가세(정수라면 0)
 
           Map<String, Object> item = new HashMap<>();
-          item.put("Material_id", materialId);
-          item.put("quantity", q);
-          item.put("unit_price", up);
+          item.put("Material_id",  materialId);
+          item.put("quantity",     q);
+          item.put("unit_price",   up);
           item.put("supply_price", supply);
-          item.put("vat", vat);
+          item.put("vat",          vat);
 
-          item.put("Company_id", comp.getId());
-          item.put("CompanyName", comp.getName());
+          item.put("Company_id",   comp.getId());
+          item.put("CompanyName",  comp.getName());
 
-          item.put("due_date", deliveryDateIso);  // 공통 납기일
-          item.put("description", materialName);  // 비고로 품목명 저장 (선택)
-          item.put("totalEdited", false);         // 자동계산 기본
+          item.put("due_date",     deliveryDateIso); // 공통 납기일
+          item.put("description",  materialName);
+          item.put("totalEdited",  false);
+
+          // 메시지용 원본 정보
+          item.put("MaterialCode", materialCode);
+          item.put("sourceRow",    r + 1);
 
           items.add(item);
+        }
 
+        // 루프 종료 후 에러가 한 건이라도 있으면 한 번에 반환
+        if (!errs.isEmpty()) {
+          AjaxResult bad = new AjaxResult();
+          bad.success = false;
+          bad.code = "MISSING_DEFAULT_VENDOR";
+          bad.message = String.join("\n", errs);
+          return bad;
         }
 
         // 3) payload 구성 → 업체별 발주 저장 (saveBaljuMultiGrouped가 Company_id로 그룹핑)
@@ -764,7 +772,7 @@ public class BaljuOrderController {
         payload.put("DueDate", deliveryDateIso);
         payload.put("spjangcd", spjangcd);
         payload.put("invatyn", "N");
-        payload.put("cboBaljuType", "Regular"); //기본은 Regular(정기) 로 저장
+        payload.put("cboBaljuType", "Regular"); // 기본 Regular(정기)
         payload.put("special_note", "");
         payload.put("items", items);
 
@@ -772,8 +780,13 @@ public class BaljuOrderController {
       }
 
     } catch (Exception e) {
+      // 개발자 로그
+      // log.error("엑셀 업로드 처리 실패", e);
       res.success = false;
-      res.message = "엑셀 처리 중 오류: " + e.getMessage();
+      res.code = "UPLOAD_FAILED";
+      res.message = "엑셀 처리 중 오류가 발생했습니다.\n"
+          + "입력한 품목에 기본 매입처가 등록되어 있는지 확인해 주세요.\n"
+          + "(경로: 기준정보 > 품목정보 > 발주/재고정보)";
       return res;
     }
   }
@@ -994,6 +1007,16 @@ public class BaljuOrderController {
       } catch (Exception ignore) {}
     }
     return null;
+  }
+
+  // double 오차 없이 반올림: 어떤 타입이 와도 안전하게 처리
+  private static double dround(Object v, int scale) {
+    if (v == null) return 0d;
+    String s = String.valueOf(v).trim();
+    if (s.isEmpty() || s.equalsIgnoreCase("null")) return 0d;
+    return new java.math.BigDecimal(s)
+        .setScale(scale, java.math.RoundingMode.HALF_UP)
+        .doubleValue();
   }
 
 
