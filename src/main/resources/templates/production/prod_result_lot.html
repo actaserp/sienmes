@@ -636,7 +636,7 @@
                 <td colspan="3">{%=o.prod_date%} {%=o.end_time%}</td>
             </tr>
             <tr>
-                <td class="tac">유효기한</td>
+                <td class="tac">소비기한</td>
                 <td colspan="3">{%=o.ValidDays%}</td>
             </tr>
             <tr>
@@ -671,7 +671,7 @@
                 <td colspan="3">{%=o.prod_date%} {%=o.end_time%}</td>
             </tr>
             <tr>
-                <td class="tac">유효기한</td>
+                <td class="tac">소비기한</td>
                 <td colspan="3">{%=o.ValidDays%}</td>
             </tr>
             <tr>
@@ -798,7 +798,7 @@
     <script type="text/x-tmpl" id="barcode_tmpl">
         <div class="content_wrap popup">
 
-            <section class="pt-2" style="overflow:auto; height:600px;">
+            <section class="pt-2" style="overflow:auto;">
                 <div class="table_box">
                     <form id="productionOrderForm">
                         <input type="hidden" id="id" name="id" value="{%=o.id%}">
@@ -807,12 +807,12 @@
                             <div class="row" id = "barcodeArea">
 
                                 <div class="col-12">
-                                    <div class="title_box">
-                                        <div class="left_align">
-                                            작업지시번호
-                                            <button type="button" class="btn-cancel" id="btnPrintWorkOrderBarcode" data-labelCd="프린트">프린트</button>
-                                        </div>
-                                    </div>
+<!--                                    <div class="title_box">-->
+<!--                                        <div class="left_align">-->
+<!--                                            작업지시번호-->
+<!--                                            <button type="button" class="btn-cancel" id="btnPrintWorkOrderBarcode" data-labelCd="프린트">프린트</button>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
                                     <div class="col-12" id="workOrderContainerDiv">
 
                                         <table class="table_1" style="width: 6.8cm; height: 6.5cm; border-collapse: collapse;">
@@ -838,7 +838,7 @@
                                                 <td colspan="3">{%=o.prod_date%} {%=o.end_time%}</td>
                                             </tr>
                                             <tr>
-                                                <td class="tac">유효기한</td>
+                                                <td class="tac">소비기한</td>
                                                 <td colspan="3">{%=o.ValidDays%}</td>
                                             </tr>
                                             <tr>
@@ -2524,7 +2524,7 @@
                         + "          <td colspan='3'> " + select_chasu[i].input_time + "</td>       "
                         + "      </tr>                                                           "
                         + "      <tr>                                                            "
-                        + "          <td class='tac'>유효기한</td>                               "
+                        + "          <td class='tac'>소비기한</td>                               "
                         + "          <td colspan='3'>" + select_jr_array[i].ValidDays + "</td>                       "
                         + "      </tr>                                                           "
                         + "      <tr>                                                            "
@@ -2540,12 +2540,14 @@
 
                 let modalContainer = null;
                 modalContainer = new PopupDraggable('바코드 출력');
-                modalContainer.open({width: 400, height: 680, $content});
+                modalContainer.open({width: 400, height: 550, $content});
 
                 // scroll 처리
                 $('.ax-modal-body').css('overflow', 'auto');
 
                 let $workOrderContainerDiv = $content.find('#workOrderContainerDiv');
+
+                $content.find('#workOrderContainerDiv').hide();
 
                 //order_num
                 let barcodeLabelText = select_jr.order_num + "(" + select_jr.mat_name + ")";
@@ -2578,7 +2580,7 @@
                     return false;
                 });
 
-                totalHtml.push($workOrderContainerDiv.html())
+                // totalHtml.push($workOrderContainerDiv.html())
 
                 for (let i = 0; i < select_jr_array.length; i++) {
                     let $LotNumberContainerDiv = $content.find('#LotNumberContainerDiv_' + i);

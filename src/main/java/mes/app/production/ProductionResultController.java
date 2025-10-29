@@ -842,73 +842,87 @@ public class ProductionResultController {
             Authentication auth) {
 
         AjaxResult result = new AjaxResult();
-
         User user = (User) auth.getPrincipal();
-
         Timestamp inoutTime = DateUtil.getNowTimeStamp();
 
         JobRes jr = this.jobResRepository.getJobResById(jrPk);
-
         MaterialLot ml = this.matLotRepository.getMatLotById(lotId);
 
-        if (ml != null) {
-            if (ml.getCurrentStock() <= 0) {
-                result.message = "가용한 재고가 없는 LOT을 지정했습니다.(" + ml.getLotNumber() + ")";
-                result.success = false;
-                return result;
+        if (ml == null) {
+            result.success = false;
+            result.message = "LOT 정보가 존재하지 않습니다.";
+            return result;
+        }
+
+        if (ml.getCurrentStock() <= 0) {
+            result.message = "가용한 재고가 없는 LOT입니다.(" + ml.getLotNumber() + ")";
+            result.success = false;
+            return result;
+        }
+
+        if (ml.getStoreHouseId() == null) {
+            result.message = "해당 품목의 기본창고가 지정되지 않았습니다(" + ml.getLotNumber() + ")";
+            result.success = false;
+            return result;
+        }
+
+        // ✅ 이미 등록된 MatProcInput 조회
+        MatProcInput existingMpi = this.matProcInputRepository
+                .findByMaterialProcessInputRequestIdAndMaterialLotId(jr.getMaterialProcessInputRequestId(), ml.getId())
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        MatProcInputReq mir;
+
+        // ✅ 요청 헤더 없으면 새로 생성
+        if (jr != null) {
+            if (jr.getMaterialProcessInputRequestId() == null) {
+                mir = new MatProcInputReq();
+                mir.setRequestDate(inoutTime);
+                mir.setRequesterId(user.getId());
+                mir.set_audit(user);
+                mir = this.matProcInputReqRepository.save(mir);
+                jr.setMaterialProcessInputRequestId(mir.getId());
+            } else {
+                mir = this.matProcInputReqRepository.getMatProcInputReqById(jr.getMaterialProcessInputRequestId());
             }
+        } else {
+            result.success = false;
+            result.message = "작업지시 정보가 없습니다.";
+            return result;
+        }
 
-            if (ml.getStoreHouseId() == null) {
-                result.message = "해당 품목의 기본창고가 지정되지 않았습니다(" + ml.getLotNumber() + ")";
-                result.success = false;
-                return result;
-            }
-
-            List<MatProcInput> mpiList = this.matProcInputRepository.findByMaterialProcessInputRequestIdAndMaterialLotId(jr.getMaterialProcessInputRequestId(), ml.getId());
-            Integer mpiCount = mpiList.size();
-            if (mpiCount > 0) {
-                result.message = "이미 지정된 로트입니다.(" + ml.getLotNumber() + ")";
-                result.success = false;
-                return result;
-            }
-
-            MatProcInputReq mir = null;
-
-            if (jr != null) {
-                if (jr.getMaterialProcessInputRequestId() == null) {
-                    mir = new MatProcInputReq();
-                    mir.setRequestDate(inoutTime);
-                    mir.setRequesterId(user.getId());
-                    mir.set_audit(user);
-                    mir = this.matProcInputReqRepository.save(mir);
-                    jr.setMaterialProcessInputRequestId(mir.getId());
-
-                } else {
-                    mir = this.matProcInputReqRepository.getMatProcInputReqById(jr.getMaterialProcessInputRequestId());
-                }
-            }
-
-            MatProcInput mpi = new MatProcInput();
+        MatProcInput mpi;
+        if (existingMpi != null) {
+            // ✅ 기존 데이터 수정
+            mpi = existingMpi;
+            mpi.setRequestQty(inputQty);
+            mpi.setInputDateTime(inoutTime);
+            mpi.setActorId(user.getId());
+            mpi.set_audit(user);
+        } else {
+            // ✅ 신규 등록
+            mpi = new MatProcInput();
             mpi.setMaterialProcessInputRequestId(mir.getId());
             mpi.setMaterialId(ml.getMaterialId());
             mpi.setRequestQty(inputQty);
-            mpi.setInputQty((float) 0);
+            mpi.setInputQty(0f);
             mpi.setMaterialLotId(ml.getId());
             mpi.setMaterialStoreHouseId(ml.getStoreHouseId());
             mpi.setState("requested");
             mpi.setInputDateTime(inoutTime);
             mpi.setActorId(user.getId());
             mpi.set_audit(user);
-            mpi = this.matProcInputRepository.save(mpi);
-
-            result.success = true;
-            result.data = mpi;
-        } else {
-            result.success = false;
         }
 
+        mpi = this.matProcInputRepository.save(mpi);
+
+        result.success = true;
+        result.data = mpi;
         return result;
     }
+
 
     @PostMapping("/multi_add_lot_input")
     @Transactional

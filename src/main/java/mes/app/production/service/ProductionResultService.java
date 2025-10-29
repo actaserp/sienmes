@@ -710,6 +710,48 @@ public class ProductionResultService {
 							   WHEN m."Useyn" = '0' THEN 'N'
 							   ELSE NULL
 						  END as useyn
+						, coalesce(nullif(m."Standard2"::numeric, 0), 1) AS full_box_kg_safe,
+				  
+						  -- 완전 박스 개수(몫)
+						  floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1)) AS full_box_count,
+						  
+						  -- 남는 중량(kg) = 필요수량 - (완박스수 × 1박스kg)
+						  round(
+							BT.bom_requ_qty
+							- floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1))
+							  * coalesce(nullif(m."Standard2"::numeric, 0), 1)
+						  , 3) AS remain_qty_kg,
+						  
+						  -- 표시 컬럼 (규칙: 몫=0이면 나머지만, 나머지=0이면 몫만, 둘 다 있으면 "몫 + 나머지")
+				  CASE
+				    -- 🔹 완박스가 0 → 남은 중량만
+				    WHEN floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1)) = 0 THEN
+				      round(
+				        BT.bom_requ_qty
+				        - floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1))
+				          * coalesce(nullif(m."Standard2"::numeric, 0), 1)
+				      , 3)::text
+				  
+				    -- 🔹 남은 중량이 0 → 완박스만
+				    WHEN round(
+				        BT.bom_requ_qty
+				        - floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1))
+				          * coalesce(nullif(m."Standard2"::numeric, 0), 1)
+				      , 3) = 0 THEN
+				      floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1))::text
+				  
+				    -- 🔹 둘 다 존재 → “몫 + 나머지”
+				    ELSE
+				      concat(
+				        floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1)),
+				        ' + ',
+				        round(
+				          BT.bom_requ_qty
+				          - floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1))
+				            * coalesce(nullif(m."Standard2"::numeric, 0), 1)
+				        , 3)
+				      )
+				  END AS weigh_display
 						from BT
 						inner join material m on m.id=BT.mat_pk
 						left join MCC on MCC.mat_pk=BT.mat_pk

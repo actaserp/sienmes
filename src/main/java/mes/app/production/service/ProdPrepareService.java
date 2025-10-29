@@ -86,7 +86,7 @@ public class ProdPrepareService {
 	                select jr."Material_id" as prod_pk, sum(jr."OrderQty") as order_sum
 	                from A
 	                inner join job_res jr on jr.id = A.jr_pk 
-	                where jr."MaterialProcessInputRequest_id" is null 
+	                where 1=1 
 	                and jr."State" in ( 'ordered', 'working')
 	                group by jr."Material_id"
 	            ), P as (
