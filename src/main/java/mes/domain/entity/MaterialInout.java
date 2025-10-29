@@ -4,16 +4,12 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import mes.domain.FloatOneDecimalConverter;
 
 @Entity
 @Table(name="mat_inout")
@@ -44,6 +40,7 @@ public class MaterialInout extends AbstractAuditModel {
 	@Column(name = "\"DefectQty\"")
 	Float defectQty;
 
+	@Convert(converter = FloatOneDecimalConverter.class)
 	@Column(name = "\"InputQty\"")
 	Float inputQty;
 
@@ -59,8 +56,9 @@ public class MaterialInout extends AbstractAuditModel {
 	@Column(name = "\"OutputType\"")
 	String outputType;
 
+	@Convert(converter = FloatOneDecimalConverter.class)
 	@Column(name = "\"OutputQty\"")
-	Float outputQty;
+	private Float outputQty;
 
 	@Column(name = "\"ReservedOutQty\"")
 	Float reservedOutQty;

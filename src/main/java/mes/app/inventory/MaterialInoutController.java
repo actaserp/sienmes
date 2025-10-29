@@ -63,14 +63,14 @@ public class MaterialInoutController {
 	
 	@Autowired
 	TestResultRepository testResultRepository;
-	
+
 	@Autowired
 	TestItemResultRepository testItemResultRepository;
 
 	@Autowired
 	BujuRepository bujuRepository;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 
 	// 입출고 전체 리스트
 	@GetMapping("/read")
@@ -408,7 +408,7 @@ public class MaterialInoutController {
 
 		return result;
 	}
-	
+
 	// 엑셀데이터 그리드로 변환
 	@SuppressWarnings("unchecked")
 	@GetMapping("/trans_multi_input_data")
@@ -452,35 +452,35 @@ public class MaterialInoutController {
 			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		User user = (User)auth.getPrincipal();
-		
+
 		// 현재 일자
 		LocalDate date = LocalDate.now();
 		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		
+
 		// 현재 시간
 		LocalTime time = LocalTime.now();
 		DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss");
-		
+
 		String state = "confirmed";
 		String _status = "a";
-		
+
 		List<Map<String, Object>> data = CommonUtil.loadJsonListMap(Q.getFirst("Q").toString());
-		
+
 		AjaxResult result = new AjaxResult();
-		
+
 		result.success = false;
 		for (int i=0; i < data.size(); i++) {
 			if(data.get(i).get("mat_code").toString().isEmpty()) {
 				continue;
 			}
-			
+
 			Material m = this.materialRepository.findByCode(data.get(i).get("mat_code").toString());
 			String testYn = m.getInTestYN() != null ? m.getInTestYN() : "";
 			Integer matId = m.getId();
 			Integer qty = Integer.parseInt(data.get(i).get("input_qty").toString());
-			
+
 			MaterialInout mi = new MaterialInout();
 			mi.setMaterialId(matId);
 			mi.setInoutDate(LocalDate.parse(date.format(dateFormat)));
@@ -526,33 +526,33 @@ public class MaterialInoutController {
 			mi.set_audit(user);
 			mi.setSpjangcd(spjangcd);
 			this.matInoutRepository.save(mi);
-			
+
 		}
 		result.success = true;
-		
+
 		return result;
 	}
-	
+
 	@GetMapping("/mio_lot_list")
 	public AjaxResult mioLotList(
 			@RequestParam("mio_id") String mioId) {
-		
+
 		List<Map<String, Object>> items = this.lotService.mioLotList(mioId);
 		AjaxResult result = new AjaxResult();
 		result.data = items;
 		return result;
 	}
-	
+
 	@GetMapping("/mio_test_list")
 	public AjaxResult mioTestList(
 			@RequestParam("mio_id") Integer mioId) {
-		
-		
+
+
 		List<TestResult> trList = this.testResultRepository.findBySourceTableNameAndSourceDataPk("mat_inout", mioId);
-		
+
 		List<Map<String, Object>> items = null;
 		Integer testMasterId = null;
-		
+
 		if (!trList.isEmpty()) {
 			items = this.materialInoutService.mioTestList(mioId,trList.get(0).getId());
 		} else {
@@ -565,14 +565,14 @@ public class MaterialInoutController {
 			}
 
 		}
-		
+
 		Map<String, Object> effectDt = this.materialInoutService.getEffectDate(mioId);
-		
+
 		String effDt = effectDt.get("EffectiveDate") != null ? effectDt.get("EffectiveDate").toString() : null;
-		
-		
+
+
 		Map<String, Object> item = new HashMap<>();
-		
+
 		item.put("EffectiveDate", effDt);
 		item.put("testDate", items.get(0).get("testDate"));
 		item.put("CheckName", items.get(0).get("CheckName"));
@@ -581,12 +581,12 @@ public class MaterialInoutController {
 		item.put("testMasterId", items.get(0).get("testMasterId"));
 		item.put("testResultId", items.get(0).get("testResultId"));
 		item.put("mioList", items);
-		
+
 		AjaxResult result = new AjaxResult();
 		result.data = item;
 		return result;
 	}
-	
+
 	@PostMapping("/lot_save")
 	@Transactional
 	public AjaxResult lotSave(
@@ -597,15 +597,15 @@ public class MaterialInoutController {
 			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		User user = (User)auth.getPrincipal();
-		
+
 		AjaxResult result = new AjaxResult();
-		
+
 		Timestamp today = new Timestamp(System.currentTimeMillis());
-		
+
 		List<Map<String, Object>> data = CommonUtil.loadJsonListMap(Q.getFirst("Q").toString());
-		
+
 		result.success = false;
 		for (int i=0; i < data.size(); i++) {
 			MaterialLot ml = null;
@@ -638,13 +638,13 @@ public class MaterialInoutController {
 				ml.setSpjangcd(spjangcd);
 				ml = this.matLotRepository.save(ml);
 			}
-			
+
 			result.success = true;
 		}
-		
+
 		return result;
 	}
-	
+
 	@PostMapping("/test_save")
 	@Transactional
 	public AjaxResult testSave(
@@ -660,29 +660,29 @@ public class MaterialInoutController {
 			@RequestParam("spjangcd") String spjangcd,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		User user = (User)auth.getPrincipal();
-		
+
 		AjaxResult result = new AjaxResult();
-		
+
 		Timestamp testDate = Timestamp.valueOf(test_date+ " 00:00:00");
-		
+
 		if (StringUtils.hasText(testResultId)) {
 			List<TestItemResult> trList = this.testItemResultRepository.findByTestResultId(Integer.parseInt(testResultId));
-			
+
 			// 결과 삭제
 			if(trList.size() > 0) {
 				for (int i = 0; i < trList.size(); i++) {
 					this.testItemResultRepository.deleteById(trList.get(i).getId());
 				}
 			}
-			
+
 			this.testItemResultRepository.flush();
 		}
-		
-		
+
+
 		TestResult tr = new TestResult();
-		
+
 		if (StringUtils.hasText(testResultId)) {
 			tr = this.testResultRepository.getTestResultById(Integer.parseInt(testResultId));
 		} else {
@@ -690,17 +690,17 @@ public class MaterialInoutController {
 			tr.setSourceTableName("mat_inout");
 			tr.setMaterialId(materialId);
 		}
-		
+
 		tr.setTestMasterId(Integer.parseInt(testMastId));
 		tr.setTestDateTime(testDate);
 		tr.set_audit(user);
 		tr.setSpjangcd(spjangcd);
-		
+
 		this.testResultRepository.saveAndFlush(tr);
-		
-		
+
+
 		List<Map<String, Object>> data = CommonUtil.loadJsonListMap(Q.getFirst("Q").toString());
-		
+
 		for(int i = 0; i < data.size(); i++) {
 			TestItemResult tir = new TestItemResult();
 			tir.setJudgeCode(judgGrp);
@@ -709,7 +709,7 @@ public class MaterialInoutController {
 			tir.setCharResult(testRemark);
 			tir.setTestItemId(Integer.parseInt(data.get(i).get("id").toString()));
 			tir.setTestResultId(tr.getId());
-			
+
 			if(data.get(i).get("result1") != null) {
 				tir.setChar1(data.get(i).get("result1").toString());
 			}
@@ -717,7 +717,7 @@ public class MaterialInoutController {
 			tir.setSpjangcd(spjangcd);
 			this.testItemResultRepository.save(tir);
 		}
-		
+
 		MaterialInout mi = this.matInoutRepository.getMatInoutById(mioId);
 		// 유효기간 변경
 		if(StringUtils.hasText(effectiveDate)) {
@@ -736,28 +736,28 @@ public class MaterialInoutController {
 		}
 
 		this.matInoutRepository.save(mi);
-		
+
 		Map<String, Object> item = new HashMap<>();
 		item.put("id", mioId);
-		
+
 		result.data = item;
-		
+
 		return result;
 	}
-	
+
 	@PostMapping("/check_in_test")
 	@Transactional
 	public AjaxResult checkInTest(
 			@RequestBody MultiValueMap<String,Object> Q,
 			HttpServletRequest request,
 			Authentication auth) {
-		
+
 		User user = (User)auth.getPrincipal();
-		
+
 		AjaxResult result = new AjaxResult();
-		
+
 		List<Map<String, Object>> data = CommonUtil.loadJsonListMap(Q.getFirst("Q").toString());
-	
+
 		for(int i = 0; i < data.size(); i++) {
 			Integer id = Integer.parseInt(data.get(i).get("id").toString());
 			Float inputQty = Float.parseFloat(data.get(i).get("PotentialInputQty").toString());
@@ -769,7 +769,7 @@ public class MaterialInoutController {
 			mi.set_audit(user);
 			this.matInoutRepository.save(mi);
 		}
-		
+
 		return result;
 	}
 
@@ -983,5 +983,5 @@ public class MaterialInoutController {
 
 		return result;
 	}
-	
+
 }

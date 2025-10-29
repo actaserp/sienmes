@@ -215,7 +215,7 @@ public class SujuController {
 					//result.success = false;
 					//result.message = "출하계획 또는 진행중인 수주입니다.";
 					//return result;
-					
+
 				}
 
 			} else {
