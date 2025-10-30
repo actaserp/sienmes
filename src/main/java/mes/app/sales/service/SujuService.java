@@ -52,26 +52,24 @@ public class SujuService {
 			   
 			  GROUP BY sh.id
 			),
-			shipment_summary AS (
-				SELECT
-					s."SujuHead_id",
-					SUM(s."SujuQty") AS total_qty,
-					COALESCE(SUM(shp."shippedQty"), 0) AS total_shipped,
-					CASE
-						WHEN COUNT(shp."SourceDataPk") = 0 THEN ''                             -- 조인 안 됨
-						WHEN COALESCE(SUM(shp."shippedQty"), 0) = 0 THEN 'ordered'             -- 조인 됐는데 출하량 0
-						WHEN SUM(shp."shippedQty") >= SUM(s."SujuQty") THEN 'shipped'          -- 전량 출하
-						WHEN SUM(shp."shippedQty") < SUM(s."SujuQty") THEN 'partial'           -- 일부 출하
-						ELSE ''
-				  	END AS shipment_state
-				  FROM suju s
-				  LEFT JOIN (
-					SELECT "SourceDataPk", SUM("Qty") AS "shippedQty"
-					FROM shipment
-					GROUP BY "SourceDataPk"
-				  ) shp ON shp."SourceDataPk" = s.id
-				  GROUP BY s."SujuHead_id"
-			)
+				shipment_summary AS (
+				    SELECT
+				        s."SujuHead_id",
+				        SUM(s."SujuQty") AS total_qty,
+				        COALESCE(SUM(sh."Qty"), 0) AS total_shipped,
+				        CASE
+				            WHEN BOOL_OR(shh."State" = 'shipped') THEN 'shipped'           -- ✅ shipment_head가 shipped면 shipped
+				            WHEN COUNT(sh.id) = 0 THEN ''                                  -- 출하 없음
+				            WHEN COALESCE(SUM(sh."Qty"), 0) = 0 THEN 'ordered'             -- 출하량 0
+				            WHEN SUM(sh."Qty") >= SUM(s."SujuQty") THEN 'shipped'          -- 전량 출하
+				            WHEN SUM(sh."Qty") < SUM(s."SujuQty") THEN 'partial'           -- 일부 출하
+				            ELSE ''
+				        END AS shipment_state
+				    FROM suju s
+				    LEFT JOIN shipment sh ON sh."SourceDataPk" = s.id
+				    LEFT JOIN shipment_head shh ON shh.id = sh."ShipmentHead_id"
+				    GROUP BY s."SujuHead_id"
+				)
 			   
 			SELECT
 			  sh.id,
