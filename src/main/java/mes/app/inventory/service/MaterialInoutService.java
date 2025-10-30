@@ -159,7 +159,7 @@ public class MaterialInoutService {
             , m."Name" AS "material_name"
             , m."CurrentStock"
             , m."ValidDays"
-            , m."LotSize"
+            , m."Standard2" as lot_size
             , m."PackingUnitQty"
             , mi."StoreHouse_id"
             , mih2."CurrentStock" AS "HouseStock"

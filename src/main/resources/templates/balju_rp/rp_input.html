@@ -66,8 +66,11 @@
         }
 
         .table_1 {
-            width: 100%;
-            border-collapse: collapse;
+            page-break-inside: avoid;     /* ✅ 인쇄 시 라벨이 중간에 잘리지 않도록 */
+        }
+
+        .table_1 td {
+            vertical-align: middle;
         }
 
         .table_1 td.b2lr {
@@ -172,6 +175,21 @@
             font-size: 24px;
             font-weight: 600;
             padding: 5px;
+        }
+
+        .material-name {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .barcode-wrapper {
+            margin-top: 15px;          /* ✅ 모든 라벨에 동일한 상단 여백 */
+            page-break-inside: avoid;  /* ✅ 인쇄 시 분리 금지 */
+        }
+        .barcode-wrapper:first-child {
+            margin-top: 0;             /* ✅ 첫 번째 라벨은 여백 없음 */
         }
     </style>
 
@@ -1066,39 +1084,43 @@
     </script>
 
     <script type="text/x-tmpl" id="barcode_table_tmpl">
-        <table class="table_1" style="width: 6.8cm; height: 6.5cm; border-collapse: collapse;">
-            <tr>
-                <td class="tac">품목코드</td>
-                <td>{%=o.MaterialCode%}</td>
-                <td class="tac">보관방법</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td class="tac">품명</td>
-                <td colspan="3">{%=o.MaterialName%}</td>
-            </tr>
-            <tr>
-                <td class="tac">LOT수량</td>
-                <td>{%=o.InputQty%}</td>
-                <td class="tac">포장단위</td>
-                <td>{%=o.UnitName%}</td>
-            </tr>
 
-            <tr>
-                <td class="tac">입고일자</td>
-                <td colspan="3">{%=o.InputDateTime%}</td>
-            </tr>
-            <tr>
-                <td class="tac">유효기한</td>
-                <td colspan="3">{%=o.EffectiveDate%}</td>
-            </tr>
-            <tr>
-                <td colspan="4" class="barcode_td">
-                </td>
-            </tr>
-        </table>
-
+        <div class="barcode-wrapper">
+            <table class="table_1" style="width: 6.8cm; height: 6.5cm; border-collapse: collapse;">
+                <tr class="label-gap">
+                  <td colspan="4" style="height: 0; border: none; padding: 0;"></td>
+                </tr>
+                <tr>
+                    <td class="tac">품목코드</td>
+                    <td>{%=o.MaterialCode%}</td>
+                    <td class="tac">보관방법</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="tac">품명</td>
+                    <td colspan="3" class="material-name">{%=o.MaterialName%}</td>
+                </tr>
+                <tr>
+                    <td class="tac">LOT수량</td>
+                    <td>{%=o.InputQty%}</td>
+                    <td class="tac">포장단위</td>
+                    <td>{%=o.UnitName%}</td>
+                </tr>
+                <tr>
+                    <td class="tac">입고일자</td>
+                    <td colspan="3">{%=o.InputDateTime%}</td>
+                </tr>
+                <tr>
+                    <td class="tac">유효기한</td>
+                    <td colspan="3">{%=o.EffectiveDate%}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="barcode_td"></td>
+                </tr>
+            </table>
+        </div>
     </script>
+
 </th:block>
 
 
@@ -2215,7 +2237,7 @@
                 $MaterialName.val(item.material_name);
                 $mio_pk.val(item.mio_pk);
                 $UnitName.val(item.unit_name);
-                $LotSize.val(item.PackingUnitQty);
+                $LotSize.val(item.lot_size);
                 $StoreHouseName.val(item.store_house_name);
                 $InputQty.val(Number(item.InputQty).toFixed(2));
                 $ValidDays.val(item.ValidDays);
@@ -2576,10 +2598,43 @@
 
                     let tmp_table = tmpl('barcode_table_tmpl', item);
                     let $tmp_table = $(tmp_table);
+
+                    // ✅ 2번째 라벨부터만 테이블 내부 top spacer 높이 부여
+                    //    (첫 번째 라벨은 0으로 유지)
+                    if (idx > 0) {
+                        $tmp_table.find('.label-gap').css('height', '0.25cm');
+                    }
+                    // 바코드 SVG 붙이기
                     $tmp_table.find('.barcode_td').append(svg);
 
                     $barcodeDiv.append($tmp_table);
                 });
+
+
+
+                // ✅ 긴 품명 자동 글자크기 조절
+                $content.find('.material-name').each(function() {
+                    const $cell = $(this);
+                    const maxWidth = $cell.width(); // 셀의 최대폭
+                    const text = $cell.text();
+                    let fontSize = 12; // 기본 폰트 크기(px)
+
+                    // 글자 길이에 따라 폰트 크기를 점진적으로 줄임
+                    const test = $('<span>').text(text).css({
+                        'font-size': fontSize + 'px',
+                        'visibility': 'hidden',
+                        'white-space': 'nowrap'
+                    }).appendTo('body');
+
+                    while (test.width() > maxWidth && fontSize > 6) {
+                        fontSize -= 0.5;
+                        test.css('font-size', fontSize + 'px');
+                    }
+
+                    $cell.css('font-size', fontSize + 'px');
+                    test.remove();
+                });
+
 
                 $.each(barcodeItems, function (idx, item) {
                     let svg_id = "#barcode_" + item.LotNumber;
