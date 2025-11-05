@@ -117,7 +117,7 @@ public class ProdPrepareService {
 	                inner join material m on m.id = B1.mat_pk
 	                inner join mat_grp mg on mg.id = m."MaterialGroup_id"		
                     left join unit u on u.id = m."Unit_id"
-                    left join company c on c.id = m."CompCode"::integer
+                    left join company c on c.id = nullif(m."CompCode", '')::integer
 	                group by B1.mat_pk, mg."MaterialType", mg."Name", m."Code", m."Name", u."Name"
 	                , m."CurrentStock", m."AvailableStock", m."ProcessSafetyStock", c."Name"
 	            ), S as (

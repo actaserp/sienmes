@@ -898,23 +898,29 @@
                 page.showLotInput(lot_number, jr_pk);
             });
 
-            // 일반 바코드 스캐너 이벤트
-            $('#txtInputLot').keydown(function (e) {
-                if (e.keyCode == 9) {
-                    let jr_pk = $('#jr_pk').val();
-                    let lot_number = $('#txtInputLot').val();
+            $('#txtInputLot').on('input', function () {
+                const jr_pk = $('#jr_pk').val();
+                const lot_number = $(this).val().trim();
+
+                // LOT 번호가 16자리면 바로 실행
+                if (lot_number.length === 16) {
                     page.showLotInput(lot_number, jr_pk);
 
+                    // ✅ 다음 스캔 대비 초기화
+                    $(this).val('');
                 }
             });
 
-
-            $('#txtInputLot').keydown(function (event) {
-                let jr_pk = $('#jr_pk').val();
-                let lot_number = $('#txtInputLot').val();
-                let keyCode = event.keyCode || event.which;
-                if (event.key === 'Enter' || keyCode === 13) {
-                    page.showLotInput(lot_number, jr_pk);
+            // Tab 또는 Enter로 스캔되는 경우도 병행 처리
+            $('#txtInputLot').on('keydown', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13 || e.keyCode === 9) {
+                    e.preventDefault();
+                    const jr_pk = $('#jr_pk').val();
+                    const lot_number = $(this).val().trim();
+                    if (lot_number !== '') {
+                        page.showLotInput(lot_number, jr_pk);
+                        $(this).val('');
+                    }
                 }
             });
 
