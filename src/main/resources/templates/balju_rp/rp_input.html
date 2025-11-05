@@ -1128,6 +1128,7 @@
     <script type="text/javascript" src="/resource/jsBarcode/JsBarcode.all.min.js"></script>
     <th:block th:replace="/common/popup_material :: popup_material"></th:block>
     <th:block th:replace="/common/popup_company :: popup_company"></th:block>
+    <th:block th:replace="/common/popup_company_purchase :: popup_company_Purchase"></th:block>
 
     <script type="text/javascript">
         class materialStorehouse {
@@ -1403,7 +1404,7 @@
                 });
 
                 $content.find('#btnCompanySearch').click(function () {
-                    let poppage = new PopCompComponent();
+                    let poppage = new PopCompComponentPurchase();
                     let $poppage = $(poppage);
                     let searchcallback = function (items) {
                         console.log('btnCompanySearch', items);
@@ -2593,6 +2594,10 @@
                 let $barcodeDiv = $content.find('#barcodeDiv');
 
                 $.each(barcodeItems, function (idx, item) {
+                    if (item.InputQty != null && item.InputQty !== '') {
+                        item.InputQty = parseFloat(item.InputQty).toFixed(2);
+                    }
+
                     let svg_id = "barcode_" + item.LotNumber;
                     let svg = "<div class='col-12'><svg id='" + svg_id + "'></svg></div>";
 

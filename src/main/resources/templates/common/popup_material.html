@@ -23,6 +23,20 @@
                 </dl>
                 <dl>
                     <dt>
+                        <label for="cboMaterialGroup">
+                            품목그룹<span class="eq"></span>
+                        </label>
+                    </dt>
+                    <dd>
+                        <div class="srch-box">
+                            <select id="cboMaterialGroup" name="cboMaterialGroup">
+
+                            </select>
+                        </div>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
                         <label for="keyword">
                             품목명<span class="eq"></span>
                         </label>
@@ -89,6 +103,7 @@
             let url = '/api/popup/search_material';
             let data = {
                 'material_type': _this.$cboMaterialType.val(),
+                'material_group': _this.$cboMaterialGroup.val(),
                 'keyword': _this.$keyword.val(),
                 spjangcd: sessionStorage.getItem('spjangcd')
             };
@@ -145,12 +160,15 @@
             this.$cboMaterialType = $content.find('#cboMaterialType');
             this.$keyword = $content.find('#keyword');
             this.$btnMaterialSelect = $content.find('#btnMaterialSelect');
+            this.$cboMaterialGroup = $content.find('#cboMaterialGroup');
 
             AjaxUtil.fillSelectOptions(this.$cboMaterialType, 'system_code', 'all', false, 'mat_type');
-            if (this.material_type != null) {
-                //console.log('popup mat type1', this.material_type);
-                this.$cboMaterialType.val(this.material_type);
-            }
+            AjaxUtil.fillSelectOptions(this.$cboMaterialGroup, 'material_group', 'all', false,);
+
+            this.$cboMaterialType.on('change', (e) => {
+                let mat_type = this.$cboMaterialType.val();
+                AjaxUtil.fillSelectOptions(this.$cboMaterialGroup, 'material_group', 'all', false, mat_type);
+            });
             //console.log('popup mat type2', this.material_type);
             //this.$cboMaterialType.val('product');
 

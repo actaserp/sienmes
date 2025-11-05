@@ -418,7 +418,7 @@ var Notify = {
     },
     success: function (msg) {
         let message = i18n.getCommonText(msg);
-        console.log('noti')
+        // console.log('noti')
         toast.push({
             theme: 'success',
             msg: message,
