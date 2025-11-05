@@ -1031,6 +1031,13 @@ public class ProductionResultController {
 
         JobRes jr = this.jobResRepository.getJobResById(jrPk);
 
+        // 기존 생산지시 수량
+        Float orderQty = jr.getOrderQty() != null ? jr.getOrderQty() : 0f;
+
+        // defect 자동 계산
+        Float defectQty = orderQty - goodQty;
+        if (defectQty < 0) defectQty = 0f; // 음수 방지
+
         if (jr.getWorkCenter_id() == null) {
             result.message = "워크센터가 지정되지 않았습니다.";
             result.success = false;
@@ -1083,6 +1090,7 @@ public class ProductionResultController {
         mp.setWorkCenterId(jr.getWorkCenter_id());
         mp.setEquipmentId(jr.getEquipment_id());
         mp.setGoodQty((float) goodQty);
+        mp.setDefectQty(defectQty);
         mp.setDescription("차수생산");
         mp.setActorId(user.getId());
         mp.set_audit(user);
@@ -1292,6 +1300,7 @@ public class ProductionResultController {
         item.put("jr_pk", jrPk);
         item.put("lot_number", lotNumber);
         item.put("good_qty_sum", jr.getGoodQty());
+        item.put("defect_qty_sum", jr.getDefectQty());
         item.put("chasu", chasu);
         item.put("prod_mat_cd", m.getCode());
 

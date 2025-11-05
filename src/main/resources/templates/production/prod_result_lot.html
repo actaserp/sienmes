@@ -2316,12 +2316,22 @@
                     // 품목코드가 같은 경우에만 그리드 수량 업데이트
                     if (serverMatCode && row && serverMatCode === rowMatCode) {
                         row.good_qty = result.data.good_qty_sum;     // 누적 양품량 반영
+                        row.defect_qty = result.data.defect_qty_sum;
                         _this.grid.collectionView?.commitEdit?.();  // 커밋
                         _this.grid.invalidate();                    // 리렌더
                     }
 
                     // detail은 항상 최신 jr_pk로 갱신
                     _this.showBasicInfo(result.data.jr_pk);
+
+                    const defectQty = result.data.defect_qty_sum || 0;
+                    if (defectQty > 0) {
+                        const defectList = _this.defectGrid.collectionView.items;
+                        if (defectList && defectList.length > 0) {
+                            defectList[0].defect_qty = defectQty;
+                            _this.saveDefectList(defectList); // /defect_save 자동 호출
+                        }
+                    }
                 };
                 let url = this.baseUrl + '/chasu_add';
                 AjaxUtil.postAsyncData(url, data, addChasuCallbackSuccess);
@@ -2338,6 +2348,8 @@
                     Alert.alert('차수 삭제오류', '선택된 차수가 없습니다.');
                     return;
                 }
+
+                const deletedDefectSum = selectedItems.reduce((sum, item) => sum + (parseFloat(item.defect_qty) || 0), 0);
 
                 let fnSuccess = function (res) {
                     if (res.success) {
@@ -2364,6 +2376,22 @@
 
                         // 변경 사항 반영
                         _this.chasuGrid.collectionView.refresh();
+
+                        // ✅ 차수 삭제 후 defectGrid 자동 반영
+                        const defectGridList = _this.defectGrid.collectionView.items;
+                        if (defectGridList && defectGridList.length > 0 && deletedDefectSum > 0) {
+                            const defectItem = defectGridList[0];
+                            let currentDefectQty = parseFloat(defectItem.defect_qty) || 0;
+
+                            // 삭제된 차수의 불량 수량만큼 빼기
+                            let newDefectQty = currentDefectQty - deletedDefectSum;
+                            if (newDefectQty < 0) newDefectQty = 0;
+
+                            defectItem.defect_qty = newDefectQty;
+
+                            // ✅ defect 저장 호출
+                            _this.saveDefectList(defectGridList);
+                        }
                     } else {
                         Alert.alert('차수 삭제 오류', res.message);
                     }
