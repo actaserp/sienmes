@@ -483,7 +483,7 @@ public class MaterialInoutController {
 			Material m = this.materialRepository.findByCode(data.get(i).get("mat_code").toString());
 			String testYn = m.getInTestYN() != null ? m.getInTestYN() : "";
 			Integer matId = m.getId();
-			Integer qty = Integer.parseInt(data.get(i).get("input_qty").toString());
+			BigDecimal qty = new BigDecimal(data.get(i).get("input_qty").toString());
 
 			MaterialInout mi = new MaterialInout();
 			mi.setMaterialId(matId);
@@ -496,32 +496,32 @@ public class MaterialInoutController {
 				mi.setInOut("in");
 				mi.setInputType(inoutType);
 				if(testYn.equals("Y")) {
-					mi.setPotentialInputQty((float)qty);
+					mi.setPotentialInputQty(qty.floatValue());
 					state = "waiting";
 					_status = "t";
 				} else {
-					mi.setInputQty((float)qty);
+					mi.setInputQty(qty.floatValue());
 					mi.setOutputQty(0f);
 					mi.setOutputType("");
 				}
 			} else if(type.equals("recall")){
 				mi.setInOut("recall");
 				mi.setOutputType(inoutType);
-				mi.setOutputQty((float)qty);
+				mi.setOutputQty(qty.floatValue());
 				mi.setInputQty(0f);
 				mi.setInputType("");
 
 			} else if(type.equals("return")){
 				mi.setInOut("return");
 				mi.setInputType(inoutType);
-				mi.setInputQty((float)qty);
+				mi.setInputQty(qty.floatValue());
 				mi.setOutputQty(0f);
 				mi.setOutputType("");
 
 			} else  {
 				mi.setInOut("out");
 				mi.setOutputType(inoutType);
-				mi.setOutputQty((float)qty);
+				mi.setOutputQty(qty.floatValue());
 				mi.setInputQty(0f);
 				mi.setInputType("");
 			}

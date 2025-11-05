@@ -13,13 +13,13 @@ public class FloatOneDecimalConverter implements AttributeConverter<Float, Doubl
     public Double convertToDatabaseColumn(Float attribute) {
         if (attribute == null) return null;
         // ✅ float → 문자열 → 소수점 1자리 → double
-        return Double.parseDouble(String.format("%.1f", attribute));
+        return Double.parseDouble(String.format("%.2f", attribute));
     }
 
     @Override
     public Float convertToEntityAttribute(Double dbData) {
         if (dbData == null) return null;
         // ✅ double → 문자열 → 소수점 1자리 → float
-        return Float.parseFloat(String.format("%.1f", dbData));
+        return Float.parseFloat(String.format("%.2f", dbData));
     }
 }
