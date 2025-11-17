@@ -762,6 +762,7 @@ public class ProductionResultService {
 						left join mat_in_house mh on mh."Material_id" = m.id and mh."StoreHouse_id"  = m."StoreHouse_id" 
 						left join MMP on MMP."Material_id" = m.id
 						where m."Useyn" = '0'
+						and m."MaterialGroup_id" != 60
                 """;
 
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);

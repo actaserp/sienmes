@@ -418,12 +418,15 @@ public class MaterialInoutService {
 					, mg."id" as "cboMaterialGroup"
 					, COALESCE(NULLIF(mi."InputType", ''), NULLIF(mi."OutputType", '')) AS "InoutType"
 					, to_char(mi."InoutDate", 'yyyy-mm-dd') || 'T' || to_char(mi."InoutTime", 'hh24:mi') as "inoutDate"
-					,COALESCE(
-						   NULLIF(mi."InputQty", 0),
-						   NULLIF(mi."OutputQty", 0),
-						   NULLIF(mi."PotentialInputQty", 0),
-						   0
-						 ) AS "InoutQty"
+					, ROUND(
+						  COALESCE(
+							  NULLIF(mi."InputQty", 0),
+							  NULLIF(mi."OutputQty", 0),
+							  NULLIF(mi."PotentialInputQty", 0),
+							  0
+						  )::numeric,
+						  6
+					  ) AS "InoutQty"
 					, mg."MaterialType" as "cboMaterialType"
                     , mi."Material_id"
                     , mi."InputType" 

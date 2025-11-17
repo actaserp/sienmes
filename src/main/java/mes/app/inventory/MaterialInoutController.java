@@ -247,6 +247,11 @@ public class MaterialInoutController {
 
 		this.matInoutRepository.save(mi);
 		this.matInoutRepository.flush();
+		if (type.equals("in")) {
+			if (!"Y".equals(testYn)) {
+				this.internalLotSave(mi, qty, user, m.getValidDays());
+			}
+		}
 
 
 //		jdbcTemplate.query(
@@ -284,8 +289,8 @@ public class MaterialInoutController {
 		Integer matPk = Integer.parseInt(materialId);
 		String state = "confirmed";
 		String _status = "a";
-		int qty = Integer.parseInt(
-				inoutQty.replace(",", "").replaceAll("[^\\d-]", "")
+		BigDecimal qty = new BigDecimal(
+				inoutQty.replace(",", "").replaceAll("[^0-9.\\-]", "")
 		);
 
 		result.success = false;
@@ -320,32 +325,32 @@ public class MaterialInoutController {
 			boolean isWaiting = mi.getState() != null && mi.getState().equals("waiting");
 
 			if(testYn.equals("Y") && isWaiting) {
-				mi.setPotentialInputQty((float)qty);
+				mi.setPotentialInputQty(qty.floatValue());
 				state = "waiting";
 				_status = "t";
 			} else {
-				mi.setInputQty((float)qty);
+				mi.setInputQty(qty.floatValue());
 				mi.setOutputQty(0f);
 				mi.setOutputType("");
 			}
 		} else if(type.equals("recall")){
 			mi.setInOut("recall");
 			mi.setOutputType(inoutType);
-			mi.setOutputQty((float)qty);
+			mi.setOutputQty(qty.floatValue());
 			mi.setInputQty(0f);
 			mi.setInputType("");
 
 		} else if(type.equals("return")){
 			mi.setInOut("return");
 			mi.setInputType(inoutType);
-			mi.setInputQty((float)qty);
+			mi.setInputQty(qty.floatValue());
 			mi.setOutputQty(0f);
 			mi.setOutputType("");
 
 		} else  {
 			mi.setInOut("out");
 			mi.setOutputType(inoutType);
-			mi.setOutputQty((float)qty);
+			mi.setOutputQty(qty.floatValue());
 			mi.setInputQty(0f);
 			mi.setInputType("");
 		}
@@ -357,7 +362,11 @@ public class MaterialInoutController {
 
 		this.matInoutRepository.save(mi);
 		this.matInoutRepository.flush();
-
+		if (type.equals("in")) {
+			if (!"Y".equals(testYn)) {
+				this.internalLotSave(mi, qty, user, m.getValidDays());
+			}
+		}
 
 //		jdbcTemplate.query(
 //				"SELECT sp_update_mat_in_house_by_inout(?, ?)",
@@ -530,6 +539,11 @@ public class MaterialInoutController {
 			mi.set_audit(user);
 			mi.setSpjangcd(spjangcd);
 			this.matInoutRepository.save(mi);
+			this.matInoutRepository.flush();
+
+			if (type.equals("in")) {
+				internalLotSave(mi, qty, user, m.getValidDays());
+			}
 
 		}
 		result.success = true;
@@ -649,6 +663,28 @@ public class MaterialInoutController {
 		return result;
 	}
 
+	private void internalLotSave(MaterialInout mi, BigDecimal qty, User user, Integer validDays) {
+
+		LocalDate inDate = mi.getInoutDate();
+		LocalDate effectiveLocalDate = inDate.plusDays(validDays);
+		Timestamp effectiveDate = Timestamp.valueOf(effectiveLocalDate.atStartOfDay());
+
+		MaterialLot ml = new MaterialLot();
+		ml.setLotNumber(this.lotService.make_lot_in_number());
+		ml.setMaterialId(mi.getMaterialId());
+		ml.setStoreHouseId(mi.getStoreHouseId());
+		ml.setInputQty(qty.floatValue());
+		ml.setCurrentStock(qty.floatValue());
+		ml.setInputDateTime(Timestamp.valueOf(LocalDateTime.of(mi.getInoutDate(), mi.getInoutTime())));
+		ml.setEffectiveDate(effectiveDate);  // 필요시 적용
+		ml.setSourceTableName("mat_inout");
+		ml.setSourceDataPk(mi.getId());
+		ml.set_audit(user);
+		ml.setSpjangcd(mi.getSpjangcd());
+
+		this.matLotRepository.save(ml);
+	}
+
 	@PostMapping("/test_save")
 	@Transactional
 	public AjaxResult testSave(
@@ -737,6 +773,10 @@ public class MaterialInoutController {
 
 			// 트리거 작동용 상태 변경
 			mi.set_status("a");
+
+			Material m = this.materialRepository.getMaterialById(materialId);
+			BigDecimal qty = BigDecimal.valueOf(mi.getInputQty());
+			this.internalLotSave(mi, qty, user, m.getValidDays());
 		}
 
 		this.matInoutRepository.save(mi);
@@ -888,6 +928,9 @@ public class MaterialInoutController {
 
 				matInoutRepository.save(mi);
 				bujuRepository.save(balju);
+				if (!"Y".equals(testYn)) {
+					this.internalLotSave(mi, qty, user, m.getValidDays());
+				}
 
 			} catch (Exception e) {
 				result.success = false;
@@ -899,6 +942,7 @@ public class MaterialInoutController {
 		result.success = true;
 		return result;
 	}
+
 	private BigDecimal parseDecimal(Object v) {
 		if (v == null) return BigDecimal.ZERO;
 		if (v instanceof Number) {
