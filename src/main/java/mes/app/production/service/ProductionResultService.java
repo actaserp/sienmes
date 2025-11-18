@@ -630,139 +630,160 @@ public class ProductionResultService {
 		dicParam.addValue("prodDate", prodDate);
 
 		String sql = """
-                with bom1 as (
-						select 
-						b1.id as bom_pk
-						, b1."Material_id" as prod_pk
-						, b1."OutputAmount" as produced_qty
-						, jr."OrderQty" as order_qty
-						, row_number() over(partition by b1."Material_id" order by b1."Version" desc) as g_idx
-						from bom b1
-						 inner join job_res jr on jr."Material_id"=b1."Material_id" and jr.id= :jrPk
-						where b1."BOMType" = 'manufacturing' and jr."ProductionDate" between b1."StartDate" and b1."EndDate"  
-						), BT as (
-						select 
-						bc."Material_id" as mat_pk
-						, round(bom1.produced_qty::numeric, 4) as produced_qty
-				    	, round(bc."Amount"::numeric, 4) as quantity
-				    	, round((bc."Amount" / bom1.produced_qty)::numeric, 4) as bom_ratio
-				    	, round((bc."Amount" / bom1.produced_qty * bom1.order_qty)::numeric, 4) as bom_requ_qty 
-						from bom_comp bc 
-						inner join bom1 on bom1.bom_pk=bc."BOM_id"
-						where bom1.g_idx=1
-						), llc as (
-						select 
-						sum(mlc."OutputQty") as consumed_qty
-						, ml."Material_id" 
-						from job_res jr 
-						inner join mat_produce mp on mp."JobResponse_id" =jr.id and jr.id= :jrPk
-						inner join mat_lot_cons mlc on mlc."SourceDataPk" =mp.id and mlc."SourceTableName" ='mat_produce'
-						inner join mat_lot ml on ml.id = mlc."MaterialLot_id" 
-						group by ml."Material_id" 
-						), MCC as (
-							select 
-							mc."Material_id" as mat_pk
-							, sum(mc."ConsumedQty") mc_qty 
-							from mat_consu mc 
-							where mc."JobResponse_id"= :jrPk group by mc."Material_id"
-						), MMP as (
-							select 
-							sum(ml."OutQtySum") as current_qty_sum
-							, mpi."Material_id"
-							, sum(round(mpi."RequestQty"::numeric, 4)) as request_qty_sum
-							from mat_proc_input mpi
-							inner join job_res jr on jr."MaterialProcessInputRequest_id" = mpi."MaterialProcessInputRequest_id" 
-							inner join mat_lot ml on ml.id = mpi."MaterialLot_id"
-							where jr.id=:jrPk
-							group by mpi."Material_id"
-						)
-						select 
-						BT.mat_pk
-						, mg."MaterialType" as mat_type
-						, fn_code_name('mat_type', mg."MaterialType") as mat_type_name
-						, mg."Name" as mat_group_name
-						, m."Code" as mat_code
-						, m."Name" as mat_name
-						, m."LotSize" as lot_size
-						, mh."CurrentStock" as "currentStock"
-						, u."Name" as unit
-						, BT.bom_ratio
-						, round(BT.bom_requ_qty::numeric, 4) as bom_consumed
-						, COALESCE(llc.consumed_qty,0) as consumed_qty
-						, MMP.request_qty_sum
-						,round(
-				  			(coalesce(round(BT.bom_requ_qty::numeric, 4), 0)   -- = bom_consumed과 동일
-				  			- coalesce(round(MMP.request_qty_sum::numeric, 4), 0)
-				  			)
-						, 4) as remain_input_qty
-						, sh."Name" as storehouse_name
-						, MCC.mc_qty
-						, COALESCE(MMP.current_qty_sum,0) as current_qty_sum
-						, coalesce(m."LotUseYN",'N') as "lotUseYn"
-						, MMP.request_qty_sum
-						,round(
-						   (
-							 coalesce(round(BT.bom_requ_qty::numeric, 0), 0)   -- = bom_consumed과 동일
-						   - coalesce(round(MMP.request_qty_sum::numeric, 0), 0)
-						   )
-						 , 3) as remain_input_qty
-						, CASE WHEN m."Useyn" = '1' THEN 'Y'
-							   WHEN m."Useyn" = '0' THEN 'N'
-							   ELSE NULL
-						  END as useyn
-						, coalesce(nullif(m."Standard2"::numeric, 0), 1) AS full_box_kg_safe,
-				  
-						  -- 완전 박스 개수(몫)
-						  floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1)) AS full_box_count,
-						  
-						  -- 남는 중량(kg) = 필요수량 - (완박스수 × 1박스kg)
-						  round(
-							BT.bom_requ_qty
-							- floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1))
-							  * coalesce(nullif(m."Standard2"::numeric, 0), 1)
-						  , 3) AS remain_qty_kg,
-						  
-						  -- 표시 컬럼 (규칙: 몫=0이면 나머지만, 나머지=0이면 몫만, 둘 다 있으면 "몫 + 나머지")
-				  CASE
-				    -- 🔹 완박스가 0 → 남은 중량만
-				    WHEN floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1)) = 0 THEN
-				      round(
+				with bom1 as (
+				    select
+				        b1.id as bom_pk
+				        , b1."Material_id" as prod_pk
+				        , b1."OutputAmount" as produced_qty
+				        , jr."OrderQty" as order_qty
+				        , row_number() over(partition by b1."Material_id" order by b1."Version" desc) as g_idx
+				    from bom b1
+				        inner join job_res jr on jr."Material_id"=b1."Material_id" and jr.id= :jrPk
+				    where b1."BOMType" = 'manufacturing'
+				      and jr."ProductionDate" between b1."StartDate" and b1."EndDate"
+				),
+				BT as (
+				    select
+				        bc."Material_id" as mat_pk
+				        , round(bom1.produced_qty::numeric, 4) as produced_qty
+				        , round(bc."Amount"::numeric, 4) as quantity
+				        , round((bc."Amount" / bom1.produced_qty)::numeric, 4) as bom_ratio
+				        , round((bc."Amount" / bom1.produced_qty * bom1.order_qty)::numeric, 4) as bom_requ_qty\s
+				    from bom_comp bc
+				        inner join bom1 on bom1.bom_pk=bc."BOM_id"
+				    where bom1.g_idx=1
+				),
+				llc as (
+				    select
+				        sum(mlc."OutputQty") as consumed_qty
+				        , ml."Material_id"
+				    from job_res jr
+				        inner join mat_produce mp on mp."JobResponse_id" =jr.id and jr.id= :jrPk
+				        inner join mat_lot_cons mlc on mlc."SourceDataPk" =mp.id and mlc."SourceTableName" ='mat_produce'
+				        inner join mat_lot ml on ml.id = mlc."MaterialLot_id"
+				    group by ml."Material_id"
+				),
+				MCC as (
+				    select
+				        mc."Material_id" as mat_pk
+				        , sum(mc."ConsumedQty") mc_qty
+				    from mat_consu mc
+				    where mc."JobResponse_id"= :jrPk
+				    group by mc."Material_id"
+				),
+				MMP as (
+				    select
+				        sum(ml."OutQtySum") as current_qty_sum
+				        , mpi."Material_id"
+				        , sum(round(mpi."RequestQty"::numeric, 4)) as request_qty_sum
+				    from mat_proc_input mpi
+				        inner join job_res jr on jr."MaterialProcessInputRequest_id" = mpi."MaterialProcessInputRequest_id"
+				        inner join mat_lot ml on ml.id = mpi."MaterialLot_id"
+				    where jr.id = :jrPk
+				    group by mpi."Material_id"
+				)
+				select
+				    BT.mat_pk
+				    , mg."MaterialType" as mat_type
+				    , fn_code_name('mat_type', mg."MaterialType") as mat_type_name
+				    , mg."Name" as mat_group_name
+				    , m."Code" as mat_code
+				    , m."Name" as mat_name
+				    , m."LotSize" as lot_size
+				    , mh."CurrentStock" as "currentStock"
+				    , u."Name" as unit
+				    , BT.bom_ratio
+				    , round(BT.bom_requ_qty::numeric, 4) as bom_consumed
+				    , COALESCE(llc.consumed_qty,0) as consumed_qty
+				    , MMP.request_qty_sum
+				    , round(
+				        coalesce(round(BT.bom_requ_qty::numeric, 4), 0)
+				      - coalesce(round(MMP.request_qty_sum::numeric, 4), 0)
+				    , 4) as remain_input_qty
+				    , sh."Name" as storehouse_name
+				    , MCC.mc_qty
+				    , COALESCE(MMP.current_qty_sum,0) as current_qty_sum
+				    , coalesce(m."LotUseYN",'N') as "lotUseYn"
+				    , MMP.request_qty_sum
+				    , round(
+				        coalesce(round(BT.bom_requ_qty::numeric,0),0)
+				      - coalesce(round(MMP.request_qty_sum::numeric,0),0)
+				    , 3) as remain_input_qty
+				    , CASE WHEN m."Useyn" = '1' THEN 'Y'
+				           WHEN m."Useyn" = '0' THEN 'N'
+				           ELSE NULL
+				      END as useyn
+				                
+				    -- ✔ Standard2 SAFE 값 (NULL, '', '0' → NULL)
+				    , nullif(nullif(m."Standard2", '')::numeric, 0) AS box_kg
+				                
+				    -- ✔ 완박스 개수
+				    , floor(BT.bom_requ_qty / nullif(nullif(m."Standard2", '')::numeric, 0)) AS full_box_count
+				                
+				    -- ✔ 남는 중량
+				    , round(
 				        BT.bom_requ_qty
-				        - floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1))
-				          * coalesce(nullif(m."Standard2"::numeric, 0), 1)
-				      , 3)::text
-				  
-				    -- 🔹 남은 중량이 0 → 완박스만
-				    WHEN round(
-				        BT.bom_requ_qty
-				        - floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1))
-				          * coalesce(nullif(m."Standard2"::numeric, 0), 1)
-				      , 3) = 0 THEN
-				      floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1))::text
-				  
-				    -- 🔹 둘 다 존재 → “몫 + 나머지”
-				    ELSE
-				      concat(
-				        floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1)),
-				        ' + ',
-				        round(
-				          BT.bom_requ_qty
-				          - floor(BT.bom_requ_qty / coalesce(nullif(m."Standard2"::numeric, 0), 1))
-				            * coalesce(nullif(m."Standard2"::numeric, 0), 1)
-				        , 3)
-				      )
-				  END AS weigh_display
-						from BT
-						inner join material m on m.id=BT.mat_pk
-						left join MCC on MCC.mat_pk=BT.mat_pk
-						left join mat_grp mg on mg.id=m."MaterialGroup_id"
-						left join unit u on u.id=m."Unit_id"
-						left join llc on llc."Material_id" = BT.mat_pk
-						left join store_house sh on m."StoreHouse_id" = sh.id
-						left join mat_in_house mh on mh."Material_id" = m.id and mh."StoreHouse_id"  = m."StoreHouse_id" 
-						left join MMP on MMP."Material_id" = m.id
-						where m."Useyn" = '0'
-						and m."MaterialGroup_id" != 60
+				        - floor(BT.bom_requ_qty / nullif(nullif(m."Standard2", '')::numeric, 0))
+				          * nullif(nullif(m."Standard2", '')::numeric, 0)
+				    , 3) AS remain_qty_kg
+				                
+				    -- ✔ 표시 규칙
+				    , CASE
+				        WHEN nullif(nullif(m."Standard2", '')::numeric, 0) IS NULL THEN NULL
+				                
+				        WHEN floor(BT.bom_requ_qty /
+				            nullif(nullif(m."Standard2", '')::numeric, 0)
+				        ) = 0 THEN
+				            round(
+				                BT.bom_requ_qty
+				                - floor(BT.bom_requ_qty /
+				                    nullif(nullif(m."Standard2", '')::numeric, 0)
+				                ) *
+				                nullif(nullif(m."Standard2", '')::numeric, 0)
+				            , 3)::text
+				                
+				        WHEN round(
+				            BT.bom_requ_qty
+				            - floor(BT.bom_requ_qty /
+				                nullif(nullif(m."Standard2", '')::numeric, 0)
+				            ) *
+				              nullif(nullif(m."Standard2", '')::numeric, 0)
+				        , 3) = 0 THEN
+				            floor(
+				                BT.bom_requ_qty /
+				                nullif(nullif(m."Standard2", '')::numeric, 0)
+				            )::text
+				                
+				        ELSE
+				            concat(
+				                floor(
+				                    BT.bom_requ_qty /
+				                    nullif(nullif(m."Standard2", '')::numeric, 0)
+				                ),
+				                ' + ',
+				                round(
+				                    BT.bom_requ_qty
+				                    - floor(BT.bom_requ_qty /
+				                        nullif(nullif(m."Standard2", '')::numeric, 0)
+				                    ) *
+				                      nullif(nullif(m."Standard2", '')::numeric, 0)
+				                , 3)
+				            )
+				      END AS weigh_display
+				                
+				from BT
+				    inner join material m on m.id=BT.mat_pk
+				    left join MCC on MCC.mat_pk=BT.mat_pk
+				    left join mat_grp mg on mg.id=m."MaterialGroup_id"
+				    left join unit u on u.id=m."Unit_id"
+				    left join llc on llc."Material_id" = BT.mat_pk
+				    left join store_house sh on m."StoreHouse_id" = sh.id
+				    left join mat_in_house mh on mh."Material_id" = m.id
+				        and mh."StoreHouse_id" = m."StoreHouse_id"
+				    left join MMP on MMP."Material_id" = m.id
+				where m."Useyn" = '0'
+				  and m."MaterialGroup_id" != 60;
+				                
                 """;
 
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
