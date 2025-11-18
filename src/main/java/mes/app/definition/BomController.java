@@ -276,7 +276,7 @@ public class BomController {
 	            , mg."Name" as group_name
 	            , m."Name" as mat_name
 	            , m."Code" as mat_code
-	            , bc."Amount"
+	            , CAST(bc."Amount" AS float8) AS "Amount"
 	            , bc."Material_id" as mat_id
 	            , m."Unit_id"
 	            , u."Name" as unit

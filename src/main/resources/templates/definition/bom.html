@@ -506,7 +506,7 @@
 
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-    <script type="text/javascript" src="/js/grid.js"></script>
+<!--    <script type="text/javascript" src="/js/grid.js"></script>-->
 
     <script type="text/javascript">
 
@@ -657,16 +657,38 @@
                         if (e.panel.cellType === wijmo.grid.CellType.ColumnHeader) {
                             e.cell.style.textAlign = 'center';
                         }
+                        if (e.panel.cellType === wijmo.grid.CellType.ColumnFooter) {
+                            e.cell.style.textAlign = 'center';   // 가운데 정렬
+                            e.cell.style.fontWeight = 'bold';    // 선택: 굵게
+                        }
                     },
                     columns: [
                         {binding: 'mat_name', header: '품목명', width: 350, align: 'left'},
-                        {binding: 'Amount', header: '필요수량', width: 70, align: 'right', format: 'N4' },
+                        {binding: 'Amount', header: '필요수량', width: 70, align: 'right', format: 'N4'},
                         {binding: 'Description', header: '비고', width: 300, align: 'left'},
                         // {binding: 'mat_code', header: '품목코드', width: 150, align: 'center'},
                         {binding: 'unit', header: '단위', width: 100, align: 'center'},
                         // {binding: 'mat_type', header: '품목구분', width: 120, align: 'center'},
                     ],
                     itemsSource: this.viewData2, // 데이터를 설정할 배열
+                });
+
+                this.grid2.columnFooters.rows.push(new wijmo.grid.Row());
+                this.grid2.loadedRows.addHandler(() => {
+
+                    // 모든 행
+                    const rows = this.grid2.rows;
+
+                    // 합계 계산
+                    const total = rows
+                        .map(r => +r.dataItem?.Amount || 0)
+                        .reduce((a, b) => a + b, 0);
+
+                    // 🔥 Footer 첫 번째 컬럼(0)에 '총합'
+                    this.grid2.columnFooters.setCellData(0, 0, '총합');
+
+                    // 🔥 Footer 두 번째 컬럼(1)에 합계 표시
+                    this.grid2.columnFooters.setCellData(0, 1, total);
                 });
 
                 new FlexGridContextMenu(this.grid2);
@@ -1125,8 +1147,15 @@
                     try {
                         let count = result.data.length;
 
+                        console.log('result.data', result.data);
+
                         // 데이터 초기화
-                        _this.grid2.itemsSource = new wijmo.collections.CollectionView(result.data);
+                        _this.viewData2.sourceCollection = result.data;
+                        this.grid2.itemsSource = this.viewData2;
+
+                        // 3) footer 강제 갱신
+                        this.grid2.invalidate();
+
 
                         // 복사할 텍스트 생성
                         let text = result.data.map(item =>
@@ -1883,16 +1912,16 @@
                 }
             });
 
-            $('#btnCompUp').click(function (e) {
-                let grid = wijmo.Control.getControl('#bomcomp-grid'); // 그리드 객체 가져오기
-                GridUtil.changeOrder('U', grid);
-            });
-
-
-            $('#btnCompDown').click(function (e) {
-                let grid = wijmo.Control.getControl('#bomcomp-grid'); // 그리드 객체 가져오기
-                GridUtil.changeOrder('D', grid);
-            });
+            // $('#btnCompUp').click(function (e) {
+            //     let grid = wijmo.Control.getControl('#bomcomp-grid'); // 그리드 객체 가져오기
+            //     GridUtil.changeOrder('U', grid);
+            // });
+            //
+            //
+            // $('#btnCompDown').click(function (e) {
+            //     let grid = wijmo.Control.getControl('#bomcomp-grid'); // 그리드 객체 가져오기
+            //     GridUtil.changeOrder('D', grid);
+            // });
 
             $('#btnCompOrderSave').click(function (e) {
                 let grid = wijmo.Control.getControl('#bomcomp-grid'); // 그리드 객체 가져오기
