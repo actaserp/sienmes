@@ -207,7 +207,7 @@ public class ProductionMensuController {
             @RequestParam(value = "jr_pk", required = false) Integer jrPk,
             @RequestParam(value = "mat_code", required = false) String mat_code) {
 
-        List<Map<String, Object>> items = this.productionResultService.getInputLotList(jrPk, mat_code);
+        List<Map<String, Object>> items = this.productionResultService.getInputLotMensuList(jrPk, mat_code);
 
         AjaxResult result = new AjaxResult();
         result.data = items;
@@ -908,7 +908,7 @@ public class ProductionMensuController {
             mpi.setInputQty(0f);
             mpi.setMaterialLotId(ml.getId());
             mpi.setMaterialStoreHouseId(ml.getStoreHouseId());
-            mpi.setState("requested");
+            mpi.setState("mensu");
             mpi.setInputDateTime(inoutTime);
             mpi.setActorId(user.getId());
             mpi.set_audit(user);

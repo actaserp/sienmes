@@ -8,6 +8,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -1137,92 +1138,102 @@ public class ProductionResultController {
             return result;
         }
 
-        for (int i = 0; i < bomMatItems.size(); i++) {
-            Map<String, Object> bomMap = bomMatItems.get(i);
+        Integer mpir_id = jr.getMaterialProcessInputRequestId();
+
+// 1) BOM 자재 목록을 Set으로 저장 (BOM 여부 판단용)
+        Set<Integer> bomMatIdSet = bomMatItems.stream()
+                .map(item -> (Integer)item.get("mat_pk"))
+                .collect(Collectors.toSet());
+
+// 2) mpir 기반 전체 투입자재 가져오기 (BOM + 비BOM 모두 포함)
+        List<Map<String, Object>> allMpiList =
+                this.productionResultService.getMaterialProcessInputListByMpirId(mpir_id);
+
+// 3) BOM 자재 먼저 처리
+        for (Map<String, Object> bomMap : bomMatItems) {
+
             float chasuBomQty = Float.parseFloat(bomMap.get("chasu_bom_qty").toString());
             int consumeMatPk = (int) bomMap.get("mat_pk");
             String matName = bomMap.get("mat_name").toString();
             Material consMat = this.materialRepository.getMaterialById(consumeMatPk);
             String lotUseYn = bomMap.get("lotUseYn").toString();
             float totalQty = 0f;
+            float remainQty = chasuBomQty;
             final float EPS = 1e-4f;
-			/*
-			 선입선출로 mat_lot 찾아서 차감
-             차감하면서 mat_lot_cons 생성
-             투입되어야할 수량보다 적으면 재고량 부족으로 return
-             */
 
+            // ─────────────────────────────────────────────
+            // ① LOT 사용 자재일 경우 FIFO 로트 소진
+            // ─────────────────────────────────────────────
             if ("Y".equals(lotUseYn)) {
-                // 수정시작
-                // 1. mat_proc_input 에서 해당 품목의 로트리스트를 가져온다.
 
-                List<Map<String, Object>> mpiList = this.productionResultService.getMaterialProcessInputList(jr.getId(), consumeMatPk);
-                // 투입요청에서 해당 품목이 로트 투입인지 조회한다
-                float remainQty = chasuBomQty;
+                // 해당 자재의 투입 로트 목록만 가져오기
+                List<Map<String, Object>> mpiList =
+                        this.productionResultService.getMaterialProcessInputList(jr.getId(), consumeMatPk);
 
-                for (int j = 0; j < mpiList.size(); j++) {
-                    Map<String, Object> mpiMap = mpiList.get(j);
+                for (Map<String, Object> mpiMap : mpiList) {
 
                     float reqQty = Float.parseFloat(mpiMap.get("req_qty").toString());
                     totalQty += reqQty;
 
-                    int matLotId = (int) mpiMap.get("ml_id");
                     float currentStock = Float.parseFloat(mpiMap.get("curr_qty").toString());
                     if (currentStock <= EPS) continue;
 
-                    float take = Math.min(reqQty, Math.min(currentStock, remainQty)); // 실제 투입량
+                    float take = Math.min(reqQty, Math.min(currentStock, remainQty));
+
                     if (take > EPS) {
+                        // mlc 생성
                         MatLotCons mlc = new MatLotCons();
                         mlc.setMaterialLotId((int) mpiMap.get("ml_id"));
                         mlc.setOutputDateTime(now);
                         mlc.setSourceDataPk(mp.getId());
                         mlc.setSourceTableName("mat_produce");
                         mlc.set_audit(user);
-                        mlc.setCurrentStock(currentStock); // 해당 로트의 당시 재고
+                        mlc.setCurrentStock(currentStock);
                         mlc.setSpjangcd(spjangcd);
                         mlc.setOutputQty(take);
-                        this.matLotConsRepository.save(mlc);
+                        matLotConsRepository.save(mlc);
 
                         remainQty -= take;
-                        if (remainQty <= EPS) { remainQty = 0f; break; }
+                        if (remainQty <= EPS) break;
                     }
                 }
 
                 if (remainQty > EPS) {
+                    result.success = false;
                     result.message = "로트 수량이 부족합니다.(" + matName + ")";
-                    result.success = false;
                     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                     return result;
                 }
-            } else {
+
+            }
+            // ─────────────────────────────────────────────
+            // ② LOT 미사용 자재 → BOM 수량만큼 일반 재고 차감 검사
+            // ─────────────────────────────────────────────
+            else {
+
                 if ("1".equals(consMat.getUseyn())) {
-                    result.message = "사용 불가능한 품목이 BOM에 등록되어 있습니다.(" + matName + ")";
                     result.success = false;
+                    result.message = "사용 불가능한 품목이 BOM에 등록되어 있습니다.(" + matName + ")";
                     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                     return result;
                 }
-                // mtyn이 0일 때는 재고 체크하지 않음
-                if ("0".equals(consMat.getMtyn())) {
-                    // 아무 조건 없이 통과
-                } else {
+
+                if (!"0".equals(consMat.getMtyn())) {  // 0이면 재고체크 안함
                     Float currentStock = consMat.getCurrentStock();
-                    if (currentStock == null || currentStock == 0f) {
-                        result.message = "가용한 품목 재고가 없습니다.(" + matName + ")";
+                    if (currentStock == null || currentStock < chasuBomQty) {
                         result.success = false;
-                        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                        return result;
-                    } else if (currentStock < goodQty) {
-                        result.message = "가용한 품목 재고가 부족합니다. \n(" +
-                                matName + ", 필요 수량: " + goodQty + ", 가용 수량: " + currentStock + ")";
-                        result.success = false;
+                        result.message = "가용한 품목 재고가 부족합니다.\n(" + matName + ")";
                         TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                         return result;
                     }
                 }
-                totalQty += chasuBomQty;
+
+                totalQty = chasuBomQty;
             }
 
-            // mat_cons 생성
+            // ─────────────────────────────────────────────
+            // ③ BOM 자재 → MaterialConsume 생성
+            // ─────────────────────────────────────────────
             MaterialConsume mc = new MaterialConsume();
             mc.setJobResponseId(jr.getId());
             mc.setMaterialId(consumeMatPk);
@@ -1231,18 +1242,19 @@ public class ProductionResultController {
             mc.setStartTime(now);
             mc.setEndTime(now);
             mc.setDescription("차수생산분");
-            mc.setBomQty(chasuBomQty);
-            mc.setConsumedQty(totalQty);        // 차수 생산분에 해당하는 BOM기준물량, lot 사용시 총 투입 수량
+            mc.setBomQty(chasuBomQty);       // BOM 기준량
+            mc.setConsumedQty(totalQty);     // 실제 투입량
             mc.set_audit(user);
             mc.setState("finished");
             mc.set_status("a");
             mc.setStoreHouseId(consMat.getStoreHouseId());
             mc.setSpjangcd(spjangcd);
-            mc = this.matConsuRepository.save(mc);
+            mc = matConsuRepository.save(mc);
 
-            //1. mat_inout 생성=> lot 투입이면 투입 수량만큼 lot 없으면 BOM 수량만큼 재고를 차감한다.
+            // ─────────────────────────────────────────────
+            // ④ MaterialInout 생성 (생산 시 재고 차감)
+            // ─────────────────────────────────────────────
             MaterialInout mic = new MaterialInout();
-            mic.setMaterialInoutHeadId(null);
             mic.setMaterialId(mc.getMaterialId());
             mic.setStoreHouseId(consMat.getStoreHouseId());
             mic.setLotNumber(mp.getLotNumber());
@@ -1258,9 +1270,79 @@ public class ProductionResultController {
             mic.setDescription("차수생산 투입재고 차감");
             mic.set_audit(user);
             mic.setSpjangcd(spjangcd);
+            matInoutRepository.save(mic);
+        }
 
-            mic = this.matInoutRepository.save(mic);
-        } // for문 끝
+
+// ========================================================================
+// 4) 여기서 BOM 외 자재를 추가적으로 처리
+// ========================================================================
+
+        for (Map<String, Object> mpi : allMpiList) {
+
+            int matPk = (int) mpi.get("mat_pk");
+
+            // 🔥 BOM 자재면 skip — 이미 위에서 처리됨
+            if (bomMatIdSet.contains(matPk)) continue;
+
+            // ===== BOM 외 자재 처리 =====
+
+            float reqQty = Float.parseFloat(mpi.get("req_qty").toString());
+            float currentStock = Float.parseFloat(mpi.get("curr_qty").toString());
+            int matLotId = (int) mpi.get("ml_id");
+
+            Material mat = materialRepository.getMaterialById(matPk);
+
+            // ▶ 즉시 MatLotCons 생성
+            MatLotCons mlc = new MatLotCons();
+            mlc.setMaterialLotId(matLotId);
+            mlc.setOutputDateTime(now);
+            mlc.setSourceDataPk(mp.getId());
+            mlc.setSourceTableName("mat_produce");
+            mlc.set_audit(user);
+            mlc.setCurrentStock(currentStock);
+            mlc.setSpjangcd(spjangcd);
+            mlc.setOutputQty(reqQty);
+            matLotConsRepository.save(mlc);
+
+            // ▶ MaterialConsume 생성 (BOM 기준 수량 없음)
+            MaterialConsume mc = new MaterialConsume();
+            mc.setJobResponseId(jr.getId());
+            mc.setMaterialId(matPk);
+            mc.setProcessOrder(mp.getProcessOrder());
+            mc.setLotIndex(mp.getLotIndex());
+            mc.setStartTime(now);
+            mc.setEndTime(now);
+            mc.setDescription("추가투입분");
+            mc.setBomQty(null);           // ★ BOM 없음
+            mc.setConsumedQty(reqQty);    // 투입량 그대로
+            mc.set_audit(user);
+            mc.setState("finished");
+            mc.set_status("a");
+            mc.setStoreHouseId(mat.getStoreHouseId());
+            mc.setSpjangcd(spjangcd);
+            mc = matConsuRepository.save(mc);
+
+            // ▶ 즉시 재고 차감(MaterialInout)
+            MaterialInout mic = new MaterialInout();
+            mic.setMaterialId(matPk);
+            mic.setStoreHouseId(mat.getStoreHouseId());
+            mic.setLotNumber((String) mpi.get("lot_number"));
+            mic.setInoutDate(LocalDate.parse(date.format(dateFormat)));
+            mic.setInoutTime(LocalTime.parse(time.format(timeFormat)));
+            mic.setInOut("out");
+            mic.setOutputType("consumed_out");
+            mic.setOutputQty(reqQty);
+            mic.setSourceDataPk(mc.getId());
+            mic.setSourceTableName("mat_consu");
+            mic.setState("confirmed");
+            mic.set_status("a");
+            mic.setDescription("차수생산 추가투입재고 차감");
+            mic.set_audit(user);
+            mic.setSpjangcd(spjangcd);
+            matInoutRepository.save(mic);
+        }
+
 
         // 2. mat_inout 생성=> 차수 수량만큼 재고를 증감한다.
         MaterialInout mip = new MaterialInout();
@@ -1411,6 +1493,9 @@ public class ProductionResultController {
         return result;
     }
 
+    // ===============================
+    // 차수 저장 (수정)
+    // ===============================
     @PostMapping("/chasu_save")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public AjaxResult chasuSave(
@@ -1426,15 +1511,14 @@ public class ProductionResultController {
             Float goodQty = Float.parseFloat(chasu.get("good_qty").toString());
             Float defectQty = Float.parseFloat(chasu.get("defect_qty").toString());
 
-            AjaxResult singleResult = saveSingleChasu(jrPk, mpId, goodQty, defectQty, auth);
+            AjaxResult single = saveSingleChasu(jrPk, mpId, goodQty, defectQty, auth);
 
-            if (!singleResult.success) {
-                // 실패 시 롤백 + 에러 메시지 반환
+            if (!single.success) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                return singleResult;
+                return single;
             }
 
-            resultList.add((Map<String, Object>) singleResult.data);
+            resultList.add((Map<String, Object>) single.data);
         }
 
         result.success = true;
@@ -1442,92 +1526,68 @@ public class ProductionResultController {
         return result;
     }
 
+    // ===============================
+    // 차수 수정 단건 처리
+    // ===============================
     public AjaxResult saveSingleChasu(Integer jrPk, Integer mpId, Float goodQty, Float defectQty, Authentication auth) {
 
         AjaxResult result = new AjaxResult();
         User user = (User) auth.getPrincipal();
-        Timestamp now = DateUtil.getNowTimeStamp();
-        // 현재 일자
+
+        // 현재 일자/시간
+        Timestamp nowTs = DateUtil.getNowTimeStamp();
         LocalDate date = LocalDate.now();
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        // 현재 시간
         LocalTime time = LocalTime.now();
         DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss");
 
+        // ===== 1) 기본 엔티티 조회 =====
         JobRes jr = this.jobResRepository.getJobResById(jrPk);
+        MaterialProduce mp = this.matProduceRepository.getMatProduceById(mpId);
 
-        MaterialProduce mpe = this.matProduceRepository.getMatProduceById(mpId);
+        if (mp == null) {
+            result.success = false;
+            result.message = "해당 차수 생산 정보가 존재하지 않습니다.(" + mpId + ")";
+            return result;
+        }
 
-        MaterialLot prodMatLot = this.matLotRepository.getByLotNumber(mpe.getLotNumber());
+        // 생산 LOT (완제품 LOT)
+        MaterialLot prodMatLot = this.matLotRepository.getByLotNumber(mp.getLotNumber());
+        if (prodMatLot == null) {
+            result.success = false;
+            result.message = "해당 차수의 생산 LOT 정보를 찾을 수 없습니다.(" + mp.getLotNumber() + ")";
+            return result;
+        }
 
-
-        List<MatLotCons> prodMatLotConsCount = this.matLotConsRepository.findByMaterialLotId(prodMatLot.getId());
-
-        if (prodMatLotConsCount.size() > 0) {
-            result.message = "해당차수의 로트가 이미 사용되어 수정할 수 없습니다.";
+        // ===== 2) 이미 이 생산 LOT가 다른 공정에서 사용되었으면 수정 불가 =====
+        //   - mat_lot_cons에 이 LOT가 걸려 있으면 이미 후공정에 투입된 것이라,
+        //     생산수량을 변경하면 안됨.
+        List<MatLotCons> prodMatLotConsList = this.matLotConsRepository.findByMaterialLotId(prodMatLot.getId());
+        if (prodMatLotConsList != null && !prodMatLotConsList.isEmpty()) {
+            result.message = "해당 차수의 로트가 이미 사용되어 수정할 수 없습니다.";
             result.success = false;
             return result;
         }
 
-        float mpGoodQty = mpe.getGoodQty() != null ? mpe.getGoodQty() : 0;
-        float mpDefectQty = mpe.getDefectQty() != null ? mpe.getDefectQty() : 0;
+        // ===== 3) 기존 생산수량/불량수량 =====
+        float prevGoodQty   = (mp.getGoodQty()   != null) ? mp.getGoodQty()   : 0f;
+        float prevDefectQty = (mp.getDefectQty() != null) ? mp.getDefectQty() : 0f;
 
-//		if (Float.compare(mpGoodQty, goodQty) == 0 && Float.compare(mpDefectQty, defectQty) == 0) {	//if (Float.compare(mpe.getGoodQty(), goodQty) == 0 && Float.compare(mpe.getDefectQty(), defectQty) == 0) {
-//			result.message = "수량변경이 없습니다.("+	mpe.getLotNumber()+ ")";
-//			result.success = false;
-//		    return result;
-//		}
+        // 변경이 전혀 없으면 그대로 합산만 다시 해서 리턴 (혹은 그냥 바로 성공 처리)
+        if (Float.compare(prevGoodQty, goodQty) == 0 &&
+                Float.compare(prevDefectQty, defectQty) == 0) {
 
-        MaterialProduce mp = this.matProduceRepository.getMatProduceById(mpId);
-
-        if (mp.getGoodQty() == null) mp.setGoodQty((float) 0);
-        if (mp.getDefectQty() == null) mp.setDefectQty((float) 0);
-
-        Float diffGoodQty = goodQty - mp.getGoodQty();
-        Float diffDefectQty = defectQty - mp.getDefectQty();
-        Float diffTotal = diffGoodQty + diffDefectQty;
-
-        // 1. mat_produce 변경
-        Float prevMatProdGoodQty = mp.getGoodQty();
-        mp.setGoodQty(goodQty);
-        mp.setDefectQty(defectQty);
-        mp.setDescription("차수생산 수량변경");
-        mp.setActorId(user.getId());
-        mp.set_audit(user);
-        this.matProduceRepository.saveAndFlush(mp);
-
-        MaterialLot ml = this.matLotRepository.findBySourceTableNameAndSourceDataPkAndLotNumber("mat_produce", mp.getId(), mp.getLotNumber());
-
-        // 2.생산입고 mat_inout 수량 조절
-        if (diffGoodQty != 0) {
-            MaterialInout mi = this.matInoutRepository.findBySourceTableNameAndSourceDataPkAndInOutAndInputTypeAndMaterialId("mat_produce", mp.getId(), "in", "produced_in", mp.getMaterialId());
-            String message = "생산차수수량변경 " + prevMatProdGoodQty + "->" + goodQty;
-            mi.setInputQty(mp.getGoodQty());
-            mi.setDescription(message);
-            mi.setInoutDate(LocalDate.parse(date.format(dateFormat)));
-            mi.setInoutTime(LocalTime.parse(time.format(timeFormat)));
-            mi = this.matInoutRepository.saveAndFlush(mi);
-
-            ml.setCurrentStock(ml.getCurrentStock() - ml.getInputQty() + mp.getGoodQty());
-            ml.setInputQty(mp.getGoodQty());
-            ml = this.matLotRepository.saveAndFlush(ml);
-        }
-
-        // 합산물량이 변경이 없으면 소모물량은 변경없다
-        if (diffTotal == 0) {
-            // jobres 양품량 업데이트
+            // 그래도 혹시 전체 합계가 달라져 있을 수 있으니 한 번 더 합산
             Map<String, Object> mapSum = this.productionResultService.getJobResponseGoodDefectQty(jrPk);
-
-            float goodQtySum = Float.parseFloat(mapSum.get("good_qty").toString());
+            float goodQtySum   = Float.parseFloat(mapSum.get("good_qty").toString());
             float defectQtySum = Float.parseFloat(mapSum.get("defect_qty").toString());
 
             jr.setGoodQty(goodQtySum);
             jr.setDefectQty(defectQtySum);
             jr.set_audit(user);
-            jr = this.jobResRepository.save(jr);
+            this.jobResRepository.save(jr);
 
-            Map<String, Object> item = new HashMap<String, Object>();
+            Map<String, Object> item = new HashMap<>();
             item.put("jr_pk", jrPk);
             item.put("lot_number", mp.getLotNumber());
             item.put("good_qty_sum", goodQtySum);
@@ -1538,153 +1598,70 @@ public class ProductionResultController {
             return result;
         }
 
-        // 변경된 물량만큼 소모 BOM 조회함
-        List<Map<String, Object>> bomMatItems = this.productionResultService.get_chasu_bom_mat_qty_list(mp.getId());
+        // ===== 4) mat_produce 생산수량/불량수량 수정 =====
+        mp.setGoodQty(goodQty);
+        mp.setDefectQty(defectQty);
+        mp.setDescription("차수생산 수량변경");
+        mp.setActorId(user.getId());
+        mp.set_audit(user);
+        this.matProduceRepository.saveAndFlush(mp);
 
-        // mat_lot_cons 삭제 및 mat_lot 정산
-        // this.productionResultService.delete_mlc_and_rebalance_ml(mp.getId());
+        // ===== 5) 생산입고(mat_inout, produced_in) 수정 =====
+        MaterialInout producedIn = this.matInoutRepository
+                .findBySourceTableNameAndSourceDataPkAndInOutAndInputTypeAndMaterialId(
+                        "mat_produce",
+                        mp.getId(),
+                        "in",
+                        "produced_in",
+                        mp.getMaterialId()
+                );
 
-        this.matLotConsRepository.deleteBySourceTableNameAndSourceDataPk("mat_produce", mp.getId());
+        if (producedIn != null) {
+            String msg = "생산차수수량변경 " + prevGoodQty + " -> " + goodQty;
 
-        for (Map<String, Object> bomMap : bomMatItems) {
-            float chasuBomQty = Float.parseFloat(bomMap.get("chasu_bom_qty").toString());
-            int consumeMatPk = (int) bomMap.get("mat_pk");
-            String matName = bomMap.get("mat_name").toString();
-            Material consMat = this.materialRepository.getMaterialById(consumeMatPk);
-            String lotUseYn = bomMap.get("lotUseYn").toString();
+            producedIn.setInputQty(goodQty);
+            producedIn.setDescription(msg);
+            producedIn.setInoutDate(LocalDate.parse(date.format(dateFormat)));
+            producedIn.setInoutTime(LocalTime.parse(time.format(timeFormat)));
+            producedIn.set_audit(user);
 
-            // 3.변경된 물량 만큼 consume 물량 변경
-            MaterialConsume mc = this.matConsuRepository.getByJobResponseIdAndProcessOrderAndLotIndexAndMaterialId(jr.getId(), mp.getProcessOrder(), mp.getLotIndex(), consumeMatPk);
-            mc.setBomQty(chasuBomQty);
-            mc.setConsumedQty(chasuBomQty);
-            mc.set_audit(user);
-            mc = this.matConsuRepository.saveAndFlush(mc);
-
-            // mat_inout 물량 조정
-            MaterialInout mi = this.matInoutRepository.findBySourceTableNameAndSourceDataPkAndInOutAndOutputTypeAndMaterialId("mat_consu", mc.getId(), "out", "consumed_out", consumeMatPk);
-            mi.set_audit(user);
-            mi.setDescription("'차수생산수량변경" + mi.getOutputQty() + " -> " + chasuBomQty);
-            mi.setOutputQty(chasuBomQty);
-            mi = this.matInoutRepository.saveAndFlush(mi);
-
-            if ("Y".equals(lotUseYn)) {
-                // 수정시작
-                // 1. mat_proc_input 에서 해당 품목의 로트리스트를 가져온다.
-
-                List<Map<String, Object>> mpiList = this.productionResultService.getMaterialProcessInputList(jr.getId(), consumeMatPk);
-                // 투입요청에서 해당 품목이 로트 투입인지 조회한다
-
-                float totalLotQty = 0;
-                for (int j = 0; j < mpiList.size(); j++) {
-                    Map<String, Object> mpiMap = mpiList.get(j);
-
-                    float currQty = Float.parseFloat(mpiMap.get("curr_qty").toString());
-                    totalLotQty += currQty;
-                }
-
-                if (totalLotQty < chasuBomQty) {
-                    result.message = "가용한 LOT 재고가 없습니다.(" + matName + ")\n 투입 내역에서 가용 재고를 추가해주세요. ";
-                    result.success = false;
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    return result;
-                }
-
-                // 작업준비에 설정된 lot 투입 품목이면
-                // 로트 사용량 추가
-                float remainQty = chasuBomQty;
-
-                // MaterialProcessInput 조회
-                for (int k = 0; k < mpiList.size(); k++) {
-                    Map<String, Object> mpiMap = mpiList.get(k);
-                    int matLotId = (int) mpiMap.get("ml_id");
-                    float currentStock = Float.parseFloat(mpiMap.get("curr_qty").toString());
-                    if (currentStock == 0) {
-                        continue;
-                    }
-
-                    MatLotCons mlc = new MatLotCons();
-                    mlc.setMaterialLotId(matLotId);
-                    mlc.setOutputDateTime(now);
-                    mlc.setSourceDataPk(mp.getId());
-                    mlc.setSourceTableName("mat_produce");
-                    mlc.set_audit(user);
-                    mlc.setCurrentStock(ml.getCurrentStock()); // 당시 재고량
-
-                    if (currentStock >= remainQty) {
-                        // 해당로트의현재수량 가능
-                        mlc.setOutputQty(remainQty);
-                        remainQty = (float) 0;
-                        mlc = this.matLotConsRepository.save(mlc);
-
-                        break;
-                    } else {
-                        mlc.setOutputQty(currentStock);
-                        mlc = this.matLotConsRepository.save(mlc);
-                        remainQty = remainQty - currentStock;
-                    }
-
-                }
-
-                if (remainQty > 0) {
-                    result.message = "로트 수량이 부족합니다.(" + matName + ")";
-                    result.success = false;
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    return result;
-                }
-            } else {
-                if ("1".equals(consMat.getUseyn())) {
-                    result.message = "사용 불가능한 품목이 BOM에 등록되어 있습니다.(" + matName + ")";
-                    result.success = false;
-                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    return result;
-                }
-
-                // mtyn이 0일 때는 재고 체크하지 않음
-                if ("0".equals(consMat.getMtyn())) {
-                    // 아무 조건 없이 통과
-                } else {
-                    Float currentStock = consMat.getCurrentStock();
-                    if (currentStock == null || currentStock == 0f) {
-                        result.message = "가용한 품목 재고가 없습니다.(" + matName + ")";
-                        result.success = false;
-                        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                        return result;
-                    } else if (currentStock < goodQty) {
-                        result.message = "가용한 품목 재고가 부족합니다. \n(" +
-                                matName + ", 필요 수량: " + goodQty + ", 가용 수량: " + currentStock + ")";
-                        result.success = false;
-                        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                        return result;
-                    }
-                }
-            }
+            this.matInoutRepository.saveAndFlush(producedIn);
         }
-        // 한번더 정산
-        //this.productionResultService.calculate_balance_mat_lot_with_mat_prod(mp.getId());
-        this.productionResultService.calculate_balance_mat_lot_with_job_res(jr.getId());
-        // 양품량 합계 업데이트
-        Map<String, Object> mapSum = this.productionResultService.getJobResponseGoodDefectQty(jrPk);
 
-        float goodQtySum = Float.parseFloat(mapSum.get("good_qty").toString());
+        // ===== 6) 생산 LOT 수량(입고 + 현재고) 수정 =====
+        // 기존 로트의 currentStock에서 "이전 생산수량"을 빼고,
+        // "새로운 생산수량"을 더해준다.
+        //   currentStock_new = currentStock_old - prevGoodQty + goodQty
+        Float lotCurrent = prodMatLot.getCurrentStock() != null ? prodMatLot.getCurrentStock() : 0f;
+        Float lotInput   = prodMatLot.getInputQty()     != null ? prodMatLot.getInputQty()     : 0f;
+
+        prodMatLot.setCurrentStock(lotCurrent - prevGoodQty + goodQty);
+        prodMatLot.setInputQty(goodQty);
+        prodMatLot.set_audit(user);
+        this.matLotRepository.saveAndFlush(prodMatLot);
+
+        // ===== 7) JobRes 전체 양품/불량 합계 재계산 =====
+        Map<String, Object> mapSum = this.productionResultService.getJobResponseGoodDefectQty(jrPk);
+        float goodQtySum   = Float.parseFloat(mapSum.get("good_qty").toString());
         float defectQtySum = Float.parseFloat(mapSum.get("defect_qty").toString());
 
         jr.setGoodQty(goodQtySum);
         jr.setDefectQty(defectQtySum);
         jr.set_audit(user);
-        jr = this.jobResRepository.save(jr);
+        this.jobResRepository.save(jr);
 
-        Map<String, Object> item = new HashMap<String, Object>();
+        // ===== 8) 결과 리턴 =====
+        Map<String, Object> item = new HashMap<>();
         item.put("jr_pk", jrPk);
         item.put("lot_number", mp.getLotNumber());
         item.put("good_qty_sum", goodQtySum);
         item.put("defect_qty_sum", defectQtySum);
 
-        result.data = item;
         result.success = true;
-
-
+        result.data = item;
         return result;
     }
+
 
     // 생산정보 삭제
     @PostMapping("/del")

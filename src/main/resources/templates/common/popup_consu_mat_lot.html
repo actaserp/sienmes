@@ -112,6 +112,12 @@
             this.$btnLotMultiSelect = null;
             this.$keyword = null;
             //this.material_type = null;
+            this.overrideConfig = {
+                useOverride: false,      // 기본: 끔
+                matType: null,           // 'jajae'
+                matGroup: null,          // 57
+                bomCompChecked: true     // true = 체크, false = 체크해제
+            };
             
         }
 
@@ -161,7 +167,6 @@
 
         show(jr_pk, callback) {
             let _this = this;
-            console.log('show jr_pk', jr_pk);
             this.callback = callback;
 
             let content = tmpl('matLotSearchTemplate', {});
@@ -226,17 +231,38 @@
             this.$chkBomComp = $content.find('#chkBomComp');
             this.$btnLotSelect = $content.find('#btnLotSelect');
             this.$btnLotMultiSelect = $content.find('#btnLotMultiSelect');
-            
-            AjaxUtil.fillSelectOptions(this.$cboMaterialType, 'consu_mat_type', 'all', false);
-            //AjaxUtil.fillSelectOptions(this.$cboMaterialGrp, 'material_group', 'all', false, 'semi', 'raw_mat', 'sub_mat');
-            AjaxUtil.fillSelectOptions(this.$cboMaterialGrp, 'material_group', 'all', false, 'semi,raw_mat,sub_mat');
 
-            //if (this.material_type != null) {
-            //    console.log('popup mat type1', this.material_type);
-            //    this.$cboMaterialType.val(this.material_type);
-            //}
-            //console.log('popup mat type2', this.material_type);
-            //this.$cboMaterialType.val('product');
+            // === override 기능 적용 ===
+            if (this.overrideConfig.useOverride) {
+                // 1) BOM 구성 체크박스
+                this.$chkBomComp.prop('checked', this.overrideConfig.bomCompChecked);
+
+                // 2) 자재타입
+                AjaxUtil.fillSelectOptions(this.$cboMaterialType,
+                    'consu_mat_type',
+                    'all',
+                    this.overrideConfig.matType
+                );
+
+                // 3) 자재타입 변경 시 그룹 고정
+                this.$cboMaterialType.off('change.override')
+                    .on('change.override', () => {
+                        AjaxUtil.fillSelectOptions(
+                            this.$cboMaterialGrp,
+                            'material_group',
+                            'all',
+                            this.overrideConfig.matGroup
+                        );
+                    });
+
+                // 4) change 강제 호출
+                this.$cboMaterialType.trigger('change');
+            } else {
+                AjaxUtil.fillSelectOptions(this.$cboMaterialType, 'consu_mat_type', 'all', false);
+                AjaxUtil.fillSelectOptions(this.$cboMaterialGrp, 'material_group', 'all', false, 'semi,raw_mat,sub_mat');
+            }
+
+
 
             $content.find('#cboMaterialType').change(function (e) {
                 if ($content.find('#cboMaterialType').val()) {

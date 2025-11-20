@@ -2941,13 +2941,21 @@
                 let _this = this;
                 let jr_pk = $('#tabBasic').find('#id').val();
 
-                let valid = true;
                 let poppage = new PopupConsumMatLotPage();
+
+                // === 여기서 override 세팅 ===
+                poppage.overrideConfig = {
+                    useOverride: true,
+                    matType: 'jajae',
+                    matGroup: 60,
+                    bomCompChecked: false
+                };
+
+                let valid = true;
                 let lot_info = {};
 
                 let searchcallback = function (lot, jr_pk) {
                     if (lot.length === 1) {
-                        // 단일 로트투입
                         if (valid) {
                             lot_info['lot_id'] = lot[0].id;
                             lot_info['lot_number'] = lot[0].lot_number;
@@ -2966,6 +2974,8 @@
 
                 poppage.show(jr_pk, searchcallback);
             }
+
+
 
             // 투입로트삭제
             delMaterialLot() {

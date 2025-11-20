@@ -498,6 +498,78 @@ public class ProductionResultService {
                              , u."Name" as unit_name
                              , mpi."RequestQty" as req_qty
                              , mpi."InputQty" 
+                             , to_char(mpi."InputDateTime",'yyyy-MM-dd') as "InputDate"
+                             , mpi."InputDateTime"
+                             , ml."LotNumber"
+                             , ml."CurrentStock" as cur_stock
+                             , m."ProcessSafetyStock" as proc_safety_stock
+                             , mpi."MaterialStoreHouse_id"
+                             , mpi."ProcessStoreHouse_id"
+                             , mpi."State"
+                             , fn_code_name('mat_proc_input_state', mpi."State") as state_name
+                             , sh."Name" as "StoreHouseName"
+                             from job_res jr 
+                             inner join mat_proc_input_req mpir on mpir.id = jr."MaterialProcessInputRequest_id" 
+                             inner join mat_proc_input mpi on mpi."MaterialProcessInputRequest_id" =mpir.id
+                             inner join material m on m.id = mpi."Material_id"
+                             inner join mat_grp mg on mg.id = m."MaterialGroup_id"
+                             left join unit u on u.id = m."Unit_id"
+                             left join mat_lot ml on ml.id = mpi."MaterialLot_id"
+                             left join store_house sh on sh.id=ml."StoreHouse_id"
+                             where jr.id =  :jrPk
+                             and (:mat_code is null or :mat_code = '' or m."Code" = :mat_code)
+                             
+                          )
+                          select R.mat_pk, R.mat_type_name, R.mat_group_name, R.mat_code, R.mat_name
+                          , R.mpir_id
+                          , R.mpi_id
+                          , R.req_qty
+                          , R."InputQty" 
+                          , R."LotNumber" as lot_number
+                          , R.state_name
+                          , R.unit_name
+                          , R.cur_stock
+                          , R."State" 
+                          , R."InputDate" as start_date
+                          , R."InputDateTime"
+                          , R."StoreHouseName"
+                          , COALESCE(AA."OutputQty", 0) as consumed_qty
+                          from R 
+                          left join AA on AA."LotNumber" = R."LotNumber"
+                          order by R."InputDateTime", R."LotNumber"
+                	""";
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+		return items;
+	}
+
+	public List<Map<String, Object>> getInputLotMensuList(Integer jrPk, String mat_code) {
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("jrPk", jrPk);
+		dicParam.addValue("mat_code", mat_code);
+
+		String sql = """
+                with AA as (
+                         select 
+                         ml."LotNumber"
+                         , sum(mlc."OutputQty") as "OutputQty" 
+                         from mat_produce mp 
+                         inner join job_res jr on jr.id = mp."JobResponse_id"
+                         inner join mat_lot_cons mlc on mlc."SourceDataPk" = mp.id and mlc."SourceTableName" ='mat_produce'   
+                         inner join mat_lot ml on ml.id = mlc."MaterialLot_id" 
+                         where jr.id= :jrPk group by ml."LotNumber" 
+                         ), R as (
+                             select  mpir.id as mpir_id
+                             , mpi.id as mpi_id
+                             , mpi."Material_id" as mat_pk
+                             , fn_code_name('mat_type', mg."MaterialType") as mat_type_name
+                             , mg."Name" as mat_group_name
+                             , m."Code" as mat_code
+                             , m."Name" as mat_name 
+                             , u."Name" as unit_name
+                             , mpi."RequestQty" as req_qty
+                             , mpi."InputQty" 
                              , to_char(mpi."InputDateTime",'yyyy-MM-dd') as "InputDateTime"
                              , ml."LotNumber"
                              , ml."CurrentStock" as cur_stock
@@ -517,6 +589,7 @@ public class ProductionResultService {
                              left join store_house sh on sh.id=ml."StoreHouse_id"
                              where jr.id =  :jrPk
                              and (:mat_code is null or :mat_code = '' or m."Code" = :mat_code)
+                             and mpi."State" = 'mensu'
                           )
                           select R.mat_pk, R.mat_type_name, R.mat_group_name, R.mat_code, R.mat_name
                           , R.mpir_id
@@ -1114,6 +1187,32 @@ public class ProductionResultService {
 
 		return this.sqlRunner.getRows(sql, param);
 	}
+
+	public List<Map<String, Object>> getMaterialProcessInputListByMpirId(int mpirId) {
+
+		MapSqlParameterSource param = new MapSqlParameterSource();
+		param.addValue("mpirId", mpirId);
+
+		String sql = """
+            select  mpi.id  as mpi_id
+                  , mpi."RequestQty" as req_qty
+                  , mpi."InputQty"   as input_qty
+                  , mpi."Material_id" as mat_pk
+                  , ml."CurrentStock" as curr_qty
+                  , ml.id as ml_id
+                  , ml."LotNumber" as lot_number
+                  , ml."EffectiveDate" as eff_date
+                  , ml."StoreHouse_id" as storehouse_id
+            from mat_proc_input mpi
+            inner join mat_lot ml 
+                     on ml.id = mpi."MaterialLot_id"
+            where mpi."MaterialProcessInputRequest_id" = :mpirId
+            order by ml."EffectiveDate"
+            """;
+
+		return this.sqlRunner.getRows(sql, param);
+	}
+
 
 
 	public List<Map<String, Object>> getMaterialProcessInputList(int jrPk, int matPk) {
