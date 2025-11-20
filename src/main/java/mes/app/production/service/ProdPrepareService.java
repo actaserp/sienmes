@@ -72,6 +72,62 @@ public class ProdPrepareService {
         return items;
 	}
 
+	// 작업지시내역 조회(계량 공정용)
+	public List<Map<String, Object>> jobOrderAndWorkingSearch(String data_date, String shift_code, Integer workcenter_pk, String spjangcd) {
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("data_date", Date.valueOf(data_date));
+		paramMap.addValue("shift_code", shift_code);
+		paramMap.addValue("workcenter_pk", workcenter_pk);
+		paramMap.addValue("spjangcd", spjangcd);
+
+		String sql = """
+        		select jr.id as jr_pk
+                , jr."WorkOrderNumber" as work_order_number
+                , to_char(jr."ProductionDate", 'yyyy-mm-dd') as production_date
+                , jr."ShiftCode" as shift_code, sh."Name" as shift_name
+                , wc."Name" as workcenter_name
+                , jr."WorkIndex" as work_index
+                , fn_code_name('mat_type', mg."MaterialType") as mat_type_name
+                , mg."Name" as mat_grp_name
+                , m."Code" as mat_code, m."Name" as mat_name, u."Name" as unit_name
+                , m.id as mat_pk
+                , jr."OrderQty" as order_qty
+                , e."Name" as equip_name
+                , jr."State" as state, fn_code_name('job_state', jr."State") as state_name
+                , jr."Description" as description
+                , jr."MaterialProcessInputRequest_id" as proc_input_req_id
+                , jr."State"
+                , fn_code_name('job_state', jr."State") as state_name
+                from job_res jr 
+                left join material m on m.id = jr."Material_id"
+                left join mat_grp mg on mg.id = m."MaterialGroup_id"
+                left join unit u on u.id = m."Unit_id"
+                left join work_center wc on wc.id = jr."WorkCenter_id"
+                left join equ e on e.id = jr."Equipment_id"
+                left join shift sh on sh."Code" = jr."ShiftCode"
+                where jr."ProductionDate" = :data_date 
+                and jr."State" in ('ordered', 'working')
+                and jr.spjangcd = :spjangcd
+                and jr."Parent_id" is null
+        		""";
+
+		if (StringUtils.isEmpty(shift_code) == false) {
+			sql +=" and jr.\"ShiftCode\" = :shift_code ";
+		}
+
+		if (workcenter_pk != null) {
+			sql += " and jr.\"WorkCenter_id\" = :workcenter_pk ";
+		}
+
+
+		sql += " order by jr.\"ProductionDate\", jr.\"WorkIndex\", jr.\"ShiftCode\", jr.id ";
+
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, paramMap);
+
+		return items;
+	}
+
 	// 작업지시내역 조회
 	public List<Map<String, Object>> bomDetailList(String jr_pks, String data_date) {
 		

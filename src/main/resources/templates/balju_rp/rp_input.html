@@ -394,21 +394,6 @@
                             </tr>
                             <tr>
                                 <th style="text-align: center">
-                                    <label for="cboCompany">구매처</label>
-                                </th>
-                                <td colspan="3">
-                                    <input id="cboCompany" name="cboCompany" type="hidden">
-                                    <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
-                                     placeholder="검색버튼을 클릭하여 구매처를 검색하세요" readonly/>
-                                    &nbsp;
-                                    <a class="btn btn-delete" title="검색" id="btnCompanySearch">
-                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                                        구매처 검색
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="text-align: center">
                                     <label for="cboMaterialType">품목유형</label>
                                 </th>
                                 <td>
@@ -436,6 +421,21 @@
                                         품목조회
                                     </a>
 
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center">
+                                    <label for="cboCompany">구매처</label>
+                                </th>
+                                <td colspan="3">
+                                    <input id="cboCompany" name="cboCompany" type="hidden">
+                                    <input class="form-control2" type="text" id="CompanyName" name="CompanyName"
+                                     placeholder="검색버튼을 클릭하여 구매처를 검색하세요" readonly/>
+                                    &nbsp;
+                                    <a class="btn btn-delete" title="검색" id="btnCompanySearch">
+                                        <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                        구매처 검색
+                                    </a>
                                 </td>
                             </tr>
                             <tr>
@@ -935,10 +935,10 @@
             </div>
 
             <div class="popup-button">
-                <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
-                <button type="button" class="btn-popup" id="btnLotRefresh"><span data-labelCd="새로고침">새로고침</span></button>
                 <button type="button" class="btn-popup y_write_auth" id="btnLotSave"><span data-labelCd="로트저장">로트저장</span></button>
                 <button type="button" class="btn-popup" id="btnBarcordPrint"><span data-labelCd="바코드출력">바코드출력</span></button>
+                <button type="button" class="btn-popup" id="modal-close-button"><span data-labelCd="닫기">닫기</span></button>
+<!--                <button type="button" class="btn-popup" id="btnLotRefresh"><span data-labelCd="새로고침">새로고침</span></button>-->
             </div>
         </div>
 
@@ -1347,34 +1347,6 @@
                     $content.find('#InoutType_hidden').val($(this).val());
                 });
 
-
-                function formatInoutQty() {
-                    let $qty = $content.find('#InoutQty');
-                    let raw = $qty.val().replace(/,/g, '').replace(/[^0-9-]/g, ''); // 숫자만 남기기
-
-                    if (!raw) {
-                        $qty.val('');
-                        return;
-                    }
-
-                    // - 부호 처리
-                    let isNegative = (type === 'recall' || type === 'return');
-                    raw = raw.replace(/^-/, ''); // 음수 기호 제거
-
-                    let num = parseInt(raw, 10);
-                    if (isNaN(num)) {
-                        $qty.val('');
-                        return;
-                    }
-
-                    let formatted = num.toLocaleString(); // 천 단위 콤마
-                    if (isNegative) {
-                        formatted = '-' + formatted;
-                    }
-
-                    $qty.val(formatted);
-                }
-
                 $content.find('#inoutSelect').trigger('change');
                 $content.find('#inoutType').trigger('change');
 
@@ -1396,6 +1368,10 @@
                         $content.find('#cboMaterialGroupName').val(items.group_name)
                         $content.find('#Material_id').val(items.id)
                         $content.find('#Material_name').val(items.Name)
+                        $content.find('#StoreHouse_id').val(items.StoreHouse_id)
+                        $content.find('#StoreHouse_id').val(items.StoreHouse_id)
+                        $content.find('#cboCompany').val(items.comp_id || '');
+                        $content.find('#CompanyName').val(items.comp_nm || '');
                     };
 
                     let poppage = new PopupMaterialPage('single');
@@ -1407,7 +1383,6 @@
                     let poppage = new PopCompComponentPurchase();
                     let $poppage = $(poppage);
                     let searchcallback = function (items) {
-                        console.log('btnCompanySearch', items);
                         $content.find('#cboCompany').val(items.id);
                         $content.find('#CompanyName').val(items.compname);
                     };

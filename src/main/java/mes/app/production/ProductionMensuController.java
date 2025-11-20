@@ -2,6 +2,7 @@ package mes.app.production;
 
 import mes.app.definition.service.EquipmentService;
 import mes.app.inventory.service.LotService;
+import mes.app.production.service.ProdPrepareService;
 import mes.app.production.service.ProductionResultService;
 import mes.domain.entity.*;
 import mes.domain.model.AjaxResult;
@@ -102,6 +103,23 @@ public class ProductionMensuController {
 
     @Autowired
     EquRunRepository equRunRepository;
+
+    @Autowired
+    private ProdPrepareService prodPrepareService;
+
+    @GetMapping("/job_order_list")
+    public AjaxResult jobOrderSearch(
+            @RequestParam(value="data_date", required=false) String data_date,
+            @RequestParam(value="shift_code", required=false) String shift_code,
+            @RequestParam(value="workcenter_pk", required=false) Integer workcenter_pk,
+            @RequestParam("spjangcd") String spjangcd,
+            HttpServletRequest request) {
+
+        List<Map<String, Object>> items = this.prodPrepareService.jobOrderAndWorkingSearch(data_date, shift_code, workcenter_pk, spjangcd);
+        AjaxResult result = new AjaxResult();
+        result.data = items;
+        return result;
+    }
 
     @GetMapping("/read")
     public AjaxResult getProdResult(

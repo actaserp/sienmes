@@ -56,10 +56,14 @@ public class PopupController {
 				, m."Equipment_id"
 				, m."VatExemptionYN"
 				, m."Standard1" as "Spec"
+				, m."StoreHouse_id"
+				, m."CompCode" as comp_id
+				, c."Name" as comp_nm
 	            from material m
 	            left join unit u on m."Unit_id" = u.id
 	            left join mat_grp mg on m."MaterialGroup_id" = mg.id
-	            left join sys_code sc on mg."MaterialType" = sc."Code" 
+	            left join sys_code sc on mg."MaterialType" = sc."Code"
+	            left join company c on m."CompCode" = c.id::varchar 
 	            and sc."CodeType" ='mat_type'
 	            where 1=1 
 	            AND "Useyn" ='0' 
