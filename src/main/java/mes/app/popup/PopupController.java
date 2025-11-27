@@ -63,9 +63,9 @@ public class PopupController {
 	            left join unit u on m."Unit_id" = u.id
 	            left join mat_grp mg on m."MaterialGroup_id" = mg.id
 	            left join sys_code sc on mg."MaterialType" = sc."Code"
-	            left join company c on m."CompCode" = c.id::varchar 
 	            and sc."CodeType" ='mat_type'
-	            where 1=1 
+	            left join company c on m."CompCode" = c.id::varchar
+	            where 1=1  
 	            AND "Useyn" ='0' 
 	            and m."spjangcd" = :spjangcd
 	    """;
@@ -84,6 +84,74 @@ public class PopupController {
 
 		if(StringUtils.hasText(keyword)){
             sql+="""
+            and (m."Name" ilike concat('%%',:keyword,'%%') or m."Code" ilike concat('%%',:keyword,'%%'))
+            """;
+		}
+		;
+		sql += "order by mg.\"Name\" , m.\"Name\" ";
+
+		MapSqlParameterSource paramMap = new MapSqlParameterSource();
+		paramMap.addValue("material_type", material_type);
+		paramMap.addValue("material_group", material_group, java.sql.Types.INTEGER);
+		paramMap.addValue("keyword", keyword);
+		paramMap.addValue("spjangcd", spjangcd);
+		result.data = this.sqlRunner.getRows(sql, paramMap);
+		return result;
+	}
+
+	@RequestMapping("/search_material_comp")
+	public AjaxResult getSearchMaterialComp(
+			@RequestParam(value="material_type", required=false) String material_type,
+			@RequestParam(value="material_group", required=false) Integer material_group,
+			@RequestParam(value="keyword", required=false) String keyword,
+			@RequestParam(value="spjangcd") String spjangcd
+	) {
+		AjaxResult result = new AjaxResult();
+
+		String sql ="""
+	            select 
+	            m.id
+	            , m."Code"
+	            , m."Name"
+	            , m."MaterialGroup_id"
+	            , mg."Name" as group_name
+	            , mg."MaterialType"
+	            , sc."Value" as "MaterialTypeName"
+	            , sc."Code" as "MaterialTypeCode"
+	            , u."Name" as unit_name
+	            , m."Mtyn" as mtyn
+	            , m."WorkCenter_id"
+				, m."Equipment_id"
+				, m."VatExemptionYN"
+				, m."Standard1" as "Spec"
+				, m."StoreHouse_id"
+				, m."CompCode" as comp_id
+				, c."Name" as comp_nm
+	            from material m
+	            left join unit u on m."Unit_id" = u.id
+	            left join mat_grp mg on m."MaterialGroup_id" = mg.id
+	            left join sys_code sc on mg."MaterialType" = sc."Code"
+	            left join company c on m."CompCode" = c.id::varchar 
+	            and sc."CodeType" ='mat_type'
+	            where 1=1 
+	            AND "Useyn" ='0' 
+	            and m."spjangcd" = :spjangcd
+	    """;
+
+		if (StringUtils.hasText(material_type)){
+			sql+=""" 
+            and mg."MaterialType" =:material_type
+            """;
+		}
+
+		if(material_group!=null){
+			sql+="""            		
+            and mg."id" =:material_group
+            """;
+		}
+
+		if(StringUtils.hasText(keyword)){
+			sql+="""
             and (m."Name" ilike concat('%%',:keyword,'%%') or m."Code" ilike concat('%%',:keyword,'%%'))
             """;
 		}
